@@ -200,6 +200,6 @@ class UserSingle(ApiBase, View):
 
 urlpatterns = [
     url(r'^$', UserAll.as_view()),
-    url(r'^{userid}/?$'.format(userid=user_id_uri_pattern), UserSingle.as_view()),
     url(r'^{userids}/?$'.format(userids=multiple_user_id_uri_pattern), UserMultiple.as_view()),
+    url(r'^{userid}/?$'.format(userid=user_id_uri_pattern), UserSingle.as_view()),
 ]
