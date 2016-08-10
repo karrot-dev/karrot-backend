@@ -20,6 +20,8 @@ class Command(BaseCommand):
         # user
         ##################################################
 
+        User.objects.create_superuser('abc@example.com', 'abc')
+
         user_tilmann = User.objects.create(
             email='til@man.com',
             display_name='Mr T',
