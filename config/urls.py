@@ -13,6 +13,7 @@ Including another URLconf
     1. Add an import:  from blog import urls as blog_urls
     2. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
+import django_httpolice
 from django.conf.urls import include, url
 from django.contrib import admin
 from rest_framework_nested import routers
@@ -47,4 +48,5 @@ urlpatterns = [
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^docs/', include('rest_framework_swagger.urls')),
+    url(r'^httpolice/$', django_httpolice.report_view),
 ]
