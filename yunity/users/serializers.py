@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from rest_framework.relations import PrimaryKeyRelatedField
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 from yunity.users.models import ProfilePicture as ProfilePictureModel
+
 
 class ProfilePictureSerializer(serializers.ModelSerializer):
     image = VersatileImageFieldSerializer(
