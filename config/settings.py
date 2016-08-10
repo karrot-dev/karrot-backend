@@ -69,6 +69,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE_CLASSES = (
+    'django_httpolice.HTTPoliceMiddleware',
     'yunity.utils.session.RealtimeClientMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -82,6 +83,9 @@ MIDDLEWARE_CLASSES = (
 )
 
 ROOT_URLCONF = 'config.urls'
+
+HTTPOLICE_RAISE = True
+HTTPOLICE_ENABLE = True
 
 TEMPLATES = [
     {
