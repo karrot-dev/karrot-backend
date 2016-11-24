@@ -46,6 +46,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework_nested',
     'rest_framework_swagger',
+    'versatileimagefield',
 
     # Application
     'yunity',
@@ -58,6 +59,7 @@ INSTALLED_APPS = (
     'yunity.stores'
 )
 
+from .versatileimagefield import *
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (

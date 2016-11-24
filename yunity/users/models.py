@@ -1,6 +1,8 @@
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
-from django.db.models import EmailField, BooleanField, TextField, OneToOneField, CASCADE
+from django.db.models import EmailField, BooleanField, TextField, OneToOneField, CASCADE, PositiveIntegerField
+from django.db.models import Model
 from django_enumfield import enum
+from versatileimagefield.fields import VersatileImageField
 
 from yunity.base.base_models import BaseModel, LocationModel
 from yunity.walls.models import Wall
@@ -47,6 +49,29 @@ class ProfileVisibility(enum.Enum):
     PUBLIC = 4
 
 
+class ProfilePicture(Model):
+    image = VersatileImageField(
+        'Image',
+        upload_to='images/users/',
+        width_field='width',
+        height_field='height'
+    )
+    height = PositiveIntegerField(
+        'Image Height',
+        blank=True,
+        null=True
+    )
+    width = PositiveIntegerField(
+        'Image Width',
+        blank=True,
+        null=True
+    )
+
+    class Meta:
+        verbose_name = 'Profile Picture'
+        verbose_name_plural = 'Profile Pictures'
+
+
 class User(AbstractBaseUser, BaseModel, LocationModel):
     email = EmailField(max_length=255, unique=True)
     is_active = BooleanField(default=True)
@@ -54,6 +79,8 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     display_name = TextField()
     first_name = TextField(null=True)
     last_name = TextField(null=True)
+
+    profile_picture = OneToOneField('users.profilepicture', null=True, on_delete=CASCADE, related_name='user')
 
     wall = OneToOneField(Wall, null=True, on_delete=CASCADE)
     profile_visibility = enum.EnumField(ProfileVisibility, default=ProfileVisibility.PRIVATE)
