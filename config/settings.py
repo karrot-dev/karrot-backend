@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'anymail',
     'influxdb_metrics',
     'timezone_field',
+    'request_profiler',
 
     # Application
     'yunity',
@@ -67,6 +68,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE_CLASSES = (
+    'request_profiler.middleware.ProfilingMiddleware',
     'yunity.utils.session.RealtimeClientMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
