@@ -43,10 +43,16 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, display_name, **extra_fields)
 
     def create_superuser(self, email, password, **extra_fields):
-        return self._create_user(email, password, None, None, None, **extra_fields)
+        user = self._create_user(email, password, None, **extra_fields)
+        user.is_staff = True
+        user.save(using=self._db)
+        return user
 
 
 class User(AbstractBaseUser, BaseModel, LocationModel):
+    class Meta:
+        default_permissions = []
+
     email = EmailField(max_length=255, unique=True)
     is_active = BooleanField(default=True)
     is_staff = BooleanField(default=False)
@@ -109,3 +115,11 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
             track_clicks=False,
             track_opens=False
         ).send()
+
+    def has_perm(self, perm, obj=None):
+        # temporarily only allow access for admins
+        return self.is_staff
+
+    def has_module_perms(self, app_label):
+        # temporarily only allow access for admins
+        return self.is_staff

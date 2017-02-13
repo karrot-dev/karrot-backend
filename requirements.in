@@ -19,3 +19,5 @@ django-crispy-forms
 django-anymail
 sparkpost
 django-influxdb-metrics
+django-timezone-field
+django-request-profiler
