@@ -50,6 +50,9 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, BaseModel, LocationModel):
+    class Meta:
+        default_permissions = []
+
     email = EmailField(max_length=255, unique=True)
     is_active = BooleanField(default=True)
     is_staff = BooleanField(default=False)

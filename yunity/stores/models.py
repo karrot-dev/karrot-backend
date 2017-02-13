@@ -13,10 +13,16 @@ from django.db import models
 
 
 class Store(BaseModel, LocationModel):
+    class Meta:
+        default_permissions = []
+
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='store')
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH)
     description = models.TextField(blank=True)
     weeks_in_advance = models.PositiveIntegerField(default=4)
+
+    def __str__(self):
+        return '{} ({})'.format(self.name, self.group)
 
 
 class PickupDateSeriesManager(models.Manager):
@@ -27,6 +33,9 @@ class PickupDateSeriesManager(models.Manager):
 
 
 class PickupDateSeries(BaseModel):
+    class Meta:
+        default_permissions = []
+
     objects = PickupDateSeriesManager()
 
     store = models.ForeignKey(
@@ -86,10 +95,14 @@ class PickupDateSeries(BaseModel):
                 pickup.max_collectors = self.max_collectors
             pickup.save()
 
+    def __str__(self):
+        return '{} of {}'.format(self.rule, self.store)
+
 
 class PickupDate(BaseModel):
     class Meta:
         ordering = ['date']
+        default_permissions = []
 
     series = models.ForeignKey(
         'stores.PickupDateSeries',
@@ -112,3 +125,6 @@ class PickupDate(BaseModel):
     # used when the respective value in the series gets updated
     is_date_changed = models.BooleanField(default=False)
     is_max_collectors_changed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return '{} of {}'.format(self.date, self.store)
