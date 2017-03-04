@@ -2,7 +2,7 @@ coverage
 django
 django[argon2]
 django-cors-headers
-django-enumfields==0.8.2
+django-enumfields
 django-extensions
 django-redis
 django-rest-swagger
