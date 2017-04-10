@@ -17,7 +17,10 @@ class HistoryFilter(FilterSet):
     class Meta:
         model = History
         fields = ('group', 'store', 'users', 'typus')
-    typus = filters.ChoiceFilter(choices=HistoryTypus.items(), method=filter_history_typus)
+    typus = filters.ChoiceFilter(
+        choices=[(e[1], e[0]) for e in HistoryTypus.choices()], 
+        method=filter_history_typus
+    )
 
 
 class HistoryPagination(LimitOffsetPagination):

@@ -1,12 +1,12 @@
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils import timezone
-from django_enumfield import enum
+from enumfields import EnumField, Enum
 
 from foodsaving.base.base_models import NicelyFormattedModel
 
 
-class HistoryTypus(enum.Enum):
+class HistoryTypus(Enum):
     GROUP_CREATE = 0
     GROUP_MODIFY = 1
     GROUP_JOIN = 2
@@ -30,7 +30,7 @@ class History(NicelyFormattedModel):
         ordering = ['-date']
 
     date = models.DateTimeField(default=timezone.now)
-    typus = enum.EnumField(HistoryTypus)
+    typus = EnumField(HistoryTypus)
     group = models.ForeignKey('groups.Group')
     store = models.ForeignKey('stores.Store', null=True)
     users = models.ManyToManyField('users.User')
