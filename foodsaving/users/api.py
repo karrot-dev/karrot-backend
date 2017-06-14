@@ -38,11 +38,12 @@ class UserViewSet(
     search_fields = ('display_name',)
 
     def get_permissions(self):
+        # Issue 232 default permission classes should always be returned
+        self.permission_classes += self.__class__.permission_classes
         if self.action == 'create':
-            self.permission_classes = (AllowAny,)
+            self.permission_classes += (AllowAny,)
         elif self.action in ('list', 'retrieve'):
-            self.permission_classes = (IsAuthenticated,)
-
+            self.permission_classes += (IsAuthenticated,)
         return super().get_permissions()
 
     def get_queryset(self):
@@ -77,6 +78,8 @@ class UserViewSet(
         """
         requires "key" parameter
         """
+        import pdb
+        pdb.set_trace()
         self.check_object_permissions(request, request.user)
         serializer = self.get_serializer(request.user, request.data)
         serializer.is_valid(raise_exception=True)
