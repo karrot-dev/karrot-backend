@@ -78,8 +78,6 @@ class UserViewSet(
         """
         requires "key" parameter
         """
-        import pdb
-        pdb.set_trace()
         self.check_object_permissions(request, request.user)
         serializer = self.get_serializer(request.user, request.data)
         serializer.is_valid(raise_exception=True)
