@@ -39,11 +39,14 @@ class UserViewSet(
 
     def get_permissions(self):
         # Issue 232 default permission classes should always be returned
-        self.permission_classes += self.__class__.permission_classes
+        # self.permission_classes += self.__class__.permission_classes
         if self.action == 'create':
-            self.permission_classes += (AllowAny,)
+            self.permission_classes = (AllowAny,)
         elif self.action in ('list', 'retrieve'):
-            self.permission_classes += (IsAuthenticated,)
+            self.permission_classes = (IsAuthenticated,)
+        else:
+            self.permission_classes += self.__class__.permission_classes
+
         return super().get_permissions()
 
     def get_queryset(self):
