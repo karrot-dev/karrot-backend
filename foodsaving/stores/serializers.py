@@ -27,8 +27,8 @@ post_store_modify = Signal()
 class PickupDateSerializer(serializers.ModelSerializer):
     class Meta:
         model = PickupDateModel
-        fields = ['id', 'date', 'series', 'store', 'max_collectors', 'collector_ids']
-        update_fields = ['date', 'max_collectors']
+        fields = ['id', 'date', 'series', 'store', 'max_collectors', 'collector_ids', 'comment']
+        update_fields = ['date', 'max_collectors', 'comment']
         extra_kwargs = {
             'series': {'read_only': True},
         }
@@ -59,12 +59,22 @@ class PickupDateSerializer(serializers.ModelSerializer):
         for attr in self.Meta.update_fields:
             if attr in validated_data:
                 selected_validated_data[attr] = validated_data[attr]
-            if pickupdate.series:
-                if attr == 'max_collectors':
-                    selected_validated_data['is_max_collectors_changed'] = True
-                elif attr == 'date':
-                    selected_validated_data['is_date_changed'] = True
         changed_data = get_changed_data(pickupdate, selected_validated_data)
+
+        if pickupdate.series:
+            if 'max_collectors' in changed_data:
+                selected_validated_data['is_max_collectors_changed'] = True
+                if not pickupdate.is_max_collectors_changed:
+                    changed_data['is_max_collectors_changed'] = True
+            if 'date' in changed_data:
+                selected_validated_data['is_date_changed'] = True
+                if not pickupdate.is_date_changed:
+                    changed_data['is_date_changed'] = True
+            if 'comment' in changed_data:
+                selected_validated_data['is_comment_changed'] = True
+                if not pickupdate.is_comment_changed:
+                    changed_data['is_comment_changed'] = True
+
         super().update(pickupdate, selected_validated_data)
 
         if changed_data:
@@ -122,8 +132,8 @@ class PickupDateLeaveSerializer(serializers.ModelSerializer):
 class PickupDateSeriesSerializer(serializers.ModelSerializer):
     class Meta:
         model = PickupDateSeriesModel
-        fields = ['id', 'max_collectors', 'store', 'rule', 'start_date']
-        update_fields = ('max_collectors', 'start_date', 'rule')
+        fields = ['id', 'max_collectors', 'store', 'rule', 'start_date', 'comment']
+        update_fields = ('max_collectors', 'start_date', 'rule', 'comment')
 
     def create(self, validated_data):
         series = super().create(validated_data)
@@ -176,7 +186,9 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
 class StoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = StoreModel
-        fields = ['id', 'name', 'description', 'group', 'address', 'latitude', 'longitude', 'weeks_in_advance']
+        fields = ['id', 'name', 'description', 'group',
+                  'address', 'latitude', 'longitude',
+                  'weeks_in_advance', 'upcoming_notification_hours']
         extra_kwargs = {
             'name': {
                 'min_length': 3
