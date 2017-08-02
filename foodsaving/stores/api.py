@@ -9,10 +9,15 @@ from rest_framework.viewsets import GenericViewSet
 from foodsaving.stores.filters import PickupDatesFilter, PickupDateSeriesFilter
 from foodsaving.stores.permissions import IsUpcoming, HasNotJoinedPickupDate, HasJoinedPickupDate, IsEmptyPickupDate, \
     IsNotFull
-from foodsaving.stores.serializers import StoreSerializer, PickupDateSerializer, PickupDateSeriesSerializer, \
+<<<<<<< HEAD
+from foodsaving.stores.serializers import StoreSerializer, FeedbackSerializer, PickupDateSerializer, PickupDateSeriesSerializer, \
     PickupDateJoinSerializer, PickupDateLeaveSerializer
+=======
+from foodsaving.stores.serializers import StoreSerializer, PickupDateSerializer, PickupDateSeriesSerializer, \
+    PickupDateJoinSerializer, PickupDateLeaveSerializer, FeedbackSerializer
+>>>>>>> e9b72fa4785fa41179077545f8eb2bfd7977021e
 from foodsaving.stores.models import Store as StoreModel, PickupDate as PickupDateModel, \
-    PickupDateSeries as PickupDateSeriesModel
+    PickupDateSeries as PickupDateSeriesModel, Feedback as FeedbackModel
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 pre_pickup_delete = Signal()
@@ -58,6 +63,37 @@ class StoreViewSet(
         PickupDateModel.objects.filter(store=store).delete()
         PickupDateSeriesModel.objects.filter(store=store).delete()
 
+class FeedbackViewSet(
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    PartialUpdateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet
+):
+
+    """
+    Feedback
+
+    # Query parameters
+    - `?user` - filter by user id
+    """
+    serializer_class = FeedbackSerializer
+    queryset = FeedbackModel.objects.all()
+
+    def get_queryset(self):
+        return self.queryset.filter(weight__members=self.request.user)
+
+    def perform_destroy(self, feedback):
+        feedback.deleted = True
+        feedback.save()
+        post_feedback_delete.send(
+            sender=self.__class__,
+            group=store.group,
+            store=store,
+            user=self.request.user,
+        )
+        feedback.save()
 
 class PickupDateSeriesViewSet(
     mixins.CreateModelMixin,
@@ -90,6 +126,7 @@ class PickupDateSeriesViewSet(
             user=self.request.user,
         )
         super().perform_destroy(series)
+
 
 
 class PickupDateViewSet(
@@ -151,3 +188,61 @@ class PickupDateViewSet(
     )
     def remove(self, request, pk=None):
         return self.partial_update(request)
+
+
+
+
+
+
+class FeedbackViewSet(
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet
+):
+    """
+    A viewset for viewing and editing user instances.
+    """
+    @detail_route(methods=['get', 'post'])
+    def add(self, request):
+        serializer_class = FeedbackSerializer
+        queryset = FeedbackModel.objects.all()
+        return Response(serializer.data)
+
+
+
+
+
+
+
+
+
+'''
+class FeedbackViewSet(
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet
+):
+    """
+    Create API endpoint for user Feedback (comment and total weight)
+    """
+    serializer_class = FeedbackSerializer
+    queryset = FeedbackModel.objects
+    permission_classes = (IsAuthenticated)
+    
+    @detail_route(
+        methods=['POST'],
+        permission_classes=(IsAuthenticated),
+        serializer_class=FeedbackSerializer
+    )
+    def add(self, request):
+        queryset = FeedbackModel.objects.all()
+        serializers = FeedbackSerializer(queryset, many=True)
+        return Response(serializer.data)
+'''
+
+
+

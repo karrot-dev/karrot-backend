@@ -27,7 +27,7 @@ from foodsaving.invitations.api import InvitationsViewSet, InvitationAcceptViewS
 from foodsaving.userauth.api import AuthViewSet
 from foodsaving.conversations.api import ChatViewSet, ChatMessageViewSet
 from foodsaving.groups.api import GroupViewSet
-from foodsaving.stores.api import StoreViewSet, PickupDateViewSet, PickupDateSeriesViewSet
+from foodsaving.stores.api import StoreViewSet, PickupDateViewSet, PickupDateSeriesViewSet, FeedbackViewSet
 from foodsaving.users.api import UserViewSet
 
 router = routers.DefaultRouter()
@@ -56,6 +56,9 @@ router.register('history', HistoryViewSet)
 # Invitation endpoints
 router.register('invitations', InvitationsViewSet)
 router.register('invitations', InvitationAcceptViewSet)
+
+# Feedback endpoints
+router.register('feedback', FeedbackViewSet)
 
 urlpatterns = [
     url(r'^api/', include(router.urls, namespace='api')),

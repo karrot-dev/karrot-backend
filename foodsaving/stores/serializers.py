@@ -9,8 +9,10 @@ from rest_framework import serializers
 from config import settings
 from foodsaving.history.utils import get_changed_data
 from foodsaving.stores.models import PickupDate as PickupDateModel
+from foodsaving.stores.models import Feedback as FeedbackModel
 from foodsaving.stores.models import PickupDateSeries as PickupDateSeriesModel
 from foodsaving.stores.models import Store as StoreModel
+from foodsaving.stores.models import Feedback as FeedbackModel
 from foodsaving.stores.signals import post_pickup_create, post_pickup_modify, post_pickup_join, post_pickup_leave, \
     post_series_create, post_series_modify, post_store_create, post_store_modify
 
@@ -229,3 +231,82 @@ class StoreSerializer(serializers.ModelSerializer):
         if w < 1:
             raise serializers.ValidationError(_('Set at least one week in advance'))
         return w
+
+<<<<<<< HEAD
+class FeedbackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FeedbackModel
+        fields = ['id', 'given_by', 'about', 'weight', 'comment']
+
+    def create(self, validated_data):
+        feedback = super().create(validated_data)
+        post_feedback_create.send(
+            sender=self.__class__,
+            weight=feedback.weight,
+            comment=feedback.comment,
+            user=self.context['request'].user,
+            payload=self.initial_data
+        )
+        return feedback
+
+    def update(self, feedback, validated_data):
+        changed_data = get_changed_data(store, validated_data)
+        feedback = super().update(store, validated_data)
+
+        if changed_data:
+            post_feedback_modify.send(
+                sender=self.__class__,
+                weight=feedback.weight,
+                comment=feedback.comment,
+                user=self.context['request'].user,
+                payload=changed_data
+            )
+        return feedback
+=======
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class FeedbackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FeedbackModel
+        fields = ['id', 'given_by', 'about', 'weight', 'comment', 'collector_ids']
+
+    def create(self, pickup_date, validated_data):
+        user = self.context['request'].user
+        feedback.add(comment)
+        post_feedback.send(
+            sender=self.__class__,
+            store=pickup_date.store,
+            user=user,
+        )
+        return feedback
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+        
+    collector_ids = serializers.PrimaryKeyRelatedField(
+        source='collectors',
+        many=True,
+        read_only=True
+    )
+
+
+
+
+>>>>>>> e9b72fa4785fa41179077545f8eb2bfd7977021e
