@@ -8,11 +8,12 @@ from rest_framework import serializers
 
 from config import settings
 from foodsaving.history.utils import get_changed_data
-from foodsaving.stores.models import PickupDate as PickupDateModel
-from foodsaving.stores.models import Feedback as FeedbackModel
-from foodsaving.stores.models import PickupDateSeries as PickupDateSeriesModel
-from foodsaving.stores.models import Store as StoreModel
-from foodsaving.stores.models import Feedback as FeedbackModel
+from foodsaving.stores.models import (
+    PickupDate as PickupDateModel,
+    Feedback as FeedbackModel,
+    PickupDateSeries as PickupDateSeriesModel,
+    Store as StoreModel,
+)
 from foodsaving.stores.signals import post_pickup_create, post_pickup_modify, post_pickup_join, post_pickup_leave, \
     post_series_create, post_series_modify, post_store_create, post_store_modify
 
@@ -231,6 +232,7 @@ class StoreSerializer(serializers.ModelSerializer):
         if w < 1:
             raise serializers.ValidationError(_('Set at least one week in advance'))
         return w
+
 
 class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
