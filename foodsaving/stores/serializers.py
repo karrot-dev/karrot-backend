@@ -232,7 +232,6 @@ class StoreSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(_('Set at least one week in advance'))
         return w
 
-<<<<<<< HEAD
 class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = FeedbackModel
@@ -262,51 +261,3 @@ class FeedbackSerializer(serializers.ModelSerializer):
                 payload=changed_data
             )
         return feedback
-=======
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class FeedbackSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FeedbackModel
-        fields = ['id', 'given_by', 'about', 'weight', 'comment', 'collector_ids']
-
-    def create(self, pickup_date, validated_data):
-        user = self.context['request'].user
-        feedback.add(comment)
-        post_feedback.send(
-            sender=self.__class__,
-            store=pickup_date.store,
-            user=user,
-        )
-        return feedback
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
-        
-    collector_ids = serializers.PrimaryKeyRelatedField(
-        source='collectors',
-        many=True,
-        read_only=True
-    )
-
-
-
-
->>>>>>> e9b72fa4785fa41179077545f8eb2bfd7977021e

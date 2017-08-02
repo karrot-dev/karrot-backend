@@ -203,12 +203,6 @@ class PickupDate(BaseModel):
             self.notifications_sent['upcoming'] = {'status': r.status_code, 'data': r.text}
             self.save()
 
-class Feedback(BaseModel):
-    given_by = models.ForeignKey('users.User')
-    about = models.ForeignKey('PickupDate')
-    weight = models.DecimalField(max_digits=5, decimal_places=1)
-    comment = models.TextField(max_length=500)
-
 
 
 
