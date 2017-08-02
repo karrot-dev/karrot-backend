@@ -29,6 +29,7 @@ class Store(BaseModel, LocationModel):
     def __str__(self):
         return '{} ({})'.format(self.name, self.group)
 
+
 class Feedback(BaseModel):
     class Meta:
         unique_together = ('weight', 'comment')
@@ -39,7 +40,6 @@ class Feedback(BaseModel):
 
     def __str__(self):
         return '{} - {}'.format(self.given_by, self.weight)
-
 
 
 class PickupDateSeriesManager(models.Manager):
@@ -202,7 +202,3 @@ class PickupDate(BaseModel):
             })
             self.notifications_sent['upcoming'] = {'status': r.status_code, 'data': r.text}
             self.save()
-
-
-
-

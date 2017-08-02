@@ -7,14 +7,18 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.stores.filters import PickupDatesFilter, PickupDateSeriesFilter
-from foodsaving.stores.permissions import IsUpcoming, HasNotJoinedPickupDate, HasJoinedPickupDate, IsEmptyPickupDate, \
-    IsNotFull
-from foodsaving.stores.serializers import StoreSerializer, FeedbackSerializer, PickupDateSerializer, PickupDateSeriesSerializer, \
-    PickupDateJoinSerializer, PickupDateLeaveSerializer
-from foodsaving.stores.serializers import StoreSerializer, PickupDateSerializer, PickupDateSeriesSerializer, \
-    PickupDateJoinSerializer, PickupDateLeaveSerializer, FeedbackSerializer
-from foodsaving.stores.models import Store as StoreModel, PickupDate as PickupDateModel, \
-    PickupDateSeries as PickupDateSeriesModel, Feedback as FeedbackModel
+from foodsaving.stores.permissions import (
+    IsUpcoming, HasNotJoinedPickupDate, HasJoinedPickupDate, IsEmptyPickupDate,
+    IsNotFull)
+from foodsaving.stores.serializers import (
+    StoreSerializer, PickupDateSerializer, PickupDateSeriesSerializer,
+    PickupDateJoinSerializer, PickupDateLeaveSerializer, FeedbackSerializer)
+from foodsaving.stores.models import (
+    Store as StoreModel,
+    PickupDate as PickupDateModel,
+    PickupDateSeries as PickupDateSeriesModel,
+    Feedback as FeedbackModel
+)
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 pre_pickup_delete = Signal()
@@ -60,6 +64,7 @@ class StoreViewSet(
         PickupDateModel.objects.filter(store=store).delete()
         PickupDateSeriesModel.objects.filter(store=store).delete()
 
+
 class FeedbackViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
@@ -91,6 +96,7 @@ class FeedbackViewSet(
             user=self.request.user,
         )
         feedback.save()
+
 
 class PickupDateSeriesViewSet(
     mixins.CreateModelMixin,
@@ -185,5 +191,3 @@ class PickupDateViewSet(
     )
     def remove(self, request, pk=None):
         return self.partial_update(request)
-
-
