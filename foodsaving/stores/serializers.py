@@ -15,7 +15,7 @@ from foodsaving.stores.models import (
     Store as StoreModel,
 )
 from foodsaving.stores.signals import post_pickup_create, post_pickup_modify, post_pickup_join, post_pickup_leave, \
-    post_series_create, post_series_modify, post_store_create, post_store_modify
+    post_series_create, post_series_modify, post_store_create, post_store_modify, post_feedback_create
 
 
 class PickupDateSerializer(serializers.ModelSerializer):
@@ -248,18 +248,4 @@ class FeedbackSerializer(serializers.ModelSerializer):
             user=self.context['request'].user,
             payload=self.initial_data
         )
-        return feedback
-
-    def update(self, feedback, validated_data):
-        changed_data = get_changed_data(store, validated_data)
-        feedback = super().update(store, validated_data)
-
-        if changed_data:
-            post_feedback_modify.send(
-                sender=self.__class__,
-                weight=feedback.weight,
-                comment=feedback.comment,
-                user=self.context['request'].user,
-                payload=changed_data
-            )
         return feedback

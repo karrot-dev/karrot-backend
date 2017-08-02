@@ -24,6 +24,7 @@ from foodsaving.utils.mixins import PartialUpdateModelMixin
 pre_pickup_delete = Signal()
 pre_series_delete = Signal()
 post_store_delete = Signal()
+post_feedback_delete = Signal()
 
 
 class StoreViewSet(
@@ -82,6 +83,7 @@ class FeedbackViewSet(
     """
     serializer_class = FeedbackSerializer
     queryset = FeedbackModel.objects.all()
+    filter_fields = ('group', 'name')
 
     def get_queryset(self):
         return self.queryset.filter(weight__members=self.request.user)
@@ -91,8 +93,8 @@ class FeedbackViewSet(
         feedback.save()
         post_feedback_delete.send(
             sender=self.__class__,
-            group=store.group,
-            store=store,
+            group=feedback.group,
+            feedback=feedback,
             user=self.request.user,
         )
         feedback.save()
@@ -129,7 +131,6 @@ class PickupDateSeriesViewSet(
             user=self.request.user,
         )
         super().perform_destroy(series)
-
 
 
 class PickupDateViewSet(
