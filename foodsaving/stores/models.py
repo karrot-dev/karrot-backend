@@ -29,6 +29,18 @@ class Store(BaseModel, LocationModel):
     def __str__(self):
         return '{} ({})'.format(self.name, self.group)
 
+class Feedback(BaseModel):
+    class Meta:
+        unique_together = ('weight', 'comment')
+    given_by = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='user_feedback')
+    about = models.ForeignKey('PickupDate')
+    weight = models.PositiveIntegerField()
+    comment = models.CharField(max_length=settings.NAME_MAX_LENGTH)
+
+    def __str__(self):
+        return '{} - {}'.format(self.given_by, self.weight)
+
+
 
 class PickupDateSeriesManager(models.Manager):
     @transaction.atomic
@@ -190,3 +202,13 @@ class PickupDate(BaseModel):
             })
             self.notifications_sent['upcoming'] = {'status': r.status_code, 'data': r.text}
             self.save()
+
+class Feedback(BaseModel):
+    given_by = models.ForeignKey('users.User')
+    about = models.ForeignKey('PickupDate')
+    weight = models.DecimalField(max_digits=5, decimal_places=1)
+    comment = models.TextField(max_length=500)
+
+
+
+
