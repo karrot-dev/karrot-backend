@@ -86,7 +86,7 @@ class FeedbackViewSet(
     # filter_fields = ('group', 'name')
 
     def get_queryset(self):
-        return self.queryset.filter(weight__members=self.request.user)
+        return self.queryset.all()
 
     def perform_destroy(self, feedback):
         feedback.deleted = True
