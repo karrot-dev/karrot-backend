@@ -83,7 +83,7 @@ class FeedbackViewSet(
     """
     serializer_class = FeedbackSerializer
     queryset = FeedbackModel.objects.all()
-    filter_fields = ('group', 'name')
+    # filter_fields = ('group', 'name')
 
     def get_queryset(self):
         return self.queryset.filter(weight__members=self.request.user)
