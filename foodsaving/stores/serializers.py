@@ -238,9 +238,14 @@ class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = FeedbackModel
         fields = ['id', 'given_by', 'about', 'weight', 'comment']
+#       update_fields = ['about', 'weight', 'comment']
+
 
     def create(self, validated_data):
+#       validated_data['given_by'] = self.context['request'].user
         feedback = super().create(validated_data)
+
+        # for creating a history event for adding feedback
         post_feedback_create.send(
             sender=self.__class__,
             weight=feedback.weight,
