@@ -15,7 +15,7 @@ from foodsaving.stores.models import (
     Store as StoreModel,
 )
 from foodsaving.stores.signals import post_pickup_create, post_pickup_modify, post_pickup_join, post_pickup_leave, \
-    post_series_create, post_series_modify, post_store_create, post_store_modify, post_feedback_create
+    post_series_create, post_series_modify, post_store_create, post_store_modify
 
 
 class PickupDateSerializer(serializers.ModelSerializer):
@@ -238,14 +238,18 @@ class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = FeedbackModel
         fields = ['id', 'given_by', 'about', 'weight', 'comment']
-#       update_fields = ['about', 'weight', 'comment']
-
+        # update_fields = ['about', 'weight', 'comment']
 
     def create(self, validated_data):
-#       validated_data['given_by'] = self.context['request'].user
+        # validated_data['given_by'] = self.context['request'].user
         feedback = super().create(validated_data)
+        return feedback
 
         # for creating a history event for adding feedback
+        """
+        Ines deleted the signal named "post_feedback_create"
+        - so this hole part might be unnessesary, too.
+
         post_feedback_create.send(
             sender=self.__class__,
             weight=feedback.weight,
@@ -254,3 +258,4 @@ class FeedbackSerializer(serializers.ModelSerializer):
             payload=self.initial_data
         )
         return feedback
+        """

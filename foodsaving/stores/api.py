@@ -69,20 +69,19 @@ class StoreViewSet(
 class FeedbackViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
-    PartialUpdateModelMixin,
-    mixins.DestroyModelMixin,
+    # PartialUpdateModelMixin,
+    # mixins.DestroyModelMixin,
     mixins.ListModelMixin,
     GenericViewSet
 ):
+    serializer_class = FeedbackSerializer
+    queryset = FeedbackModel.objects.all()
 
     """
     Feedback
 
     # Query parameters
-    - `?user` - filter by user id
-    """
-    serializer_class = FeedbackSerializer
-    queryset = FeedbackModel.objects.all()
+    -
     # filter_fields = ('group', 'name')
 
     def get_queryset(self):
@@ -98,6 +97,8 @@ class FeedbackViewSet(
             user=self.request.user,
         )
         feedback.save()
+         `?user` - filter by user id
+    """
 
 
 class PickupDateSeriesViewSet(
