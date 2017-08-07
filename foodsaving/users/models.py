@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from anymail.message import AnymailMessage
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+from django.db import transaction, IntegrityError
 from django.template.loader import render_to_string
 
 from django.db.models import EmailField, BooleanField, TextField, CharField, DateTimeField, ForeignKey
@@ -18,12 +19,16 @@ MAX_DISPLAY_NAME_LENGTH = 80
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
+    @transaction.atomic
     def _create_user(self, email, password, display_name=None, is_active=True, **extra_fields):
         """ Creates and saves a User with the given username, email and password.
 
         """
         email = self._validate_email(email)
         extra_fields['unverified_email'] = email
+
+        if self.filter(email__iexact=email).exists():
+            raise IntegrityError('email must be unique')
 
         user = self.model(
             email=email,
@@ -32,12 +37,12 @@ class UserManager(BaseUserManager):
             **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
-        user.send_welcome_mail()
+        user._send_welcome_mail()
         return user
 
     def _validate_email(self, email):
         if email is None:
-            raise ValueError('The given email must be set')
+            raise ValueError('The email field must be set')
         return self.normalize_email(email)
 
     def create_user(self, email=None, password=None, display_name=None,
@@ -79,6 +84,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     def get_short_name(self):
         return self.display_name
 
+    @transaction.atomic
     def verify_mail(self):
         self.mail_verified = True
         self.activation_key = ''
@@ -93,7 +99,16 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         self.key_expires_at = timezone.now() + timedelta(days=7)
         self.save()
 
-    def send_mail_change_notification(self):
+    @transaction.atomic
+    def update_email(self, unverified_email):
+        self.unverified_email = unverified_email
+        self._send_mail_change_notification()
+        self.send_new_verification_code()
+
+    def update_language(self, language):
+        self.language = language
+
+    def _send_mail_change_notification(self):
         context = {
             'user': self,
         }
@@ -107,7 +122,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
             track_opens=False
         ).send()
 
-    def send_welcome_mail(self):
+    def _send_welcome_mail(self):
         self._unverify_mail()
 
         url = '{hostname}/#!/verify-mail?key={key}'.format(hostname=settings.HOSTNAME,
@@ -127,6 +142,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
             track_opens=False
         ).send()
 
+    @transaction.atomic
     def send_new_verification_code(self):
         self._unverify_mail()
 
@@ -147,6 +163,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
             track_opens=False
         ).send()
 
+    @transaction.atomic
     def reset_password(self):
         new_password = User.objects.make_random_password(length=20)
         self.set_password(new_password)

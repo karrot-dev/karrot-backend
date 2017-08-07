@@ -33,11 +33,12 @@ INSTALLED_APPS = (
     'foodsaving.userauth',
     'foodsaving.base',
     'foodsaving.frontend',
-    'foodsaving.users',
+    'foodsaving.users.UsersConfig',
     'foodsaving.conversations',
     'foodsaving.history.HistoryConfig',
     'foodsaving.groups.GroupsConfig',
     'foodsaving.stores.StoresConfig',
+    'foodsaving.invitations.InvitationsConfig',
 
     # removed app, it's just here that the migration can run
     'foodsaving.walls',
@@ -53,6 +54,7 @@ INSTALLED_APPS = (
     'timezone_field',
     'raven.contrib.django.raven_compat',
     'django_jinja',
+    'channels',
 )
 
 
@@ -65,8 +67,6 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
-        'rest_framework.renderers.AdminRenderer',
     )
 }
 
@@ -178,6 +178,17 @@ SILENCED_SYSTEM_CHECKS = [
 
 DESCRIPTION_MAX_LENGTH = 100000
 NAME_MAX_LENGTH = 80
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "asgi_redis.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("localhost", 6379)],
+        },
+        "ROUTING": "config.routing.channel_routing",
+    },
+}
+
 
 # NB: Keep this as the last line, and keep
 # local_settings.py out of version control

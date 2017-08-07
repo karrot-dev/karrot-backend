@@ -2,33 +2,24 @@ from datetime import timedelta
 
 import dateutil.rrule
 from django.db import transaction
-from django.dispatch import Signal
 from django.utils import timezone
-from rest_framework import serializers
-
 from django.utils.translation import ugettext as _
+from rest_framework import serializers
 
 from config import settings
 from foodsaving.history.utils import get_changed_data
 from foodsaving.stores.models import PickupDate as PickupDateModel
 from foodsaving.stores.models import PickupDateSeries as PickupDateSeriesModel
 from foodsaving.stores.models import Store as StoreModel
-
-post_pickup_create = Signal()
-post_pickup_modify = Signal()
-post_pickup_join = Signal()
-post_pickup_leave = Signal()
-post_series_create = Signal()
-post_series_modify = Signal()
-post_store_create = Signal()
-post_store_modify = Signal()
+from foodsaving.stores.signals import post_pickup_create, post_pickup_modify, post_pickup_join, post_pickup_leave, \
+    post_series_create, post_series_modify, post_store_create, post_store_modify
 
 
 class PickupDateSerializer(serializers.ModelSerializer):
     class Meta:
         model = PickupDateModel
-        fields = ['id', 'date', 'series', 'store', 'max_collectors', 'collector_ids', 'comment']
-        update_fields = ['date', 'max_collectors', 'comment']
+        fields = ['id', 'date', 'series', 'store', 'max_collectors', 'collector_ids', 'description']
+        update_fields = ['date', 'max_collectors', 'description']
         extra_kwargs = {
             'series': {'read_only': True},
         }
@@ -70,10 +61,10 @@ class PickupDateSerializer(serializers.ModelSerializer):
                 selected_validated_data['is_date_changed'] = True
                 if not pickupdate.is_date_changed:
                     changed_data['is_date_changed'] = True
-            if 'comment' in changed_data:
-                selected_validated_data['is_comment_changed'] = True
-                if not pickupdate.is_comment_changed:
-                    changed_data['is_comment_changed'] = True
+            if 'description' in changed_data:
+                selected_validated_data['is_description_changed'] = True
+                if not pickupdate.is_description_changed:
+                    changed_data['is_description_changed'] = True
 
         super().update(pickupdate, selected_validated_data)
 
@@ -132,8 +123,8 @@ class PickupDateLeaveSerializer(serializers.ModelSerializer):
 class PickupDateSeriesSerializer(serializers.ModelSerializer):
     class Meta:
         model = PickupDateSeriesModel
-        fields = ['id', 'max_collectors', 'store', 'rule', 'start_date', 'comment']
-        update_fields = ('max_collectors', 'start_date', 'rule', 'comment')
+        fields = ['id', 'max_collectors', 'store', 'rule', 'start_date', 'description']
+        update_fields = ('max_collectors', 'start_date', 'rule', 'description')
 
     def create(self, validated_data):
         series = super().create(validated_data)

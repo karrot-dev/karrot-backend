@@ -4,16 +4,15 @@ import dateutil.rrule
 import requests
 from dateutil.relativedelta import relativedelta
 from django.contrib.postgres.fields import JSONField
+from django.db import models
 from django.db import transaction
 from django.db.models import Count
-from django.dispatch import Signal
 from django.template.loader import render_to_string
-
 from django.utils import timezone
 
 from config import settings
 from foodsaving.base.base_models import BaseModel, LocationModel
-from django.db import models
+from foodsaving.stores.signals import pickup_done, pickup_missed
 
 
 class Store(BaseModel, LocationModel):
@@ -49,7 +48,7 @@ class PickupDateSeries(BaseModel):
     max_collectors = models.PositiveIntegerField(blank=True, null=True)
     rule = models.TextField()
     start_date = models.DateTimeField()
-    comment = models.TextField(blank=True)
+    description = models.TextField(blank=True)
 
     @transaction.atomic
     def delete(self, *args, **kwargs):
@@ -87,7 +86,7 @@ class PickupDateSeries(BaseModel):
                     max_collectors=self.max_collectors,
                     series=self,
                     store=self.store,
-                    comment=self.comment
+                    description=self.description
                 )
             if not new_date:
                 # only delete pickup dates when they are empty
@@ -98,16 +97,12 @@ class PickupDateSeries(BaseModel):
                 pickup.date = new_date
             if not pickup.is_max_collectors_changed:
                 pickup.max_collectors = self.max_collectors
-            if not pickup.is_comment_changed:
-                pickup.comment = self.comment
+            if not pickup.is_description_changed:
+                pickup.description = self.description
             pickup.save()
 
     def __str__(self):
         return '{} - {}'.format(self.date, self.store)
-
-
-pickup_done = Signal()
-pickup_missed = Signal()
 
 
 class PickupDateManager(models.Manager):
@@ -163,7 +158,7 @@ class PickupDate(BaseModel):
         settings.AUTH_USER_MODEL,
         related_name='pickup_dates'
     )
-    comment = models.TextField(blank=True)
+    description = models.TextField(blank=True)
     max_collectors = models.PositiveIntegerField(null=True)
     deleted = models.BooleanField(default=False)
 
@@ -171,7 +166,7 @@ class PickupDate(BaseModel):
     # used when the respective value in the series gets updated
     is_date_changed = models.BooleanField(default=False)
     is_max_collectors_changed = models.BooleanField(default=False)
-    is_comment_changed = models.BooleanField(default=False)
+    is_description_changed = models.BooleanField(default=False)
 
     notifications_sent = JSONField(default=dict)
 
