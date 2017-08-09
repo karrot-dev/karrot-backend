@@ -31,8 +31,6 @@ class Store(BaseModel, LocationModel):
 
 
 class Feedback(BaseModel):
-    class Meta:
-        unique_together = ('weight', 'comment')
     given_by = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='user_feedback')
     about = models.ForeignKey('PickupDate')
     weight = models.PositiveIntegerField()
@@ -57,7 +55,7 @@ class PickupDateSeries(BaseModel):
         related_name='series',
         on_delete=models.CASCADE
     )
-    max_collectors = models.Posit iveIntegerField(blank=True, null=True)
+    max_collectors = models.PositiveIntegerField(blank=True, null=True)
     rule = models.TextField()
     start_date = models.DateTimeField()
     description = models.TextField(blank=True)
