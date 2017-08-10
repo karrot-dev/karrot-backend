@@ -8,7 +8,7 @@ database:
     - cp config/local_settings.py.ci config/local_settings.py
 test:
   override:
-    - coverage run manage.py test
+    - coverage run manage.py test --parallel 2
     - flake8 ./
   post:
     - coverage html -d $CIRCLE_ARTIFACTS
