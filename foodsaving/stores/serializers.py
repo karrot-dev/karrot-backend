@@ -237,7 +237,7 @@ class StoreSerializer(serializers.ModelSerializer):
 class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = FeedbackModel
-        fields = ['id', 'weight', 'comment']
+        fields = ['id', 'weight', 'comment', 'given_by', 'about']
         # update_fields = ['about', 'weight', 'comment']
 
     def create(self, validated_data):
