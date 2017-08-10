@@ -245,17 +245,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
         feedback = super().create(validated_data)
         return feedback
 
-        # for creating a history event for adding feedback
-        """
-        Ines deleted the signal named "post_feedback_create"
-        - so this hole part might be unnessesary, too.
-
-        post_feedback_create.send(
-            sender=self.__class__,
-            weight=feedback.weight,
-            comment=feedback.comment,
-            user=self.context['request'].user,
-            payload=self.initial_data
-        )
-        return feedback
-        """
+    def validate_given_by(self, given_by_id):
+        if given_by_id not in self.context['request'].user.groups.all():
+            raise serializers.ValidationError(_('You are not member of the store\'s group.'))
+        return given_by_id
