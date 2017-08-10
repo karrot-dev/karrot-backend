@@ -13,11 +13,17 @@ class FeedbackTest(APITestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.url = '/api/feedback/'
+
+        # pickup date for group with one member and one store
         cls.member = UserFactory()
         cls.group = GroupFactory(members=[cls.member])
         cls.store = StoreFactory(group=cls.group)
         cls.pickup = PickupDateFactory(store=cls.store)
 
+        # not a member of the group
+        cls.user = UserFactory()
+
+        # create feedback
         cls.feedback = {
             'given_by': cls.member.id,
             'about': cls.pickup.id,
@@ -25,13 +31,14 @@ class FeedbackTest(APITestCase):
             'comment': 'asfjk'
         }
 
-    def test_details(self):
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_the_user_is_not_member_of_group(self):
-        response = self.client.post(self.url, self.feedback)
+    def test_create_feedback(self):
+        response = self.client.post(self.url, self.feedback, format='json')
 
         self.assertEqual(
-            response.status_code, status.HTTP_404_NOT_FOUND, response.data)
+            response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+    def test_create_feedback_as_user(self):
+        self.client.force_login(user=self.user)
+        response = self.client.post(self.url, self.feedback, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(response.data, {'given_by': ['You are not member of the store\'s group.']})

@@ -69,36 +69,16 @@ class StoreViewSet(
 class FeedbackViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
-    # PartialUpdateModelMixin,
-    # mixins.DestroyModelMixin,
     mixins.ListModelMixin,
     GenericViewSet
 ):
     serializer_class = FeedbackSerializer
     queryset = FeedbackModel.objects.all()
+    # queryset = PickupDateModel.objects.filter(deleted=False)
+    permission_classes = (IsAuthenticated,)
 
-    """
-    Feedback
-
-    # Query parameters
-    -
-    # filter_fields = ('group', 'name')
-
-    def get_queryset(self):
-        return self.queryset.all()
-
-    def perform_destroy(self, feedback):
-        feedback.deleted = True
-        feedback.save()
-        post_feedback_delete.send(
-            sender=self.__class__,
-            group=feedback.group,
-            feedback=feedback,
-            user=self.request.user,
-        )
-        feedback.save()
-         `?user` - filter by user id
-    """
+    # def get_queryset(self):
+    #    return self.queryset.filter(store__group__members=self.request.user)
 
 
 class PickupDateSeriesViewSet(
