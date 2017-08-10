@@ -14,7 +14,19 @@ class FeedbackTest(APITestCase):
         super().setUpClass()
         cls.url = '/api/feedback/'
 
-        # pickup date for group with one member and one store
+        """
+        pickup date for group with one member and one store
+
+        setup:
+        1. create user
+        2. create group with the user as member
+        3. create a store within that group
+        4. create a pickup within that store
+
+        ToDo:
+        - Pickup should be in the past (to allow giving feedback)
+        - Add user to the pickup as collector
+        """
         cls.member = UserFactory()
         cls.group = GroupFactory(members=[cls.member])
         cls.store = StoreFactory(group=cls.group)
@@ -32,12 +44,27 @@ class FeedbackTest(APITestCase):
         }
 
     def test_create_feedback(self):
+        """
+        Non-User is not allowed to give feedback.
+
+        Test:
+        1. user gives feedback to pickup
+        2. make sure that response is NOT valid
+        """
         response = self.client.post(self.url, self.feedback, format='json')
 
         self.assertEqual(
             response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_create_feedback_as_user(self):
+        """
+        User is not allowed to give feedback when not a member of the stores group.
+
+        Test:
+        1. log user in
+        2. user gives feedback to pickup
+        3. make sure that response is NOT valid
+        """
         self.client.force_login(user=self.user)
         response = self.client.post(self.url, self.feedback, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)

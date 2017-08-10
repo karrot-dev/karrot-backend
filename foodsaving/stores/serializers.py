@@ -238,12 +238,12 @@ class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = FeedbackModel
         fields = ['id', 'weight', 'comment', 'given_by', 'about']
-        # update_fields = ['about', 'weight', 'comment']
-
-    def create(self, validated_data):
-        # validated_data['given_by'] = self.context['request'].user
-        feedback = super().create(validated_data)
-        return feedback
+        """
+        Tilmann suggested to make 'given_by' read_only - but the following code produces errors
+        extra_kwargs = {
+            'given_by': {'read_only': True}
+        }
+        """
 
     def validate_given_by(self, given_by_id):
         if given_by_id not in self.context['request'].user.groups.all():
