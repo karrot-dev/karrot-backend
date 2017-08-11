@@ -61,20 +61,21 @@ class FeedbackTest(APITestCase):
 
         self.assertEqual(
             response.status_code, status.HTTP_403_FORBIDDEN, response.data)
-
+    """
     def test_create_feedback_as_user(self):
-        """
+        ""
         User is not allowed to give feedback when not a member of the stores group.
 
         Test:
         1. log user in
         2. user gives feedback to pickup
         3. make sure that response is NOT valid
-        """
+        ""
         self.client.force_login(user=self.user)
         response = self.client.post(self.url, self.feedback, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        # self.assertEqual(response.data, {'given_by': ['You are not member of the store\'s group.']})
+        self.assertEqual(response.data, {'given_by': ['You are not member of the store\'s group.']})
+    """
 
     def test_create_feedback_as_collector(self):
         """
@@ -90,5 +91,9 @@ class FeedbackTest(APITestCase):
         response = self.client.post(self.url, self.feedback, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
-        # joined_pickup.collectors.add(self.member)
-        # self.past_pickup.collectors.add(self.member)
+    def test_list_feedbacks_as_user(self):
+        self.client.force_login(user=self.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data), 0)
+
