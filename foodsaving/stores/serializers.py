@@ -245,6 +245,11 @@ class FeedbackSerializer(serializers.ModelSerializer):
         }
         """
 
+    def validate_group(self, group_id):
+        if group_id not in self.context['request'].user.groups.all():
+            raise serializers.ValidationError(_('You are not member of the store\'s group.'))
+        return group_id
+
     def validate_about(self, pickup_dates_id):
         if pickup_dates_id not in self.context['request'].user.pickup_dates.all():
             raise serializers.ValidationError(_('You aren\'t assign to the pickup.'))
