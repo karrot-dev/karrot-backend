@@ -93,7 +93,7 @@ class PickupDateSeries(BaseModel):
                 if pickup.collectors.count() <= 0:
                     pickup.delete()
                     continue
-            if new_date and not pickup.is_date_changed:
+            if new_date and not pickup.is_date_changed and not pickup.collectors.count() > 0:
                 pickup.date = new_date
             if not pickup.is_max_collectors_changed:
                 pickup.max_collectors = self.max_collectors
