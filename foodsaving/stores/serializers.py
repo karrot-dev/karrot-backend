@@ -243,15 +243,27 @@ class FeedbackSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'given_by': {'read_only': True}
         }
-        """
-    """
     def validate_given_by(self, user_id):
         if user_id not in self.context['request'].user.groups.all():
             raise serializers.ValidationError(_('You are not member of the store\'s group.'))
         return user_id
-    """
+                """
+    # Is the user a member of the group?
+    # def validate_given_by(self, user_id):
+    #     if user_id is in groups
 
-    def validate_about(self, pickup_dates_id):
-        if pickup_dates_id not in self.context['request'].user.pickup_dates.all():
+    #     if not self.context['request'].user.groups.filter(id=group_id).exists():
+    #         raise serializers.ValidationError(_('You are not member of the store\'s group.'))
+    #     return user_id
+
+    def validate_about(self, about):
+        # is the member assiged to the pickup?
+        user = self.context['request'].user
+        pickup_date = about  # PickupDateModel.objects.get(pk=about)
+        group = pickup_date.store.group
+        if user not in group.members.all():
+            raise serializers.ValidationError(_('You are not member of the store\'s group.'))
+        # if user is in self.context['request'].
+        if about not in self.context['request'].user.pickup_dates.all():
             raise serializers.ValidationError(_('You aren\'t assign to the pickup.'))
-        return pickup_dates_id
+        return about
