@@ -90,6 +90,22 @@ class FeedbackTest(APITestCase):
         response = self.client.post(self.url, self.feedback, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
+    def test_create_feedback_fails_as_non_collector(self):
+        """
+        Member is not allowed to give feedback when he is not assiged to the
+        Pickup.
+
+        Test:
+        1. log user in
+        2. user gives feedback to pickup
+        3. user joins the pickup
+        4. feedback has not been created
+        """
+        self.client.force_login(user=self.member)
+        response = self.client.post(self.url, self.feedback, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(response.data, {'about': ['You aren\'t assign to the pickup.']})
+
     def test_list_feedback_works_as_user(self):
         self.client.force_login(user=self.user)
         response = self.client.get(self.url)
