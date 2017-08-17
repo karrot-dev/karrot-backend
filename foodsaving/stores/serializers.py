@@ -259,7 +259,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
     def validate_about(self, about):
         # is the member assiged to the pickup?
         user = self.context['request'].user
-        pickup_date = about  # PickupDateModel.objects.get(pk=1)
+        pickup_date = about  # PickupDateModel.objects.get(pk=about)
         group = pickup_date.store.group
         if user not in group.members.all():
             raise serializers.ValidationError(_('You are not member of the store\'s group.'))
