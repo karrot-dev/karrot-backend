@@ -237,7 +237,9 @@ class StoreSerializer(serializers.ModelSerializer):
 class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = FeedbackModel
-        fields = ['id', 'weight', 'comment', 'given_by', 'about']
+        fields = ['id', 'weight', 'comment', 'about', 'given_by']
+        # read_only_fields = ('given_by',)
+
         """
         Tilmann suggested to make 'given_by' read_only - but the following code produces errors
         extra_kwargs = {
@@ -257,10 +259,10 @@ class FeedbackSerializer(serializers.ModelSerializer):
     #     return user_id
 
     def validate_about(self, about):
-        # is the member assiged to the pickup?
         user = self.context['request'].user
         pickup_date = about  # PickupDateModel.objects.get(pk=about)
         group = pickup_date.store.group
+        # is the member assiged to the pickup?
         if user not in group.members.all():
             raise serializers.ValidationError(_('You are not member of the store\'s group.'))
         # if user is in self.context['request'].
