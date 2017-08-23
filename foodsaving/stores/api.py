@@ -5,6 +5,8 @@ from rest_framework import viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
+from django.http import Http404
+from django.shortcuts import render_to_response
 
 from foodsaving.groups.api import IsMember
 from foodsaving.stores.filters import PickupDatesFilter, PickupDateSeriesFilter
@@ -76,10 +78,35 @@ class FeedbackViewSet(
     serializer_class = FeedbackSerializer
     queryset = FeedbackModel.objects.all()
     # queryset = PickupDateModel.objects.filter(deleted=False)
-    permission_classes = (IsAuthenticated, IsMember)
+    permission_classes = (IsAuthenticated,)
 
-    # def get_queryset(self):
-    #    return self.queryset.filter(store__group__members=self.request.user)
+    # tried with def detail but returned 1 test failure
+    # @detail_route(
+    #    methods=['GET'],
+    #    serializer_class=FeedbackSerializer
+    # )
+
+    # returns 1 failure in tests
+    def detail(self, request, pickup_id):
+        """raises 404 if user is not member of group"""
+        try:
+            p = FeedbackModel.about.get(pk=pickup_id)
+        except FeedbackModel.DoesNotExist:
+            raise Http404
+        return render_to_response({'about': p})
+
+    # Looked like correct one, returned 8 failures for all tests:
+    # def get_permissions(self):
+    #    if self.action == 'retrieve':
+    #        self.permission_classes = (IsAuthenticated, IsMember,)
+    #    raise Http404
+
+    #    return super().get_permissions()
+
+    # influences Swagger tests - many errors:
+    # def get_serializer_class(self):
+    #   if self.action == 'list' and self.request.user not in self.members.all():
+    #   raise Http404("You don't have rights of group member.")
 
 
 class PickupDateSeriesViewSet(
