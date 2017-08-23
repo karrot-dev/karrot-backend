@@ -29,10 +29,10 @@ class FeedbackTest(APITestCase):
         - Pickup should be in the past (to allow giving feedback)
         - Add user to the pickup as collector
         """
-        cls.member_marie = UserFactory()
-        cls.collector_ines = UserFactory()
+        cls.member = UserFactory()
+        cls.collector = UserFactory()
         # create group and let 'member' and 'collector' join
-        cls.group = GroupFactory(members=[cls.member_marie, cls.collector_ines])
+        cls.group = GroupFactory(members=[cls.member, cls.collector])
         cls.store = StoreFactory(group=cls.group)
         cls.pickup = PickupDateFactory(store=cls.store)
 
@@ -42,11 +42,11 @@ class FeedbackTest(APITestCase):
         # past pickup date
         cls.past_pickup = PickupDateFactory(store=cls.store, date=timezone.now() - relativedelta(days=1))
         # transforms the menber into a collector
-        cls.past_pickup.collectors.add(cls.collector_ines)
+        cls.past_pickup.collectors.add(cls.collector)
 
         # create feedback
         cls.feedback = {
-            'given_by': cls.member_marie.id,
+            'given_by': cls.member.id,
             'about': cls.past_pickup.id,
             'weight': 2,
             'comment': 'asfjk'
@@ -89,7 +89,7 @@ class FeedbackTest(APITestCase):
         2. user gives feedback to pickup
         3. feedback NOT created
         """
-        self.client.force_login(user=self.member_marie)
+        self.client.force_login(user=self.member)
         response = self.client.post(self.url, self.feedback, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(response.data, {'about': ['You aren\'t assign to the pickup.']})
@@ -103,15 +103,31 @@ class FeedbackTest(APITestCase):
         2. user gives feedback to pickup
         3. feedback created
         """
-        self.client.force_login(user=self.collector_ines)
+        self.client.force_login(user=self.collector)
         response = self.client.post(self.url, self.feedback, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
-    def test_list_feedback_works_as_user(self):
+    def test_list_feedback_fails_as_non_user(self):
         """
-        comment
+        Non-User is NOT allowed to see list of feedback
+        """
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+    def test_list_feedback_fails_as_non_group_member(self):
+        """
+        Non-Member is NOT allowed to see list of feedback
         """
         self.client.force_login(user=self.user)
         response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
+        self.assertEqual(response.data, {'about': ['You are not member of the store\'s group.']})
+
+    def test_list_feedback_works_as_group_member(self):
+        """
+        Member is allowed to see list of feedback
+        """
+        self.client.force_login(user=self.member)
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data), 0)
+        # self.assertEqual(len(response.data), 0)

@@ -6,6 +6,7 @@ from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
+from foodsaving.groups.api import IsMember
 from foodsaving.stores.filters import PickupDatesFilter, PickupDateSeriesFilter
 from foodsaving.stores.permissions import (
     IsUpcoming, HasNotJoinedPickupDate, HasJoinedPickupDate, IsEmptyPickupDate,
@@ -75,7 +76,7 @@ class FeedbackViewSet(
     serializer_class = FeedbackSerializer
     queryset = FeedbackModel.objects.all()
     # queryset = PickupDateModel.objects.filter(deleted=False)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsMember)
 
     # def get_queryset(self):
     #    return self.queryset.filter(store__group__members=self.request.user)
