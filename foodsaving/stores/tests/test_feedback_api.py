@@ -29,8 +29,10 @@ class FeedbackTest(APITestCase):
         - Pickup should be in the past (to allow giving feedback)
         - Add user to the pickup as collector
         """
-        cls.member = UserFactory()
-        cls.group = GroupFactory(members=[cls.member])
+        cls.member_marie = UserFactory()
+        cls.collector_ines = UserFactory()
+        # create group and let 'member' and 'collector' join
+        cls.group = GroupFactory(members=[cls.member_marie, cls.collector_ines])
         cls.store = StoreFactory(group=cls.group)
         cls.pickup = PickupDateFactory(store=cls.store)
 
@@ -39,11 +41,12 @@ class FeedbackTest(APITestCase):
 
         # past pickup date
         cls.past_pickup = PickupDateFactory(store=cls.store, date=timezone.now() - relativedelta(days=1))
-        cls.past_pickup.collectors.add(cls.member)
+        # transforms the menber into a collector
+        cls.past_pickup.collectors.add(cls.collector_ines)
 
         # create feedback
         cls.feedback = {
-            'given_by': cls.member.id,
+            'given_by': cls.member_marie.id,
             'about': cls.past_pickup.id,
             'weight': 2,
             'comment': 'asfjk'
@@ -76,37 +79,38 @@ class FeedbackTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(response.data, {'about': ['You are not member of the store\'s group.']})
 
+    def test_create_feedback_fails_as_non_collector(self):
+        """
+        Group Member is not allowed to give feedback when he is not assiged to the
+        Pickup.
+
+        Test:
+        1. log user in as group member
+        2. user gives feedback to pickup
+        3. feedback NOT created
+        """
+        self.client.force_login(user=self.member_marie)
+        response = self.client.post(self.url, self.feedback, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(response.data, {'about': ['You aren\'t assign to the pickup.']})
+
     def test_create_feedback_works_as_collector(self):
         """
         Member is allowed to give feedback when he is assiged to the Pickup.
 
         Test:
-        1. log user in
+        1. log user in as group member
         2. user gives feedback to pickup
-        3. make sure that response is valid
-        4. make sure that feedback has been created
+        3. feedback created
         """
-        self.client.force_login(user=self.member)
+        self.client.force_login(user=self.collector_ines)
         response = self.client.post(self.url, self.feedback, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
-    def test_create_feedback_fails_as_non_collector(self):
-        """
-        Member is not allowed to give feedback when he is not assiged to the
-        Pickup.
-
-        Test:
-        1. log user in
-        2. user gives feedback to pickup
-        3. user joins the pickup
-        4. feedback has not been created
-        """
-        self.client.force_login(user=self.member)
-        response = self.client.post(self.url, self.feedback, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        self.assertEqual(response.data, {'about': ['You aren\'t assign to the pickup.']})
-
     def test_list_feedback_works_as_user(self):
+        """
+        comment
+        """
         self.client.force_login(user=self.user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
