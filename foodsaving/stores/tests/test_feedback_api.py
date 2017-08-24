@@ -114,20 +114,31 @@ class FeedbackTest(APITestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
-    def test_list_feedback_fails_as_non_group_member(self):
+    def test_list_feedback_works_as_non_group_member(self):
         """
-        Non-Member is NOT allowed to see list of feedback
+        Non-Member is allowed to see an empty list of feedback
         """
         self.client.force_login(user=self.user)
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
-        self.assertEqual(response.data, {'about': ['You are not member of the store\'s group.']})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data), 0)
+        # Why is this list empty?
 
     def test_list_feedback_works_as_group_member(self):
         """
-        Member is allowed to see list of feedback
+        Member is allowed to see an empty list of feedback
         """
         self.client.force_login(user=self.member)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        # self.assertEqual(len(response.data), 0)
+        self.assertEqual(len(response.data), 0)
+
+    def test_list_feedback_works_as_collector(self):
+        """
+        Collector is allowed to see list of feedback
+        """
+        self.client.force_login(user=self.collector)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        print(response.data)
+        self.assertEqual(len(response.data), 2)

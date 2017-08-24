@@ -5,10 +5,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
-from django.http import Http404
-from django.shortcuts import render_to_response
 
-from foodsaving.groups.api import IsMember
 from foodsaving.stores.filters import PickupDatesFilter, PickupDateSeriesFilter
 from foodsaving.stores.permissions import (
     IsUpcoming, HasNotJoinedPickupDate, HasJoinedPickupDate, IsEmptyPickupDate,
@@ -22,6 +19,7 @@ from foodsaving.stores.models import (
     PickupDateSeries as PickupDateSeriesModel,
     Feedback as FeedbackModel
 )
+
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 pre_pickup_delete = Signal()
@@ -80,33 +78,23 @@ class FeedbackViewSet(
     # queryset = PickupDateModel.objects.filter(deleted=False)
     permission_classes = (IsAuthenticated,)
 
-    # tried with def detail but returned 1 test failure
-    # @detail_route(
-    #    methods=['GET'],
-    #    serializer_class=FeedbackSerializer
-    # )
+    """
+    @list_route      for a list of feedback
+    @detail_route    for one specific feedback
+    (
+        methods=['GET'],
+    )
+    def list_feedback(self, request, pk=None):
 
-    # returns 1 failure in tests
-    def detail(self, request, pickup_id):
-        """raises 404 if user is not member of group"""
-        try:
-            p = FeedbackModel.about.get(pk=pickup_id)
-        except FeedbackModel.DoesNotExist:
-            raise Http404
-        return render_to_response({'about': p})
+    """
 
-    # Looked like correct one, returned 8 failures for all tests:
+    # Looked like correct one for retrieving data:
     # def get_permissions(self):
+
     #    if self.action == 'retrieve':
     #        self.permission_classes = (IsAuthenticated, IsMember,)
-    #    raise Http404
 
     #    return super().get_permissions()
-
-    # influences Swagger tests - many errors:
-    # def get_serializer_class(self):
-    #   if self.action == 'list' and self.request.user not in self.members.all():
-    #   raise Http404("You don't have rights of group member.")
 
 
 class PickupDateSeriesViewSet(
