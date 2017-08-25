@@ -97,6 +97,18 @@ class FeedbackViewSet(
     #    return super().get_permissions()
 
 
+"""
+TILMANN said here:
+https://github.com/yunity/foodsaving-backend/pull/342/files/18ac4bf7e6935bd615b3efcfa677a44dc73c66b4
+
+queryset = FeedbackModel.objects  # make all feedback objects available by default
+
+def get_queryset(self):
+    # apply additional filters depending on the user who makes the request
+    return self.queryset.filter(about__store__group__members=self.request.user)
+"""
+
+
 class PickupDateSeriesViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,

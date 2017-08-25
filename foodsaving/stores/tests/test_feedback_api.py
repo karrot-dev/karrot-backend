@@ -24,11 +24,8 @@ class FeedbackTest(APITestCase):
         2. create group with the user as member
         3. create a store within that group
         4. create a pickup within that store
-
-        ToDo:
-        - Pickup should be in the past (to allow giving feedback)
-        - Add user to the pickup as collector
         """
+
         cls.member = UserFactory()
         cls.collector = UserFactory()
         # create group and let 'member' and 'collector' join
