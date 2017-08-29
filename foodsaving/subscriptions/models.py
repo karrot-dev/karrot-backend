@@ -10,3 +10,10 @@ class ChannelSubscription(BaseModel):
     user = ForeignKey(settings.AUTH_USER_MODEL)
     reply_channel = TextField()  # django channels channel
     lastseen_at = DateTimeField(default=timezone.now, null=True)
+
+
+class PushSubscription(BaseModel):
+    """A subscription to receive messages over an FCM push channel."""
+    user = ForeignKey(settings.AUTH_USER_MODEL)
+    token = TextField()
+    platform = TextField()
