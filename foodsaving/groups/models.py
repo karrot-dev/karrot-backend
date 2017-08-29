@@ -44,3 +44,6 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     def remove_member(self, user):
         pre_group_leave.send(sender=self.__class__, group=self, user=user)
         self.members.remove(user)
+
+    def is_member(self, user):
+        return user in self.members.all()
