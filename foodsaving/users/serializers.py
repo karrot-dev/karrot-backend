@@ -7,7 +7,6 @@ from django.utils.translation import ugettext as _
 
 
 class UserSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = get_user_model()
         fields = ['id', 'display_name', 'email', 'unverified_email', 'password',
@@ -46,6 +45,12 @@ class UserSerializer(serializers.ModelSerializer):
         if 'language' in validated_data and validated_data['language'] != user.language:
             user.update_language(validated_data.pop('language'))
         return super().update(user, validated_data)
+
+
+class UserIdSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ['id']
 
 
 class VerifyMailSerializer(serializers.Serializer):
