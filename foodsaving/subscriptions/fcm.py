@@ -11,6 +11,8 @@ fcm = None
 
 if hasattr(settings, 'FCM_SERVER_KEY'):
     fcm = FCMNotification(api_key=settings.FCM_SERVER_KEY)
+else:
+    logger.warning('Please configure FCM_SERVER_KEY in your settings to use want to use push messaging')
 
 
 def notify_multiple_devices(**kwargs):
@@ -22,8 +24,7 @@ def notify_multiple_devices(**kwargs):
     """
 
     if fcm is None:
-        logger.warning('Please configure FCM_SERVER_KEY in your settings to use want to use push messaging')
-        return
+        return None
 
     response = fcm.notify_multiple_devices(**kwargs)
     tokens = kwargs.get('registration_ids', [])
@@ -32,3 +33,5 @@ def notify_multiple_devices(**kwargs):
     for index, result in enumerate(response['results']):
         if 'error' in result and result['error'] == 'InvalidRegistration':
             PushSubscription.objects.filter(token=tokens[index]).delete()
+
+    return response
