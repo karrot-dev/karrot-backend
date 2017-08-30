@@ -19,7 +19,7 @@ def logger_warning_mock():
 
 
 @contextmanager
-def fcm_reload_without_unset_config():
+def fcm_reload_without_config():
     from django.conf import settings
     original = settings.FCM_SERVER_KEY
     try:
@@ -60,7 +60,7 @@ class FCMTests(TestCase):
 
     def test_continues_if_config_not_present(self, m):
         with logger_warning_mock() as warning_mock:
-            with fcm_reload_without_unset_config():
+            with fcm_reload_without_config():
                 result = notify_multiple_devices(registration_ids=['mytoken'])
                 self.assertIsNone(result)
                 warning_mock.assert_called_with(
