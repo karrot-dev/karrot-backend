@@ -6,6 +6,9 @@ from django.utils import timezone
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.stores.factories import StoreFactory, PickupDateFactory
 from foodsaving.users.factories import UserFactory
+from foodsaving.stores.models import Feedback
+from foodsaving.users.models import User
+from foodsaving.stores.models import PickupDate
 
 # from foodsaving.stores.models import Feedback
 
@@ -42,12 +45,15 @@ class FeedbackTest(APITestCase):
         cls.past_pickup.collectors.add(cls.collector)
 
         # create feedback
-        cls.feedback = {
-            'given_by': cls.member.id,
-            'about': cls.past_pickup.id,
+        # User.objects.get(id=cls.user.id)
+        cls.feedback_data = {
+            'given_by': cls.collector,
+            'about': cls.past_pickup,
             'weight': 2,
             'comment': 'asfjk'
         }
+        cls.feedback_data2 = Feedback.objects.create(**cls.feedback_data)
+        cls.feedback_data1 = Feedback.objects.create(**cls.feedback_data)
 
     def test_create_feedback_fails_as_non_user(self):
         """
@@ -57,8 +63,7 @@ class FeedbackTest(APITestCase):
         1. user gives feedback to pickup
         2. make sure that response is NOT valid
         """
-        response = self.client.post(self.url, self.feedback, format='json')
-
+        response = self.client.post(self.url, self.feedback_data, format='json')
         self.assertEqual(
             response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
@@ -72,7 +77,7 @@ class FeedbackTest(APITestCase):
         3. make sure that response is NOT valid
         """
         self.client.force_login(user=self.user)
-        response = self.client.post(self.url, self.feedback, format='json')
+        response = self.client.post(self.url, self.feedback_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(response.data, {'about': ['You are not member of the store\'s group.']})
 
@@ -87,7 +92,7 @@ class FeedbackTest(APITestCase):
         3. feedback NOT created
         """
         self.client.force_login(user=self.member)
-        response = self.client.post(self.url, self.feedback, format='json')
+        response = self.client.post(self.url, self.feedback_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(response.data, {'about': ['You aren\'t assign to the pickup.']})
 
@@ -101,7 +106,7 @@ class FeedbackTest(APITestCase):
         3. feedback created
         """
         self.client.force_login(user=self.collector)
-        response = self.client.post(self.url, self.feedback, format='json')
+        response = self.client.post(self.url, self.feedback_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
     def test_list_feedback_fails_as_non_user(self):
