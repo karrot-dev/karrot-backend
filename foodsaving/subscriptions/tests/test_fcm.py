@@ -61,7 +61,7 @@ class FCMTests(TestCase):
     def test_continues_if_config_not_present(self, m):
         with logger_warning_mock() as warning_mock:
             with fcm_reload_without_config():
-                result = notify_multiple_devices(registration_ids=['mytoken'])
-                self.assertIsNone(result)
                 warning_mock.assert_called_with(
                     'Please configure FCM_SERVER_KEY in your settings to use want to use push messaging')
+                result = notify_multiple_devices(registration_ids=['mytoken'])
+                self.assertIsNone(result)
