@@ -44,20 +44,21 @@ def group_deleted(**kwargs):
         conversation.delete()
 
 
-@receiver(m2m_changed, sender='groups.Group_members')
-def group_membership_change(**kwargs):
-    """Keep the conversation participants up to date with the group members."""
-
-    action = kwargs.get('action')
-    group = kwargs.get('instance')
-    user_ids = kwargs.get('pk_set')
-
-    if action == 'post_add':
-        conversation = Conversation.objects.get_or_create_for_target(group)
-        for user in User.objects.filter(pk__in=user_ids):
-            conversation.join(user)
-
-    elif action == 'pre_remove':
-        conversation = Conversation.objects.get_for_target(group)
-        if conversation:
-            ConversationParticipant.objects.filter(conversation=conversation, user__id__in=user_ids).delete()
+# TODO: reimplement this with GroupMembership
+# @receiver(m2m_changed, sender='groups.Group_members')
+# def group_membership_change(**kwargs):
+#     """Keep the conversation participants up to date with the group members."""
+#
+#     action = kwargs.get('action')
+#     group = kwargs.get('instance')
+#     user_ids = kwargs.get('pk_set')
+#
+#     if action == 'post_add':
+#         conversation = Conversation.objects.get_or_create_for_target(group)
+#         for user in User.objects.filter(pk__in=user_ids):
+#             conversation.join(user)
+#
+#     elif action == 'pre_remove':
+#         conversation = Conversation.objects.get_for_target(group)
+#         if conversation:
+#             ConversationParticipant.objects.filter(conversation=conversation, user__id__in=user_ids).delete()
