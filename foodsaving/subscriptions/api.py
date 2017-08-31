@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.subscriptions.models import PushSubscription
-from foodsaving.subscriptions.serializers import PushSubscriptionSerializer
+from foodsaving.subscriptions.serializers import PushSubscriptionSerializer, CreatePushSubscriptionSerializer
 
 
 class PushSubscriptionViewSet(
@@ -19,6 +19,11 @@ class PushSubscriptionViewSet(
     queryset = PushSubscription.objects
     serializer_class = PushSubscriptionSerializer
     permission_classes = (IsAuthenticated,)
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return CreatePushSubscriptionSerializer
+        return self.serializer_class
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)

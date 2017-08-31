@@ -40,7 +40,7 @@ class TestSubscriptionsAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['token'], data['token'])
-        self.assertEqual(response.data[0]['user']['id'], user.id)
+        self.assertFalse(hasattr(response.data[0], 'user'))
 
     def test_retrieve_subscriptions(self):
         user = UserFactory()
@@ -52,6 +52,7 @@ class TestSubscriptionsAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['id'], subscription.id)
         self.assertEqual(response.data['token'], subscription.token)
+        self.assertFalse(hasattr(response.data, 'user'))
 
     def test_can_delete_subscriptions(self):
         user = UserFactory()

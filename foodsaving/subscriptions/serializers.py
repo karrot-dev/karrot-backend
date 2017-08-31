@@ -11,23 +11,32 @@ class PushSubscriptionSerializer(serializers.ModelSerializer):
         model = PushSubscription
         fields = [
             'id',
-            'user',
             'token',
             'platform'
         ]
-        validators = [
-            UniqueTogetherValidator(
-                queryset=PushSubscription.objects.all(),
-                fields=('user', 'token')
-            )
-        ]
-
-    user = UserIdSerializer(
-        read_only=True,
-        default=CurrentUserDefault()
-    )
 
     platform = SerializerMethodField()
 
     def get_platform(self, obj):
         return PushSubscriptionPlatform.name(obj.platform).lower()
+
+
+class CreatePushSubscriptionSerializer(PushSubscriptionSerializer):
+    class Meta(PushSubscriptionSerializer.Meta):
+        fields = PushSubscriptionSerializer.Meta.fields + [
+            'user'
+        ]
+        validators = [
+            UniqueTogetherValidator(
+                queryset=PushSubscription.objects.all(),
+                fields=PushSubscription._meta.unique_together[0]  # only supports first tuple
+            )
+        ]
+
+    # user field is only here so make the UniqueTogetherValidator work
+    # https://stackoverflow.com/a/27239870
+    # https://github.com/encode/django-rest-framework/issues/2164#issuecomment-65196943
+    user = UserIdSerializer(
+        read_only=True,
+        default=CurrentUserDefault()
+    )
