@@ -47,13 +47,20 @@ class FeedbackTest(APITestCase):
         # create feedback
         # User.objects.get(id=cls.user.id)
         cls.feedback_data = {
+            'given_by': cls.collector.id,
+            'about': cls.past_pickup.id,
+            'weight': 2,
+            'comment': 'asfjk'
+        }
+
+        cls.feedback_data_0 = {
             'given_by': cls.collector,
             'about': cls.past_pickup,
             'weight': 2,
             'comment': 'asfjk'
         }
-        cls.feedback_data2 = Feedback.objects.create(**cls.feedback_data)
-        cls.feedback_data1 = Feedback.objects.create(**cls.feedback_data)
+        Feedback.objects.create(**cls.feedback_data_0)
+        Feedback.objects.create(**cls.feedback_data_0)
 
     def test_create_feedback_fails_as_non_user(self):
         """
@@ -118,7 +125,7 @@ class FeedbackTest(APITestCase):
 
     def test_list_feedback_works_as_non_group_member(self):
         """
-        Non-Member is allowed to see an empty list of feedback
+        Non-Member doesn't see feedback but an empty list
         """
         self.client.force_login(user=self.user)
         response = self.client.get(self.url)
@@ -128,12 +135,12 @@ class FeedbackTest(APITestCase):
 
     def test_list_feedback_works_as_group_member(self):
         """
-        Member is allowed to see an empty list of feedback
+        Member is allowed to see list of feedback (DOUBLE CHECK!!)
         """
         self.client.force_login(user=self.member)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data), 0)
+        self.assertEqual(len(response.data), 2)
 
     def test_list_feedback_works_as_collector(self):
         """
