@@ -7,8 +7,6 @@ from foodsaving.groups.factories import GroupFactory
 from foodsaving.stores.factories import StoreFactory, PickupDateFactory
 from foodsaving.users.factories import UserFactory
 from foodsaving.stores.models import Feedback
-from foodsaving.users.models import User
-from foodsaving.stores.models import PickupDate
 
 # from foodsaving.stores.models import Feedback
 
@@ -44,23 +42,27 @@ class FeedbackTest(APITestCase):
         # transforms the menber into a collector
         cls.past_pickup.collectors.add(cls.collector)
 
-        # create feedback
-        # User.objects.get(id=cls.user.id)
-        cls.feedback_data = {
+        # create a feedback data for POST method
+        cls.feedback_post = {
             'given_by': cls.collector.id,
             'about': cls.past_pickup.id,
             'weight': 2,
             'comment': 'asfjk'
         }
 
-        cls.feedback_data_0 = {
+        # create a feedback data for GET method
+        cls.feedback_get = {
             'given_by': cls.collector,
             'about': cls.past_pickup,
             'weight': 2,
             'comment': 'asfjk'
         }
-        Feedback.objects.create(**cls.feedback_data_0)
-        Feedback.objects.create(**cls.feedback_data_0)
+
+        # create 2 instances of feedback for GET method
+        cls.feedback = Feedback.objects.create(**cls.feedback_get)
+        Feedback.objects.create(**cls.feedback_get)
+
+        cls.feedback_url = cls.url + str(cls.feedback.id) + '/'
 
     def test_create_feedback_fails_as_non_user(self):
         """
@@ -70,7 +72,7 @@ class FeedbackTest(APITestCase):
         1. user gives feedback to pickup
         2. make sure that response is NOT valid
         """
-        response = self.client.post(self.url, self.feedback_data, format='json')
+        response = self.client.post(self.url, self.feedback_post, format='json')
         self.assertEqual(
             response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
@@ -84,7 +86,7 @@ class FeedbackTest(APITestCase):
         3. make sure that response is NOT valid
         """
         self.client.force_login(user=self.user)
-        response = self.client.post(self.url, self.feedback_data, format='json')
+        response = self.client.post(self.url, self.feedback_post, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(response.data, {'about': ['You are not member of the store\'s group.']})
 
@@ -99,7 +101,7 @@ class FeedbackTest(APITestCase):
         3. feedback NOT created
         """
         self.client.force_login(user=self.member)
-        response = self.client.post(self.url, self.feedback_data, format='json')
+        response = self.client.post(self.url, self.feedback_post, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(response.data, {'about': ['You aren\'t assign to the pickup.']})
 
@@ -113,7 +115,7 @@ class FeedbackTest(APITestCase):
         3. feedback created
         """
         self.client.force_login(user=self.collector)
-        response = self.client.post(self.url, self.feedback_data, format='json')
+        response = self.client.post(self.url, self.feedback_post, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
     def test_list_feedback_fails_as_non_user(self):
@@ -151,3 +153,34 @@ class FeedbackTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         print(response.data)
         self.assertEqual(len(response.data), 2)
+
+    def test_retrieve_feedback_fails_as_non_user(self):
+        """
+        Non-User is NOT allowed to see single feedback
+        """
+        response = self.client.get(self.feedback_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+    def test_retrieve_feedback_fails_as_non_group_member(self):
+        """
+        Non-Member is NOT allowed to see single feedback
+        """
+        self.client.force_login(user=self.user)
+        response = self.client.get(self.feedback_url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
+
+    def test_retrieve_feedback_works_as_group_member(self):
+        """
+        Member is allowed to see single feedback
+        """
+        self.client.force_login(user=self.member)
+        response = self.client.get(self.feedback_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+    def test_retrieve_feedback_works_as_collector(self):
+        """
+        Collector is allowed to see list of feedback
+        """
+        self.client.force_login(user=self.collector)
+        response = self.client.get(self.feedback_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
