@@ -245,28 +245,11 @@ class FeedbackSerializer(serializers.ModelSerializer):
         validated_data['given_by'] = self.context['request'].user
         return super().create(validated_data)
 
-        """
-    def validate_given_by(self, user_id):
-        if user_id not in self.context['request'].user.groups.all():
-            raise serializers.ValidationError(_('You are not member of the store\'s group.'))
-        return user_id
-                """
-    # Is the user a member of the group?
-    # def validate_given_by(self, user_id):
-    #     if user_id is in groups
-
-    #     if not self.context['request'].user.groups.filter(id=group_id).exists():
-    #         raise serializers.ValidationError(_('You are not member of the store\'s group.'))
-    #     return user_id
-
     def validate_about(self, about):
         user = self.context['request'].user
-        pickup_date = about  # PickupDateModel.objects.get(pk=about)
-        group = pickup_date.store.group
-        # is the member assiged to the pickup?
-        if user not in group.members.all():
+        group = about.store.group
+        if not group.is_member(user):
             raise serializers.ValidationError(_('You are not member of the store\'s group.'))
-        # if user is in self.context['request'].
-        if about not in self.context['request'].user.pickup_dates.all():
+        if not about.is_collector(user):
             raise serializers.ValidationError(_('You aren\'t assign to the pickup.'))
         return about

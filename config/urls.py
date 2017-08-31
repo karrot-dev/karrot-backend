@@ -54,7 +54,7 @@ router.register('invitations', InvitationsViewSet)
 router.register('invitations', InvitationAcceptViewSet)
 
 # Feedback endpoints
-router.register(r'feedback', FeedbackViewSet, base_name='user_feedback')
+router.register(r'feedback', FeedbackViewSet)
 
 urlpatterns = [
     url(r'^api/', include(router.urls, namespace='api')),

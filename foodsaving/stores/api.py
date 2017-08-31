@@ -25,7 +25,6 @@ from foodsaving.utils.mixins import PartialUpdateModelMixin
 pre_pickup_delete = Signal()
 pre_series_delete = Signal()
 post_store_delete = Signal()
-post_feedback_delete = Signal()
 
 
 class StoreViewSet(
@@ -75,41 +74,10 @@ class FeedbackViewSet(
 ):
     serializer_class = FeedbackSerializer
     queryset = FeedbackModel.objects.all()
-    # queryset = PickupDateModel.objects.filter(deleted=False)
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         return self.queryset.filter(about__store__group__members=self.request.user)
-
-    """
-    @list_route      for a list of feedback
-    @detail_route    for one specific feedback
-    (
-        methods=['GET'],
-    )
-    def list_feedback(self, request, pk=None):
-
-    """
-
-    # Looked like correct one for retrieving data:
-    # def get_permissions(self):
-
-    #    if self.action == 'retrieve':
-    #        self.permission_classes = (IsAuthenticated, IsMember,)
-
-    #    return super().get_permissions()
-
-
-"""
-TILMANN said here:
-https://github.com/yunity/foodsaving-backend/pull/342/files/18ac4bf7e6935bd615b3efcfa677a44dc73c66b4
-
-queryset = FeedbackModel.objects  # make all feedback objects available by default
-
-def get_queryset(self):
-    # apply additional filters depending on the user who makes the request
-    return self.queryset.filter(about__store__group__members=self.request.user)
-"""
 
 
 class PickupDateSeriesViewSet(
@@ -120,12 +88,7 @@ class PickupDateSeriesViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
-    """
-    Pickup Date Series
 
-    # Query parameters
-    - `?store` - filter by store id
-    """
     serializer_class = PickupDateSeriesSerializer
     queryset = PickupDateSeriesModel.objects
     filter_backends = (filters.DjangoFilterBackend,)
