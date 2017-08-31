@@ -46,7 +46,7 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         GroupMembership.objects.filter(group=self, user=user).delete()
 
     def is_member(self, user):
-        return GroupMembership.objects.filter(group=self, user=user).exists()
+        return not user.is_anonymous() and GroupMembership.objects.filter(group=self, user=user).exists()
 
 
 class GroupMembership(BaseModel):
