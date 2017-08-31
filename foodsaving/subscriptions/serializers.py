@@ -3,7 +3,7 @@ from rest_framework.fields import SerializerMethodField, CurrentUserDefault
 from rest_framework.validators import UniqueTogetherValidator
 
 from foodsaving.subscriptions.models import PushSubscription, PushSubscriptionPlatform
-from foodsaving.users.serializers import UserIdSerializer
+from foodsaving.users.serializers import UserSerializer
 
 
 class PushSubscriptionSerializer(serializers.ModelSerializer):
@@ -36,7 +36,7 @@ class CreatePushSubscriptionSerializer(PushSubscriptionSerializer):
     # user field is only here so make the UniqueTogetherValidator work
     # https://stackoverflow.com/a/27239870
     # https://github.com/encode/django-rest-framework/issues/2164#issuecomment-65196943
-    user = UserIdSerializer(
+    user = UserSerializer(
         read_only=True,
         default=CurrentUserDefault()
     )

@@ -1,9 +1,8 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from rest_framework import serializers
-
-from django.conf import settings
 from django.utils.translation import ugettext as _
+from rest_framework import serializers
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -45,12 +44,6 @@ class UserSerializer(serializers.ModelSerializer):
         if 'language' in validated_data and validated_data['language'] != user.language:
             user.update_language(validated_data.pop('language'))
         return super().update(user, validated_data)
-
-
-class UserIdSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = get_user_model()
-        fields = ['id']
 
 
 class VerifyMailSerializer(serializers.Serializer):
