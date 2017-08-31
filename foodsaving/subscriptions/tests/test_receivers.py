@@ -91,5 +91,5 @@ class ReceiverTests(ChannelTestCase):
         # add a message to the conversation
         ConversationMessage.objects.create(conversation=conversation, content=content, author=author)
 
-        # we can't check it was received but the check_json_data above will at least check it sent the write info
+        # we can't check it was received but the check_json_data above will at least check it sent the right info
 
