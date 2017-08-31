@@ -78,6 +78,9 @@ class FeedbackViewSet(
     # queryset = PickupDateModel.objects.filter(deleted=False)
     permission_classes = (IsAuthenticated,)
 
+    def get_queryset(self):
+        return self.queryset.filter(about__store__group__members=self.request.user)
+
     """
     @list_route      for a list of feedback
     @detail_route    for one specific feedback
