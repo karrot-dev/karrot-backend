@@ -7,7 +7,7 @@ from django.db.models import Q
 
 
 def convert_comment_to_description(apps, schema_editor):
-    activity_model = apps.get_model('activity', 'History')
+    activity_model = apps.get_model('activity', 'Activity')
 
     # convert
     for h in activity_model.objects.filter(payload__has_key='comment'):
