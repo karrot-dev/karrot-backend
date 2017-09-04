@@ -131,7 +131,7 @@ class PickupDateManager(models.Manager):
         if they have at least one collector: send out the pickup_done signal
         else send out pickup_missed
 
-        currently only used by the history component
+        currently only used by the activity component
         """
         for _ in self.filter(done_and_processed=False, date__lt=timezone.now()):
             payload = {}
@@ -195,7 +195,7 @@ class PickupDate(BaseModel):
     is_description_changed = models.BooleanField(default=False)
 
     # internal value to find out if this has been processed
-    # e.g. logged to history as PICKUP_DONE or PICKUP_MISSED
+    # e.g. logged to activity as PICKUP_DONE or PICKUP_MISSED
     done_and_processed = models.BooleanField(default=False)
 
     notifications_sent = JSONField(default=dict)

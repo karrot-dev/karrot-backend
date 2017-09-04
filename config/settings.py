@@ -34,7 +34,7 @@ INSTALLED_APPS = (
     'foodsaving.subscriptions.SubscriptionsConfig',
     'foodsaving.users.UsersConfig',
     'foodsaving.conversations',
-    'foodsaving.history.HistoryConfig',
+    'foodsaving.activity.ActivityConfig',
     'foodsaving.groups.GroupsConfig',
     'foodsaving.stores.StoresConfig',
     'foodsaving.invitations.InvitationsConfig',

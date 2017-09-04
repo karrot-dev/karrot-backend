@@ -18,7 +18,7 @@ def delete_user_handler(sender, **kwargs):
 def handle_invitation_accepted(sender, **kwargs):
     group = kwargs['group']
     user = kwargs['accepted_user']
-    group.add_member(user, history_payload={
+    group.add_member(user, activity_payload={
         'invited_by': kwargs['invited_by'].id,
         'invited_at': kwargs['invited_at'].isoformat(),
         'invited_via': 'e-mail'

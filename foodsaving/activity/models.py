@@ -6,7 +6,7 @@ from django_enumfield import enum
 from foodsaving.base.base_models import NicelyFormattedModel
 
 
-class HistoryTypus(enum.Enum):
+class ActivityTypus(enum.Enum):
     GROUP_CREATE = 0
     GROUP_MODIFY = 1
     GROUP_JOIN = 2
@@ -26,16 +26,16 @@ class HistoryTypus(enum.Enum):
     PICKUP_MISSED = 16
 
 
-class History(NicelyFormattedModel):
+class Activity(NicelyFormattedModel):
     class Meta:
         ordering = ['-date']
 
     date = models.DateTimeField(default=timezone.now)
-    typus = enum.EnumField(HistoryTypus)
+    typus = enum.EnumField(ActivityTypus)
     group = models.ForeignKey('groups.Group')
     store = models.ForeignKey('stores.Store', null=True)
     users = models.ManyToManyField('users.User')
     payload = JSONField(null=True)
 
     def __str__(self):
-        return '{} - {} ({})'.format(self.date, HistoryTypus.name(self.typus), self.group)
+        return '{} - {} ({})'.format(self.date, ActivityTypus.name(self.typus), self.group)

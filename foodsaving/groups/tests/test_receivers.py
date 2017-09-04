@@ -6,7 +6,7 @@ from foodsaving.conversations.models import Conversation
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.receivers import handle_invitation_accepted
-from foodsaving.history.models import History
+from foodsaving.activity.models import Activity
 from foodsaving.users.factories import UserFactory
 
 
@@ -19,7 +19,7 @@ class TestInvitationReceiver(TestCase):
         cls.user = UserFactory()
         cls.invited_at = timezone.now()
 
-    def test_invite_accepted_joins_group_and_adds_history(self):
+    def test_invite_accepted_joins_group_and_adds_activity(self):
         handle_invitation_accepted(
             None,
             group=self.group,
@@ -28,7 +28,7 @@ class TestInvitationReceiver(TestCase):
             invited_at=self.invited_at
         )
 
-        h = History.objects.all()
+        h = Activity.objects.all()
         self.assertEqual(h.count(), 1)
         h = h.first()
         self.assertEqual(h.payload['invited_by'], self.invited_by.id)

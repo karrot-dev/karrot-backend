@@ -7,21 +7,21 @@ from django.db.models import Q
 
 
 def convert_comment_to_description(apps, schema_editor):
-    history_model = apps.get_model('history', 'History')
+    activity_model = apps.get_model('activity', 'Activity')
 
     # convert
-    for h in history_model.objects.filter(payload__has_key='comment'):
+    for h in activity_model.objects.filter(payload__has_key='comment'):
         h.payload['description'] = h.payload['comment']
         del h.payload['comment']
         h.save()
 
-    for h in history_model.objects.filter(payload__has_key='is_comment_changed'):
+    for h in activity_model.objects.filter(payload__has_key='is_comment_changed'):
         h.payload['is_description_changed'] = h.payload['is_comment_changed']
         del h.payload['is_comment_changed']
         h.save()
 
     # check
-    assert history_model.objects.\
+    assert activity_model.objects.\
         filter(Q(payload__has_key='comment') | Q(payload__has_key='is_comment_changed')).\
         count() == 0
 

@@ -8,7 +8,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
 import django_enumfield.db.fields
-import foodsaving.history.models
+import foodsaving.activity.models
 
 
 class Migration(migrations.Migration):
@@ -23,11 +23,11 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='History',
+            name='Activity',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('date', models.DateTimeField(default=django.utils.timezone.now)),
-                ('typus', django_enumfield.db.fields.EnumField(default=0, enum=foodsaving.history.models.HistoryTypus)),
+                ('typus', django_enumfield.db.fields.EnumField(default=0, enum=foodsaving.activity.models.ActivityTypus)),
                 ('payload', django.contrib.postgres.fields.jsonb.JSONField(null=True)),
                 ('group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='groups.Group')),
                 ('store', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='stores.Store')),

@@ -37,9 +37,9 @@ class Group(BaseModel, LocationModel, ConversationMixin):
             ):
                 p.notify_upcoming()
 
-    def add_member(self, user, history_payload=None):
+    def add_member(self, user, activity_payload=None):
         GroupMembership.objects.create(group=self, user=user)
-        post_group_join.send(sender=self.__class__, group=self, user=user, payload=history_payload)
+        post_group_join.send(sender=self.__class__, group=self, user=user, payload=activity_payload)
 
     def remove_member(self, user):
         pre_group_leave.send(sender=self.__class__, group=self, user=user)
