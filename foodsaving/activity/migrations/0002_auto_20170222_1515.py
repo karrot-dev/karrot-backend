@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterModelOptions(
-            name='activity',
+            name='history',
             options={'ordering': ['date']},
         ),
     ]

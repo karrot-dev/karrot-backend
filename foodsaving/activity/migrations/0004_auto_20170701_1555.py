@@ -27,9 +27,9 @@ class ActivityTypus(enum.Enum):
 
 
 def convert_missed_pickups(apps, schema_editor):
-    activity_model = apps.get_model('activity', 'Activity')
+    activity_model = apps.get_model('activity', 'History')
     to_convert = activity_model.objects.filter(typus=ActivityTypus.PICKUP_DONE, users=None)
-    print('converting', to_convert.count(), 'activity entries')
+    print('converting', to_convert.count(), 'history entries')
     to_convert.update(typus=ActivityTypus.PICKUP_MISSED)
 
     assert activity_model.objects.filter(typus=ActivityTypus.PICKUP_DONE, users=None).count() == 0
