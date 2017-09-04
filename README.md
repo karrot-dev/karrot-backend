@@ -1,10 +1,19 @@
-[![CircleCI](https://circleci.com/gh/yunity/yunity-core/tree/master.svg?style=svg)](https://circleci.com/gh/yunity/yunity-core/tree/master)
-
 # foodsaving-backend
+
+Django server for the foodsaving tool API
+
+[![CircleCI](https://circleci.com/gh/yunity/foodsaving-backend.svg?style=svg)](https://circleci.com/gh/yunity/foodsaving-backend)
+[![codecov](https://codecov.io/gh/yunity/foodsaving-backend/branch/master/graph/badge.svg)](https://codecov.io/gh/yunity/foodsaving-backend)
+
+There are 3 approaches to getting your developer environment setup:
+
+1. [single docker container](#getting-started-with-docker) - includes backend, postgres, and redis in one container
+2. [local install](#local-install) - install everything on your system ([Arch](#arch-linux), [Ubuntu](#ubuntu-or-debian), [Debian](#ubuntu-or-debian), [macOS](#mac-os), [OpenSUSE Leap](#opensuse-leap))
+3. [docker-compose setup](#docker-compose) - includes backend, frontend, mail catcher, postgres, redis, etc..
 
 ## Getting started with Docker
 
-You can automate your setup with [Docker](https://www.docker.com/what-docker). 
+You can automate your setup with [Docker](https://www.docker.com/what-docker).
 
 Build the docker container:
 ```sh
@@ -13,27 +22,23 @@ docker build -t backend .
 Run this container, including your most recent source code changes:
 
 ```sh
-docker run -it -p 8000:8000 -v $PWD/foodsaving:/foodsaving-backend/foodsaving backend
+docker run -d -p 8000:8000 -v $PWD/foodsaving:/foodsaving-backend/foodsaving backend
 ```
 
 Note 1: This assumes that your terminal's working directory is in the foodsaving-backend directory, i.e. the directory you cloned from Github.
 Note 2: Only changes you make in the "foodsaving" directory are included.
 
-Once in the container, you can Populate your database with test data:
+The test data are automatically created in the container. You can see log-in details after running this command:
 
 ```sh
-python manage.py create_sample_data
+docker logs -f <container_id_or_name>
 ```
 
 With this data, you can log in as one of the printed e-mail addresses with password 123
 
-Run the server with
+The server is already running in Docker container.
 
-```sh
-python manage.py runserver 0.0.0.0:8000
-```
-
-## Getting started without Docker
+## Local install
 ### Install requirements
 
 - python3.5 or greater/virtualenv
@@ -69,7 +74,7 @@ sudo systemctl enable postgresql.service
 sudo systemctl enable redis.service
 ```
 
-#### Ubuntu/Debian
+#### Ubuntu or Debian
 As the foodsaving tool requires relatively recent versions of some packages, using Ubuntu 15.10 or greater is required.
 
 ```sh
@@ -87,12 +92,15 @@ brew services start redis
 ```
 
 #### OpenSUSE Leap
-
 All packages should be available in the default repositories `repo-oss` and `repo-non-oss`.
 
 ```sh
 sudo zypper install python-virtualenv postgresql-devel postgresql python-redis redis
 ```
+
+## Docker Compose
+
+Head over to [yunity/foodsaving-docker](https://github.com/yunity/foodsaving-docker) for further instructions.
 
 ## Django quick introduction
 Before using any tools from the shell, you need to activate the virtualenv:
@@ -109,9 +117,11 @@ The manage.py application can be used to perform administrative tasks:
   - test: Run automated tests
 
 ## API Documentation
+
 A swagger description file is generated at /doc. You can pass it to any swagger installation.
 
 ## Django application settings
+
 In development, you can add and override local settings in
 `config/local_settings.py`, which is present in `.gitignore` and hence out of
 version control. If the file is not present, i.e. in production, nothing
@@ -155,6 +165,7 @@ source env/bin/activate
 ```
 
 # Contributing to foodsaving-backend
+
 To contribute, please get in contact with us. We want to follow a pull request / code review cycle as soon as possible but in our early design stages we prefer to work in teams at the same desk.
 We use
 
@@ -162,6 +173,7 @@ We use
 - [Slack](https://yunity.slack.com) as team communication, not only for development
 
 ## Coding guidelines
+
 We follow PEP8 with the same rules as the [Django project](https://docs.djangoproject.com/en/dev/internals/contributing/writing-code/coding-style/).
 As always, the coding style may not apply at some parts.
 You can execute `flake8` in the repository root to check your code.

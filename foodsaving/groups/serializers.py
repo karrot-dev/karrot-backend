@@ -1,12 +1,13 @@
 import pytz
+from django.conf import settings
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from config import settings
-from foodsaving.groups.models import Group as GroupModel
+from foodsaving.groups.models import Group as GroupModel, GroupMembership
 from foodsaving.groups.signals import post_group_modify, post_group_create
 from foodsaving.history.utils import get_changed_data
+from . import roles
 
 
 class TimezoneField(serializers.Field):
@@ -20,8 +21,23 @@ class TimezoneField(serializers.Field):
             raise ValidationError(_('Unknown timezone'))
 
 
+class GroupMembershipInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GroupMembership
+        fields = ('created_at', 'roles')
+        extra_kwargs = {
+            'created_at': {
+                'read_only': True
+            },
+            'roles': {
+                'read_only': True
+            },
+        }
+
+
 class GroupDetailSerializer(serializers.ModelSerializer):
     "use this also for creating and updating a group"
+
     class Meta:
         model = GroupModel
         fields = [
@@ -30,6 +46,7 @@ class GroupDetailSerializer(serializers.ModelSerializer):
             'description',
             'public_description',
             'members',
+            'memberships',
             'address',
             'latitude',
             'longitude',
@@ -44,6 +61,9 @@ class GroupDetailSerializer(serializers.ModelSerializer):
             'members': {
                 'read_only': True
             },
+            'memberships': {
+                'read_only': True
+            },
             'description': {
                 'trim_whitespace': False,
                 'max_length': settings.DESCRIPTION_MAX_LENGTH
@@ -53,6 +73,12 @@ class GroupDetailSerializer(serializers.ModelSerializer):
                 'max_length': 255
             }
         }
+
+    memberships = serializers.SerializerMethodField()
+
+    def get_memberships(self, group):
+        return {m.user_id: GroupMembershipInfoSerializer(m).data for m in group.groupmembership_set.all()}
+
     timezone = TimezoneField()
 
     def update(self, group, validated_data):
@@ -70,8 +96,7 @@ class GroupDetailSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context['request'].user
         group = GroupModel.objects.create(**validated_data)
-        group.members.add(user)
-        group.save()
+        GroupMembership.objects.create(group=group, user=user)
         post_group_create.send(sender=self.__class__, group=group, user=user, payload=self.initial_data)
         return group
 
@@ -81,6 +106,7 @@ class GroupPreviewSerializer(serializers.ModelSerializer):
     Public information for all visitors
     should be readonly
     """
+
     class Meta:
         model = GroupModel
         fields = [
@@ -133,3 +159,33 @@ class TimezonesSerializer(serializers.Serializer):
         read_only=True
     )
 
+
+class EmptySerializer(serializers.Serializer):
+    pass
+
+
+class GroupMembershipAddRoleSerializer(serializers.Serializer):
+    role_name = serializers.ChoiceField(
+        choices=(roles.GROUP_MEMBERSHIP_MANAGER,),
+        required=True,
+        write_only=True
+    )
+
+    def update(self, instance, validated_data):
+        role = validated_data['role_name']
+        instance.add_roles([role])
+        instance.save()
+        return instance
+
+
+class GroupMembershipRemoveRoleSerializer(serializers.Serializer):
+    role_name = serializers.CharField(
+        required=True,
+        write_only=True
+    )
+
+    def update(self, instance, validated_data):
+        role = validated_data['role_name']
+        instance.remove_roles([role])
+        instance.save()
+        return instance

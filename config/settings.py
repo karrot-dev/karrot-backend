@@ -15,7 +15,6 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Application definition
 
 INSTALLED_APPS = (
@@ -32,7 +31,7 @@ INSTALLED_APPS = (
     'foodsaving',
     'foodsaving.userauth',
     'foodsaving.base',
-    'foodsaving.frontend',
+    'foodsaving.subscriptions.SubscriptionsConfig',
     'foodsaving.users.UsersConfig',
     'foodsaving.conversations',
     'foodsaving.history.HistoryConfig',
@@ -57,7 +56,6 @@ INSTALLED_APPS = (
     'channels',
 )
 
-
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.AllowAny',
@@ -72,7 +70,6 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE_CLASSES = (
     'influxdb_metrics.middleware.InfluxDBRequestMiddleware',
-    'foodsaving.utils.session.RealtimeClientMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -118,10 +115,12 @@ TEMPLATES = [
     },
 ]
 
+REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/0",
+        "LOCATION": "redis://{}:6379/0".format(REDIS_HOST),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
@@ -171,9 +170,8 @@ AUTH_USER_MODEL = 'users.User'
 LOGIN_URL = '/api-auth/login/'
 LOGOUT_URL = '/api-auth/logout/'
 
-
 SILENCED_SYSTEM_CHECKS = [
-    'urls.W005', # we don't need to reverse backend URLs
+    'urls.W005',  # we don't need to reverse backend URLs
 ]
 
 DESCRIPTION_MAX_LENGTH = 100000
@@ -183,16 +181,16 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "asgi_redis.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("localhost", 6379)],
+            "hosts": [(REDIS_HOST, 6379)],
         },
-        "ROUTING": "config.routing.channel_routing",
+        "ROUTING": "foodsaving.subscriptions.routing.channel_routing",
     },
 }
-
 
 # NB: Keep this as the last line, and keep
 # local_settings.py out of version control
 try:
     from .local_settings import *
 except ImportError:
-    raise Exception("config/local_settings.py is missing! Copy the provided example file and adapt it to your own config.")
+    raise Exception(
+        "config/local_settings.py is missing! Copy the provided example file and adapt it to your own config.")

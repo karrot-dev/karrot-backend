@@ -10,7 +10,7 @@ from django.db.models import Count
 from django.template.loader import render_to_string
 from django.utils import timezone
 
-from config import settings
+from django.conf import settings
 from foodsaving.base.base_models import BaseModel, LocationModel
 from foodsaving.stores.signals import pickup_done, pickup_missed
 
@@ -28,6 +28,13 @@ class Store(BaseModel, LocationModel):
 
     def __str__(self):
         return '{} ({})'.format(self.name, self.group)
+
+
+class Feedback(BaseModel):
+    given_by = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='feedback')
+    about = models.ForeignKey('PickupDate')
+    weight = models.PositiveIntegerField(blank=True, null=True)
+    comment = models.CharField(max_length=settings.DESCRIPTION_MAX_LENGTH, blank=True)
 
 
 class PickupDateSeriesManager(models.Manager):
@@ -74,32 +81,43 @@ class PickupDateSeries(BaseModel):
         return [tz.localize(d) for d in dates]
 
     def update_pickup_dates(self, start=timezone.now):
-        # shifting period start time into the future avoids pickup dates which are only valid for a short time
+        """
+        synchronizes the pickup dates with the series
+
+        changes to the series fields are also made to the pickup dates, except for
+        - the field on the pickup date has been modified
+        - users have joined the pickup date
+        """
+
+        # shift start time slightly into future to avoid pickup dates which are only valid for very short time
         start_date = start() + relativedelta(minutes=5)
+
         for pickup, new_date in zip_longest(
             self.pickup_dates.filter(date__gte=start_date),
             self.get_dates_for_rule(start_date=start_date)
         ):
             if not pickup:
-                pickup = PickupDate.objects.create(
+                # does not yet exist
+                PickupDate.objects.create(
                     date=new_date,
                     max_collectors=self.max_collectors,
                     series=self,
                     store=self.store,
                     description=self.description
                 )
-            if not new_date:
-                # only delete pickup dates when they are empty
-                if pickup.collectors.count() <= 0:
+            elif pickup.collectors.count() < 1:
+                # only modify pickups when nobody has joined
+                if not new_date:
+                    # series changed and now this pickup should not exist anymore
                     pickup.delete()
-                    continue
-            if new_date and not pickup.is_date_changed:
-                pickup.date = new_date
-            if not pickup.is_max_collectors_changed:
-                pickup.max_collectors = self.max_collectors
-            if not pickup.is_description_changed:
-                pickup.description = self.description
-            pickup.save()
+                else:
+                    if not pickup.is_date_changed:
+                        pickup.date = new_date
+                    if not pickup.is_max_collectors_changed:
+                        pickup.max_collectors = self.max_collectors
+                    if not pickup.is_description_changed:
+                        pickup.description = self.description
+                    pickup.save()
 
     def __str__(self):
         return '{} - {}'.format(self.date, self.store)
@@ -107,10 +125,17 @@ class PickupDateSeries(BaseModel):
 
 class PickupDateManager(models.Manager):
     @transaction.atomic
-    def delete_old_pickup_dates(self):
-        for _ in self.filter(date__lt=timezone.now()):
-            # move pickup dates into history, also empty ones
+    def process_finished_pickup_dates(self):
+        """find all pickup dates that are in the past and didn't get processed yet
+
+        if they have at least one collector: send out the pickup_done signal
+        else send out pickup_missed
+
+        currently only used by the history component
+        """
+        for _ in self.filter(done_and_processed=False, date__lt=timezone.now()):
             payload = {}
+            payload['pickup_date'] = _.id
             if _.series:
                 payload['series'] = _.series.id
             if _.max_collectors:
@@ -132,7 +157,8 @@ class PickupDateManager(models.Manager):
                     date=_.date,
                     payload=payload
                 )
-            _.delete()
+            _.done_and_processed = True
+            _.save()
 
 
 class PickupDate(BaseModel):
@@ -168,6 +194,10 @@ class PickupDate(BaseModel):
     is_max_collectors_changed = models.BooleanField(default=False)
     is_description_changed = models.BooleanField(default=False)
 
+    # internal value to find out if this has been processed
+    # e.g. logged to history as PICKUP_DONE or PICKUP_MISSED
+    done_and_processed = models.BooleanField(default=False)
+
     notifications_sent = JSONField(default=dict)
 
     def __str__(self):
@@ -190,3 +220,17 @@ class PickupDate(BaseModel):
             })
             self.notifications_sent['upcoming'] = {'status': r.status_code, 'data': r.text}
             self.save()
+
+    def is_upcoming(self):
+        return self.date > timezone.now()
+
+    def is_full(self):
+        if not self.max_collectors:
+            return False
+        return self.collectors.count() >= self.max_collectors
+
+    def is_collector(self, user):
+        return self.collectors.filter(id=user.id).exists()
+
+    def is_empty(self):
+        return self.collectors.count() == 0

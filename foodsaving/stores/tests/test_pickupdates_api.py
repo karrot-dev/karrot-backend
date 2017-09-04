@@ -10,6 +10,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 from foodsaving.groups.factories import GroupFactory
+from foodsaving.groups.models import GroupMembership
 from foodsaving.stores.factories import StoreFactory, PickupDateFactory, PickupDateSeriesFactory
 from foodsaving.stores.models import PickupDate
 from foodsaving.users.factories import UserFactory
@@ -383,6 +384,31 @@ class TestPickupDateSeriesChangeAPI(APITestCase):
         self.assertFalse(pickup_under_test.is_max_collectors_changed)
         self.assertFalse(pickup_under_test.is_date_changed)
 
+    def test_keep_date_if_pickup_has_collectors(self):
+        """
+        https://github.com/yunity/foodsaving-frontend/issues/596
+        It's unexpected if the date changes automatically when people have joined
+        """
+        self.client.force_login(user=self.member)
+        pickup_under_test = self.series.pickup_dates.first()
+        url = '/api/pickup-dates/{}/add/'.format(pickup_under_test.id)
+
+        # join pickup
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        original_date = pickup_under_test.date
+
+        # change series date
+        url = '/api/pickup-date-series/{}/'.format(self.series.id)
+        response = self.client.patch(url, {'start_date': self.series.start_date + relativedelta(hours=1)})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+        # check if time of pickup is the same
+        url = '/api/pickup-dates/{}/'.format(pickup_under_test.id)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(parse(response.data['date']), original_date, "time shouldn't change!")
+
 
 class TestPickupDateSeriesAPIAuth(APITestCase):
     """ Testing actions that are forbidden """
@@ -596,7 +622,7 @@ class TestPickupDatesAPI(APITestCase):
         self.pickup.max_collectors = 1
         self.pickup.save()
         u2 = UserFactory()
-        self.group.members.add(u2)
+        GroupMembership.objects.create(group=self.group, user=u2)
         self.pickup.collectors.add(u2)
         response = self.client.post(self.join_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)

@@ -4,6 +4,7 @@ from django.core.management import call_command
 from django.utils import timezone
 from rest_framework.test import APITestCase
 
+from foodsaving.groups.models import GroupMembership
 from foodsaving.users.factories import UserFactory
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.stores.factories import StoreFactory, PickupDateFactory, PickupDateSeriesFactory
@@ -72,7 +73,7 @@ class TestHistoryAPIWithExistingGroup(PaginatedResponseTestCase):
 
     def test_leave_group(self):
         user = UserFactory()
-        self.group.members.add(user)
+        GroupMembership.objects.create(group=self.group, user=user)
         self.client.force_login(user)
         self.client.post(self.group_url + 'leave/')
 
@@ -216,7 +217,7 @@ class TestHistoryAPIWithDonePickup(PaginatedResponseTestCase):
         )
         cls.pickup_url = '/api/pickup-dates/{}/'.format(cls.pickup.id)
         cls.pickup.collectors.add(cls.member)
-        call_command('delete_old_pickup_dates')
+        call_command('process_finished_pickup_dates')
 
     def test_pickup_done(self):
         self.client.force_login(self.member)
@@ -244,7 +245,7 @@ class TestHistoryAPIWithMissedPickup(PaginatedResponseTestCase):
         )
         cls.pickup_url = '/api/pickup-dates/{}/'.format(cls.pickup.id)
         # No one who joined the pickup
-        call_command('delete_old_pickup_dates')
+        call_command('process_finished_pickup_dates')
 
     def test_pickup_done(self):
         self.client.force_login(self.member)
