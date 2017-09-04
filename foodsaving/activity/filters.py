@@ -5,7 +5,7 @@ from django.utils.encoding import force_str
 from django_filters.fields import RangeField
 from django_filters.rest_framework import filters, FilterSet
 
-from foodsaving.history.models import HistoryTypus, History
+from foodsaving.activity.models import ActivityTypus, Activity
 
 
 class ISODateTimeField(forms.DateTimeField):
@@ -25,15 +25,15 @@ class DateTimeFromToRangeFilter(django_filters.RangeFilter):
     field_class = DateTimeRangeField
 
 
-def filter_history_typus(qs, field, value):
-    return qs.filter(**{field: getattr(HistoryTypus, value)})
+def filter_activity_typus(qs, field, value):
+    return qs.filter(**{field: getattr(ActivityTypus, value)})
 
 
-class HistoryFilter(FilterSet):
-    typus = filters.ChoiceFilter(choices=HistoryTypus.items(), method=filter_history_typus)
+class ActivityFilter(FilterSet):
+    typus = filters.ChoiceFilter(choices=ActivityTypus.items(), method=filter_activity_typus)
     date = DateTimeFromToRangeFilter(name='date')
 
     class Meta:
-        model = History
+        model = Activity
         fields = ('group', 'store', 'users', 'typus', 'date')
 

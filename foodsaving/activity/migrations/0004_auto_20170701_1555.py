@@ -6,7 +6,7 @@ from django.db import migrations
 from django_enumfield import enum
 
 
-class HistoryTypus(enum.Enum):
+class ActivityTypus(enum.Enum):
     GROUP_CREATE = 0
     GROUP_MODIFY = 1
     GROUP_JOIN = 2
@@ -27,18 +27,18 @@ class HistoryTypus(enum.Enum):
 
 
 def convert_missed_pickups(apps, schema_editor):
-    history_model = apps.get_model('history', 'History')
-    to_convert = history_model.objects.filter(typus=HistoryTypus.PICKUP_DONE, users=None)
-    print('converting', to_convert.count(), 'history entries')
-    to_convert.update(typus=HistoryTypus.PICKUP_MISSED)
+    activity_model = apps.get_model('activity', 'Activity')
+    to_convert = activity_model.objects.filter(typus=ActivityTypus.PICKUP_DONE, users=None)
+    print('converting', to_convert.count(), 'activity entries')
+    to_convert.update(typus=ActivityTypus.PICKUP_MISSED)
 
-    assert history_model.objects.filter(typus=HistoryTypus.PICKUP_DONE, users=None).count() == 0
+    assert activity_model.objects.filter(typus=ActivityTypus.PICKUP_DONE, users=None).count() == 0
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('history', '0003_auto_20170225_1957'),
+        ('activity', '0003_auto_20170225_1957'),
     ]
 
     operations = [

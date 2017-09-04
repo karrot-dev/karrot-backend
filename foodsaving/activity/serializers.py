@@ -1,15 +1,15 @@
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
-from foodsaving.history.models import History, HistoryTypus
+from foodsaving.activity.models import Activity, ActivityTypus
 
 
-class HistorySerializer(serializers.ModelSerializer):
+class ActivitySerializer(serializers.ModelSerializer):
     class Meta:
-        model = History
+        model = Activity
         fields = ['id', 'date', 'typus', 'group', 'store', 'users', 'payload']
 
     typus = SerializerMethodField()
 
     def get_typus(self, obj):
-        return HistoryTypus.name(obj.typus)
+        return ActivityTypus.name(obj.typus)

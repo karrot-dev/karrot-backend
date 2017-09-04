@@ -7,7 +7,7 @@ from django.utils.translation import ugettext as _
 from rest_framework import serializers
 
 from django.conf import settings
-from foodsaving.history.utils import get_changed_data
+from foodsaving.activity.utils import get_changed_data
 from foodsaving.stores.models import (
     PickupDate as PickupDateModel,
     Feedback as FeedbackModel,

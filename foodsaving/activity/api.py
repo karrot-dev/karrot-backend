@@ -3,26 +3,26 @@ from rest_framework.filters import DjangoFilterBackend
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 
-from foodsaving.history.filters import HistoryFilter
-from foodsaving.history.models import History
-from foodsaving.history.serializers import HistorySerializer
+from foodsaving.activity.filters import ActivityFilter
+from foodsaving.activity.models import Activity
+from foodsaving.activity.serializers import ActivitySerializer
 
 
-class HistoryPagination(LimitOffsetPagination):
+class ActivityPagination(LimitOffsetPagination):
     default_limit = 50
     max_limit = 1000
 
 
-class HistoryViewSet(viewsets.ReadOnlyModelViewSet):
+class ActivityViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    History of user actions
+    Activity of user actions
     """
-    serializer_class = HistorySerializer
-    queryset = History.objects
+    serializer_class = ActivitySerializer
+    queryset = Activity.objects
     filter_backends = (DjangoFilterBackend,)
-    filter_class = HistoryFilter
+    filter_class = ActivityFilter
     permission_classes = (IsAuthenticated,)
-    pagination_class = HistoryPagination
+    pagination_class = ActivityPagination
 
     def get_queryset(self):
         return self.queryset.filter(group__members=self.request.user)

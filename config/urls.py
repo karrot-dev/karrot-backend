@@ -22,7 +22,7 @@ from rest_framework_swagger.views import get_swagger_view
 
 from foodsaving.conversations.api import ConversationMessageViewSet
 from foodsaving.groups.api import GroupViewSet
-from foodsaving.history.api import HistoryViewSet
+from foodsaving.activity.api import ActivityViewSet
 from foodsaving.invitations.api import InvitationsViewSet, InvitationAcceptViewSet
 from foodsaving.stores.api import StoreViewSet, PickupDateViewSet, PickupDateSeriesViewSet, FeedbackViewSet
 from foodsaving.subscriptions.api import PushSubscriptionViewSet
@@ -50,8 +50,8 @@ router.register(r'subscriptions/push', PushSubscriptionViewSet)
 # Store endpoints
 router.register(r'stores', StoreViewSet)
 
-# History endpoints
-router.register('history', HistoryViewSet)
+# Activity endpoints
+router.register('activity', ActivityViewSet)
 
 # Invitation endpoints
 router.register('invitations', InvitationsViewSet)

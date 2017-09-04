@@ -1,8 +1,8 @@
 from django.apps import AppConfig
 
 
-class HistoryConfig(AppConfig):
-    name = 'foodsaving.history'
+class ActivityConfig(AppConfig):
+    name = 'foodsaving.activity'
 
     def ready(self):
         from . import receivers  # noqa: F401

@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from foodsaving.groups.factories import GroupFactory
-from foodsaving.history.models import History
+from foodsaving.activity.models import Activity
 from foodsaving.invitations.models import Invitation
 from foodsaving.users.factories import UserFactory
 
@@ -198,8 +198,8 @@ class TestInvitationAcceptAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(self.group.members.count(), 1)
 
-        # should not add any history
-        self.assertEqual(History.objects.count(), 0)
+        # should not add any activity
+        self.assertEqual(Activity.objects.count(), 0)
 
     def test_accept_invite_when_signed_out(self):
         self.client.force_login(self.member)
