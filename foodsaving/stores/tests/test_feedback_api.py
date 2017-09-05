@@ -38,6 +38,11 @@ class FeedbackTest(APITestCase):
             'comment': 'asfjk'
         }
 
+        # create a feedback data for POST method without weight and comment
+        cls.feedback_without_weight_comment = {
+            'about': cls.past_pickup.id,
+        }
+
         # create a feedback to future pickup
         cls.future_feedback_post = {
             'about': cls.pickup.id,
@@ -185,3 +190,13 @@ class FeedbackTest(APITestCase):
         response = self.client.post(self.url, self.future_feedback_post)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(response.data, {'about': ['The pickup is not done yet']})
+
+    def test_weight_and_comment_is_null_fails(self):
+        """
+        Both comment and weight cannot be empty
+        - non-working test at the moment
+        """
+        self.client.force_login(user=self.collector)
+        response = self.client.post(self.url, self.feedback_without_weight_comment, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(response.data, {"Both comment and weight cannot be blank."})
