@@ -255,10 +255,23 @@ class FeedbackSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(_('You aren\'t assigned to the pickup.'))
         return about
 
-    def validate(self, data):
+    # def validate(self, validated_data):
         """
         Getting KeyError for comment field
+
+        if validated_data['comment'] is None and validated_data['weight'] is None:
+            raise serializers.ValidationError("Both comment and weight cannot be blank.")
+        return validated_data
+
+    def validate_data(self, data):
+        if not self.data['weight'].exists():
+            if not self.data['comment'].exists():
+                raise serializers.ValidationError(_('Both comment and weight cannot be blank.'))
+        return data
         """
-        if data['comment'] is None and data['weight'] is None:
+    def validate(self, data):
+        if data.get('comment') is None and data.get('weight') is None:
             raise serializers.ValidationError("Both comment and weight cannot be blank.")
         return data
+        # if self.data['weight'] is None and self.data['comment'] is None:
+        # if 'weight' not in self.data and 'comment' not in self.data:

@@ -117,6 +117,16 @@ class FeedbackTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertEqual(response.data['comment'], '')
 
+    def test_weight_and_comment_is_null_fails(self):
+        """
+        Both comment and weight cannot be empty
+        - non-working test at the moment
+        """
+        self.client.force_login(user=self.collector)
+        response = self.client.post(self.url, self.feedback_without_weight_comment, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(response.data, {'non_field_errors': ['Both comment and weight cannot be blank.']})
+
     def test_list_feedback_fails_as_non_user(self):
         """
         Non-User is NOT allowed to see list of feedback
@@ -190,13 +200,3 @@ class FeedbackTest(APITestCase):
         response = self.client.post(self.url, self.future_feedback_post)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(response.data, {'about': ['The pickup is not done yet']})
-
-    def test_weight_and_comment_is_null_fails(self):
-        """
-        Both comment and weight cannot be empty
-        - non-working test at the moment
-        """
-        self.client.force_login(user=self.collector)
-        response = self.client.post(self.url, self.feedback_without_weight_comment, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        self.assertEqual(response.data, {"Both comment and weight cannot be blank."})
