@@ -1,9 +1,11 @@
 import json
 
 from channels import Channel
+from dateutil.relativedelta import relativedelta
 from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
+from django.utils import timezone
 
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage
 from foodsaving.subscriptions.fcm import notify_multiple_devices
@@ -28,8 +30,14 @@ def send_messages(sender, instance, **kwargs):
         }
     }
 
-    for item in ChannelSubscription.objects.filter(user__in=conversation.participants.all()):
-        Channel(item.reply_channel).send({
+    push_exclude_users = []
+
+    for subscription in ChannelSubscription.objects.filter(user__in=conversation.participants.all()):
+
+        if not subscription.away_at:
+            push_exclude_users.append(subscription.user)
+
+        Channel(subscription.reply_channel).send({
             # TODO: use a serializer
             "text": json.dumps({
                 'topic': topic,
@@ -37,10 +45,10 @@ def send_messages(sender, instance, **kwargs):
             })
         })
 
-    # TODO: only send push if no active channel subscription (via presence detector)
-
     tokens = [item.token for item in
-              PushSubscription.objects.filter(Q(user__in=conversation.participants.all()) & ~Q(user=message.author))]
+              PushSubscription.objects.filter(
+                  Q(user__in=conversation.participants.all()) & ~Q(user__in=push_exclude_users) & ~Q(
+                      user=message.author))]
 
     notify_multiple_devices(
         registration_ids=tokens,
