@@ -101,18 +101,15 @@ class UserViewSet(
     def reset_password(self, request, pk=None):
         """
         send a request with 'email' to this endpoint to get a new password mailed
-
-        to prevent information leaks, also returns success if the mail doesn't exist
         """
         request_email = request.data.get('email')
         if not request_email:
             return Response(status=status.HTTP_400_BAD_REQUEST,
                             data={'error': 'mail address is not provided'})
         try:
-            user = get_user_model().objects.get(email=request_email)
+            user = get_user_model().objects.get(email__iexact=request_email)
         except get_user_model().DoesNotExist:
-            # don't leak valid mail addresses
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
         user.reset_password()
         return Response(status=status.HTTP_204_NO_CONTENT, data={})
