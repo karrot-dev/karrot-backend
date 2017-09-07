@@ -43,12 +43,6 @@ class TestFeedbackModel(TestCase):
         with self.assertRaises(IntegrityError):
             Feedback.objects.create(weight=-1, about=self.pickup, given_by=self.user, comment="soup")
 
-    def test_weight_is_null_passes(self):
-        Feedback.objects.create(about=self.pickup, given_by=self.user, comment="soup")
-
-    def test_comment_is_null_passes(self):
-        Feedback.objects.create(about=self.pickup, given_by=self.user, weight=1)
-
     def test_create_fails_if_comment_too_long(self):
         with self.assertRaises(DataError):
             Feedback.objects.create(comment='a' * 100001, about=self.pickup, given_by=self.user, weight=1)
