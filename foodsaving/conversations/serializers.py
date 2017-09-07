@@ -2,7 +2,7 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
-from foodsaving.conversations.models import Conversation, ConversationMessage
+from foodsaving.conversations.models import Conversation, ConversationMessage, ConversationParticipant
 
 
 class ConversationSerializer(serializers.ModelSerializer):
@@ -11,8 +11,34 @@ class ConversationSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'participants',
-            'created_at'
+            'created_at',
+            'seen_up_to'
         ]
+
+    seen_up_to = serializers.SerializerMethodField()
+
+    def get_seen_up_to(self, conversation):
+        user = self.context['request'].user
+        participant = conversation.conversationparticipant_set.get(user=user)
+        return participant.seen_up_to
+
+
+class ConversationParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConversationParticipant
+        fields = [
+            'seen_up_to'
+        ]
+
+    def validate_seen_up_to(self, message):
+        if not self.instance.conversation.messages.filter(id=message.id).exists():
+            raise serializers.ValidationError('Must refer to a message in the conversation')
+        return message
+
+    def update(self, participant, validated_data):
+        participant.seen_up_to = validated_data['seen_up_to']
+        participant.save()
+        return participant
 
 
 class ConversationMessageSerializer(serializers.ModelSerializer):
@@ -23,8 +49,20 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
             'author',
             'content',
             'conversation',
-            'created_at'
+            'created_at',
+            'seen'
         ]
+
+    seen = serializers.SerializerMethodField()
+
+    def get_seen(self, message):
+        user = self.context['request'].user
+        # TODO: make sure this is cached when using this serializer over a list of messages
+        participant = message.conversation.conversationparticipant_set.get(user=user)
+        if participant.seen_up_to:
+            return message.id <= participant.seen_up_to_id
+        else:
+            return False
 
 
 class CreateConversationMessageSerializer(serializers.ModelSerializer):

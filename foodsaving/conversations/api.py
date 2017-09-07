@@ -1,12 +1,13 @@
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import mixins
+from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.conversations.models import Conversation, ConversationMessage
 from foodsaving.conversations.serializers import ConversationSerializer, ConversationMessageSerializer, \
-    CreateConversationMessageSerializer
+    CreateConversationMessageSerializer, ConversationParticipantSerializer
 
 
 class IsConversationParticipant(BasePermission):
@@ -24,6 +25,33 @@ class IsConversationParticipant(BasePermission):
 
         # otherwise it is fine (messages will be filtered for the users conversations)
         return True
+
+
+class ConversationViewSet(
+    GenericViewSet
+):
+    """
+    Conversations
+    """
+
+    queryset = Conversation.objects
+    serializer_class = ConversationSerializer
+
+    def get_queryset(self):
+        return self.queryset.filter(participants=self.request.user)
+
+    @detail_route(
+        methods=['PATCH'],
+        permission_classes=(IsAuthenticated,),
+        serializer_class=ConversationParticipantSerializer
+    )
+    def participant(self, request, pk=None):
+        conversation = self.get_object()
+        participant = conversation.conversationparticipant_set.get(user=request.user)
+        serializer = self.get_serializer(participant, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
 
 class ConversationMessageViewSet(
