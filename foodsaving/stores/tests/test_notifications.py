@@ -11,7 +11,7 @@ from foodsaving.users.factories import UserFactory
 
 
 def parse(body):
-    return json.loads(body, encoding='utf-8')
+    return json.loads(body.decode('utf-8'))
 
 
 class TestNotificationsDisabled(APITestCase):
