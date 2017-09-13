@@ -1,16 +1,15 @@
 from datetime import timedelta
 
 from anymail.message import AnymailMessage
+from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
-from django.db import transaction, IntegrityError
-from django.template.loader import render_to_string
-
+from django.db import transaction
 from django.db.models import EmailField, BooleanField, TextField, CharField, DateTimeField, ForeignKey
+from django.template.loader import render_to_string
 from django.utils import crypto
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 
-from django.conf import settings
 from foodsaving.base.base_models import BaseModel, LocationModel
 
 MAX_DISPLAY_NAME_LENGTH = 80
@@ -27,18 +26,25 @@ class UserManager(BaseUserManager):
         email = self._validate_email(email)
         extra_fields['unverified_email'] = email
 
-        if self.filter(email__iexact=email).exists():
-            raise IntegrityError('email must be unique')
-
         user = self.model(
             email=email,
             is_active=is_active,
             display_name=display_name,
             **extra_fields)
         user.set_password(password)
-        user.save(using=self._db)
+        user.save()
         user._send_welcome_mail()
         return user
+
+    def filter_by_similar_email(self, email):
+        return self.filter(email__iexact=email)
+
+    def get_by_natural_key(self, email):
+        """
+        As we don't allow sign-ups with similarly cased email addresses,
+        we can allow users to login with case spelling mistakes
+        """
+        return self.filter_by_similar_email(email).first()
 
     def _validate_email(self, email):
         if email is None:
@@ -52,7 +58,8 @@ class UserManager(BaseUserManager):
     def create_superuser(self, email, password, **extra_fields):
         user = self._create_user(email, password, email, **extra_fields)
         user.is_superuser = True
-        user.save(using=self._db)
+        user.is_staff = True
+        user.save()
         return user
 
 

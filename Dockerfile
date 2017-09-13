@@ -8,11 +8,12 @@ RUN echo 'fsync = off' >> /etc/postgresql/9.5/main/postgresql.conf; service post
 
 # Python virtualenv setup
 COPY requirements.txt /
-RUN rm -rf /env; virtualenv -p /usr/bin/python3 /env; bash -c 'source /env/bin/activate; pip install -r /requirements.txt'
+COPY requirements-dev.txt /
+RUN rm -rf /env; virtualenv -p /usr/bin/python3 /env; bash -c 'source /env/bin/activate; pip install -r /requirements.txt; pip install -r /requirements-dev.txt'
 
 # Django setup
-COPY . /foodsaving-backend
-WORKDIR /foodsaving-backend
+COPY . /karrot-backend
+WORKDIR /karrot-backend
 RUN cd config; sed 's/fstool-user/root/g; s/fstool-pw/root/g' local_settings.py.example > local_settings.py
 RUN bash -c 'source /env/bin/activate; service postgresql start; service redis-server start; python manage.py migrate; python manage.py create_sample_data >/tmp/create_data; service postgresql stop; service redis-server stop'
 RUN echo 'source /env/bin/activate' >> /root/.bashrc
@@ -21,4 +22,4 @@ EXPOSE 8000
 EXPOSE 5432
 # The '0.0.0.0:8000' makes the server listen on 0.0.0.0 instead of 127.0.0.1.
 # It seems docker cannot expose services bound to the loopback interface.
-CMD bash -c 'service postgresql start; service redis-server start; cd /foodsaving-backend; source /env/bin/activate; cat /tmp/create_data; python manage.py runserver 0.0.0.0:8000'
+CMD bash -c 'service postgresql start; service redis-server start; cd /karrot-backend; source /env/bin/activate; cat /tmp/create_data; python manage.py runserver 0.0.0.0:8000'
