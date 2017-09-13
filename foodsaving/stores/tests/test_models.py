@@ -2,6 +2,7 @@ from dateutil import rrule
 from dateutil.relativedelta import relativedelta
 from django.db import DataError
 from django.db import IntegrityError
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
 from datetime import datetime
@@ -40,11 +41,11 @@ class TestFeedbackModel(TestCase):
         cls.user = UserFactory()
 
     def test_weight_is_negative_fails(self):
-        with self.assertRaises(IntegrityError):
+        with self.assertRaises(ValidationError):
             Feedback.objects.create(weight=-1, about=self.pickup, given_by=self.user, comment="soup")
 
     def test_weight_is_too_high_number_fails(self):
-        with self.assertRaises(IntegrityError):
+        with self.assertRaises(ValidationError):
             Feedback.objects.create(weight=10001, about=self.pickup, given_by=self.user, comment="soup")
 
     def test_create_fails_if_comment_too_long(self):

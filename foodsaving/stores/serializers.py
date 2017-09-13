@@ -272,6 +272,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data.get('comment') is None and data.get('weight') is None:
             raise serializers.ValidationError("Both comment and weight cannot be blank.")
+        # return data
+        if data.get('weight') < 0.0 or data.get('weight') > 10000.0:
+            raise serializers.ValidationError()
         return data
-        # if self.data['weight'] is None and self.data['comment'] is None:
-        # if 'weight' not in self.data and 'comment' not in self.data:

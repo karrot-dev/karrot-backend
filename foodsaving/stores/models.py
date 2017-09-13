@@ -34,7 +34,7 @@ class Store(BaseModel, LocationModel):
 class Feedback(BaseModel):
     given_by = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='feedback')
     about = models.ForeignKey('PickupDate')
-    weight = models.FloatField(blank=True, null=True, validators=[MinValueValidator(0.1), MaxValueValidator(10000)])
+    weight = models.FloatField(blank=True, null=True)
     comment = models.CharField(max_length=settings.DESCRIPTION_MAX_LENGTH, blank=True)
 
 
