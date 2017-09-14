@@ -200,3 +200,42 @@ class FeedbackTest(APITestCase):
         response = self.client.post(self.url, self.future_feedback_post)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(response.data, {'about': ['The pickup is not done yet']})
+
+    def test_patch_feedback_fails_as_non_user(self):
+        """
+        Non-user is not allowed to change feedback
+        """
+        response = self.client.patch(self.feedback_url, self.feedback_post, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+    def test_patch_feedback_fails_as_user(self):
+        """
+        User is not allowed to change feedback
+        """
+        self.client.force_login(user=self.user)
+        response = self.client.patch(self.feedback_url, self.feedback_post, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
+
+    def test_patch_feedback_fails_as_group_member(self):
+        """
+        Group member is not allowed to change feedback
+        """
+        self.client.force_login(user=self.member)
+        response = self.client.patch(self.feedback_url, self.feedback_post, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
+    def test_patch_feedback_works_as_collector(self):
+        """
+        Collector is allowed to change feedback
+        """
+        self.client.force_login(user=self.collector)
+        response = self.client.patch(self.feedback_url, self.feedback_post, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+    def test_patch_weight_to_negative_value_fails(self):
+        """
+        Collector cannot change weight to negative value
+        """
+        self.client.force_login(user=self.collector)
+        response = self.client.patch(self.feedback_url, {'weight': -1})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)

@@ -69,6 +69,7 @@ class StoreViewSet(
 class FeedbackViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
+    PartialUpdateModelMixin,
     mixins.ListModelMixin,
     GenericViewSet
 ):
