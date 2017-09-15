@@ -17,7 +17,8 @@ class FeedbackTest(APITestCase):
 
         cls.member = UserFactory()
         cls.collector = UserFactory()
-        cls.group = GroupFactory(members=[cls.member, cls.collector])
+        cls.evil_collector = UserFactory()
+        cls.group = GroupFactory(members=[cls.member, cls.collector, cls.evil_collector])
         cls.store = StoreFactory(group=cls.group)
         cls.pickup = PickupDateFactory(store=cls.store, date=timezone.now() + relativedelta(days=1))
 
@@ -28,7 +29,7 @@ class FeedbackTest(APITestCase):
         cls.past_pickup = PickupDateFactory(store=cls.store, date=timezone.now() - relativedelta(days=1))
 
         # transforms the member into a collector
-        cls.past_pickup.collectors.add(cls.collector)
+        cls.past_pickup.collectors.add(cls.collector, cls.evil_collector)
         cls.pickup.collectors.add(cls.collector)
 
         # create a feedback data for POST method
@@ -224,13 +225,31 @@ class FeedbackTest(APITestCase):
         response = self.client.patch(self.feedback_url, self.feedback_post, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
+    """
+    def test_change_max_collectors_for_series(self):
+        "should change all future instances (except for individually changed ones), but not past ones"
+        url = '/api/pickup-date-series/{}/'.format(self.series.id)
+        self.client.force_login(user=self.member)
+        response = self.client.patch(url, {'max_collectors': 99})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data['max_collectors'], 99)
+    """
+
+    def test_patch_feedback_fails_as_evil_collector(self):
+        """
+        """
+        self.client.force_login(user=self.evil_collector)
+        response = self.client.patch(self.feedback_url, {'weight': 3}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
     def test_patch_feedback_works_as_collector(self):
         """
         Collector is allowed to change feedback
         """
         self.client.force_login(user=self.collector)
-        response = self.client.patch(self.feedback_url, self.feedback_post, format='json')
+        response = self.client.patch(self.feedback_url, {'weight': 3}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data['weight'], 3)
 
     def test_patch_weight_to_negative_value_fails(self):
         """
