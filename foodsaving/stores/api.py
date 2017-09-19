@@ -73,6 +73,14 @@ class FeedbackViewSet(
     mixins.ListModelMixin,
     GenericViewSet
 ):
+    """
+    Feedback
+
+    # Query parameters
+    - `?given_by` - filter by user id
+    - `?about` - filter by pickup id
+    - `?store` - filter by store id
+    """
     serializer_class = FeedbackSerializer
     queryset = FeedbackModel.objects.all()
     permission_classes = (IsAuthenticated,)
