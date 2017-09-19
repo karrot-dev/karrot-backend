@@ -81,8 +81,10 @@ class FeedbackViewSet(
         return self.queryset.filter(about__store__group__members=self.request.user)
 
     def get_permissions(self):
-        if self.action == 'update':
-            self.permission_classes = (IsSameCollector)
+        if self.action == 'partial_update':
+            self.permission_classes = (IsAuthenticated, IsSameCollector,)
+
+        return super().get_permissions()
 
 
 class PickupDateSeriesViewSet(

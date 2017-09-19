@@ -45,4 +45,4 @@ class IsSameCollector(permissions.BasePermission):
     message = _('This feedback is given by another user.')
 
     def has_object_permission(self, request, view, obj):
-        pass
+        return obj.given_by == request.user

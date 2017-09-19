@@ -223,24 +223,16 @@ class FeedbackTest(APITestCase):
         """
         self.client.force_login(user=self.member)
         response = self.client.patch(self.feedback_url, self.feedback_post, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-
-    """
-    def test_change_max_collectors_for_series(self):
-        "should change all future instances (except for individually changed ones), but not past ones"
-        url = '/api/pickup-date-series/{}/'.format(self.series.id)
-        self.client.force_login(user=self.member)
-        response = self.client.patch(url, {'max_collectors': 99})
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data['max_collectors'], 99)
-    """
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_patch_feedback_fails_as_evil_collector(self):
         """
         """
         self.client.force_login(user=self.evil_collector)
         response = self.client.patch(self.feedback_url, {'weight': 3}, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+#  user.has_perm('foo.change_bar')
 
     def test_patch_feedback_works_as_collector(self):
         """
