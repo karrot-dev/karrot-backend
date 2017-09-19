@@ -227,12 +227,11 @@ class FeedbackTest(APITestCase):
 
     def test_patch_feedback_fails_as_evil_collector(self):
         """
+        A collector is not allowed to change feedback if he didn't created it
         """
         self.client.force_login(user=self.evil_collector)
         response = self.client.patch(self.feedback_url, {'weight': 3}, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
-
-#  user.has_perm('foo.change_bar')
 
     def test_patch_feedback_works_as_collector(self):
         """
