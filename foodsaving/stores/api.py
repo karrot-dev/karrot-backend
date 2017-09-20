@@ -137,7 +137,6 @@ class PickupDateViewSet(
 ):
     """
     Pickup Dates
-
     # Query parameters
     - `?series` - filter by pickup date series id
     - `?store` - filter by store id
