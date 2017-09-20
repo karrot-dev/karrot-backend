@@ -6,7 +6,9 @@ from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
-from foodsaving.stores.filters import PickupDatesFilter, PickupDateSeriesFilter
+from foodsaving.stores.filters import (
+    PickupDatesFilter, PickupDateSeriesFilter
+)
 from foodsaving.stores.permissions import (
     IsUpcoming, HasNotJoinedPickupDate, HasJoinedPickupDate, IsEmptyPickupDate,
     IsNotFull, IsSameCollector)
@@ -83,6 +85,8 @@ class FeedbackViewSet(
     """
     serializer_class = FeedbackSerializer
     queryset = FeedbackModel.objects.all()
+    filter_backends = (filters.DjangoFilterBackend,)
+    filter_fields = ('about', 'given_by')
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
