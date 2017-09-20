@@ -54,11 +54,9 @@ class TestFeedbackAPIFilter(APITestCase):
         self.assertEqual(len(response.data), Feedback.objects.filter(about=self.pickup.id).count())
         self.assertEqual(response.data[0]['about'], self.pickup.id)
 
-    """
     def test_filter_by_given_by(self):
         self.client.force_login(user=self.collector)
-        response = self.client.get(self.url, {'given_by': self.pickup.id})
+        response = self.client.get(self.url, {'given_by': self.collector.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), Feedback.objects.filter(given_by=self.pickup.id).count())
-        self.assertEqual(response.data[0]['given_by'], self.pickup.id)
-        """
+        self.assertEqual(len(response.data), Feedback.objects.filter(given_by=self.collector.id).count())
+        self.assertEqual(response.data[0]['given_by'], self.collector.id)
