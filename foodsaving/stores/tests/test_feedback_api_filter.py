@@ -46,28 +46,43 @@ class TestFeedbackAPIFilter(APITestCase):
         cls.pickup.collectors.add(cls.collector, )
         cls.pickup2.collectors.add(cls.collector, cls.collector2)
 
-    # How much Feedback do I have for one pickupdate
     def test_filter_by_about(self):
+        """
+        Filter the two feedbacks and return the one that is about 'pickup'
+        """
         self.client.force_login(user=self.collector)
         response = self.client.get(self.url, {'about': self.pickup.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), Feedback.objects.filter(about=self.pickup.id).count())
         self.assertEqual(response.data[0]['about'], self.pickup.id)
+        self.assertEqual(len(response.data), 1)
 
     def test_filter_by_given_by(self):
+        """
+        Filter the two feedbacks and return the one that is given_by 'collector'
+        """
         self.client.force_login(user=self.collector)
         response = self.client.get(self.url, {'given_by': self.collector.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), Feedback.objects.filter(given_by=self.collector.id).count())
         self.assertEqual(response.data[0]['given_by'], self.collector.id)
-        # print(response.data[0]['given_by'])
+        self.assertEqual(len(response.data), 1)
 
     def test_filter_by_store(self):
+        """
+        Filter the two feedbacks and return the one that is about the pickup at 'store'
+        """
         self.client.force_login(user=self.collector)
         response = self.client.get(self.url, {'store': self.store.id})
+        self.assertEqual(response.data[0]['id'], self.feedback.id)
+        self.assertEqual(response.data[0]['about'], self.pickup.id)
+        self.assertEqual(len(response.data), 1)
+
+    def test_filter_by_store_2(self):
+        """
+        Filter the two feedbacks and return the one that is about the pickup at 'store2'
+        """
+        self.client.force_login(user=self.collector)
+        response = self.client.get(self.url, {'store': self.store2.id})
+        self.assertEqual(response.data[0]['id'], self.feedback2.id)
+        self.assertEqual(response.data[0]['about'], self.pickup2.id)
+        self.assertEqual(len(response.data), 1)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        store_ids = [_.id for _ in self.group.store.all()]
-        print(store_ids)
-        for _ in response.data:
-            self.assertTrue(_['about'] in store_ids)
-        self.assertEqual(len(response.data), Feedback.objects.filter(about__store=self.store.id).count())
