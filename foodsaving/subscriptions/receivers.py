@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage
+from foodsaving.conversations.serializers import ConversationMessageSerializer
 from foodsaving.subscriptions.fcm import notify_multiple_devices
 from foodsaving.subscriptions.models import ChannelSubscription, PushSubscription
 
@@ -19,16 +20,8 @@ def send_messages(sender, instance, **kwargs):
     message = instance
     conversation = message.conversation
 
-    # TODO: use a serializer
     topic = 'conversations:message'
-    payload = {
-        'id': message.id,
-        'content': message.content,
-        'author': message.author.id,
-        'conversation': {
-            'id': conversation.id
-        }
-    }
+    payload = ConversationMessageSerializer(message).data
 
     push_exclude_users = []
 
@@ -38,7 +31,6 @@ def send_messages(sender, instance, **kwargs):
             push_exclude_users.append(subscription.user)
 
         Channel(subscription.reply_channel).send({
-            # TODO: use a serializer
             "text": json.dumps({
                 'topic': topic,
                 'payload': payload

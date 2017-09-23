@@ -8,7 +8,7 @@ from timezone_field import TimeZoneField
 
 from foodsaving.base.base_models import BaseModel, LocationModel
 from foodsaving.conversations.models import ConversationMixin
-from foodsaving.groups.signals import post_group_join, pre_group_leave
+from foodsaving.history.models import History, HistoryTypus
 
 
 class GroupManager(models.Manager):
@@ -33,18 +33,30 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         return '{}'.format(self.name)
 
     def send_notifications(self):
-        for s in self.store.all():
-            for p in s.pickup_dates.filter(
-                    date__gt=timezone.now() - relativedelta(hours=s.upcoming_notification_hours)
-            ):
-                p.notify_upcoming()
+        if self.slack_webhook.startswith('https://hooks.slack.com/services/'):
+            for s in self.store.all():
+                # get all pick-ups within the notification range
+                for p in s.pickup_dates.filter(
+                        date__lt=timezone.now() + relativedelta(hours=s.upcoming_notification_hours),
+                        date__gt=timezone.now()
+                ):
+                    p.notify_upcoming_via_slack()
 
     def add_member(self, user, history_payload=None):
         GroupMembership.objects.create(group=self, user=user)
-        post_group_join.send(sender=self.__class__, group=self, user=user, payload=history_payload)
+        History.objects.create(
+            typus=HistoryTypus.GROUP_JOIN,
+            group=self,
+            users=[user, ],
+            payload=history_payload
+        )
 
     def remove_member(self, user):
-        pre_group_leave.send(sender=self.__class__, group=self, user=user)
+        History.objects.create(
+            typus=HistoryTypus.GROUP_LEAVE,
+            group=self,
+            users=[user, ]
+        )
         GroupMembership.objects.filter(group=self, user=user).delete()
 
     def is_member(self, user):
@@ -53,6 +65,13 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     def is_member_with_role(self, user, role_name):
         return not user.is_anonymous() and GroupMembership.objects.filter(group=self, user=user,
                                                                           roles__contains=[role_name]).exists()
+
+    def accept_invite(self, user, invited_by, invited_at):
+        self.add_member(user, history_payload={
+            'invited_by': invited_by.id,
+            'invited_at': invited_at.isoformat(),
+            'invited_via': 'e-mail'
+        })
 
 
 class GroupMembership(BaseModel):
