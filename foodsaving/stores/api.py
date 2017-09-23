@@ -1,4 +1,3 @@
-from django.dispatch import Signal
 from rest_framework import filters
 from rest_framework import mixins
 from rest_framework import viewsets
@@ -6,10 +5,13 @@ from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
-from foodsaving.stores.filters import PickupDatesFilter, PickupDateSeriesFilter
+from foodsaving.history.models import History, HistoryTypus
+from foodsaving.stores.filters import (
+    PickupDatesFilter, PickupDateSeriesFilter, FeedbackFilter
+)
 from foodsaving.stores.permissions import (
     IsUpcoming, HasNotJoinedPickupDate, HasJoinedPickupDate, IsEmptyPickupDate,
-    IsNotFull)
+    IsNotFull, IsSameCollector)
 from foodsaving.stores.serializers import (
     StoreSerializer, PickupDateSerializer, PickupDateSeriesSerializer,
     PickupDateJoinSerializer, PickupDateLeaveSerializer, FeedbackSerializer)
@@ -21,10 +23,6 @@ from foodsaving.stores.models import (
 )
 
 from foodsaving.utils.mixins import PartialUpdateModelMixin
-
-pre_pickup_delete = Signal()
-pre_series_delete = Signal()
-post_store_delete = Signal()
 
 
 class StoreViewSet(
@@ -55,11 +53,11 @@ class StoreViewSet(
     def perform_destroy(self, store):
         store.deleted = True
         store.save()
-        post_store_delete.send(
-            sender=self.__class__,
+        History.objects.create(
+            typus=HistoryTypus.STORE_DELETE,
             group=store.group,
             store=store,
-            user=self.request.user,
+            users=[self.request.user, ],
         )
         # implicit action: delete all pickups and series, but don't send out signals for them
         PickupDateModel.objects.filter(store=store).delete()
@@ -69,15 +67,32 @@ class StoreViewSet(
 class FeedbackViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
+    PartialUpdateModelMixin,
     mixins.ListModelMixin,
     GenericViewSet
 ):
+    """
+    Feedback
+
+    # Query parameters
+    - `?given_by` - filter by user id
+    - `?about` - filter by pickup id
+    - `?store` - filter by store id
+    """
     serializer_class = FeedbackSerializer
     queryset = FeedbackModel.objects.all()
+    filter_backends = (filters.DjangoFilterBackend,)
+    filter_class = FeedbackFilter
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         return self.queryset.filter(about__store__group__members=self.request.user)
+
+    def get_permissions(self):
+        if self.action == 'partial_update':
+            self.permission_classes = (IsAuthenticated, IsSameCollector,)
+
+        return super().get_permissions()
 
 
 class PickupDateSeriesViewSet(
@@ -99,11 +114,11 @@ class PickupDateSeriesViewSet(
         return self.queryset.filter(store__group__members=self.request.user)
 
     def perform_destroy(self, series):
-        pre_series_delete.send(
-            sender=self.__class__,
+        History.objects.create(
+            typus=HistoryTypus.SERIES_DELETE,
             group=series.store.group,
             store=series.store,
-            user=self.request.user,
+            users=[self.request.user, ],
         )
         super().perform_destroy(series)
 
@@ -118,7 +133,6 @@ class PickupDateViewSet(
 ):
     """
     Pickup Dates
-
     # Query parameters
     - `?series` - filter by pickup date series id
     - `?store` - filter by store id
@@ -144,11 +158,11 @@ class PickupDateViewSet(
         # set deleted flag to make the pickup date invisible
         pickup.deleted = True
 
-        pre_pickup_delete.send(
-            sender=self.__class__,
+        History.objects.create(
+            typus=HistoryTypus.PICKUP_DELETE,
             group=pickup.store.group,
             store=pickup.store,
-            user=self.request.user
+            users=[self.request.user, ]
         )
         pickup.save()
 

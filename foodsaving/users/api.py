@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Q
-from django.dispatch import Signal
 from django.utils import timezone
 from rest_framework import filters
 from rest_framework import mixins
@@ -13,8 +12,6 @@ from rest_framework.viewsets import GenericViewSet
 from foodsaving.users.permissions import IsSameUser, IsNotVerified
 from foodsaving.users.serializers import UserSerializer, VerifyMailSerializer
 from foodsaving.utils.mixins import PartialUpdateModelMixin
-
-pre_user_delete = Signal(providing_args=['user'])
 
 
 class UserViewSet(
@@ -51,10 +48,16 @@ class UserViewSet(
 
     def perform_destroy(self, user):
         """
-        To keep historic pickup infos, don't delete this user, but delete it from the database.
-        Removal from group and future pickups is handled via the signal.
+        To keep historic pickup infos, don't delete this user, but remove its details from the database.
         """
-        pre_user_delete.send(sender=self.__class__, user=user)
+
+        from foodsaving.groups.models import Group
+        from foodsaving.groups.models import GroupMembership
+
+        # Emits pre_delete and post_delete signals, they are used to remove the user from pick-ups
+        for _ in Group.objects.filter(members__in=[user, ]):
+            GroupMembership.objects.filter(group=_, user=user).delete()
+
         user.description = ''
         user.set_unusable_password()
         user.mail = None
@@ -101,18 +104,15 @@ class UserViewSet(
     def reset_password(self, request, pk=None):
         """
         send a request with 'email' to this endpoint to get a new password mailed
-
-        to prevent information leaks, also returns success if the mail doesn't exist
         """
         request_email = request.data.get('email')
         if not request_email:
             return Response(status=status.HTTP_400_BAD_REQUEST,
                             data={'error': 'mail address is not provided'})
         try:
-            user = get_user_model().objects.get(email=request_email)
+            user = get_user_model().objects.get(email__iexact=request_email)
         except get_user_model().DoesNotExist:
-            # don't leak valid mail addresses
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
         user.reset_password()
         return Response(status=status.HTTP_204_NO_CONTENT, data={})

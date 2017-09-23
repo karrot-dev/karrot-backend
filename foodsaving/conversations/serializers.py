@@ -50,8 +50,9 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
             'content',
             'conversation',
             'created_at',
-            'seen'
+            'seen',
         ]
+        read_only_fields = ('author', 'id', 'created_at', 'seen')
 
     seen = serializers.SerializerMethodField()
 
@@ -62,23 +63,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
         if participant.seen_up_to:
             return message.id <= participant.seen_up_to_id
         else:
-            return False
-
-
-class CreateConversationMessageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ConversationMessage
-        fields = [
-            'id',
-            'author',
-            'content',
-            'conversation'
-        ]
-        extra_kwargs = {
-            'author': {
-                'read_only': True
-            }
-        }
+            return False        
 
     def validate_conversation(self, conversation):
         if self.context['request'].user not in conversation.participants.all():
