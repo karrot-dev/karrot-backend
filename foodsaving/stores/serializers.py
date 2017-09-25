@@ -261,4 +261,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data.get('comment') is None and data.get('weight') is None:
             raise serializers.ValidationError("Both comment and weight cannot be blank.")
+        # working on fixing the code below: the user should not be allowed to give a feedback twice
+        if data.post('given_by') > 1:
+            raise serializers.ValidationError('You already gave a feedback to this pickup')
         return data
