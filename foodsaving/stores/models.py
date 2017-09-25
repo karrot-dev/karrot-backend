@@ -12,7 +12,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 
 from foodsaving.base.base_models import BaseModel, LocationModel
-from foodsaving.stores.signals import pickup_done, pickup_missed
+from foodsaving.history.models import History, HistoryTypus
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
@@ -135,7 +135,11 @@ class PickupDateManager(models.Manager):
 
         currently only used by the history component
         """
-        for _ in self.filter(done_and_processed=False, date__lt=timezone.now()):
+        for _ in self.filter(
+                done_and_processed=False,
+                date__lt=timezone.now(),
+                deleted=False,
+        ):
             payload = {}
             payload['pickup_date'] = _.id
             if _.series:
@@ -143,21 +147,21 @@ class PickupDateManager(models.Manager):
             if _.max_collectors:
                 payload['max_collectors'] = _.max_collectors
             if _.collectors.count() == 0:
-                pickup_missed.send(
-                    sender=PickupDate.__class__,
+                History.objects.create(
+                    typus=HistoryTypus.PICKUP_MISSED,
                     group=_.store.group,
                     store=_.store,
                     date=_.date,
-                    payload=payload
+                    payload=payload,
                 )
             else:
-                pickup_done.send(
-                    sender=PickupDate.__class__,
+                History.objects.create(
+                    typus=HistoryTypus.PICKUP_DONE,
                     group=_.store.group,
                     store=_.store,
                     users=_.collectors.all(),
                     date=_.date,
-                    payload=payload
+                    payload=payload,
                 )
             _.done_and_processed = True
             _.save()

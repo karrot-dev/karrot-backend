@@ -1,12 +1,24 @@
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import mixins
+from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from foodsaving.conversations.models import Conversation, ConversationMessage
-from foodsaving.conversations.serializers import ConversationSerializer, ConversationMessageSerializer, \
-    CreateConversationMessageSerializer
+from foodsaving.conversations.models import (
+    Conversation,
+    ConversationMessage
+)
+from foodsaving.conversations.serializers import (
+    ConversationSerializer,
+    ConversationMessageSerializer
+)
+
+
+class MessagePagination(CursorPagination):
+    # TODO: create an index on 'created_at' for increased speed
+    page_size = 50
+    ordering = '-created_at'
 
 
 class IsConversationParticipant(BasePermission):
@@ -35,19 +47,11 @@ class ConversationMessageViewSet(
     ConversationMessages
     """
 
-    # TODO: sort by newest first (reverse id)
-    # TODO: limit to 50 or so
-    # TODO: to load older messages add "before" that does a "where id < before"
-
     queryset = ConversationMessage.objects
     serializer_class = ConversationMessageSerializer
     permission_classes = (IsAuthenticated, IsConversationParticipant)
     filter_fields = ('conversation',)
-
-    def get_serializer_class(self):
-        if self.action == 'create':
-            return CreateConversationMessageSerializer
-        return self.serializer_class
+    pagination_class = MessagePagination
 
     def get_queryset(self):
         return self.queryset.filter(conversation__participants=self.request.user)
