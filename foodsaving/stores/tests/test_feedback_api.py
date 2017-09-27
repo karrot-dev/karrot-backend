@@ -111,17 +111,6 @@ class FeedbackTest(APITestCase):
         response = self.client.post(self.url, self.feedback_post, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
-    def test_create_feedback_fails_as_collector_already_gave_feedback(self):
-        """
-        Collector is not allowed to give feedback twice.
-        """
-        self.client.force_login(user=self.collector3)
-        response = self.client.post(self.url, self.feedback_post, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        response = self.client.post(self.url, self.feedback_post, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, {'given_by': ['You already gave feedback for this pickup']})
-
     def test_create_feedback_without_weight(self):
         """
         Weight field can be empty

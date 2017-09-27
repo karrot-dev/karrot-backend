@@ -246,6 +246,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data['given_by'] = self.context['request'].user
+        """
         unique_validator = UniqueTogetherValidator(
             queryset=FeedbackModel.objects.all(),
             fields=('about', 'given_by')
@@ -255,6 +256,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
             unique_validator(validated_data)
         except serializers.ValidationError:
             raise serializers.ValidationError({"given_by": [_('You already gave feedback for this pickup')]})
+        """
         return super().create(validated_data)
 
     def validate_about(self, about):
