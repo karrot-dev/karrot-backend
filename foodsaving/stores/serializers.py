@@ -5,6 +5,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 from django.conf import settings
 
@@ -245,6 +246,15 @@ class FeedbackSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data['given_by'] = self.context['request'].user
+        unique_validator = UniqueTogetherValidator(
+            queryset=FeedbackModel.objects.all(),
+            fields=('about', 'given_by')
+        )
+        unique_validator.set_context(self)
+        try:
+            unique_validator(validated_data)
+        except serializers.ValidationError:
+            raise serializers.ValidationError({"given_by": [_('You already gave feedback for this pickup')]})
         return super().create(validated_data)
 
     def validate_about(self, about):
@@ -261,7 +271,4 @@ class FeedbackSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data.get('comment') is None and data.get('weight') is None:
             raise serializers.ValidationError("Both comment and weight cannot be blank.")
-        # working on fixing the code below: the user should not be allowed to give a feedback twice
-        if data.post('given_by') > 1:
-            raise serializers.ValidationError('You already gave a feedback to this pickup')
         return data
