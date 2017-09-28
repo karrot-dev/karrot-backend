@@ -66,14 +66,6 @@ class TestFeedbackModel(TestCase):
         Feedback.objects.create(given_by=self.user, about=self.pickup)
         Feedback.objects.create(given_by=self.user, about=PickupDateFactory())
 
-    def test_create_feedback_for_old_pickup_fails(self):
-        Feedback.objects.create(given_by=self.user, about=self.old_pickup)
-        # print(self.old_pickup)
-        """
-        with self.assertRaises(IntegrityError):
-            Feedback.objects.create(given_by=self.user, about=self.old_pickup)
-        """
-
 
 class TestPickupDateSeriesModel(TestCase):
     @classmethod
