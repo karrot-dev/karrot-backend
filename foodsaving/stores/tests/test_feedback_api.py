@@ -33,11 +33,12 @@ class FeedbackTest(APITestCase):
         cls.past_pickup = PickupDateFactory(store=cls.store, date=timezone.now() - relativedelta(days=1))
 
         # old pickup date
-        cls.old_pickup = PickupDateFactory(store=cls.store, date=timezone.now() - relativedelta(days=31))
+        cls.old_pickup = PickupDateFactory(store=cls.store, date=timezone.now() - relativedelta(days=32))
 
         # transforms the member into a collector
         cls.past_pickup.collectors.add(cls.collector, cls.evil_collector, cls.collector2, cls.collector3)
         cls.pickup.collectors.add(cls.collector, cls.collector2, cls.collector3)
+        cls.old_pickup.collectors.add(cls.collector3)
 
         # create feedback for POST method
         cls.feedback_post = {
@@ -138,6 +139,7 @@ class FeedbackTest(APITestCase):
         """
         self.client.force_login(user=self.collector3)
         response = self.client.post(self.url, self.feedback_for_old_pickup, format='json')
+        print(self.old_pickup)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(
             response.data, {'about': ['You can\'t give feedback for pickups more that 30 days ago.']}
@@ -290,5 +292,5 @@ class FeedbackTest(APITestCase):
         Collector cannot change weight to negative value
         """
         self.client.force_login(user=self.collector)
-        response = self.client.patch(self.feedback_url, {'weight': -1})
+        response = self.client.patch(self.feedback_url, {'weight': -1}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)

@@ -263,8 +263,8 @@ class FeedbackSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(_('The pickup is not done yet'))
         if not about.is_collector(user):
             raise serializers.ValidationError(_('You aren\'t assigned to the pickup.'))
-        if not about.is_old_pickup(user):
-            raise serializers.ValidationError(_('You can\'t give feedback for pickups more that 30 days ago'))
+        # if not about.is_old_pickup(user):
+        #    raise serializers.ValidationError(_('You can\'t give feedback for pickups more that 30 days ago'))
         return about
 
     def validate(self, data):

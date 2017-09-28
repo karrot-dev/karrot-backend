@@ -90,7 +90,7 @@ class FeedbackViewSet(
 
     def get_permissions(self):
         if self.action == 'partial_update':
-            self.permission_classes = (IsAuthenticated, IsSameCollector,)
+            self.permission_classes = (IsAuthenticated, IsOldPickupDate, IsSameCollector,)
 
         return super().get_permissions()
 
