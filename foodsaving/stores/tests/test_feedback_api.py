@@ -111,6 +111,17 @@ class FeedbackTest(APITestCase):
         response = self.client.post(self.url, self.feedback_post, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
+    def test_create_feedback_twice_fails_for_one_pickup(self):
+        """
+        Member is allowed to give feedback when he is assigned to the Pickup.
+        """
+        self.client.force_login(user=self.collector3)
+        response = self.client.post(self.url, self.feedback_post, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        response = self.client.post(self.url, self.feedback_post, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(response.data, {'non_field_errors': ['You already gave feedback for this pickup']})
+
     def test_create_feedback_without_weight(self):
         """
         Weight field can be empty

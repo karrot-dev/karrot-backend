@@ -245,6 +245,13 @@ class FeedbackSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data['given_by'] = self.context['request'].user
+
+        existing_feedback = len(FeedbackModel.objects.filter(
+            about=validated_data['about'], given_by=validated_data['given_by']
+        ))
+
+        if existing_feedback != 0:
+            raise serializers.ValidationError({'non_field_errors': [_('You already gave feedback for this pickup')]})
         return super().create(validated_data)
 
     def validate_about(self, about):
