@@ -11,7 +11,7 @@ from foodsaving.stores.filters import (
 )
 from foodsaving.stores.permissions import (
     IsUpcoming, HasNotJoinedPickupDate, HasJoinedPickupDate, IsEmptyPickupDate,
-    IsNotFull, IsSameCollector)
+    IsNotFull, IsSameCollector, IsOldPickupDate)
 from foodsaving.stores.serializers import (
     StoreSerializer, PickupDateSerializer, PickupDateSeriesSerializer,
     PickupDateJoinSerializer, PickupDateLeaveSerializer, FeedbackSerializer)
@@ -83,7 +83,7 @@ class FeedbackViewSet(
     queryset = FeedbackModel.objects.all()
     filter_backends = (filters.DjangoFilterBackend,)
     filter_class = FeedbackFilter
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOldPickupDate)
 
     def get_queryset(self):
         return self.queryset.filter(about__store__group__members=self.request.user)

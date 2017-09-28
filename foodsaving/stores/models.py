@@ -40,8 +40,8 @@ class Feedback(BaseModel):
         blank=True, null=True, validators=[MinValueValidator(-0.01), MaxValueValidator(10000.0)])
     comment = models.CharField(max_length=settings.DESCRIPTION_MAX_LENGTH, blank=True)
 
-    def is_recent_pickup(self):
-        return self.about.date >= timezone.now() - relativedelta(days=30)
+    def is_old_pickup(self):
+        return self.about.date <= timezone.now() - relativedelta(days=30)
 
 
 class PickupDateSeriesManager(models.Manager):
