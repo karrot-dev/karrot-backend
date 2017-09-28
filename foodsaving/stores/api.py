@@ -11,7 +11,7 @@ from foodsaving.stores.filters import (
 )
 from foodsaving.stores.permissions import (
     IsUpcoming, HasNotJoinedPickupDate, HasJoinedPickupDate, IsEmptyPickupDate,
-    IsNotFull, IsSameCollector, IsOldPickupDate)
+    IsNotFull, IsSameCollector)
 from foodsaving.stores.serializers import (
     StoreSerializer, PickupDateSerializer, PickupDateSeriesSerializer,
     PickupDateJoinSerializer, PickupDateLeaveSerializer, FeedbackSerializer)
@@ -83,14 +83,14 @@ class FeedbackViewSet(
     queryset = FeedbackModel.objects.all()
     filter_backends = (filters.DjangoFilterBackend,)
     filter_class = FeedbackFilter
-    permission_classes = (IsAuthenticated, IsOldPickupDate)
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         return self.queryset.filter(about__store__group__members=self.request.user)
 
     def get_permissions(self):
         if self.action == 'partial_update':
-            self.permission_classes = (IsAuthenticated, IsOldPickupDate, IsSameCollector,)
+            self.permission_classes = (IsAuthenticated, IsSameCollector,)
 
         return super().get_permissions()
 

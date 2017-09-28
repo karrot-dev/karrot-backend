@@ -139,10 +139,9 @@ class FeedbackTest(APITestCase):
         """
         self.client.force_login(user=self.collector3)
         response = self.client.post(self.url, self.feedback_for_old_pickup, format='json')
-        print(self.old_pickup)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(
-            response.data, {'about': ['You can\'t give feedback for pickups more that 30 days ago.']}
+            response.data, {'about': ['You can\'t give feedback for pickups more than 30 days ago.']}
         )
 
     def test_create_feedback_without_weight(self):

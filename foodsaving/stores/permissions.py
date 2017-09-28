@@ -20,15 +20,6 @@ class IsEmptyPickupDate(permissions.BasePermission):
         return obj.is_empty()
 
 
-class IsOldPickupDate(permissions.BasePermission):
-    message = _('You can\'t give feedback for pickups more that 30 days ago.')
-
-    def has_object_permission(self, request, view, obj):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        return obj.is_recent_pickup()
-
-
 class HasJoinedPickupDate(permissions.BasePermission):
     message = _('You have not joined this pickup date.')
 

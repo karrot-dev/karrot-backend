@@ -37,10 +37,8 @@ class TestFeedbackModel(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        thirtyone_days_ago = timezone.now() - relativedelta(days=32)
 
         cls.pickup = PickupDateFactory()
-        cls.old_pickup = PickupDateFactory(date=thirtyone_days_ago)
         cls.user = UserFactory()
 
     def test_weight_is_negative_fails(self):
@@ -65,15 +63,6 @@ class TestFeedbackModel(TestCase):
     def test_create_two_feedback_for_different_pickups_as_same_user_works(self):
         Feedback.objects.create(given_by=self.user, about=self.pickup)
         Feedback.objects.create(given_by=self.user, about=PickupDateFactory())
-
-    def test_create_feedback_for_old_pickup_fails(self):
-        pass
-        # Feedback.objects.create(given_by=self.user, about=self.old_pickup)
-        # print(self.old_pickup)
-        """with self.assertRaises(DataError):
-            model = Feedback.objects.create(about=self.old_pickup, given_by=self.user, comment="soup")
-            model.clean_fields()
-            """
 
 
 class TestPickupDateSeriesModel(TestCase):
