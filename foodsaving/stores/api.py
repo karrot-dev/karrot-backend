@@ -1,4 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db import transaction
 from rest_framework import mixins
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route
@@ -154,6 +155,12 @@ class PickupDateViewSet(
     def get_queryset(self):
         return self.queryset.filter(store__group__members=self.request.user)
 
+    def filter_queryset(self, queryset):
+        qs = super().filter_queryset(queryset)
+        if self.action == 'add':
+            qs = qs.select_for_update()
+        return qs
+
     def perform_destroy(self, pickup):
         # set deleted flag to make the pickup date invisible
         pickup.deleted = True
@@ -172,7 +179,8 @@ class PickupDateViewSet(
         serializer_class=PickupDateJoinSerializer
     )
     def add(self, request, pk=None):
-        return self.partial_update(request)
+        with transaction.atomic():
+            return self.partial_update(request)
 
     @detail_route(
         methods=['POST'],
