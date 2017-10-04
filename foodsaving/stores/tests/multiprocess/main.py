@@ -1,4 +1,3 @@
-import json
 import multiprocessing
 import unittest
 
@@ -10,7 +9,7 @@ Run server with manage.py runserver
 Generate some sample data with manage.py create_sample_data
 
 Find 4 users in the same group and a pickup date they can access. Fill out next lines and run test:
-python foodsaving/stores/tests/process_concurrency/main.py
+python main.py
 """
 
 credentials = [
@@ -49,15 +48,19 @@ class TestPickupDatesAPIConcurrently(unittest.TestCase):
         taskq = mp.Queue(30)
         responseq = mp.Queue(30)
 
-        n = 4
-        for id in range(n):
+        clients = []
+        for id in range(4):
             client = CSRFSession()
             client.get('http://localhost:8000/api/auth/status/')
             r = client.post('http://localhost:8000/api/auth/', json=credentials[id])
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
-            client.post(pickup_url + 'remove/')
+            clients.append(client)
 
+        def leave_all():
+            [c.post(pickup_url + 'remove/') for c in clients]
+
+        for id, client in enumerate(clients):
             mp.Process(
                 target=do_requests_process,
                 kwargs={
@@ -69,36 +72,24 @@ class TestPickupDatesAPIConcurrently(unittest.TestCase):
                 }
             ).start()
 
-            client.close()
+        workload = 10
+        for _ in range(10):
+            leave_all()
+            for id in range(workload):
+                taskq.put('task{}'.format(id))
 
-        workload = 16
-        for id in range(workload):
-            taskq.put('task{}'.format(id))
+            responses = []
+            for _ in range(workload):
+                (task, r) = responseq.get()
+                responses.append(r)
 
-        responses = []
-        for _ in range(workload):
-            (task, r) = responseq.get()
-            responses.append(r)
+            self.assertEqual(1, sum(1 for r in responses if r.status_code == status.HTTP_200_OK))
+            self.assertEqual(workload - 1, sum(1 for r in responses if r.status_code == status.HTTP_403_FORBIDDEN))
 
-        for _ in range(n):
+        for _ in clients:
             taskq.put('STOP')
 
-        for i in responses:
-            if i.status_code not in (status.HTTP_200_OK, status.HTTP_403_FORBIDDEN):
-                print(i, i.text)
-
-        for i in responses:
-            print(i.status_code)
-
-        # self.assertEqual(1, sum(1 for r in responses if r.status_code == status.HTTP_200_OK))
-        # self.assertEqual(workload - 1, sum(1 for r in responses if r.status_code == status.HTTP_403_FORBIDDEN))
-
-        client = CSRFSession()
-        client.get('http://localhost:8000/api/auth/status/')
-        client.post('http://localhost:8000/api/auth/', json=credentials[0])
-        r = client.get(pickup_url)
-        print(json.loads(r.text))
-        client.close()
+        [c.close() for c in clients]
 
 
 if __name__ == '__main__':
