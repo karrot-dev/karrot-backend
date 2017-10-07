@@ -145,6 +145,7 @@ class PickupDateViewSet(
     filter_backends = (DjangoFilterBackend,)
     filter_class = PickupDatesFilter
     permission_classes = (IsAuthenticated, IsUpcoming)
+    select_for_update_actions = ('add', 'remove', 'create', 'partial_update')
 
     def get_permissions(self):
         if self.action == 'destroy':
@@ -154,7 +155,7 @@ class PickupDateViewSet(
 
     def get_queryset(self):
         qs = self.queryset
-        if self.action == 'add':
+        if self.action in self.select_for_update_actions:
             qs = qs.select_for_update()
         return qs.filter(store__group__members=self.request.user)
 

@@ -93,9 +93,7 @@ class PickupDateJoinSerializer(serializers.ModelSerializer):
 
     def update(self, pickupdate, validated_data):
         user = self.context['request'].user
-        print('adding start')
         pickupdate.collectors.add(user)
-        print('adding done')
 
         History.objects.create(
             typus=HistoryTypus.PICKUP_JOIN,
