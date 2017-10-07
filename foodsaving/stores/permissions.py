@@ -1,5 +1,5 @@
-from rest_framework import permissions
 from django.utils.translation import ugettext_lazy as _
+from rest_framework import permissions
 
 
 class IsUpcoming(permissions.BasePermission):
@@ -38,6 +38,10 @@ class IsNotFull(permissions.BasePermission):
     message = _('Pickup date is already full.')
 
     def has_object_permission(self, request, view, obj):
+        if obj.is_full():
+            print('pickup is full')
+        else:
+            print('pickup is empty')
         return not obj.is_full()
 
 

@@ -1,12 +1,11 @@
 from datetime import timedelta
 
 import dateutil.rrule
+from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
-
-from django.conf import settings
 
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.history.utils import get_changed_data
@@ -94,7 +93,9 @@ class PickupDateJoinSerializer(serializers.ModelSerializer):
 
     def update(self, pickupdate, validated_data):
         user = self.context['request'].user
+        print('adding start')
         pickupdate.collectors.add(user)
+        print('adding done')
 
         History.objects.create(
             typus=HistoryTypus.PICKUP_JOIN,

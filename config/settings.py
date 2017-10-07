@@ -177,10 +177,15 @@ NAME_MAX_LENGTH = 80
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "asgi_redis.RedisChannelLayer",
+        "ROUTING": "foodsaving.subscriptions.routing.channel_routing",
         "CONFIG": {
             "hosts": [(REDIS_HOST, 6379)],
         },
-        "ROUTING": "foodsaving.subscriptions.routing.channel_routing",
+        # redis for live server test case. DON'T let this into production!
+        # try out IPC transport, but Andrew wants to deprecate it
+        "TEST_CONFIG": {
+            "hosts": [('localhost', 6379)],
+        },
     },
 }
 
