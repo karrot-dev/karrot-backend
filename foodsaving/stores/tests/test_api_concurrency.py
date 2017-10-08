@@ -2,7 +2,6 @@ import threading
 
 # from channels.test import ChannelLiveServerTestCase
 from rest_framework import status
-from rest_framework.test import APITransactionTestCase
 
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.stores.factories import StoreFactory, PickupDateFactory
@@ -27,47 +26,6 @@ class Fixture():
         pickup_url = url + str(self.pickup.id) + '/'
         self.join_url = pickup_url + 'add/'
         self.remove_url = pickup_url + 'remove/'
-
-
-class TestPickupDatesAPIConcurrently(APITransactionTestCase):
-    def test_single_user_joins_pickup_concurrently(self):
-        data = Fixture(members=1)
-
-        threads = []
-        responses = []
-
-        def do_requests():
-            self.client.force_login(user=data.members[0])
-            responses.append(self.client.post(data.join_url, format='json'))
-
-        requests = 6
-        [threads.append(threading.Thread(target=do_requests)) for _ in range(requests)]
-        [t.start() for t in threads]
-        [t.join() for t in threads]
-
-        self.assertEqual(1, sum(1 for r in responses if r.status_code == status.HTTP_200_OK))
-        self.assertEqual(requests - 1, sum(1 for r in responses if r.status_code == status.HTTP_403_FORBIDDEN))
-
-    def test_many_users_join_pickup_concurrently(self):
-        data = Fixture(members=4)
-
-        threads = []
-        responses = []
-
-        def do_requests(member):
-            self.client.force_login(user=member)
-            responses.append(self.client.post(data.join_url, format='json'))
-
-        requests = 4
-        [threads.append(threading.Thread(
-            target=do_requests,
-            kwargs={'member': data.members[id]}
-        )) for id in range(requests)]
-        [t.start() for t in threads]
-        [t.join() for t in threads]
-
-        self.assertEqual(1, sum(1 for r in responses if r.status_code == status.HTTP_200_OK))
-        self.assertEqual(requests - 1, sum(1 for r in responses if r.status_code == status.HTTP_403_FORBIDDEN))
 
 
 class TestPickupDatesAPILive(MultiprocessTestCase):
