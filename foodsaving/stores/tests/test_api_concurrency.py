@@ -43,8 +43,7 @@ class TestPickupDatesAPILive(MultiprocessTestCase):
         n_clients = 4
         for id in range(n_clients):
             client = CSRFSession(self.live_server_url)
-            client.get('/api/auth/status/')
-            r = client.post('/api/auth/', json={'email': member.email, 'password': member.display_name})
+            r = client.login(member.email, member.display_name)
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
             clients.append(client)
@@ -71,8 +70,7 @@ class TestPickupDatesAPILive(MultiprocessTestCase):
         n_clients = len(data.members)
         for member in data.members:
             client = CSRFSession(self.live_server_url)
-            client.get('/api/auth/status/')
-            r = client.post('/api/auth/', json={'email': member.email, 'password': member.display_name})
+            r = client.login(member.email, member.display_name)
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
             clients.append(client)

@@ -40,7 +40,7 @@ class MultiprocessTestCase(ChannelLiveServerTestCase):
         if current_process().daemon:
             # daemon processes can't have children. this limitation imposed by the multiprocessing lib
             def skip_tests(*args, **kwargs):
-                raise unittest.SkipTest("MultiprocessTestCase can't run in parallel mode, skipping")
+                raise unittest.SkipTest("MultiprocessTestCase can't run in parallel mode")
 
             def no_op(*args, **kwargs):
                 pass
