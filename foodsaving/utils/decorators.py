@@ -3,6 +3,10 @@ from rest_framework import generics
 
 
 class acquire_lock_before_actions(object):
+    """
+    Enable atomic transactions and select_for_update locks on each given action.
+    Can be applied to subclasses of GenericAPIView, as we patch the action and get_queryset method
+    """
     def __init__(self, *args):
         """Receive actions names as arguments"""
         self.actions = args
