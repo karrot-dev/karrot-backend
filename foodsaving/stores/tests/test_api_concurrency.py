@@ -5,9 +5,8 @@ from rest_framework import status
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.stores.factories import StoreFactory, PickupDateFactory
 from foodsaving.stores.serializers import PickupDateJoinSerializer
-from foodsaving.stores.tests.liveserver import MultiprocessTestCase
-from foodsaving.stores.tests.shared import CSRFSession
-from foodsaving.tests.utils import add_delay
+from foodsaving.tests.liveserver import MultiprocessTestCase
+from foodsaving.tests.utils import add_delay, sessions
 from foodsaving.users.factories import UserFactory
 
 
@@ -35,78 +34,52 @@ class TestPickupDatesAPILive(MultiprocessTestCase):
         data = Fixture(members=1)
         member = data.members[0]
 
-        responses = []
+        with sessions((self.live_server_url, member.email, member.display_name) for _ in range(4)) as clients:
+            responses = []
 
-        clients = []
-        n_clients = 4
-        for _ in range(n_clients):
-            client = CSRFSession(self.live_server_url)
-            r = client.login(member.email, member.display_name)
-            self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+            def do_requests(client):
+                responses.append(client.post(data.join_url))
 
-            clients.append(client)
+            threads = [threading.Thread(target=do_requests, kwargs={'client': c}) for c in clients]
+            [t.start() for t in threads]
+            [t.join() for t in threads]
 
-        def do_requests(client):
-            responses.append(client.post(data.join_url))
-
-        threads = [threading.Thread(target=do_requests, kwargs={'client': c}) for c in clients]
-        [t.start() for t in threads]
-        [t.join() for t in threads]
-        [c.close() for c in clients]
-
-        self.assertEqual(1, sum(1 for r in responses if r.status_code == status.HTTP_200_OK))
-        self.assertEqual(n_clients - 1, sum(1 for r in responses if r.status_code == status.HTTP_403_FORBIDDEN))
-        self.assertEqual(data.pickup.collectors.count(), 1)
+            self.assertEqual(1, sum(1 for r in responses if r.status_code == status.HTTP_200_OK))
+            self.assertEqual(len(clients) - 1, sum(1 for r in responses if r.status_code == status.HTTP_403_FORBIDDEN))
+            self.assertEqual(data.pickup.collectors.count(), 1)
 
     def test_many_users_join_pickup_concurrently(self):
         data = Fixture(members=4)
 
-        responses = []
+        with sessions((self.live_server_url, member.email, member.display_name) for member in data.members) as clients:
+            responses = []
 
-        clients = []
-        n_clients = len(data.members)
-        for member in data.members:
-            client = CSRFSession(self.live_server_url)
-            r = client.login(member.email, member.display_name)
-            self.assertEqual(r.status_code, status.HTTP_201_CREATED)
-            clients.append(client)
+            def do_requests(client):
+                responses.append(client.post(data.join_url))
 
-        def do_requests(client):
-            responses.append(client.post(data.join_url))
+            threads = [threading.Thread(target=do_requests, kwargs={'client': c}) for c in clients]
+            [t.start() for t in threads]
+            [t.join() for t in threads]
 
-        threads = [threading.Thread(target=do_requests, kwargs={'client': c}) for c in clients]
-        [t.start() for t in threads]
-        [t.join() for t in threads]
-        [c.close() for c in clients]
-
-        self.assertEqual(1, sum(1 for r in responses if r.status_code == status.HTTP_200_OK))
-        self.assertEqual(n_clients - 1, sum(1 for r in responses if r.status_code == status.HTTP_403_FORBIDDEN))
-        self.assertEqual(data.pickup.collectors.count(), 1)
+            self.assertEqual(1, sum(1 for r in responses if r.status_code == status.HTTP_200_OK))
+            self.assertEqual(len(clients) - 1, sum(1 for r in responses if r.status_code == status.HTTP_403_FORBIDDEN))
+            self.assertEqual(data.pickup.collectors.count(), 1)
 
     def test_single_user_leaves_pickup_concurrently(self):
         data = Fixture(members=1)
         member = data.members[0]
         data.pickup.collectors.add(member)
 
-        clients = []
-        n_clients = 4
-        for _ in range(n_clients):
-            client = CSRFSession(self.live_server_url)
-            r = client.login(member.email, member.display_name)
-            self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        with sessions((self.live_server_url, member.email, member.display_name) for _ in range(4)) as clients:
+            responses = []
 
-            clients.append(client)
+            def do_requests(client):
+                responses.append(client.post(data.remove_url))
 
-        responses = []
+            threads = [threading.Thread(target=do_requests, kwargs={'client': c}) for c in clients]
+            [t.start() for t in threads]
+            [t.join() for t in threads]
 
-        def do_requests(client):
-            responses.append(client.post(data.remove_url))
-
-        threads = [threading.Thread(target=do_requests, kwargs={'client': c}) for c in clients]
-        [t.start() for t in threads]
-        [t.join() for t in threads]
-        [c.close() for c in clients]
-
-        self.assertEqual(1, sum(1 for r in responses if r.status_code == status.HTTP_200_OK))
-        self.assertEqual(n_clients - 1, sum(1 for r in responses if r.status_code == status.HTTP_403_FORBIDDEN))
-        self.assertEqual(data.pickup.collectors.count(), 0)
+            self.assertEqual(1, sum(1 for r in responses if r.status_code == status.HTTP_200_OK))
+            self.assertEqual(len(clients) - 1, sum(1 for r in responses if r.status_code == status.HTTP_403_FORBIDDEN))
+            self.assertEqual(data.pickup.collectors.count(), 0)

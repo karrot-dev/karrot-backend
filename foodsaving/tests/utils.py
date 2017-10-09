@@ -1,17 +1,20 @@
+from contextlib import contextmanager, ExitStack
 from time import sleep
 
+import requests
 from django.apps import apps
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 from django.test import TestCase
 from django.test.utils import TestContextDecorator
-
-
-# Mostly based on this nice persons article:
-#   https://www.caktusgroup.com/blog/2016/02/02/writing-unit-tests-django-migrations/
+from rest_framework import status
 
 
 class TestMigrations(TestCase):
+    """
+    Mostly based on this nice persons article:
+    https://www.caktusgroup.com/blog/2016/02/02/writing-unit-tests-django-migrations/
+    """
     @property
     def app(self):
         return apps.get_containing_app_config(type(self).__module__).name
@@ -84,3 +87,37 @@ class add_delay(TestContextDecorator):
     def disable(self):
         for owner, fn_name, original in self._delayed_fns:
             setattr(owner, fn_name, original)
+
+
+@contextmanager
+def sessions(data):
+    with ExitStack() as stack:
+        clients = []
+        for hostname, email, password in data:
+            client = stack.enter_context(CSRFSession(hostname))
+            r = client.login(email, password)
+            assert r.status_code == status.HTTP_201_CREATED, 'Could not log in'
+            clients.append(client)
+        yield clients
+
+
+class CSRFSession(requests.Session):
+    def __init__(self, host):
+        super().__init__()
+        self.host = host
+
+    def request(self, method, url, **kwargs):
+        # apply hostname before every request
+        url = self.host + url
+
+        response = super().request(method, url, **kwargs)
+
+        # refresh CSRF token
+        csrftoken = self.cookies.get('csrftoken', '')
+        self.headers.update({'X-CSRFToken': csrftoken})
+        return response
+
+    def login(self, email, password):
+        # first do some request to get the CSRF token
+        self.get('/api/auth/status/')
+        return self.post('/api/auth/', json={'email': email, 'password': password})
