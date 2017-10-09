@@ -58,7 +58,7 @@ class add_delay(TestContextDecorator):
         (PickupDateJoinSerializer, 'update'),
         (PickupDateLeaveSerializer, 'update')
     )
-    class SomeTestCase(ChannelLiveServerTestCase):
+    class SomeTestCase(TestCase):
         pass
 
     This will delay PickupDateJoinSerializer.update and PickupDateLeaveSerializer.update for the duration of the test

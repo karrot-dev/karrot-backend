@@ -13,7 +13,7 @@ class CSRFSession(requests.Session):
         response = super().request(method, url, **kwargs)
 
         # refresh CSRF token
-        csrftoken = self.cookies['csrftoken']
+        csrftoken = self.cookies.get('csrftoken', '')
         self.headers.update({'X-CSRFToken': csrftoken})
         return response
 

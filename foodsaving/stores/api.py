@@ -1,5 +1,4 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db import transaction
 from rest_framework import mixins
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route
@@ -23,6 +22,7 @@ from foodsaving.stores.permissions import (
 from foodsaving.stores.serializers import (
     StoreSerializer, PickupDateSerializer, PickupDateSeriesSerializer,
     PickupDateJoinSerializer, PickupDateLeaveSerializer, FeedbackSerializer)
+from foodsaving.utils.decorators import acquire_lock_before_actions
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 
@@ -124,6 +124,7 @@ class PickupDateSeriesViewSet(
         super().perform_destroy(series)
 
 
+@acquire_lock_before_actions('add', 'remove')
 class PickupDateViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
@@ -145,7 +146,6 @@ class PickupDateViewSet(
     filter_backends = (DjangoFilterBackend,)
     filter_class = PickupDatesFilter
     permission_classes = (IsAuthenticated, IsUpcoming)
-    select_for_update_actions = ('add', 'remove', 'create', 'partial_update')
 
     def get_permissions(self):
         if self.action == 'destroy':
@@ -154,10 +154,7 @@ class PickupDateViewSet(
         return super().get_permissions()
 
     def get_queryset(self):
-        qs = self.queryset
-        if self.action in self.select_for_update_actions:
-            qs = qs.select_for_update()
-        return qs.filter(store__group__members=self.request.user)
+        return self.queryset.filter(store__group__members=self.request.user)
 
     def perform_destroy(self, pickup):
         # set deleted flag to make the pickup date invisible
@@ -177,8 +174,7 @@ class PickupDateViewSet(
         serializer_class=PickupDateJoinSerializer
     )
     def add(self, request, pk=None):
-        with transaction.atomic():
-            return self.partial_update(request)
+        return self.partial_update(request)
 
     @detail_route(
         methods=['POST'],
