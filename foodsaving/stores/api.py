@@ -124,7 +124,7 @@ class PickupDateSeriesViewSet(
         super().perform_destroy(series)
 
 
-@acquire_lock_before_actions('add', 'remove')
+@acquire_lock_before_actions('add', 'remove', 'destroy')
 class PickupDateViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,

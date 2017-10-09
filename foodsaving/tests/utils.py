@@ -96,7 +96,7 @@ def sessions(data):
         for hostname, email, password in data:
             client = stack.enter_context(CSRFSession(hostname))
             r = client.login(email, password)
-            assert r.status_code == status.HTTP_201_CREATED, 'Could not log in'
+            assert status.is_success(r.status_code), 'Could not log in'
             clients.append(client)
         yield clients
 
