@@ -1,4 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db import OperationalError
 from rest_framework import mixins
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route
@@ -121,7 +122,12 @@ class PickupDateSeriesViewSet(
             store=series.store,
             users=[self.request.user, ],
         )
-        super().perform_destroy(series)
+        while True:
+            try:
+                super().perform_destroy(series)
+                break
+            except OperationalError:
+                pass
 
 
 @acquire_lock_before_actions('add', 'remove', 'destroy')
