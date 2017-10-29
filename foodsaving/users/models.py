@@ -140,14 +140,17 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
             'url': url,
         }
 
-        AnymailMessage(
-            subject=render_to_string('mailverification-subject.jinja').replace('\n', ''),
-            body=render_to_string('mailverification-body-text.jinja', context),
+        msg = AnymailMessage(
+            subject=render_to_string('welcome-subject.jinja').replace('\n', ''),
+            body=render_to_string('welcome-body-text.jinja', context),
             to=[self.unverified_email],
             from_email=settings.DEFAULT_FROM_EMAIL,
             track_clicks=False,
             track_opens=False
-        ).send()
+        )
+        html_content = render_to_string('welcome-body-html.jinja', context)
+        msg.attach_alternative(html_content, 'text/html')
+        msg.send()
 
     @transaction.atomic
     def send_new_verification_code(self):
