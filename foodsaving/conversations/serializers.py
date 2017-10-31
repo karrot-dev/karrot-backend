@@ -57,7 +57,15 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
     seen = serializers.SerializerMethodField()
 
     def get_seen(self, message):
-        user = self.context['request'].user
+        user = None
+        if 'user' in self.context:
+            user = self.context['user']
+        elif 'request' in self.context:
+            user = self.context['request'].user
+
+        if not user:
+            return False
+
         # TODO: make sure this is cached when using this serializer over a list of messages
         participant = message.conversation.conversationparticipant_set.get(user=user)
         if participant.seen_up_to:

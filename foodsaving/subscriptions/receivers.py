@@ -19,7 +19,7 @@ def send_messages(sender, instance, **kwargs):
     conversation = message.conversation
 
     topic = 'conversations:message'
-    payload = ConversationMessageSerializer(message).data
+    payload = ConversationMessageSerializer(message, context={'user': message.author}).data
 
     for item in ChannelSubscription.objects.filter(user__in=conversation.participants.all()):
         Channel(item.reply_channel).send({
