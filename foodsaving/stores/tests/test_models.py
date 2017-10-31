@@ -37,10 +37,8 @@ class TestFeedbackModel(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        thirtyone_days_ago = timezone.now() - relativedelta(days=31)
 
         cls.pickup = PickupDateFactory()
-        cls.old_pickup = PickupDateFactory(date=thirtyone_days_ago)
         cls.user = UserFactory()
 
     def test_weight_is_negative_fails(self):

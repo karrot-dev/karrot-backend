@@ -46,6 +46,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'corsheaders',
     'rest_framework',
+    'rest_framework.authtoken',
     'rest_framework_nested',
     'rest_framework_swagger',
     'anymail',
@@ -60,12 +61,13 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.AllowAny',
     ),
-    'DEFAULT_FILTER_BACKENDS': (
-        'rest_framework.filters.DjangoFilterBackend',
-    ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
-    )
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ),
 }
 
 MIDDLEWARE_CLASSES = (

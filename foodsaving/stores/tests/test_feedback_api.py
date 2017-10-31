@@ -32,35 +32,46 @@ class FeedbackTest(APITestCase):
         # past pickup date
         cls.past_pickup = PickupDateFactory(store=cls.store, date=timezone.now() - relativedelta(days=1))
 
+        # old pickup date
+        cls.old_pickup = PickupDateFactory(store=cls.store, date=timezone.now() - relativedelta(days=32))
+
         # transforms the member into a collector
         cls.past_pickup.collectors.add(cls.collector, cls.evil_collector, cls.collector2, cls.collector3)
         cls.pickup.collectors.add(cls.collector, cls.collector2, cls.collector3)
+        cls.old_pickup.collectors.add(cls.collector3)
 
-        # create a feedback data for POST method
+        # create feedback for POST method
         cls.feedback_post = {
             'about': cls.past_pickup.id,
             'weight': 2,
             'comment': 'asfjk'
         }
 
-        # create a feedback data for POST method without weight and comment
+        # create feedback for POST method without weight and comment
         cls.feedback_without_weight_comment = {
             'about': cls.past_pickup.id,
         }
 
-        # create a feedback to future pickup
+        # create feedback to future pickup
         cls.future_feedback_post = {
             'about': cls.pickup.id,
             'weight': 2,
             'comment': 'asfjk'
         }
 
-        # create a feedback data for GET method
+        # create feedback for an old pickup
+        cls.feedback_for_old_pickup = {
+            'about': cls.old_pickup.id,
+            'weight': 5,
+            'comment': 'this is long ago'
+        }
+
+        # create feedback for GET method
         cls.feedback_get = {
             'given_by': cls.collector,
             'about': cls.past_pickup,
             'weight': 2,
-            'comment': 'asfjk'
+            'comment': 'asfjk2'
         }
 
         cls.feedback_get_2 = {
@@ -113,7 +124,7 @@ class FeedbackTest(APITestCase):
 
     def test_create_feedback_twice_fails_for_one_pickup(self):
         """
-        Member is allowed to give feedback when he is assigned to the Pickup.
+        Collector is not allowed to give feedback more than one time to the Pickup.
         """
         self.client.force_login(user=self.collector3)
         response = self.client.post(self.url, self.feedback_post, format='json')
@@ -121,6 +132,17 @@ class FeedbackTest(APITestCase):
         response = self.client.post(self.url, self.feedback_post, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(response.data, {'non_field_errors': ['You already gave feedback for this pickup']})
+
+    def test_create_feedback_fails_for_old_pickup(self):
+        """
+        Collector is not allowed to give feedback for old Pickups.
+        """
+        self.client.force_login(user=self.collector3)
+        response = self.client.post(self.url, self.feedback_for_old_pickup, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(
+            response.data, {'about': ['You can\'t give feedback for pickups more than 30 days ago.']}
+        )
 
     def test_create_feedback_without_weight(self):
         """
@@ -269,5 +291,5 @@ class FeedbackTest(APITestCase):
         Collector cannot change weight to negative value
         """
         self.client.force_login(user=self.collector)
-        response = self.client.patch(self.feedback_url, {'weight': -1})
+        response = self.client.patch(self.feedback_url, {'weight': -1}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
