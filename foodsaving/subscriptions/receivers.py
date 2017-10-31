@@ -1,11 +1,9 @@
 import json
 
 from channels import Channel
-from dateutil.relativedelta import relativedelta
 from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
-from django.utils import timezone
 
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage
 from foodsaving.conversations.serializers import ConversationMessageSerializer
