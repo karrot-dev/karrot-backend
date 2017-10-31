@@ -63,7 +63,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
         if participant.seen_up_to:
             return message.id <= participant.seen_up_to_id
         else:
-            return False        
+            return False
 
     def validate_conversation(self, conversation):
         if self.context['request'].user not in conversation.participants.all():
