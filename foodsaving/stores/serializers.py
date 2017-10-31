@@ -1,12 +1,12 @@
 from datetime import timedelta
 
 import dateutil.rrule
+from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
-
-from django.conf import settings
+from rest_framework.validators import UniqueTogetherValidator
 
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.history.utils import get_changed_data
@@ -26,6 +26,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'series': {'read_only': True},
         }
+
     collector_ids = serializers.PrimaryKeyRelatedField(
         source='collectors',
         many=True,
@@ -185,7 +186,7 @@ class StoreSerializer(serializers.ModelSerializer):
         model = StoreModel
         fields = ['id', 'name', 'description', 'group',
                   'address', 'latitude', 'longitude',
-                  'weeks_in_advance', 'upcoming_notification_hours']
+                  'weeks_in_advance', 'upcoming_notification_hours', 'status']
         extra_kwargs = {
             'name': {
                 'min_length': 3
@@ -195,6 +196,9 @@ class StoreSerializer(serializers.ModelSerializer):
                 'max_length': settings.DESCRIPTION_MAX_LENGTH
             }
         }
+
+    status = serializers.ChoiceField(choices=StoreModel.STATUSES,
+                                     default=StoreModel.DEFAULT_STATUS)
 
     def create(self, validated_data):
         store = super().create(validated_data)
@@ -241,11 +245,14 @@ class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = FeedbackModel
         fields = ['id', 'weight', 'comment', 'about', 'given_by']
-        read_only_fields = ('given_by',)
-
-    def create(self, validated_data):
-        validated_data['given_by'] = self.context['request'].user
-        return super().create(validated_data)
+        read_only_fields = ['given_by', ]
+        extra_kwargs = {'given_by': {'default': serializers.CurrentUserDefault()}}
+        validators = [
+            UniqueTogetherValidator(
+                queryset=FeedbackModel.objects.all(),
+                fields=FeedbackModel._meta.unique_together[0]
+            )
+        ]
 
     def validate_about(self, about):
         user = self.context['request'].user
@@ -256,6 +263,8 @@ class FeedbackSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(_('The pickup is not done yet'))
         if not about.is_collector(user):
             raise serializers.ValidationError(_('You aren\'t assigned to the pickup.'))
+        if not about.is_recent():
+            raise serializers.ValidationError(_('You can\'t give feedback for pickups more than 30 days ago.'))
         return about
 
     def validate(self, data):

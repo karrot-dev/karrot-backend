@@ -19,11 +19,16 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 class Store(BaseModel, LocationModel):
     class Meta:
         unique_together = ('group', 'name')
+
+    DEFAULT_STATUS = 'created'
+    STATUSES = (DEFAULT_STATUS, 'negotiating', 'active', 'declined', 'archived')
+
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='store')
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH)
     description = models.TextField(blank=True)
     weeks_in_advance = models.PositiveIntegerField(default=4)
     upcoming_notification_hours = models.PositiveIntegerField(default=4)
+    status = models.CharField(max_length=20, default=DEFAULT_STATUS)
 
     deleted = models.BooleanField(default=False)
 
@@ -32,6 +37,8 @@ class Store(BaseModel, LocationModel):
 
 
 class Feedback(BaseModel):
+    class Meta:
+        unique_together = ('about', 'given_by')
     given_by = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='feedback')
     about = models.ForeignKey('PickupDate')
     weight = models.FloatField(
@@ -246,3 +253,6 @@ class PickupDate(BaseModel):
 
     def is_empty(self):
         return self.collectors.count() == 0
+
+    def is_recent(self):
+        return self.date >= timezone.now() - relativedelta(days=30)
