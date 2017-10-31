@@ -26,6 +26,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'series': {'read_only': True},
         }
+
     collector_ids = serializers.PrimaryKeyRelatedField(
         source='collectors',
         many=True,
@@ -185,7 +186,7 @@ class StoreSerializer(serializers.ModelSerializer):
         model = StoreModel
         fields = ['id', 'name', 'description', 'group',
                   'address', 'latitude', 'longitude',
-                  'weeks_in_advance', 'upcoming_notification_hours']
+                  'weeks_in_advance', 'upcoming_notification_hours', 'status']
         extra_kwargs = {
             'name': {
                 'min_length': 3
@@ -195,6 +196,9 @@ class StoreSerializer(serializers.ModelSerializer):
                 'max_length': settings.DESCRIPTION_MAX_LENGTH
             }
         }
+
+    status = serializers.ChoiceField(choices=StoreModel.STATUSES,
+                                     default=StoreModel.DEFAULT_STATUS)
 
     def create(self, validated_data):
         store = super().create(validated_data)
