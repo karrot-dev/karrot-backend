@@ -1,21 +1,23 @@
 import pytz
 from django.utils.translation import ugettext_lazy as _
-from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
 from rest_framework.decorators import detail_route, list_route
+from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, BasePermission
 from rest_framework.response import Response
-from rest_framework.schemas import is_custom_action
+from rest_framework.schemas.generators import is_custom_action
 from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.conversations.api import RetrieveConversationMixin
 from foodsaving.groups import roles
 from foodsaving.groups.filters import GroupsFilter
-from foodsaving.groups.models import Group as GroupModel, GroupMembership
+from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement
 from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer, GroupJoinSerializer, \
     GroupLeaveSerializer, TimezonesSerializer, EmptySerializer, \
-    GroupMembershipAddRoleSerializer, GroupMembershipRemoveRoleSerializer, GroupMembershipInfoSerializer
+    GroupMembershipAddRoleSerializer, GroupMembershipRemoveRoleSerializer, GroupMembershipInfoSerializer, \
+    AgreementSerializer, AgreementAgreeSerializer
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 
@@ -41,6 +43,26 @@ class CanUpdateMemberships(BasePermission):
         return obj.group.is_member_with_role(request.user, roles.GROUP_MEMBERSHIP_MANAGER)
 
 
+class GroupInfoViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet
+):
+    """
+    Group Info - public information
+
+    # Query parameters
+    - `?members` - filter by member user id
+    - `?search` - search in name and public description
+    - `?include_empty` - set to False to exclude empty groups without members
+    """
+    queryset = GroupModel.objects
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filter_class = GroupsFilter
+    search_fields = ('name', 'public_description')
+    serializer_class = GroupPreviewSerializer
+
+
 class GroupViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
@@ -50,7 +72,7 @@ class GroupViewSet(
     GenericViewSet
 ):
     """
-    Groups
+    Group Detail - in future only for members
 
     # Query parameters
     - `?members` - filter by member user id
@@ -58,7 +80,7 @@ class GroupViewSet(
     - `?include_empty` - set to False to exclude empty groups without members
     """
     queryset = GroupModel.objects
-    filter_backends = (filters.SearchFilter, filters.DjangoFilterBackend)
+    filter_backends = (SearchFilter, DjangoFilterBackend)
     filter_class = GroupsFilter
     search_fields = ('name', 'public_description')
 
@@ -143,3 +165,25 @@ class GroupViewSet(
         self.perform_update(serializer)
 
         return Response(GroupMembershipInfoSerializer(instance).data)
+
+
+class AgreementViewSet(
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    PartialUpdateModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet
+):
+    queryset = Agreement.objects
+    serializer_class = AgreementSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return self.queryset.filter(group__members=self.request.user)
+
+    @detail_route(
+        methods=['POST'],
+        serializer_class=AgreementAgreeSerializer,
+    )
+    def agree(self, request, pk=None):
+        return self.partial_update(request)
