@@ -164,7 +164,7 @@ source env/bin/activate
 ./manage.py migrate
 ```
 
-The very first migration initializes your database. Thus, you will need to execute the above commands before you launch your backend for the first time.
+In particular, before you launch your backend for the very first time you will need to execute `./manage.py migrate` to initialize your database.
 
 # Contributing to karrot-backend
 
