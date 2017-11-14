@@ -82,15 +82,14 @@ class TestConversationsAPI(APITestCase):
 
     def test_mark_seen_up_to(self):
         group = GroupFactory()
-        conversation = group.conversation # ConversationFactory()
+        conversation = group.conversation
         user = UserFactory()
         group.add_member(user)
-        # conversation.join(user)
         message = conversation.messages.create(author=user, content='yay')
         self.client.force_login(user=user)
 
         # mark it as seen
-        data = { 'seen_up_to': message.id }
+        data = {'seen_up_to': message.id}
         response = self.client.patch('/api/conversations/{}/participant/'.format(conversation.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['seen_up_to'], message.id)
