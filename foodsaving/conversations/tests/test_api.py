@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from foodsaving.conversations.factories import ConversationFactory
+from foodsaving.groups.factories import GroupFactory
 from foodsaving.users.factories import UserFactory
 
 
@@ -78,3 +79,29 @@ class TestConversationsAPI(APITestCase):
         data = {'conversation': self.conversation3.id, 'content': 'a nice message'}
         response = self.client.post('/api/messages/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_mark_seen_up_to(self):
+        group = GroupFactory()
+        conversation = group.conversation # ConversationFactory()
+        user = UserFactory()
+        group.add_member(user)
+        # conversation.join(user)
+        message = conversation.messages.create(author=user, content='yay')
+        self.client.force_login(user=user)
+
+        # check the messages api shows it as unseen
+        response = self.client.get('/api/messages/?conversation={}'.format(conversation.id), format='json')
+        self.assertEqual(response.data['results'][0]['seen'], False)
+
+        # mark it as seen
+        data = { 'seen_up_to': message.id }
+        response = self.client.patch('/api/conversations/{}/participant/'.format(conversation.id), data, format='json')
+        self.assertEqual(response.data['seen_up_to'], message.id)
+
+        # check the messages api shows it as seen now
+        response = self.client.get('/api/messages/?conversation={}'.format(conversation.id), format='json')
+        self.assertEqual(response.data['results'][0]['seen'], True)
+
+        # check the group/conversation api shows it as seen now
+        response = self.client.get('/api/groups/{}/conversation/'.format(group.id), format='json')
+        self.assertEqual(response.data['seen_up_to'], message.id)

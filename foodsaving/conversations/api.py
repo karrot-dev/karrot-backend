@@ -94,5 +94,5 @@ class RetrieveConversationMixin(object):
     def retrieve_conversation(self, request, *args, **kwargs):
         target = self.get_object()
         conversation = Conversation.objects.get_or_create_for_target(target)
-        serializer = ConversationSerializer(conversation)
+        serializer = ConversationSerializer(conversation, context={'request': request})
         return Response(serializer.data)

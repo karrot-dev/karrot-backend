@@ -28,7 +28,7 @@ class ConversationSerializer(serializers.ModelSerializer):
             return None
 
         participant = conversation.conversationparticipant_set.get(user=user)
-        return participant.seen_up_to
+        return participant.seen_up_to.id
 
 
 class ConversationParticipantSerializer(serializers.ModelSerializer):
