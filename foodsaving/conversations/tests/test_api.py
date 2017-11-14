@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from foodsaving.conversations.factories import ConversationFactory
+from foodsaving.conversations.models import ConversationParticipant
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.users.factories import UserFactory
 
@@ -62,7 +63,6 @@ class TestConversationsAPI(APITestCase):
         response = self.client.post('/api/messages/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertEqual(response.data['content'], data['content'])
-        self.assertEqual(response.data['seen'], False)
         self.assertEqual(conversation.messages.first().content, data['content'])
         self.assertEqual(conversation.messages.first().created_at, parse(response.data['created_at']), response.data)
         self.assertEqual(conversation.messages.first().id, response.data['id'])
@@ -89,19 +89,11 @@ class TestConversationsAPI(APITestCase):
         message = conversation.messages.create(author=user, content='yay')
         self.client.force_login(user=user)
 
-        # check the messages api shows it as unseen
-        response = self.client.get('/api/messages/?conversation={}'.format(conversation.id), format='json')
-        self.assertEqual(response.data['results'][0]['seen'], False)
-
         # mark it as seen
         data = { 'seen_up_to': message.id }
         response = self.client.patch('/api/conversations/{}/participant/'.format(conversation.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['seen_up_to'], message.id)
 
-        # check the messages api shows it as seen now
-        response = self.client.get('/api/messages/?conversation={}'.format(conversation.id), format='json')
-        self.assertEqual(response.data['results'][0]['seen'], True)
-
-        # check the group/conversation api shows it as seen now
-        response = self.client.get('/api/groups/{}/conversation/'.format(group.id), format='json')
-        self.assertEqual(response.data['seen_up_to'], message.id)
+        participant = ConversationParticipant.objects.get(conversation=conversation, user=user)
+        self.assertEqual(participant.seen_up_to, message)

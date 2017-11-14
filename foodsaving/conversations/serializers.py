@@ -60,28 +60,8 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
             'content',
             'conversation',
             'created_at',
-            'seen',
         ]
-        read_only_fields = ('author', 'id', 'created_at', 'seen')
-
-    seen = serializers.SerializerMethodField()
-
-    def get_seen(self, message):
-        user = None
-        if 'user' in self.context:
-            user = self.context['user']
-        elif 'request' in self.context:
-            user = self.context['request'].user
-
-        if not user:
-            return None
-
-        # TODO: make sure this is cached when using this serializer over a list of messages
-        participant = message.conversation.conversationparticipant_set.get(user=user)
-        if participant.seen_up_to:
-            return message.id <= participant.seen_up_to_id
-        else:
-            return False
+        read_only_fields = ('author', 'id', 'created_at')
 
     def validate_conversation(self, conversation):
         if self.context['request'].user not in conversation.participants.all():

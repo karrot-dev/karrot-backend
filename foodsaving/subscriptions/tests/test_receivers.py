@@ -41,8 +41,7 @@ class ReceiverTests(ChannelTestCase):
                 'content': message.content,
                 'author': message.author.id,
                 'conversation': conversation.id,
-                'created_at': message.created_at,
-                'seen': False
+                'created_at': message.created_at
             }
         })
 
