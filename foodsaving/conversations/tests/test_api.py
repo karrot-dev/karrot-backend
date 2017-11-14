@@ -61,6 +61,7 @@ class TestConversationsAPI(APITestCase):
         response = self.client.post('/api/messages/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertEqual(response.data['content'], data['content'])
+        self.assertEqual(response.data['seen'], False)
         self.assertEqual(conversation.messages.first().content, data['content'])
         self.assertEqual(conversation.messages.first().created_at, parse(response.data['created_at']), response.data)
         self.assertEqual(conversation.messages.first().id, response.data['id'])
