@@ -28,6 +28,8 @@ class ConversationSerializer(serializers.ModelSerializer):
             return None
 
         participant = conversation.conversationparticipant_set.get(user=user)
+        if not participant.seen_up_to:
+            return None
         return participant.seen_up_to.id
 
 
