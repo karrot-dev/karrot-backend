@@ -10,6 +10,7 @@ from django.template.loader import render_to_string
 from django.utils import crypto
 from django.utils import timezone
 from django.utils.translation import ugettext as _
+from versatileimagefield.fields import VersatileImageField
 
 from foodsaving.base.base_models import BaseModel, LocationModel
 
@@ -84,6 +85,12 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     deleted = BooleanField(default=False)
     deleted_at = DateTimeField(default=None, null=True)
     current_group = ForeignKey('groups.Group', blank=True, null=True, on_delete=models.SET_NULL)
+
+    photo = VersatileImageField(
+        'Photo',
+        upload_to='uploads/user__photos/',
+        null=True,
+    )
 
     objects = UserManager()
 
