@@ -16,7 +16,6 @@ from foodsaving.conversations.serializers import (
     ConversationMessageSerializer,
     ConversationMarkSerializer
 )
-from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 
 class MessagePagination(CursorPagination):

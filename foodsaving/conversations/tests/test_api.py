@@ -4,7 +4,6 @@ from rest_framework.test import APITestCase
 
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationParticipant
-from foodsaving.groups.factories import GroupFactory
 from foodsaving.users.factories import UserFactory
 
 
