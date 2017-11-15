@@ -52,13 +52,13 @@ class ConversationViewSet(
 
     queryset = Conversation.objects
     serializer_class = ConversationSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         return self.queryset.filter(participants=self.request.user)
 
     @detail_route(
         methods=['POST'],
-        permission_classes=(IsAuthenticated,),
         serializer_class=ConversationMarkSerializer
     )
     def mark(self, request, pk=None):
