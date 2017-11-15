@@ -130,3 +130,19 @@ class TestConversationsSeenUpToAPI(APITestCase):
 
         self.participant.refresh_from_db()
         self.assertEqual(self.participant.seen_up_to, message)
+
+    def test_mark_seen_up_to_fails_for_invalid_id(self):
+        self.client.force_login(user=self.user)
+        data = {'seen_up_to': 9817298172}
+        response = self.client.post('/api/conversations/{}/mark/'.format(self.conversation.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['seen_up_to'][0], 'Invalid pk "{}" - object does not exist.'.format(data['seen_up_to']))
+
+    def test_mark_seen_up_to_fails_for_message_in_other_conversation(self):
+        conversation = ConversationFactory()
+        message = conversation.messages.create(author=self.user, content='yay')
+        self.client.force_login(user=self.user)
+        data = {'seen_up_to': message.id}
+        response = self.client.post('/api/conversations/{}/mark/'.format(self.conversation.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['seen_up_to'][0], 'Must refer to a message in the conversation')
