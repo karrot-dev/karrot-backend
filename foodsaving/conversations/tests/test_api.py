@@ -80,19 +80,48 @@ class TestConversationsAPI(APITestCase):
         response = self.client.post('/api/messages/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_mark_seen_up_to(self):
-        group = GroupFactory()
-        conversation = group.conversation
-        user = UserFactory()
-        group.add_member(user)
-        message = conversation.messages.create(author=user, content='yay')
-        self.client.force_login(user=user)
 
-        # mark it as seen
-        data = {'seen_up_to': message.id}
-        response = self.client.patch('/api/conversations/{}/participant/'.format(conversation.id), data, format='json')
+class TestConversationsSeenUpToAPI(APITestCase):
+    def setUp(self):
+        self.conversation = ConversationFactory()
+        self.user = UserFactory()
+        self.conversation.join(self.user)
+        self.participant = ConversationParticipant.objects.get(conversation=self.conversation, user=self.user)
+
+    def test_conversation_get(self):
+        message = self.conversation.messages.create(author=self.user, content='yay')
+        self.client.force_login(user=self.user)
+
+        self.participant.seen_up_to = message
+        self.participant.save()
+
+        response = self.client.get('/api/conversations/{}/'.format(self.conversation.id), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['seen_up_to'], message.id)
 
-        participant = ConversationParticipant.objects.get(conversation=conversation, user=user)
-        self.assertEqual(participant.seen_up_to, message)
+    def test_conversation_list(self):
+        message = self.conversation.messages.create(author=self.user, content='yay')
+        self.client.force_login(user=self.user)
+
+        self.participant.seen_up_to = message
+        self.participant.save()
+
+        response = self.client.get('/api/conversations/'.format(self.conversation.id), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]['seen_up_to'], message.id)
+
+    def test_mark_seen_up_to(self):
+        message = self.conversation.messages.create(author=self.user, content='yay')
+        self.client.force_login(user=self.user)
+
+        response = self.client.get('/api/conversations/{}/'.format(self.conversation.id), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['seen_up_to'], None)
+
+        data = {'seen_up_to': message.id}
+        response = self.client.post('/api/conversations/{}/mark/'.format(self.conversation.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['seen_up_to'], message.id)
+
+        self.participant.refresh_from_db()
+        self.assertEqual(self.participant.seen_up_to, message)

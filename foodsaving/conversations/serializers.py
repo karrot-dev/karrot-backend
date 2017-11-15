@@ -1,8 +1,18 @@
+from django.db.models import QuerySet
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
 from foodsaving.conversations.models import Conversation, ConversationMessage, ConversationParticipant
+
+
+def get_user_from_context(context):
+    if 'user' in context:
+        return context['user']
+    elif 'request' in context:
+        return context['request'].user
+    else:
+        return None
 
 
 class ConversationSerializer(serializers.ModelSerializer):
@@ -18,27 +28,19 @@ class ConversationSerializer(serializers.ModelSerializer):
     seen_up_to = serializers.SerializerMethodField()
 
     def get_seen_up_to(self, conversation):
-        user = None
-        if 'user' in self.context:
-            user = self.context['user']
-        elif 'request' in self.context:
-            user = self.context['request'].user
-
+        user = get_user_from_context(self.context)
         if not user:
             return None
-
         participant = conversation.conversationparticipant_set.get(user=user)
         if not participant.seen_up_to:
             return None
         return participant.seen_up_to.id
 
 
-class ConversationParticipantSerializer(serializers.ModelSerializer):
+class ConversationMarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConversationParticipant
-        fields = [
-            'seen_up_to'
-        ]
+        fields = ('seen_up_to',)
 
     def validate_seen_up_to(self, message):
         if not self.instance.conversation.messages.filter(id=message.id).exists():

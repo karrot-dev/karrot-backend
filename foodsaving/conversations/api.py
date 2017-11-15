@@ -14,8 +14,9 @@ from foodsaving.conversations.models import (
 from foodsaving.conversations.serializers import (
     ConversationSerializer,
     ConversationMessageSerializer,
-    ConversationParticipantSerializer
+    ConversationMarkSerializer
 )
+from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 
 class MessagePagination(CursorPagination):
@@ -42,6 +43,9 @@ class IsConversationParticipant(BasePermission):
 
 
 class ConversationViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    PartialUpdateModelMixin,
     GenericViewSet
 ):
     """
@@ -55,11 +59,11 @@ class ConversationViewSet(
         return self.queryset.filter(participants=self.request.user)
 
     @detail_route(
-        methods=['PATCH'],
+        methods=['POST'],
         permission_classes=(IsAuthenticated,),
-        serializer_class=ConversationParticipantSerializer
+        serializer_class=ConversationMarkSerializer
     )
-    def participant(self, request, pk=None):
+    def mark(self, request, pk=None):
         conversation = self.get_object()
         participant = conversation.conversationparticipant_set.get(user=request.user)
         serializer = self.get_serializer(participant, data=request.data, partial=True)
