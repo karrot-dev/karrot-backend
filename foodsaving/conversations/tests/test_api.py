@@ -91,12 +91,18 @@ class TestConversationsSeenUpToAPI(APITestCase):
         message = self.conversation.messages.create(author=self.user, content='yay')
         self.client.force_login(user=self.user)
 
+        response = self.client.get('/api/conversations/{}/'.format(self.conversation.id), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['seen_up_to'], None)
+        self.assertEqual(response.data['unread_message_count'], 1)
+
         self.participant.seen_up_to = message
         self.participant.save()
 
         response = self.client.get('/api/conversations/{}/'.format(self.conversation.id), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['seen_up_to'], message.id)
+        self.assertEqual(response.data['unread_message_count'], 0)
 
     def test_conversation_list(self):
         message = self.conversation.messages.create(author=self.user, content='yay')

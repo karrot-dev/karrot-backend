@@ -21,10 +21,12 @@ class ConversationSerializer(serializers.ModelSerializer):
             'id',
             'participants',
             'created_at',
-            'seen_up_to'
+            'seen_up_to',
+            'unread_message_count'
         ]
 
     seen_up_to = serializers.SerializerMethodField()
+    unread_message_count = serializers.SerializerMethodField()
 
     def get_seen_up_to(self, conversation):
         user = get_user_from_context(self.context)
@@ -34,6 +36,16 @@ class ConversationSerializer(serializers.ModelSerializer):
         if not participant.seen_up_to:
             return None
         return participant.seen_up_to.id
+
+    def get_unread_message_count(self, conversation):
+        user = get_user_from_context(self.context)
+        if not user:
+            return None
+        participant = conversation.conversationparticipant_set.get(user=user)
+        messages = conversation.messages
+        if participant.seen_up_to:
+            messages = messages.filter(id__gt=participant.seen_up_to.id)
+        return messages.count()
 
 
 class ConversationMarkSerializer(serializers.ModelSerializer):
