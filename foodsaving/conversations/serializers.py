@@ -5,15 +5,6 @@ from rest_framework.exceptions import PermissionDenied
 from foodsaving.conversations.models import Conversation, ConversationMessage, ConversationParticipant
 
 
-def get_user_from_context(context):
-    if 'user' in context:
-        return context['user']
-    elif 'request' in context:
-        return context['request'].user
-    else:
-        return None
-
-
 class ConversationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversation
@@ -29,18 +20,14 @@ class ConversationSerializer(serializers.ModelSerializer):
     unread_message_count = serializers.SerializerMethodField()
 
     def get_seen_up_to(self, conversation):
-        user = get_user_from_context(self.context)
-        if not user:
-            return None
+        user = self.context['request'].user
         participant = conversation.conversationparticipant_set.get(user=user)
         if not participant.seen_up_to:
             return None
         return participant.seen_up_to.id
 
     def get_unread_message_count(self, conversation):
-        user = get_user_from_context(self.context)
-        if not user:
-            return None
+        user = self.context['request'].user
         participant = conversation.conversationparticipant_set.get(user=user)
         messages = conversation.messages
         if participant.seen_up_to:

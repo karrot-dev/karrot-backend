@@ -19,7 +19,7 @@ def send_messages(sender, instance, **kwargs):
     conversation = message.conversation
 
     topic = 'conversations:message'
-    payload = ConversationMessageSerializer(message, context={'user': message.author}).data
+    payload = ConversationMessageSerializer(message).data
 
     push_exclude_users = []
 
