@@ -45,7 +45,6 @@ class IsConversationParticipant(BasePermission):
 class ConversationViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
-    PartialUpdateModelMixin,
     GenericViewSet
 ):
     """
