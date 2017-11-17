@@ -87,7 +87,7 @@ class ReceiverPushTests(ChannelTestCase):
     def test_sends_to_push_subscribers(self, m):
         def check_json_data(request):
             data = json.loads(request.body.decode('utf-8'))
-            self.assertEqual(data['notification']['title'], f'{self.author.display_name}: {self.content}')
+            self.assertEqual(data['notification']['title'], '{}: {}'.format(self.author.display_name, self.content))
             self.assertEqual(data['to'], self.token)
             return True
 
@@ -109,7 +109,7 @@ class ReceiverPushTests(ChannelTestCase):
     def test_send_push_notification_if_channel_subscription_is_away(self, m):
         def check_json_data(request):
             data = json.loads(request.body.decode('utf-8'))
-            self.assertEqual(data['notification']['title'], f'{self.author.display_name}: {self.content}')
+            self.assertEqual(data['notification']['title'], '{}: {}'.format(self.author.display_name, self.content))
             self.assertEqual(data['to'], self.token)
             return True
 
