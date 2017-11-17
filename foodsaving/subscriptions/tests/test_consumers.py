@@ -94,6 +94,15 @@ class TokenUtilTests(TestCase):
     def test_check_for_auth_token_header(self):
         message = TestMessage({
             'headers': [
+                [b'sec-websocket-protocol', b'karrot.token,karrot.token.value.Zm9v']
+            ]
+        })
+        check_for_auth_token_header(message)
+        self.assertEqual(message.channel_session['auth_token'], 'foo')
+
+    def test_check_for_auth_token_header_with_removed_base64_padding(self):
+        message = TestMessage({
+            'headers': [
                 [b'sec-websocket-protocol', b'karrot.token,karrot.token.value.Zm9vMQ']
             ]
         })
