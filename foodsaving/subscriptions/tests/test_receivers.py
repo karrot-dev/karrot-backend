@@ -2,8 +2,8 @@ import json
 
 import requests_mock
 from channels.test import ChannelTestCase, WSClient
-from django.utils import timezone
 from dateutil.parser import parse
+from django.utils import timezone
 from pyfcm.baseapi import BaseAPI as FCMAPI
 
 from foodsaving.conversations.factories import ConversationFactory

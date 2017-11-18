@@ -43,17 +43,16 @@ def send_messages(sender, instance, **kwargs):
 
     if len(tokens) > 0:
 
+        message_title = message.author.display_name
         if isinstance(conversation.target, Group):
-            message_title = '{} / {}'.format(conversation.target.name, message.author.display_name)
-        else:
-            message_title = message.author.display_name
+            message_title = '{} / {}'.format(conversation.target.name, message_title)
 
         notify_multiple_devices(
             registration_ids=tokens,
             message_title=message_title,
             message_body=message.content,
-            # this causes each notification for a given conversation to replace previous notifications so they don't build
-            # up too much. fancier would be to make the new notifications show a summary not just the latest message.
+            # this causes each notification for a given conversation to replace previous notifications
+            # fancier would be to make the new notifications show a summary not just the latest message
             tag='conversation:{}'.format(conversation.id)
         )
 
