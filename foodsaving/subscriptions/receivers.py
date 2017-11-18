@@ -43,7 +43,8 @@ def send_messages(sender, instance, **kwargs):
 
     notify_multiple_devices(
         registration_ids=tokens,
-        message_title='{}: {}'.format(message.author.display_name, message.content),
+        message_title=message.author.display_name,
+        message_body=message.content,
         # this causes each notification for a given conversation to replace previous notifications so they don't build
         # up too much. fancier would be to make the new notifications show a summary not just the latest message.
         tag='conversation:{}'.format(conversation.id)
