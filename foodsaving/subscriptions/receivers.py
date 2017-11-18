@@ -7,6 +7,7 @@ from django.dispatch import receiver
 
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage
 from foodsaving.conversations.serializers import ConversationMessageSerializer
+from foodsaving.groups.models import Group
 from foodsaving.subscriptions.fcm import notify_multiple_devices
 from foodsaving.subscriptions.models import ChannelSubscription, PushSubscription
 
@@ -24,7 +25,6 @@ def send_messages(sender, instance, **kwargs):
     push_exclude_users = []
 
     for subscription in ChannelSubscription.objects.recent().filter(user__in=conversation.participants.all()):
-
         # TODO: add back in once https://github.com/yunity/karrot-frontend/issues/770 is implemented
         # if not subscription.away_at:
         #     push_exclude_users.append(subscription.user)
@@ -41,14 +41,21 @@ def send_messages(sender, instance, **kwargs):
                   Q(user__in=conversation.participants.all()) & ~Q(user__in=push_exclude_users) & ~Q(
                       user=message.author))]
 
-    notify_multiple_devices(
-        registration_ids=tokens,
-        message_title=message.author.display_name,
-        message_body=message.content,
-        # this causes each notification for a given conversation to replace previous notifications so they don't build
-        # up too much. fancier would be to make the new notifications show a summary not just the latest message.
-        tag='conversation:{}'.format(conversation.id)
-    )
+    if len(tokens) > 0:
+
+        if isinstance(conversation.target, Group):
+            message_title = '{} / {}'.format(conversation.target.name, message.author.display_name)
+        else:
+            message_title = message.author.display_name
+
+        notify_multiple_devices(
+            registration_ids=tokens,
+            message_title=message_title,
+            message_body=message.content,
+            # this causes each notification for a given conversation to replace previous notifications so they don't build
+            # up too much. fancier would be to make the new notifications show a summary not just the latest message.
+            tag='conversation:{}'.format(conversation.id)
+        )
 
 
 @receiver(pre_delete, sender=ConversationParticipant)
