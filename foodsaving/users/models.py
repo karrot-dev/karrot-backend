@@ -20,7 +20,7 @@ class UserManager(BaseUserManager):
 
     @transaction.atomic
     def _create_user(self, email, password, display_name=None, is_active=True, **extra_fields):
-        """ Creates and saves a User with the given username, email and password.
+        """ Creates and saves a user with the given username, email and password.
 
         """
         email = self._validate_email(email)
@@ -110,6 +110,10 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     def update_email(self, unverified_email):
         self.unverified_email = unverified_email
         self._send_mail_change_notification()
+        if unverified_email == self.email:
+            # was changed back to previous e-mail address, no further verification needed
+            self.verify_mail()
+            return
         self.send_new_verification_code()
 
     def update_language(self, language):

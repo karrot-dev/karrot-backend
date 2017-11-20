@@ -26,7 +26,7 @@ class AuthUserSerializer(serializers.ModelSerializer):
         fields = ['id', 'display_name', 'email', 'unverified_email', 'password',
                   'address', 'latitude', 'longitude', 'description', 'mail_verified',
                   'key_expires_at', 'current_group', 'language']
-        read_only_field = ['unverified_email', 'key_expires_at']
+        read_only_fields = ('unverified_email', 'key_expires_at')
         extra_kwargs = {
             'email': {
                 'required': True
@@ -56,8 +56,10 @@ class AuthUserSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, user, validated_data):
-        if 'email' in validated_data and validated_data['email'] != user.email:
-            user.update_email(validated_data.pop('email'))
+        if 'email' in validated_data:
+            latest_email = user.email if user.email == user.unverified_email else user.unverified_email
+            if validated_data['email'] != latest_email:
+                user.update_email(validated_data.pop('email'))
         if 'password' in validated_data:
             user.set_password(validated_data.pop('password'))
         if 'language' in validated_data and validated_data['language'] != user.language:

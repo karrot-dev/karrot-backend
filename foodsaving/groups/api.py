@@ -75,11 +75,11 @@ class GroupViewSet(
 
     def create(self, request, *args, **kwargs):
         """Create a new group"""
-        super().create(request, *args, **kwargs)
+        return super().create(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
         """Get details to one of your groups"""
-        super().retrieve(request, *args, **kwargs)
+        return super().retrieve(request, *args, **kwargs)
 
     def list(self, request, *args, **kwargs):
         """List your groups
@@ -88,11 +88,11 @@ class GroupViewSet(
         - `?members` - filter by member user id
         - `?search` - search in name and public description
         """
-        super().list(request, *args, **kwargs)
+        return super().list(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):
         """Update one of your groups"""
-        super().partial_update(request, *args, *kwargs)
+        return super().partial_update(request, *args, *kwargs)
 
     def get_queryset(self):
         if self.action == 'join':
