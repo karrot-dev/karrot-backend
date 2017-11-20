@@ -82,20 +82,3 @@ class VerifyMailSerializer(serializers.Serializer):
     def update(self, user, validated_data):
         user.verify_mail()
         return user
-
-
-class Re(serializers.Serializer):
-    key = serializers.CharField(max_length=40, min_length=40)
-
-    def validate_key(self, key):
-        user = self.instance
-        if user.key_expires_at < timezone.now():
-            raise serializers.ValidationError(_('Key has expired'))
-        if key != user.activation_key:
-            raise serializers.ValidationError(_('Key is invalid'))
-        return key
-
-    def update(self, user, validated_data):
-        user.verify_mail()
-        return user
-
