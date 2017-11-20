@@ -4,9 +4,10 @@ from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 
 from foodsaving.groups.factories import GroupFactory
-from foodsaving.stores.factories import StoreFactory, PickupDateFactory
+from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory
-from foodsaving.stores.models import Feedback
+from foodsaving.pickups.models import Feedback
+from pickups.factories import PickupDateFactory
 
 
 class TestFeedbackAPIFilter(APITestCase):

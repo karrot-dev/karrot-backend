@@ -11,7 +11,8 @@ from django.core.management.base import BaseCommand
 from rest_framework.test import APIClient
 
 from foodsaving.groups.models import Group
-from foodsaving.stores.models import Store, PickupDate, PickupDateSeries
+from foodsaving.pickups.models import PickupDate, PickupDateSeries
+from foodsaving.stores.models import Store
 from foodsaving.users.models import User
 from foodsaving.utils.tests.fake import faker
 
