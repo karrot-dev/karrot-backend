@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import authenticate, login, get_user_model
+from django.utils import timezone
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
 
@@ -65,3 +66,36 @@ class AuthUserSerializer(serializers.ModelSerializer):
         if 'language' in validated_data and validated_data['language'] != user.language:
             user.update_language(validated_data.pop('language'))
         return super().update(user, validated_data)
+
+
+class VerifyMailSerializer(serializers.Serializer):
+    key = serializers.CharField(max_length=40, min_length=40)
+
+    def validate_key(self, key):
+        user = self.instance
+        if user.key_expires_at < timezone.now():
+            raise serializers.ValidationError(_('Key has expired'))
+        if key != user.activation_key:
+            raise serializers.ValidationError(_('Key is invalid'))
+        return key
+
+    def update(self, user, validated_data):
+        user.verify_mail()
+        return user
+
+
+class Re(serializers.Serializer):
+    key = serializers.CharField(max_length=40, min_length=40)
+
+    def validate_key(self, key):
+        user = self.instance
+        if user.key_expires_at < timezone.now():
+            raise serializers.ValidationError(_('Key has expired'))
+        if key != user.activation_key:
+            raise serializers.ValidationError(_('Key is invalid'))
+        return key
+
+    def update(self, user, validated_data):
+        user.verify_mail()
+        return user
+

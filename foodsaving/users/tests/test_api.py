@@ -61,7 +61,7 @@ class TestUsersAPI(APITestCase):
 class TestPasswordReset(APITestCase):
     def setUp(self):
         self.verified_user = VerifiedUserFactory(email='reset_test@example.com')
-        self.url = '/api/users/reset_password/'
+        self.url = '/api/auth/user/reset_password/'
         mail.outbox = []
 
     def test_reset_password_succeeds(self):
@@ -95,7 +95,7 @@ class TestEMailVerification(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.verified_user = VerifiedUserFactory()
-        self.url = '/api/users/verify_mail/'
+        self.url = '/api/auth/user/verify_mail/'
 
     def test_verify_mail_succeeds(self):
         self.client.force_login(user=self.user)
@@ -141,7 +141,7 @@ class TestResendEMailVerificationKey(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.verified_user = VerifiedUserFactory()
-        self.url = '/api/users/resend_verification/'
+        self.url = '/api/auth/user/resend_verification/'
         mail.outbox = []
 
     def test_resend_verification_succeeds(self):
@@ -156,8 +156,8 @@ class TestResendEMailVerificationKey(APITestCase):
     def test_resend_verification_fails_if_already_verified(self):
         self.client.force_login(user=self.verified_user)
         response = self.client.post(self.url)
-        self.assertEqual(response.data, {'error': 'Already verified'})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['detail'], 'Mail is already verified.')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_resend_verification_fails_if_not_logged_in(self):
         response = self.client.post(self.url)
