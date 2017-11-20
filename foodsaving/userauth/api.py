@@ -8,21 +8,6 @@ from rest_framework.response import Response
 from foodsaving.userauth.serializers import AuthLoginSerializer, AuthUserSerializer
 
 
-class AuthStatusView(generics.GenericAPIView):
-    serializer_class = AuthLoginSerializer
-
-    def get(self, request, **kwargs):
-        """ Get the login state (logged in user)
-        DEPRECATED in favour of /auth/user/
-        """
-        generate_csrf_token_for_frontend(request)
-        if request.user.is_anonymous():
-            return Response(data={"error": "not_authed"}, status=status.HTTP_401_UNAUTHORIZED)
-        else:
-            serializer = AuthUserSerializer(request.user)
-            return Response(serializer.data)
-
-
 class LogoutView(views.APIView):
     def post(self, request, **kwargs):
         """ Log out """
@@ -69,6 +54,7 @@ class AuthUserView(generics.GenericAPIView):
 
     def get(self, request):
         """Get logged-in user"""
+        generate_csrf_token_for_frontend(request)
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 

@@ -27,7 +27,7 @@ from foodsaving.history.api import HistoryViewSet
 from foodsaving.invitations.api import InvitationsViewSet, InvitationAcceptViewSet
 from foodsaving.stores.api import StoreViewSet, PickupDateViewSet, PickupDateSeriesViewSet, FeedbackViewSet
 from foodsaving.subscriptions.api import PushSubscriptionViewSet
-from foodsaving.userauth.api import AuthUserView, AuthView, LogoutView, AuthStatusView
+from foodsaving.userauth.api import AuthUserView, AuthView, LogoutView
 from foodsaving.users.api import UserViewSet
 
 router = routers.DefaultRouter()
@@ -65,7 +65,6 @@ router.register(r'feedback', FeedbackViewSet)
 
 urlpatterns = [
     url(r'^api/auth/token/$', obtain_auth_token),
-    url(r'^api/auth/status/$', AuthStatusView.as_view()),
     url(r'^api/auth/logout/$', LogoutView.as_view()),
     url(r'^api/auth/user/$', AuthUserView.as_view()),
     url(r'^api/auth/$', AuthView.as_view()),
