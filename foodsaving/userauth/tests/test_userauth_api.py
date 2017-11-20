@@ -229,12 +229,10 @@ class TestChangeEMail(APITestCase):
         mail.outbox.clear()
         response = self.client.patch(self.url, {'email': original})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        # only expect change notice mail
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox), 2)
         self.assertEqual(mail.outbox[0].subject, 'Your email address changed!')
         self.assertEqual(response.data['email'], original)
-        self.assertEqual(response.data['mail_verified'], True)
+        self.assertEqual(response.data['mail_verified'], False)
 
     def test_dont_change_email(self):
         self.client.force_login(user=self.verified_user)

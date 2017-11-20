@@ -110,10 +110,6 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     def update_email(self, unverified_email):
         self.unverified_email = unverified_email
         self._send_mail_change_notification()
-        if unverified_email == self.email:
-            # was changed back to previous e-mail address, no further verification needed
-            self.verify_mail()
-            return
         self.send_new_verification_code()
 
     def update_language(self, language):
