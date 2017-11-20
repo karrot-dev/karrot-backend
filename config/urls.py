@@ -70,7 +70,7 @@ urlpatterns = [
     url(r'^api/auth/user/$', AuthUserView.as_view()),
     url(r'^api/auth/user/verify_mail/$', VerifyMailView.as_view()),
     url(r'^api/auth/user/resend_verification/$', ResendVerificationView.as_view()),
-    url(r'^api/auth/user/reset_password/$', ResetPasswordView.as_view()),
+    url(r'^api/auth/reset_password/$', ResetPasswordView.as_view()),
     url(r'^api/auth/$', AuthView.as_view()),
     url(r'^api/', include(router.urls, namespace='api')),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
