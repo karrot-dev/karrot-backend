@@ -7,7 +7,7 @@ from foodsaving.groups.factories import GroupFactory
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.pickups.models import Feedback
 from foodsaving.users.factories import UserFactory
-from pickups.factories import PickupDateFactory
+from foodsaving.pickups.factories import PickupDateFactory
 
 
 class FeedbackTest(APITestCase):

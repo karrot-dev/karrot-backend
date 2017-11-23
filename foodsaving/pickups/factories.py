@@ -10,7 +10,7 @@ from foodsaving.pickups.models import (
     PickupDate as PickupDateModel,
     PickupDateSeries as PickupDateSeriesModel
 )
-from stores.factories import StoreFactory
+from foodsaving.stores.factories import StoreFactory
 
 
 def in_one_day():

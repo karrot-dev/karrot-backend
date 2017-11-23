@@ -10,7 +10,7 @@ from datetime import datetime
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.pickups.models import PickupDateSeries, PickupDate, Feedback
 from foodsaving.users.factories import UserFactory
-from stores.factories import StoreFactory
+from foodsaving.stores.factories import StoreFactory
 
 
 class TestFeedbackModel(TestCase):

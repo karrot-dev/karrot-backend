@@ -8,7 +8,7 @@ from rest_framework.test import APITestCase
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory
-from pickups.factories import PickupDateFactory
+from foodsaving.pickups.factories import PickupDateFactory
 
 
 def parse(body):

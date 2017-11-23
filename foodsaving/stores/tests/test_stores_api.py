@@ -10,7 +10,7 @@ from foodsaving.groups.factories import GroupFactory
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory
 from foodsaving.utils.tests.fake import faker
-from pickups.factories import PickupDateSeriesFactory, PickupDateFactory
+from foodsaving.pickups.factories import PickupDateSeriesFactory, PickupDateFactory
 
 
 class TestStoresAPI(APITestCase):

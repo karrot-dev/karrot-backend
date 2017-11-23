@@ -7,7 +7,7 @@ from foodsaving.groups.factories import GroupFactory
 from foodsaving.pickups.factories import PickupDateFactory, PickupDateSeriesFactory
 from foodsaving.pickups.models import PickupDate as PickupDateModel
 from foodsaving.users.factories import UserFactory
-from stores.factories import StoreFactory
+from foodsaving.stores.factories import StoreFactory
 
 
 class TestPickupdatesAPIFilter(APITestCase):

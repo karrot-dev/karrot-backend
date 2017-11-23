@@ -14,7 +14,7 @@ from foodsaving.groups.models import GroupMembership
 from foodsaving.pickups.factories import PickupDateFactory, PickupDateSeriesFactory
 from foodsaving.pickups.models import PickupDate
 from foodsaving.users.factories import UserFactory
-from stores.factories import StoreFactory
+from foodsaving.stores.factories import StoreFactory
 
 
 def shift_date_in_local_time(old_date, delta, tz):
