@@ -262,7 +262,7 @@ class TestEMailVerification(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.verified_user = VerifiedUserFactory()
-        self.url = '/api/auth/user/verify_mail/'
+        self.url = '/api/auth/verify_mail/'
 
     def test_verify_mail_succeeds(self):
         self.client.force_login(user=self.user)
@@ -308,7 +308,7 @@ class TestResendEMailVerificationKey(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.verified_user = VerifiedUserFactory()
-        self.url = '/api/auth/user/resend_verification/'
+        self.url = '/api/auth/resend_verification/'
         mail.outbox = []
 
     def test_resend_verification_succeeds(self):
