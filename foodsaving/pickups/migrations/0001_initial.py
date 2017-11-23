@@ -93,7 +93,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='feedback',
-            unique_together=set([('about', 'given_by')]),
+            unique_together={('about', 'given_by')},
         ),
     ]
 

@@ -23,6 +23,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='pushsubscription',
-            unique_together=set([('user', 'token')]),
+            unique_together={('user', 'token')},
         ),
     ]

@@ -43,6 +43,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='groupmembership',
-            unique_together=set([('group', 'user')]),
+            unique_together={('group', 'user')},
         ),
     ]

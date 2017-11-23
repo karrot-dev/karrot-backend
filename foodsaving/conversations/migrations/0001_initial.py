@@ -4,8 +4,6 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import django.utils.timezone
-import django_enumfield.db.fields
-import foodsaving.conversations.models
 
 
 class Migration(migrations.Migration):
