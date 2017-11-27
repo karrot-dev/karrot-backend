@@ -1,25 +1,23 @@
+from datetime import datetime
+
 from dateutil import rrule
 from dateutil.relativedelta import relativedelta
-from django.db import DataError
 from django.core.exceptions import ValidationError
+from django.db import DataError
 from django.db import IntegrityError
 from django.test import TestCase
 from django.utils import timezone
-from datetime import datetime
 
-from foodsaving.pickups.factories import PickupDateFactory
-from foodsaving.pickups.models import PickupDateSeries, PickupDate, Feedback
-from foodsaving.users.factories import UserFactory
 from foodsaving.stores.factories import StoreFactory
+from foodsaving.users.factories import UserFactory
+from foodsaving.pickups.factories import PickupDateFactory
+from foodsaving.pickups.models import Feedback, PickupDateSeries, PickupDate
 
 
 class TestFeedbackModel(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
-        cls.pickup = PickupDateFactory()
-        cls.user = UserFactory()
+    def setUp(self):
+        self.pickup = PickupDateFactory()
+        self.user = UserFactory()
 
     def test_weight_is_negative_fails(self):
         with self.assertRaises(ValidationError):
@@ -46,11 +44,10 @@ class TestFeedbackModel(TestCase):
 
 
 class TestPickupDateSeriesModel(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.store = StoreFactory()
-        cls.recurrence = rrule.rrule(
+    def setUp(self):
+
+        self.store = StoreFactory()
+        self.recurrence = rrule.rrule(
             freq=rrule.WEEKLY,
         )
 
