@@ -32,7 +32,6 @@ class TestHistoryAPICreateGroup(PaginatedResponseTestCase):
 
 
 class TestHistoryAPIOrdering(PaginatedResponseTestCase):
-    @classmethod
     def setUp(self):
         self.member = UserFactory()
 
