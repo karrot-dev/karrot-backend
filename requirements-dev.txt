@@ -14,10 +14,10 @@ idna==2.6                 # via requests
 ipython-genutils==0.2.0   # via traitlets
 ipython==6.2.1
 jedi==0.11.0              # via ipython
-parso==0.1.0              # via jedi
+parso==0.1.1              # via jedi
 pexpect==4.3.0            # via ipython
 pickleshare==0.7.4        # via ipython
-pip-tools==1.10.2
+pip-tools==1.11.0
 prompt-toolkit==1.0.15    # via ipython
 ptyprocess==0.5.2         # via pexpect
 pycodestyle==2.3.1        # via autopep8
