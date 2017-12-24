@@ -6,21 +6,24 @@ The `urlpatterns` list routes URLs to views. For more information please see:
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.urls import path, include
+from django.urls import path, include, re_path
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
 from rest_framework.authtoken.views import obtain_auth_token
+from rest_framework.documentation import include_docs_urls
 from rest_framework_nested import routers
-from rest_framework_swagger.views import get_swagger_view
 
 from foodsaving.conversations.api import ConversationMessageViewSet, ConversationViewSet
 from foodsaving.groups.api import GroupViewSet, AgreementViewSet, GroupInfoViewSet
 from foodsaving.history.api import HistoryViewSet
 from foodsaving.invitations.api import InvitationsViewSet, InvitationAcceptViewSet
 from foodsaving.pickups.api import PickupDateViewSet, PickupDateSeriesViewSet, FeedbackViewSet
+from foodsaving.stores.api import StoreViewSet
 from foodsaving.subscriptions.api import PushSubscriptionViewSet
 from foodsaving.userauth.api import AuthUserView, AuthView, LogoutView, VerifyMailView, ResendVerificationView, \
     ResetPasswordView
 from foodsaving.users.api import UserViewSet
-from foodsaving.stores.api import StoreViewSet
 
 router = routers.DefaultRouter()
 
@@ -55,6 +58,18 @@ router.register('invitations', InvitationAcceptViewSet)
 # Feedback endpoints
 router.register('feedback', FeedbackViewSet)
 
+schema_view = get_schema_view(
+    openapi.Info(
+        title='Karrot API',
+        default_version='v1',
+        description='API documentation',
+        contact=openapi.Contact(email='karrot@foodsaving.world'),
+        license=openapi.License(name='AGPLv3'),
+    ),
+    public=False,
+    permission_classes=(permissions.AllowAny,),
+)
+
 urlpatterns = [
     path('api/auth/token/', obtain_auth_token),
     path('api/auth/logout/', LogoutView.as_view()),
@@ -67,7 +82,10 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('admin/docs/', include('django.contrib.admindocs.urls')),
     path('admin/', admin.site.urls),
-    path('docs/', get_swagger_view()),
+    re_path(r'^drf_docs/', include_docs_urls(title='Karrot API', public=False)),
+    re_path(r'^schema(?P<format>.json|.yaml)$', schema_view.without_ui(cache_timeout=None), name='schema-json'),
+    re_path(r'^docs/$', schema_view.with_ui('swagger', cache_timeout=None), name='schema-swagger-ui'),
+    re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=None), name='schema-redoc'),
 ]
 
 if settings.DEBUG:

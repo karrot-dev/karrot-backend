@@ -50,7 +50,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_nested',
-    'rest_framework_swagger',
+    'drf_yasg',
     'anymail',
     'influxdb_metrics',
     'timezone_field',
