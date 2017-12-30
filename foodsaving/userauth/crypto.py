@@ -39,8 +39,8 @@ class VerificationCodeManager:
         base64 compressed and signed using Django's TimestampSigner.
         """
         assert (self._type == VerificationCodeManager.EMAIL_VERIFICATION and not user.mail_verified) \
-               or (self._type == VerificationCodeManager.PASSWORD_RESET and not user.password_valid) \
-               or self._type == VerificationCodeManager.ACCOUNT_DELETE
+            or (self._type == VerificationCodeManager.PASSWORD_RESET and not user.password_valid) \
+            or self._type == VerificationCodeManager.ACCOUNT_DELETE
 
         return signing.dumps(
             obj=(user.email, self._type),
