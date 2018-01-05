@@ -6,7 +6,6 @@ from django.test import TestCase
 
 # Mostly based on this nice persons article:
 #   https://www.caktusgroup.com/blog/2016/02/02/writing-unit-tests-django-migrations/
-
 class TestMigrations(TestCase):
     @property
     def app(self):
@@ -36,3 +35,12 @@ class TestMigrations(TestCase):
 
     def setUpBeforeMigration(self, apps):
         pass
+
+
+class ExtractPaginationMixin(object):
+    def get_results(self, *args, **kwargs):
+        """Overrides response.data to remove the pagination control in tests"""
+        response = self.client.get(*args, **kwargs)
+        if 'results' in response.data:
+            response.data = response.data['results']
+        return response

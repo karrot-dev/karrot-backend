@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db import transaction
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.template.loader import render_to_string
 from django.utils import timezone
 
@@ -143,6 +143,12 @@ class PickupDateManager(models.Manager):
             _.done_and_processed = True
             _.save()
 
+    def feedback_possible_q(self, user):
+        return Q(date__lte=timezone.now()) \
+            & Q(date__gte=timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)) \
+            & Q(collectors=user) \
+            & ~Q(feedback__given_by=user)
+
 
 class PickupDate(BaseModel):
     objects = PickupDateManager()
@@ -225,7 +231,7 @@ class PickupDate(BaseModel):
         return self.collectors.count() == 0
 
     def is_recent(self):
-        return self.date >= timezone.now() - relativedelta(days=30)
+        return self.date >= timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
 
 class Feedback(BaseModel):

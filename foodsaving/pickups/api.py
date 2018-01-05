@@ -2,6 +2,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route
+from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
@@ -16,11 +17,17 @@ from foodsaving.pickups.models import (
 )
 from foodsaving.pickups.permissions import (
     IsUpcoming, HasNotJoinedPickupDate, HasJoinedPickupDate, IsEmptyPickupDate,
-    IsNotFull, IsSameCollector)
+    IsNotFull, IsSameCollector, IsRecentPickupDate)
 from foodsaving.pickups.serializers import (
     PickupDateSerializer, PickupDateSeriesSerializer,
     PickupDateJoinSerializer, PickupDateLeaveSerializer, FeedbackSerializer)
 from foodsaving.utils.mixins import PartialUpdateModelMixin
+
+
+class FeedbackPagination(CursorPagination):
+    # TODO: create an index on 'created_at' for increased speed
+    page_size = 10
+    ordering = '-created_at'
 
 
 class FeedbackViewSet(
@@ -37,19 +44,22 @@ class FeedbackViewSet(
     - `?given_by` - filter by user id
     - `?about` - filter by pickup id
     - `?store` - filter by store id
+    - `?group` - filter by group id
+    - `?created_at_0` and `?created_at_1` - filter by creation date
     """
     serializer_class = FeedbackSerializer
     queryset = FeedbackModel.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_class = FeedbackFilter
     permission_classes = (IsAuthenticated,)
+    pagination_class = FeedbackPagination
 
     def get_queryset(self):
         return self.queryset.filter(about__store__group__members=self.request.user)
 
     def get_permissions(self):
         if self.action == 'partial_update':
-            self.permission_classes = (IsAuthenticated, IsSameCollector,)
+            self.permission_classes = (IsAuthenticated, IsSameCollector, IsRecentPickupDate)
 
         return super().get_permissions()
 
@@ -82,6 +92,15 @@ class PickupDateSeriesViewSet(
         super().perform_destroy(series)
 
 
+class PickupDatePagination(CursorPagination):
+    """Pagination with a high number of pickup dates in order to not break
+    frontend assumptions of getting all upcoming pickup dates per group.
+    Could be reduced and add pagination handling in frontend when speed becomes an issue"""
+    # TODO: create an index on 'date' for increased speed
+    page_size = 400
+    ordering = 'date'
+
+
 class PickupDateViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
@@ -92,7 +111,9 @@ class PickupDateViewSet(
 ):
     """
     Pickup Dates
-    # Query parameters
+
+    list:
+    Query parameters
     - `?series` - filter by pickup date series id
     - `?store` - filter by store id
     - `?group` - filter by group id
@@ -103,6 +124,7 @@ class PickupDateViewSet(
     filter_backends = (DjangoFilterBackend,)
     filter_class = PickupDatesFilter
     permission_classes = (IsAuthenticated, IsUpcoming)
+    pagination_class = PickupDatePagination
 
     def get_permissions(self):
         if self.action == 'destroy':
