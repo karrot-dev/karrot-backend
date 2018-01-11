@@ -3,9 +3,8 @@ from datetime import timedelta
 from anymail.message import AnymailMessage
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
-from django.db import transaction
-from django.db import models
-from django.db.models import EmailField, BooleanField, TextField, CharField, DateTimeField, ForeignKey, OneToOneField
+from django.db import transaction, models
+from django.db.models import EmailField, BooleanField, TextField, CharField, DateTimeField, ForeignKey
 from django.template.loader import render_to_string
 from django.utils import crypto
 from django.utils import timezone
@@ -77,8 +76,6 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     description = TextField(blank=True)
     language = CharField(max_length=7, default='en')
 
-    verification_code = OneToOneField('userauth.VerificationCode', default=VerificationCode(),
-                                      on_delete=models.CASCADE)
     activation_key = CharField(max_length=40, blank=True)
     key_expires_at = DateTimeField(null=True)
     mail_verified = BooleanField(default=False)

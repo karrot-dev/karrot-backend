@@ -81,9 +81,6 @@ FCM_SERVER_KEY = 'your server key'
 # Verification codes
 ########
 
-# Edit the salt for increased security
-VERIFICATION_CODE_SALT = 'http://dev.karrot.world'
-
 # Time until a verification code expires
 EMAIL_VERIFICATION_TIME_LIMIT_HOURS = 3 * 24
 PASSWORD_RESET_TIME_LIMIT_MINUTES = 180

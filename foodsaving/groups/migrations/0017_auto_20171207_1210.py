@@ -16,6 +16,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='group',
             name='active_agreement',
-            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='active_group', to='groups.Agreement'),
+            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.SET_NULL,
+                                       related_name='active_group', to='groups.Agreement'),
         ),
     ]
