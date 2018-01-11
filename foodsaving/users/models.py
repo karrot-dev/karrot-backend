@@ -11,7 +11,6 @@ from django.utils import timezone
 from django.utils.translation import ugettext as _
 
 from foodsaving.base.base_models import BaseModel, LocationModel
-from foodsaving.userauth.models import VerificationCode
 
 MAX_DISPLAY_NAME_LENGTH = 80
 

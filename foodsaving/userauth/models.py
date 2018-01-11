@@ -26,11 +26,10 @@ class VerificationCode(BaseModel):
     # Debug modes
     # DEBUG_VALIDITY_TIME_LIMIT = 'DEBUG_VALIDITY_TIME_LIMIT'
     # DEBUG_MODES = [DEBUG_VALIDITY_TIME_LIMIT]
-    
-    LENGTH = 20
 
-    user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-                      default=crypto.get_random_string(length=LENGTH))
+    LENGTH = 25
+
+    user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     code = CharField('actual verification code', unique=True, max_length=50,
                      default=crypto.get_random_string(length=LENGTH))
     type = CharField(max_length=50)
