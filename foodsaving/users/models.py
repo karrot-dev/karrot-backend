@@ -88,7 +88,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
 
     photo = VersatileImageField(
         'Photo',
-        upload_to='uploads/user__photos/',
+        upload_to='user__photos',
         null=True,
     )
 
