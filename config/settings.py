@@ -153,7 +153,8 @@ VERSATILEIMAGEFIELD_SETTINGS = {
 
 VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
     'user_profile': [
-        ('thumbnail', 'thumbnail__120x120')
+        ('full_size', 'url'),
+        ('thumbnail', 'thumbnail__120x120'),
     ],
 }
 
