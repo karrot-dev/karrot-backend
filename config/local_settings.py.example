@@ -21,8 +21,8 @@ DEBUG = True
 # ALLOWED_HOSTS = ['*']
 
 # Uploaded files location, e.g. user photos
-MEDIA_ROOT = 'uploads/'
-MEDIA_URL = 'media/'
+MEDIA_ROOT = './uploads/'
+MEDIA_URL = '/media/'
 
 ######
 # Mail configuration
