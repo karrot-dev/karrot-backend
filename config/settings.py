@@ -147,6 +147,10 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.BCryptPasswordHasher',
 ]
 
+VERSATILEIMAGEFIELD_SETTINGS = {
+    'image_key_post_processor': 'versatileimagefield.processors.md5',
+}
+
 VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
     'user_profile': [
         ('thumbnail', 'thumbnail__120x120')
