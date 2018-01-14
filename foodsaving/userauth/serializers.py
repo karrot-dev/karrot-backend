@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login, get_user_model
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
+from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from foodsaving.userauth.models import VerificationCode
 
@@ -24,12 +25,25 @@ class AuthLoginSerializer(serializers.Serializer):
 
 
 class AuthUserSerializer(serializers.ModelSerializer):
+
+    photo = VersatileImageFieldSerializer(
+        sizes='user_profile',
+        required=False,
+        allow_null=True,
+        write_only=True
+    )
+    photo_urls = VersatileImageFieldSerializer(
+        sizes='user_profile',
+        read_only=True,
+        source='photo'
+    )
+
     class Meta:
         model = get_user_model()
         fields = ['id', 'display_name', 'email', 'unverified_email', 'password',
                   'address', 'latitude', 'longitude', 'description', 'mail_verified',
-                  'current_group', 'language']
-        read_only_fields = ('unverified_email', 'mail_verified')
+                  'current_group', 'language', 'photo', 'photo_urls']
+        read_only_fields = ('unverified_email', 'key_expires_at', 'mail_verified')
         extra_kwargs = {
             'password': {
                 'write_only': True
@@ -78,6 +92,9 @@ class AuthUserSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(_('We could not send you an e-mail.'))
         if 'language' in validated_data and validated_data['language'] != user.language:
             user.update_language(validated_data.pop('language'))
+        if 'photo' in validated_data and validated_data['photo'] is None:
+            user.delete_photo()
+
         return super().update(user, validated_data)
 
 
