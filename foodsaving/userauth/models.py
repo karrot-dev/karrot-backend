@@ -1,15 +1,20 @@
 from datetime import timedelta
 
-from django.db.models import CharField, DateTimeField, ForeignKey
-from django.db import models, transaction
+from django.db.models import CharField, ForeignKey, Manager
+from django.db import models
 from django.conf import settings
 from django.utils import crypto, timezone
 
 from foodsaving.base.base_models import BaseModel
 
-# TODO:
-# ~ Ensure each user can have at most one verification code of a certain type at a time.
-# ~ 'Resend verification code' functionality
+# TODO: Ensure each user can have at most one verification code of a certain type at a time.
+
+
+class VerificationCodeManager(Manager):
+    def create(self, *args, **kwargs):
+        if 'code' not in kwargs or not kwargs['code']:
+            kwargs['code'] = crypto.get_random_string(length=VerificationCode.LENGTH)
+        return super(VerificationCodeManager, self).create(*args, **kwargs)
 
 
 class VerificationCode(BaseModel):
@@ -23,20 +28,13 @@ class VerificationCode(BaseModel):
     ACCOUNT_DELETE = 'ACCOUNT_DELETE'
     TYPES = [EMAIL_VERIFICATION, PASSWORD_RESET, ACCOUNT_DELETE]
 
-    # Debug modes
-    # DEBUG_VALIDITY_TIME_LIMIT = 'DEBUG_VALIDITY_TIME_LIMIT'
-    # DEBUG_MODES = [DEBUG_VALIDITY_TIME_LIMIT]
-
     LENGTH = 25
 
-    user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    code = CharField('actual verification code', unique=True, max_length=50,
-                     default=crypto.get_random_string(length=LENGTH))
-    type = CharField(max_length=50)
+    objects = VerificationCodeManager()
 
-    # For documentation and debugging purposes,
-    # invalidate a verification code instead of deleting it right away.
-    invalidated_at = DateTimeField(blank=True, null=True)
+    user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    code = CharField('actual verification code', unique=True, max_length=50)
+    type = CharField(max_length=50)
 
     def _get_validity_time_limit(self):
         """
@@ -52,20 +50,8 @@ class VerificationCode(BaseModel):
             return settings.ACCOUNT_DELETE_TIME_LIMIT_MINUTES * 60
         raise NotImplementedError
 
-    def _has_expired(self):
+    def has_expired(self):
+        """
+        True if the expiration date lies in the past or if the code has been invalidated.
+        """
         return self.created_at + timedelta(seconds=self._get_validity_time_limit()) < timezone.now()
-
-    def is_valid(self, code, user, type):
-        """
-        Check if the given verification code is of the given type and valid for the given user.
-        """
-        return code == self.code \
-            and type == self.type \
-            and user == self.user \
-            and not self._has_expired() \
-            and not self.invalidated_at
-
-    @transaction.atomic
-    def invalidate(self):
-        self.invalidated_at = timezone.now()
-        self.save()

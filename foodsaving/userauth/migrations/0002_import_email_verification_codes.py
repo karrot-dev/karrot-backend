@@ -10,7 +10,7 @@ def migrate_email_verification_codes(apps, schema_editor):
     VerificationCode = apps.get_model('userauth', 'VerificationCode')
 
     for user in User.objects.all():
-        # User.objects.filter() does not seem to work here
+        # User.objects.filter() is not applicable here so we have to filter manually:
         if user.activation_key and not user.mail_verified and user.key_expires_at \
                 and user.key_expires_at > timezone.now():
             # For simplicity, reset the verification time limit

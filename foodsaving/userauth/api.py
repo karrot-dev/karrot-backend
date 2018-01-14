@@ -79,8 +79,6 @@ class AuthUserView(generics.GenericAPIView):
         user.mail = None
         user.is_active = False
         user.is_staff = False
-        user.activation_key = ''
-        user.key_expires_at = None
         user.mail_verified = False
         user.unverified_email = None
         user.deleted_at = timezone.now()
@@ -98,7 +96,7 @@ class VerifyMailView(generics.GenericAPIView):
         """
         Send token to verify e-mail
 
-        requires "key" parameter
+        requires "code" parameter
         """
         self.check_object_permissions(request, request.user)
         serializer = self.get_serializer(request.user, request.data)

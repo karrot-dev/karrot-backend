@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                                           verbose_name='actual verification code')),
                 ('type', models.CharField(max_length=50)),
                 ('invalidated_at', models.DateTimeField(blank=True, null=True)),
-                ('user', models.ForeignKey(default='CeaHs4YfNpeHxoymOCth', on_delete=django.db.models.deletion.CASCADE,
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
                                            to=settings.AUTH_USER_MODEL)),
             ],
             options={
