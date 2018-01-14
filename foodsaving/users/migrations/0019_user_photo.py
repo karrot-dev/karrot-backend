@@ -7,13 +7,14 @@ import versatileimagefield.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0017_auto_20171207_1210'),
+        ('users', '0018_remove_verification_codes'),
     ]
 
     operations = [
         migrations.AddField(
             model_name='user',
             name='photo',
-            field=versatileimagefield.fields.VersatileImageField(null=True, upload_to='uploads/user__photos/', verbose_name='Photo'),
+            field=versatileimagefield.fields.VersatileImageField(null=True, upload_to='uploads/user__photos/',
+                                                                 verbose_name='Photo'),
         ),
     ]
