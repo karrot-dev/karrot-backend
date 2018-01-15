@@ -18,6 +18,7 @@ class ReceiverTests(ChannelTestCase):
     def test_receives_messages(self):
         client = WSClient()
         user = UserFactory()
+        author_client = WSClient()
         author = UserFactory()
 
         # join a conversation
@@ -28,6 +29,8 @@ class ReceiverTests(ChannelTestCase):
         # login and connect
         client.force_login(user)
         client.send_and_consume('websocket.connect', path='/')
+        author_client.force_login(author)
+        author_client.send_and_consume('websocket.connect', path='/')
 
         # add a message to the conversation
         message = ConversationMessage.objects.create(conversation=conversation, content='yay', author=author)
@@ -43,6 +46,47 @@ class ReceiverTests(ChannelTestCase):
                 'author': message.author.id,
                 'conversation': conversation.id,
                 'created_at': message.created_at
+            }
+        })
+
+        # and they should get an updated conversation object
+        response = client.receive(json=True)
+        response['payload']['created_at'] = parse(response['payload']['created_at'])
+        del response['payload']['participants']
+        self.assertEqual(response, {
+            'topic': 'conversations:conversation',
+            'payload': {
+                'id': conversation.id,
+                'created_at': conversation.created_at,
+                'seen_up_to': None,
+                'unread_message_count': 1,
+            }
+        })
+
+        # author should get message & updated conversations object too
+        response = author_client.receive(json=True)
+        response['payload']['created_at'] = parse(response['payload']['created_at'])
+        self.assertEqual(response, {
+            'topic': 'conversations:message',
+            'payload': {
+                'id': message.id,
+                'content': message.content,
+                'author': message.author.id,
+                'conversation': conversation.id,
+                'created_at': message.created_at
+            }
+        })
+
+        response = author_client.receive(json=True)
+        response['payload']['created_at'] = parse(response['payload']['created_at'])
+        del response['payload']['participants']
+        self.assertEqual(response, {
+            'topic': 'conversations:conversation',
+            'payload': {
+                'id': conversation.id,
+                'created_at': conversation.created_at,
+                'seen_up_to': message.id,
+                'unread_message_count': 0,
             }
         })
 
