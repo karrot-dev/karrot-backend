@@ -16,7 +16,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='user',
             name='current_group',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
-                                    to='groups.Group'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='groups.Group'),
         ),
     ]
