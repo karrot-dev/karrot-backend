@@ -206,6 +206,12 @@ CHANNEL_LAYERS = {
 
 CHANNELS_WS_PROTOCOLS = ['karrot.token']
 
+# Verification codes:
+# Time until a verification code expires
+EMAIL_VERIFICATION_TIME_LIMIT_HOURS = 7 * 24
+PASSWORD_RESET_TIME_LIMIT_MINUTES = 180
+ACCOUNT_DELETE_TIME_LIMIT_MINUTES = 180
+
 # NB: Keep this as the last line, and keep
 # local_settings.py out of version control
 try:

@@ -43,7 +43,7 @@ class AuthUserSerializer(serializers.ModelSerializer):
         fields = ['id', 'display_name', 'email', 'unverified_email', 'password',
                   'address', 'latitude', 'longitude', 'description', 'mail_verified',
                   'current_group', 'language', 'photo', 'photo_urls']
-        read_only_fields = ('unverified_email', 'key_expires_at', 'mail_verified')
+        read_only_fields = ('unverified_email', 'mail_verified')
         extra_kwargs = {
             'password': {
                 'write_only': True

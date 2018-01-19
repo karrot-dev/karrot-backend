@@ -98,7 +98,7 @@ class VerifyMailView(generics.GenericAPIView):
         """
         Send token to verify e-mail
 
-        requires "code" parameter
+        requires "key" parameter
         """
         self.check_object_permissions(request, request.user)
         serializer = self.get_serializer(request.user, request.data)

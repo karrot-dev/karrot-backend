@@ -8,6 +8,7 @@ from django.utils import crypto, timezone
 from foodsaving.base.base_models import BaseModel
 
 # TODO: Ensure each user can have at most one verification code of a certain type at a time.
+#       (Consider adding 'unique_together' constraint)
 
 
 class VerificationCodeManager(Manager):
@@ -28,7 +29,7 @@ class VerificationCode(BaseModel):
     ACCOUNT_DELETE = 'ACCOUNT_DELETE'
     TYPES = [EMAIL_VERIFICATION, PASSWORD_RESET, ACCOUNT_DELETE]
 
-    LENGTH = 25
+    LENGTH = 40  # TODO: Change to 25 (will require frontend changes)
 
     objects = VerificationCodeManager()
 

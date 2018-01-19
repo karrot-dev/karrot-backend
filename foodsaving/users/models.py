@@ -141,7 +141,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     def _send_welcome_mail(self):
         self._unverify_mail()
 
-        url = '{hostname}/#/verify-mail?code={code}'.format(
+        url = '{hostname}/#/verify-mail?key={code}'.format(
             hostname=settings.HOSTNAME,
             code=VerificationCode.objects.get(user=self, type=VerificationCode.EMAIL_VERIFICATION).code
         )
@@ -164,7 +164,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     def send_new_verification_code(self):
         self._unverify_mail()
 
-        url = '{hostname}/#/verify-mail?code={code}'.format(
+        url = '{hostname}/#/verify-mail?key={code}'.format(
             hostname=settings.HOSTNAME,
             code=VerificationCode.objects.get(user=self, type=VerificationCode.EMAIL_VERIFICATION).code
         )

@@ -7,7 +7,7 @@ import versatileimagefield.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0018_remove_verification_codes'),
+        ('users', '0017_auto_20171207_1210'),
     ]
 
     operations = [
