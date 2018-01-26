@@ -16,6 +16,7 @@ from foodsaving.utils.tests.fake import faker
 
 class ReceiverTests(ChannelTestCase):
     def test_receives_messages(self):
+        self.maxDiff = None
         client = WSClient()
         user = UserFactory()
         author_client = WSClient()
@@ -52,12 +53,14 @@ class ReceiverTests(ChannelTestCase):
         # and they should get an updated conversation object
         response = client.receive(json=True)
         response['payload']['created_at'] = parse(response['payload']['created_at'])
+        response['payload']['updated_at'] = parse(response['payload']['updated_at'])
         del response['payload']['participants']
         self.assertEqual(response, {
             'topic': 'conversations:conversation',
             'payload': {
                 'id': conversation.id,
                 'created_at': conversation.created_at,
+                'updated_at': conversation.updated_at,
                 'seen_up_to': None,
                 'unread_message_count': 1,
             }
@@ -79,12 +82,14 @@ class ReceiverTests(ChannelTestCase):
 
         response = author_client.receive(json=True)
         response['payload']['created_at'] = parse(response['payload']['created_at'])
+        response['payload']['updated_at'] = parse(response['payload']['updated_at'])
         del response['payload']['participants']
         self.assertEqual(response, {
             'topic': 'conversations:conversation',
             'payload': {
                 'id': conversation.id,
                 'created_at': conversation.created_at,
+                'updated_at': conversation.updated_at,
                 'seen_up_to': message.id,
                 'unread_message_count': 0,
             }
