@@ -142,15 +142,12 @@ class ReceiverPushTests(ChannelTestCase):
         # add a message to the conversation
         ConversationMessage.objects.create(conversation=self.conversation, content=self.content, author=self.author)
 
-    # TODO: add back in once https://github.com/yunity/karrot-frontend/issues/770 is implemented
-    # def test_does_not_send_push_notification_if_active_channel_subscription(self, m):
-    #     # add a channel subscription to prevent the push being sent
-    #     ChannelSubscription.objects.create(user=self.user, reply_channel='foo')
-    #
-    #     # add a message to the conversation
-    #     ConversationMessage.objects.create(conversation=self.conversation, content=self.content, author=self.author)
-    #
-    #     # if it sent a push message, the requests mock would complain there is no matching request...
+    def test_does_not_send_push_notification_if_active_channel_subscription(self, m):
+        # add a channel subscription to prevent the push being sent
+        ChannelSubscription.objects.create(user=self.user, reply_channel='foo')
+        # add a message to the conversation
+        ConversationMessage.objects.create(conversation=self.conversation, content=self.content, author=self.author)
+        # if it sent a push message, the requests mock would complain there is no matching request...
 
     def test_send_push_notification_if_channel_subscription_is_away(self, m):
         def check_json_data(request):

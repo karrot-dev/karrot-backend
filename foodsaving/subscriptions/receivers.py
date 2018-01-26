@@ -29,9 +29,8 @@ def send_messages(sender, instance, **kwargs):
     push_exclude_users = []
 
     for subscription in ChannelSubscription.objects.recent().filter(user__in=conversation.participants.all()):
-        # TODO: add back in once https://github.com/yunity/karrot-frontend/issues/770 is implemented
-        # if not subscription.away_at:
-        #     push_exclude_users.append(subscription.user)
+        if not subscription.away_at:
+            push_exclude_users.append(subscription.user)
 
         Channel(subscription.reply_channel).send({
             "text": json.dumps({
