@@ -53,4 +53,4 @@ class History(NicelyFormattedModel):
     payload = JSONField(null=True)
 
     def __str__(self):
-        return '{} - {} ({})'.format(self.date, HistoryTypus.name(self.typus), self.group)
+        return 'History {} - {} ({})'.format(self.date, HistoryTypus.name(self.typus), self.group)
