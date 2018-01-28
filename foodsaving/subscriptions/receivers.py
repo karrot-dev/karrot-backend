@@ -11,7 +11,7 @@ from foodsaving.conversations.models import ConversationParticipant, Conversatio
 from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer
 from foodsaving.groups.models import Group
 from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer
-from foodsaving.history.models import History
+from foodsaving.history.models import history_created
 from foodsaving.history.serializers import HistorySerializer
 from foodsaving.pickups.models import PickupDate, PickupDateSeries, Feedback, pickup_done
 from foodsaving.pickups.serializers import PickupDateSerializer, PickupDateSeriesSerializer, FeedbackSerializer
@@ -118,17 +118,13 @@ def remove_participant(sender, instance, **kwargs):
 @receiver(post_save, sender=Group)
 def send_group_updates(sender, instance, **kwargs):
     group = instance
-    payload = GroupDetailSerializer(group).data
+    detail_payload = GroupDetailSerializer(group).data
     for subscription in ChannelSubscription.objects.recent().filter(user__in=group.members.all()):
-        send_in_channel(subscription.reply_channel, topic='groups:group_detail', payload=payload)
+        send_in_channel(subscription.reply_channel, topic='groups:group_detail', payload=detail_payload)
 
-
-@receiver(post_save, sender=Group)
-def send_group_preview_updates(sender, instance, **kwargs):
-    group = instance
-    payload = GroupPreviewSerializer(group).data
+    preview_payload = GroupPreviewSerializer(group).data
     for subscription in ChannelSubscription.objects.recent():
-        send_in_channel(subscription.reply_channel, topic='groups:group_preview', payload=payload)
+        send_in_channel(subscription.reply_channel, topic='groups:group_preview', payload=preview_payload)
 
 
 # Store
@@ -144,6 +140,10 @@ def send_store_updates(sender, instance, **kwargs):
 @receiver(post_save, sender=PickupDate)
 def send_pickup_updates(sender, instance, **kwargs):
     pickup = instance
+    if pickup.done_and_processed:
+        # doesn't change serialized data
+        return
+
     payload = PickupDateSerializer(pickup).data
     for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.store.group.members.all()):
         if not pickup.deleted:
@@ -217,7 +217,7 @@ def send_user_updates(sender, instance, **kwargs):
 
 
 # History
-@receiver(post_save, sender=History)
+@receiver(history_created)
 def send_history_updates(sender, instance, **kwargs):
     history = instance
     payload = HistorySerializer(history).data
