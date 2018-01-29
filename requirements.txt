@@ -35,7 +35,7 @@ django-versatileimagefield==1.8.1
 django[argon2]==2.0.1
 djangorestframework==3.7.7
 drf-nested-routers==0.90.0
-factory-boy==2.9.2
+factory-boy==2.10.0
 faker==0.8.10             # via factory-boy
 flake8==3.5.0
 furl==1.0.1
