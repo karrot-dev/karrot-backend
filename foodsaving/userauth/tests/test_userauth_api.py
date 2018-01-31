@@ -162,6 +162,9 @@ class TestUploadPhoto(APITestCase):
         response = self.client.get(self.url)
         self.assertTrue('full_size' in response.data['photo_urls'])
         self.assertTrue('thumbnail' in response.data['photo_urls'])
+        print('hostname', settings.HOSTNAME)
+        print('urls', response.data['photo_urls']['full_size'])
+        self.assertTrue(response.data['photo_urls']['full_size'].startswith('http://testserver'))
 
         # delete photo
         response = self.client.patch(self.url, {'photo': None}, format='json')
