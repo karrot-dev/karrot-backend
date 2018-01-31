@@ -1,6 +1,7 @@
 import json
 
 import os
+import pathlib
 import requests_mock
 from shutil import copyfile
 from channels.test import ChannelTestCase, WSClient
@@ -336,6 +337,7 @@ class UserReceiverTest(ChannelTestCase):
         self.other_member = UserFactory()
         self.unrelated_user = UserFactory()
         self.group = GroupFactory(members=[self.member, self.other_member])
+        pathlib.Path(settings.MEDIA_ROOT).mkdir(exist_ok=True)
         copyfile(os.path.join(os.path.dirname(__file__), './photo.jpg'),
                  os.path.join(settings.MEDIA_ROOT, 'photo.jpg'))
         self.member.photo = 'photo.jpg'
