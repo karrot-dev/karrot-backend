@@ -49,7 +49,7 @@ jinja2==2.10              # via coreschema, django-jinja
 markdown==2.6.11
 markupsafe==1.0           # via jinja2
 mccabe==0.6.1             # via flake8
-msgpack-python==0.5.1     # via asgi-redis
+msgpack-python==0.5.2     # via asgi-redis
 olefile==0.45.1           # via pillow
 openapi-codec==1.3.2      # via django-rest-swagger
 orderedmultidict==0.7.11  # via furl
