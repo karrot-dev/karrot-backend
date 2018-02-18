@@ -2,10 +2,12 @@ from anymail.message import AnymailMessage
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import transaction, models
-from django.db.models import EmailField, BooleanField, TextField, CharField, DateTimeField, ForeignKey
+from django.db.models import EmailField, BooleanField, TextField, CharField, DateTimeField, ForeignKey, SmallIntegerField, ManyToManyField
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 from versatileimagefield.fields import VersatileImageField
+from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 from foodsaving.base.base_models import BaseModel, LocationModel
 from foodsaving.userauth.models import VerificationCode
@@ -78,6 +80,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     deleted = BooleanField(default=False)
     deleted_at = DateTimeField(default=None, null=True)
     current_group = ForeignKey('groups.Group', blank=True, null=True, on_delete=models.SET_NULL)
+    trusts = ManyToManyField('users.User', through='Trust', through_fields=('sender', 'reciever'))
 
     photo = VersatileImageField(
         'Photo',
@@ -206,3 +209,52 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     def has_module_perms(self, app_label):
         # temporarily only allow access for admins
         return self.is_superuser
+
+    def trust_by(self, loggedinUser):
+        if self.id == loggedinUser.id:
+            # TODO: maybe wrong position for such validations?
+            raise ValidationError("you don't have to mark explicitly, that you trust yourself")
+
+        trust = self.trust_recieved.filter(sender=loggedinUser)
+        if not trust.exists():
+
+            # rate limits
+            # TODO: maybe wrong position for such validations?
+            week = timezone.now()-timezone.timedelta(days=7)
+            day = timezone.now()-timezone.timedelta(days=1)
+            month = timezone.now()-timezone.timedelta(days=30)
+            trustsDay = loggedinUser.trust_sent.filter(created_at__gt=day).count()
+            if trustsDay > settings.TRUST_RATE_LIMIT_DAY:
+                raise ValidationError("max {} trusts per day".format(settings.TRUST_RATE_LIMIT_DAY))
+
+            trustsWeek = loggedinUser.trust_sent.filter(created_at__gt=week).count()
+            if trustsWeek > settings.TRUST_RATE_LIMIT_WEEK:
+                raise ValidationError("max {} trusts per week".format(settings.TRUST_RATE_LIMIT_WEEK))
+
+            trustsMonth = loggedinUser.trust_sent.filter(created_at__gt=month).count()
+            if trustsMonth > settings.TRUST_RATE_LIMIT_DAY:
+                raise ValidationError("max {} trusts per month".format(settings.TRUST_RATE_LIMIT_MONTH))
+
+            Trust.objects.create(sender=loggedinUser, reciever=self)
+        else:
+            trust[0].created_at = timezone.now()            
+            trust[0].save()
+    
+    def untrust_by(self, loggedinUser):
+        trust = self.trust_recieved.get(sender=loggedinUser)
+        if trust:
+            trust.delete()
+
+    def get_trust_by(self, loggedinUser):
+        minimum_creation_date = timezone.now()-timezone.timedelta(days=settings.TRUST_EXPIRE_TIME_DAYS)
+        trusts = self.trust_recieved.filter(sender=loggedinUser, created_at__gt=minimum_creation_date)
+        if trusts.exists():
+            return trusts.first()
+        else:
+            return None
+
+
+class Trust(BaseModel):
+    sender = ForeignKey(settings.AUTH_USER_MODEL, related_name='trust_sent', on_delete=models.CASCADE)
+    reciever = ForeignKey('users.User', related_name='trust_recieved', on_delete=models.CASCADE)
+    level = SmallIntegerField(default=5)
