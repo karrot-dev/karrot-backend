@@ -105,12 +105,6 @@ class TestHistoryAPIWithExistingStore(APITestCase, ExtractPaginationMixin):
         response = self.get_results(history_url)
         self.assertEqual(len(response.data), 0)
 
-    def test_delete_store(self):
-        self.client.force_login(self.member)
-        self.client.delete(self.store_url, {'name': 'new'})
-        response = self.get_results(history_url)
-        self.assertEqual(response.data[0]['typus'], 'STORE_DELETE')
-
     def test_create_pickup(self):
         self.client.force_login(self.member)
         self.client.post('/api/pickup-dates/', {
