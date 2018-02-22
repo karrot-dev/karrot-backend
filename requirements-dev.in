@@ -3,3 +3,5 @@ ipython
 requests-mock
 tblib
 autopep8
+pytest-django
+pytest-xdist

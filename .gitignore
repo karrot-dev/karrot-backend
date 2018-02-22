@@ -1,7 +1,9 @@
 # Python
 **/__pycache__/
+.pytest_cache
 env
 myvenv
+test-results
 
 # Project
 /config/local_settings.py
