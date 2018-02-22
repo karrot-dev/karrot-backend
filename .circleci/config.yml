@@ -18,25 +18,25 @@ jobs:
       - restore_cache:
           key: python-cache
       - run:
+          name: configure and run tests
+          environment:
+            LC_ALL: C.UTF-8
+            LANG: C.UTF-8
           command: |
-            export LC_ALL=C.UTF-8
-            export LANG=C.UTF-8
             test -d env/bin || virtualenv -p python3 env
-            env/bin/pip install --upgrade pip
-            env/bin/pip install pip-tools
-            env/bin/pip-sync requirements*.txt
+            source env/bin/activate
+            pip install --upgrade pip
+            pip install pip-tools
+            pip-sync requirements*.txt
             cp config/local_settings.py.ci config/local_settings.py
-            env/bin/coverage run manage.py test --parallel 4
-            env/bin/flake8 ./
-            env/bin/coverage html -d coverage-report
-            env/bin/pip install codecov && env/bin/codecov
+            coverage run manage.py test --parallel 4
+            flake8 ./
+            pip install codecov && codecov
       - save_cache:
           paths:
             - env
             - ~/.cache/pip
           key: python-cache
-      - store_artifacts:
-          path: coverage-report
 
 workflows:
   version: 2
