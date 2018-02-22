@@ -21,7 +21,7 @@ jobs:
           command: |
             export LC_ALL=C.UTF-8
             export LANG=C.UTF-8
-            virtualenv -p python3 env
+            test -d env/bin || virtualenv -p python3 env
             env/bin/pip install --upgrade pip
             env/bin/pip install pip-tools
             env/bin/pip-sync requirements*.txt
