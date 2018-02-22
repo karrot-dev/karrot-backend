@@ -9,13 +9,7 @@ if [ -z "$name" ]; then
   exit 1
 fi
 
-BRANCH=$CIRCLE_BRANCH
-
-if [ -z "$BRANCH" ]; then
-  BRANCH=$(git rev-parse --abbrev-ref HEAD)
-fi
-
-echo "deploying branch [$BRANCH] to [$name]"
+echo "deploying branch [$name]"
 
 git clone https://github.com/yunity/yuca yuca
 
