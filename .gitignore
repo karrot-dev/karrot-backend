@@ -4,6 +4,7 @@
 env
 myvenv
 test-results
+.coverage
 
 # Project
 /config/local_settings.py

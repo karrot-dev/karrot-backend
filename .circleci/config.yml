@@ -30,7 +30,7 @@ jobs:
             pip-sync requirements*.txt
             cp config/local_settings.py.ci config/local_settings.py
             mkdir -p test-reports
-            coverage run pytest -n 4 --junitxml=test-reports/backend.xml
+            pytest -n 4 --cov=foodsaving --cov-report xml --junitxml=test-reports/backend.xml
             flake8 ./
             pip install codecov && codecov
       - store_test_results:
