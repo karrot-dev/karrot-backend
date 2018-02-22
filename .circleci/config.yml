@@ -29,7 +29,7 @@ jobs:
             env/bin/coverage run manage.py test
             env/bin/flake8 ./
             env/bin/coverage html -d coverage-report
-            env/bin/pip install codecov && codecov
+            env/bin/pip install codecov && env/bin/codecov
       - save_cache:
           paths:
             - env
