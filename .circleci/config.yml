@@ -1,9 +1,14 @@
+defaults: &defaults
+    working_directory: ~/repo
+    docker:
+      - image: karrot/python:1.4
+
 version: 2
 jobs:
   test:
-    working_directory: ~/repo
+    <<: *defaults
     docker:
-      - image: karrot/python:1.3
+      - image: karrot/python:1.4
         environment:
           PGHOST: 127.0.0.1
       - image: circleci/postgres:9.6.2
@@ -43,8 +48,44 @@ jobs:
             - ~/.cache/pip
           key: python-cache
 
+  deploy-dev:
+    <<: *defaults
+    steps:
+      - run: ./deploy.sh karrot-dev
+
+  deploy-karrot-world:
+    <<: *defaults
+    steps:
+      - run: ./deploy.sh karrot-world
+            
+  deploy-foodsharing-taiwan:
+    <<: *defaults
+    steps:
+      - run: ./deploy.sh foodsharing-taiwan
+
 workflows:
   version: 2
   all-the-things:
     jobs:
       - test
+      - deploy-dev:
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - test
+      - deploy-karrot-world:
+          filters:
+            branches:
+              only:
+                - production
+          requires:
+            - test
+      - deploy-foodsharing-taiwan:
+          filters:
+            branches:
+              only:
+                - production
+          requires:
+            - test
