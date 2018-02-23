@@ -1,0 +1,8 @@
+{
+  "name": "karrot-mjml",
+  "version": "1.0.0",
+  "dependencies": {
+    "find": "^0.2.9",
+    "mjml": "^3.3.5"
+  }
+}
