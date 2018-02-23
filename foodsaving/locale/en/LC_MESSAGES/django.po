@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-23 15:00+0000\n"
+"POT-Creation-Date: 2018-02-23 22:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 #: foodsaving/base/templates/base-text.jinja2:1
 #, python-format
 msgid "Hello %(full_name)s,"
@@ -70,8 +70,7 @@ msgstr ""
 msgid "An invitation has already been sent to this e-mail address"
 msgstr ""
 
-#: foodsaving/invitations/serializers.py:26
-#: foodsaving/stores/serializers.py:64
+#: foodsaving/invitations/serializers.py:26 foodsaving/stores/serializers.py:64
 msgid "You are not a member of this group."
 msgstr ""
 
@@ -147,7 +146,7 @@ msgstr ""
 msgid "You aren't assigned to the pickup."
 msgstr ""
 
-#: foodsaving/pickups/templates/upcoming_pickup_slack.jinja2:1
+#: foodsaving/pickups/templates/upcoming_pickup.slack.jinja2:1
 #, python-format
 msgid ""
 "Food pick-up in %(number_of_hours)s hours, <%(store_page_url)s|click here> "
@@ -180,6 +179,11 @@ msgstr ""
 
 #: foodsaving/users/templates/accountdelete_request.subject.jinja2:1
 msgid "Request to delete your account"
+msgstr ""
+
+#: foodsaving/users/templates/accountdelete_request.text.jinja2:3
+#, python-format
+msgid "Request to delete your account on %(site_name)s."
 msgstr ""
 
 #: foodsaving/users/templates/accountdelete_success.subject.jinja2:1
@@ -238,8 +242,8 @@ msgstr ""
 
 #: foodsaving/users/templates/mailverification.html.jinja2:88
 msgid ""
-"Before we get started, please confirm your email address by clicking the "
-"link below:"
+"After we get started, please confirm your email address by clicking the link "
+"below:"
 msgstr ""
 
 #: foodsaving/users/templates/mailverification.subject.jinja2:1
