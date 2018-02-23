@@ -216,22 +216,28 @@ Please set the python interpreter to the virtual env python created during durin
 
 For all those who love Vim, just enable syntax checking and add python and django plugins to Vim. Follow [using vim with django](https://code.djangoproject.com/wiki/UsingVimWithDjango).
 
-# Template viewer
+# Email template viewer
 
-There is a nice template browser you can use. Notes here are rough for now.
+When editing emails it's useful to be able to see how they will be rendered.
 
-Assuming you're all up and running, visit [localhost:8000/\_templates](http://localhost:8000/_templates) this shows you all the templates and you can browser the subject, plain, and html versions of them.
+Assuming the server is running you can visit visit [localhost:8000/\_templates](http://localhost:8000/_templates).
 
-If you want hot reloading run:
-
+To compile the `.mjml` templates to `.html.jinja2` files you can run:
 ```
 cd mjml
 yarn
+./convert
+```
+
+If you want to watch for changes, and support hot reloading then run:
+
+```
 ./convert --watch
 ```
 
-This will convert `.mjml` templates into `.html.jinja2` templates (never edit `.html.jinja2` files by hand).
+(refresh your browser after starting the server as the websocket is not reconnecting)
 
-Reload the browser (as it connects to a websocket server that did not exist when you first loaded the page).
+_Note: you should never edit `.html.jinja2` files directly._ 
+
 
 Enjoy! ... oh and be sure to visit https://mjml.io/documentation/#components to find some nice components to use.
