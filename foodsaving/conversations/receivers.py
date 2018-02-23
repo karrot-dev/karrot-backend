@@ -7,6 +7,7 @@ from django.dispatch import receiver
 
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage
 from foodsaving.webhooks.api import make_local_part
+from foodsaving.webhooks.models import EmailEvent
 
 
 @receiver(post_save, sender=ConversationMessage)
@@ -27,13 +28,17 @@ def mark_as_read(sender, instance, **kwargs):
 def notify_participants(sender, instance, **kwargs):
     message = instance
 
-    participants = ConversationParticipant.objects.filter(
+    participants_to_notify = ConversationParticipant.objects.filter(
         conversation=message.conversation,
         email_notifications=True
     ).exclude(
         user=message.author
+    ).exclude(
+        user__email__in=EmailEvent.objects.filter(event='bounce').values('address')
     )
-    for participant in participants:
+
+    # TODO make into nice template
+    for participant in participants_to_notify:
         local_part = make_local_part(message.conversation, participant.user)
         reply_to = formataddr(('Reply to Conversation', '{}@replies.karrot.world'.format(local_part)))
         AnymailMessage(
