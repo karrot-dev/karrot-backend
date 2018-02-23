@@ -123,7 +123,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         self.language = language
 
     def _send_mail_change_notification(self):
-        send_email('changemail_notice', self)
+        send_email('changemail_notice', self, {})
 
     def _send_welcome_mail(self):
         self._unverify_mail()
@@ -132,7 +132,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
                 hostname=settings.HOSTNAME,
                 code=VerificationCode.objects.get(user=self, type=VerificationCode.EMAIL_VERIFICATION).code
             )
-        })
+        }, to=self.unverified_email)
 
     @transaction.atomic
     def send_new_verification_code(self):
@@ -142,14 +142,14 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
                 hostname=settings.HOSTNAME,
                 code=VerificationCode.objects.get(user=self, type=VerificationCode.EMAIL_VERIFICATION).code
             )
-        })
+        }, to=self.unverified_email)
 
     @transaction.atomic
     def reset_password(self):
         new_password = User.objects.make_random_password(length=20)
         self.set_password(new_password)
         self.save()
-        send_email('newpassword', self, { 'password': new_password })
+        send_email('newpassword', self, {'password': new_password})
 
     def has_perm(self, perm, obj=None):
         # temporarily only allow access for admins
