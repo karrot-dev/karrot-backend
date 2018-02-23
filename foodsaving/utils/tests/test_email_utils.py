@@ -1,4 +1,3 @@
-from django.utils.translation import activate
 from rest_framework.test import APITestCase
 
 from config import settings
@@ -28,6 +27,7 @@ class TestEmailUtils(APITestCase):
         self.assertIn(str(invitation.token), email.body)
         self.assertIn(settings.SITE_NAME, email.body)
         self.assertIn(settings.HOSTNAME, email.body)
+        self.assertNotIn('&amp;', email.body)
 
     def test_mailverification(self):
         verification_code = VerificationCode.objects.get(user=self.user)
