@@ -7,19 +7,21 @@ from config import settings
 
 
 def prepare_accountdelete_request_email(user):
-    return prepare_email('accountdelete_request', user, {})
+    return prepare_email('accountdelete_request', user)
 
 
 def prepare_accountdelete_success_email(user):
-    return prepare_email('accountdelete_success', user, {})
+    return prepare_email('accountdelete_success', user)
 
 
 def prepare_changemail_notice_email(user):
-    return prepare_email('changemail_notice', user, {})
+    return prepare_email('changemail_notice', user)
 
 
 def prepare_changemail_success_email(user):
-    return prepare_email('changemail_success', user, {})
+    return prepare_email('changemail_success', user, {
+        'url': 'ERROR_URL_HAS_NOT_BEEN_DEFINED'
+    })
 
 
 def prepare_emailinvitation_email(invitation):
@@ -63,7 +65,7 @@ def prepare_send_new_verification_code_email(user, verification_code):
     return prepare_email('send_new_verification_code', user, {
         'url': '{hostname}/#/verify-mail?key={code}'.format(
             hostname=settings.HOSTNAME,
-            code=verification_code
+            code=verification_code.code
         )
     }, to=user.unverified_email)
 
