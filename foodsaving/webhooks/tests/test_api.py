@@ -1,3 +1,5 @@
+from base64 import b64encode
+
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -23,7 +25,7 @@ class TestEmailReplyAPI(APITestCase):
                 'rcpt_to': '{}@example.com'.format(reply_token),
                 'content': {'text': 'message body'}
             }}}],
-            headers={'HTTP_X_MESSAGESYSTEMS_WEBHOOK_TOKEN': 'test_key'},
+            HTTP_X_MESSAGESYSTEMS_WEBHOOK_TOKEN='test_key',
             format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.data)
@@ -31,13 +33,17 @@ class TestEmailReplyAPI(APITestCase):
 
 
 class TestEmailEventAPI(APITestCase):
+
+    @override_settings(SPARKPOST_WEBHOOK_KEY='test_key')
     def test_receive_incoming_email(self):
+        basic_auth = 'basic {}'.format(b64encode('asdf:test_key'.encode()).decode())
         response = self.client.post(
             '/api/webhooks/email_event/',
             data=[{'msys': {'message_event': {
                 'type': 'bounce',
                 'rcpt_to': 'spam@example.com'
             }}}],
+            HTTP_AUTHORIZATION=basic_auth,
             format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.data)
