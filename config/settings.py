@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'foodsaving.stores.StoresConfig',
     'foodsaving.pickups.PickupsConfig',
     'foodsaving.invitations.InvitationsConfig',
+    'foodsaving.template_previews',
     'foodsaving.webhooks.WebhooksConfig',
 
     # removed app, it's just here that the migration can run
@@ -95,7 +96,7 @@ TEMPLATES = [
         "BACKEND": "django_jinja.backend.Jinja2",
         "APP_DIRS": True,
         "OPTIONS": {
-            "match_extension": ".jinja",
+            "match_extension": ".jinja2",
             "extensions": [
                 "jinja2.ext.i18n",
             ],
