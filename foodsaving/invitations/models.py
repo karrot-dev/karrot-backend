@@ -63,11 +63,11 @@ class Invitation(BaseModel):
             'invited_by_name': self.invited_by.display_name,
         }
 
-        return render_to_string('emailinvitation-body-text.jinja', context)
+        return render_to_string('emailinvitation.text.jinja2', context)
 
     def send_mail(self):
         AnymailMessage(
-            subject=render_to_string('emailinvitation-subject.jinja').replace('\n', ''),
+            subject=render_to_string('emailinvitation.subject.jinja2').replace('\n', ''),
             body=self.get_email_body(),
             to=[self.email],
             from_email=settings.DEFAULT_FROM_EMAIL,

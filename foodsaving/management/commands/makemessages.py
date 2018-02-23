@@ -6,9 +6,9 @@ class Command(DjangoJinjaMakeMessagesCommand):
     @classmethod
     def update_options(cls, **options):
         if options.get('extensions', None) and 'jinja' not in options['extensions']:
-            options['extensions'] += ['jinja']
+            options['extensions'] += ['jinja', 'jinja2']
         else:
-            options['extensions'] = ['html', 'txt', 'py', 'jinja']
+            options['extensions'] = ['html', 'txt', 'py', 'jinja', 'jinja2']
 
         if 'en' not in options['locale']:
             options['locale'].append('en')
