@@ -8,7 +8,7 @@ from django.test import TestCase
 
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.users.factories import UserFactory
-from foodsaving.utils import email
+from foodsaving.utils import email_utils
 from foodsaving.utils.tests.fake import faker
 
 
@@ -73,7 +73,7 @@ class TestUserModel(TestCase):
 class TestSendMail(TestCase):
     def setUp(self):
         # Mock AnymailMessage to throw error on send
-        self.mail_class = email.AnymailMessage
+        self.mail_class = email_utils.AnymailMessage
         self._original_send = self.mail_class.send
         self.mail_class.send = MagicMock(side_effect=AnymailAPIError())
 

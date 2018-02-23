@@ -215,3 +215,23 @@ Please set the python interpreter to the virtual env python created during durin
 ### Vim
 
 For all those who love Vim, just enable syntax checking and add python and django plugins to Vim. Follow [using vim with django](https://code.djangoproject.com/wiki/UsingVimWithDjango).
+
+# Template viewer
+
+There is a nice template browser you can use. Notes here are rough for now.
+
+Assuming you're all up and running, visit [localhost:8000/\_templates](http://localhost:8000/_templates) this shows you all the templates and you can browser the subject, plain, and html versions of them.
+
+If you want hot reloading run:
+
+```
+cd mjml
+yarn
+./convert --watch
+```
+
+This will convert `.mjml` templates into `.html.jinja2` templates (never edit `.html.jinja2` files by hand).
+
+Reload the browser (as it connects to a websocket server that did not exist when you first loaded the page).
+
+Enjoy! ... oh and be sure to visit https://mjml.io/documentation/#components to find some nice components to use.

@@ -15,7 +15,7 @@ from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.userauth.models import VerificationCode
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
-from foodsaving.utils import email
+from foodsaving.utils import email_utils
 from foodsaving.utils.tests.fake import faker
 
 
@@ -179,7 +179,7 @@ class TestRejectedAddress(APITestCase):
         self.url = '/api/auth/user/'
 
         # Mock AnymailMessage to throw error on send
-        self.mail_class = email.AnymailMessage
+        self.mail_class = email_utils.AnymailMessage
         self._original_send = self.mail_class.send
         self.mail_class.send = MagicMock(side_effect=AnymailAPIError())
 

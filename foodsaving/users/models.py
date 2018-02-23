@@ -6,7 +6,7 @@ from versatileimagefield.fields import VersatileImageField
 
 from foodsaving.base.base_models import BaseModel, LocationModel
 from foodsaving.userauth.models import VerificationCode
-from foodsaving.utils.email import send_email
+from foodsaving.utils.email_utils import prepare_mailverification_email, prepare_email
 
 MAX_DISPLAY_NAME_LENGTH = 80
 
@@ -123,33 +123,31 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         self.language = language
 
     def _send_mail_change_notification(self):
-        send_email('changemail_notice', self, {})
+        prepare_email('changemail_notice', self, {}).send()
 
     def _send_welcome_mail(self):
         self._unverify_mail()
-        send_email('mailverification', self, {
-            'url': '{hostname}/#/verify-mail?key={code}'.format(
-                hostname=settings.HOSTNAME,
-                code=VerificationCode.objects.get(user=self, type=VerificationCode.EMAIL_VERIFICATION).code
-            )
-        }, to=self.unverified_email)
+        prepare_mailverification_email(
+            user=self,
+            verification_code=VerificationCode.objects.get(user=self, type=VerificationCode.EMAIL_VERIFICATION)
+        ).send()
 
     @transaction.atomic
     def send_new_verification_code(self):
         self._unverify_mail()
-        send_email('send_new_verification_code', self, {
+        prepare_email('send_new_verification_code', self, {
             'url': '{hostname}/#/verify-mail?key={code}'.format(
                 hostname=settings.HOSTNAME,
                 code=VerificationCode.objects.get(user=self, type=VerificationCode.EMAIL_VERIFICATION).code
             )
-        }, to=self.unverified_email)
+        }, to=self.unverified_email).send()
 
     @transaction.atomic
     def reset_password(self):
         new_password = User.objects.make_random_password(length=20)
         self.set_password(new_password)
         self.save()
-        send_email('newpassword', self, {'password': new_password})
+        prepare_email('newpassword', self, {'password': new_password}).send()
 
     def has_perm(self, perm, obj=None):
         # temporarily only allow access for admins
