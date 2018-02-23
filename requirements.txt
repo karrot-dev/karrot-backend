@@ -10,14 +10,16 @@ asgiref==1.1.2            # via asgi-redis, channels, daphne
 attrs==17.4.0             # via automat
 autobahn==17.10.1         # via daphne
 automat==0.6.0            # via twisted
+cchardet==2.1.1           # via talon
 certifi==2018.1.18        # via requests
 cffi==1.11.4              # via argon2-cffi
 channels==1.1.8
-chardet==3.0.4            # via requests
+chardet==3.0.4            # via requests, talon
 constantly==15.1.0        # via twisted
 cookies==2.2.1            # via responses
 coreapi==2.3.3            # via django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via coreapi
+cssselect==1.0.3          # via talon
 daphne==1.4.2             # via channels
 django-anymail==1.2
 django-cors-headers==2.1.0
@@ -39,16 +41,19 @@ faker==0.8.10             # via factory-boy
 flake8==3.5.0
 furl==1.0.1
 hiredis==0.2.0
+html5lib==1.0.1           # via talon
 hyperlink==17.3.1         # via twisted
 idna==2.6                 # via requests
 incremental==17.5.0       # via twisted
 influxdb==5.0.0           # via django-influxdb-metrics
 itypes==1.1.0             # via coreapi
 jinja2==2.10              # via coreschema, django-jinja
+lxml==4.1.1               # via talon
 markdown==2.6.11
 markupsafe==1.0           # via jinja2
 mccabe==0.6.1             # via flake8
 msgpack-python==0.5.1     # via asgi-redis
+numpy==1.14.1             # via scipy, talon
 olefile==0.45.1           # via pillow
 openapi-codec==1.3.2      # via django-rest-swagger
 orderedmultidict==0.7.11  # via furl
@@ -64,12 +69,16 @@ python-server-metrics==0.2.1  # via django-influxdb-metrics
 pytz==2017.3
 raven==6.5.0
 redis==2.10.6
+regex==2018.2.21          # via talon
 requests-toolbelt==0.8.0  # via pyfcm
 requests==2.18.4          # via coreapi, django-anymail, influxdb, pyfcm, requests-toolbelt, responses, sparkpost
 responses==0.8.1
+scikit-learn==0.19.1      # via talon
+scipy==1.0.0              # via talon
 simplejson==3.13.2        # via django-rest-swagger
-six==1.11.0               # via argon2-cffi, asgi-redis, asgiref, autobahn, automat, django-anymail, django-extensions, faker, furl, influxdb, orderedmultidict, python-dateutil, responses, tld, txaio
+six==1.11.0               # via argon2-cffi, asgi-redis, asgiref, autobahn, automat, django-anymail, django-extensions, faker, furl, html5lib, influxdb, orderedmultidict, python-dateutil, responses, talon, tld, txaio
 sparkpost==1.3.5
+talon==1.4.4
 text-unidecode==1.1       # via faker
 tld==0.7.9                # via django-influxdb-metrics
 twisted==17.9.0           # via daphne
@@ -77,4 +86,5 @@ txaio==2.8.2              # via autobahn
 typing==3.6.4             # via django-extensions
 uritemplate==3.0.0        # via coreapi
 urllib3==1.22             # via requests
+webencodings==0.5.1       # via html5lib
 zope.interface==4.4.3     # via twisted

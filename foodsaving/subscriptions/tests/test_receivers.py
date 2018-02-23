@@ -26,6 +26,7 @@ from foodsaving.utils.tests.fake import faker
 
 class ConversationReceiverTests(ChannelTestCase):
     def test_receives_messages(self):
+        self.maxDiff = None
         client = WSClient()
         user = UserFactory()
         author_client = WSClient()

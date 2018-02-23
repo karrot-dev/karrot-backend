@@ -35,6 +35,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # ANYMAIL = {
 #     "SPARKPOST_API_KEY": "your sparkpost key"
 # }
+# SPARKPOST_INCOMING_KEY = ''
+# https://developers.sparkpost.com/api/relay-webhooks.html
 
 DEFAULT_FROM_EMAIL = "your mail domain"  # can be anything if using the console backend
 HOSTNAME = 'https://localhost:8000'  # for constructing the frontend URL

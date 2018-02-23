@@ -1,7 +1,12 @@
+from email.utils import formataddr
+
+from anymail.message import AnymailMessage
+from django.conf import settings
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage
+from foodsaving.webhooks.api import make_local_part
 
 
 @receiver(post_save, sender=ConversationMessage)
@@ -16,6 +21,30 @@ def mark_as_read(sender, instance, **kwargs):
 
     participant.seen_up_to = message
     participant.save()
+
+
+@receiver(post_save, sender=ConversationMessage)
+def notify_participants(sender, instance, **kwargs):
+    message = instance
+
+    participants = ConversationParticipant.objects.filter(
+        conversation=message.conversation,
+        email_notifications=True
+    ).exclude(
+        user=message.author
+    )
+    for participant in participants:
+        local_part = make_local_part(message.conversation, participant.user)
+        reply_to = formataddr(('Reply to Conversation', '{}@replies.karrot.world'.format(local_part)))
+        AnymailMessage(
+            subject='New conversation message from {}'.format(message.author.display_name),
+            body=message.content,
+            to=[participant.user.email],
+            reply_to=[reply_to],
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            track_clicks=False,
+            track_opens=False
+        ).send()
 
 
 @receiver(post_save, sender=ConversationParticipant)

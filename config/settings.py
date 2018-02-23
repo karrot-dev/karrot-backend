@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'foodsaving.stores.StoresConfig',
     'foodsaving.pickups.PickupsConfig',
     'foodsaving.invitations.InvitationsConfig',
+    'foodsaving.webhooks.WebhooksConfig',
 
     # removed app, it's just here that the migration can run
     'foodsaving.walls',
@@ -138,6 +139,7 @@ SESSION_CACHE_ALIAS = "default"
 WSGI_APPLICATION = 'config.wsgi.application'
 
 EMAIL_BACKEND = "anymail.backends.sparkpost.EmailBackend"
+SPARKPOST_INCOMING_KEY = ''
 
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.Argon2PasswordHasher',

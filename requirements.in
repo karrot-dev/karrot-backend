@@ -23,7 +23,8 @@ django-timezone-field
 raven
 responses
 furl
-channels
+channels~=1.1
 asgi_redis
 pyfcm
 django-versatileimagefield
+talon
