@@ -206,26 +206,3 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
 
         participant.refresh_from_db()
         self.assertTrue(participant.email_notifications)
-
-    # https://github.com/yunity/karrot-backend/issues/490
-    # def test_send_email_notifications(self):
-    #     users = [UserFactory() for _ in range(3)]
-    #     [self.conversation.join(u) for u in users]
-    #
-    #     mail.outbox = []
-    #     ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
-    #
-    #     actual_recipients = set(m.to[0] for m in mail.outbox)
-    #     expected_recipients = set(u.email for u in users)
-    #     self.assertEqual(actual_recipients, expected_recipients)
-    #
-    #     self.assertEqual(len(mail.outbox), 3)
-    #
-    # def test_exclude_bounced_addresses(self):
-    #     bounce_user = UserFactory()
-    #     self.conversation.join(bounce_user)
-    #     EmailEvent.objects.create(address=bounce_user.email, event='bounce', payload={})
-    #
-    #     mail.outbox = []
-    #     ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
-    #     self.assertEqual(len(mail.outbox), 0)

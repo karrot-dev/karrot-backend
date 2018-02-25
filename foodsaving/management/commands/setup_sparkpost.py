@@ -9,12 +9,10 @@ class Command(BaseCommand):
         print(response.request.method, response.request.url, response.status_code, response.json())
 
     def handle(self, *args, **options):
-        # TODO use sparkpost subaccounts to receive correct emailevents
-
         # use subaccounts for sending emails and receiving emailevents
         # use main account for setting up relay
 
-        hostname = 'https://d0a00370.ngrok.io'
+        hostname = settings.HOSTNAME
 
         s = requests.Session()
 

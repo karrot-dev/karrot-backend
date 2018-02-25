@@ -40,7 +40,7 @@ INSTALLED_APPS = (
     'foodsaving.pickups.PickupsConfig',
     'foodsaving.invitations.InvitationsConfig',
     'foodsaving.template_previews',
-    'foodsaving.webhooks.WebhooksConfig',
+    'foodsaving.webhooks',
 
     # removed app, it's just here that the migration can run
     'foodsaving.walls',

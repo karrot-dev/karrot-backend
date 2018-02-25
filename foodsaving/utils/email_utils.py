@@ -64,19 +64,20 @@ def prepare_conversation_message_notification(user, message):
     reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
     from_email = formataddr((message.author.display_name, 'noreply@{}'.format(settings.HOSTNAME)))
 
-    return prepare_email(
-        'conversation_message_notification',
-        from_email=from_email,
-        user=user,
-        reply_to=[reply_to],
-        extra_context={
-            'conversation_name': conversation_name,
-            'author_name': message.author.display_name,
-            'message_content': message.content,
-            'conversation_url': conversation_url,
-            'mute_url': conversation_url + '?mute=1'
-        }
-    )
+    with translation.override(user.language):
+        return prepare_email(
+            'conversation_message_notification',
+            from_email=from_email,
+            user=user,
+            reply_to=[reply_to],
+            extra_context={
+                'conversation_name': conversation_name,
+                'author_name': message.author.display_name,
+                'message_content': message.content,
+                'conversation_url': conversation_url,
+                'mute_url': conversation_url + '?mute=1'
+            }
+        )
 
 
 def prepare_emailinvitation_email(invitation):
