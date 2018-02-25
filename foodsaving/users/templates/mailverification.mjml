@@ -6,7 +6,7 @@
     <mj-body>
         <mj-container>
             <mj-include path="../../base/templates/_header.mjml"/>
-            <mj-section background-color="#ffffff" padding="40px 0 40px 0">
+            <mjml-section background-color="#ffffff" padding="40px 0 40px 0">
                 <mj-column width="80%">
                     <mj-text>
                         <h1>{% trans %}Thank you for signing up to {{ site_name }}!{% endtrans %}</h1>
@@ -19,7 +19,7 @@
                         {% trans %}Verify your email address{% endtrans %}
                     </mj-button>
                 </mj-column>
-            </mj-section>
+            </mjml-section>
             <mj-include path="../../base/templates/_footer.mjml"/>
         </mj-container>
     </mj-body>
