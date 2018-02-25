@@ -161,7 +161,7 @@ def prepare_email(template, user=None, extra_context=None, to=None):
             })
 
         if not to:
-            if user:
+            if not user:
                 raise Exception('Do not know who to send the email to, no "user" or "to" field')
             to = user.email
 
