@@ -10,7 +10,7 @@ drf-nested-routers
 factory-boy
 hiredis
 markdown
-psycopg2
+psycopg2-binary
 redis
 flake8
 pytz

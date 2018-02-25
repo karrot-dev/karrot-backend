@@ -26,6 +26,8 @@ def mark_as_read(sender, instance, **kwargs):
 @receiver(post_save, sender=ConversationMessage)
 def notify_participants(sender, instance, **kwargs):
     message = instance
+    if not message.conversation.target:
+        return
 
     # exclude emails that had bounces or similar events recently
     ignored_addresses = EmailEvent.objects.filter(created_at__gte=now() - relativedelta(months=6)).values('address')

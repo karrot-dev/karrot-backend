@@ -48,8 +48,11 @@ def prepare_changemail_success_email(user):
 
 
 def prepare_conversation_message_notification(user, message):
-    # TODO make more general once conversations are implemented for models other than groups
-    group = Group.objects.get(id=message.conversation.target_id)
+    group = message.conversation.target
+    target_type = message.conversation.target_type
+    if group is None or target_type != ContentType.objects.get_for_model(Group):
+        raise Exception('Cannot send message notification if conversation does not belong to a group')
+
     reply_to_name = group.name
     conversation_url = '{hostname}/#/group/{group_id}/wall'.format(
         hostname=settings.HOSTNAME,
@@ -57,15 +60,14 @@ def prepare_conversation_message_notification(user, message):
     )
     conversation_name = group.name
 
-    # TODO put message author in FROM name
-
     local_part = make_local_part(message.conversation, user)
     reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
     from_email = formataddr((message.author.display_name, 'noreply@{}'.format(settings.HOSTNAME)))
+
     return prepare_email(
         'conversation_message_notification',
         from_email=from_email,
-        to=user,
+        user=user,
         reply_to=[reply_to],
         extra_context={
             'conversation_name': conversation_name,

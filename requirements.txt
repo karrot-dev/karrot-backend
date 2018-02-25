@@ -59,7 +59,7 @@ openapi-codec==1.3.2      # via django-rest-swagger
 orderedmultidict==0.7.11  # via furl
 pillow==5.0.0             # via django-versatileimagefield
 psutil==5.4.3             # via python-server-metrics
-psycopg2==2.7.4
+psycopg2-binary==2.7.4
 pycodestyle==2.3.1        # via flake8
 pycparser==2.18           # via cffi
 pyfcm==1.4.5
