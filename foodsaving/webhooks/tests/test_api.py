@@ -16,7 +16,7 @@ class TestEmailReplyAPI(APITestCase):
         self.conversation = ConversationFactory()
         self.conversation.join(self.user)
 
-    @override_settings(SPARKPOST_INCOMING_KEY='test_key')
+    @override_settings(SPARKPOST_RELAY_SECRET='test_key')
     def test_receive_incoming_email(self):
         reply_token = make_local_part(self.conversation, self.user)
         response = self.client.post(
@@ -34,7 +34,7 @@ class TestEmailReplyAPI(APITestCase):
 
 class TestEmailEventAPI(APITestCase):
 
-    @override_settings(SPARKPOST_WEBHOOK_KEY='test_key')
+    @override_settings(SPARKPOST_WEBHOOK_SECRET='test_key')
     def test_receive_incoming_email(self):
         basic_auth = 'basic {}'.format(b64encode('asdf:test_key'.encode()).decode())
         response = self.client.post(

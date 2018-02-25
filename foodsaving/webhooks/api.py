@@ -22,7 +22,7 @@ class IncomingEmailView(views.APIView):
         """
 
         auth_key = request.META.get('HTTP_X_MESSAGESYSTEMS_WEBHOOK_TOKEN')
-        if auth_key is None or auth_key != settings.SPARKPOST_INCOMING_KEY:
+        if auth_key is None or auth_key != settings.SPARKPOST_RELAY_SECRET:
             return Response(
                 status=status.HTTP_403_FORBIDDEN,
                 data={'message': 'Invalid HTTP_X_MESSAGESYSTEMS_WEBHOOK_TOKEN header'}
@@ -79,7 +79,7 @@ class EmailEventView(views.APIView):
             if len(auth) == 2:
                 if auth[0].lower() == "basic":
                     _, password = b64decode(auth[1]).decode().split(':', 1)
-                    return password == settings.SPARKPOST_WEBHOOK_KEY
+                    return password == settings.SPARKPOST_WEBHOOK_SECRET
 
     def post(self, request):
         """

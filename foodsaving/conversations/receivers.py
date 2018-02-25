@@ -1,9 +1,11 @@
 from email.utils import formataddr
 
 from anymail.message import AnymailMessage
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
+from django.utils.timezone import now
 
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage
 from foodsaving.webhooks.api import make_local_part
@@ -28,13 +30,16 @@ def mark_as_read(sender, instance, **kwargs):
 def notify_participants(sender, instance, **kwargs):
     message = instance
 
+    # exclude emails that had bounces or similar events recently
+    ignored_addresses = EmailEvent.objects.filter(created_at__gte=now() - relativedelta(months=6)).values('address')
+
     participants_to_notify = ConversationParticipant.objects.filter(
         conversation=message.conversation,
         email_notifications=True
     ).exclude(
         user=message.author
     ).exclude(
-        user__email__in=EmailEvent.objects.filter(event='bounce').values('address')
+        user__email__in=ignored_addresses
     )
 
     # TODO make into nice template
