@@ -5,6 +5,7 @@ from rest_framework.test import APITestCase
 
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage
+from foodsaving.tests.utils import MockTranslationMixin
 from foodsaving.users.factories import UserFactory
 from foodsaving.webhooks.models import EmailEvent
 
@@ -162,7 +163,7 @@ class TestConversationsSeenUpToAPI(APITestCase):
         self.assertEqual(response.data['seen_up_to'][0], 'Must refer to a message in the conversation')
 
 
-class TestConversationsEmailNotificationsAPI(APITestCase):
+class TestConversationsEmailNotificationsAPI(APITestCase, MockTranslationMixin):
     def setUp(self):
         self.conversation = ConversationFactory()
         self.user = UserFactory()

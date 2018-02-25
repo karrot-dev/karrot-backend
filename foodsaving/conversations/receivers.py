@@ -1,14 +1,11 @@
-from email.utils import formataddr
-
-from anymail.message import AnymailMessage
 from dateutil.relativedelta import relativedelta
-from django.conf import settings
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
+from django.utils import translation
 from django.utils.timezone import now
 
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage
-from foodsaving.webhooks.api import make_local_part
+from foodsaving.utils import email_utils
 from foodsaving.webhooks.models import EmailEvent
 
 
@@ -42,19 +39,9 @@ def notify_participants(sender, instance, **kwargs):
         user__email__in=ignored_addresses
     )
 
-    # TODO make into nice template
     for participant in participants_to_notify:
-        local_part = make_local_part(message.conversation, participant.user)
-        reply_to = formataddr(('Reply to Conversation', '{}@replies.karrot.world'.format(local_part)))
-        AnymailMessage(
-            subject='New conversation message from {}'.format(message.author.display_name),
-            body=message.content,
-            to=[participant.user.email],
-            reply_to=[reply_to],
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            track_clicks=False,
-            track_opens=False
-        ).send()
+        with translation.override(participant.user.language):
+            email_utils.prepare_conversation_message_notification(user=participant.user, message=message).send()
 
 
 @receiver(post_save, sender=ConversationParticipant)
