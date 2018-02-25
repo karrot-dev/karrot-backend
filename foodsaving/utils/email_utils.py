@@ -230,7 +230,7 @@ def prepare_email(template, user=None, context=None, to=None, language=None, **k
         language = user.language
 
     subject, text_content, html_content = prepare_email_content(template, context, language)
-    
+
     from_email = formataddr((settings.SITE_NAME, settings.DEFAULT_FROM_EMAIL))
 
     message_kwargs = {
