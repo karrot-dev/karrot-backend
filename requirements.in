@@ -28,3 +28,5 @@ asgi_redis
 pyfcm
 django-versatileimagefield
 talon
+jinja2
+html2text
