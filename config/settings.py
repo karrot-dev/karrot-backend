@@ -216,6 +216,26 @@ EMAIL_VERIFICATION_TIME_LIMIT_HOURS = 7 * 24
 PASSWORD_RESET_TIME_LIMIT_MINUTES = 180
 ACCOUNT_DELETE_TIME_LIMIT_MINUTES = 180
 
+
+# Default dummy settings, please override in local_settings.py
+DEFAULT_FROM_EMAIL = "testing@example.com"
+SPARKPOST_RELAY_DOMAIN = 'replies.karrot.localhost'
+HOSTNAME = 'https://localhost:8000'
+SITE_NAME = 'karrot.localhost'
+MEDIA_ROOT = './uploads/'
+MEDIA_URL = '/media/'
+INFLUXDB_DISABLED = True
+INFLUXDB_HOST = ''
+INFLUXDB_PORT = ''
+INFLUXDB_USER = ''
+INFLUXDB_PASSWORD = ''
+INFLUXDB_DATABASE = ''
+INFLUXDB_TAGS_HOST = ''
+INFLUXDB_TIMEOUT = 2
+INFLUXDB_USE_CELERY = False
+INFLUXDB_USE_THREADING = True
+
+
 # NB: Keep this as the last line, and keep
 # local_settings.py out of version control
 try:
