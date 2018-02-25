@@ -1,11 +1,22 @@
 import itertools
-
+from email.utils import formataddr
 import html2text
 from anymail.message import AnymailMessage
 from babel.dates import format_date, format_datetime
 from dateutil.relativedelta import relativedelta
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count
+from django.utils import formats, translation
+from django.utils import timezone
+import html2text
+from anymail.message import AnymailMessage
+from dateutil.relativedelta import relativedelta
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Count
+from django.template import TemplateDoesNotExist
+from django.template.loader import render_to_string, get_template
+from django.utils import formats, translation
+from django.utils import timezone
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string, get_template
 from django.utils import timezone
@@ -14,6 +25,7 @@ from django.utils.timezone import get_current_timezone
 from django.utils.translation import to_locale, get_language
 from furl import furl
 from jinja2 import Environment
+from foodsaving.webhooks.api import make_local_part
 
 from config import settings
 from foodsaving.conversations.models import ConversationMessage
@@ -25,14 +37,9 @@ def date_filter(value):
     return format_date(value, format='full', locale=to_locale(get_language()))
 
 
-def date2_filter(value):
-    return format_datetime(value, 'H:mm a', tzinfo=get_current_timezone(), locale=to_locale(get_language()))
-
-
 def jinja2_environment(**options):
     env = Environment(**options)
     env.filters['date'] = date_filter
-    env.filters['date2'] = date2_filter
     return env
 
 
@@ -52,6 +59,39 @@ def prepare_changemail_success_email(user):
     return prepare_email('changemail_success', user, {
         'url': 'ERROR_URL_HAS_NOT_BEEN_DEFINED'
     })
+
+
+def prepare_conversation_message_notification(user, message):
+    group = message.conversation.target
+    target_type = message.conversation.target_type
+    if group is None or target_type != ContentType.objects.get_for_model(Group):
+        raise Exception('Cannot send message notification if conversation does not belong to a group')
+
+    reply_to_name = group.name
+    conversation_url = '{hostname}/#/group/{group_id}/wall'.format(
+        hostname=settings.HOSTNAME,
+        group_id=group.id
+    )
+    conversation_name = group.name
+
+    local_part = make_local_part(message.conversation, user)
+    reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
+    from_email = formataddr((message.author.display_name, 'noreply@{}'.format(settings.HOSTNAME)))
+
+    with translation.override(user.language):
+        return prepare_email(
+            'conversation_message_notification',
+            from_email=from_email,
+            user=user,
+            reply_to=[reply_to],
+            context={
+                'conversation_name': conversation_name,
+                'author_name': message.author.display_name,
+                'message_content': message.content,
+                'conversation_url': conversation_url,
+                'mute_url': conversation_url + '?mute=1'
+            }
+        )
 
 
 def prepare_emailinvitation_email(invitation):
@@ -163,7 +203,6 @@ def prepare_send_new_verification_code_email(user, verification_code):
         )
     }, to=user.unverified_email)
 
-
 def generate_plaintext_from_html(html):
     # always create an instance as it keeps state inside it
     # and will create ever increment link references otherwise
@@ -173,8 +212,7 @@ def generate_plaintext_from_html(html):
     h.ignore_images = True
     return h.handle(html)
 
-
-def prepare_email(template, user=None, context=None, to=None, language=None):
+def prepare_email(template, user=None, context=None, to=None, language=None, **kwargs):
     context = dict(context) if context else {}
 
     context.update({
@@ -201,20 +239,22 @@ def prepare_email(template, user=None, context=None, to=None, language=None):
 
     subject, text_content, html_content = prepare_email_content(template, context, language)
 
-    email = AnymailMessage(
-        subject=subject,
-        body=text_content,
-        to=to,
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        track_clicks=False,
-        track_opens=False
-    )
+    message_kwargs = {
+        'subject': subject,
+        'body': text_content,
+        'to': [to],
+        'from_email': settings.DEFAULT_FROM_EMAIL,
+        'track_clicks': False,
+        'track_opens': False,
+        **kwargs,
+    }
+
+    email = AnymailMessage(**message_kwargs)
 
     if html_content:
         email.attach_alternative(html_content, 'text/html')
 
     return email
-
 
 def prepare_email_content(template, context, language='en'):
     with translation.override(language):
