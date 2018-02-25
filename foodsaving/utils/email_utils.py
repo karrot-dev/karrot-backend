@@ -1,22 +1,12 @@
 import itertools
 from email.utils import formataddr
+
 import html2text
 from anymail.message import AnymailMessage
-from babel.dates import format_date, format_datetime
+from babel.dates import format_date
 from dateutil.relativedelta import relativedelta
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count
-from django.utils import formats, translation
-from django.utils import timezone
-import html2text
-from anymail.message import AnymailMessage
-from dateutil.relativedelta import relativedelta
-from django.contrib.contenttypes.models import ContentType
-from django.db.models import Count
-from django.template import TemplateDoesNotExist
-from django.template.loader import render_to_string, get_template
-from django.utils import formats, translation
-from django.utils import timezone
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string, get_template
 from django.utils import timezone
@@ -25,12 +15,12 @@ from django.utils.timezone import get_current_timezone
 from django.utils.translation import to_locale, get_language
 from furl import furl
 from jinja2 import Environment
-from foodsaving.webhooks.api import make_local_part
 
 from config import settings
 from foodsaving.conversations.models import ConversationMessage
 from foodsaving.groups.models import Group
 from foodsaving.pickups.models import PickupDate
+from foodsaving.webhooks.api import make_local_part
 
 
 def date_filter(value):
@@ -203,6 +193,7 @@ def prepare_send_new_verification_code_email(user, verification_code):
         )
     }, to=user.unverified_email)
 
+
 def generate_plaintext_from_html(html):
     # always create an instance as it keeps state inside it
     # and will create ever increment link references otherwise
@@ -211,6 +202,7 @@ def generate_plaintext_from_html(html):
     h.inline_links = False
     h.ignore_images = True
     return h.handle(html)
+
 
 def prepare_email(template, user=None, context=None, to=None, language=None, **kwargs):
     context = dict(context) if context else {}
@@ -242,7 +234,7 @@ def prepare_email(template, user=None, context=None, to=None, language=None, **k
     message_kwargs = {
         'subject': subject,
         'body': text_content,
-        'to': [to],
+        'to': to,
         'from_email': settings.DEFAULT_FROM_EMAIL,
         'track_clicks': False,
         'track_opens': False,
@@ -255,6 +247,7 @@ def prepare_email(template, user=None, context=None, to=None, language=None, **k
         email.attach_alternative(html_content, 'text/html')
 
     return email
+
 
 def prepare_email_content(template, context, language='en'):
     with translation.override(language):
