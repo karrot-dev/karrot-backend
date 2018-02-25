@@ -23,9 +23,11 @@ def mark_as_read(sender, instance, **kwargs):
     participant.save()
 
 
-@receiver(post_save, sender=ConversationMessage)
+# connect it once all notifications are completely implemented https://github.com/yunity/karrot-backend/issues/490
+# @receiver(post_save, sender=ConversationMessage)
 def notify_participants(sender, instance, **kwargs):
     message = instance
+
     if not message.conversation.target:
         return
 
