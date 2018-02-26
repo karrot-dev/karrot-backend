@@ -60,6 +60,7 @@ INSTALLED_APPS = (
     'django_jinja',
     'channels',
     'versatileimagefield',
+    'huey.contrib.djhuey',
 )
 
 REST_FRAMEWORK = {
@@ -142,6 +143,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 EMAIL_BACKEND = "anymail.backends.sparkpost.EmailBackend"
 SPARKPOST_EMAIL_EVENTS = ["bounce", "spam_complaint", "out_of_band", "policy_rejection"]
+EMAIL_EVENTS_AVOID = ['bounce', 'out_of_band', 'policy_rejection']
 
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.Argon2PasswordHasher',
@@ -234,6 +236,10 @@ INFLUXDB_TAGS_HOST = ''
 INFLUXDB_TIMEOUT = 2
 INFLUXDB_USE_CELERY = False
 INFLUXDB_USE_THREADING = True
+
+HUEY = {
+    'always_eager': True,
+}
 
 
 # NB: Keep this as the last line, and keep
