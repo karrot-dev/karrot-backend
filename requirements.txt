@@ -21,7 +21,7 @@ cookies==2.2.1            # via responses
 coreapi==2.3.3            # via django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via coreapi
 cssselect==1.0.3          # via talon
-daphne==1.4.2             # via channels
+daphne==2.0.4             # via channels
 django-anymail==1.4
 django-cors-headers==2.1.0
 django-crispy-forms==1.7.0
