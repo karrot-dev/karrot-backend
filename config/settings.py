@@ -238,14 +238,7 @@ INFLUXDB_USE_CELERY = False
 INFLUXDB_USE_THREADING = True
 
 HUEY = {
-    'always_eager': False,
-    'connection': {
-        'host': REDIS_HOST,
-    },
-    'consumer': {
-        'workers': 8,
-        'worker_type' : 'greenlet',
-    },
+    'always_eager': True,
 }
 
 
