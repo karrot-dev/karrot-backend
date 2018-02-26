@@ -39,9 +39,6 @@ def notify_participants(sender, instance, **kwargs):
     participants_to_notify = ConversationParticipant.objects.filter(
         conversation=message.conversation,
         email_notifications=True,
-        # only send to Nick and Tilmann for now
-        # remove once https://github.com/yunity/karrot-backend/issues/490 is done
-        user__id__in=[222, 8]
     ).exclude(
         user=message.author
     ).exclude(
