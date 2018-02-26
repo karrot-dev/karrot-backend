@@ -60,6 +60,7 @@ INSTALLED_APPS = (
     'django_jinja',
     'channels',
     'versatileimagefield',
+    'huey.contrib.djhuey',
 )
 
 REST_FRAMEWORK = {
@@ -235,6 +236,16 @@ INFLUXDB_TAGS_HOST = ''
 INFLUXDB_TIMEOUT = 2
 INFLUXDB_USE_CELERY = False
 INFLUXDB_USE_THREADING = True
+
+HUEY = {
+    'connection': {
+        'host': REDIS_HOST,
+    },
+    'consumer': {
+        'workers': 8,
+        'worker_type' : 'greenlet',
+    },
+}
 
 
 # NB: Keep this as the last line, and keep
