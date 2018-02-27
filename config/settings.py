@@ -29,7 +29,7 @@ INSTALLED_APPS = (
 
     # Application
     'foodsaving',
-    'foodsaving.base',
+    'foodsaving.base.BaseConfig',
     'foodsaving.userauth.UserAuthConfig',
     'foodsaving.subscriptions.SubscriptionsConfig',
     'foodsaving.users.UsersConfig',
@@ -60,6 +60,7 @@ INSTALLED_APPS = (
     'django_jinja',
     'channels',
     'versatileimagefield',
+    'huey.contrib.djhuey',
 )
 
 REST_FRAMEWORK = {
@@ -222,7 +223,7 @@ ACCOUNT_DELETE_TIME_LIMIT_MINUTES = 180
 DEFAULT_FROM_EMAIL = "testing@example.com"
 SPARKPOST_RELAY_DOMAIN = 'replies.karrot.localhost'
 HOSTNAME = 'https://localhost:8000'
-SITE_NAME = 'karrot.localhost'
+SITE_NAME = 'karrot local development'
 MEDIA_ROOT = './uploads/'
 MEDIA_URL = '/media/'
 INFLUXDB_DISABLED = True
@@ -235,6 +236,10 @@ INFLUXDB_TAGS_HOST = ''
 INFLUXDB_TIMEOUT = 2
 INFLUXDB_USE_CELERY = False
 INFLUXDB_USE_THREADING = True
+
+HUEY = {
+    'always_eager': True,
+}
 
 
 # NB: Keep this as the last line, and keep

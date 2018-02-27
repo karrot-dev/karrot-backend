@@ -1,12 +1,8 @@
-from dateutil.relativedelta import relativedelta
-from django.conf import settings
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
-from django.utils.timezone import now
 
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage
-from foodsaving.utils import email_utils
-from foodsaving.webhooks.models import EmailEvent
+from foodsaving.conversations import tasks
 
 
 @receiver(post_save, sender=ConversationMessage)
@@ -30,23 +26,7 @@ def notify_participants(sender, instance, **kwargs):
     if not message.conversation.target:
         return
 
-    # exclude emails that had bounces or similar events recently
-    ignored_addresses = EmailEvent.objects.filter(
-        created_at__gte=now() - relativedelta(months=6),
-        event__in=settings.EMAIL_EVENTS_AVOID
-    ).values('address')
-
-    participants_to_notify = ConversationParticipant.objects.filter(
-        conversation=message.conversation,
-        email_notifications=True,
-    ).exclude(
-        user=message.author
-    ).exclude(
-        user__email__in=ignored_addresses
-    )
-
-    for participant in participants_to_notify:
-        email_utils.prepare_conversation_message_notification(user=participant.user, message=message).send()
+    tasks.notify_participants(message)
 
 
 @receiver(post_save, sender=ConversationParticipant)
