@@ -2,6 +2,7 @@ from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage
+from foodsaving.conversations import tasks
 
 
 @receiver(post_save, sender=ConversationMessage)
@@ -16,6 +17,16 @@ def mark_as_read(sender, instance, **kwargs):
 
     participant.seen_up_to = message
     participant.save()
+
+
+@receiver(post_save, sender=ConversationMessage)
+def notify_participants(sender, instance, **kwargs):
+    message = instance
+
+    if not message.conversation.target:
+        return
+
+    tasks.notify_participants(message)
 
 
 @receiver(post_save, sender=ConversationParticipant)
