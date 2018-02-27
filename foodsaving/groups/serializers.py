@@ -6,6 +6,7 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 
 from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
     GroupNotificationType
+from foodsaving.groups.roles import APPROVED
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.history.utils import get_changed_data
 from . import roles
@@ -115,7 +116,7 @@ class GroupDetailSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context['request'].user
         group = GroupModel.objects.create(**validated_data)
-        GroupMembership.objects.create(group=group, user=user)
+        group.add_member(user)
         History.objects.create(
             typus=HistoryTypus.GROUP_CREATE,
             group=group,

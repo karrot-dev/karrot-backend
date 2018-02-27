@@ -185,7 +185,7 @@ class TestGroupsAPI(APITestCase):
             date=timezone.now() + relativedelta(weeks=1),
             collectors=[self.member, ],
         )
-        GroupMembership.objects.create(group=unrelated_pickupdate.store.group, user=self.member)
+        unrelated_pickupdate.store.group.add_member(self.member)
 
         self.client.force_login(user=self.member)
         response = self.client.post('/api/groups/{}/leave/'.format(self.group.id))

@@ -14,6 +14,7 @@ from rest_framework.viewsets import GenericViewSet
 from foodsaving.conversations.api import RetrieveConversationMixin
 from foodsaving.groups import roles, stats
 from foodsaving.groups.filters import GroupsFilter, GroupsInfoFilter
+from foodsaving.groups.roles import APPROVED
 from foodsaving.groups.models import Agreement, Group as GroupModel, GroupMembership
 from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer, GroupJoinSerializer, \
     GroupLeaveSerializer, TimezonesSerializer, EmptySerializer, \
@@ -98,9 +99,10 @@ class GroupViewSet(
         return super().partial_update(request, *args, **kwargs)
 
     def get_queryset(self):
+        # can join all groups but only do anything else to groups where user is member of
         if self.action == 'join':
             return self.queryset
-        return self.queryset.filter(members=self.request.user)
+        return self.queryset.filter(members=self.request.user, roles__contains=[APPROVED])
 
     @detail_route(
         methods=['POST'],

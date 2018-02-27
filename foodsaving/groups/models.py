@@ -9,6 +9,7 @@ from timezone_field import TimeZoneField
 from foodsaving.base.base_models import BaseModel, LocationModel
 from foodsaving.conversations.models import ConversationMixin
 from foodsaving.history.models import History, HistoryTypus
+from foodsaving.groups.roles import APPROVED
 
 
 class GroupManager(models.Manager):
@@ -37,6 +38,9 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         on_delete=models.SET_NULL
     )
 
+    def members_with_all_roles(self, roles):
+        return self.members.filter(groupmembership__roles__contains=roles)
+
     def __str__(self):
         return 'Group {}'.format(self.name)
 
@@ -50,8 +54,12 @@ class Group(BaseModel, LocationModel, ConversationMixin):
                 ):
                     p.notify_upcoming_via_slack()
 
-    def add_member(self, user, history_payload=None):
+    def add_application(self, user):
         GroupMembership.objects.create(group=self, user=user)
+        self.create = History.objects.create(typus=HistoryTypus.GROUP_APPLY, group=self, users=[user, ], )
+
+    def add_member(self, user, history_payload=None):
+        GroupMembership.objects.create(group=self, user=user, roles=[APPROVED])
         History.objects.create(
             typus=HistoryTypus.GROUP_JOIN,
             group=self,
@@ -60,15 +68,16 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         )
 
     def remove_member(self, user):
-        History.objects.create(
-            typus=HistoryTypus.GROUP_LEAVE,
-            group=self,
-            users=[user, ]
-        )
+        if self.is_member(user) :
+            History.objects.create(
+                typus=HistoryTypus.GROUP_LEAVE,
+                group=self,
+                users=[user, ]
+            )
         GroupMembership.objects.filter(group=self, user=user).delete()
 
     def is_member(self, user):
-        return not user.is_anonymous and GroupMembership.objects.filter(group=self, user=user).exists()
+        return self.is_member_with_role(user, [APPROVED])
 
     def is_member_with_role(self, user, role_name):
         return not user.is_anonymous and GroupMembership.objects.filter(group=self, user=user,
@@ -120,6 +129,12 @@ class GroupMembership(BaseModel):
         for role in roles:
             if role not in self.roles:
                 self.roles.append(role)
+                if role is APPROVED:
+                    History.objects.create(
+                        typus=HistoryTypus.GROUP_JOIN,
+                        group=self.group,
+                        users=[self.user, ],
+                    )
 
     def remove_roles(self, roles):
         for role in roles:

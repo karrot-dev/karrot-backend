@@ -12,9 +12,7 @@ class TestStoresAPIFilter(APITestCase):
 
         self.user = UserFactory()
         self.user2 = UserFactory()
-        self.group = GroupFactory()
-        GroupMembership.objects.create(group=self.group, user=self.user)
-        GroupMembership.objects.create(group=self.group, user=self.user2)
+        self.group = GroupFactory(members = [self.user, self.user2])
 
     def test_search_display_name(self):
         self.client.force_login(user=self.user2)
