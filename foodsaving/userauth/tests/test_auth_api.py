@@ -5,6 +5,9 @@ from rest_framework.test import APITestCase
 
 from foodsaving.users.factories import UserFactory
 
+# TODO: Rename this file to something like 'test_login_api.py'
+#       (to better distinguish it from the other file 'test_userauth_api.py')
+
 
 class TestUserAuthAPI(APITestCase):
     def setUp(self):

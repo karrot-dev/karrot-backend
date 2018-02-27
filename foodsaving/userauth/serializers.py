@@ -99,21 +99,20 @@ class AuthUserSerializer(serializers.ModelSerializer):
         return super().update(user, validated_data)
 
 
+# TODO generalize (-> to become 'VerificationCodeSerializer')
 class VerifyMailSerializer(serializers.Serializer):
-    # TODO: Rename to 'verification_code' (will change the API!)
-    key = serializers.CharField(max_length=50, min_length=20)
+    code = serializers.CharField(max_length=50, min_length=20)
 
-    def validate_key(self, code):  # TODO: Rename to 'validate_code'
-        user = self.instance
-
+    def validate_code(self, code):
         try:
-            matched_code = VerificationCode.objects.get(user=user, type=VerificationCode.EMAIL_VERIFICATION, code=code)
+            matched_code = VerificationCode.objects.get(code=code, type=VerificationCode.EMAIL_VERIFICATION)
         except VerificationCode.DoesNotExist:
             raise serializers.ValidationError(_('Verification code is invalid'))
 
         if matched_code.has_expired():
             raise serializers.ValidationError(_('Verification code has expired'))
 
+        self.instance = matched_code.user
         return code
 
     def update(self, user, validated_data):

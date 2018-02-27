@@ -118,7 +118,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     def update_email(self, unverified_email):
         self.unverified_email = unverified_email
         self._send_mail_change_notification()
-        self.send_new_verification_code()
+        self.send_mail_verification_code()
 
     def update_language(self, language):
         self.language = language
@@ -134,10 +134,10 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         ).send()
 
     @transaction.atomic
-    def send_new_verification_code(self):
+    def send_mail_verification_code(self):
         self._unverify_mail()
         prepare_email('send_new_verification_code', self, {
-            'url': '{hostname}/#/verify-mail?key={code}'.format(
+            'url': '{hostname}/#/verify_mail?code={code}'.format(
                 hostname=settings.HOSTNAME,
                 code=VerificationCode.objects.get(user=self, type=VerificationCode.EMAIL_VERIFICATION).code
             )

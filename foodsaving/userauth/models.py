@@ -29,7 +29,7 @@ class VerificationCode(BaseModel):
     ACCOUNT_DELETE = 'ACCOUNT_DELETE'
     TYPES = [EMAIL_VERIFICATION, PASSWORD_RESET, ACCOUNT_DELETE]
 
-    LENGTH = 40  # TODO: Change to 25 (will require frontend changes)
+    LENGTH = 40
 
     objects = VerificationCodeManager()
 

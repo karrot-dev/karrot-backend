@@ -5,9 +5,9 @@ from rest_framework import status, generics, views
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
-from foodsaving.userauth.permissions import IsNotVerified
 from foodsaving.userauth.serializers import AuthLoginSerializer, AuthUserSerializer, VerifyMailSerializer, \
     ChangePasswordSerializer
+from foodsaving.userauth.permissions import MailIsNotVerified
 
 
 class LogoutView(views.APIView):
@@ -91,29 +91,30 @@ class AuthUserView(generics.GenericAPIView):
 
 
 class VerifyMailView(generics.GenericAPIView):
-    permission_classes = (IsAuthenticated, IsNotVerified)
+    # No need to add the MailIsNotVerified permission because
+    # verification codes only exist for unverified users anyway.
+    permission_classes = (AllowAny,)
     serializer_class = VerifyMailSerializer
 
     def post(self, request):
         """
-        Send token to verify e-mail
-
-        requires "key" parameter
+        Verify an e-mail address.
         """
-        self.check_object_permissions(request, request.user)
-        serializer = self.get_serializer(request.user, request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=status.HTTP_204_NO_CONTENT, data={})
 
 
-class ResendVerificationView(views.APIView):
-    permission_classes = (IsAuthenticated, IsNotVerified)
+class ResendMailVerificationCodeView(views.APIView):
+    permission_classes = (IsAuthenticated, MailIsNotVerified)
 
     def post(self, request):
-        """Resend verification e-mail"""
+        """
+        Resend a verification code (via e-mail).
+        """
         self.check_object_permissions(request, request.user)
-        request.user.send_new_verification_code()
+        request.user.send_mail_verification_code()
         return Response(status=status.HTTP_204_NO_CONTENT, data={})
 
 

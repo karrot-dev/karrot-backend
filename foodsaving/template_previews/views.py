@@ -12,7 +12,7 @@ from foodsaving.invitations.models import Invitation
 from foodsaving.userauth.models import VerificationCode
 from foodsaving.users.models import User
 from foodsaving.utils import email_utils
-from foodsaving.utils.email_utils import prepare_send_new_verification_code_email
+from foodsaving.utils.email_utils import prepare_resend_mail_verification_code
 
 foodsaving_basedir = os.path.abspath(os.path.join(settings.BASE_DIR, 'foodsaving'))
 
@@ -66,8 +66,8 @@ class Handlers:
     def passwordreset_success(self):
         return email_utils.prepare_passwordreset_success_email(user=random_user())
 
-    def send_new_verification_code(self):
-        return prepare_send_new_verification_code_email(
+    def resend_mail_verification_code(self):
+        return prepare_resend_mail_verification_code(
             user=random_user(),
             verification_code=VerificationCode.objects.first()
         )

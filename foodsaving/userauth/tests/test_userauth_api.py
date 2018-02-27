@@ -359,49 +359,44 @@ class TestEMailVerification(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.url = '/api/auth/verify_mail/'
+        self.type = VerificationCode.EMAIL_VERIFICATION
 
     def test_verify_mail_succeeds(self):
-        self.client.force_login(user=self.user)
-        code = VerificationCode.objects.get(user=self.user, type=VerificationCode.EMAIL_VERIFICATION).code
-        response = self.client.post(self.url, {'key': code})
+        code = VerificationCode.objects.get(user=self.user, type=self.type).code
+        response = self.client.post(self.url, {'code': code})
         self.assertEqual(response.data, {})
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-    def test_verify_mail_fails_if_not_logged_in(self):
-        code = VerificationCode.objects.get(user=self.user, type=VerificationCode.EMAIL_VERIFICATION).code
-        response = self.client.post(self.url, {'key': code})
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
     def test_verify_mail_fails_with_wrong_verification_code(self):
         self.client.force_login(user=self.user)
-        response = self.client.post(self.url, {'key': 'w' * 40})
-        self.assertEqual(response.data, {'key': ['Verification code is invalid']})
+        response = self.client.post(self.url, {'code': 'w' * 40})
+        self.assertEqual(response.data['code'], ['Verification code is invalid'])
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_verify_mail_fails_if_verification_code_too_old(self):
-        self.client.force_login(user=self.user)
-        verification_code = VerificationCode.objects.get(user=self.user, type=VerificationCode.EMAIL_VERIFICATION)
+        verification_code = VerificationCode.objects.get(user=self.user, type=self.type)
         backup = verification_code.created_at
         verification_code.created_at = timezone.now() - timedelta(days=8)
         verification_code.save()
-        response = self.client.post(self.url, {'key': verification_code.code})
-        self.assertEqual(response.data, {'key': ['Verification code has expired']})
+        response = self.client.post(self.url, {'code': verification_code.code})
+        self.assertEqual(response.data['code'], ['Verification code has expired'])
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         verification_code.created_at = backup
         verification_code.save()
 
     def test_verify_mail_fails_if_already_verified(self):
-        self.client.force_login(user=self.user)
         code = VerificationCode.objects.get(user=self.user, type=VerificationCode.EMAIL_VERIFICATION).code
-        self.client.post(self.url, {'key': code})
-        response = self.client.post(self.url, {'key': code})
-        self.assertEqual(response.data['detail'], 'Mail is already verified.')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.client.post(self.url, {'code': code})
+        response = self.client.post(self.url, {'code': code})
+        self.assertEqual(response.data['code'], ['Verification code is invalid'])
+        # We send an HTTP_400_BAD_REQUEST instead of an HTTP_403_FORBIDDEN simply because
+        # if the user is not logged in, we cannot identify him/her
+        # (we delete verification codes right after usage).
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_verify_mail_fails_without_verification_code(self):
-        self.client.force_login(user=self.user)
         response = self.client.post(self.url)
-        self.assertEqual(response.data, {'key': ['This field is required.']})
+        self.assertEqual(response.data, {'code': ['This field is required.']})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
@@ -409,10 +404,10 @@ class TestResendEMailVerificationCode(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.verified_user = VerifiedUserFactory()
-        self.url = '/api/auth/resend_verification/'
+        self.url = '/api/auth/resend_mail_verification_code/'
         mail.outbox = []
 
-    def test_resend_verification_succeeds(self):
+    def test_resend_mail_verification_code_succeeds(self):
         self.client.force_login(user=self.user)
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -421,12 +416,12 @@ class TestResendEMailVerificationCode(APITestCase):
         self.assertEqual(mail.outbox[0].to, [self.user.email])
         self.assertNotIn('Thank you for signing up', mail.outbox[0].body)
 
-    def test_resend_verification_fails_if_already_verified(self):
+    def test_resend_mail_verification_code_fails_if_already_verified(self):
         self.client.force_login(user=self.verified_user)
         response = self.client.post(self.url)
         self.assertEqual(response.data['detail'], 'Mail is already verified.')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_resend_verification_fails_if_not_logged_in(self):
+    def test_resend_mail_verification_code_fails_if_not_logged_in(self):
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

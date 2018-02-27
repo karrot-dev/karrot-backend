@@ -104,7 +104,7 @@ def prepare_group_summary_email(group):
 
 def prepare_mailverification_email(user, verification_code):
     return prepare_email('mailverification', user, {
-        'url': '{hostname}/#/verify-mail?key={code}'.format(
+        'url': '{hostname}/#/verify-mail?code={code}'.format(
             hostname=settings.HOSTNAME,
             code=verification_code.code
         )
@@ -125,9 +125,9 @@ def prepare_passwordreset_success_email(user):
     return prepare_email('passwordreset_success', user, {})
 
 
-def prepare_send_new_verification_code_email(user, verification_code):
+def prepare_resend_mail_verification_code(user, verification_code):
     return prepare_email('send_new_verification_code', user, {
-        'url': '{hostname}/#/verify-mail?key={code}'.format(
+        'url': '{hostname}/#/verify_mail?code={code}'.format(
             hostname=settings.HOSTNAME,
             code=verification_code.code
         )
