@@ -1,8 +1,11 @@
+from anymail.exceptions import AnymailAPIError
 from dateutil.relativedelta import relativedelta
 from django.utils.timezone import now
 from huey.contrib.djhuey import db_task
 
 from django.conf import settings
+from raven.contrib.django.raven_compat.models import client as sentry_client
+
 from foodsaving.conversations.models import ConversationParticipant
 from foodsaving.utils import email_utils
 from foodsaving.webhooks.models import EmailEvent
@@ -26,4 +29,7 @@ def notify_participants(message):
     )
 
     for participant in participants_to_notify:
-        email_utils.prepare_conversation_message_notification(user=participant.user, message=message).send()
+        try:
+            email_utils.prepare_conversation_message_notification(user=participant.user, message=message).send()
+        except AnymailAPIError:
+            sentry_client.captureException()
