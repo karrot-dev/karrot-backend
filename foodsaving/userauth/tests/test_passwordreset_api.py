@@ -25,7 +25,7 @@ class TestPasswordReset(APITestCase):
         self.assertEqual(response.data, {})
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].subject, 'Forgot your password?')
+        self.assertIn('Forgot your password?', mail.outbox[0].subject)
         self.assertEqual(mail.outbox[0].to, [self.verified_user.email])
 
     def test_request_password_reset_fails_if_wrong_mail(self):
@@ -68,7 +68,7 @@ class TestPasswordReset(APITestCase):
         response = self.client.post(self.url_password_reset, {'code': code, 'new_password': self.new_password})
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(mail.outbox), 2)
-        self.assertEqual(mail.outbox[1].subject, 'New password set!')
+        self.assertIn('New password set!', mail.outbox[1].subject)
         self.assertEqual(mail.outbox[1].to, [self.verified_user.email])
 
         # Login with the old password does not work
