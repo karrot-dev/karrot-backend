@@ -1,4 +1,4 @@
-from django.contrib.auth import logout, get_user_model
+from django.contrib.auth import logout
 from django.middleware.csrf import get_token as generate_csrf_token_for_frontend
 from django.utils import timezone
 from rest_framework import status, generics, views
@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from foodsaving.userauth.serializers import AuthLoginSerializer, AuthUserSerializer, VerifyMailSerializer, \
-    ChangePasswordSerializer
+    ChangePasswordSerializer, RequestResetPasswordSerializer, ResetPasswordSerializer
 from foodsaving.userauth.permissions import MailIsNotVerified
 
 
@@ -118,26 +118,31 @@ class ResendMailVerificationCodeView(views.APIView):
         return Response(status=status.HTTP_204_NO_CONTENT, data={})
 
 
-class ResetPasswordView(views.APIView):
+class RequestResetPasswordView(generics.GenericAPIView):
     permission_classes = (AllowAny,)
+    serializer_class = RequestResetPasswordSerializer
 
     def post(self, request):
         """
-        Request new password
-
-        send a request with 'email' to this endpoint to get a new password mailed
+        Request a reset of the password.
         """
-        request_email = request.data.get('email')
-        if not request_email:
-            return Response(status=status.HTTP_400_BAD_REQUEST,
-                            data={'email': ['this field is required']})
-        try:
-            user = get_user_model().objects.active().get(email__iexact=request_email)
-        except get_user_model().DoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST,
-                            data={'email': ['e-mail address is not registered']})
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=status.HTTP_204_NO_CONTENT, data={})
 
-        user.reset_password()
+
+class ResetPasswordView(generics.GenericAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ResetPasswordSerializer
+
+    def post(self, request):
+        """
+        Reset the password using a previously requested verification token.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(status=status.HTTP_204_NO_CONTENT, data={})
 
 

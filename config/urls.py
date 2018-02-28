@@ -19,7 +19,7 @@ from foodsaving.invitations.api import InvitationsViewSet, InvitationAcceptViewS
 from foodsaving.pickups.api import PickupDateViewSet, PickupDateSeriesViewSet, FeedbackViewSet
 from foodsaving.subscriptions.api import PushSubscriptionViewSet
 from foodsaving.userauth.api import AuthUserView, AuthView, LogoutView, \
-    ResetPasswordView, ChangePasswordView, VerifyMailView, ResendMailVerificationCodeView
+    RequestResetPasswordView, ChangePasswordView, VerifyMailView, ResendMailVerificationCodeView, ResetPasswordView
 from foodsaving.users.api import UserViewSet
 from foodsaving.stores.api import StoreViewSet
 from foodsaving.webhooks.api import IncomingEmailView, EmailEventView
@@ -65,6 +65,7 @@ urlpatterns = [
     path('api/auth/user/', AuthUserView.as_view()),
     path('api/auth/verify_mail/', VerifyMailView.as_view()),
     path('api/auth/resend_mail_verification_code/', ResendMailVerificationCodeView.as_view()),
+    path('api/auth/reset_password/request/', RequestResetPasswordView.as_view()),
     path('api/auth/reset_password/', ResetPasswordView.as_view()),
     path('api/auth/change_password/', ChangePasswordView.as_view()),
     path('api/webhooks/incoming_email/', IncomingEmailView.as_view()),

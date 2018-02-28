@@ -145,10 +145,23 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
 
     @transaction.atomic
     def reset_password(self):
-        new_password = User.objects.make_random_password(length=20)
+        self.set_unusable_password()
+        self.save()
+        VerificationCode.objects.filter(user=self, type=VerificationCode.PASSWORD_RESET).delete()
+        VerificationCode.objects.create(user=self, type=VerificationCode.PASSWORD_RESET)
+        prepare_email('passwordreset', self, {
+            'url': '{hostname}/#/reset_password?code={code}'.format(
+                hostname=settings.HOSTNAME,
+                code=VerificationCode.objects.get(user=self, type=VerificationCode.PASSWORD_RESET).code
+            )
+        }).send()
+
+    @transaction.atomic
+    def change_password(self, new_password):
         self.set_password(new_password)
         self.save()
-        prepare_email('newpassword', self, {'password': new_password}).send()
+        prepare_email('passwordchange', self, {}).send()
+        VerificationCode.objects.filter(user=self, type=VerificationCode.PASSWORD_RESET).delete()
 
     def has_perm(self, perm, obj=None):
         # temporarily only allow access for admins

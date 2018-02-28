@@ -130,6 +130,44 @@ class ChangePasswordSerializer(serializers.Serializer):
         return old_password
 
     def update(self, user, validated_data):
-        user.set_password(validated_data['new_password'])
-        user.save()
+        user.change_password(validated_data['new_password'])
+        return user
+
+
+class RequestResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, email):
+        UserModel = get_user_model()
+
+        try:
+            self.instance = UserModel.objects.active().get(email__iexact=email)
+        except UserModel.DoesNotExist:
+            raise serializers.ValidationError(_('Unknown e-mail address'))
+
+        return email
+
+    def update(self, user, validated_data):
+        user.reset_password()
+        return user
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    code = serializers.CharField(max_length=50, min_length=20)
+    new_password = serializers.CharField()
+
+    def validate_code(self, code):
+        try:
+            matched_code = VerificationCode.objects.get(code=code, type=VerificationCode.PASSWORD_RESET)
+        except VerificationCode.DoesNotExist:
+            raise serializers.ValidationError(_('Verification code is invalid'))
+
+        if matched_code.has_expired():
+            raise serializers.ValidationError(_('Verification code has expired'))
+
+        self.instance = matched_code.user
+        return code
+
+    def update(self, user, validated_data):
+        user.change_password(validated_data['new_password'])
         return user
