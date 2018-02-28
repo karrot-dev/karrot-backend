@@ -404,7 +404,7 @@ class TestResendEMailVerificationCode(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.verified_user = VerifiedUserFactory()
-        self.url = '/api/auth/resend_mail_verification_code/'
+        self.url = '/api/auth/verify_mail/resend_verification_code/'
         mail.outbox = []
 
     def test_resend_mail_verification_code_succeeds(self):

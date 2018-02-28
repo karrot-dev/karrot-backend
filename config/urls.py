@@ -64,7 +64,7 @@ urlpatterns = [
     path('api/auth/logout/', LogoutView.as_view()),
     path('api/auth/user/', AuthUserView.as_view()),
     path('api/auth/verify_mail/', VerifyMailView.as_view()),
-    path('api/auth/resend_mail_verification_code/', ResendMailVerificationCodeView.as_view()),
+    path('api/auth/verify_mail/resend_verification_code/', ResendMailVerificationCodeView.as_view()),
     path('api/auth/reset_password/request/', RequestResetPasswordView.as_view()),
     path('api/auth/reset_password/', ResetPasswordView.as_view()),
     path('api/auth/change_password/', ChangePasswordView.as_view()),
