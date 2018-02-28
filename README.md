@@ -98,6 +98,22 @@ All packages should be available in the default repositories `repo-oss` and `rep
 sudo zypper install python-virtualenv postgresql-devel postgresql python-redis redis
 ```
 
+### Setup virtualenv
+
+The backend is meant to be run inside a python virtualenv that is independent from your systems python packages.
+
+As we installed `python3` and `virtualenv` earlier, we can now proceed to create the environment and download the necessary packages:
+
+```
+# inside the karrot-backend folder
+virtualenv --no-site-packages --pyton=python3 env
+. ./env/bin/activate
+pip install pip-tools
+./sync.py
+```
+
+This step might be useful in the docker compose setup as well, to have packages available locally for development.
+
 ## Docker Compose
 
 Head over to [yunity/foodsaving-docker](https://github.com/yunity/foodsaving-docker) for further instructions.
@@ -190,7 +206,9 @@ For more detailled notes on how to implement this in javascript, see https://doc
 
 # Hints
 
-## Speed up testing: relaxed postgres fsync behaviour
+## Speed up testing
+
+### Relaxed postgres fsync behaviour
 On a local setup, you may want to change fsync behaviour to speed up the test running process. You may want to make sure to understand the implications but on a dev machine this should be fine.
 
 Edit /var/lib/postgres/data/postgresql.conf and add or edit
@@ -198,6 +216,16 @@ Edit /var/lib/postgres/data/postgresql.conf and add or edit
 ```
 fsync = off
 ```
+
+### Parallel testing
+Running the tests in parallel process can increase testing speed significantly. 
+To execute the whole test suite on a CPU with 4 kernels, you may want to use:
+
+```
+python manage.py test --parallel=4
+```
+
+For further information, see https://docs.djangoproject.com/en/2.0/ref/django-admin/#cmdoption-test-parallel.
 
 ## Update requirement packages
 pip-tools is used to manage requirements. To use the latest possible requirements, do:

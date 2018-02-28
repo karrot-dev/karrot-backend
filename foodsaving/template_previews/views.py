@@ -1,3 +1,4 @@
+import html
 import os
 import re
 
@@ -6,6 +7,7 @@ from django.template.loader import render_to_string
 from django.template.utils import get_app_template_dirs
 
 from config import settings
+from foodsaving.conversations.models import ConversationMessage
 from foodsaving.groups.models import Group
 from foodsaving.invitations.models import Invitation
 from foodsaving.userauth.models import VerificationCode
@@ -18,6 +20,14 @@ foodsaving_basedir = os.path.abspath(os.path.join(settings.BASE_DIR, 'foodsaving
 
 def random_user():
     return User.objects.order_by('?').first()
+
+
+def random_group():
+    return Group.objects.order_by('?').first()
+
+
+def random_message():
+    return ConversationMessage.objects.order_by('?').first()
 
 
 class Handlers:
@@ -34,6 +44,9 @@ class Handlers:
     def changemail_success(self):
         return email_utils.prepare_changemail_success_email(user=random_user())
 
+    def conversation_message_notification(self):
+        return email_utils.prepare_conversation_message_notification(user=random_user(), message=random_message())
+
     def emailinvitation(self):
         invitation = Invitation.objects.first()
         if invitation is None:
@@ -42,6 +55,11 @@ class Handlers:
             invitation = Invitation.objects.create(group=group, invited_by=invited_by,
                                                    email='exampleinvitation@foo.com')
         return email_utils.prepare_emailinvitation_email(invitation)
+
+    def group_summary(self):
+        group = random_group()
+        from_date, to_date = email_utils.calculate_group_summary_dates(group)
+        return email_utils.prepare_group_summary_emails(group, from_date, to_date)[0]
 
     def mailverification(self):
         return email_utils.prepare_mailverification_email(
@@ -93,12 +111,18 @@ def list_templates(request):
                         for idx, s in enumerate(['subject', 'text', 'html']):
                             if os.path.isfile('{}.{}.jinja2'.format(os.path.join(directory, name), s)):
                                 formats.append(s)
+                            elif s == 'text':
+                                formats.append('autotext')
 
-                        templates[name] = {
-                            'name': name,
-                            'has_handler': name in dir(handlers),
-                            'formats': formats,
-                        }
+                        # only include if some formats were defined (even empty ones would end up with autotext...)
+                        if len(formats) > 1:
+                            formats.append('raw')
+
+                            templates[name] = {
+                                'name': name,
+                                'has_handler': name in dir(handlers),
+                                'formats': formats,
+                            }
 
     return HttpResponse(render_to_string('template_preview_list.jinja2', {
         'templates': sorted(templates.values(), key=lambda t: t['name'])
@@ -132,8 +156,11 @@ def show_template(request):
 
         return HttpResponse(html_content)
 
-    elif format == 'text':
+    elif format == 'text' or format == 'autotext':
         return HttpResponse('<pre>{}</pre>'.format(email.body))
 
     elif format == 'subject':
         return HttpResponse('<pre>{}</pre>'.format(email.subject))
+
+    elif format == 'raw':
+        return HttpResponse('<pre>{}</pre>'.format(html.escape(email.message().as_string())))

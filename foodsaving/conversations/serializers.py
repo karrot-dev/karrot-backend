@@ -15,12 +15,14 @@ class ConversationSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
             'seen_up_to',
-            'unread_message_count'
+            'unread_message_count',
+            'email_notifications'
         ]
 
     seen_up_to = serializers.SerializerMethodField()
     unread_message_count = serializers.SerializerMethodField()
     updated_at = serializers.SerializerMethodField()
+    email_notifications = serializers.SerializerMethodField()
 
     def get_seen_up_to(self, conversation):
         user = self.context['request'].user
@@ -46,6 +48,11 @@ class ConversationSerializer(serializers.ModelSerializer):
             date = conversation.updated_at
         return DateTimeField().to_representation(date)
 
+    def get_email_notifications(self, conversation):
+        user = self.context['request'].user
+        participant = conversation.conversationparticipant_set.get(user=user)
+        return participant.email_notifications
+
 
 class ConversationMarkSerializer(serializers.ModelSerializer):
     class Meta:
@@ -63,6 +70,12 @@ class ConversationMarkSerializer(serializers.ModelSerializer):
         return participant
 
 
+class ConversationEmailNotificationsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConversationParticipant
+        fields = ('email_notifications',)
+
+
 class ConversationMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConversationMessage
@@ -72,8 +85,9 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
             'content',
             'conversation',
             'created_at',
+            'received_via'
         ]
-        read_only_fields = ('author', 'id', 'created_at')
+        read_only_fields = ('author', 'id', 'created_at', 'received_via')
 
     def validate_conversation(self, conversation):
         if self.context['request'].user not in conversation.participants.all():

@@ -1,10 +1,13 @@
 from dateutil.parser import parse
+from django.core import mail
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from foodsaving.conversations.factories import ConversationFactory
-from foodsaving.conversations.models import ConversationParticipant
+from foodsaving.conversations.models import ConversationParticipant, Conversation, ConversationMessage
+from foodsaving.groups.factories import GroupFactory
 from foodsaving.users.factories import UserFactory
+from foodsaving.webhooks.models import EmailEvent
 
 
 class TestConversationsAPI(APITestCase):
@@ -158,3 +161,72 @@ class TestConversationsSeenUpToAPI(APITestCase):
         response = self.client.post('/api/conversations/{}/mark/'.format(self.conversation.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['seen_up_to'][0], 'Must refer to a message in the conversation')
+
+
+class TestConversationsEmailNotificationsAPI(APITestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.group = GroupFactory(members=[self.user])
+        self.conversation = Conversation.objects.get_or_create_for_target(self.group)
+        self.conversation.join(self.user)
+        self.participant = ConversationParticipant.objects.get(conversation=self.conversation, user=self.user)
+
+    def test_disable_email_notifications(self):
+        participant = ConversationParticipant.objects.get(conversation=self.conversation, user=self.user)
+        self.assertTrue(participant.email_notifications)
+
+        self.client.force_login(user=self.user)
+
+        data = {'email_notifications': False}
+        response = self.client.post(
+            '/api/conversations/{}/email_notifications/'.format(self.conversation.id),
+            data,
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['email_notifications'], False)
+
+        participant.refresh_from_db()
+        self.assertFalse(participant.email_notifications)
+
+    def test_enable_email_notifications(self):
+        participant = ConversationParticipant.objects.get(conversation=self.conversation, user=self.user)
+        participant.email_notifications = False
+        participant.save()
+        self.assertFalse(participant.email_notifications)
+
+        self.client.force_login(user=self.user)
+
+        data = {'email_notifications': True}
+        response = self.client.post(
+            '/api/conversations/{}/email_notifications/'.format(self.conversation.id),
+            data,
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['email_notifications'], True)
+
+        participant.refresh_from_db()
+        self.assertTrue(participant.email_notifications)
+
+    def test_send_email_notifications(self):
+        users = [UserFactory() for _ in range(3)]
+        [self.conversation.join(u) for u in users]
+
+        mail.outbox = []
+        ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
+
+        actual_recipients = set(m.to[0] for m in mail.outbox)
+        expected_recipients = set(u.email for u in users)
+        self.assertEqual(actual_recipients, expected_recipients)
+
+        self.assertEqual(len(mail.outbox), 3)
+
+    def test_exclude_bounced_addresses(self):
+        bounce_user = UserFactory()
+        self.conversation.join(bounce_user)
+        EmailEvent.objects.create(address=bounce_user.email, event='bounce', payload={})
+
+        mail.outbox = []
+        ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
+        self.assertEqual(len(mail.outbox), 0)
