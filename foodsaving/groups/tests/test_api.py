@@ -300,7 +300,7 @@ class TestGroupMemberLastSeenAPI(APITestCase):
         self.membership.refresh_from_db()
         self.assertGreater(self.membership.lastseen_at, before)
 
-        
+
 class TestDefaultGroupMembership(APITestCase):
     def setUp(self):
         self.creator = UserFactory()
