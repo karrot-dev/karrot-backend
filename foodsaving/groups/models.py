@@ -2,7 +2,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models, transaction
-from django.db.models import TextField
+from django.db.models import TextField,DateTimeField
 from django.utils import timezone
 from timezone_field import TimeZoneField
 
@@ -96,6 +96,7 @@ class GroupMembership(BaseModel):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     roles = ArrayField(TextField(), default=list)
+    last_seen = DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = 'groups_group_members'
