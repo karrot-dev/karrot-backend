@@ -12,9 +12,9 @@ from rest_framework import status
 from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.conversations.api import RetrieveConversationMixin
-from foodsaving.groups import roles
+from foodsaving.groups import roles, stats
 from foodsaving.groups.filters import GroupsFilter, GroupsInfoFilter
-from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement
+from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, Group
 from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer, GroupJoinSerializer, \
     GroupLeaveSerializer, TimezonesSerializer, EmptySerializer, \
     GroupMembershipAddRoleSerializer, GroupMembershipRemoveRoleSerializer, GroupMembershipInfoSerializer, \
@@ -141,6 +141,7 @@ class GroupViewSet(
         gm = get_object_or_404(GroupMembership.objects, group=pk, user=request.user)
         gm.lastseen_at = timezone.now()
         gm.save()
+        stats.group_activity(Group.objects.get(pk=pk))
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @detail_route(
