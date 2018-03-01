@@ -16,10 +16,8 @@ class TestPasswordReset(APITestCase):
         self.url_request_password_reset = '/api/auth/reset_password/request/'
         self.url_password_reset = '/api/auth/reset_password/'
         self.type = VerificationCode.PASSWORD_RESET
-        self.old_password = 'forgotten'
+        self.old_password = self.verified_user.display_name
         self.new_password = 'super-safe'
-        self.verified_user.set_password(self.old_password)
-        self.verified_user.save()
         mail.outbox = []
 
     def test_request_password_reset_succeeds(self):
