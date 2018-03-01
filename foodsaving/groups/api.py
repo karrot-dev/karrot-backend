@@ -141,7 +141,7 @@ class GroupViewSet(
         gm = get_object_or_404(GroupMembership.objects, group=pk, user=request.user)
         gm.lastseen_at = timezone.now()
         gm.save()
-        stats.group_activity(Group.objects.get(pk=pk))
+        stats.group_activity(gm.group)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @detail_route(
