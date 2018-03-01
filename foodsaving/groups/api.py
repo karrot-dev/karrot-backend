@@ -1,20 +1,20 @@
 import pytz
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
-from django.utils import timezone
 from rest_framework import mixins
+from rest_framework import status
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.conversations.api import RetrieveConversationMixin
 from foodsaving.groups import roles, stats
 from foodsaving.groups.filters import GroupsFilter, GroupsInfoFilter
-from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, Group
+from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement
 from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer, GroupJoinSerializer, \
     GroupLeaveSerializer, TimezonesSerializer, EmptySerializer, \
     GroupMembershipAddRoleSerializer, GroupMembershipRemoveRoleSerializer, GroupMembershipInfoSerializer, \
