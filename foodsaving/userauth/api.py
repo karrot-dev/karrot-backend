@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from foodsaving.userauth.serializers import AuthLoginSerializer, AuthUserSerializer, VerifyMailSerializer, \
-    ChangePasswordSerializer, RequestResetPasswordSerializer, ResetPasswordSerializer
+    ChangePasswordSerializer, RequestResetPasswordSerializer, ResetPasswordSerializer, ChangeMailSerializer
 from foodsaving.userauth.permissions import MailIsNotVerified
 
 
@@ -48,8 +48,7 @@ class AuthUserView(generics.GenericAPIView):
 
     def patch(self, request):
         """Update user profile"""
-        instance = request.user
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer = self.get_serializer(request.user, request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -162,4 +161,19 @@ class ChangePasswordView(generics.GenericAPIView):
         # Keep the user logged in
         update_session_auth_hash(request, user)
 
+        return Response(status=status.HTTP_200_OK, data=AuthUserSerializer(instance=request.user).data)
+
+
+class ChangeMailView(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ChangeMailSerializer
+
+    def post(self, request):
+        """
+        Change the e-mail address.
+        """
+        self.check_object_permissions(request, request.user)
+        serializer = self.get_serializer(request.user, request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(status=status.HTTP_200_OK, data=AuthUserSerializer(instance=request.user).data)

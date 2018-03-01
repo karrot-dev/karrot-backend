@@ -120,6 +120,13 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         self._send_mail_change_notification()
         self.send_mail_verification_code()
 
+    @transaction.atomic
+    def restore_email(self):
+        VerificationCode.objects.filter(user=self, type=VerificationCode.EMAIL_VERIFICATION).delete()
+        self.unverified_email = self.email
+        self.mail_verified = True
+        self.save()
+
     def update_language(self, language):
         self.language = language
 

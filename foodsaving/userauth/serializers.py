@@ -25,7 +25,6 @@ class AuthLoginSerializer(serializers.Serializer):
 
 
 class AuthUserSerializer(serializers.ModelSerializer):
-
     photo = VersatileImageFieldSerializer(
         sizes='user_profile',
         required=False,
@@ -49,22 +48,21 @@ class AuthUserSerializer(serializers.ModelSerializer):
             'password': {
                 'write_only': True
             },
-            'email': {
-                'required': True
-            },
             'description': {
                 'trim_whitespace': False,
-                'max_length': settings.DESCRIPTION_MAX_LENGTH},
+                'max_length': settings.DESCRIPTION_MAX_LENGTH
+            },
             'mail_verified': {
                 'default': False
             },
         }
 
     def validate_email(self, email):
-        user = self.context['request'].user
-        similar = self.Meta.model.objects.filter_by_similar_email(email)
-        if (self.instance is None and similar.exists()) \
-                or (self.instance is not None and similar.exclude(id=user.id).exists()):
+        if self.context['request'].method != 'POST':
+            return email
+
+        similar = get_user_model().objects.filter_by_similar_email(email)
+        if similar.exists():
             raise serializers.ValidationError(_('Similar e-mail exists: ') + similar.first().email)
         return email
 
@@ -85,12 +83,7 @@ class AuthUserSerializer(serializers.ModelSerializer):
         if 'password' in validated_data:
             del validated_data['password']
         if 'email' in validated_data:
-            latest_email = user.email if user.email == user.unverified_email else user.unverified_email
-            if validated_data['email'] != latest_email:
-                try:
-                    user.update_email(validated_data.pop('email'))
-                except AnymailAPIError:
-                    raise serializers.ValidationError(_('We could not send you an e-mail.'))
+            del validated_data['email']
         if 'language' in validated_data and validated_data['language'] != user.language:
             user.update_language(validated_data.pop('language'))
         if 'photo' in validated_data and validated_data['photo'] is None:
@@ -116,7 +109,10 @@ class VerifyMailSerializer(serializers.Serializer):
         return code
 
     def update(self, user, validated_data):
-        user.verify_mail()
+        try:
+            user.verify_mail()
+        except AnymailAPIError:
+            raise serializers.ValidationError(_('We could not send you an e-mail.'))
         return user
 
 
@@ -126,11 +122,43 @@ class ChangePasswordSerializer(serializers.Serializer):
 
     def validate_old_password(self, old_password):
         if not self.instance.check_password(old_password):
-            raise serializers.ValidationError()
+            raise serializers.ValidationError(_('Wrong password'))
         return old_password
 
     def update(self, user, validated_data):
-        user.change_password(validated_data['new_password'])
+        try:
+            user.change_password(validated_data['new_password'])
+        except AnymailAPIError:
+            raise serializers.ValidationError(_('We could not send you an e-mail.'))
+        return user
+
+
+class ChangeMailSerializer(serializers.Serializer):
+    password = serializers.CharField()
+    new_email = serializers.EmailField()
+
+    def validate_password(self, password):
+        if not self.instance.check_password(password):
+            raise serializers.ValidationError(_('Wrong password'))
+        return password
+
+    def validate_new_email(self, email):
+        similar = get_user_model().objects.filter_by_similar_email(email)
+        if similar.exclude(id=self.instance.id).exists():
+            raise serializers.ValidationError(_('Similar e-mail exists: ') + similar.first().email)
+        return email
+
+    def update(self, user, validated_data):
+        new_email = validated_data['new_email']
+
+        if user.email == new_email:
+            if user.unverified_email != new_email:
+                user.restore_email()
+        else:
+            try:
+                user.update_email(new_email)
+            except AnymailAPIError:
+                raise serializers.ValidationError(_('We could not send you an e-mail.'))
         return user
 
 
@@ -148,7 +176,10 @@ class RequestResetPasswordSerializer(serializers.Serializer):
         return email
 
     def update(self, user, validated_data):
-        user.reset_password()
+        try:
+            user.reset_password()
+        except AnymailAPIError:
+            raise serializers.ValidationError(_('We could not send you an e-mail.'))
         return user
 
 
@@ -169,5 +200,8 @@ class ResetPasswordSerializer(serializers.Serializer):
         return code
 
     def update(self, user, validated_data):
-        user.change_password(validated_data['new_password'])
+        try:
+            user.change_password(validated_data['new_password'])
+        except AnymailAPIError:
+            raise serializers.ValidationError(_('We could not send you an e-mail.'))
         return user

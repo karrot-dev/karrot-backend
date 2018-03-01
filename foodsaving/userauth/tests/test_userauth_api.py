@@ -178,6 +178,7 @@ class TestRejectedAddress(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.url = '/api/auth/user/'
+        self.url_change_mail = '/api/auth/change_mail/'
 
         # Mock AnymailMessage to throw error on send
         self.mail_class = email_utils.AnymailMessage
@@ -197,7 +198,8 @@ class TestRejectedAddress(APITestCase):
 
     def test_change_to_rejected_address_fails(self):
         self.client.force_login(user=self.user)
-        response = self.client.patch(self.url, {'email': 'bad@test.com'})
+        response = self.client.post(self.url_change_mail,
+                                    {'password': self.user.display_name, 'new_email': 'bad@test.com'})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
 
@@ -259,100 +261,124 @@ class TestChangeEMail(APITestCase):
     def setUp(self):
         self.verified_user = VerifiedUserFactory()
         self.another_user = VerifiedUserFactory()
-        self.url = '/api/auth/user/'
+        self.old_email = self.verified_user.email
+        self.new_email = faker.email()
+        self.password = self.verified_user.display_name
+        self.url = '/api/auth/change_mail/'
+        self.url_patch = '/api/auth/user/'
         mail.outbox = []
+
+    def test_patch_fails(self):
+        self.client.force_login(user=self.verified_user)
+        self.assertTrue(self.verified_user.mail_verified)
+
+        # typical frontend use case of getting, modifying and sending data
+        data = self.client.get(self.url_patch).data
+        data['email'] = self.new_email
+        response = self.client.patch(self.url_patch, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(self.verified_user.email, self.verified_user.unverified_email)
+        self.assertEqual(response.data['email'], self.old_email)
+        self.assertEqual(len(mail.outbox), 0)
 
     def test_change_succeeds(self):
         self.client.force_login(user=self.verified_user)
         self.assertTrue(self.verified_user.mail_verified)
 
-        old_email = self.verified_user.email
-        new_email = faker.email()
+        response = self.client.post(self.url, {'password': self.password, 'new_email': self.new_email})
 
-        # typical frontend use case of getting, modifying and sending data
-        data = self.client.get(self.url).data
-        data['email'] = new_email
-        response = self.client.patch(self.url, data, format='json')
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data['email'], old_email)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['email'], self.verified_user.unverified_email)
         self.assertEqual(len(mail.outbox), 2)
         self.assertIn('Your email address changed!', mail.outbox[0].subject)
-        self.assertEqual(mail.outbox[0].to, [old_email], 'error: change notice sent to wrong address')
+        self.assertEqual(mail.outbox[0].to, [self.old_email], 'error: change notice sent to wrong address')
         self.assertIn('Please verify your email', mail.outbox[1].subject)
         self.assertEqual(
             mail.outbox[1].to,
-            [new_email],
+            [self.new_email],
             'error: verification request sent to wrong address'
         )
         self.assertNotIn('Thank you for signing up', mail.outbox[1].body)
 
         self.verified_user.refresh_from_db()
         self.assertFalse(self.verified_user.mail_verified)
-        self.assertEqual(self.verified_user.email, old_email)
-        self.assertEqual(self.verified_user.unverified_email, new_email)
+        self.assertEqual(self.verified_user.email, self.old_email)
+        self.assertEqual(self.verified_user.unverified_email, self.new_email)
 
         self.verified_user.verify_mail()
         self.verified_user.refresh_from_db()
         self.assertTrue(self.verified_user.mail_verified)
-        self.assertEqual(self.verified_user.email, new_email)
-        response = self.client.get(self.url)
-        self.assertEqual(response.data['email'], new_email)
+        self.assertEqual(self.verified_user.email, self.new_email)
+        response = self.client.get(self.url_patch)
+        self.assertEqual(response.data['email'], self.new_email)
+
+    def test_change_without_password_fails(self):
+        self.client.force_login(user=self.verified_user)
+        response = self.client.post(self.url, {'new_email': self.new_email})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        response = self.client.post(self.url, {'password': '', 'new_email': self.new_email})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_change_with_wrong_password_fails(self):
+        self.client.force_login(user=self.verified_user)
+        response = self.client.post(self.url, {'password': 'wrong', 'new_email': self.new_email})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(len(mail.outbox), 0)
 
     def test_change_to_existing_mail_fails(self):
         self.client.force_login(user=self.verified_user)
-        data = {'email': self.another_user.email}
-        response = self.client.patch(self.url, data)
+        response = self.client.post(self.url, {'password': self.password, 'new_email': self.another_user.email})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(len(mail.outbox), 0)
 
     def test_change_to_existing_similar_mail_fails(self):
         self.client.force_login(user=self.verified_user)
         similar_mail = self.another_user.email[0].swapcase() + self.another_user.email[1:]
-        data = {'email': similar_mail}
-        response = self.client.patch(self.url, data)
+        response = self.client.post(self.url, {'password': self.password, 'new_email': similar_mail})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['email'], ['Similar e-mail exists: ' + self.another_user.email])
+        self.assertEqual(response.data['new_email'], ['Similar e-mail exists: ' + self.another_user.email])
         self.assertEqual(len(mail.outbox), 0)
 
     def test_change_to_similar_mail_succeeds(self):
         self.client.force_login(user=self.verified_user)
         similar_mail = self.verified_user.email[0].swapcase() + self.verified_user.email[1:]
-        data = {'email': similar_mail}
-        response = self.client.patch(self.url, data)
+        response = self.client.post(self.url, {'password': self.password, 'new_email': similar_mail})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(mail.outbox), 2)
 
-    def test_change_back_to_previous_address(self):
+    def test_restore_email_succeeds(self):
         self.client.force_login(user=self.verified_user)
-        original = self.verified_user.email
-        response = self.client.patch(self.url, {'email': faker.email()})
+
+        response = self.client.post(self.url, {'password': self.password, 'new_email': self.new_email})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(mail.outbox), 2)
         mail.outbox.clear()
-        response = self.client.patch(self.url, {'email': original})
+
+        response = self.client.post(self.url, {'password': self.password, 'new_email': self.old_email})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(mail.outbox), 2)
-        self.assertIn('Your email address changed!', mail.outbox[0].subject)
-        self.assertEqual(response.data['email'], original)
-        self.assertEqual(response.data['mail_verified'], False)
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(self.verified_user.email, self.old_email)
+        self.assertEqual(self.verified_user.unverified_email, self.old_email)
+        self.assertTrue(self.verified_user.mail_verified)
 
     def test_dont_change_email(self):
         self.client.force_login(user=self.verified_user)
-        response = self.client.patch(self.url, {'email': self.verified_user.email})
+        response = self.client.post(self.url, {'password': self.password, 'new_email': self.old_email})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['mail_verified'], True)
         self.assertEqual(len(mail.outbox), 0)
 
     def test_changing_sensitive_fields_is_forbidden(self):
         self.client.force_login(user=self.verified_user)
-        response = self.client.get(self.url)
+        response = self.client.get(self.url_patch)
         original = response.data
 
-        response = self.client.patch(self.url, {'unverified_email': faker.email()})
+        response = self.client.patch(self.url_patch, {'unverified_email': faker.email()})
         self.assertEqual(response.data['unverified_email'], original['unverified_email'])
 
-        response = self.client.patch(self.url, {'mail_verified': False})
+        response = self.client.patch(self.url_patch, {'mail_verified': False})
         self.assertEqual(response.data['mail_verified'], True)
 
 
