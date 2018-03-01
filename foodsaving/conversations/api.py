@@ -123,7 +123,7 @@ class ConversationMessageViewSet(
 
     @detail_route(
         methods=('DELETE',),
-        url_path='reactions/(?P<name>[a-z_]+)',
+        url_path='reactions/(?P<name>[a-z0-9_+-]+)',
         url_name='remove_reaction',
     )
     def remove_reaction(self, request, pk, name):

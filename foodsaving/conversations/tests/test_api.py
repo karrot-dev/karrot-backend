@@ -337,3 +337,23 @@ class TestConversationsMessageReactionsAPI(APITestCase):
             format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_remove_thumbs(self):
+        "Can remove +1 and -1. They contain unusual characters, i.e. +, -, number."
+
+        self.reaction = self.message.reactions.create(user=self.user, name='+1')
+        self.reaction = self.message.reactions.create(user=self.user, name='-1')
+        # log in
+        self.client.force_login(user=self.user)
+
+        response = self.client.delete(
+            '/api/messages/{}/reactions/{}/'.format(self.message.id, '-1'),
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        response = self.client.delete(
+            '/api/messages/{}/reactions/{}/'.format(self.message.id, '+1'),
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
