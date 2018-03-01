@@ -238,3 +238,102 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
         mail.outbox = []
         ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
         self.assertEqual(len(mail.outbox), 0)
+
+
+class TestConversationsMessageReactionsAPI(APITestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.user2 = UserFactory()
+        self.group = GroupFactory(members=[self.user, self.user2])
+        self.conversation = Conversation.objects.get_or_create_for_target(self.group)
+        self.conversation.join(self.user)
+        self.participant = ConversationParticipant.objects.get(conversation=self.conversation, user=self.user)
+        self.message = self.conversation.messages.create(author=self.user, content='hello')
+        self.reaction = self.message.reactions.create(user=self.user, name='thumbsdown')
+
+    # valid data
+    def test_react_to_message_with_emoji(self):
+        "User who can participate in conversation can react to a message with emoji."
+
+        # log in
+        self.client.force_login(user=self.user)
+        data = {'name': 'thumbsup'}
+        response = self.client.post(
+            '/api/messages/{}/reactions/'.format(self.message.id),
+            data,
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['name'], 'thumbsup')
+        # @TODO test that the data was saved into database
+
+    def test_dont_react_twice_with_the_same_emoji(self):
+        "Can not react with the same emoji twice."
+
+        # log in
+        self.client.force_login(user=self.user)
+        data = {'name': 'thumbsup'}
+
+        # first request is ok
+        response = self.client.post(
+            '/api/messages/{}/reactions/'.format(self.message.id),
+            data,
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # second request fails
+        response = self.client.post(
+            '/api/messages/{}/reactions/'.format(self.message.id),
+            data,
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+
+    def test_react_with_different_emoji(self):
+        "Can react multiple times with different emoji."
+
+        # log in
+        self.client.force_login(user=self.user)
+
+        # first request is ok
+        response = self.client.post(
+            '/api/messages/{}/reactions/'.format(self.message.id),
+            {'name': 'thumbsup'},
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # second request with different emoji is ok
+        response = self.client.post(
+            '/api/messages/{}/reactions/'.format(self.message.id),
+            {'name': 'tada'},
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_include_reactions_in_message(self):
+        "When reading conversations, include reactions in the response for every message"
+
+        # add a few more reactions
+        self.reaction = self.message.reactions.create(user=self.user, name='thumbsup')
+        self.reaction = self.message.reactions.create(user=self.user2, name='thumbsup')
+
+        self.client.force_login(user=self.user)
+        response = self.client.get('/api/messages/?conversation={}'.format(self.conversation.id), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 1)
+        self.assertEqual(len(response.data['results'][0]['reactions']), 3)
+
+    def test_remove_existing_reaction(self):
+        "User can remove her reaction."
+
+        # log in
+        self.client.force_login(user=self.user)
+
+        # first request is ok
+        response = self.client.delete(
+            '/api/messages/{}/reactions/{}/'.format(self.message.id, 'thumbsdown'),
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)

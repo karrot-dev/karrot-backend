@@ -1,6 +1,9 @@
 from django.utils.translation import ugettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db import IntegrityError
 from rest_framework import mixins
+from rest_framework import status
+from rest_framework.generics import get_object_or_404
 from rest_framework.decorators import detail_route
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated, BasePermission
@@ -9,11 +12,13 @@ from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.conversations.models import (
     Conversation,
-    ConversationMessage
+    ConversationMessage,
+    ConversationMessageReaction
 )
 from foodsaving.conversations.serializers import (
     ConversationSerializer,
     ConversationMessageSerializer,
+    ConversationMessageReactionSerializer,
     ConversationMarkSerializer,
     ConversationEmailNotificationsSerializer)
 
@@ -100,6 +105,35 @@ class ConversationMessageViewSet(
 
     def get_queryset(self):
         return self.queryset.filter(conversation__participants=self.request.user)
+
+    @detail_route(
+        methods=('POST',),
+        filter_fields=('name',)
+    )
+    def reactions(self, request, pk):
+        """route for POST /messages/{id}/reactions/ with body {\"name\":\"emoji_name\"}"""
+
+        instance = get_object_or_404(ConversationMessage.objects, id=pk)
+        reaction = ConversationMessageReaction(message=instance, name=request.data['name'], user=request.user)
+        try:
+            reaction.save()
+        except IntegrityError:
+            return Response(status=status.HTTP_409_CONFLICT)
+        return Response(ConversationMessageReactionSerializer(reaction).data, status=status.HTTP_201_CREATED)
+
+    @detail_route(
+        methods=('DELETE',),
+        url_path='reactions/(?P<name>[a-z_]+)',
+        url_name='remove_reaction',
+    )
+    def remove_reaction(self, request, pk, name):
+        """route for DELETE /messages/{id}/reactions/{name}/"""
+
+        message = get_object_or_404(ConversationMessage.objects, id=pk)
+        reaction = get_object_or_404(ConversationMessageReaction.objects, name=name, message=message,
+                                     user=request.user)
+        reaction.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class RetrieveConversationMixin(object):
