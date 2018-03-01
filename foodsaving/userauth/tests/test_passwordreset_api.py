@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.contrib import auth
 from django.core import mail
 from django.utils import timezone
 from rest_framework import status
@@ -18,6 +19,7 @@ class TestPasswordReset(APITestCase):
         self.old_password = 'forgotten'
         self.new_password = 'super-safe'
         self.verified_user.set_password(self.old_password)
+        self.verified_user.save()
         mail.outbox = []
 
     def test_request_password_reset_succeeds(self):
@@ -48,7 +50,16 @@ class TestPasswordReset(APITestCase):
 
     def test_request_password_reset_disables_login(self):
         self.client.post(self.url_request_password_reset, {'email': self.verified_user.email})
+
+        # Login with the old password does not work
         self.assertFalse(self.client.login(email=self.verified_user.email, password=self.old_password))
+        # Login with empty password does not work either
+        self.assertFalse(self.client.login(email=self.verified_user.email, password=''))
+
+    def test_request_password_reset_logs_out_user(self):
+        self.client.force_login(user=self.verified_user)
+        self.client.post(self.url_request_password_reset, {'email': self.verified_user.email})
+        self.assertFalse(auth.get_user(self.client).is_authenticated)
 
     def test_request_password_reset_twice_succeeds(self):
         self.client.post(self.url_request_password_reset, {'email': self.verified_user.email})
@@ -73,6 +84,8 @@ class TestPasswordReset(APITestCase):
 
         # Login with the old password does not work
         self.assertFalse(self.client.login(email=self.verified_user.email, password=self.old_password))
+        # Login with empty password does not work either
+        self.assertFalse(self.client.login(email=self.verified_user.email, password=''))
         # Login with the new password works
         self.assertTrue(self.client.login(email=self.verified_user.email, password=self.new_password))
 

@@ -1,4 +1,4 @@
-from django.contrib.auth import logout
+from django.contrib.auth import logout, update_session_auth_hash
 from django.middleware.csrf import get_token as generate_csrf_token_for_frontend
 from django.utils import timezone
 from rest_framework import status, generics, views
@@ -147,15 +147,19 @@ class ResetPasswordView(generics.GenericAPIView):
 
 
 class ChangePasswordView(generics.GenericAPIView):
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
     serializer_class = ChangePasswordSerializer
 
     def post(self, request):
         """
-        Change your password
+        Change the password.
         """
         self.check_object_permissions(request, request.user)
         serializer = self.get_serializer(request.user, request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        user = serializer.save()
+
+        # Keep the user logged in
+        update_session_auth_hash(request, user)
+
         return Response(status=status.HTTP_200_OK, data=AuthUserSerializer(instance=request.user).data)

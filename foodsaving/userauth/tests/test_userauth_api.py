@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 from anymail.exceptions import AnymailAPIError
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
+from django.contrib import auth
 from django.core import mail
 from django.utils import timezone
 from rest_framework import status
@@ -232,11 +233,11 @@ class TestChangePassword(APITestCase):
         response = self.client.post(self.url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response)
 
-        # logged out
-        response = self.client.post(self.url, self.data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        # User stays logged in
+        self.assertTrue(auth.get_user(self.client).is_authenticated)
 
         # test new password
+        self.client.logout()
         self.assertTrue(self.client.login(email=self.user.email, password='new_password'))
 
     def test_change_with_wrong_password_fails(self):
