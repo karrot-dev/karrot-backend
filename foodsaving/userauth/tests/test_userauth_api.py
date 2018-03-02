@@ -84,6 +84,7 @@ class TestUsersAPI(APITestCase):
 
 class TestUserDeleteAPI(APITestCase):
     def setUp(self):
+        self.type = VerificationCode.ACCOUNT_DELETE
         self.user = UserFactory()
         self.user2 = UserFactory()
         self.group = GroupFactory(members=[self.user, self.user2])
@@ -97,22 +98,51 @@ class TestUserDeleteAPI(APITestCase):
             date=timezone.now() - relativedelta(days=1),
             collectors=[self.user, ]
         )
-        self.url = '/api/auth/user/'
+        self.url_delete = '/api/auth/user/delete/'
+        self.url_request_delete = '/api/auth/user/delete/request/'
+        mail.outbox = []
 
-    def test_delete_self(self):
+    def test_request_deletion_succeeds(self):
+        self.client.force_login(self.user)
+        response = self.client.post(self.url_request_delete)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('Request to delete your account', mail.outbox[0].subject)
+        self.assertEqual(mail.outbox[0].to, [self.user.email])
+
+    def test_request_deletion_fails_if_not_logged_in(self):
+        response = self.client.post(self.url_request_delete)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_request_deletion_twice_succeeds(self):
+        self.client.force_login(self.user)
+        self.client.post(self.url_request_delete)
+        response = self.client.post(self.url_request_delete)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(mail.outbox), 2)
+        codes = VerificationCode.objects.filter(user=self.user, type=VerificationCode.ACCOUNT_DELETE)
+        self.assertEqual(codes.count(), 1)
+
+    def test_delete_succeeds(self):
         self.assertEqual(self.pickupdate.collectors.count(), 1)
         self.assertEqual(self.past_pickupdate.collectors.count(), 1)
 
         self.client.force_login(self.user)
-        response = self.client.delete(self.url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.data)
+        self.client.post(self.url_request_delete)
+        code = VerificationCode.objects.get(user=self.user, type=self.type).code
+        response = self.client.post(self.url_delete, {'code': code})
 
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(self.group.members.get_queryset().filter(id=self.user.id).exists())
         self.assertFalse(self.pickupdate.collectors.get_queryset().filter(id=self.user.id).exists())
         self.assertTrue(self.past_pickupdate.collectors.get_queryset().filter(id=self.user.id).exists())
 
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertIn('Your account was deleted', mail.outbox[1].subject)
+        self.assertEqual(mail.outbox[1].to, [self.user.email])
+
         # actions are disabled when user is deleted
-        self.client.logout()
         self.assertEqual(
             self.client.post('/api/auth/', {'email': self.user.email, 'password': self.user.display_name}).status_code,
             status.HTTP_400_BAD_REQUEST
@@ -121,6 +151,35 @@ class TestUserDeleteAPI(APITestCase):
             self.client.post('/api/auth/reset_password/', {'email': self.user.email}).status_code,
             status.HTTP_400_BAD_REQUEST
         )
+
+    def test_deletion_fails_without_verification_code(self):
+        self.client.force_login(self.user)
+        self.client.post(self.url_request_delete)
+        response = self.client.post(self.url_delete)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, {'code': ['This field is required.']})
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_deletion_fails_with_previous_verification_code(self):
+        self.client.force_login(self.user)
+        self.client.post(self.url_request_delete)
+        code = VerificationCode.objects.get(user=self.user, type=self.type).code
+        self.client.post(self.url_request_delete)
+        response = self.client.post(self.url_delete, {'code': code})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['code'], ['Verification code is invalid'])
+        self.assertEqual(len(mail.outbox), 2)
+
+    def test_deletion_fails_if_verification_code_too_old(self):
+        self.client.force_login(self.user)
+        self.client.post(self.url_request_delete)
+        verification_code = VerificationCode.objects.get(user=self.user, type=self.type)
+        verification_code.created_at = timezone.now() - timedelta(days=8)
+        verification_code.save()
+        response = self.client.post(self.url_delete, {'code': verification_code.code})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['code'], ['Verification code has expired'])
+        self.assertEqual(len(mail.outbox), 1)
 
 
 class TestCreateUserErrors(APITestCase):
@@ -177,8 +236,10 @@ class TestUploadPhoto(APITestCase):
 class TestRejectedAddress(APITestCase):
     def setUp(self):
         self.user = UserFactory()
-        self.url = '/api/auth/user/'
+        self.url_user = '/api/auth/user/'
         self.url_change_mail = '/api/auth/change_mail/'
+        self.url_request_account_deletion = '/api/auth/user/delete/request/'
+        self.url_request_account_deletion = '/api/auth/user/delete/'
 
         # Mock AnymailMessage to throw error on send
         self.mail_class = email_utils.AnymailMessage
@@ -189,7 +250,7 @@ class TestRejectedAddress(APITestCase):
         self.mail_class.send = self._original_send
 
     def test_sign_up_with_rejected_address_fails(self):
-        response = self.client.post(self.url, {
+        response = self.client.post(self.url_user, {
             'email': 'bad@test.com',
             'password': faker.name(),
             'display_name': faker.name()
@@ -201,6 +262,22 @@ class TestRejectedAddress(APITestCase):
         response = self.client.post(self.url_change_mail,
                                     {'password': self.user.display_name, 'new_email': 'bad@test.com'})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
+    def test_request_account_deletion_fails(self):
+        self.client.force_login(user=self.user)
+        response = self.client.post(self.url_request_account_deletion)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        codes = VerificationCode.objects.filter(user=self.user, type=VerificationCode.ACCOUNT_DELETE)
+        self.assertEqual(codes.count(), 0)
+
+    def test_account_deletion_fails(self):
+        self.client.force_login(user=self.user)
+        code = VerificationCode.objects.create(user=self.user, type=VerificationCode.ACCOUNT_DELETE).code
+        response = self.client.post(self.url_request_account_deletion, {'code': code})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        codes = VerificationCode.objects.filter(user=self.user, type=VerificationCode.ACCOUNT_DELETE)
+        self.assertEqual(codes.count(), 1)
+        self.assertTrue(auth.get_user(self.client).is_authenticated)
 
 
 class TestSetCurrentGroup(APITestCase):

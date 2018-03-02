@@ -92,13 +92,12 @@ class AuthUserSerializer(serializers.ModelSerializer):
         return super().update(user, validated_data)
 
 
-# TODO generalize (-> to become 'VerificationCodeSerializer')
-class VerifyMailSerializer(serializers.Serializer):
+class VerificationCodeSerializer(serializers.Serializer):
     code = serializers.CharField(max_length=50, min_length=20)
 
     def validate_code(self, code):
         try:
-            matched_code = VerificationCode.objects.get(code=code, type=VerificationCode.EMAIL_VERIFICATION)
+            matched_code = VerificationCode.objects.get(code=code, type=self.context['type'])
         except VerificationCode.DoesNotExist:
             raise serializers.ValidationError(_('Verification code is invalid'))
 
@@ -108,12 +107,26 @@ class VerifyMailSerializer(serializers.Serializer):
         self.instance = matched_code.user
         return code
 
+    def _update(self, user, validated_data):
+        type = self.context['type']
+
+        if type == VerificationCode.EMAIL_VERIFICATION:
+            user.verify_mail()
+        elif type == VerificationCode.PASSWORD_RESET:
+            user.change_password(validated_data['new_password'])
+        elif type == VerificationCode.ACCOUNT_DELETE:
+            user.delete_()
+
     def update(self, user, validated_data):
         try:
-            user.verify_mail()
+            self._update(user, validated_data)
         except AnymailAPIError:
             raise serializers.ValidationError(_('We could not send you an e-mail.'))
         return user
+
+
+class ResetPasswordSerializer(VerificationCodeSerializer):
+    new_password = serializers.CharField()
 
 
 class ChangePasswordSerializer(serializers.Serializer):
@@ -178,30 +191,6 @@ class RequestResetPasswordSerializer(serializers.Serializer):
     def update(self, user, validated_data):
         try:
             user.reset_password()
-        except AnymailAPIError:
-            raise serializers.ValidationError(_('We could not send you an e-mail.'))
-        return user
-
-
-class ResetPasswordSerializer(serializers.Serializer):
-    code = serializers.CharField(max_length=50, min_length=20)
-    new_password = serializers.CharField()
-
-    def validate_code(self, code):
-        try:
-            matched_code = VerificationCode.objects.get(code=code, type=VerificationCode.PASSWORD_RESET)
-        except VerificationCode.DoesNotExist:
-            raise serializers.ValidationError(_('Verification code is invalid'))
-
-        if matched_code.has_expired():
-            raise serializers.ValidationError(_('Verification code has expired'))
-
-        self.instance = matched_code.user
-        return code
-
-    def update(self, user, validated_data):
-        try:
-            user.change_password(validated_data['new_password'])
         except AnymailAPIError:
             raise serializers.ValidationError(_('We could not send you an e-mail.'))
         return user

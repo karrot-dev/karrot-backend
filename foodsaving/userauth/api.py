@@ -1,13 +1,14 @@
 from django.contrib.auth import logout, update_session_auth_hash
 from django.middleware.csrf import get_token as generate_csrf_token_for_frontend
-from django.utils import timezone
 from rest_framework import status, generics, views
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
-from foodsaving.userauth.serializers import AuthLoginSerializer, AuthUserSerializer, VerifyMailSerializer, \
-    ChangePasswordSerializer, RequestResetPasswordSerializer, ResetPasswordSerializer, ChangeMailSerializer
+from foodsaving.userauth.models import VerificationCode
 from foodsaving.userauth.permissions import MailIsNotVerified
+from foodsaving.userauth.serializers import AuthLoginSerializer, AuthUserSerializer, \
+    ChangePasswordSerializer, RequestResetPasswordSerializer, ChangeMailSerializer, \
+    VerificationCodeSerializer, ResetPasswordSerializer
 
 
 class LogoutView(views.APIView):
@@ -59,47 +60,45 @@ class AuthUserView(generics.GenericAPIView):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
-    def delete(self, request):
+
+class RequestDeleteUserView(views.APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
         """
-        Deletes the user from the database
-
-        To keep historic pickup infos, don't delete this user, but remove its details from the database.
+        Request the deletion of the user account.
         """
-        user = request.user
-        from foodsaving.groups.models import Group
-        from foodsaving.groups.models import GroupMembership
+        request.user.send_account_deletion_verification_code()
+        return Response(status=status.HTTP_204_NO_CONTENT, data={})
 
-        # Emits pre_delete and post_delete signals, they are used to remove the user from pick-ups
-        for _ in Group.objects.filter(members__in=[user, ]):
-            GroupMembership.objects.filter(group=_, user=user).delete()
 
-        user.description = ''
-        user.set_unusable_password()
-        user.mail = None
-        user.is_active = False
-        user.is_staff = False
-        user.mail_verified = False
-        user.unverified_email = None
-        user.deleted_at = timezone.now()
-        user.deleted = True
-        user.delete_photo()
+class DeleteUserView(generics.GenericAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = VerificationCodeSerializer
 
-        user.save()
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def post(self, request):
+        """
+        Delete the user account using a previously requested verification token.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.context['type'] = VerificationCode.ACCOUNT_DELETE
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=status.HTTP_204_NO_CONTENT, data={})
 
 
 class VerifyMailView(generics.GenericAPIView):
     # No need to add the MailIsNotVerified permission because
     # verification codes only exist for unverified users anyway.
     permission_classes = (AllowAny,)
-    serializer_class = VerifyMailSerializer
+    serializer_class = VerificationCodeSerializer
 
     def post(self, request):
         """
         Verify an e-mail address.
         """
         serializer = self.get_serializer(data=request.data)
+        serializer.context['type'] = VerificationCode.EMAIL_VERIFICATION
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=status.HTTP_204_NO_CONTENT, data={})
@@ -140,6 +139,7 @@ class ResetPasswordView(generics.GenericAPIView):
         Reset the password using a previously requested verification token.
         """
         serializer = self.get_serializer(data=request.data)
+        serializer.context['type'] = VerificationCode.PASSWORD_RESET
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=status.HTTP_204_NO_CONTENT, data={})

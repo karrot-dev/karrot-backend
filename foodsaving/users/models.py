@@ -2,11 +2,13 @@ from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import transaction, models
 from django.db.models import EmailField, BooleanField, TextField, CharField, DateTimeField, ForeignKey
+from django.utils import timezone
 from versatileimagefield.fields import VersatileImageField
 
 from foodsaving.base.base_models import BaseModel, LocationModel
 from foodsaving.userauth.models import VerificationCode
 from foodsaving.utils.email_utils import prepare_mailverification_email, prepare_email
+from foodsaving.groups.models import Group, GroupMembership
 
 MAX_DISPLAY_NAME_LENGTH = 80
 
@@ -151,6 +153,16 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         }, to=self.unverified_email).send()
 
     @transaction.atomic
+    def send_account_deletion_verification_code(self):
+        VerificationCode.objects.filter(user=self, type=VerificationCode.ACCOUNT_DELETE).delete()
+        prepare_email('accountdelete_request', self, {
+            'url': '{hostname}/#/delete_account?code={code}'.format(
+                hostname=settings.HOSTNAME,
+                code=VerificationCode.objects.create(user=self, type=VerificationCode.ACCOUNT_DELETE).code
+            )
+        }).send()
+
+    @transaction.atomic
     def reset_password(self):
         self.set_unusable_password()
         self.save()
@@ -169,6 +181,31 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         self.save()
         prepare_email('passwordchange', self, {}).send()
         VerificationCode.objects.filter(user=self, type=VerificationCode.PASSWORD_RESET).delete()
+
+    @transaction.atomic
+    def delete_(self):
+        """
+        Delete the user.
+
+        To keep historic pickup infos, keep the user account but clear personal data.
+        """
+        # Emits pre_delete and post_delete signals, they are used to remove the user from pick-ups
+        for _ in Group.objects.filter(members__in=[self, ]):
+            GroupMembership.objects.filter(group=_, user=self).delete()
+
+        self.description = ''
+        self.set_unusable_password()
+        self.mail = None
+        self.is_active = False
+        self.is_staff = False
+        self.mail_verified = False
+        self.unverified_email = None
+        self.deleted_at = timezone.now()
+        self.deleted = True
+        self.delete_photo()
+        self.save()
+
+        prepare_email('accountdelete_success', self, {}).send()
 
     def has_perm(self, perm, obj=None):
         # temporarily only allow access for admins
