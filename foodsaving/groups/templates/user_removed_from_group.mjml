@@ -16,7 +16,7 @@
                             {% trans %}It has been over {{ inactivity_deletion_days }} days since you visited the "{{ group_name }}" group.{% endtrans %}
 			</p>
                         <p>
-                            {% trans %}Unfortunately, we need to reduce inactive accounts in our groups. For that reason, we have removed your account from that particular group. {% endtrans %}
+                            {% trans %}For that reason, we have removed your account from that particular group. {% endtrans %}
                         </p>
                         <p>
 			    {% trans %}You're still on the site though, just click on the button below to visit!{% endtrans %}

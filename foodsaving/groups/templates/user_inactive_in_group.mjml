@@ -16,7 +16,7 @@
                             {% trans %}It looks like you've not visited the <a href="{{ group_url }}">{{ group_name }}</a> group for over {{ num_days_inactive }} days.{% endtrans %}
 			</p>
                         <p>
-                            {% trans %}Unfortunately, we need to reduce inactive accounts in our groups. If you remain inactive for {{ inactivity_deletion_days }} days, we will sadly have to remove you from that group. {% endtrans %}
+                            {% trans %}If you don't visit the group in the next {{ inactivity_deletion_days }} we will sadly have to remove you from that group. {% endtrans %}
                         </p>
                         <p>
 			    {% trans %}It's easy to remain active in the group though, just click the button below!{% endtrans %}
