@@ -14,7 +14,7 @@ from foodsaving.users.factories import UserFactory
 class TestGroupStats(TestCase):
 
     @patch('foodsaving.groups.stats.write_points')
-    def test_group_members_stats_foo(self, mock_write_points):
+    def test_group_members_stats(self, mock_write_points):
         def update_member_activity(user, **kwargs):
             GroupMembership.objects.filter(user=user).update(lastseen_at=timezone.now() - relativedelta(**kwargs))
 
@@ -24,6 +24,8 @@ class TestGroupStats(TestCase):
         update_member_activity(members[0], days=2)
         update_member_activity(members[1], days=8)
         update_member_activity(members[2], days=31)
+        update_member_activity(members[3], days=61)
+        update_member_activity(members[4], days=91)
 
         stats.group_members_stats(group)
 
@@ -33,9 +35,11 @@ class TestGroupStats(TestCase):
                 'group': str(group.id),
             },
             'fields': {
-                'count_active_1d': 7,
-                'count_active_7d': 8,
-                'count_active_30d': 9,
+                'count_active_1d': 5,
+                'count_active_7d': 6,
+                'count_active_30d': 7,
+                'count_active_60d': 8,
+                'count_active_90d': 9,
                 'count_total': 10,
             },
         }])
