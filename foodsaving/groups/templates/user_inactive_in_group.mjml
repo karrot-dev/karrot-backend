@@ -1,0 +1,33 @@
+<mjml>
+    <mj-head>
+        <mj-include path="../../base/templates/_base-head.mjml"/>
+        <mj-title>{{ group_name }}</mj-title>
+    </mj-head>
+    <mj-body>
+        <mj-container>
+            <mj-include path="../../base/templates/_header.mjml"/>
+            <mj-section>
+                <mj-column>
+                    <mj-text>
+                        <p>
+			{% trans %}Hey, we're missing you!{% endtrans %}
+		    	</p>
+                        <p>
+                            {% trans %}It looks like you've not visited the <a href="{{ group_url }}">{{ group_name }}</a> group for over {{ num_days_inactive }} days.{% endtrans %}
+			</p>
+                        <p>
+                            {% trans %}Unfortunately, we need to reduce inactive accounts in our groups. If you remain inactive for {{ inactivity_deletion_days }} days, we will sadly have to remove you from that group. {% endtrans %}
+                        </p>
+                        <p>
+			    {% trans %}It's easy to remain active in the group though, just click the button below!{% endtrans %}
+                        </p>
+                    </mj-text>
+                    <mj-button href="{{ group_url }}">
+                        {% trans %}Visit {{ group_name }}{% endtrans %}
+                    </mj-button>
+                </mj-column>
+            </mj-section>
+            <mj-include path="../../base/templates/_footer.mjml"/>
+        </mj-container>
+    </mj-body>
+</mjml>

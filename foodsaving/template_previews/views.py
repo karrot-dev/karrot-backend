@@ -82,6 +82,18 @@ class Handlers:
             verification_code=VerificationCode.objects.first()
         )
 
+    def user_inactive_in_group(self):
+        return email_utils.prepare_user_inactive_in_group_email(
+            user=random_user(),
+            group=random_group()
+        )
+
+    def user_removed_from_group(self):
+        return email_utils.prepare_user_removed_from_group_email(
+            user=random_user(),
+            group=random_group()
+        )
+
 
 handlers = Handlers()
 
