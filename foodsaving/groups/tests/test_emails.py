@@ -19,7 +19,7 @@ class TestGroupSummaryEmails(APITestCase):
         self.user_without_notifications = UserFactory(language='en')
         self.group.add_member(self.user_without_notifications)
         m = GroupMembership.objects.get(group=self.group, user=self.user_without_notifications)
-        m.notifications = []
+        m.notification_types = []
         m.save()
 
     def test_creates_one_email_for_one_language(self):
