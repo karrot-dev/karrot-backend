@@ -81,6 +81,9 @@ class Group(BaseModel, LocationModel, ConversationMixin):
             'invited_via': 'e-mail'
         })
 
+    def members_with_notification_type(self, type):
+        return self.members.filter(groupmembership__notifications__contains=[type])
+
 
 class Agreement(BaseModel):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
@@ -94,11 +97,20 @@ class UserAgreement(BaseModel):
     agreement = models.ForeignKey(Agreement, on_delete=models.CASCADE)
 
 
+class GroupNotificationType(object):
+    WEEKLY_SUMMARY = 'weekly_summary'
+
+
+def get_default_notifications():
+    return [GroupNotificationType.WEEKLY_SUMMARY]
+
+
 class GroupMembership(BaseModel):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     roles = ArrayField(TextField(), default=list)
     lastseen_at = DateTimeField(default=timezone.now)
+    notifications = ArrayField(TextField(), default=get_default_notifications)
 
     class Meta:
         db_table = 'groups_group_members'
