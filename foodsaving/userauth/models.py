@@ -7,9 +7,6 @@ from django.utils import crypto, timezone
 
 from foodsaving.base.base_models import BaseModel
 
-# TODO: Ensure each user can have at most one verification code of a certain type at a time.
-#       (Consider adding 'unique_together' constraint)
-
 
 class VerificationCodeManager(Manager):
     def create(self, *args, **kwargs):
@@ -36,6 +33,9 @@ class VerificationCode(BaseModel):
     user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     code = CharField('actual verification code', unique=True, max_length=50)
     type = CharField(max_length=50)
+
+    class Meta:
+        unique_together = ('user', 'type')
 
     def _get_validity_time_limit(self):
         """
