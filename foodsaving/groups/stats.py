@@ -50,6 +50,8 @@ def group_members_stats(group):
             'count_active_1d': members_active_within(days=1),
             'count_active_7d': members_active_within(days=7),
             'count_active_30d': members_active_within(days=30),
+            'count_active_60d': members_active_within(days=60),
+            'count_active_90d': members_active_within(days=90),
         },
     }])
 
