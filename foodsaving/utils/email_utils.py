@@ -27,7 +27,9 @@ def jinja2_environment(**options):
 
 
 def prepare_accountdelete_request_email(user):
-    return prepare_email('accountdelete_request', user)
+    return prepare_email('accountdelete_request', user, {
+        'url': 'ERROR_URL_HAS_NOT_BEEN_DEFINED'
+    })
 
 
 def prepare_accountdelete_success_email(user):

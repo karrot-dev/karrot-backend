@@ -1,7 +1,7 @@
 <mjml>
     <mj-head>
         <mj-include path="../../base/templates/_base-head.mjml"/>
-        <mj-title>{% trans %}Verify your email address{% endtrans %}</mj-title>
+        <mj-title>{% trans %}Try again to verify your mail{% endtrans %}</mj-title>
     </mj-head>
     <mj-body>
         <mj-container>
@@ -9,11 +9,10 @@
             <mj-section>
                 <mj-column>
                     <mj-text>
-                        <h1>{% trans %}Thank you for signing up to {{ site_name }}!{% endtrans %}</h1>
+                        <h1>{% trans %}You requested a new verification link to {{ site_name }}{% endtrans %}</h1>
                     </mj-text>
                     <mj-text>
-                        <p>{% trans %}Welcome to {{ site_name }}, {{ user_display_name }}!{% endtrans %}</p>
-                        <p>{% trans %}To get started, please confirm your email address by clicking the link below:{% endtrans %}</p>
+                        <p>{% trans %}Here you have the link again to confirm your email:{% endtrans %}</p>
                     </mj-text>
                     <mj-button href="{{ url }}">
                         {% trans %}Verify your email address{% endtrans %}
