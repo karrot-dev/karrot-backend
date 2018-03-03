@@ -15,7 +15,7 @@
                         <p>{% trans %}We're sad to hear that you want to delete your account, could we have done anything better?{% endtrans %}</p>
                         <p>{% trans %}Anyhow, you can finish the deletion by clicking the link below:{% endtrans %}</p>
                     </mj-text>
-                    <mj-button href="{{ url }}">
+                    <mj-button background-color="ef1f1f" href="{{ url }}">
                         {% trans %}Delete your account{% endtrans %}
                     </mj-button>
                 </mj-column>
