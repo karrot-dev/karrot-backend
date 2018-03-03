@@ -9,7 +9,7 @@ from timezone_field import TimeZoneField
 from foodsaving.base.base_models import BaseModel, LocationModel
 from foodsaving.conversations.models import ConversationMixin
 from foodsaving.history.models import History, HistoryTypus
-from foodsaving.groups.roles import APPROVED
+from foodsaving.groups.roles import GROUP_APPROVED_MEMBER
 
 
 class GroupManager(models.Manager):
@@ -39,7 +39,7 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     )
 
     def approved_member_count(self):
-        return self.members_with_all_roles([APPROVED]).count()
+        return self.members_with_all_roles([GROUP_APPROVED_MEMBER]).count()
 
     def members_with_all_roles(self, roles):
         return self.members.filter(groupmembership__roles__contains=roles)
@@ -64,7 +64,7 @@ class Group(BaseModel, LocationModel, ConversationMixin):
 
     def add_member(self, user, history_payload=None):
         """Adds a "full" member to the group, e.g. grants the status of a normal member."""
-        GroupMembership.objects.create(group=self, user=user, roles=[APPROVED])
+        GroupMembership.objects.create(group=self, user=user, roles=[GROUP_APPROVED_MEMBER])
         History.objects.create(
             typus=HistoryTypus.GROUP_JOIN,
             group=self,
@@ -82,7 +82,7 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         GroupMembership.objects.filter(group=self, user=user).delete()
 
     def is_member(self, user):
-        return self.is_member_with_role(user, [APPROVED])
+        return self.is_member_with_role(user, [GROUP_APPROVED_MEMBER])
 
     def is_member_with_role(self, user, role_name):
         return not user.is_anonymous and GroupMembership.objects.filter(group=self, user=user,
@@ -140,7 +140,7 @@ class GroupMembership(BaseModel):
         for role in roles:
             if role not in self.roles:
                 self.roles.append(role)
-                if role is APPROVED:
+                if role is GROUP_APPROVED_MEMBER:
                     History.objects.create(
                         typus=HistoryTypus.GROUP_JOIN,
                         group=self.group,

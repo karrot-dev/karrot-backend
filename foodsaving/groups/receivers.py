@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from foodsaving.conversations.models import Conversation
 from foodsaving.groups import roles, stats
 from foodsaving.groups.models import Group, GroupMembership
-from foodsaving.groups.roles import APPROVED
+from foodsaving.groups.roles import GROUP_APPROVED_MEMBER
 
 
 @receiver(post_save, sender=Group)
@@ -13,7 +13,7 @@ def group_created(**kwargs):
     group = kwargs.get('instance')
     # TODO: limit this to only run on creation
     conversation = Conversation.objects.get_or_create_for_target(group)
-    conversation.sync_users(group.members_with_all_roles([APPROVED]))
+    conversation.sync_users(group.members_with_all_roles([GROUP_APPROVED_MEMBER]))
 
 
 @receiver(pre_delete, sender=Group)
@@ -32,7 +32,7 @@ def group_member_added(sender, instance, **kwargs):
     user = instance.user
     roles = instance.roles
     conversation = Conversation.objects.get_or_create_for_target(group)
-    if APPROVED in roles:
+    if GROUP_APPROVED_MEMBER in roles:
         conversation.join(user)
         stats.group_joined(group)
     else:

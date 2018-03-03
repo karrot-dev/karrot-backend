@@ -14,7 +14,7 @@ from rest_framework.viewsets import GenericViewSet
 from foodsaving.conversations.api import RetrieveConversationMixin
 from foodsaving.groups import roles, stats
 from foodsaving.groups.filters import GroupsFilter, GroupsInfoFilter
-from foodsaving.groups.roles import APPROVED
+from foodsaving.groups.roles import GROUP_APPROVED_MEMBER
 from foodsaving.groups.models import Agreement, Group as GroupModel, GroupMembership
 from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer, GroupJoinSerializer, \
     GroupLeaveSerializer, TimezonesSerializer, EmptySerializer, \
@@ -103,7 +103,7 @@ class GroupViewSet(
         if self.action == 'join':
             return self.queryset
         return self.queryset.filter(groupmembership__user=self.request.user,
-                                    groupmembership__roles__contains=[APPROVED])
+                                    groupmembership__roles__contains=[GROUP_APPROVED_MEMBER])
 
     @detail_route(
         methods=['POST'],
@@ -142,7 +142,7 @@ class GroupViewSet(
     )
     def mark_user_active(self, request, pk=None):
         """Mark that the logged-in user is active in the group"""
-        gm = get_object_or_404(GroupMembership.objects, group=pk, user=request.user, roles__contains=[APPROVED])
+        gm = get_object_or_404(GroupMembership.objects, group=pk, user=request.user, roles__contains=[GROUP_APPROVED_MEMBER])
         gm.lastseen_at = timezone.now()
         gm.save()
         stats.group_activity(gm.group)
