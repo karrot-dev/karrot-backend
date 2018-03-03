@@ -44,7 +44,7 @@ def group_summary_email(group, recipient_count):
     }])
 
 
-def periodic_task(name,extra_fields=dict):
+def periodic_task(name, extra_fields=dict):
     write_points([{
         'measurement': 'karrot.periodic',
         'tags': {'name': name, },

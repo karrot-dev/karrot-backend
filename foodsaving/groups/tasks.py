@@ -13,7 +13,7 @@ from foodsaving.groups.models import GroupMembership
 from config import settings
 from foodsaving.utils.email_utils import prepare_user_inactive_in_group_email, prepare_user_removed_from_group_email
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 
 @db_periodic_task(crontab(minute=0))  # every hour
@@ -29,7 +29,7 @@ def record_group_stats():
     write_points(points)
 
 
-@db_periodic_task(crontab(hour=2, minute=0)) # 2am every day
+@db_periodic_task(crontab(hour=2, minute=0))  # 2am every day
 def process_inactive_users():
     now = timezone.now()
 
@@ -51,7 +51,7 @@ def process_inactive_users():
         gm.save()
         count_users_flagged_inactive += 1
 
-    stats.periodic_task('group__process_inactive_users',{
+    stats.periodic_task('group__process_inactive_users', {
         'count_users_flagged_inactive': count_users_flagged_inactive,
         'count_users_removed': count_users_removed
     })
