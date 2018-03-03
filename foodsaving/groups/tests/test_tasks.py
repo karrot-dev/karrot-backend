@@ -1,6 +1,6 @@
 from django.core import mail
 from django.utils import timezone
-from rest_framework.test import APITestCase
+from django.test import TestCase
 
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership
@@ -11,13 +11,11 @@ from config import settings
 from datetime import timedelta
 
 
-# This probably shouldn't be APITestCase???
-class TestProcessInactiveUsers (APITestCase):
+class TestProcessInactiveUsers (TestCase):
     def setUp(self):
-        self.admin = UserFactory()  # has membership management rights
         self.member1 = UserFactory()
         self.member2 = UserFactory()
-        self.group = GroupFactory(members=[self.admin, self.member1, self.member2])
+        self.group = GroupFactory(members=[self.member1, self.member2])
 
         now = timezone.now()
 
@@ -39,6 +37,7 @@ class TestProcessInactiveUsers (APITestCase):
         self.assertEqual(len(mail.outbox), 2)
         self.membership1.refresh_from_db()
         self.assertEqual(self.membership1.active, False)
-        self.assertEqual(len(GroupMembership.objects.all()), 2)
+        self.assertEqual(len(GroupMembership.objects.all()), 1)
+        self.assertEqual(GroupMembership.objects.first(), self.member1)
 
 
