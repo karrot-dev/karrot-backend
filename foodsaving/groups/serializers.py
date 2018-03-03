@@ -262,7 +262,8 @@ class GroupMembershipAddRoleSerializer(serializers.Serializer):
 
 
 class GroupMembershipRemoveRoleSerializer(serializers.Serializer):
-    role_name = serializers.CharField(
+    role_name = serializers.ChoiceField(
+        choices=(roles.GROUP_MEMBERSHIP_MANAGER, roles.GROUP_AGREEMENT_MANAGER,),
         required=True,
         write_only=True
     )
