@@ -1,7 +1,7 @@
 <mjml>
     <mj-head>
         <mj-include path="../../base/templates/_base-head.mjml"/>
-        <mj-title>{% trans %}Verify your email address{% endtrans %}</mj-title>
+        <mj-title>{% trans %}Please verify your email address{% endtrans %}</mj-title>
     </mj-head>
     <mj-body>
         <mj-container>
