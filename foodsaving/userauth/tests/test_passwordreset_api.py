@@ -1,6 +1,5 @@
 from datetime import timedelta
 
-from django.contrib import auth
 from django.core import mail
 from django.utils import timezone
 from rest_framework import status
@@ -13,8 +12,8 @@ from foodsaving.userauth.models import VerificationCode
 class TestPasswordReset(APITestCase):
     def setUp(self):
         self.verified_user = VerifiedUserFactory(email='reset_test@example.com')
-        self.url_request_password_reset = '/api/auth/reset_password/request/'
-        self.url_password_reset = '/api/auth/reset_password/'
+        self.url_request_password_reset = '/api/auth/password/request_reset/'
+        self.url_password_reset = '/api/auth/password/reset/'
         self.type = VerificationCode.PASSWORD_RESET
         self.old_password = self.verified_user.display_name
         self.new_password = 'super-safe'

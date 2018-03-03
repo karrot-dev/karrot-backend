@@ -17,15 +17,14 @@ from foodsaving.groups.api import GroupViewSet, AgreementViewSet, GroupInfoViewS
 from foodsaving.history.api import HistoryViewSet
 from foodsaving.invitations.api import InvitationsViewSet, InvitationAcceptViewSet
 from foodsaving.pickups.api import PickupDateViewSet, PickupDateSeriesViewSet, FeedbackViewSet
+from foodsaving.stores.api import StoreViewSet
 from foodsaving.subscriptions.api import PushSubscriptionViewSet
+from foodsaving.template_previews import views as template_preview_views
 from foodsaving.userauth.api import AuthUserView, AuthView, LogoutView, \
     RequestResetPasswordView, ChangePasswordView, VerifyMailView, ResendMailVerificationCodeView, ResetPasswordView, \
-    ChangeMailView, DeleteUserView, RequestDeleteUserView
+    ChangeMailView, RequestDeleteUserView
 from foodsaving.users.api import UserViewSet
-from foodsaving.stores.api import StoreViewSet
 from foodsaving.webhooks.api import IncomingEmailView, EmailEventView
-
-from foodsaving.template_previews import views as template_preview_views
 
 router = routers.DefaultRouter()
 
@@ -64,14 +63,13 @@ urlpatterns = [
     path('api/auth/token/', obtain_auth_token),
     path('api/auth/logout/', LogoutView.as_view()),
     path('api/auth/user/', AuthUserView.as_view()),
-    path('api/auth/user/delete/request/', RequestDeleteUserView.as_view()),
-    path('api/auth/user/delete/', DeleteUserView.as_view()),
-    path('api/auth/verify_mail/', VerifyMailView.as_view()),
-    path('api/auth/verify_mail/resend_verification_code/', ResendMailVerificationCodeView.as_view()),
-    path('api/auth/reset_password/request/', RequestResetPasswordView.as_view()),
-    path('api/auth/reset_password/', ResetPasswordView.as_view()),
-    path('api/auth/change_password/', ChangePasswordView.as_view()),
-    path('api/auth/change_mail/', ChangeMailView.as_view()),
+    path('api/auth/user/request_delete/', RequestDeleteUserView.as_view()),
+    path('api/auth/email/', ChangeMailView.as_view()),
+    path('api/auth/email/verify/', VerifyMailView.as_view()),
+    path('api/auth/email/resend_verification_code/', ResendMailVerificationCodeView.as_view()),
+    path('api/auth/password/', ChangePasswordView.as_view()),
+    path('api/auth/password/request_reset/', RequestResetPasswordView.as_view()),
+    path('api/auth/password/reset/', ResetPasswordView.as_view()),
     path('api/webhooks/incoming_email/', IncomingEmailView.as_view()),
     path('api/webhooks/email_event/', EmailEventView.as_view()),
     path('api/auth/', AuthView.as_view()),

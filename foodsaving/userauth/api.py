@@ -1,4 +1,6 @@
+from anymail.exceptions import AnymailAPIError
 from django.contrib.auth import logout, update_session_auth_hash
+from django.utils.translation import ugettext as _
 from django.middleware.csrf import get_token as generate_csrf_token_for_frontend
 from rest_framework import status, generics, views
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -31,14 +33,19 @@ class AuthView(generics.GenericAPIView):
 
 
 class AuthUserView(generics.GenericAPIView):
-    permission_classes = (IsAuthenticated,)
     serializer_class = AuthUserSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get_permissions(self):
         # Allow creating user when not logged in
-        if self.request.method.lower() == 'post':
+        if self.request.method.lower() == 'post' or self.request.method.lower() == 'delete':
             return ()
         return super().get_permissions()
+
+    def get_serializer_class(self):
+        if self.request.method.lower() == 'delete':
+            return VerificationCodeSerializer
+        return self.serializer_class
 
     def post(self, request):
         """Create a new user"""
@@ -60,6 +67,16 @@ class AuthUserView(generics.GenericAPIView):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
+    def delete(self, request):
+        """
+        Delete the user account using a previously requested verification token.
+        """
+        serializer = self.get_serializer(data=request.query_params)
+        serializer.context['type'] = VerificationCode.ACCOUNT_DELETE
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=status.HTTP_204_NO_CONTENT, data={})
+
 
 class RequestDeleteUserView(views.APIView):
     permission_classes = (IsAuthenticated,)
@@ -68,22 +85,10 @@ class RequestDeleteUserView(views.APIView):
         """
         Request the deletion of the user account.
         """
-        request.user.send_account_deletion_verification_code()
-        return Response(status=status.HTTP_204_NO_CONTENT, data={})
-
-
-class DeleteUserView(generics.GenericAPIView):
-    permission_classes = (AllowAny,)
-    serializer_class = VerificationCodeSerializer
-
-    def post(self, request):
-        """
-        Delete the user account using a previously requested verification token.
-        """
-        serializer = self.get_serializer(data=request.data)
-        serializer.context['type'] = VerificationCode.ACCOUNT_DELETE
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        try:
+            request.user.send_account_deletion_verification_code()
+        except AnymailAPIError:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={_('We could not send you an e-mail.')})
         return Response(status=status.HTTP_204_NO_CONTENT, data={})
 
 
@@ -149,7 +154,7 @@ class ChangePasswordView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = ChangePasswordSerializer
 
-    def post(self, request):
+    def put(self, request):
         """
         Change the password.
         """
@@ -168,7 +173,7 @@ class ChangeMailView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = ChangeMailSerializer
 
-    def post(self, request):
+    def put(self, request):
         """
         Change the e-mail address.
         """

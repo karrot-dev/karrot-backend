@@ -98,8 +98,9 @@ class TestUserDeleteAPI(APITestCase):
             date=timezone.now() - relativedelta(days=1),
             collectors=[self.user, ]
         )
-        self.url_delete = '/api/auth/user/delete/'
-        self.url_request_delete = '/api/auth/user/delete/request/'
+        self.url_user = '/api/auth/user/'
+        self.url_delete = '/api/auth/user/?code={:s}'
+        self.url_request_delete = '/api/auth/user/request_delete/'
         mail.outbox = []
 
     def test_request_deletion_succeeds(self):
@@ -131,7 +132,7 @@ class TestUserDeleteAPI(APITestCase):
         self.client.force_login(self.user)
         self.client.post(self.url_request_delete)
         code = VerificationCode.objects.get(user=self.user, type=self.type).code
-        response = self.client.post(self.url_delete, {'code': code})
+        response = self.client.delete(self.url_delete.format(code))
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(self.group.members.get_queryset().filter(id=self.user.id).exists())
@@ -148,14 +149,14 @@ class TestUserDeleteAPI(APITestCase):
             status.HTTP_400_BAD_REQUEST
         )
         self.assertEqual(
-            self.client.post('/api/auth/reset_password/', {'email': self.user.email}).status_code,
+            self.client.post('/api/auth/password/reset/', {'email': self.user.email}).status_code,
             status.HTTP_400_BAD_REQUEST
         )
 
     def test_deletion_fails_without_verification_code(self):
         self.client.force_login(self.user)
         self.client.post(self.url_request_delete)
-        response = self.client.post(self.url_delete)
+        response = self.client.delete(self.url_user)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, {'code': ['This field is required.']})
         self.assertEqual(len(mail.outbox), 1)
@@ -165,7 +166,7 @@ class TestUserDeleteAPI(APITestCase):
         self.client.post(self.url_request_delete)
         code = VerificationCode.objects.get(user=self.user, type=self.type).code
         self.client.post(self.url_request_delete)
-        response = self.client.post(self.url_delete, {'code': code})
+        response = self.client.delete(self.url_delete.format(code))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['code'], ['Verification code is invalid'])
         self.assertEqual(len(mail.outbox), 2)
@@ -176,7 +177,7 @@ class TestUserDeleteAPI(APITestCase):
         verification_code = VerificationCode.objects.get(user=self.user, type=self.type)
         verification_code.created_at = timezone.now() - timedelta(days=8)
         verification_code.save()
-        response = self.client.post(self.url_delete, {'code': verification_code.code})
+        response = self.client.delete(self.url_delete.format(verification_code.code))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['code'], ['Verification code has expired'])
         self.assertEqual(len(mail.outbox), 1)
@@ -237,9 +238,8 @@ class TestRejectedAddress(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.url_user = '/api/auth/user/'
-        self.url_change_mail = '/api/auth/change_mail/'
-        self.url_request_account_deletion = '/api/auth/user/delete/request/'
-        self.url_request_account_deletion = '/api/auth/user/delete/'
+        self.url_change_email = '/api/auth/password/'
+        self.url_request_account_deletion = '/api/auth/user/request_delete/'
 
         # Mock AnymailMessage to throw error on send
         self.mail_class = email_utils.AnymailMessage
@@ -259,8 +259,8 @@ class TestRejectedAddress(APITestCase):
 
     def test_change_to_rejected_address_fails(self):
         self.client.force_login(user=self.user)
-        response = self.client.post(self.url_change_mail,
-                                    {'password': self.user.display_name, 'new_email': 'bad@test.com'})
+        response = self.client.put(self.url_change_email, {'password': self.user.display_name,
+                                                           'new_email': 'bad@test.com'})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_request_account_deletion_fails(self):
@@ -273,7 +273,7 @@ class TestRejectedAddress(APITestCase):
     def test_account_deletion_fails(self):
         self.client.force_login(user=self.user)
         code = VerificationCode.objects.create(user=self.user, type=VerificationCode.ACCOUNT_DELETE).code
-        response = self.client.post(self.url_request_account_deletion, {'code': code})
+        response = self.client.delete(self.url_user, {'code': code})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         codes = VerificationCode.objects.filter(user=self.user, type=VerificationCode.ACCOUNT_DELETE)
         self.assertEqual(codes.count(), 1)
@@ -304,12 +304,12 @@ class TestSetCurrentGroup(APITestCase):
 class TestChangePassword(APITestCase):
     def setUp(self):
         self.user = UserFactory()
-        self.url = '/api/auth/change_password/'
+        self.url = '/api/auth/password/'
         self.data = {'new_password': 'new_password', 'old_password': self.user.display_name}
 
     def test_change_succeeds(self):
         self.client.force_login(user=self.user)
-        response = self.client.post(self.url, self.data, format='json')
+        response = self.client.put(self.url, self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response)
 
         # User stays logged in
@@ -322,7 +322,7 @@ class TestChangePassword(APITestCase):
     def test_change_with_wrong_password_fails(self):
         self.client.force_login(user=self.user)
         data = {'new_password': self.data['new_password'], 'old_password': 'this_is_wrong'}
-        response = self.client.post(self.url, data, format='json')
+        response = self.client.put(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response)
         self.assertTrue(self.client.login(email=self.user.email, password=self.user.display_name))
 
@@ -341,7 +341,7 @@ class TestChangeEMail(APITestCase):
         self.old_email = self.verified_user.email
         self.new_email = faker.email()
         self.password = self.verified_user.display_name
-        self.url = '/api/auth/change_mail/'
+        self.url = '/api/auth/email/'
         self.url_patch = '/api/auth/user/'
         mail.outbox = []
 
@@ -363,7 +363,7 @@ class TestChangeEMail(APITestCase):
         self.client.force_login(user=self.verified_user)
         self.assertTrue(self.verified_user.mail_verified)
 
-        response = self.client.post(self.url, {'password': self.password, 'new_email': self.new_email})
+        response = self.client.put(self.url, {'password': self.password, 'new_email': self.new_email})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['email'], self.verified_user.unverified_email)
@@ -392,28 +392,28 @@ class TestChangeEMail(APITestCase):
 
     def test_change_without_password_fails(self):
         self.client.force_login(user=self.verified_user)
-        response = self.client.post(self.url, {'new_email': self.new_email})
+        response = self.client.put(self.url, {'new_email': self.new_email})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        response = self.client.post(self.url, {'password': '', 'new_email': self.new_email})
+        response = self.client.put(self.url, {'password': '', 'new_email': self.new_email})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(len(mail.outbox), 0)
 
     def test_change_with_wrong_password_fails(self):
         self.client.force_login(user=self.verified_user)
-        response = self.client.post(self.url, {'password': 'wrong', 'new_email': self.new_email})
+        response = self.client.put(self.url, {'password': 'wrong', 'new_email': self.new_email})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(len(mail.outbox), 0)
 
     def test_change_to_existing_mail_fails(self):
         self.client.force_login(user=self.verified_user)
-        response = self.client.post(self.url, {'password': self.password, 'new_email': self.another_user.email})
+        response = self.client.put(self.url, {'password': self.password, 'new_email': self.another_user.email})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(len(mail.outbox), 0)
 
     def test_change_to_existing_similar_mail_fails(self):
         self.client.force_login(user=self.verified_user)
         similar_mail = self.another_user.email[0].swapcase() + self.another_user.email[1:]
-        response = self.client.post(self.url, {'password': self.password, 'new_email': similar_mail})
+        response = self.client.put(self.url, {'password': self.password, 'new_email': similar_mail})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['new_email'], ['Similar e-mail exists: ' + self.another_user.email])
         self.assertEqual(len(mail.outbox), 0)
@@ -421,19 +421,19 @@ class TestChangeEMail(APITestCase):
     def test_change_to_similar_mail_succeeds(self):
         self.client.force_login(user=self.verified_user)
         similar_mail = self.verified_user.email[0].swapcase() + self.verified_user.email[1:]
-        response = self.client.post(self.url, {'password': self.password, 'new_email': similar_mail})
+        response = self.client.put(self.url, {'password': self.password, 'new_email': similar_mail})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(mail.outbox), 2)
 
     def test_restore_email_succeeds(self):
         self.client.force_login(user=self.verified_user)
 
-        response = self.client.post(self.url, {'password': self.password, 'new_email': self.new_email})
+        response = self.client.put(self.url, {'password': self.password, 'new_email': self.new_email})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(mail.outbox), 2)
         mail.outbox.clear()
 
-        response = self.client.post(self.url, {'password': self.password, 'new_email': self.old_email})
+        response = self.client.put(self.url, {'password': self.password, 'new_email': self.old_email})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(mail.outbox), 0)
         self.assertEqual(self.verified_user.email, self.old_email)
@@ -442,7 +442,7 @@ class TestChangeEMail(APITestCase):
 
     def test_dont_change_email(self):
         self.client.force_login(user=self.verified_user)
-        response = self.client.post(self.url, {'password': self.password, 'new_email': self.old_email})
+        response = self.client.put(self.url, {'password': self.password, 'new_email': self.old_email})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['mail_verified'], True)
         self.assertEqual(len(mail.outbox), 0)
@@ -462,7 +462,7 @@ class TestChangeEMail(APITestCase):
 class TestEMailVerification(APITestCase):
     def setUp(self):
         self.user = UserFactory()
-        self.url = '/api/auth/verify_mail/'
+        self.url = '/api/auth/email/verify/'
         self.type = VerificationCode.EMAIL_VERIFICATION
 
     def test_verify_mail_succeeds(self):
@@ -508,7 +508,7 @@ class TestResendEMailVerificationCode(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.verified_user = VerifiedUserFactory()
-        self.url = '/api/auth/verify_mail/resend_verification_code/'
+        self.url = '/api/auth/email/resend_verification_code/'
         mail.outbox = []
 
     def test_resend_mail_verification_code_succeeds(self):

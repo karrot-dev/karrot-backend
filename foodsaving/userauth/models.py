@@ -11,7 +11,8 @@ from foodsaving.base.base_models import BaseModel
 class VerificationCodeManager(Manager):
     def create(self, *args, **kwargs):
         if 'code' not in kwargs or not kwargs['code']:
-            kwargs['code'] = crypto.get_random_string(length=VerificationCode.LENGTH)
+            url_safe_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+            kwargs['code'] = crypto.get_random_string(length=VerificationCode.LENGTH, allowed_chars=url_safe_chars)
         return super(VerificationCodeManager, self).create(*args, **kwargs)
 
 
