@@ -13,7 +13,7 @@
                     </mj-text>
                     <mj-text>
                         <p>{% trans %}Welcome to {{ site_name }}, {{ user_display_name }}!{% endtrans %}</p>
-                        <p>{% trans %}To get started, please confirm your email address by clicking the link below:{% endtrans %}</p>
+                        <p>{% trans %}After we get started, please confirm your email address by clicking the link below:{% endtrans %}</p>
                     </mj-text>
                     <mj-button href="{{ url }}">
                         {% trans %}Verify your email address{% endtrans %}
