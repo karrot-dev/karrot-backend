@@ -37,14 +37,14 @@ def process_inactive_users():
     count_users_removed = 0
 
     remove_threshold_date = now - timedelta(days=settings.NUMBER_OF_DAYS_UNTIL_REMOVED_FROM_GROUP)
-    for gm in GroupMembership.objects.all().filter(lastseen_at__lte=remove_threshold_date, active=False):
+    for gm in GroupMembership.objects.filter(lastseen_at__lte=remove_threshold_date, active=False):
         email = prepare_user_removed_from_group_email(gm.user, gm.group)
         email.send()
         gm.delete()
         count_users_removed += 1
 
     inactive_threshold_date = now - timedelta(days=settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP)
-    for gm in GroupMembership.objects.all().filter(lastseen_at__lte=inactive_threshold_date, active=True):
+    for gm in GroupMembership.objects.filter(lastseen_at__lte=inactive_threshold_date, active=True):
         email = prepare_user_inactive_in_group_email(gm.user, gm.group)
         email.send()
         gm.active = False

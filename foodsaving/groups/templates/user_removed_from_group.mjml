@@ -13,7 +13,7 @@
 			{% trans %}Hey,{% endtrans %}
 		    	</p>
                         <p>
-                            {% trans %}It has been over {{ inactivity_deletion_days }} days since you visited the "{{ group_name }}" group.{% endtrans %}
+                            {% trans %}It has been over {{ inactivity_deletion_days }} days since you visited "{{ group_name }}".{% endtrans %}
 			</p>
                         <p>
                             {% trans %}For that reason, we have removed your account from that particular group. {% endtrans %}

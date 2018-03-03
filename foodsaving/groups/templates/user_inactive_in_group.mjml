@@ -16,15 +16,17 @@
                             {% trans %}It looks like you've not visited the <a href="{{ group_url }}">{{ group_name }}</a> group for over {{ num_days_inactive }} days.{% endtrans %}
 			</p>
                         <p>
-                            {% trans %}If you don't visit the group in the next {{ inactivity_deletion_days }} we will sadly have to remove you from that group. {% endtrans %}
-                        </p>
-                        <p>
-			    {% trans %}It's easy to remain active in the group though, just click the button below!{% endtrans %}
+                            {% trans %}If you don't visit the group in the next {{ inactivity_deletion_days }} days, we will sadly have to remove you from that group. {% endtrans %}
                         </p>
                     </mj-text>
                     <mj-button href="{{ group_url }}">
                         {% trans %}Visit {{ group_name }}{% endtrans %}
                     </mj-button>
+		    <mj-text>
+                        <p>
+			    If you are not interested in "{{ group_name }}" anymore, you don't need to click. After {{ inactivity_deletion_days }} days, you will be removed from the group to keep the member list up to date.
+			</p>
+		    </mj-text>
                 </mj-column>
             </mj-section>
             <mj-include path="../../base/templates/_footer.mjml"/>

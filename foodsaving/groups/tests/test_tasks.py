@@ -13,20 +13,20 @@ from datetime import timedelta
 
 class TestProcessInactiveUsers (TestCase):
     def setUp(self):
-        self.activeUser = UserFactory()
-        self.inactiveUser = UserFactory()
-        self.deletedUser = UserFactory()
-        self.group = GroupFactory(members=[self.activeUser, self.inactiveUser, self.deletedUser])
+        self.active_user = UserFactory()
+        self.inactive_user = UserFactory()
+        self.deleted_user = UserFactory()
+        self.group = GroupFactory(members=[self.active_user, self.inactive_user, self.deleted_user])
 
         now = timezone.now()
 
         inactive_email_date = now - timedelta(days=settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP)
-        self.membership1 = GroupMembership.objects.get(group=self.group, user=self.inactiveUser)
+        self.membership1 = GroupMembership.objects.get(group=self.group, user=self.inactive_user)
         self.membership1.lastseen_at = inactive_email_date
         self.membership1.save()
 
         remove_email_date = now - timedelta(days=settings.NUMBER_OF_DAYS_UNTIL_REMOVED_FROM_GROUP + 1)
-        self.membership2 = GroupMembership.objects.get(group=self.group, user=self.deletedUser)
+        self.membership2 = GroupMembership.objects.get(group=self.group, user=self.deleted_user)
         self.membership2.lastseen_at = remove_email_date
         self.membership2.active = False
         self.membership2.save()
@@ -39,7 +39,7 @@ class TestProcessInactiveUsers (TestCase):
 
     def test_process_inactive_users_leaves_active_user_alone(self):
         process_inactive_users()
-        activeMembership = GroupMembership.objects.get(group=self.group, user=self.activeUser)
+        activeMembership = GroupMembership.objects.get(group=self.group, user=self.active_user)
         self.assertEqual(activeMembership.active, True)
 
     def test_process_inactive_users_flags_inactive_user(self):
