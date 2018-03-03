@@ -17,7 +17,7 @@ class TestGroupSummaryEmails(APITestCase):
     def setUp(self):
         self.group = GroupFactory()
 
-        self.user_without_notifications = VerifiedUserFactory(language='en', mail_verified=True)
+        self.user_without_notifications = VerifiedUserFactory(language='en')
         self.group.add_member(self.user_without_notifications)
         m = GroupMembership.objects.get(group=self.group, user=self.user_without_notifications)
         m.notification_types = []
@@ -50,13 +50,13 @@ class TestGroupSummaryEmails(APITestCase):
         n = 5
 
         for _ in list(range(n)):
-            self.group.add_member(VerifiedUserFactory(language='en', mail_verified=True))
+            self.group.add_member(VerifiedUserFactory(language='en'))
 
         for _ in list(range(n)):
-            self.group.add_member(VerifiedUserFactory(language='de', mail_verified=True))
+            self.group.add_member(VerifiedUserFactory(language='de'))
 
         for _ in list(range(n)):
-            self.group.add_member(VerifiedUserFactory(language='fr', mail_verified=True))
+            self.group.add_member(VerifiedUserFactory(language='fr'))
 
         from_date, to_date = group_emails.calculate_group_summary_dates(self.group)
         emails = group_emails.prepare_group_summary_emails(self.group, from_date, to_date)

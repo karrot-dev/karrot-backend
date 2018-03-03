@@ -18,8 +18,9 @@ class EmailEventManager(BaseUserManager):
 
 
 class EmailEvent(BaseModel):
+    objects = EmailEventManager()
+    
     id = BigAutoField(primary_key=True)
     address = TextField()
     event = CharField(max_length=255)
     payload = JSONField()
-    objects = EmailEventManager()

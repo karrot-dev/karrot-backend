@@ -33,8 +33,6 @@ def send_summary_emails():
 
         if not group.sent_summary_up_to or group.sent_summary_up_to < to_date:
 
-            print('sending summary for [{}] {} to {}'.format(group.name, from_date, to_date))
-
             recipient_count = 0
 
             for email in emails.prepare_group_summary_emails(group, from_date, to_date):
