@@ -276,7 +276,7 @@ class TestChangeEMail(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data['email'], old_email)
         self.assertEqual(len(mail.outbox), 2)
-        self.assertIn('Your email address changed!', mail.outbox[0].subject)
+        self.assertIn('Your email address changed', mail.outbox[0].subject)
         self.assertEqual(mail.outbox[0].to, [old_email], 'error: change notice sent to wrong address')
         self.assertIn('Please verify your email', mail.outbox[1].subject)
         self.assertEqual(
@@ -332,7 +332,7 @@ class TestChangeEMail(APITestCase):
         response = self.client.patch(self.url, {'email': original})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(mail.outbox), 2)
-        self.assertIn('Your email address changed!', mail.outbox[0].subject)
+        self.assertIn('Your email address changed', mail.outbox[0].subject)
         self.assertEqual(response.data['email'], original)
         self.assertEqual(response.data['mail_verified'], False)
 
