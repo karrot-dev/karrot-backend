@@ -34,13 +34,31 @@ def group_activity(group):
     }])
 
 
-def group_members_stats(group):
+def group_summary_email(group, recipient_count):
+    write_points([{
+        'measurement': 'karrot.email.group_summary',
+        'tags': {
+            'group': str(group.id)
+        },
+        'fields': {'value': 1, 'recipient_count': recipient_count},
+    }])
+
+
+def periodic_task(name):
+    write_points([{
+        'measurement': 'karrot.periodic',
+        'tags': {'name': name, },
+        'fields': {'value': 1, },
+    }])
+
+
+def get_group_members_stats(group):
     now = timezone.now()
 
     def members_active_within(**kwargs):
         return group.members.filter(groupmembership__lastseen_at__gte=now - relativedelta(**kwargs)).count()
 
-    write_points([{
+    return [{
         'measurement': 'karrot.group.members',
         'tags': {
             'group': str(group.id)
@@ -53,10 +71,10 @@ def group_members_stats(group):
             'count_active_60d': members_active_within(days=60),
             'count_active_90d': members_active_within(days=90),
         },
-    }])
+    }]
 
 
-def group_stores_stats(group):
+def get_group_stores_stats(group):
     fields = {
         'count_total': group.store.count(),
     }
@@ -65,10 +83,10 @@ def group_stores_stats(group):
         # record one value per store status too
         fields['count_status_{}'.format(entry['status'])] = entry['count']
 
-    write_points([{
+    return [{
         'measurement': 'karrot.group.stores',
         'tags': {
             'group': str(group.id),
         },
         'fields': fields,
-    }])
+    }]

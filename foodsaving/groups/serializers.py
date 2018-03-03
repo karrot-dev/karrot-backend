@@ -4,7 +4,8 @@ from django.utils.translation import ugettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, PermissionDenied
 
-from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement
+from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
+    GroupNotificationType
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.history.utils import get_changed_data
 from . import roles
@@ -24,7 +25,7 @@ class TimezoneField(serializers.Field):
 class GroupMembershipInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupMembership
-        fields = ('created_at', 'roles')
+        fields = ('created_at', 'roles',)
         extra_kwargs = {
             'created_at': {
                 'read_only': True
@@ -54,6 +55,7 @@ class GroupDetailSerializer(serializers.ModelSerializer):
             'timezone',
             'active_agreement',
             'active',
+            'notification_types',
         ]
         extra_kwargs = {
             'name': {
@@ -68,9 +70,10 @@ class GroupDetailSerializer(serializers.ModelSerializer):
                 'max_length': 255
             },
         }
-        read_only_fields = ['active', 'members', 'memberships']
+        read_only_fields = ['active', 'members', 'memberships', 'notification_types']
 
     memberships = serializers.SerializerMethodField()
+    notification_types = serializers.SerializerMethodField()
 
     def validate_active_agreement(self, active_agreement):
         user = self.context['request'].user
@@ -84,6 +87,13 @@ class GroupDetailSerializer(serializers.ModelSerializer):
 
     def get_memberships(self, group):
         return {m.user_id: GroupMembershipInfoSerializer(m).data for m in group.groupmembership_set.all()}
+
+    def get_notification_types(self, group):
+        if 'request' not in self.context:
+            return []
+        user = self.context['request'].user
+        membership = group.groupmembership_set.get(user=user)
+        return membership.notification_types
 
     timezone = TimezoneField()
 
@@ -237,7 +247,7 @@ class EmptySerializer(serializers.Serializer):
 
 class GroupMembershipAddRoleSerializer(serializers.Serializer):
     role_name = serializers.ChoiceField(
-        choices=(roles.GROUP_MEMBERSHIP_MANAGER, roles.GROUP_AGREEMENT_MANAGER, ),
+        choices=(roles.GROUP_MEMBERSHIP_MANAGER, roles.GROUP_AGREEMENT_MANAGER,),
         required=True,
         write_only=True
     )
@@ -258,5 +268,32 @@ class GroupMembershipRemoveRoleSerializer(serializers.Serializer):
     def update(self, instance, validated_data):
         role = validated_data['role_name']
         instance.remove_roles([role])
+        instance.save()
+        return instance
+
+
+class GroupMembershipAddNotificationTypeSerializer(serializers.Serializer):
+    notification_type = serializers.ChoiceField(
+        choices=(GroupNotificationType.WEEKLY_SUMMARY,),
+        required=True,
+        write_only=True
+    )
+
+    def update(self, instance, validated_data):
+        notification_type = validated_data['notification_type']
+        instance.add_notification_types([notification_type])
+        instance.save()
+        return instance
+
+
+class GroupMembershipRemoveNotificationTypeSerializer(serializers.Serializer):
+    notification_type = serializers.CharField(
+        required=True,
+        write_only=True
+    )
+
+    def update(self, instance, validated_data):
+        notification_type = validated_data['notification_type']
+        instance.remove_notification_types([notification_type])
         instance.save()
         return instance
