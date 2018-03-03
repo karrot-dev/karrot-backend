@@ -4,8 +4,6 @@ from django.utils import timezone
 
 from foodsaving.conversations.models import Conversation
 from foodsaving.groups.factories import GroupFactory
-from foodsaving.groups.models import GroupMembership
-from foodsaving.groups.roles import APPROVED
 from foodsaving.users.factories import UserFactory
 
 

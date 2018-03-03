@@ -5,7 +5,6 @@ from django.utils import timezone
 from rest_framework.test import APITestCase
 
 from foodsaving.groups.factories import GroupFactory
-from foodsaving.groups.models import GroupMembership
 from foodsaving.pickups.factories import PickupDateFactory, PickupDateSeriesFactory
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.tests.utils import ExtractPaginationMixin

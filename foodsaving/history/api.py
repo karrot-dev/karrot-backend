@@ -28,4 +28,6 @@ class HistoryViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = HistoryPagination
 
     def get_queryset(self):
-        return self.queryset.filter(group__in=GroupMembership.objects.filter(user=self.request.user, roles__contains=[APPROVED]).values_list('group', flat=True))
+        return self.queryset.filter(
+            group__in=GroupMembership.objects.filter(user=self.request.user, roles__contains=[APPROVED]).values_list(
+                'group', flat=True))

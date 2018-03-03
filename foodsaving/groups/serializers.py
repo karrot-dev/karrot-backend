@@ -6,7 +6,6 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 
 from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
     GroupNotificationType
-from foodsaving.groups.roles import APPROVED
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.history.utils import get_changed_data
 from . import roles

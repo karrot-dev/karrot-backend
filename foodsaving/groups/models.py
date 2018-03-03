@@ -52,18 +52,18 @@ class Group(BaseModel, LocationModel, ConversationMixin):
             for s in self.store.all():
                 # get all pick-ups within the notification range
                 for p in s.pickup_dates.filter(
-                        date__lt=timezone.now() + relativedelta(hours=s.upcoming_notification_hours),
-                        date__gt=timezone.now()
+                    date__lt=timezone.now() + relativedelta(hours=s.upcoming_notification_hours),
+                    date__gt=timezone.now()
                 ):
                     p.notify_upcoming_via_slack()
 
-    # Adds a person to the group marked as being an applicant
     def add_applicant(self, user):
+        """Adds a person to the group marked as being an applicant"""
         GroupMembership.objects.create(group=self, user=user)
         self.create = History.objects.create(typus=HistoryTypus.GROUP_APPLY, group=self, users=[user, ], )
 
-    # Adds a "full" member to the group, e.g. grants the status of a normal member.
     def add_member(self, user, history_payload=None):
+        """Adds a "full" member to the group, e.g. grants the status of a normal member."""
         GroupMembership.objects.create(group=self, user=user, roles=[APPROVED])
         History.objects.create(
             typus=HistoryTypus.GROUP_JOIN,
@@ -73,7 +73,7 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         )
 
     def remove_member(self, user):
-        if self.is_member(user) :
+        if self.is_member(user):
             History.objects.create(
                 typus=HistoryTypus.GROUP_LEAVE,
                 group=self,
@@ -109,6 +109,7 @@ class Agreement(BaseModel):
 class UserAgreement(BaseModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     agreement = models.ForeignKey(Agreement, on_delete=models.CASCADE)
+
 
 class GroupNotificationType(object):
     WEEKLY_SUMMARY = 'weekly_summary'

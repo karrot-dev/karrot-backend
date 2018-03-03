@@ -102,7 +102,8 @@ class GroupViewSet(
         # can join all groups but only do anything else to groups where user is member of
         if self.action == 'join':
             return self.queryset
-        return self.queryset.filter(groupmembership__user=self.request.user, groupmembership__roles__contains=[APPROVED])
+        return self.queryset.filter(groupmembership__user=self.request.user,
+                                    groupmembership__roles__contains=[APPROVED])
 
     @detail_route(
         methods=['POST'],
