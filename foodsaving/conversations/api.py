@@ -55,7 +55,7 @@ class IsMessageConversationParticipant(BasePermission):
         # if message_id
         try:
             message_id = int(request.resolver_match.kwargs.get('pk'))
-        except ValueError:
+        except (ValueError, TypeError):
             return True
 
         message = ConversationMessage.objects.filter(pk=message_id).first()
