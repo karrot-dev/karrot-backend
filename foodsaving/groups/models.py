@@ -38,6 +38,9 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         on_delete=models.SET_NULL
     )
 
+    def active_member_count(self):
+        return self.members_with_all_roles([APPROVED]).count()
+
     def members_with_all_roles(self, roles):
         return self.members.filter(groupmembership__roles__contains=roles)
 
@@ -54,10 +57,12 @@ class Group(BaseModel, LocationModel, ConversationMixin):
                 ):
                     p.notify_upcoming_via_slack()
 
-    def add_application(self, user):
+    # Adds a person to the group marked as being an applicant
+    def add_applicant(self, user):
         GroupMembership.objects.create(group=self, user=user)
         self.create = History.objects.create(typus=HistoryTypus.GROUP_APPLY, group=self, users=[user, ], )
 
+    # Adds a "full" member to the group, e.g. grants the status of a normal member.
     def add_member(self, user, history_payload=None):
         GroupMembership.objects.create(group=self, user=user, roles=[APPROVED])
         History.objects.create(
@@ -105,7 +110,6 @@ class UserAgreement(BaseModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     agreement = models.ForeignKey(Agreement, on_delete=models.CASCADE)
 
-
 class GroupNotificationType(object):
     WEEKLY_SUMMARY = 'weekly_summary'
 
@@ -114,7 +118,13 @@ def get_default_notification_types():
     return [GroupNotificationType.WEEKLY_SUMMARY]
 
 
+class GroupMembershipManager(models.Manager):
+    pass
+
+
 class GroupMembership(BaseModel):
+    objects = GroupMembershipManager()
+
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     roles = ArrayField(TextField(), default=list)

@@ -200,7 +200,8 @@ class GroupPreviewSerializer(serializers.ModelSerializer):
             'latitude',
             'longitude',
             'members',
-            'protected'
+            'protected',
+            'active_member_count'
         ]
 
     protected = serializers.SerializerMethodField()
