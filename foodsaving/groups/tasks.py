@@ -35,9 +35,9 @@ def send_removal_from_group_notification_to_user(user, group):
     email = prepare_user_removed_from_group_email(user, group)
     email.send()
 
-        
-@db_periodic_task(crontab(hour='2',minute='0'))
-def process_inactive_users ():
+
+@db_periodic_task(crontab(hour='2', minute='0'))
+def process_inactive_users():
     now = timezone.now()
 
     print("Processing inactive users")
