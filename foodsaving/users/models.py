@@ -164,8 +164,6 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
 
     @transaction.atomic
     def reset_password(self):
-        self.set_unusable_password()
-        self.save()
         VerificationCode.objects.filter(user=self, type=VerificationCode.PASSWORD_RESET).delete()
         VerificationCode.objects.create(user=self, type=VerificationCode.PASSWORD_RESET)
         prepare_email('passwordreset', self, {

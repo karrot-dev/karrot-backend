@@ -46,19 +46,6 @@ class TestPasswordReset(APITestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, [self.verified_user.email])
 
-    def test_request_password_reset_disables_login(self):
-        self.client.post(self.url_request_password_reset, {'email': self.verified_user.email})
-
-        # Login with the old password does not work
-        self.assertFalse(self.client.login(email=self.verified_user.email, password=self.old_password))
-        # Login with empty password does not work either
-        self.assertFalse(self.client.login(email=self.verified_user.email, password=''))
-
-    def test_request_password_reset_logs_out_user(self):
-        self.client.force_login(user=self.verified_user)
-        self.client.post(self.url_request_password_reset, {'email': self.verified_user.email})
-        self.assertFalse(auth.get_user(self.client).is_authenticated)
-
     def test_request_password_reset_twice_succeeds(self):
         self.client.post(self.url_request_password_reset, {'email': self.verified_user.email})
         response = self.client.post(self.url_request_password_reset, {'email': self.verified_user.email})
@@ -94,10 +81,8 @@ class TestPasswordReset(APITestCase):
         self.assertEqual(response.data, {'code': ['This field is required.']})
         self.assertEqual(len(mail.outbox), 1)
 
-        # Login with the old password does not work
-        self.assertFalse(self.client.login(email=self.verified_user.email, password=self.old_password))
-        # Login with the new password does not work either
-        self.assertFalse(self.client.login(email=self.verified_user.email, password=self.new_password))
+        # Login with the old password still works
+        self.assertTrue(self.client.login(email=self.verified_user.email, password=self.old_password))
 
     def test_password_reset_fails_if_verification_code_too_old(self):
         self.client.post(self.url_request_password_reset, {'email': self.verified_user.email})
@@ -110,10 +95,8 @@ class TestPasswordReset(APITestCase):
         self.assertEqual(response.data['code'], ['Verification code has expired'])
         self.assertEqual(len(mail.outbox), 1)
 
-        # Login with the old password does not work
-        self.assertFalse(self.client.login(email=self.verified_user.email, password=self.old_password))
-        # Login with the new password does not work either
-        self.assertFalse(self.client.login(email=self.verified_user.email, password=self.new_password))
+        # Login with the old password still works
+        self.assertTrue(self.client.login(email=self.verified_user.email, password=self.old_password))
 
     def test_password_reset_fails_without_new_password(self):
         self.client.post(self.url_request_password_reset, {'email': self.verified_user.email})
@@ -123,8 +106,8 @@ class TestPasswordReset(APITestCase):
         self.assertEqual(response.data, {'new_password': ['This field is required.']})
         self.assertEqual(len(mail.outbox), 1)
 
-        # Login with the old password does not work
-        self.assertFalse(self.client.login(email=self.verified_user.email, password=self.old_password))
+        # Login with the old password still works
+        self.assertTrue(self.client.login(email=self.verified_user.email, password=self.old_password))
 
     def test_password_reset_fails_with_previous_verification_code(self):
         self.client.post(self.url_request_password_reset, {'email': self.verified_user.email})
@@ -134,7 +117,5 @@ class TestPasswordReset(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['code'], ['Verification code is invalid'])
 
-        # Login with the old password does not work
-        self.assertFalse(self.client.login(email=self.verified_user.email, password=self.old_password))
-        # Login with the new password does not work either
-        self.assertFalse(self.client.login(email=self.verified_user.email, password=self.new_password))
+        # Login with the old password still works
+        self.assertTrue(self.client.login(email=self.verified_user.email, password=self.old_password))
