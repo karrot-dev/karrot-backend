@@ -1,6 +1,5 @@
 from django.utils.translation import ugettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db import IntegrityError
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
@@ -20,7 +19,8 @@ from foodsaving.conversations.serializers import (
     ConversationMessageSerializer,
     ConversationMessageReactionSerializer,
     ConversationMarkSerializer,
-    ConversationEmailNotificationsSerializer)
+    ConversationEmailNotificationsSerializer,
+    EmojiField)
 
 
 class MessagePagination(CursorPagination):
@@ -43,6 +43,32 @@ class IsConversationParticipant(BasePermission):
             return request.user in conversation.participants.all()
 
         # otherwise it is fine (messages will be filtered for the users conversations)
+        return True
+
+
+class IsMessageConversationParticipant(BasePermission):
+    "Is the specified message in a conversation which user is member of?"
+
+    message = _('You are not in the conversation')
+
+    def has_permission(self, request, view):
+        # if message_id
+        try:
+            message_id = int(request.resolver_match.kwargs.get('pk'))
+        except ValueError:
+            return True
+
+        message = ConversationMessage.objects.filter(pk=message_id).first()
+
+        # if they specify a conversation, check they are in it
+        if message:
+            conversation = Conversation.objects.filter(pk=message.conversation.id).first()  # Conversation or None
+            if not conversation:
+                return False
+
+            return request.user in conversation.participants.all()
+
+        # otherwise handle 404 later
         return True
 
 
@@ -108,30 +134,39 @@ class ConversationMessageViewSet(
 
     @detail_route(
         methods=('POST',),
-        filter_fields=('name',)
+        filter_fields=('name',),
+        permission_classes=(IsAuthenticated, IsMessageConversationParticipant)
     )
     def reactions(self, request, pk):
         """route for POST /messages/{id}/reactions/ with body {\"name\":\"emoji_name\"}"""
 
-        instance = get_object_or_404(ConversationMessage.objects, id=pk)
-        reaction = ConversationMessageReaction(message=instance, name=request.data['name'], user=request.user)
-        try:
-            reaction.save()
-        except IntegrityError:
-            return Response(status=status.HTTP_409_CONFLICT)
-        return Response(ConversationMessageReactionSerializer(reaction).data, status=status.HTTP_201_CREATED)
+        data = {
+            'message': pk,
+            'name': request.data['name'],
+            'user': request.user.id,
+        }
+
+        serializer = ConversationMessageReactionSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @detail_route(
         methods=('DELETE',),
         url_path='reactions/(?P<name>[a-z0-9_+-]+)',
         url_name='remove_reaction',
+        permission_classes=(IsAuthenticated, IsMessageConversationParticipant)
     )
     def remove_reaction(self, request, pk, name):
         """route for DELETE /messages/{id}/reactions/{name}/"""
 
+        name = EmojiField.to_internal_value(None, name)
+
         message = get_object_or_404(ConversationMessage.objects, id=pk)
         reaction = get_object_or_404(ConversationMessageReaction.objects, name=name, message=message,
                                      user=request.user)
+
         reaction.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
