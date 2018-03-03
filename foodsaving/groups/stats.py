@@ -45,7 +45,7 @@ def group_summary_email(group, recipient_count):
 
 
 def periodic_task(name, extra_fields=None):
-    if extra_fields == None:
+    if extra_fields is None:
         extra_fields = dict()
     write_points([{
         'measurement': 'karrot.periodic',
