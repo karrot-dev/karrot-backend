@@ -7,15 +7,16 @@ import json
 with open('foodsaving/conversations/emoji_names.json') as json_data:
     emojis = json.load(json_data)
 
+"""
 # flattened emoji list as expected
-EMOJI_LIST = [item for sublist in emojis for item in sublist]
-EMOJI_LIST_CHOICES = [(item, item,) for item in EMOJI_LIST]
+EMOJI_LIST = [item[0] for item in emojis]
 
 
 def isEmojiName(name: str) -> bool:
     "Find out whether name is a name of a supported emoji"
 
     return name in EMOJI_LIST
+"""
 
 
 def normalizeEmojiName(name: str) -> str:

@@ -11,7 +11,6 @@ from django.db.models import ForeignKey, TextField, ManyToManyField, BooleanFiel
 from django.utils.text import Truncator
 
 from foodsaving.base.base_models import BaseModel, UpdatedAtMixin
-from foodsaving.conversations.helpers import EMOJI_LIST_CHOICES
 
 
 class ConversationManager(models.Manager):
@@ -104,7 +103,7 @@ class ConversationMessageReaction(BaseModel):
     user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     message = ForeignKey(ConversationMessage, related_name='reactions', on_delete=models.CASCADE)
     # Name of the emoji
-    name = CharField(choices=EMOJI_LIST_CHOICES, max_length=100)
+    name = CharField(max_length=100)
 
     class Meta:
         unique_together = ['user', 'name', 'message']

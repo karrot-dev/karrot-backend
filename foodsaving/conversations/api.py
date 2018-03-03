@@ -62,10 +62,8 @@ class IsMessageConversationParticipant(BasePermission):
 
         # if they specify a conversation, check they are in it
         if message:
-            conversation = Conversation.objects.filter(pk=message.conversation.id).first()  # Conversation or None
-            if not conversation:
-                return False
-
+            # If a message exists, its conversation must exist, or database is corrupted.
+            conversation = Conversation.objects.filter(pk=message.conversation.id).first()
             return request.user in conversation.participants.all()
 
         # otherwise handle 404 later
