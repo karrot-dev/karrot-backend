@@ -25,4 +25,4 @@ class TestGroupSerializer(TestCase):
         self.assertEqual(len(serializer.data.keys()), 9)
         self.assertEqual(serializer.data['id'], self.group.id)
         self.assertEqual(serializer.data['name'], self.group.name)
-        self.assertEqual(serializer.data['active_member_count'], self.group.active_member_count())
+        self.assertEqual(serializer.data['approved_member_count'], self.group.approved_member_count())

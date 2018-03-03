@@ -38,7 +38,7 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         on_delete=models.SET_NULL
     )
 
-    def active_member_count(self):
+    def approved_member_count(self):
         return self.members_with_all_roles([APPROVED]).count()
 
     def members_with_all_roles(self, roles):
