@@ -60,12 +60,9 @@ class IsMessageConversationParticipant(BasePermission):
 
         message = ConversationMessage.objects.filter(pk=message_id).first()
 
-        # if they specify a conversation, check they are in it
+        # check that user belongs to the conversation of this message
         if message:
-            # If a message exists, its conversation must exist, or database is corrupted.
-            conversation = Conversation.objects.filter(pk=message.conversation.id).first()
-            return request.user in conversation.participants.all()
-
+            return message.conversation.participants.filter(id=request.user.id).exists()
         # otherwise handle 404 later
         return True
 
@@ -145,10 +142,9 @@ class ConversationMessageViewSet(
         }
 
         serializer = ConversationMessageReactionSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @detail_route(
         methods=('DELETE',),
