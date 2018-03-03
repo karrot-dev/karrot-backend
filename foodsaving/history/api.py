@@ -29,5 +29,8 @@ class HistoryViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         return self.queryset.filter(
-            group__in=GroupMembership.objects.filter(user=self.request.user, roles__contains=[GROUP_APPROVED_MEMBER]).values_list(
-                'group', flat=True))
+            group__in=GroupMembership.objects.filter(
+                user=self.request.user,
+                roles__contains=[GROUP_APPROVED_MEMBER]
+            ).values_list('group', flat=True)
+        )

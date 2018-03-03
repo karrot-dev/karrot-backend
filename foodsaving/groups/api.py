@@ -142,10 +142,15 @@ class GroupViewSet(
     )
     def mark_user_active(self, request, pk=None):
         """Mark that the logged-in user is active in the group"""
-        gm = get_object_or_404(GroupMembership.objects, group=pk, user=request.user, roles__contains=[GROUP_APPROVED_MEMBER])
-        gm.lastseen_at = timezone.now()
-        gm.save()
-        stats.group_activity(gm.group)
+        membership = get_object_or_404(
+            GroupMembership,
+            group=pk,
+            user=request.user,
+            roles__contains=[GROUP_APPROVED_MEMBER]
+        )
+        membership.lastseen_at = timezone.now()
+        membership.save()
+        stats.group_activity(membership.group)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @detail_route(
