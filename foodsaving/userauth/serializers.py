@@ -115,7 +115,7 @@ class VerificationCodeSerializer(serializers.Serializer):
         elif type == VerificationCode.PASSWORD_RESET:
             user.change_password(validated_data['new_password'])
         elif type == VerificationCode.ACCOUNT_DELETE:
-            user.delete_()
+            user.erase()
 
     def update(self, user, validated_data):
         try:

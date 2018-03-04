@@ -166,7 +166,7 @@ class ChangePasswordView(generics.GenericAPIView):
         # Keep the user logged in
         update_session_auth_hash(request, user)
 
-        return Response(status=status.HTTP_200_OK, data=AuthUserSerializer(instance=request.user).data)
+        return Response(status=status.HTTP_204_NO_CONTENT, data={})
 
 
 class ChangeMailView(generics.GenericAPIView):
@@ -181,4 +181,4 @@ class ChangeMailView(generics.GenericAPIView):
         serializer = self.get_serializer(request.user, request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(status=status.HTTP_200_OK, data=AuthUserSerializer(instance=request.user).data)
+        return Response(status=status.HTTP_204_NO_CONTENT, data={})

@@ -310,7 +310,7 @@ class TestChangePassword(APITestCase):
     def test_change_succeeds(self):
         self.client.force_login(user=self.user)
         response = self.client.put(self.url, self.data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response)
 
         # User stays logged in
         self.assertTrue(auth.get_user(self.client).is_authenticated)
@@ -365,8 +365,7 @@ class TestChangeEMail(APITestCase):
 
         response = self.client.put(self.url, {'password': self.password, 'new_email': self.new_email})
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['email'], self.verified_user.unverified_email)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(mail.outbox), 2)
         self.assertIn('Your email address changed!', mail.outbox[0].subject)
         self.assertEqual(mail.outbox[0].to, [self.old_email], 'error: change notice sent to wrong address')
@@ -422,19 +421,19 @@ class TestChangeEMail(APITestCase):
         self.client.force_login(user=self.verified_user)
         similar_mail = self.verified_user.email[0].swapcase() + self.verified_user.email[1:]
         response = self.client.put(self.url, {'password': self.password, 'new_email': similar_mail})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(mail.outbox), 2)
 
     def test_restore_email_succeeds(self):
         self.client.force_login(user=self.verified_user)
 
         response = self.client.put(self.url, {'password': self.password, 'new_email': self.new_email})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(mail.outbox), 2)
         mail.outbox.clear()
 
         response = self.client.put(self.url, {'password': self.password, 'new_email': self.old_email})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(mail.outbox), 0)
         self.assertEqual(self.verified_user.email, self.old_email)
         self.assertEqual(self.verified_user.unverified_email, self.old_email)
@@ -443,8 +442,7 @@ class TestChangeEMail(APITestCase):
     def test_dont_change_email(self):
         self.client.force_login(user=self.verified_user)
         response = self.client.put(self.url, {'password': self.password, 'new_email': self.old_email})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['mail_verified'], True)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(mail.outbox), 0)
 
     def test_changing_sensitive_fields_is_forbidden(self):

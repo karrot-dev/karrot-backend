@@ -173,7 +173,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         prepare_passwordchange_email(self).send()
 
     @transaction.atomic
-    def delete_(self):
+    def erase(self):
         """
         Delete the user.
 
