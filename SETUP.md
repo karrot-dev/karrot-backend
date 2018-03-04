@@ -152,6 +152,12 @@ source env/bin/activate
 
 In particular, before you launch your backend for the very first time you will need to execute `./manage.py migrate` to initialize your database.
 
+## Update requirement packages
+pip-tools is used to manage requirements. To use the latest possible requirements, do:
+
+- `pip install pip-tools`
+- `pip-compile --upgrade`
+
 ## Speed up testing
 
 ### Relaxed postgres fsync behaviour
@@ -162,3 +168,13 @@ Edit /var/lib/postgres/data/postgresql.conf and add or edit
 ```
 fsync = off
 ```
+
+### Parallel testing
+Running the tests in parallel process can increase testing speed significantly. 
+To execute the whole test suite on a CPU with 4 kernels, you may want to use:
+
+```
+python manage.py test --parallel=4
+```
+
+For further information, see https://docs.djangoproject.com/en/2.0/ref/django-admin/#cmdoption-test-parallel.
