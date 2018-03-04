@@ -26,22 +26,17 @@ def jinja2_environment(**options):
     return env
 
 
-def prepare_accountdelete_request_email(user):
-    return prepare_email('accountdelete_request', user)
-
-
 def prepare_accountdelete_success_email(user):
     return prepare_email('accountdelete_success', user)
 
 
-def prepare_changemail_notice_email(user):
-    return prepare_email('changemail_notice', user)
+def prepare_accountdelete_request_email(user, verification_code):
+    return prepare_email('accountdelete_request', user, {
+        'url': '{hostname}/#/user/delete?code={code}'.format(hostname=settings.HOSTNAME, code=verification_code.code)})
 
 
-def prepare_changemail_success_email(user):
-    return prepare_email('changemail_success', user, {
-        'url': 'ERROR_URL_HAS_NOT_BEEN_DEFINED'
-    })
+def prepare_changemail_email(user):
+    return prepare_email('changemail', user)
 
 
 def prepare_conversation_message_notification(user, message):
@@ -94,34 +89,27 @@ def prepare_emailinvitation_email(invitation):
 
 def prepare_mailverification_email(user, verification_code):
     return prepare_email('mailverification', user, {
-        'url': '{hostname}/#/verify-mail?code={code}'.format(
+        'url': '{hostname}/#/email/verify?code={code}'.format(
             hostname=settings.HOSTNAME,
             code=verification_code.code
         )
     }, to=user.unverified_email)
 
 
-def prepare_newpassword_email(user, new_password):
-    return prepare_email('newpassword', user, {'password': new_password})
+def prepare_signup_email(user, verification_code):
+    return prepare_email('signup', user, {
+        'url': '{hostname}/#/email/verify?code={code}'.format(hostname=settings.HOSTNAME, code=verification_code.code)
+    }, to=user.unverified_email)
 
 
-def prepare_passwordreset_request_email(user):
+def prepare_passwordchange_email(user):
+    return prepare_email('passwordchange', user)
+
+
+def prepare_passwordreset_request_email(user, verification_code):
     return prepare_email('passwordreset_request', user, {
-        'url': 'ERROR_URL_HAS_NOT_BEEN_DEFINED'
-    })
-
-
-def prepare_passwordreset_success_email(user):
-    return prepare_email('passwordreset_success', user, {})
-
-
-def prepare_resend_mail_verification_code(user, verification_code):
-    return prepare_email('send_new_verification_code', user, {
-        'url': '{hostname}/#/verify_mail?code={code}'.format(
-            hostname=settings.HOSTNAME,
-            code=verification_code.code
-        )
-    }, to=user.unverified_email)
+        'url': '{hostname}/#/password/reset?code={code}'.format(hostname=settings.HOSTNAME,
+                                                                code=verification_code.code)})
 
 
 def generate_plaintext_from_html(html):

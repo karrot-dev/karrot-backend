@@ -14,7 +14,6 @@ from foodsaving.invitations.models import Invitation
 from foodsaving.userauth.models import VerificationCode
 from foodsaving.users.models import User
 from foodsaving.utils import email_utils
-from foodsaving.utils.email_utils import prepare_resend_mail_verification_code
 
 foodsaving_basedir = os.path.abspath(os.path.join(settings.BASE_DIR, 'foodsaving'))
 
@@ -32,6 +31,7 @@ def random_message():
 
 
 class Handlers:
+    # TODO: Add remaining emails
 
     def accountdelete_request(self):
         return email_utils.prepare_accountdelete_request_email(user=random_user())
@@ -40,10 +40,7 @@ class Handlers:
         return email_utils.prepare_accountdelete_success_email(user=random_user())
 
     def changemail_notice(self):
-        return email_utils.prepare_changemail_notice_email(user=random_user())
-
-    def changemail_success(self):
-        return email_utils.prepare_changemail_success_email(user=random_user())
+        return email_utils.prepare_changemail_email(user=random_user())
 
     def conversation_message_notification(self):
         return email_utils.prepare_conversation_message_notification(user=random_user(), message=random_message())
@@ -68,20 +65,11 @@ class Handlers:
             verification_code=VerificationCode.objects.first()
         )
 
-    def newpassword(self):
-        return email_utils.prepare_newpassword_email(user=random_user(), new_password='ANICENEWRANDOMPASSWORD')
-
     def passwordreset_request(self):
         return email_utils.prepare_passwordreset_request_email(user=random_user())
 
-    def passwordreset_success(self):
-        return email_utils.prepare_passwordreset_success_email(user=random_user())
-
-    def resend_mail_verification_code(self):
-        return prepare_resend_mail_verification_code(
-            user=random_user(),
-            verification_code=VerificationCode.objects.first()
-        )
+    def passwordchange(self):
+        return email_utils.prepare_passwordchange_email(user=random_user())
 
 
 handlers = Handlers()

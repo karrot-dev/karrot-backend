@@ -1,14 +1,16 @@
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import transaction, models
-from django.utils import timezone
 from django.db.models import EmailField, BooleanField, TextField, CharField, DateTimeField, ForeignKey, Q
+from django.utils import timezone
 from versatileimagefield.fields import VersatileImageField
 
 from foodsaving.base.base_models import BaseModel, LocationModel
-from foodsaving.userauth.models import VerificationCode
-from foodsaving.utils.email_utils import prepare_mailverification_email, prepare_email
 from foodsaving.groups.models import Group, GroupMembership
+from foodsaving.userauth.models import VerificationCode
+from foodsaving.utils.email_utils import prepare_mailverification_email, prepare_accountdelete_request_email, \
+    prepare_passwordchange_email, prepare_passwordreset_request_email, \
+    prepare_changemail_email, prepare_accountdelete_success_email, prepare_signup_email
 from foodsaving.webhooks.models import EmailEvent
 
 MAX_DISPLAY_NAME_LENGTH = 80
@@ -137,48 +139,38 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         self.language = language
 
     def _send_mail_change_notification(self):
-        prepare_email('changemail_notice', self, {}).send()
+        prepare_changemail_email(self).send()
 
+    @transaction.atomic
     def _send_welcome_mail(self):
         self._unverify_mail()
-        prepare_mailverification_email(
-            user=self,
-            verification_code=VerificationCode.objects.get(user=self, type=VerificationCode.EMAIL_VERIFICATION)
-        ).send()
+        verification_code = VerificationCode.objects.get(user=self, type=VerificationCode.EMAIL_VERIFICATION)
+        prepare_signup_email(user=self, verification_code=verification_code).send()
 
     @transaction.atomic
     def send_mail_verification_code(self):
         self._unverify_mail()
         verification_code = VerificationCode.objects.get(user=self, type=VerificationCode.EMAIL_VERIFICATION)
-        prepare_mailverification_email(self, verification_code.code).send()
+        prepare_mailverification_email(self, verification_code).send()
 
     @transaction.atomic
     def send_account_deletion_verification_code(self):
         VerificationCode.objects.filter(user=self, type=VerificationCode.ACCOUNT_DELETE).delete()
-        prepare_email('accountdelete_request', self, {
-            'url': '{hostname}/#/user/delete?code={code}'.format(
-                hostname=settings.HOSTNAME,
-                code=VerificationCode.objects.create(user=self, type=VerificationCode.ACCOUNT_DELETE).code
-            )
-        }).send()
+        verification_code = VerificationCode.objects.create(user=self, type=VerificationCode.ACCOUNT_DELETE)
+        prepare_accountdelete_request_email(self, verification_code).send()
 
     @transaction.atomic
-    def reset_password(self):
+    def send_password_reset_verification_code(self):
         VerificationCode.objects.filter(user=self, type=VerificationCode.PASSWORD_RESET).delete()
-        VerificationCode.objects.create(user=self, type=VerificationCode.PASSWORD_RESET)
-        prepare_email('passwordreset', self, {
-            'url': '{hostname}/#/password/reset?code={code}'.format(
-                hostname=settings.HOSTNAME,
-                code=VerificationCode.objects.get(user=self, type=VerificationCode.PASSWORD_RESET).code
-            )
-        }).send()
+        verification_code = VerificationCode.objects.create(user=self, type=VerificationCode.PASSWORD_RESET)
+        prepare_passwordreset_request_email(self, verification_code).send()
 
     @transaction.atomic
     def change_password(self, new_password):
         self.set_password(new_password)
         self.save()
-        prepare_email('passwordchange', self, {}).send()
         VerificationCode.objects.filter(user=self, type=VerificationCode.PASSWORD_RESET).delete()
+        prepare_passwordchange_email(self).send()
 
     @transaction.atomic
     def delete_(self):
@@ -203,7 +195,8 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         self.delete_photo()
         self.save()
 
-        prepare_email('accountdelete_success', self, {}).send()
+        VerificationCode.objects.filter(user=self, type=VerificationCode.ACCOUNT_DELETE).delete()
+        prepare_accountdelete_success_email(self).send()
 
     def has_perm(self, perm, obj=None):
         # temporarily only allow access for admins

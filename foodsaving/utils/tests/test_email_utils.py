@@ -29,9 +29,9 @@ class TestEmailUtils(APITestCase):
         self.assertIn(settings.HOSTNAME, email.body)
         self.assertNotIn('&amp;', email.body)
 
-    def test_mailverification(self):
+    def test_signup(self):
         verification_code = VerificationCode.objects.get(user=self.user, type=VerificationCode.EMAIL_VERIFICATION)
-        email = email_utils.prepare_mailverification_email(
+        email = email_utils.prepare_signup_email(
             user=self.user,
             verification_code=verification_code,
         )
@@ -52,9 +52,9 @@ class TestEmailUtils(APITestCase):
         self.assertIn(settings.HOSTNAME, html)
         self.assertIn(verification_code.code, html)
 
-    def test_resend_mail_verification_code(self):
+    def test_mailverification(self):
         verification_code = VerificationCode.objects.get(user=self.user)
-        email = email_utils.prepare_resend_mail_verification_code(self.user, verification_code)
+        email = email_utils.prepare_mailverification_email(self.user, verification_code)
         self.assertEqual(len(email.alternatives), 0)
         self.assertEqual(email.to[0], self.user.unverified_email)
         self.assertIn(settings.HOSTNAME, email.body)

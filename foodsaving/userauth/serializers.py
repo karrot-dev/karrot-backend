@@ -190,7 +190,7 @@ class RequestResetPasswordSerializer(serializers.Serializer):
 
     def update(self, user, validated_data):
         try:
-            user.reset_password()
+            user.send_password_reset_verification_code()
         except AnymailAPIError:
             raise serializers.ValidationError(_('We could not send you an e-mail.'))
         return user
