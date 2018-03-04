@@ -2,7 +2,7 @@
 
 Django API server for the _karrot_ frontend
 
-Our issues are tracked in [karrot-frontend](https://github.com/yunity/karrot-frontend/issues). We plan to unite the karrot-backend, karrot-frontend and related repos in near future.
+Our issues are tracked in [karrot-frontend](https://github.com/yunity/karrot-frontend/issues). We plan to unite karrot-backend, karrot-frontend and related repos in near future.
 
 [![CircleCI](https://circleci.com/gh/yunity/karrot-backend.svg?style=svg)](https://circleci.com/gh/yunity/karrot-backend)
 [![codecov](https://codecov.io/gh/yunity/karrot-backend/branch/master/graph/badge.svg)](https://codecov.io/gh/yunity/karrot-backend)
