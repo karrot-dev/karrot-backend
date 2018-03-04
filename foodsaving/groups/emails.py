@@ -1,11 +1,13 @@
 import itertools
 
 from dateutil.relativedelta import relativedelta
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count
 from django.utils import timezone
 from django.utils.timezone import get_current_timezone
 
+from config import settings
 from foodsaving.conversations.models import ConversationMessage
 from foodsaving.groups.models import Group, GroupNotificationType
 from foodsaving.pickups.models import PickupDate
@@ -39,6 +41,11 @@ def prepare_group_summary_data(group, from_date, to_date):
         created_at__lt=to_date,
     )
 
+    settings_url = '{hostname}/#/group/{group_id}/settings'.format(
+        hostname=settings.HOSTNAME,
+        group_id=group.id,
+    )
+
     return {
         # minus one second so it's displayed as the full day
         'to_date': to_date - relativedelta(seconds=1),
@@ -48,13 +55,18 @@ def prepare_group_summary_data(group, from_date, to_date):
         'pickups_done_count': pickups_done_count,
         'pickups_missed_count': pickups_missed_count,
         'messages': messages,
+        'settings_url': settings_url,
     }
 
 
 def prepare_group_summary_emails(group, from_date, to_date):
     """Prepares one email per language"""
     context = prepare_group_summary_data(group, from_date, to_date)
-    members = group.members_with_notification_type(GroupNotificationType.WEEKLY_SUMMARY)
+
+    members = group \
+        .members_with_notification_type(GroupNotificationType.WEEKLY_SUMMARY) \
+        .exclude(groupmembership__user__in=get_user_model().objects.unverified_or_ignored())
+
     grouped_members = itertools.groupby(members.order_by('language'), key=lambda member: member.language)
     return [prepare_email(template='group_summary',
                           context=context,
