@@ -149,12 +149,8 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     @transaction.atomic
     def send_mail_verification_code(self):
         self._unverify_mail()
-        prepare_email('send_new_verification_code', self, {
-            'url': '{hostname}/#/email/verify?code={code}'.format(
-                hostname=settings.HOSTNAME,
-                code=VerificationCode.objects.get(user=self, type=VerificationCode.EMAIL_VERIFICATION).code
-            )
-        }, to=self.unverified_email).send()
+        verification_code = VerificationCode.objects.get(user=self, type=VerificationCode.EMAIL_VERIFICATION)
+        prepare_mailverification_email(self, verification_code.code).send()
 
     @transaction.atomic
     def send_account_deletion_verification_code(self):
