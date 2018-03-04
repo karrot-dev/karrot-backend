@@ -150,7 +150,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     def send_mail_verification_code(self):
         self._unverify_mail()
         prepare_email('send_new_verification_code', self, {
-            'url': '{hostname}/#/verify_mail?code={code}'.format(
+            'url': '{hostname}/#/email/verify?code={code}'.format(
                 hostname=settings.HOSTNAME,
                 code=VerificationCode.objects.get(user=self, type=VerificationCode.EMAIL_VERIFICATION).code
             )
@@ -160,7 +160,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     def send_account_deletion_verification_code(self):
         VerificationCode.objects.filter(user=self, type=VerificationCode.ACCOUNT_DELETE).delete()
         prepare_email('accountdelete_request', self, {
-            'url': '{hostname}/#/delete_account?code={code}'.format(
+            'url': '{hostname}/#/user/delete?code={code}'.format(
                 hostname=settings.HOSTNAME,
                 code=VerificationCode.objects.create(user=self, type=VerificationCode.ACCOUNT_DELETE).code
             )
@@ -171,7 +171,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         VerificationCode.objects.filter(user=self, type=VerificationCode.PASSWORD_RESET).delete()
         VerificationCode.objects.create(user=self, type=VerificationCode.PASSWORD_RESET)
         prepare_email('passwordreset', self, {
-            'url': '{hostname}/#/reset_password?code={code}'.format(
+            'url': '{hostname}/#/password/reset?code={code}'.format(
                 hostname=settings.HOSTNAME,
                 code=VerificationCode.objects.get(user=self, type=VerificationCode.PASSWORD_RESET).code
             )
