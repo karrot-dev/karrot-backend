@@ -48,5 +48,5 @@ class Migration(migrations.Migration):
             old_name='comment',
             new_name='description',
         ),
-        migrations.RunPython(convert_comment_to_description)
+        migrations.RunPython(convert_comment_to_description, reverse_code=migrations.RunPython.noop)
     ]

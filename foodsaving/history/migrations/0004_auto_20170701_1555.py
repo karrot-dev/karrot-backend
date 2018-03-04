@@ -42,5 +42,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(convert_missed_pickups)
+        migrations.RunPython(convert_missed_pickups, reverse_code=migrations.RunPython.noop)
     ]
