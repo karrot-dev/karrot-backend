@@ -28,27 +28,29 @@ class TestLastseenAtDataMigration(TestMigrations):
         History = apps.get_model('history', 'History')
         Group = apps.get_model('groups', 'Group')
         GroupMembership = apps.get_model('groups', 'GroupMembership')
-        user = User.objects.create(email=self.email, display_name='Peter')
-        user.created_at = timezone.now() - relativedelta(days=200)
-        user.save()
-        group = Group.objects.create(
+        self.user = User.objects.create(email=self.email, display_name='Peter')
+        self.group = Group.objects.create(
             name=faker.name(),
             description=faker.sentence(nb_words=40),
             public_description=faker.sentence(nb_words=20),
         )
-        membership = GroupMembership.objects.create(group=group, user=user)
+        membership = GroupMembership.objects.create(group=self.group, user=self.user)
         self.membership_id = membership.id
-        history = History.objects.create(
+        self.history = History.objects.create(
             typus=HistoryTypus.GROUP_CREATE,
-            group=group,
+            group=self.group,
             payload={},
-            date=timezone.now() - relativedelta(days=100)
         )
-        history.users.add(user)
-        history.save()
-        self.expected_lastseen_at = history.date
+        self.history.users.add(self.user)
+        self.history.save()
+
+        self.history.date = timezone.now() - relativedelta(days=100)
+        self.history.save()
+
+        self.user.created_at = timezone.now() - relativedelta(days=200)
+        self.user.save()
 
     def test_sets_lastseen_to_last_history_item(self):
         GroupMembership = self.apps.get_model('groups', 'GroupMembership')
         membership = GroupMembership.objects.get(pk=self.membership_id)
-        self.assertEqual(membership.lastseen_at, self.expected_lastseen_at)
+        self.assertEqual(membership.lastseen_at, self.history.date)
