@@ -23,15 +23,7 @@ The manage.py application can be used to perform administrative tasks:
   - migrate: Apply database migrations
   - shell\_plus: (requires ipython) for playing in a django python environment
   - test: Run automated tests
-
-# Contributing to karrot-backend
-
-To contribute, please get in contact with us. We want to follow a pull request / code review cycle as soon as possible but in our early design stages we prefer to work in teams at the same desk.
-We use
-
-- github issues for development tasks
-- [Slack](https://yunity.slack.com) as team communication, not only for development
-
+ 
 ## Coding guidelines
 
 We follow PEP8 with the same rules as the [Django project](https://docs.djangoproject.com/en/dev/internals/contributing/writing-code/coding-style/).
