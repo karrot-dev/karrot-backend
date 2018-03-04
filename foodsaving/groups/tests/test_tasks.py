@@ -1,3 +1,4 @@
+from dateutil.relativedelta import relativedelta
 from django.core import mail
 from django.utils import timezone
 from django.test import TestCase
@@ -50,4 +51,23 @@ class TestProcessInactiveUsers (TestCase):
     def test_process_inactive_users_sends_emails(self):
         process_inactive_users()
         self.assertEqual(len(mail.outbox), 2)
+
+
+class TestProcessReallyInactiveUsers(TestCase):
+
+    def setUp(self):
+        self.user = UserFactory()
+        self.group = GroupFactory(members=[self.user])
+        self.membership = GroupMembership.objects.get(group=self.group, user=self.user)
+        now = timezone.now()
+        self.membership.lastseen_at = now - relativedelta(years=1)
+        self.membership.save()
+        mail.outbox = []
+
+    def test_give_really_inactive_user_a_chance(self):
+        process_inactive_users()
+        process_inactive_users()
+        self.assertTrue(GroupMembership.objects.filter(group=self.group, user=self.user).exists())
+
+
 
