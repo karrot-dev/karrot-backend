@@ -9,14 +9,17 @@
             <mj-section>
                 <mj-column>
                     <mj-text>
-                        <h1>{% trans %}You requested a new verification link to {{ site_name }}{% endtrans %}</h1>
+                        <h1>{% trans %}Thank you for signing up to {{ site_name }}{% endtrans %}</h1>
                     </mj-text>
                     <mj-text>
-                        <p>{% trans %}Here you have the link again to confirm your email:{% endtrans %}</p>
+                        <p>{% trans %}Please click the following link to confirm your email:{% endtrans %}</p>
                     </mj-text>
                     <mj-button href="{{ url }}">
                         {% trans %}Verify your email address{% endtrans %}
                     </mj-button>
+                    <mj-text>
+                        <p>{% trans %}You can safely ignore this message if it wasn't you who signed up at our service using this email address.{% endtrans %}</p>
+                    </mj-text>
                 </mj-column>
             </mj-section>
             <mj-include path="../../base/templates/_footer.mjml"/>

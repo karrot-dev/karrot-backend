@@ -9,11 +9,11 @@
             <mj-section>
                 <mj-column>
                     <mj-text>
-                        <h1>{% trans %}Thank you for signing up to {{ site_name }}!{% endtrans %}</h1>
+                        <h1>{% trans %}Thank you for registering an email address for {{ site_name }}!{% endtrans %}</h1>
                     </mj-text>
                     <mj-text>
-                        <p>{% trans %}Welcome to {{ site_name }}, {{ user_display_name }}!{% endtrans %}</p>
-                        <p>{% trans %}After we get started, please confirm your email address by clicking the link below:{% endtrans %}</p>
+                        <p>{% trans %}Welcome (back) to {{ site_name }}, {{ user_display_name }}!{% endtrans %}</p>
+                        <p>{% trans %}Please confirm your email address by clicking the link below:{% endtrans %}</p>
                     </mj-text>
                     <mj-button href="{{ url }}">
                         {% trans %}Verify your email address{% endtrans %}
