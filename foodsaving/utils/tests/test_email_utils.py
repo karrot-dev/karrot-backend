@@ -20,7 +20,7 @@ class TestEmailUtils(APITestCase):
             invited_by=self.user
         )
         email = email_utils.prepare_emailinvitation_email(invitation)
-        self.assertEqual(len(email.alternatives), 0)
+        self.assertEqual(len(email.alternatives), 1)
         self.assertEqual(email.to[0], 'bla@bla.com')
         self.assertIn(self.group.name, email.body)
         self.assertIn(self.user.display_name, email.body)
@@ -55,7 +55,7 @@ class TestEmailUtils(APITestCase):
     def test_send_new_verification_code(self):
         verification_code = VerificationCode.objects.get(user=self.user)
         email = email_utils.prepare_send_new_verification_code_email(self.user, verification_code)
-        self.assertEqual(len(email.alternatives), 0)
+        self.assertEqual(len(email.alternatives), 1)
         self.assertEqual(email.to[0], self.user.unverified_email)
         self.assertIn(settings.HOSTNAME, email.body)
         self.assertIn(verification_code.code, email.body)
