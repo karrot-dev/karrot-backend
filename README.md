@@ -5,118 +5,11 @@ Django API server for the _karrot_ frontend
 [![CircleCI](https://circleci.com/gh/yunity/karrot-backend.svg?style=svg)](https://circleci.com/gh/yunity/karrot-backend)
 [![codecov](https://codecov.io/gh/yunity/karrot-backend/branch/master/graph/badge.svg)](https://codecov.io/gh/yunity/karrot-backend)
 
-There are 3 approaches to getting your developer environment setup:
+## Developer setup
 
-1. [single docker container](#getting-started-with-docker) - includes backend, postgres, and redis in one container
-2. [local install](#local-install) - install everything on your system ([Arch](#arch-linux), [Ubuntu](#ubuntu-or-debian), [Debian](#ubuntu-or-debian), [macOS](#mac-os), [OpenSUSE Leap](#opensuse-leap))
-3. [docker-compose setup](#docker-compose) - includes backend, frontend, mail catcher, postgres, redis, etc..
+The recommended way to getting your developer environment setup is docker-compose - includes backend, frontend, mail catcher, postgres, redis, etc..
 
-## Getting started with Docker
-
-You can automate your setup with [Docker](https://www.docker.com/what-docker).
-
-Build the docker container:
-```sh
-docker build -t backend .
-```
-Run this container, including your most recent source code changes:
-
-```sh
-docker run -d -p 8000:8000 -v $PWD/foodsaving:/karrot-backend/foodsaving backend
-```
-
-Note 1: This assumes that your terminal's working directory is in the karrot-backend directory, i.e. the directory you cloned from Github.
-Note 2: Only changes you make in the "foodsaving" directory are included.
-
-The test data are automatically created in the container. You can see log-in details after running this command:
-
-```sh
-docker logs -f CONTAINER
-```
-
-With this data, you can log in as one of the printed e-mail addresses with password 123
-
-The server is already running in Docker container.
-
-## Local install
-### Install requirements
-
-- python3.5 or greater/virtualenv
-- postgresql >=9.4
-- redis-server
-
-#### Arch Linux
-
-All packages can be obtained from core, extra or community repositories. When queried, chose to install all packets out of base-devel.
-
-```sh
-sudo pacman -S base-devel python python-pip python-virtualenv postgresql python-redis redis
-```
-
-Afterwards, do the first-time postgres setup (taken from the [Arch Linux wiki](https://wiki.archlinux.org/index.php/PostgreSQL))
-
-```sh
-sudo -i -u postgres
-initdb --locale en_US.UTF-8 -E UTF8 -D '/var/lib/postgres/data'
-```
-
-By default, Arch Linux does not start the installed services. Do it manually by executing
-
-```sh
-sudo systemctl start postgresql.service
-sudo systemctl start redis.service
-```
-
-You can add them to autostart as well:
-
-```sh
-sudo systemctl enable postgresql.service
-sudo systemctl enable redis.service
-```
-
-#### Ubuntu or Debian
-As _karrot_ requires relatively recent versions of some packages, using Ubuntu 15.10 or greater is required.
-
-```sh
-sudo apt-get install git redis-server python3 python3-dev python-virtualenv postgresql postgresql-server-dev-9.4 gcc build-essential g++ libffi-dev libncurses5-dev
-```
-#### Mac OS
-For Mac OS, you will need homebrew. With homebrew you can install all packages.
-
-```sh
-brew install postgresql
-initdb /usr/local/var/postgres -E utf8
-brew services start postgresql
-brew install redis
-brew services start redis
-```
-
-#### OpenSUSE Leap
-All packages should be available in the default repositories `repo-oss` and `repo-non-oss`.
-
-```sh
-sudo zypper install python-virtualenv postgresql-devel postgresql python-redis redis
-```
-
-### Setup virtualenv
-
-The backend is meant to be run inside a python virtualenv that is independent from your systems python packages.
-
-As we installed `python3` and `virtualenv` earlier, we can now proceed to create the environment and download the necessary packages:
-
-```
-# inside the karrot-backend folder
-virtualenv --no-site-packages --pyton=python3 env
-. ./env/bin/activate
-pip install pip-tools
-./sync.py
-```
-
-This step might be useful in the docker compose setup as well, to have packages available locally for development.
-
-## Docker Compose
-
-Head over to [yunity/foodsaving-docker](https://github.com/yunity/foodsaving-docker) for further instructions.
+Head over to [yunity/karrot-docker](https://github.com/yunity/karrot-docker) for further instructions.
 
 ## Django quick introduction
 Before using any tools from the shell, you need to activate the virtualenv:
@@ -131,6 +24,9 @@ The manage.py application can be used to perform administrative tasks:
   - migrate: Apply database migrations
   - shell\_plus: (requires ipython) for playing in a django python environment
   - test: Run automated tests
+
+1. [single docker container](#getting-started-with-docker) - includes backend, postgres, and redis in one container
+2. [local install](#local-install) - install everything on your system ([Arch](#arch-linux), [Ubuntu](#ubuntu-or-debian), [Debian](#ubuntu-or-debian), [macOS](#mac-os), [OpenSUSE Leap](#opensuse-leap))
 
 ## API Documentation
 
