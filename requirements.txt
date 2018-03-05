@@ -16,7 +16,7 @@ bleach==2.1.2
 cchardet==2.1.1           # via talon
 certifi==2018.1.18        # via requests
 cffi==1.11.5              # via argon2-cffi
-channels==1.1.8
+channels==2.0.2
 chardet==3.0.4            # via requests, talon
 constantly==15.1.0        # via twisted
 coreapi==2.3.3            # via django-rest-swagger, openapi-codec
