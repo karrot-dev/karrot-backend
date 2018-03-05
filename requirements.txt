@@ -24,7 +24,7 @@ coreschema==0.0.4         # via coreapi
 cssselect==1.0.3          # via talon
 daphne==2.0.4             # via channels
 django-anymail==1.4
-django-cors-headers==2.1.0
+django-cors-headers==2.2.0
 django-crispy-forms==1.7.0
 django-enumfield==1.3b2
 django-extensions==2.0.0
