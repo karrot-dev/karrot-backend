@@ -15,7 +15,7 @@ bleach-whitelist==0.0.8
 bleach==2.1.2
 cchardet==2.1.1           # via talon
 certifi==2018.1.18        # via requests
-cffi==1.11.4              # via argon2-cffi
+cffi==1.11.5              # via argon2-cffi
 channels==1.1.8
 chardet==3.0.4            # via requests, talon
 constantly==15.1.0        # via twisted
