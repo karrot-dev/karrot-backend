@@ -69,7 +69,7 @@ pycodestyle==2.3.1        # via flake8
 pycparser==2.18           # via cffi
 pyfcm==1.4.5
 pyflakes==1.6.0           # via flake8
-pymdown-extensions==4.8
+pymdown-extensions==4.9
 python-dateutil==2.6.1    # via faker, influxdb
 python-server-metrics==0.2.1  # via django-influxdb-metrics
 pytz==2018.3
