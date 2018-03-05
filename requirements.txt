@@ -87,7 +87,7 @@ talon==1.4.4
 text-unidecode==1.2       # via faker
 tld==0.7.9                # via django-influxdb-metrics
 twisted==17.9.0           # via daphne
-txaio==2.8.2              # via autobahn
+txaio==2.9.0              # via autobahn
 typing==3.6.4             # via django-extensions
 uritemplate==3.0.0        # via coreapi
 urllib3==1.22             # via requests
