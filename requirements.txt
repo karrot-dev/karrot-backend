@@ -73,7 +73,7 @@ pymdown-extensions==4.9
 python-dateutil==2.6.1    # via faker, influxdb
 python-server-metrics==0.2.1  # via django-influxdb-metrics
 pytz==2018.3
-raven==6.5.0
+raven==6.6.0
 redis==2.10.6
 regex==2018.2.21          # via talon
 requests-toolbelt==0.8.0  # via pyfcm
