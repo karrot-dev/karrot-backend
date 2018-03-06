@@ -171,8 +171,7 @@ def prepare_user_inactive_in_group_email(user, group):
         hostname=settings.HOSTNAME,
         group_id=group.id
     )
-    inactivity_deletion_days = settings.NUMBER_OF_DAYS_UNTIL_REMOVED_FROM_GROUP \
-        - settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP
+    inactivity_deletion_days = settings.NUMBER_OF_DAYS_UNTIL_REMOVED_FROM_GROUP
     return prepare_email(
         'user_inactive_in_group',
         user=user,

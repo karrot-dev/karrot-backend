@@ -220,7 +220,7 @@ ACCOUNT_DELETE_TIME_LIMIT_MINUTES = 180
 
 # For removal of members from groups
 NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP = 30
-NUMBER_OF_DAYS_UNTIL_REMOVED_FROM_GROUP = 90
+NUMBER_OF_DAYS_UNTIL_REMOVED_FROM_GROUP = 60
 
 
 # Default dummy settings, please override in local_settings.py

@@ -300,7 +300,7 @@ class TestGroupMemberLastSeenAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.membership.refresh_from_db()
         self.assertGreater(self.membership.lastseen_at, before)
-        self.assertEqual(self.membership.active, True)
+        self.assertEqual(self.membership.inactive_at, None)
 
 
 class TestDefaultGroupMembership(APITestCase):

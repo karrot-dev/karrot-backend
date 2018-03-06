@@ -15,9 +15,6 @@
                         <p>
                             {% trans %}It looks like you've not visited the <a href="{{ group_url }}">{{ group_name }}</a> group for over {{ num_days_inactive }} days.{% endtrans %}
 			</p>
-                        <p>
-                            {% trans %}If you don't visit the group in the next {{ inactivity_deletion_days }} days, we will sadly have to remove you from that group. {% endtrans %}
-                        </p>
                     </mj-text>
                     <mj-button href="{{ group_url }}">
                         {% trans %}Visit {{ group_name }}{% endtrans %}

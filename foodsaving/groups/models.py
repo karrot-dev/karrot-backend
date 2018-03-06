@@ -110,6 +110,7 @@ class GroupMembership(BaseModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     roles = ArrayField(TextField(), default=list)
     lastseen_at = DateTimeField(default=timezone.now)
+    inactive_at = DateTimeField(default=None, null=True)
     active = models.BooleanField(default=True)
     notification_types = ArrayField(TextField(), default=get_default_notification_types)
 
