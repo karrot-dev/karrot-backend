@@ -5,6 +5,7 @@ from django.db.models import TextField, DateTimeField, Manager
 from django.utils import timezone
 from timezone_field import TimeZoneField
 
+from foodsaving.groups import group_status
 from foodsaving.base.base_models import BaseModel, LocationModel
 from foodsaving.conversations.models import ConversationMixin
 from foodsaving.history.models import History, HistoryTypus
@@ -16,7 +17,11 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='groups', through='GroupMembership')
     password = models.CharField(max_length=255, blank=True)
     public_description = models.TextField(blank=True)
-    active = models.BooleanField(default=True)
+    status = models.CharField(
+        default=group_status.ACTIVE,
+        choices=group_status.CHOICES,
+        max_length=100,
+    )
     sent_summary_up_to = DateTimeField(null=True)
     timezone = TimeZoneField(default='Europe/Berlin', null=True, blank=True)
     active_agreement = models.OneToOneField(
