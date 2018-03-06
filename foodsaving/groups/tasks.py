@@ -11,7 +11,7 @@ from foodsaving.groups.models import Group
 from django.utils import timezone
 from foodsaving.groups.models import GroupMembership
 from config import settings
-from foodsaving.utils.email_utils import prepare_user_inactive_in_group_email, prepare_user_removed_from_group_email
+from foodsaving.utils.email_utils import prepare_user_inactive_in_group_email
 
 from datetime import timedelta
 
