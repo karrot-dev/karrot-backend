@@ -46,3 +46,13 @@ def feedback_given(feedback):
         'tags': pickup_tags(feedback.about),
         'fields': {'value': 1},
     }])
+
+
+def pickup_notification_email(group, **kwargs):
+    write_points([{
+        'measurement': 'karrot.email.group_summary',
+        'tags': {
+            'group': str(group.id)
+        },
+        'fields': {'value': 1, **kwargs},
+    }])

@@ -36,21 +36,21 @@
                                 {{ tonight_date | date }}
                             </h2>
 
-                            <p>The day is not over yet, there are still pickups to be done!</p>
+                            <p>The day is not over, there are still pickups to be done!</p>
 
-                            {% if user_pickups_tonight and user_pickups_tonight|length > 0 %}
+                            {% if tonight_user and tonight_user|length > 0 %}
                                 {% trans %}You are signed up for{% endtrans %}:
-                                {{ pickup_list(user_pickups_tonight) }}
+                                {{ pickup_list(tonight_user) }}
                             {% endif %}
 
-                            {% if group_pickups_tonight_empty and group_pickups_tonight_empty|length > 0 %}
+                            {% if tonight_empty and tonight_empty|length > 0 %}
                                 {% trans %}No-one is yet signed up for{% endtrans %}:
-                                {{ pickup_list(group_pickups_tonight_empty) }}
+                                {{ pickup_list(tonight_empty) }}
                             {% endif %}
 
-                            {% if group_pickups_tonight_not_full and group_pickups_tonight_not_full|length > 0 %}
+                            {% if tonight_not_full and tonight_not_full|length > 0 %}
                                 {% trans %}There is still space available for{% endtrans %}:
-                                {{ pickup_list(group_pickups_tonight_not_full, show_empty_collectors_count=true) }}
+                                {{ pickup_list(tonight_not_full, show_empty_collectors_count=true) }}
                             {% endif %}
 
                         {% endif %}
@@ -66,19 +66,19 @@
                                 {{ tomorrow_date | date }}
                             </h2>
 
-                            {% if user_pickups_tomorrow and user_pickups_tomorrow|length > 0 %}
+                            {% if tomorrow_user and tomorrow_user|length > 0 %}
                                 {% trans %}You are signed up for{% endtrans %}:
-                                {{ pickup_list(user_pickups_tomorrow) }}
+                                {{ pickup_list(tomorrow_user) }}
                             {% endif %}
 
-                            {% if group_pickups_tomorrow_empty and group_pickups_tomorrow_empty|length > 0 %}
+                            {% if tomorrow_empty and tomorrow_empty|length > 0 %}
                                 {% trans %}No-one is yet signed up for{% endtrans %}:
-                                {{ pickup_list(group_pickups_tomorrow_empty) }}
+                                {{ pickup_list(tomorrow_empty) }}
                             {% endif %}
 
-                            {% if group_pickups_tomorrow_not_full and group_pickups_tomorrow_not_full|length > 0 %}
+                            {% if tomorrow_not_full and tomorrow_not_full|length > 0 %}
                                 {% trans %}There is still space available for{% endtrans %}:
-                                {{ pickup_list(group_pickups_tomorrow_not_full, show_empty_collectors_count=true) }}
+                                {{ pickup_list(tomorrow_not_full, show_empty_collectors_count=true) }}
                             {% endif %}
 
                         {% endif %}

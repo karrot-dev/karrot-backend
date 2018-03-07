@@ -25,7 +25,7 @@ def time_filter(value):
     return format_time(value, format='short', locale=to_locale(get_language()))
 
 
-def store_url_fn(store):
+def store_url(store):
     return '{hostname}/#/group/{group_id}/store/{store_id}/pickups'.format(
         hostname=settings.HOSTNAME,
         group_id=store.group.id,
@@ -37,7 +37,7 @@ def jinja2_environment(**options):
     env = Environment(**options)
     env.filters['date'] = date_filter
     env.filters['time'] = time_filter
-    env.globals['store_url'] = store_url_fn
+    env.globals['store_url'] = store_url
     return env
 
 
