@@ -5,7 +5,7 @@ from rest_framework.fields import DateTimeField
 
 from foodsaving.conversations.models import Conversation, ConversationMessage, \
     ConversationParticipant, ConversationMessageReaction
-from foodsaving.conversations.helpers import normalizeEmojiName
+from foodsaving.conversations.helpers import normalize_emoji_name
 
 
 class ConversationSerializer(serializers.ModelSerializer):
@@ -79,14 +79,14 @@ class ConversationEmailNotificationsSerializer(serializers.ModelSerializer):
 
 
 class EmojiField(serializers.Field):
-    "Emoji field is normalized and validated here"
+    """Emoji field is normalized and validated here"""
 
     def to_representation(self, obj):
         return obj
 
     def to_internal_value(self, data):
         try:
-            return normalizeEmojiName(data)
+            return normalize_emoji_name(data)
         except Exception:
             raise serializers.ValidationError('not a valid emoji name')
 

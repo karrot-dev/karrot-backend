@@ -47,24 +47,12 @@ class IsConversationParticipant(BasePermission):
 
 
 class IsMessageConversationParticipant(BasePermission):
-    "Is the specified message in a conversation which user is member of?"
+    """Is the specified message in a conversation which user participates in?"""
 
-    message = _('You are not in the conversation')
+    message = _('You are not in this conversation')
 
-    def has_permission(self, request, view):
-        # if message_id
-        try:
-            message_id = int(request.resolver_match.kwargs.get('pk'))
-        except (ValueError, TypeError):
-            return True
-
-        message = ConversationMessage.objects.filter(pk=message_id).first()
-
-        # check that user belongs to the conversation of this message
-        if message:
-            return message.conversation.participants.filter(id=request.user.id).exists()
-        # otherwise handle 404 later
-        return True
+    def has_object_permission(self, request, view, message):
+        return message.conversation.participants.filter(id=request.user.id).exists()
 
 
 class ConversationViewSet(
@@ -133,7 +121,12 @@ class ConversationMessageViewSet(
         permission_classes=(IsAuthenticated, IsMessageConversationParticipant)
     )
     def reactions(self, request, pk):
-        """route for POST /messages/{id}/reactions/ with body {\"name\":\"emoji_name\"}"""
+        """route for POST /messages/{id}/reactions/ with body {"name":"emoji_name"}"""
+
+        message = get_object_or_404(ConversationMessage.objects, id=pk)
+
+        # object permissions check has to be triggered manually
+        self.check_object_permissions(self.request, message)
 
         data = {
             'message': pk,
@@ -158,6 +151,10 @@ class ConversationMessageViewSet(
         name = EmojiField.to_internal_value(None, name)
 
         message = get_object_or_404(ConversationMessage.objects, id=pk)
+
+        # object permissions check has to be triggered manually
+        self.check_object_permissions(self.request, message)
+
         reaction = get_object_or_404(ConversationMessageReaction.objects, name=name, message=message,
                                      user=request.user)
 
