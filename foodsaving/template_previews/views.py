@@ -7,7 +7,6 @@ from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadReque
 from django.template.loader import render_to_string
 from django.template.utils import get_app_template_dirs
 from django.utils import timezone
-from django.utils.timezone import localtime
 
 import foodsaving.groups.emails
 from config import settings
@@ -96,7 +95,6 @@ class Handlers:
         pickup2 = PickupDate.objects.order_by('?').first()
         pickup3 = PickupDate.objects.order_by('?').first()
         pickup4 = PickupDate.objects.order_by('?').first()
-        pickup5 = PickupDate.objects.order_by('?').first()
 
         localtime = timezone.localtime()
 

@@ -40,7 +40,7 @@ def prepare_pickup_notification_email(
         context={
             'settings_url': settings_url,
             'group': group,
-            'tonight_date':tonight_date,
+            'tonight_date': tonight_date,
             'tomorrow_date': tomorrow_date,
             'has_pickups_tonight': has_pickups_tonight,
             'has_pickups_tomorrow': has_pickups_tomorrow,

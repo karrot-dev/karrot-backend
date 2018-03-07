@@ -74,7 +74,6 @@ class TestGroupSummaryEmails(APITestCase):
             groupmembership__user__in=get_user_model().objects.unverified_or_ignored()
         )
 
-
         self.assertEqual(
             sorted(to),
             sorted([member.email for member in expected_members])
