@@ -8,7 +8,7 @@ from freezegun import freeze_time
 from rest_framework.test import APITestCase
 
 from foodsaving.groups.factories import GroupFactory
-from foodsaving.groups.models import GroupNotificationType, GroupMembership
+from foodsaving.groups.models import GroupMembership
 from foodsaving.pickups.models import PickupDate
 from foodsaving.pickups.tasks import daily_pickup_notifications, fetch_pickup_notification_data_for_group
 from foodsaving.stores.factories import StoreFactory
@@ -122,12 +122,12 @@ class TestPickupNotificationTask(APITestCase):
         with group_timezone_at(self.group, hour=20):
             tonight = relativedelta(minutes=10)
             tomorrow = relativedelta(hours=10)
-            [self.create_user_pickup(tonight) for _  in range(2)]
-            [self.create_empty_pickup(tonight) for _  in range(3)]
-            [self.create_not_full_pickup(tonight) for _  in range(4)]
-            [self.create_user_pickup(tomorrow) for _  in range(5)]
-            [self.create_empty_pickup(tomorrow) for _  in range(6)]
-            [self.create_not_full_pickup(tomorrow) for _  in range(7)]
+            [self.create_user_pickup(tonight) for _ in range(2)]
+            [self.create_empty_pickup(tonight) for _ in range(3)]
+            [self.create_not_full_pickup(tonight) for _ in range(4)]
+            [self.create_user_pickup(tomorrow) for _ in range(5)]
+            [self.create_empty_pickup(tomorrow) for _ in range(6)]
+            [self.create_not_full_pickup(tomorrow) for _ in range(7)]
             daily_pickup_notifications()
             write_points.assert_called_with([{
                 'measurement': 'karrot.email.pickup_notification',
