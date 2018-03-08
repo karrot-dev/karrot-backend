@@ -103,7 +103,6 @@ def prepare_user_inactive_in_group_email(user, group):
         hostname=settings.HOSTNAME,
         group_id=group.id
     )
-    inactivity_deletion_days = settings.NUMBER_OF_DAYS_UNTIL_REMOVED_FROM_GROUP
     return prepare_email(
         'user_inactive_in_group',
         user=user,
@@ -111,21 +110,5 @@ def prepare_user_inactive_in_group_email(user, group):
             'group_name': group.name,
             'group_url': group_url,
             'num_days_inactive': settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP,
-            'inactivity_deletion_days': inactivity_deletion_days
-        }
-    )
-
-
-def prepare_user_removed_from_group_email(user, group):
-    site_url = '{hostname}'.format(
-        hostname=settings.HOSTNAME
-    )
-    return prepare_email(
-        'user_removed_from_group',
-        user=user,
-        context={
-            'group_name': group.name,
-            'group_url': site_url,
-            'inactivity_deletion_days': settings.NUMBER_OF_DAYS_UNTIL_REMOVED_FROM_GROUP
         }
     )
