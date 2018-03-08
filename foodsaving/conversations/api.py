@@ -123,7 +123,7 @@ class ConversationMessageViewSet(
     def reactions(self, request, pk):
         """route for POST /messages/{id}/reactions/ with body {"name":"emoji_name"}"""
 
-        message = get_object_or_404(ConversationMessage.objects, id=pk)
+        message = get_object_or_404(ConversationMessage, id=pk)
 
         # object permissions check has to be triggered manually
         self.check_object_permissions(self.request, message)
@@ -150,12 +150,12 @@ class ConversationMessageViewSet(
 
         name = EmojiField.to_internal_value(None, name)
 
-        message = get_object_or_404(ConversationMessage.objects, id=pk)
+        message = get_object_or_404(ConversationMessage, id=pk)
 
         # object permissions check has to be triggered manually
         self.check_object_permissions(self.request, message)
 
-        reaction = get_object_or_404(ConversationMessageReaction.objects, name=name, message=message,
+        reaction = get_object_or_404(ConversationMessageReaction, name=name, message=message,
                                      user=request.user)
 
         reaction.delete()
