@@ -1,25 +1,20 @@
-import itertools
 from email.utils import formataddr
 
 import html2text
 from anymail.message import AnymailMessage
+from babel.dates import format_date, format_time
 from babel.dates import format_date
-from dateutil.relativedelta import relativedelta
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Count
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string, get_template
-from django.utils import timezone
 from django.utils import translation
-from django.utils.timezone import get_current_timezone
 from django.utils.translation import to_locale, get_language
 from furl import furl
 from jinja2 import Environment
 
 from config import settings
-from foodsaving.conversations.models import ConversationMessage
 from foodsaving.groups.models import Group
-from foodsaving.pickups.models import PickupDate
+from foodsaving.utils import stats
 from foodsaving.webhooks.api import make_local_part
 
 
@@ -27,9 +22,23 @@ def date_filter(value):
     return format_date(value, format='full', locale=to_locale(get_language()))
 
 
+def time_filter(value):
+    return format_time(value, format='short', locale=to_locale(get_language()))
+
+
+def store_url(store):
+    return '{hostname}/#/group/{group_id}/store/{store_id}/pickups'.format(
+        hostname=settings.HOSTNAME,
+        group_id=store.group.id,
+        store_id=store.id,
+    )
+
+
 def jinja2_environment(**options):
     env = Environment(**options)
     env.filters['date'] = date_filter
+    env.filters['time'] = time_filter
+    env.globals['store_url'] = store_url
     return env
 
 
@@ -99,106 +108,6 @@ def prepare_emailinvitation_email(invitation):
     }, to=invitation.email)
 
 
-def calculate_group_summary_dates(group):
-    with timezone.override(group.timezone):
-        tz = get_current_timezone()
-
-        # midnight last night in the groups local timezone
-        midnight = tz.localize(timezone.now().replace(
-            tzinfo=None, hour=0, minute=0, second=0, microsecond=0
-        ))
-
-        # 7 days before that
-        from_date = midnight - relativedelta(days=7)
-
-        # a week after from date
-        to_date = from_date + relativedelta(days=7)
-
-        return from_date, to_date
-
-
-def prepare_group_summary_data(group, from_date, to_date):
-    new_users = group.members.filter(
-        groupmembership__created_at__gte=from_date,
-        groupmembership__created_at__lt=to_date,
-    ).all()
-
-    pickups_done_count = PickupDate.objects \
-        .annotate(num_collectors=Count('collectors')) \
-        .filter(store__group=group,
-                date__gte=from_date,
-                date__lt=to_date,
-                num_collectors__gt=0).count()
-
-    pickups_missed_count = PickupDate.objects \
-        .annotate(num_collectors=Count('collectors')) \
-        .filter(store__group=group,
-                date__gte=from_date,
-                date__lt=to_date,
-                num_collectors=0).count()
-
-    messages = ConversationMessage.objects.filter(
-        conversation__target_type=ContentType.objects.get_for_model(Group),
-        conversation__target_id=group.id,
-        created_at__gte=from_date,
-        created_at__lt=to_date,
-    )
-
-    return {
-        # minus one second so it's displayed as the full day
-        'to_date': to_date - relativedelta(seconds=1),
-        'from_date': from_date,
-        'group': group,
-        'new_users': new_users,
-        'pickups_done_count': pickups_done_count,
-        'pickups_missed_count': pickups_missed_count,
-        'messages': messages,
-    }
-
-
-def prepare_group_summary_emails(group, from_date, to_date):
-    """Prepares one email per language"""
-    context = prepare_group_summary_data(group, from_date, to_date)
-    grouped_members = itertools.groupby(group.members.order_by('language'), key=lambda member: member.language)
-    return [prepare_email(template='group_summary',
-                          context=context,
-                          to=[member.email for member in members],
-                          language=language) for (language, members) in grouped_members]
-
-
-def prepare_user_inactive_in_group_email(user, group):
-    group_url = '{hostname}/#/group/{group_id}/'.format(
-        hostname=settings.HOSTNAME,
-        group_id=group.id
-    )
-    inactivity_deletion_days = settings.NUMBER_OF_DAYS_UNTIL_REMOVED_FROM_GROUP
-    return prepare_email(
-        'user_inactive_in_group',
-        user=user,
-        context={
-            'group_name': group.name,
-            'group_url': group_url,
-            'num_days_inactive': settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP,
-            'inactivity_deletion_days': inactivity_deletion_days
-        }
-    )
-
-
-def prepare_user_removed_from_group_email(user, group):
-    site_url = '{hostname}'.format(
-        hostname=settings.HOSTNAME
-    )
-    return prepare_email(
-        'user_removed_from_group',
-        user=user,
-        context={
-            'group_name': group.name,
-            'group_url': site_url,
-            'inactivity_deletion_days': settings.NUMBER_OF_DAYS_UNTIL_REMOVED_FROM_GROUP
-        }
-    )
-
-
 def prepare_mailverification_email(user, verification_code):
     return prepare_email('mailverification', user, {
         'url': '{hostname}/#/verify-mail?key={code}'.format(
@@ -241,6 +150,17 @@ def generate_plaintext_from_html(html):
     return h.handle(html)
 
 
+class StatCollectingAnymailMessage(AnymailMessage):
+
+    def send(self, *args, **kwargs):
+        try:
+            super(StatCollectingAnymailMessage, self).send(*args, **kwargs)
+            stats.email_sent(recipient_count=len(self.to))
+        except Exception as exception:
+            stats.email_error(recipient_count=len(self.to))
+            raise exception
+
+
 def prepare_email(template, user=None, context=None, to=None, language=None, **kwargs):
     context = dict(context) if context else {}
 
@@ -280,7 +200,7 @@ def prepare_email(template, user=None, context=None, to=None, language=None, **k
         **kwargs,
     }
 
-    email = AnymailMessage(**message_kwargs)
+    email = StatCollectingAnymailMessage(**message_kwargs)
 
     if html_content:
         email.attach_alternative(html_content, 'text/html')
