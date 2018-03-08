@@ -20,7 +20,11 @@
                                                 {{ pickup.store.name }}
                                             </a>
                                             {% if show_empty_collectors_count %}
-                                                - {{ pickup.empty_collectors_count() }} remaining
+                                                -
+                                                {% transempty_collectors_count=pickup.empty_collectors_count(),
+                                                        max_collectors=pickup.max_collectors %}
+                                                    {{ empty_collectors_count }}/{{ max_collectors }} remaining
+                                                {% endtrans %}
                                             {% endif %}
                                         </li>
                                     {% endfor %}

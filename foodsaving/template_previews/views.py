@@ -103,12 +103,12 @@ class Handlers:
             group=user.groups.first(),
             tonight_date=localtime,
             tomorrow_date=localtime + relativedelta(days=1),
-            user_pickups_tonight=[pickup1, pickup2],
-            group_pickups_tonight_empty=[pickup3, pickup4],
-            group_pickups_tonight_not_full=[pickup4],
-            user_pickups_tomorrow=[pickup2],
-            group_pickups_tomorrow_empty=[pickup3],
-            group_pickups_tomorrow_not_full=[pickup4],
+            tonight_user=[pickup1, pickup2],
+            tonight_empty=[pickup3, pickup4],
+            tonight_not_full=[pickup4],
+            tomorrow_user=[pickup2],
+            tomorrow_empty=[pickup3],
+            tomorrow_not_full=[pickup4],
         )
 
     def send_new_verification_code(self):
