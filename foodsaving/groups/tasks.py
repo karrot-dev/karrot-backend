@@ -1,20 +1,18 @@
 import traceback
+from datetime import timedelta
 
 from django.db.models import Count
+from django.utils import timezone
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task
 from influxdb_metrics.loader import write_points
 
+from config import settings
 from foodsaving.groups import stats, emails
 from foodsaving.groups.emails import prepare_user_inactive_in_group_email
 from foodsaving.groups.models import Group
-from foodsaving.utils import stats_utils
-
-from django.utils import timezone
 from foodsaving.groups.models import GroupMembership
-from config import settings
-
-from datetime import timedelta
+from foodsaving.utils import stats_utils
 
 
 @db_periodic_task(crontab(minute=0))  # every hour
@@ -35,7 +33,6 @@ def process_inactive_users():
     now = timezone.now()
 
     count_users_flagged_inactive = 0
-    count_users_removed = 0
 
     inactive_threshold_date = now - timedelta(days=settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP)
     for membership in GroupMembership.objects.filter(lastseen_at__lte=inactive_threshold_date, inactive_at=None):
@@ -47,7 +44,6 @@ def process_inactive_users():
 
     stats_utils.periodic_task('group__process_inactive_users', {
         'count_users_flagged_inactive': count_users_flagged_inactive,
-        'count_users_removed': count_users_removed
     })
 
 
