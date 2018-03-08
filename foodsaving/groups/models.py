@@ -77,7 +77,6 @@ class GroupNotificationType(object):
     WEEKLY_SUMMARY = 'weekly_summary'
     DAILY_PICKUP_NOTIFICATION = 'daily_pickup_notification'
 
-
 def get_default_notification_types():
     return [
         GroupNotificationType.WEEKLY_SUMMARY,
