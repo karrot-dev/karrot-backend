@@ -8,6 +8,7 @@ from foodsaving.groups.models import Group, GroupMembership, GroupNotificationTy
 from foodsaving.pickups import stats
 from foodsaving.pickups.emails import prepare_pickup_notification_email
 from foodsaving.pickups.models import PickupDate
+from foodsaving.users.models import User
 from foodsaving.utils import stats_utils
 
 
@@ -66,7 +67,9 @@ def fetch_pickup_notification_data_for_group(group):
 
     users = group.members.filter(
         groupmembership__in=GroupMembership.objects.with_notification_type(
-            GroupNotificationType.DAILY_PICKUP_NOTIFICATION)
+            GroupNotificationType.DAILY_PICKUP_NOTIFICATION),
+    ).exclude(
+        groupmembership__user__in=User.objects.unverified_or_ignored(),
     )
 
     for user in users:

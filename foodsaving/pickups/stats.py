@@ -50,7 +50,7 @@ def feedback_given(feedback):
 
 def pickup_notification_email(group, **kwargs):
     write_points([{
-        'measurement': 'karrot.email.group_summary',
+        'measurement': 'karrot.email.pickup_notification',
         'tags': {
             'group': str(group.id)
         },
