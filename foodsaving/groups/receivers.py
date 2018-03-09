@@ -38,8 +38,12 @@ def membership_initialized(sender, instance, **kwargs):
 def check_membership_role_changes(sender, instance, created, **kwargs):
     membership = instance
 
-    added_roles = set(membership.roles) - set(membership._existing_roles)
-    removed_roles = set(membership._existing_roles) - set(membership.roles)
+    if created:
+        added_roles = membership.roles
+        removed_roles = set()
+    else:
+        added_roles = set(membership.roles) - set(membership._existing_roles)
+        removed_roles = set(membership._existing_roles) - set(membership.roles)
 
     if len(added_roles) > 0 or len(removed_roles) > 0:
         roles_changed.send(
@@ -68,9 +72,7 @@ def group_member_removed(sender, instance, **kwargs):
     conversation = Conversation.objects.get_for_target(group)
     if conversation:
         conversation.leave(user)
-    if group.is_member(user):
-        # Only send the group left stat is user was full member of the group before
-        stats.group_left(group)
+    stats.group_left(group)
 
 
 @receiver(roles_changed, sender=GroupMembership)

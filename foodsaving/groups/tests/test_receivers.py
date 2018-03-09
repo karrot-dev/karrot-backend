@@ -66,7 +66,6 @@ def signal_handler_for(signal):
     finally:
         signal.disconnect(handler)
 
-
 class TestCustomRoleSignals(TestCase):
     def setUp(self):
         self.user = UserFactory()
