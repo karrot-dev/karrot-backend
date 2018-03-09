@@ -1,3 +1,8 @@
+from contextlib import contextmanager
+# Mostly based on this nice persons article:
+#   https://www.caktusgroup.com/blog/2016/02/02/writing-unit-tests-django-migrations/
+from unittest.mock import Mock
+
 from channels.test import WSClient
 from django.apps import apps
 from django.db import connection
@@ -5,8 +10,6 @@ from django.db.migrations.executor import MigrationExecutor
 from django.test import TestCase
 
 
-# Mostly based on this nice persons article:
-#   https://www.caktusgroup.com/blog/2016/02/02/writing-unit-tests-django-migrations/
 class TestMigrations(TestCase):
     @property
     def app(self):
@@ -54,3 +57,13 @@ class ReceiveAllWSClient(WSClient):
             if response is None:
                 break
             yield response
+
+
+@contextmanager
+def signal_handler_for(signal):
+    handler = Mock()
+    try:
+        signal.connect(handler)
+        yield handler
+    finally:
+        signal.disconnect(handler)

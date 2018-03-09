@@ -1,6 +1,3 @@
-from contextlib import contextmanager
-from unittest.mock import Mock
-
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.utils import timezone
@@ -9,6 +6,7 @@ from foodsaving.conversations.models import Conversation
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.receivers import roles_changed
+from foodsaving.tests.utils import signal_handler_for
 from foodsaving.users.factories import UserFactory
 
 
@@ -56,15 +54,6 @@ class TestConversationReceiver(TestCase):
         return Conversation.objects.filter(target_id=group.id,
                                            target_type=ContentType.objects.get_for_model(group)).first()
 
-
-@contextmanager
-def signal_handler_for(signal):
-    handler = Mock()
-    try:
-        signal.connect(handler)
-        yield handler
-    finally:
-        signal.disconnect(handler)
 
 class TestCustomRoleSignals(TestCase):
     def setUp(self):
