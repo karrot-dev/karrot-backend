@@ -1,3 +1,5 @@
+from enum import Enum
+
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -5,10 +7,15 @@ from django.db.models import TextField, DateTimeField, Manager
 from django.utils import timezone
 from timezone_field import TimeZoneField
 
-from foodsaving.groups import group_status
 from foodsaving.base.base_models import BaseModel, LocationModel
 from foodsaving.conversations.models import ConversationMixin
 from foodsaving.history.models import History, HistoryTypus
+
+
+class GroupStatus(Enum):
+    ACTIVE = 'active'
+    INACTIVE = 'inactive'
+    PLAYGROUND = 'playground'
 
 
 class Group(BaseModel, LocationModel, ConversationMixin):
@@ -18,8 +25,8 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     password = models.CharField(max_length=255, blank=True)
     public_description = models.TextField(blank=True)
     status = models.CharField(
-        default=group_status.ACTIVE,
-        choices=group_status.CHOICES,
+        default=GroupStatus.ACTIVE.value,
+        choices=[(status.value, status.value) for status in GroupStatus],
         max_length=100,
     )
     sent_summary_up_to = DateTimeField(null=True)
