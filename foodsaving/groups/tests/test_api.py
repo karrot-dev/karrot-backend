@@ -21,7 +21,7 @@ class TestGroupsInfoAPI(APITestCase):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member, ])
         self.not_approved_member = UserFactory()
-        self.group.add_member(self.applicant, roles=[])
+        self.group.add_member(self.not_approved_member, roles=[])
         self.url = '/api/groups-info/'
 
     def test_list_groups_as_anon(self):
@@ -62,7 +62,7 @@ class TestGroupsInfoAPI(APITestCase):
         self.assertFalse('password' in response.data)
 
     def test_retrieve_group_as_applicant(self):
-        self.client.force_login(user=self.applicant)
+        self.client.force_login(user=self.not_approved_member)
         url = self.url + str(self.group.id) + '/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

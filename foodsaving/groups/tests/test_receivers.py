@@ -94,6 +94,7 @@ class TestCustomRoleSignals(TestCase):
                 signal=roles_changed,
                 added_roles={'d'},
                 removed_roles=set(),
+                created=False,
             )
             self.assertEqual(handler.call_count, 1)
 
@@ -107,6 +108,7 @@ class TestCustomRoleSignals(TestCase):
                 signal=roles_changed,
                 added_roles=set(),
                 removed_roles={'a'},
+                created=False,
             )
             self.assertEqual(handler.call_count, 1)
 
@@ -120,6 +122,7 @@ class TestCustomRoleSignals(TestCase):
                 signal=roles_changed,
                 added_roles={'d', 'e', 'f'},
                 removed_roles=set(),
+                created=False,
             )
             self.assertEqual(handler.call_count, 1)
 
@@ -134,6 +137,7 @@ class TestCustomRoleSignals(TestCase):
                 signal=roles_changed,
                 added_roles=set(),
                 removed_roles={'a', 'b'},
+                created=False,
             )
             self.assertEqual(handler.call_count, 1)
 
@@ -147,5 +151,6 @@ class TestCustomRoleSignals(TestCase):
                 signal=roles_changed,
                 added_roles={'all', 'new', 'roles'},
                 removed_roles={'a', 'b', 'c'},
+                created=False,
             )
             self.assertEqual(handler.call_count, 1)

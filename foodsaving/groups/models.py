@@ -53,12 +53,15 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         if roles is None:
             roles = [GROUP_APPROVED_MEMBER]
         GroupMembership.objects.create(group=self, user=user, roles=roles)
-        History.objects.create(
-            typus=HistoryTypus.GROUP_JOIN,
-            group=self,
-            users=[user, ],
-            payload=history_payload
-        )
+        if GROUP_APPROVED_MEMBER in roles:
+            # ToDo: this should actually be handled in the receiver as well, but there we would not have the
+            # history payload
+            History.objects.create(
+                typus=HistoryTypus.GROUP_JOIN,
+                group=self,
+                users=[user, ],
+                payload=history_payload
+            )
 
     def remove_member(self, user):
         if self.is_member(user):
@@ -132,12 +135,6 @@ class GroupMembership(BaseModel):
         for role in roles:
             if role not in self.roles:
                 self.roles.append(role)
-                if role is GROUP_APPROVED_MEMBER:
-                    History.objects.create(
-                        typus=HistoryTypus.GROUP_JOIN,
-                        group=self.group,
-                        users=[self.user, ],
-                    )
 
     def remove_roles(self, roles):
         for role in roles:

@@ -5,8 +5,9 @@ from foodsaving.conversations.models import Conversation
 from foodsaving.groups import roles, stats
 from foodsaving.groups.models import Group, GroupMembership
 from foodsaving.groups.roles import GROUP_APPROVED_MEMBER
+from foodsaving.history.models import History, HistoryTypus
 
-roles_changed = Signal(providing_args=['added_roles', 'removed_roles'])
+roles_changed = Signal(providing_args=['added_roles', 'removed_roles', 'created'])
 
 
 @receiver(post_save, sender=Group)
@@ -51,6 +52,7 @@ def check_membership_role_changes(sender, instance, created, **kwargs):
             instance=membership,
             added_roles=added_roles,
             removed_roles=removed_roles,
+            created=created,
         )
 
     membership._existing_roles = list(membership.roles)
@@ -76,7 +78,7 @@ def group_member_removed(sender, instance, **kwargs):
 
 
 @receiver(roles_changed, sender=GroupMembership)
-def group_membership_roles_changed(sender, instance, added_roles, removed_roles, **kwargs):
+def group_membership_roles_changed(sender, instance, added_roles, removed_roles, created, **kwargs):
     membership = instance
     group = membership.group
     user = membership.user
@@ -84,6 +86,13 @@ def group_membership_roles_changed(sender, instance, added_roles, removed_roles,
     conversation = Conversation.objects.get_or_create_for_target(group)
     if roles.GROUP_APPROVED_MEMBER in added_roles:
         conversation.join(user)
+        if not created:
+            # the creation case is handled in add_member, to be able to write history context
+            History.objects.create(
+                typus=HistoryTypus.GROUP_JOIN,
+                group=group,
+                users=[user, ],
+            )
     elif roles.GROUP_APPROVED_MEMBER in removed_roles:
         conversation.leave(user)
 
