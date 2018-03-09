@@ -39,7 +39,7 @@ def check_membership_role_changes(sender, instance, created, **kwargs):
     membership = instance
 
     if created:
-        added_roles = membership.roles
+        added_roles = set(membership.roles)
         removed_roles = set()
     else:
         added_roles = set(membership.roles) - set(membership._existing_roles)

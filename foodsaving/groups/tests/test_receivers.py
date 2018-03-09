@@ -68,9 +68,11 @@ class TestCustomRoleSignals(TestCase):
             self.membership.roles.append('d')
             self.membership.save()
             handler.assert_called_with(
-                instance=self.membership, added_roles={'d'}, removed_roles=set(),
+                instance=self.membership,
                 sender=GroupMembership,
                 signal=roles_changed,
+                added_roles={'d'},
+                removed_roles=set(),
             )
             self.assertEqual(handler.call_count, 1)
 
