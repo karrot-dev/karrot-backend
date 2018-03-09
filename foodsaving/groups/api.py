@@ -149,6 +149,7 @@ class GroupViewSet(
             roles__contains=[GROUP_APPROVED_MEMBER]
         )
         membership.lastseen_at = timezone.now()
+        membership.inactive_at = None
         membership.save()
         stats.group_activity(membership.group)
         return Response(status=status.HTTP_204_NO_CONTENT)

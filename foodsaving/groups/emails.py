@@ -7,8 +7,9 @@ from django.db.models import Count
 from django.utils import timezone
 from django.utils.timezone import get_current_timezone
 
+from config import settings
 from foodsaving.conversations.models import ConversationMessage
-from foodsaving.groups.models import Group, GroupNotificationType
+from foodsaving.groups.models import Group, GroupNotificationType, GroupMembership
 from foodsaving.pickups.models import PickupDate
 from foodsaving.utils.email_utils import prepare_email
 
@@ -40,6 +41,11 @@ def prepare_group_summary_data(group, from_date, to_date):
         created_at__lt=to_date,
     )
 
+    settings_url = '{hostname}/#/group/{group_id}/settings'.format(
+        hostname=settings.HOSTNAME,
+        group_id=group.id,
+    )
+
     return {
         # minus one second so it's displayed as the full day
         'to_date': to_date - relativedelta(seconds=1),
@@ -49,6 +55,7 @@ def prepare_group_summary_data(group, from_date, to_date):
         'pickups_done_count': pickups_done_count,
         'pickups_missed_count': pickups_missed_count,
         'messages': messages,
+        'settings_url': settings_url,
     }
 
 
@@ -56,15 +63,21 @@ def prepare_group_summary_emails(group, from_date, to_date):
     """Prepares one email per language"""
     context = prepare_group_summary_data(group, from_date, to_date)
 
-    members = group \
-        .members_with_notification_type(GroupNotificationType.WEEKLY_SUMMARY) \
-        .exclude(groupmembership__user__in=get_user_model().objects.unverified_or_ignored())
+    members = group.members.filter(
+        groupmembership__in=GroupMembership.objects.with_notification_type(GroupNotificationType.WEEKLY_SUMMARY)
+    ).exclude(
+        groupmembership__user__in=get_user_model().objects.unverified_or_ignored()
+    )
 
     grouped_members = itertools.groupby(members.order_by('language'), key=lambda member: member.language)
-    return [prepare_email(template='group_summary',
-                          context=context,
-                          to=[member.email for member in members],
-                          language=language) for (language, members) in grouped_members]
+    return [
+        prepare_email(
+            template='group_summary',
+            context=context,
+            to=[member.email for member in members],
+            language=language
+        ) for (language, members) in grouped_members
+    ]
 
 
 def calculate_group_summary_dates(group):
@@ -83,3 +96,19 @@ def calculate_group_summary_dates(group):
         to_date = from_date + relativedelta(days=7)
 
         return from_date, to_date
+
+
+def prepare_user_inactive_in_group_email(user, group):
+    group_url = '{hostname}/#/group/{group_id}/'.format(
+        hostname=settings.HOSTNAME,
+        group_id=group.id
+    )
+    return prepare_email(
+        'user_inactive_in_group',
+        user=user,
+        context={
+            'group_name': group.name,
+            'group_url': group_url,
+            'num_days_inactive': settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP,
+        }
+    )

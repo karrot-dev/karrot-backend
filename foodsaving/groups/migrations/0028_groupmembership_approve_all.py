@@ -17,7 +17,7 @@ def grant_approved_role_to_members(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('groups', '0021_groupmembership_notification_types'),
+        ('groups', '0027_auto_20180309_0936'),
     ]
 
     operations = [

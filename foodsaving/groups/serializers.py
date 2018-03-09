@@ -25,7 +25,7 @@ class TimezoneField(serializers.Field):
 class GroupMembershipInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupMembership
-        fields = ('created_at', 'roles',)
+        fields = ('created_at', 'roles', 'active',)
         extra_kwargs = {
             'created_at': {
                 'read_only': True
@@ -34,6 +34,11 @@ class GroupMembershipInfoSerializer(serializers.ModelSerializer):
                 'read_only': True
             },
         }
+
+    active = serializers.SerializerMethodField()
+
+    def get_active(self, membership):
+        return membership.inactive_at is None
 
 
 class GroupDetailSerializer(serializers.ModelSerializer):
@@ -53,9 +58,8 @@ class GroupDetailSerializer(serializers.ModelSerializer):
             'longitude',
             'password',
             'timezone',
-            'slack_webhook',
             'active_agreement',
-            'active',
+            'status',
             'notification_types',
         ]
         extra_kwargs = {
@@ -133,7 +137,7 @@ class AgreementSerializer(serializers.ModelSerializer):
             'title',
             'content',
             'group',
-            'agreed'
+            'agreed',
         ]
         extra_kwargs = {
             'agreed': {
@@ -200,7 +204,8 @@ class GroupPreviewSerializer(serializers.ModelSerializer):
             'longitude',
             'members',
             'protected',
-            'approved_member_count'
+            'approved_member_count',
+            'status',
         ]
 
     protected = serializers.SerializerMethodField()
@@ -277,7 +282,10 @@ class GroupMembershipRemoveRoleSerializer(serializers.Serializer):
 
 class GroupMembershipAddNotificationTypeSerializer(serializers.Serializer):
     notification_type = serializers.ChoiceField(
-        choices=(GroupNotificationType.WEEKLY_SUMMARY,),
+        choices=(
+            GroupNotificationType.WEEKLY_SUMMARY,
+            GroupNotificationType.DAILY_PICKUP_NOTIFICATION,
+        ),
         required=True,
         write_only=True
     )

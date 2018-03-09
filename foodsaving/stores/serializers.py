@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.history.utils import get_changed_data
-from foodsaving.stores.models import Store as StoreModel
+from foodsaving.stores.models import Store as StoreModel, StoreStatus
 
 
 class StoreSerializer(serializers.ModelSerializer):
@@ -13,7 +13,7 @@ class StoreSerializer(serializers.ModelSerializer):
         model = StoreModel
         fields = ['id', 'name', 'description', 'group',
                   'address', 'latitude', 'longitude',
-                  'weeks_in_advance', 'upcoming_notification_hours', 'status']
+                  'weeks_in_advance', 'status']
         extra_kwargs = {
             'name': {
                 'min_length': 3
@@ -25,7 +25,7 @@ class StoreSerializer(serializers.ModelSerializer):
         }
 
     status = serializers.ChoiceField(
-        choices=StoreModel.STATUSES,
+        choices=[status.value for status in StoreStatus],
         default=StoreModel.DEFAULT_STATUS
     )
 

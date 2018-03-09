@@ -2,15 +2,20 @@ import html
 import os
 import re
 
+from dateutil.relativedelta import relativedelta
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
 from django.template.loader import render_to_string
 from django.template.utils import get_app_template_dirs
+from django.utils import timezone
 
 import foodsaving.groups.emails
 from config import settings
 from foodsaving.conversations.models import ConversationMessage
+from foodsaving.groups.emails import prepare_user_inactive_in_group_email
 from foodsaving.groups.models import Group
 from foodsaving.invitations.models import Invitation
+from foodsaving.pickups.emails import prepare_pickup_notification_email
+from foodsaving.pickups.models import PickupDate
 from foodsaving.userauth.models import VerificationCode
 from foodsaving.users.models import User
 from foodsaving.utils import email_utils
@@ -59,8 +64,15 @@ class Handlers:
 
     def group_summary(self):
         group = random_group()
-        from_date, to_date = foodsaving.groups.emails.calculate_group_summary_dates(group)
-        return foodsaving.groups.emails.prepare_group_summary_emails(group, from_date, to_date)[0]
+
+        from_date = timezone.now() - relativedelta(days=7)
+        to_date = from_date + relativedelta(days=7)
+
+        summary_emails = foodsaving.groups.emails.prepare_group_summary_emails(group, from_date, to_date)
+        if len(summary_emails) is 0:
+            raise Exception(
+                'No emails were generated, you need at least one verified user in your db, and some activity data...')
+        return summary_emails[0]
 
     def mailverification(self):
         return email_utils.prepare_mailverification_email(
@@ -77,10 +89,39 @@ class Handlers:
     def passwordreset_success(self):
         return email_utils.prepare_passwordreset_success_email(user=random_user())
 
+    def pickup_notification(self):
+        user = random_user()
+
+        pickup1 = PickupDate.objects.order_by('?').first()
+        pickup2 = PickupDate.objects.order_by('?').first()
+        pickup3 = PickupDate.objects.order_by('?').first()
+        pickup4 = PickupDate.objects.order_by('?').first()
+
+        localtime = timezone.localtime()
+
+        return prepare_pickup_notification_email(
+            user=user,
+            group=user.groups.first(),
+            tonight_date=localtime,
+            tomorrow_date=localtime + relativedelta(days=1),
+            tonight_user=[pickup1, pickup2],
+            tonight_empty=[pickup3, pickup4],
+            tonight_not_full=[pickup4],
+            tomorrow_user=[pickup2],
+            tomorrow_empty=[pickup3],
+            tomorrow_not_full=[pickup4],
+        )
+
     def send_new_verification_code(self):
         return prepare_send_new_verification_code_email(
             user=random_user(),
             verification_code=VerificationCode.objects.first()
+        )
+
+    def user_inactive_in_group(self):
+        return prepare_user_inactive_in_group_email(
+            user=random_user(),
+            group=random_group()
         )
 
 
@@ -98,7 +139,7 @@ def list_templates(request):
         for directory, dirnames, filenames in os.walk(directory):
             relative_dir = directory[len(foodsaving_basedir) + 1:]
             for filename in filenames:
-                if re.match(r'.*\.jinja2$', filename) and not re.match(r'.*\.slack\.jinja2$', filename):
+                if re.match(r'.*\.jinja2$', filename):
                     path = os.path.join(relative_dir, filename)
 
                     # strip out anything past the first dot for the name

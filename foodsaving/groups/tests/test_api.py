@@ -8,7 +8,7 @@ from rest_framework.test import APITestCase
 from foodsaving.groups import roles
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
-    GroupNotificationType
+    GroupNotificationType, get_default_notification_types
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory
@@ -239,7 +239,7 @@ class TestGroupsAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class TestGroupMembershipsAPI(APITestCase):
+class TestGroupMembershipRolesAPI(APITestCase):
     def setUp(self):
         self.admin = UserFactory()  # has membership management rights
         self.member = UserFactory()
@@ -314,6 +314,27 @@ class TestGroupMembershipsAPI(APITestCase):
         self.assertNotIn(role, self.membership.roles)
 
 
+class TestGroupMembershipsAPI(APITestCase):
+    def setUp(self):
+        self.active_user = UserFactory()
+        self.inactive_user = UserFactory()
+        self.group = GroupFactory(members=[self.active_user, self.inactive_user])
+        self.active_membership = self.group.groupmembership_set.get(user=self.active_user)
+        self.inactive_membership = self.group.groupmembership_set.get(user=self.inactive_user)
+        self.inactive_membership.inactive_at = timezone.now()
+        self.inactive_membership.save()
+
+    def test_shows_user_active(self):
+        self.client.force_login(user=self.active_user)
+        response = self.client.get('/api/groups/{}/'.format(self.group.id))
+        self.assertEqual(response.data['memberships'][self.active_user.id]['active'], True)
+
+    def test_shows_user_inactive(self):
+        self.client.force_login(user=self.active_user)
+        response = self.client.get('/api/groups/{}/'.format(self.group.id))
+        self.assertEqual(response.data['memberships'][self.inactive_user.id]['active'], False)
+
+
 class TestGroupMemberLastSeenAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
@@ -328,6 +349,7 @@ class TestGroupMemberLastSeenAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.membership.refresh_from_db()
         self.assertGreater(self.membership.lastseen_at, before)
+        self.assertEqual(self.membership.inactive_at, None)
 
 
 class TestDefaultGroupMembership(APITestCase):
@@ -373,7 +395,6 @@ class TestGroupNotificationTypes(APITestCase):
         self.membership.notification_types = []
         self.membership.save()
 
-        self.assertEqual(self.membership.notification_types, [])
         response = self.client.put(
             '/api/groups/{}/notification_types/{}/'.format(self.group.id, GroupNotificationType.WEEKLY_SUMMARY))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -382,7 +403,8 @@ class TestGroupNotificationTypes(APITestCase):
 
     def test_remove_notification_type(self):
         self.client.force_login(user=self.user)
-        self.assertEqual(self.membership.notification_types, [GroupNotificationType.WEEKLY_SUMMARY])
+        self.membership.notification_types = [GroupNotificationType.WEEKLY_SUMMARY]
+        self.membership.save()
         response = self.client.delete(
             '/api/groups/{}/notification_types/{}/'.format(self.group.id, GroupNotificationType.WEEKLY_SUMMARY))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -393,7 +415,7 @@ class TestGroupNotificationTypes(APITestCase):
         self.client.force_login(user=self.user)
         response = self.client.get(
             '/api/groups/{}/'.format(self.group.id))
-        self.assertEqual(response.data['notification_types'], [GroupNotificationType.WEEKLY_SUMMARY])
+        self.assertEqual(response.data['notification_types'], get_default_notification_types())
 
 
 class TestAgreementsAPI(APITestCase):

@@ -26,6 +26,13 @@
         padding: 0;
     }
 
+    h3 {
+        color: #888888;
+        font-size: 18px;
+        margin: 0 0 10px 0;
+        padding: 0;
+    }
+
     ul {
       padding-left: 25px;
     }
@@ -34,10 +41,6 @@
         text-transform: uppercase;
         font-weight: 700;
         color: #4a982e;
-    }
-
-    .message-content {
-        font-size: 13px;
     }
 
     .footer-link {
@@ -65,5 +68,8 @@
     }
     .message-content h3 {
         font-size: 1.1em;
+    }
+    .message-content p {
+      margin: 0 0 10px 0;
     }
 </mj-style>

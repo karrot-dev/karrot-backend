@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='groupmembership',
             name='lastseen_at',
-            field=models.DateTimeField(default=django.utils.timezone.now),
+            field=models.DateTimeField(null=True),
         ),
     ]
