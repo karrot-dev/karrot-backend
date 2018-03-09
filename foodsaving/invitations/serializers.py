@@ -3,7 +3,7 @@ from django.utils.translation import ugettext as _
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from foodsaving.groups.models import GroupMembership, Group
+from foodsaving.groups.models import Group
 from foodsaving.groups.roles import GROUP_APPROVED_MEMBER
 from foodsaving.invitations.models import Invitation
 

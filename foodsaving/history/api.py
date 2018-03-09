@@ -3,7 +3,7 @@ from rest_framework import viewsets
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
 
-from foodsaving.groups.models import GroupMembership, Group
+from foodsaving.groups.models import Group
 from foodsaving.groups.roles import GROUP_APPROVED_MEMBER
 from foodsaving.history.filters import HistoryFilter
 from foodsaving.history.models import History
