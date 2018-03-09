@@ -60,7 +60,7 @@ class StoreSerializer(serializers.ModelSerializer):
         return store
 
     def validate_group(self, group):
-        if not group.is_member(self.context['request'].user):
+        if not group.is_approved_member(self.context['request'].user):
             raise serializers.ValidationError(_('You are not a member of this group.'))
         return group
 

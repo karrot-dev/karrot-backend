@@ -70,7 +70,7 @@ class AuthUserSerializer(serializers.ModelSerializer):
 
     def validate_current_group(self, group):
         user = self.context['request'].user
-        if group and not group.is_member(user):
+        if group and not group.is_approved_member(user):
             raise serializers.ValidationError()
         return group
 

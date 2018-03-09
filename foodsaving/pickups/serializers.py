@@ -167,7 +167,7 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
         return series
 
     def validate_store(self, store):
-        if not store.group.is_member(self.context['request'].user):
+        if not store.group.is_approved_member(self.context['request'].user):
             raise serializers.ValidationError(_('You are not member of the store\'s group.'))
         return store
 
@@ -206,7 +206,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
     def validate_about(self, about):
         user = self.context['request'].user
         group = about.store.group
-        if not group.is_member(user):
+        if not group.is_approved_member(user):
             raise serializers.ValidationError(_('You are not member of the store\'s group.'))
         if about.is_upcoming():
             raise serializers.ValidationError(_('The pickup is not done yet'))

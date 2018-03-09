@@ -68,13 +68,19 @@ def group_member_added(sender, instance, created, **kwargs):
 
 @receiver(pre_delete, sender=GroupMembership)
 def group_member_removed(sender, instance, **kwargs):
-    """When a user is removed from a conversation we will notify them."""
-    group = instance.group
-    user = instance.user
+    membership = instance
+    group = membership.group
+    user = membership.user
     conversation = Conversation.objects.get_for_target(group)
     if conversation:
         conversation.leave(user)
     stats.group_left(group)
+    if roles.GROUP_APPROVED_MEMBER in membership.roles:
+        History.objects.create(
+            typus=HistoryTypus.GROUP_LEAVE,
+            group=group,
+            users=[user, ]
+        )
 
 
 @receiver(roles_changed, sender=GroupMembership)

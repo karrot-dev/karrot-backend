@@ -9,8 +9,8 @@ from timezone_field import TimeZoneField
 
 from foodsaving.base.base_models import BaseModel, LocationModel
 from foodsaving.conversations.models import ConversationMixin
-from foodsaving.history.models import History, HistoryTypus
 from foodsaving.groups.roles import GROUP_APPROVED_MEMBER
+from foodsaving.history.models import History, HistoryTypus
 
 
 class GroupStatus(Enum):
@@ -74,16 +74,10 @@ class Group(BaseModel, LocationModel, ConversationMixin):
             )
 
     def remove_member(self, user):
-        if self.is_member(user):
-            History.objects.create(
-                typus=HistoryTypus.GROUP_LEAVE,
-                group=self,
-                users=[user, ]
-            )
         GroupMembership.objects.filter(group=self, user=user).delete()
 
-    def is_member(self, user):
-        return self.is_member_with_role(user, [GROUP_APPROVED_MEMBER])
+    def is_approved_member(self, user):
+        return self.is_member_with_role(user, GROUP_APPROVED_MEMBER)
 
     def is_member_with_role(self, user, role_name):
         return not user.is_anonymous and GroupMembership.objects.filter(group=self, user=user,

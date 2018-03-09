@@ -28,7 +28,7 @@ class IsNotMember(BasePermission):
     message = _('You are already a member.')
 
     def has_object_permission(self, request, view, obj):
-        return not obj.is_member(request.user)
+        return not obj.is_approved_member(request.user)
 
 
 class CanUpdateMemberships(BasePermission):

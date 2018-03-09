@@ -367,7 +367,7 @@ class TestDefaultGroupMembership(APITestCase):
         role = roles.GROUP_MEMBERSHIP_MANAGER
         self.assertIn(role, membership.roles)
         # creator is also seen as a member
-        self.assertTrue(GroupModel.objects.get(id=group_id).is_member(self.creator))
+        self.assertTrue(GroupModel.objects.get(id=group_id).is_approved_member(self.creator))
 
         # can't drop management rights as only admin
         self.client.delete('/api/groups/{}/users/{}/roles/{}/'.format(group_id, self.creator.id, role))

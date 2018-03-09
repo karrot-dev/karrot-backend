@@ -1,6 +1,4 @@
 from contextlib import contextmanager
-# Mostly based on this nice persons article:
-#   https://www.caktusgroup.com/blog/2016/02/02/writing-unit-tests-django-migrations/
 from unittest.mock import Mock
 
 from channels.test import WSClient
@@ -10,6 +8,8 @@ from django.db.migrations.executor import MigrationExecutor
 from django.test import TestCase
 
 
+# Mostly based on this nice persons article:
+#   https://www.caktusgroup.com/blog/2016/02/02/writing-unit-tests-django-migrations/
 class TestMigrations(TestCase):
     @property
     def app(self):
