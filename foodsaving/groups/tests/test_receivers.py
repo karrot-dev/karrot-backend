@@ -34,7 +34,7 @@ class TestConversationReceiver(TestCase):
     def test_not_adds_participant_not_approved(self):
         group = GroupFactory()
         user = UserFactory()
-        group.add_applicant(user)
+        group.add_member(user, roles=[])
         conversation = self.get_conversation_for_group(group)
         self.assertNotIn(user, conversation.participants.all(), 'Conversation did have not approved user in')
 

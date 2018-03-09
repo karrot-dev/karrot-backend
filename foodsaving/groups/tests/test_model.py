@@ -29,7 +29,7 @@ class TestGroupModel(TestCase):
         group = GroupFactory(members=user)
         self.assertEquals(group.approved_member_count(), 2)
         # Adding a non-approved user should not increment active count
-        group.add_applicant(UserFactory())
+        group.add_member(UserFactory(), roles=[])
         self.assertEquals(group.approved_member_count(), 2)
         # Adding an approved user should not increment active count
         group.add_member(UserFactory())

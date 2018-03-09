@@ -48,13 +48,11 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     def __str__(self):
         return 'Group {}'.format(self.name)
 
-    def add_applicant(self, user, history_payload=None):
-        GroupMembership.objects.create(group=self, user=user)
-        self.create = History.objects.create(typus=HistoryTypus.GROUP_APPLY, group=self, users=[user, ], )
-
-    def add_member(self, user, history_payload=None):
+    def add_member(self, user, history_payload=None, roles=None):
         """Adds a "full" member to the group, e.g. grants the status of a normal member."""
-        GroupMembership.objects.create(group=self, user=user, roles=[GROUP_APPROVED_MEMBER])
+        if roles is None:
+            roles = [GROUP_APPROVED_MEMBER]
+        GroupMembership.objects.create(group=self, user=user, roles=roles)
         History.objects.create(
             typus=HistoryTypus.GROUP_JOIN,
             group=self,

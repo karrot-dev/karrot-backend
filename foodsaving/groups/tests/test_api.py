@@ -20,8 +20,8 @@ class TestGroupsInfoAPI(APITestCase):
         self.user = UserFactory()
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member, ])
-        self.applicant = UserFactory()
-        self.group.add_applicant(self.applicant)
+        self.not_approved_member = UserFactory()
+        self.group.add_member(self.applicant, roles=[])
         self.url = '/api/groups-info/'
 
     def test_list_groups_as_anon(self):
@@ -75,7 +75,7 @@ class TestGroupsAPI(APITestCase):
         self.member = UserFactory()
         self.applicant = UserFactory()
         self.group = GroupFactory(members=[self.member, ])
-        self.group.add_applicant(self.applicant)
+        self.group.add_member(self.applicant, roles=[])
         self.group_with_password = GroupFactory(password='abc')
         self.join_password_url = '/api/groups/{}/join/'.format(self.group_with_password.id)
         self.url = '/api/groups/'
