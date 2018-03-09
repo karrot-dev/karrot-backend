@@ -3,7 +3,7 @@ from enum import Enum
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import TextField, DateTimeField, Manager
+from django.db.models import TextField, DateTimeField, Manager, QuerySet
 from django.utils import timezone
 from timezone_field import TimeZoneField
 
@@ -19,7 +19,17 @@ class GroupStatus(Enum):
     PLAYGROUND = 'playground'
 
 
+class GroupManager(Manager):
+    def with_member_with_role(self, user, role):
+        return self.filter(
+            groupmembership__roles__contains=[role],
+            groupmembership__user=user,
+        )
+
+
 class Group(BaseModel, LocationModel, ConversationMixin):
+    objects = GroupManager()
+
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH, unique=True)
     description = models.TextField(blank=True)
     members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='groups', through='GroupMembership')
@@ -40,10 +50,10 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     )
 
     def approved_member_count(self):
-        return self.members_with_all_roles([GROUP_APPROVED_MEMBER]).count()
+        return self.members_with_role(GROUP_APPROVED_MEMBER).count()
 
-    def members_with_all_roles(self, roles):
-        return self.members.filter(groupmembership__roles__contains=roles)
+    def members_with_role(self, role):
+        return self.members.filter(groupmembership__roles__contains=[role])
 
     def __str__(self):
         return 'Group {}'.format(self.name)
@@ -111,14 +121,16 @@ def get_default_notification_types():
     ]
 
 
-class GroupMembershipManager(Manager):
-
+class GroupMembershipQuerySet(QuerySet):
     def with_notification_type(self, type):
         return self.filter(notification_types__contains=[type])
 
+    def with_role(self, role):
+        return self.filter(roles__contains=[role])
+
 
 class GroupMembership(BaseModel):
-    objects = GroupMembershipManager()
+    objects = GroupMembershipQuerySet.as_manager()
 
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

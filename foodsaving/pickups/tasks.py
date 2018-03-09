@@ -5,6 +5,7 @@ from huey import crontab
 from huey.contrib.djhuey import db_periodic_task
 
 from foodsaving.groups.models import Group, GroupMembership, GroupNotificationType
+from foodsaving.groups.roles import GROUP_APPROVED_MEMBER
 from foodsaving.pickups import stats
 from foodsaving.pickups.emails import prepare_pickup_notification_email
 from foodsaving.pickups.models import PickupDate
@@ -70,13 +71,12 @@ def fetch_pickup_notification_data_for_group(group):
 
     users = group.members.filter(
         groupmembership__in=GroupMembership.objects.with_notification_type(
-            GroupNotificationType.DAILY_PICKUP_NOTIFICATION),
+            GroupNotificationType.DAILY_PICKUP_NOTIFICATION).with_role(GROUP_APPROVED_MEMBER)
     ).exclude(
         groupmembership__user__in=User.objects.unverified_or_ignored(),
     )
 
     for user in users:
-
         user_pickups = PickupDate.objects.filter(
             store__group=group,
             collectors__in=[user],

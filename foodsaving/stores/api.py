@@ -4,6 +4,8 @@ from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
+from foodsaving.groups.models import Group
+from foodsaving.groups.roles import GROUP_APPROVED_MEMBER
 from foodsaving.stores.models import Store as StoreModel
 from foodsaving.stores.serializers import StoreSerializer
 from foodsaving.utils.mixins import PartialUpdateModelMixin
@@ -31,4 +33,6 @@ class StoreViewSet(
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return self.queryset.filter(group__members=self.request.user)
+        return self.queryset.filter(
+            group__in=Group.objects.with_member_with_role(self.request.user, GROUP_APPROVED_MEMBER)
+        )

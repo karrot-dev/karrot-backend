@@ -3,7 +3,7 @@ from rest_framework import viewsets
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
 
-from foodsaving.groups.models import GroupMembership
+from foodsaving.groups.models import GroupMembership, Group
 from foodsaving.groups.roles import GROUP_APPROVED_MEMBER
 from foodsaving.history.filters import HistoryFilter
 from foodsaving.history.models import History
@@ -29,8 +29,5 @@ class HistoryViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         return self.queryset.filter(
-            group__in=GroupMembership.objects.filter(
-                user=self.request.user,
-                roles__contains=[GROUP_APPROVED_MEMBER]
-            ).values_list('group', flat=True)
+            group__in=Group.objects.with_member_with_role(self.request.user, GROUP_APPROVED_MEMBER)
         )

@@ -7,7 +7,7 @@ from foodsaving.groups.models import Group, GroupMembership
 from foodsaving.groups.roles import GROUP_APPROVED_MEMBER
 from foodsaving.history.models import History, HistoryTypus
 
-roles_changed = Signal(providing_args=['added_roles', 'removed_roles', 'created'])
+roles_changed = Signal(providing_args=['added_roles', 'removed_roles'])
 
 
 @receiver(post_save, sender=Group)
@@ -16,7 +16,7 @@ def group_created(sender, instance, created, **kwargs):
     if created:
         group = instance
         conversation = Conversation.objects.get_or_create_for_target(group)
-        conversation.sync_users(group.members_with_all_roles([GROUP_APPROVED_MEMBER]))
+        conversation.sync_users(group.members_with_role(GROUP_APPROVED_MEMBER))
 
 
 @receiver(pre_delete, sender=Group)
