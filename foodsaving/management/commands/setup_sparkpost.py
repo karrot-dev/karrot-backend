@@ -7,22 +7,29 @@ from rest_framework import status
 
 class Command(BaseCommand):
 
+    def add_arguments(self, parser):
+        parser.add_argument('--quiet', action='store_true', dest='quiet')
+
     errors = []
 
     def log_response(self, response):
-        try:
-            json = response.json()
-        except:  # noqa
-            json = ''
-        print(response.request.method, response.request.url)
-        print(response.status_code, json)
-        print()
+        if not self.quiet:
+            try:
+                json = response.json()
+            except:  # noqa
+                json = ''
+            print(response.request.method, response.request.url)
+            print(response.status_code, json)
+            print()
 
     def setup_event_webhook(self, s):
         response = s.get('https://api.sparkpost.com/api/v1/webhooks')
         self.log_response(response)
         if not status.is_success(response.status_code):
-            self.errors.append('Failed to get existing event webhooks')
+            self.errors.append(
+                'Failed to get existing event webhooks.' +
+                'Check if your subaccount API key has permission to Read/Write Event Webhooks.'
+            )
 
         webhooks = response.json()
         event_webhook_data = {
@@ -48,6 +55,8 @@ class Command(BaseCommand):
             if not status.is_success(response.status_code):
                 self.errors.append('Failed to create new event webhook')
         else:
+            # TODO fix updating, if fails quite often
+            return
             response = s.put(
                 'https://api.sparkpost.com/api/v1/webhooks/' + existing_event_webhook['id'],
                 json=event_webhook_data
@@ -66,7 +75,10 @@ class Command(BaseCommand):
         response = s.get('https://api.sparkpost.com/api/v1/relay-webhooks')
         self.log_response(response)
         if not status.is_success(response.status_code):
-            self.errors.append('Failed to get existing relay webhooks')
+            self.errors.append(
+                'Failed to get existing relay webhooks.' +
+                'Check if your main account API key has permission to Read/Write Relay Webhooks.'
+            )
 
         relay_webhooks = response.json()
         existing_relay = None
@@ -101,6 +113,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         s = requests.Session()
+        self.quiet = options['quiet']
 
         # use subaccounts for sending emails and receiving email events
         s.headers.update({'Authorization': settings.ANYMAIL['SPARKPOST_API_KEY']})

@@ -1,7 +1,9 @@
+from enum import Enum
+
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import TextField, DateTimeField
+from django.db.models import TextField, DateTimeField, Manager
 from django.utils import timezone
 from timezone_field import TimeZoneField
 
@@ -10,13 +12,23 @@ from foodsaving.conversations.models import ConversationMixin
 from foodsaving.history.models import History, HistoryTypus
 
 
+class GroupStatus(Enum):
+    ACTIVE = 'active'
+    INACTIVE = 'inactive'
+    PLAYGROUND = 'playground'
+
+
 class Group(BaseModel, LocationModel, ConversationMixin):
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH, unique=True)
     description = models.TextField(blank=True)
     members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='groups', through='GroupMembership')
     password = models.CharField(max_length=255, blank=True)
     public_description = models.TextField(blank=True)
-    active = models.BooleanField(default=True)
+    status = models.CharField(
+        default=GroupStatus.ACTIVE.value,
+        choices=[(status.value, status.value) for status in GroupStatus],
+        max_length=100,
+    )
     sent_summary_up_to = DateTimeField(null=True)
     timezone = TimeZoneField(default='Europe/Berlin', null=True, blank=True)
     active_agreement = models.OneToOneField(
@@ -60,9 +72,6 @@ class Group(BaseModel, LocationModel, ConversationMixin):
             'invited_via': 'e-mail'
         })
 
-    def members_with_notification_type(self, type):
-        return self.members.filter(groupmembership__notification_types__contains=[type])
-
 
 class Agreement(BaseModel):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
@@ -78,17 +87,30 @@ class UserAgreement(BaseModel):
 
 class GroupNotificationType(object):
     WEEKLY_SUMMARY = 'weekly_summary'
+    DAILY_PICKUP_NOTIFICATION = 'daily_pickup_notification'
 
 
 def get_default_notification_types():
-    return [GroupNotificationType.WEEKLY_SUMMARY]
+    return [
+        GroupNotificationType.WEEKLY_SUMMARY,
+        GroupNotificationType.DAILY_PICKUP_NOTIFICATION,
+    ]
+
+
+class GroupMembershipManager(Manager):
+
+    def with_notification_type(self, type):
+        return self.filter(notification_types__contains=[type])
 
 
 class GroupMembership(BaseModel):
+    objects = GroupMembershipManager()
+
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     roles = ArrayField(TextField(), default=list)
     lastseen_at = DateTimeField(default=timezone.now)
+    inactive_at = DateTimeField(null=True)
     notification_types = ArrayField(TextField(), default=get_default_notification_types)
 
     class Meta:

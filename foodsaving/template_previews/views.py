@@ -8,11 +8,14 @@ from django.template.loader import render_to_string
 from django.template.utils import get_app_template_dirs
 from django.utils import timezone
 
-import foodsaving.groups.emails
 from config import settings
 from foodsaving.conversations.models import ConversationMessage
+from foodsaving.groups.emails import prepare_user_inactive_in_group_email, prepare_group_summary_emails, \
+    prepare_group_summary_data
 from foodsaving.groups.models import Group
 from foodsaving.invitations.models import Invitation
+from foodsaving.pickups.emails import prepare_pickup_notification_email
+from foodsaving.pickups.models import PickupDate
 from foodsaving.userauth.models import VerificationCode
 from foodsaving.users.models import User
 from foodsaving.utils import email_utils
@@ -33,8 +36,6 @@ def random_message():
 
 
 class Handlers:
-    # TODO: Add remaining emails
-
     def accountdelete_request(self):
         return email_utils.prepare_accountdelete_request_email(user=random_user())
 
@@ -62,7 +63,8 @@ class Handlers:
         from_date = timezone.now() - relativedelta(days=7)
         to_date = from_date + relativedelta(days=7)
 
-        summary_emails = foodsaving.groups.emails.prepare_group_summary_emails(group, from_date, to_date)
+        context = prepare_group_summary_data(group, from_date, to_date)
+        summary_emails = prepare_group_summary_emails(group, context)
         if len(summary_emails) is 0:
             raise Exception(
                 'No emails were generated, you need at least one verified user in your db, and some activity data...')
@@ -79,6 +81,38 @@ class Handlers:
 
     def passwordchange(self):
         return email_utils.prepare_passwordchange_email(user=random_user())
+
+    def passwordreset_success(self):
+        return email_utils.prepare_passwordreset_success_email(user=random_user())
+
+    def pickup_notification(self):
+        user = random_user()
+
+        pickup1 = PickupDate.objects.order_by('?').first()
+        pickup2 = PickupDate.objects.order_by('?').first()
+        pickup3 = PickupDate.objects.order_by('?').first()
+        pickup4 = PickupDate.objects.order_by('?').first()
+
+        localtime = timezone.localtime()
+
+        return prepare_pickup_notification_email(
+            user=user,
+            group=user.groups.first(),
+            tonight_date=localtime,
+            tomorrow_date=localtime + relativedelta(days=1),
+            tonight_user=[pickup1, pickup2],
+            tonight_empty=[pickup3, pickup4],
+            tonight_not_full=[pickup4],
+            tomorrow_user=[pickup2],
+            tomorrow_empty=[pickup3],
+            tomorrow_not_full=[pickup4],
+        )
+
+    def user_inactive_in_group(self):
+        return prepare_user_inactive_in_group_email(
+            user=random_user(),
+            group=random_group()
+        )
 
 
 handlers = Handlers()
