@@ -16,7 +16,6 @@ from foodsaving.groups.models import Group
 from foodsaving.invitations.models import Invitation
 from foodsaving.pickups.emails import prepare_pickup_notification_email
 from foodsaving.pickups.models import PickupDate
-from foodsaving.userauth.models import VerificationCode
 from foodsaving.users.models import User
 from foodsaving.utils import email_utils
 
@@ -35,9 +34,14 @@ def random_message():
     return ConversationMessage.objects.order_by('?').first()
 
 
+def pseudo_verification_code():
+    return '0123456789012345678901234567890123456789'
+
+
 class Handlers:
     def accountdelete_request(self):
-        return email_utils.prepare_accountdelete_request_email(user=random_user())
+        return email_utils.prepare_accountdelete_request_email(user=random_user(),
+                                                               verification_code=pseudo_verification_code())
 
     def accountdelete_success(self):
         return email_utils.prepare_accountdelete_success_email(user=random_user())
@@ -73,17 +77,15 @@ class Handlers:
     def mailverification(self):
         return email_utils.prepare_mailverification_email(
             user=random_user(),
-            verification_code=VerificationCode.objects.first()
+            verification_code=pseudo_verification_code()
         )
 
     def passwordreset_request(self):
-        return email_utils.prepare_passwordreset_request_email(user=random_user())
+        return email_utils.prepare_passwordreset_request_email(user=random_user(),
+                                                               verification_code=pseudo_verification_code())
 
     def passwordchange(self):
         return email_utils.prepare_passwordchange_email(user=random_user())
-
-    def passwordreset_success(self):
-        return email_utils.prepare_passwordreset_success_email(user=random_user())
 
     def pickup_notification(self):
         user = random_user()
