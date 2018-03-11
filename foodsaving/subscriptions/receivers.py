@@ -1,7 +1,10 @@
 import json
+import sys
+from asyncio import get_event_loop
 from collections import namedtuple
 
-from channels import Channel
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.conf import settings
 from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete, m2m_changed
@@ -33,13 +36,27 @@ class AbsoluteURIBuildingRequest:
         return settings.HOSTNAME + path
 
 
+# TODO: remove this! I just don't know how to decide whether to use the event loop or not right now
+TESTING = sys.argv[1:2] == ['test']
+
+channel_layer = get_channel_layer()
+channel_layer_send_sync = async_to_sync(channel_layer.send)
+event_loop = get_event_loop()
+
+
 def send_in_channel(channel, topic, payload):
-    Channel(channel).send({
+    message = {
+        'type': 'message.send',
         'text': json.dumps({
             'topic': topic,
-            'payload': payload
-        })
-    })
+            'payload': payload,
+        }),
+    }
+
+    if TESTING:
+        event_loop.create_task(channel_layer.send(channel, message))
+    else:
+        channel_layer_send_sync(channel, message)
 
 
 @receiver(post_save, sender=ConversationMessage)
@@ -60,10 +77,14 @@ def send_messages(sender, instance, **kwargs):
 
         send_in_channel(subscription.reply_channel, topic, payload)
 
-    tokens = [item.token for item in
-              PushSubscription.objects.filter(
-                  Q(user__in=conversation.participants.all()) & ~Q(user__in=push_exclude_users) & ~Q(
-                      user=message.author))]
+    tokens = [
+        item.token for item in
+        PushSubscription.objects.filter(
+          Q(user__in=conversation.participants.all()) &
+          ~Q(user__in=push_exclude_users) &
+          ~Q(user=message.author)
+        )
+    ]
 
     if len(tokens) > 0:
 
@@ -86,9 +107,11 @@ def send_messages(sender, instance, **kwargs):
     # so they will receive the `send_conversation_update` message
     topic = 'conversations:conversation'
 
-    for subscription in ChannelSubscription.objects.recent()\
-            .filter(user__in=conversation.participants.all())\
-            .exclude(user=message.author):
+    for subscription in ChannelSubscription.objects.recent().filter(
+        user__in=conversation.participants.all()
+    ).exclude(
+        user=message.author
+    ):
         payload = ConversationSerializer(conversation, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
@@ -127,6 +150,7 @@ def remove_participant(sender, instance, **kwargs):
 def send_group_updates(sender, instance, **kwargs):
     group = instance
     detail_payload = GroupDetailSerializer(group).data
+
     for subscription in ChannelSubscription.objects.recent().filter(user__in=group.members.all()):
         send_in_channel(subscription.reply_channel, topic='groups:group_detail', payload=detail_payload)
 
@@ -248,4 +272,3 @@ def send_history_updates(sender, instance, **kwargs):
     payload = HistorySerializer(history).data
     for subscription in ChannelSubscription.objects.recent().filter(user__in=history.group.members.all()):
         send_in_channel(subscription.reply_channel, topic='history:history', payload=payload)
-

@@ -9,3 +9,4 @@ pytest-xdist
 pytest-cov
 freezegun
 logging_tree
+asynctest
