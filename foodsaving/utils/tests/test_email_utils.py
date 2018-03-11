@@ -1,7 +1,6 @@
-from unittest import TestCase
-
 import pytz
 from django.utils import timezone
+from django.test import TestCase
 
 from config import settings
 from foodsaving.groups.factories import GroupFactory
