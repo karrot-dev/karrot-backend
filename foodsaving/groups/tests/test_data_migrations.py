@@ -2,10 +2,30 @@ import logging
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
-
 from foodsaving.history.models import HistoryTypus
-from foodsaving.tests.utils import TestMigrations
 from foodsaving.utils.tests.fake import faker
+from foodsaving.groups.roles import GROUP_APPROVED_MEMBER
+from foodsaving.tests.utils import TestMigrations
+
+
+class TestMembershipsGetApprovedRole(TestMigrations):
+    migrate_from = [('groups', '0027_auto_20180309_0936'),
+                    ('users', '0020_user_mobile_number')]
+    migrate_to = [('groups', '0028_groupmembership_approve_all'),
+                  ]
+
+    def setUpBeforeMigration(self, apps):
+        User = apps.get_model('users', 'User')
+        Group = apps.get_model('groups', 'Group')
+        GroupMembership = apps.get_model('groups', 'GroupMembership')
+
+        user = User.objects.create()
+        group = Group.objects.create()
+        GroupMembership.objects.create(user=user, group=group)
+
+    def test_extract_pickups_from_stores_app(self):
+        GroupMembership = self.apps.get_model('groups', 'GroupMembership')
+        self.assertIn(GROUP_APPROVED_MEMBER, GroupMembership.objects.first().roles)
 
 
 class TestLastseenAtDataMigration(TestMigrations):

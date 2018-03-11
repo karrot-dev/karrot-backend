@@ -6,6 +6,8 @@ from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
+from foodsaving.groups.models import Group
+from foodsaving.groups.roles import GROUP_APPROVED_MEMBER
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.pickups.filters import (
     PickupDatesFilter, PickupDateSeriesFilter, FeedbackFilter
@@ -55,7 +57,9 @@ class FeedbackViewSet(
     pagination_class = FeedbackPagination
 
     def get_queryset(self):
-        return self.queryset.filter(about__store__group__members=self.request.user)
+        return self.queryset.filter(
+            about__store__group__in=Group.objects.with_member_with_role(self.request.user, GROUP_APPROVED_MEMBER)
+        )
 
     def get_permissions(self):
         if self.action == 'partial_update':
@@ -72,7 +76,6 @@ class PickupDateSeriesViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
-
     serializer_class = PickupDateSeriesSerializer
     queryset = PickupDateSeriesModel.objects
     filter_backends = (DjangoFilterBackend,)
@@ -80,7 +83,9 @@ class PickupDateSeriesViewSet(
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return self.queryset.filter(store__group__members=self.request.user)
+        return self.queryset.filter(
+            store__group__in=Group.objects.with_member_with_role(self.request.user, GROUP_APPROVED_MEMBER)
+        )
 
     def perform_destroy(self, series):
         History.objects.create(
@@ -133,7 +138,10 @@ class PickupDateViewSet(
         return super().get_permissions()
 
     def get_queryset(self):
-        return self.queryset.filter(store__group__members=self.request.user, store__status='active')
+        return self.queryset.filter(
+            store__group__in=Group.objects.with_member_with_role(self.request.user, GROUP_APPROVED_MEMBER),
+            store__status='active',
+        )
 
     def perform_destroy(self, pickup):
         # set deleted flag to make the pickup date invisible

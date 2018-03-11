@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import GenericViewSet
 
+from foodsaving.groups.models import Group
+from foodsaving.groups.roles import GROUP_APPROVED_MEMBER
 from foodsaving.invitations.models import Invitation
 from foodsaving.invitations.serializers import InvitationSerializer, InvitationAcceptSerializer
 
@@ -17,7 +19,7 @@ class InvitesPerDayThrottle(UserRateThrottle):
 
 class NotInGroup(BasePermission):
     def has_object_permission(self, request, view, obj):
-        return not obj.group.is_member(request.user)
+        return not obj.group.is_approved_member(request.user)
 
 
 class InvitationsViewSet(
@@ -32,24 +34,26 @@ class InvitationsViewSet(
     queryset = Invitation.objects
     serializer_class = InvitationSerializer
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('group', )
-    permission_classes = (IsAuthenticated, )
+    filter_fields = ('group',)
+    permission_classes = (IsAuthenticated,)
     throttle_classes = ()
 
     def get_queryset(self):
-        users_groups = self.request.user.groups.values('id')
-        return self.queryset.filter(group__in=users_groups, expires_at__gte=timezone.now())
+        return self.queryset.filter(
+            group__in=Group.objects.with_member_with_role(self.request.user, GROUP_APPROVED_MEMBER),
+            expires_at__gte=timezone.now(),
+        )
 
     def get_throttles(self):
         if self.action == 'create':
-            self.throttle_classes = (InvitesPerDayThrottle, )
+            self.throttle_classes = (InvitesPerDayThrottle,)
         return super().get_throttles()
 
 
 class InvitationAcceptViewSet(GenericViewSet):
     queryset = Invitation.objects
     serializer_class = InvitationAcceptSerializer
-    permission_classes = (IsAuthenticated, NotInGroup, )
+    permission_classes = (IsAuthenticated, NotInGroup,)
     lookup_field = 'token'
 
     def get_queryset(self):
@@ -68,5 +72,3 @@ class InvitationAcceptViewSet(GenericViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
-
-

@@ -1,3 +1,6 @@
+from contextlib import contextmanager
+from unittest.mock import Mock
+
 from channels.test import WSClient
 from django.apps import apps
 from django.db import connection
@@ -54,3 +57,13 @@ class ReceiveAllWSClient(WSClient):
             if response is None:
                 break
             yield response
+
+
+@contextmanager
+def signal_handler_for(signal):
+    handler = Mock()
+    try:
+        signal.connect(handler)
+        yield handler
+    finally:
+        signal.disconnect(handler)
