@@ -49,9 +49,9 @@ class TestGroupSummaryEmails(APITestCase):
         self.assertEqual(len(emails), 1)
 
         expected_members = self.group.members.filter(
-            groupmembership__in=GroupMembership.objects \
-                .active() \
-                .with_notification_type(GroupNotificationType.WEEKLY_SUMMARY)
+            groupmembership__in=GroupMembership.objects.active().with_notification_type(
+                GroupNotificationType.WEEKLY_SUMMARY
+            )
         ).exclude(
             groupmembership__user__in=get_user_model().objects.unverified_or_ignored()
         )
@@ -84,9 +84,9 @@ class TestGroupSummaryEmails(APITestCase):
             to.extend(email.to)
 
         expected_members = self.group.members.filter(
-            groupmembership__in=GroupMembership.objects \
-                .active() \
-                .with_notification_type(GroupNotificationType.WEEKLY_SUMMARY)
+            groupmembership__in=GroupMembership.objects.active().with_notification_type(
+                GroupNotificationType.WEEKLY_SUMMARY
+            )
         ).exclude(
             groupmembership__user__in=get_user_model().objects.unverified_or_ignored()
         )

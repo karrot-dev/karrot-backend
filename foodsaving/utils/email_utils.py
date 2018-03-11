@@ -3,7 +3,6 @@ from email.utils import formataddr
 import html2text
 from anymail.message import AnymailMessage
 from babel.dates import format_date, format_time
-from django.contrib.contenttypes.models import ContentType
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string, get_template
 from django.utils import translation
