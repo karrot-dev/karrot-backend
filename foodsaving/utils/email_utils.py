@@ -3,10 +3,10 @@ from email.utils import formataddr
 import html2text
 from anymail.message import AnymailMessage
 from babel.dates import format_date, format_time
-from django.contrib.contenttypes.models import ContentType
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string, get_template
 from django.utils import translation
+from django.utils.timezone import get_current_timezone
 from django.utils.translation import to_locale, get_language
 from furl import furl
 from jinja2 import Environment
@@ -18,11 +18,20 @@ from foodsaving.webhooks.api import make_local_part
 
 
 def date_filter(value):
-    return format_date(value, format='full', locale=to_locale(get_language()))
+    return format_date(
+        value.astimezone(get_current_timezone()),
+        format='full',
+        locale=to_locale(get_language()),
+    )
 
 
 def time_filter(value):
-    return format_time(value, format='short', locale=to_locale(get_language()))
+    return format_time(
+        value,
+        format='short',
+        locale=to_locale(get_language()),
+        tzinfo=get_current_timezone(),
+    )
 
 
 def store_url(store):
@@ -63,10 +72,10 @@ def prepare_changemail_email(user):
 
 
 def prepare_conversation_message_notification(user, message):
-    group = message.conversation.target
-    target_type = message.conversation.target_type
-    if group is None or target_type != ContentType.objects.get_for_model(Group):
+    if not isinstance(message.conversation.target, Group):
         raise Exception('Cannot send message notification if conversation does not belong to a group')
+
+    group = message.conversation.target
 
     reply_to_name = group.name
     conversation_url = '{hostname}/#/group/{group_id}/wall'.format(
