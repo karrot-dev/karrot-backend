@@ -1,10 +1,13 @@
+import asyncio
 import json
 import os
 import pathlib
 from shutil import copyfile
 
+import asynctest
+import django
 import requests_mock
-from channels.test import ChannelTestCase, WSClient
+from channels.testing import WebsocketCommunicator
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -18,18 +21,37 @@ from foodsaving.groups.factories import GroupFactory
 from foodsaving.invitations.models import Invitation
 from foodsaving.pickups.factories import PickupDateFactory, PickupDateSeriesFactory, FeedbackFactory
 from foodsaving.stores.factories import StoreFactory
-from foodsaving.subscriptions.models import PushSubscriptionPlatform, PushSubscription, ChannelSubscription
-from foodsaving.tests.utils import ReceiveAllWSClient
+from foodsaving.subscriptions.consumers import WebsocketConsumer
+from foodsaving.subscriptions.models import PushSubscription, PushSubscriptionPlatform, ChannelSubscription
 from foodsaving.users.factories import UserFactory
 from foodsaving.utils.tests.fake import faker
 
 
-class ConversationReceiverTests(ChannelTestCase):
-    def test_receives_messages(self):
+async def receive_responses_sorted_by_topic(communicator, count):
+    responses = []
+    for _ in range(count):
+        responses.append(await communicator.receive_json_from(timeout=5))
+    return sorted(responses, key=lambda r: r['topic'])
+
+
+class ConversationReceiverTests(asynctest.TestCase):
+    use_default_loop = True
+
+    def setUp(self):
+        self.communicator = WebsocketCommunicator(WebsocketConsumer, '/')
+        self.author_communicator = WebsocketCommunicator(WebsocketConsumer, '/')
+
+    async def tearDown(self):
+        await asyncio.wait([
+            self.communicator.disconnect(),
+            self.author_communicator.disconnect(),
+        ])
+
+    async def test_receives_messages(self):
         self.maxDiff = None
-        client = WSClient()
+        communicator = self.communicator
+        author_communicator = self.author_communicator
         user = UserFactory()
-        author_client = WSClient()
         author = UserFactory()
 
         # join a conversation
@@ -38,36 +60,23 @@ class ConversationReceiverTests(ChannelTestCase):
         conversation.join(author)
 
         # login and connect
-        client.force_login(user)
-        client.send_and_consume('websocket.connect', path='/')
-        author_client.force_login(author)
-        author_client.send_and_consume('websocket.connect', path='/')
+
+        communicator.scope['user'] = user
+        await communicator.connect()
+
+        author_communicator.scope['user'] = author
+        await author_communicator.connect()
 
         # add a message to the conversation
         message = ConversationMessage.objects.create(conversation=conversation, content='yay', author=author)
 
-        # hopefully they receive it!
-        response = client.receive(json=True)
-        response['payload']['created_at'] = parse(response['payload']['created_at'])
-        self.assertEqual(response, {
-            'topic': 'conversations:message',
-            'payload': {
-                'id': message.id,
-                'content': message.content,
-                'author': message.author.id,
-                'conversation': conversation.id,
-                'created_at': message.created_at,
-                'received_via': '',
-                'reactions': []
-            }
-        })
+        responses = await receive_responses_sorted_by_topic(communicator, 2)
 
-        # and they should get an updated conversation object
-        response = client.receive(json=True)
-        response['payload']['created_at'] = parse(response['payload']['created_at'])
-        response['payload']['updated_at'] = parse(response['payload']['updated_at'])
-        del response['payload']['participants']
-        self.assertEqual(response, {
+        # they should get an updated conversation object
+        responses[0]['payload']['created_at'] = parse(responses[0]['payload']['created_at'])
+        responses[0]['payload']['updated_at'] = parse(responses[0]['payload']['updated_at'])
+        del responses[0]['payload']['participants']
+        self.assertEqual(responses[0], {
             'topic': 'conversations:conversation',
             'payload': {
                 'id': conversation.id,
@@ -79,10 +88,9 @@ class ConversationReceiverTests(ChannelTestCase):
             }
         })
 
-        # author should get message & updated conversations object too
-        response = author_client.receive(json=True)
-        response['payload']['created_at'] = parse(response['payload']['created_at'])
-        self.assertEqual(response, {
+        # and the message
+        responses[1]['payload']['created_at'] = parse(responses[1]['payload']['created_at'])
+        self.assertEqual(responses[1], {
             'topic': 'conversations:message',
             'payload': {
                 'id': message.id,
@@ -95,14 +103,17 @@ class ConversationReceiverTests(ChannelTestCase):
             }
         })
 
+        # author should get message & updated conversations object too
+
+        author_responses = await receive_responses_sorted_by_topic(author_communicator, 2)
+
         # Author receives more recent `update_at` time,
         # because their `seen_up_to` status is set after sending the message.
         author_participant = conversation.conversationparticipant_set.get(user=author)
-        response = author_client.receive(json=True)
-        response['payload']['created_at'] = parse(response['payload']['created_at'])
-        response['payload']['updated_at'] = parse(response['payload']['updated_at'])
-        del response['payload']['participants']
-        self.assertEqual(response, {
+        author_responses[0]['payload']['created_at'] = parse(author_responses[0]['payload']['created_at'])
+        author_responses[0]['payload']['updated_at'] = parse(author_responses[0]['payload']['updated_at'])
+        del author_responses[0]['payload']['participants']
+        self.assertEqual(author_responses[0], {
             'topic': 'conversations:conversation',
             'payload': {
                 'id': conversation.id,
@@ -114,8 +125,22 @@ class ConversationReceiverTests(ChannelTestCase):
             }
         })
 
-    def tests_receive_message_on_leave(self):
-        client = WSClient()
+        author_responses[1]['payload']['created_at'] = parse(author_responses[1]['payload']['created_at'])
+        self.assertEqual(author_responses[1], {
+            'topic': 'conversations:message',
+            'payload': {
+                'id': message.id,
+                'content': message.content,
+                'author': message.author.id,
+                'conversation': conversation.id,
+                'created_at': message.created_at,
+                'received_via': '',
+                'reactions': []
+            }
+        })
+
+    async def tests_receive_message_on_leave(self):
+        communicator = WebsocketCommunicator(WebsocketConsumer, '/')
         user = UserFactory()
 
         # join a conversation
@@ -123,12 +148,14 @@ class ConversationReceiverTests(ChannelTestCase):
         conversation.join(user)
 
         # login and connect
-        client.force_login(user)
-        client.send_and_consume('websocket.connect', path='/')
+        communicator.scope['user'] = user
+        await communicator.connect()
 
         conversation.leave(user)
 
-        self.assertEqual(client.receive(json=True), {
+        response = await communicator.receive_json_from()
+
+        self.assertEqual(response, {
             'topic': 'conversations:leave',
             'payload': {
                 'id': conversation.id
@@ -136,58 +163,64 @@ class ConversationReceiverTests(ChannelTestCase):
         })
 
 
-class GroupReceiverTests(ChannelTestCase):
+class GroupReceiverTests(asynctest.TestCase):
+    use_default_loop = True
+
     def setUp(self):
-        self.client = WSClient()
+        self.communicator = WebsocketCommunicator(WebsocketConsumer, '/')
         self.member = UserFactory()
         self.user = UserFactory()
         self.group = GroupFactory(members=[self.member])
 
-    def test_receive_group_changes(self):
-        self.client.force_login(self.member)
-        self.client.send_and_consume('websocket.connect', path='/')
+    async def tearDown(self):
+        await self.communicator.disconnect()
+
+    async def test_receive_group_changes(self):
+        self.communicator.scope['user'] = self.member
+        await self.communicator.connect()
 
         name = faker.name()
         self.group.name = name
         self.group.save()
 
-        response = self.client.receive(json=True)
-        self.assertEqual(response['topic'], 'groups:group_detail')
-        self.assertEqual(response['payload']['name'], name)
-        self.assertTrue('description' in response['payload'])
+        responses = await receive_responses_sorted_by_topic(self.communicator, 2)
 
-        response = self.client.receive(json=True)
-        self.assertEqual(response['topic'], 'groups:group_preview')
-        self.assertEqual(response['payload']['name'], name)
-        self.assertTrue('description' not in response['payload'])
+        self.assertEqual(responses[0]['topic'], 'groups:group_detail')
+        self.assertEqual(responses[0]['payload']['name'], name)
+        self.assertTrue('description' in responses[0]['payload'])
 
-        self.assertIsNone(self.client.receive(json=True))
+        self.assertEqual(responses[1]['topic'], 'groups:group_preview')
+        self.assertEqual(responses[1]['payload']['name'], name)
+        self.assertTrue('description' not in responses[1]['payload'])
 
-    def test_receive_group_changes_as_nonmember(self):
-        self.client.force_login(self.user)
-        self.client.send_and_consume('websocket.connect', path='/')
+    async def test_receive_group_changes_as_nonmember(self):
+        self.communicator.scope['user'] = self.user
+        await self.communicator.connect()
 
         name = faker.name()
         self.group.name = name
         self.group.save()
 
-        response = self.client.receive(json=True)
+        response = await self.communicator.receive_json_from()
         self.assertEqual(response['topic'], 'groups:group_preview')
         self.assertEqual(response['payload']['name'], name)
         self.assertTrue('description' not in response['payload'])
 
-        self.assertIsNone(self.client.receive(json=True))
 
+class InvitationReceiverTests(asynctest.TestCase):
+    use_default_loop = True
 
-class InvitationReceiverTests(ChannelTestCase):
     def setUp(self):
-        self.client = ReceiveAllWSClient()
+        self.communicator = WebsocketCommunicator(WebsocketConsumer, '/')
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
 
-    def test_receive_invitation_updates(self):
-        self.client.force_login(self.member)
-        self.client.send_and_consume('websocket.connect', path='/')
+    async def tearDown(self):
+        await self.communicator.disconnect()
+
+    async def test_receive_invitation_updates(self):
+        self.communicator.scope['user'] = self.member
+        await self.communicator.connect()
 
         invitation = Invitation.objects.create(
             email='bla@bla.com',
@@ -195,13 +228,11 @@ class InvitationReceiverTests(ChannelTestCase):
             invited_by=self.member
         )
 
-        response = self.client.receive(json=True)
+        response = await self.communicator.receive_json_from()
         self.assertEqual(response['topic'], 'invitations:invitation')
         self.assertEqual(response['payload']['email'], invitation.email)
 
-        self.assertIsNone(self.client.receive(json=True))
-
-    def test_receive_invitation_accept(self):
+    async def test_receive_invitation_accept(self):
         invitation = Invitation.objects.create(
             email='bla@bla.com',
             group=self.group,
@@ -209,92 +240,107 @@ class InvitationReceiverTests(ChannelTestCase):
         )
         user = UserFactory()
 
-        self.client.force_login(self.member)
-        self.client.send_and_consume('websocket.connect', path='/')
+        self.communicator.scope['user'] = self.member
+        await self.communicator.connect()
 
         id = invitation.id
         invitation.accept(user)
 
-        response = next(r for r in self.client.receive_all(json=True) if r['topic'] == 'invitations:invitation_accept')
-        self.assertEqual(response['payload']['id'], id)
+        responses = await receive_responses_sorted_by_topic(self.communicator, 3)
+
+        self.assertEqual(responses[0]['topic'], 'history:history')
+
+        self.assertEqual(responses[1]['topic'], 'invitations:invitation_accept')
+        self.assertEqual(responses[1]['payload']['id'], id)
+
+        self.assertEqual(responses[2]['topic'], 'users:user')
+        self.assertEqual(responses[2]['payload']['id'], user.id)
 
 
-class StoreReceiverTests(ChannelTestCase):
+class StoreReceiverTests(asynctest.TestCase):
+    use_default_loop = True
+
     def setUp(self):
-        self.client = WSClient()
+        self.communicator = WebsocketCommunicator(WebsocketConsumer, '/')
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
 
-    def test_receive_store_changes(self):
-        self.client.force_login(self.member)
-        self.client.send_and_consume('websocket.connect', path='/')
+    async def tearDown(self):
+        await self.communicator.disconnect()
+
+    async def test_receive_store_changes(self):
+        self.communicator.scope['user'] = self.member
+        await self.communicator.connect()
 
         name = faker.name()
         self.store.name = name
         self.store.save()
 
-        response = self.client.receive(json=True)
+        response = await self.communicator.receive_json_from()
         self.assertEqual(response['topic'], 'stores:store')
         self.assertEqual(response['payload']['name'], name)
 
-        self.assertIsNone(self.client.receive(json=True))
 
+class PickupDateReceiverTests(asynctest.TestCase):
+    use_default_loop = True
 
-class PickupDateReceiverTests(ChannelTestCase):
     def setUp(self):
-        self.client = WSClient()
+        self.communicator = WebsocketCommunicator(WebsocketConsumer, '/')
+
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(store=self.store)
 
-    def test_receive_pickup_changes(self):
-        self.client.force_login(self.member)
-        self.client.send_and_consume('websocket.connect', path='/')
+    async def tearDown(self):
+        await self.communicator.disconnect()
+
+    async def test_receive_pickup_changes(self):
+        self.communicator.scope['user'] = self.member
+        await self.communicator.connect()
 
         # change property
         date = faker.future_datetime(end_date='+30d', tzinfo=timezone.utc)
         self.pickup.date = date
         self.pickup.save()
 
-        response = self.client.receive(json=True)
+        response = await self.communicator.receive_json_from()
         self.assertEqual(response['topic'], 'pickups:pickupdate')
         self.assertEqual(parse(response['payload']['date']), date)
 
         # join
         self.pickup.collectors.add(self.member)
 
-        response = self.client.receive(json=True)
+        response = await self.communicator.receive_json_from()
         self.assertEqual(response['topic'], 'pickups:pickupdate')
         self.assertEqual(response['payload']['collector_ids'], [self.member.id])
 
         # leave
         self.pickup.collectors.remove(self.member)
 
-        response = self.client.receive(json=True)
+        response = await self.communicator.receive_json_from()
         self.assertEqual(response['topic'], 'pickups:pickupdate')
         self.assertEqual(response['payload']['collector_ids'], [])
 
-        self.assertIsNone(self.client.receive(json=True))
-
-    def test_receive_pickup_delete(self):
-        self.client.force_login(self.member)
-        self.client.send_and_consume('websocket.connect', path='/')
+    async def test_receive_pickup_delete(self):
+        self.communicator.scope['user'] = self.member
+        await self.communicator.connect()
 
         self.pickup.deleted = True
         self.pickup.save()
 
-        response = self.client.receive(json=True)
+        response = await self.communicator.receive_json_from()
         self.assertEqual(response['topic'], 'pickups:pickupdate_deleted')
         self.assertEqual(response['payload']['id'], self.pickup.id)
 
-        self.assertIsNone(self.client.receive(json=True))
 
+class PickupDateSeriesReceiverTests(asynctest.TestCase):
+    use_default_loop = True
 
-class PickupDateSeriesReceiverTests(ChannelTestCase):
     def setUp(self):
-        self.client = WSClient()
+        self.communicator = WebsocketCommunicator(WebsocketConsumer, '/')
+
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
@@ -303,85 +349,94 @@ class PickupDateSeriesReceiverTests(ChannelTestCase):
         # They would lead to interfering websocket messages
         self.series = PickupDateSeriesFactory(store=self.store, start_date=timezone.now() + relativedelta(months=2))
 
-    def test_receive_series_changes(self):
-        self.client.force_login(self.member)
-        self.client.send_and_consume('websocket.connect', path='/')
+    async def tearDown(self):
+        await self.communicator.disconnect()
+
+    async def test_receive_series_changes(self):
+        self.communicator.scope['user'] = self.member
+        await self.communicator.connect()
 
         date = faker.future_datetime(end_date='+30d', tzinfo=timezone.utc) + relativedelta(months=2)
         self.series.start_date = date
         self.series.save()
 
-        response = self.client.receive(json=True)
+        response = await self.communicator.receive_json_from()
         self.assertEqual(response['topic'], 'pickups:series')
         self.assertEqual(parse(response['payload']['start_date']), date)
 
-        self.assertIsNone(self.client.receive(json=True))
-
-    def test_receive_series_delete(self):
-        self.client.force_login(self.member)
-        self.client.send_and_consume('websocket.connect', path='/')
+    async def test_receive_series_delete(self):
+        self.communicator.scope['user'] = self.member
+        await self.communicator.connect()
 
         id = self.series.id
         self.series.delete()
 
-        response = self.client.receive(json=True)
+        response = await self.communicator.receive_json_from()
         self.assertEqual(response['topic'], 'pickups:series_deleted')
         self.assertEqual(response['payload']['id'], id)
 
-        self.assertIsNone(self.client.receive(json=True))
 
+class FeedbackReceiverTests(asynctest.TestCase):
+    use_default_loop = True
 
-class FeedbackReceiverTests(ChannelTestCase):
     def setUp(self):
-        self.client = WSClient()
+        self.communicator = WebsocketCommunicator(WebsocketConsumer, '/')
+
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(store=self.store)
 
-    def test_receive_feedback_changes(self):
-        self.client.force_login(self.member)
-        self.client.send_and_consume('websocket.connect', path='/')
+    async def tearDown(self):
+        await self.communicator.disconnect()
+
+    async def test_receive_feedback_changes(self):
+        self.communicator.scope['user'] = self.member
+        await self.communicator.connect()
 
         feedback = FeedbackFactory(given_by=self.member, about=self.pickup)
 
-        response = self.client.receive(json=True)
+        response = await self.communicator.receive_json_from()
         self.assertEqual(response['topic'], 'feedback:feedback')
         self.assertEqual(response['payload']['weight'], feedback.weight)
 
-        self.assertIsNone(self.client.receive(json=True))
 
+class FinishedPickupReceiverTest(asynctest.TestCase):
+    use_default_loop = True
 
-class FinishedPickupReceiverTest(ChannelTestCase):
     def setUp(self):
-        self.client = WSClient()
+        self.communicator = WebsocketCommunicator(WebsocketConsumer, '/')
+
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(store=self.store, collectors=[self.member])
 
-    def test_receive_feedback_possible_and_history(self):
+    async def tearDown(self):
+        await self.communicator.disconnect()
+
+    async def test_receive_feedback_possible_and_history(self):
         self.pickup.date = timezone.now() - relativedelta(days=1)
         self.pickup.save()
 
-        self.client.force_login(self.member)
-        self.client.send_and_consume('websocket.connect', path='/')
+        self.communicator.scope['user'] = self.member
+        await self.communicator.connect()
         call_command('process_finished_pickup_dates')
 
-        response = self.client.receive(json=True)
-        self.assertEqual(response['topic'], 'history:history')
-        self.assertEqual(response['payload']['typus'], 'PICKUP_DONE')
+        responses = await receive_responses_sorted_by_topic(self.communicator, 2)
 
-        response = self.client.receive(json=True)
-        self.assertEqual(response['topic'], 'pickups:feedback_possible')
-        self.assertEqual(response['payload']['id'], self.pickup.id)
+        self.assertEqual(responses[0]['topic'], 'history:history')
+        self.assertEqual(responses[0]['payload']['typus'], 'PICKUP_DONE')
 
-        self.assertIsNone(self.client.receive(json=True))
+        self.assertEqual(responses[1]['topic'], 'pickups:feedback_possible')
+        self.assertEqual(responses[1]['payload']['id'], self.pickup.id)
 
 
-class UserReceiverTest(ChannelTestCase):
+class UserReceiverTest(asynctest.TestCase):
+    use_default_loop = True
+
     def setUp(self):
-        self.client = WSClient()
+        self.communicator = WebsocketCommunicator(WebsocketConsumer, '/')
         self.member = UserFactory()
         self.other_member = UserFactory()
         self.unrelated_user = UserFactory()
@@ -394,50 +449,47 @@ class UserReceiverTest(ChannelTestCase):
         self.other_member.photo = 'photo.jpg'
         self.other_member.save()
 
-    def test_receive_own_user_changes(self):
-        self.client.force_login(self.member)
-        self.client.send_and_consume('websocket.connect', path='/')
+    async def tearDown(self):
+        await self.communicator.disconnect()
+
+    async def test_receive_own_user_changes(self):
+        self.communicator.scope['user'] = self.member
+        await self.communicator.connect()
 
         name = faker.name()
         self.member.display_name = name
         self.member.save()
 
-        response = self.client.receive(json=True)
+        response = await self.communicator.receive_json_from()
         self.assertEqual(response['topic'], 'auth:user')
         self.assertEqual(response['payload']['display_name'], name)
         self.assertTrue('current_group' in response['payload'])
         self.assertTrue(response['payload']['photo_urls']['full_size'].startswith(settings.HOSTNAME))
 
-        self.assertIsNone(self.client.receive(json=True))
-
-    def test_receive_changes_of_other_user(self):
-        self.client.force_login(self.member)
-        self.client.send_and_consume('websocket.connect', path='/')
+    async def test_receive_changes_of_other_user(self):
+        self.communicator.scope['user'] = self.member
+        await self.communicator.connect()
 
         name = faker.name()
         self.other_member.display_name = name
         self.other_member.save()
 
-        response = self.client.receive(json=True)
+        response = await self.communicator.receive_json_from()
         self.assertEqual(response['topic'], 'users:user')
         self.assertEqual(response['payload']['display_name'], name)
         self.assertTrue('current_group' not in response['payload'])
         self.assertTrue(response['payload']['photo_urls']['full_size'].startswith(settings.HOSTNAME))
 
-        self.assertIsNone(self.client.receive(json=True))
-
-    def test_unrelated_user_receives_no_changes(self):
-        self.client.force_login(self.unrelated_user)
-        self.client.send_and_consume('websocket.connect', path='/')
+    async def test_unrelated_user_receives_no_changes(self):
+        self.communicator.scope['user'] = self.unrelated_user
+        await self.communicator.connect()
 
         self.member.display_name = faker.name()
         self.member.save()
 
-        self.assertIsNone(self.client.receive(json=True))
-
 
 @requests_mock.Mocker()
-class ReceiverPushTests(ChannelTestCase):
+class ReceiverPushTests(django.test.TestCase):
     def setUp(self):
         self.user = UserFactory()
         self.author = UserFactory()
@@ -491,7 +543,7 @@ class ReceiverPushTests(ChannelTestCase):
 
 
 @requests_mock.Mocker()
-class GroupConversationReceiverPushTests(ChannelTestCase):
+class GroupConversationReceiverPushTests(django.test.TestCase):
     def setUp(self):
         self.group = GroupFactory()
         self.user = UserFactory()

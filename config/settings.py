@@ -204,13 +204,14 @@ FEEDBACK_POSSIBLE_DAYS = 30
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "asgi_redis.RedisChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [(REDIS_HOST, 6379)],
         },
-        "ROUTING": "foodsaving.subscriptions.routing.channel_routing",
     },
 }
+
+ASGI_APPLICATION = 'foodsaving.subscriptions.routing.application'
 
 CHANNELS_WS_PROTOCOLS = ['karrot.token']
 

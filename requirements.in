@@ -22,8 +22,8 @@ django-influxdb-metrics
 django-timezone-field
 raven
 furl
-channels~=1.1
-asgi_redis
+channels~=2.0
+channels_redis
 pyfcm
 django-versatileimagefield
 html2text
