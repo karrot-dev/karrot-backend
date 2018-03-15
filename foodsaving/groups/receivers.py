@@ -3,7 +3,7 @@ from django.dispatch import receiver
 
 from foodsaving.conversations.models import Conversation, ConversationParticipant
 from foodsaving.groups import roles, stats
-from foodsaving.groups.models import Group, GroupMembership
+from foodsaving.groups.models import Group, GroupMembership, GroupStatus
 
 
 @receiver(post_save, sender=Group)
@@ -29,8 +29,14 @@ def group_member_added(sender, instance, **kwargs):
     if kwargs.get('created') is True:
         group = instance.group
         user = instance.user
+        membership = instance
+        if group.is_playground():
+            membership.notification_types = []
+            membership.save()
+
         conversation = Conversation.objects.get_or_create_for_target(group)
-        conversation.join(user)
+        conversation.join(user, email_notifications=not group.is_playground())
+
         stats.group_joined(group)
 
 
