@@ -9,7 +9,8 @@ from foodsaving.base.base_models import BaseModel, LocationModel
 from foodsaving.groups.models import Group, GroupMembership
 from foodsaving.userauth.models import VerificationCode
 from foodsaving.users.emails import prepare_accountdelete_request_email, prepare_accountdelete_success_email, \
-    prepare_changemail_success_email, prepare_changemail_request_email, prepare_signup_email, prepare_passwordreset_success_email, \
+    prepare_changemail_success_email, prepare_changemail_request_email, prepare_signup_email, \
+    prepare_passwordreset_success_email, \
     prepare_passwordreset_request_email
 from foodsaving.webhooks.models import EmailEvent
 

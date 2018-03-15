@@ -24,6 +24,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         faker.seed(int(time.time()))
+
         def print(*args):
             self.stdout.write(' '.join([str(_) for _ in args]))
 

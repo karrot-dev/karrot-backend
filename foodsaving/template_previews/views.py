@@ -21,7 +21,6 @@ from foodsaving.invitations.models import Invitation
 from foodsaving.pickups.emails import prepare_pickup_notification_email
 from foodsaving.pickups.models import PickupDate
 from foodsaving.users.models import User
-from foodsaving.utils import email_utils
 
 foodsaving_basedir = os.path.abspath(os.path.join(settings.BASE_DIR, 'foodsaving'))
 
@@ -56,7 +55,8 @@ class Handlers:
         return foodsaving.users.emails.prepare_changemail_success_email(user=random_user())
 
     def conversation_message_notification(self):
-        return foodsaving.conversations.emails.prepare_conversation_message_notification(user=random_user(), message=random_message())
+        return foodsaving.conversations.emails.prepare_conversation_message_notification(user=random_user(),
+                                                                                         message=random_message())
 
     def emailinvitation(self):
         invitation = Invitation.objects.first()

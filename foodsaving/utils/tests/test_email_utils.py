@@ -1,6 +1,6 @@
 import pytz
-from django.utils import timezone
 from django.test import TestCase
+from django.utils import timezone
 
 import foodsaving.invitations.emails
 import foodsaving.users.emails
@@ -9,7 +9,6 @@ from foodsaving.groups.factories import GroupFactory
 from foodsaving.invitations.models import Invitation
 from foodsaving.userauth.models import VerificationCode
 from foodsaving.users.factories import UserFactory
-from foodsaving.utils import email_utils
 from foodsaving.utils.email_utils import time_filter, date_filter
 
 

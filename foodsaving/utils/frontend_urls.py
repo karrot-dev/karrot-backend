@@ -24,6 +24,7 @@ def group_wall_url(group):
         group_id=group.id
     )
 
+
 def conversation_mute_url(group, conversation):
     return '{}?mute_conversation={}'.format(group_wall_url(group), conversation.id)
 
@@ -34,6 +35,7 @@ def group_settings_url(group):
         group_id=group.id,
     )
 
+
 def invite_url(invitation):
     invite_url = furl('{hostname}/#/signup'.format(hostname=settings.HOSTNAME))
     invite_url.fragment.args = {
@@ -41,6 +43,7 @@ def invite_url(invitation):
         'email': invitation.email
     }
     return invite_url
+
 
 def user_delete_url(code):
     return '{hostname}/#/user/delete?code={code}'.format(
@@ -54,6 +57,7 @@ def user_emailverification_url(code):
         hostname=settings.HOSTNAME,
         code=code
     )
+
 
 def user_passwordreset_url(code):
     return '{hostname}/#/password/reset?code={code}'.format(

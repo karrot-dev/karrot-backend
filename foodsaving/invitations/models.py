@@ -8,7 +8,6 @@ from django.utils import timezone
 
 import foodsaving.invitations.emails
 from foodsaving.base.base_models import BaseModel
-from foodsaving.utils import email_utils
 
 
 class InvitationManager(models.Manager):
