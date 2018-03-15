@@ -140,7 +140,7 @@ class TestUserDeleteAPI(APITestCase):
         self.assertTrue(self.past_pickupdate.collectors.get_queryset().filter(id=self.user.id).exists())
 
         self.assertEqual(len(mail.outbox), 2)
-        self.assertIn('Your account was deleted', mail.outbox[1].subject)
+        self.assertIn('Account successfully deleted', mail.outbox[1].subject)
         self.assertEqual(mail.outbox[1].to, [self.user.email])
 
         # actions are disabled when user is deleted
@@ -367,7 +367,7 @@ class TestChangeEMail(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(mail.outbox), 2)
-        self.assertIn('Your email address changed!', mail.outbox[0].subject)
+        self.assertIn('Your email address changed', mail.outbox[0].subject)
         self.assertEqual(mail.outbox[0].to, [self.old_email], 'error: change notice sent to wrong address')
         self.assertIn('Please verify your email', mail.outbox[1].subject)
         self.assertEqual(

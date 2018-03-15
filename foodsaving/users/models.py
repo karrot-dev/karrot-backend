@@ -8,9 +8,9 @@ from versatileimagefield.fields import VersatileImageField
 from foodsaving.base.base_models import BaseModel, LocationModel
 from foodsaving.groups.models import Group, GroupMembership
 from foodsaving.userauth.models import VerificationCode
-from foodsaving.utils.email_utils import prepare_mailverification_email, prepare_accountdelete_request_email, \
-    prepare_passwordchange_email, prepare_passwordreset_request_email, \
-    prepare_changemail_email, prepare_accountdelete_success_email, prepare_signup_email
+from foodsaving.users.emails import prepare_accountdelete_request_email, prepare_accountdelete_success_email, \
+    prepare_changemail_success_email, prepare_changemail_request_email, prepare_signup_email, prepare_passwordreset_success_email, \
+    prepare_passwordreset_request_email
 from foodsaving.webhooks.models import EmailEvent
 
 MAX_DISPLAY_NAME_LENGTH = 80
@@ -139,7 +139,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         self.language = language
 
     def _send_mail_change_notification(self):
-        prepare_changemail_email(self).send()
+        prepare_changemail_success_email(self).send()
 
     @transaction.atomic
     def _send_welcome_mail(self):
@@ -151,7 +151,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     def send_mail_verification_code(self):
         self._unverify_mail()
         verification_code = VerificationCode.objects.get(user=self, type=VerificationCode.EMAIL_VERIFICATION)
-        prepare_mailverification_email(self, verification_code).send()
+        prepare_changemail_request_email(self, verification_code).send()
 
     @transaction.atomic
     def send_account_deletion_verification_code(self):
@@ -170,14 +170,14 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         self.set_password(new_password)
         self.save()
         VerificationCode.objects.filter(user=self, type=VerificationCode.PASSWORD_RESET).delete()
-        prepare_passwordchange_email(self).send()
+        prepare_passwordreset_success_email(self).send()
 
     @transaction.atomic
     def erase(self):
         """
         Delete the user.
 
-        To keep historic pickup infos, keep the user account but clear personal data.
+        To keep historic pickup infos, keep the user account b clear personal data.
         """
         # Emits pre_delete and post_delete signals, they are used to remove the user from pick-ups
         for _ in Group.objects.filter(members__in=[self, ]):
