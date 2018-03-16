@@ -18,6 +18,9 @@
                     <mj-button background-color="ef1f1f" href="{{ url }}">
                         {% trans %}Delete your account{% endtrans %}
                     </mj-button>
+                    <mj-text>
+                        <p>{% trans %}If you changed your mind, you can simply ignore this e-mail.{% endtrans %}</p>
+                    </mj-text>
                 </mj-column>
             </mj-section>
             <mj-include path="../../base/templates/_footer.mjml"/>
