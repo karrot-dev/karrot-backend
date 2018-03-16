@@ -54,6 +54,6 @@ class VerificationCode(BaseModel):
 
     def has_expired(self):
         """
-        True if the expiration date lies in the past or if the code has been invalidated.
+        True if the expiration date lies in the past.
         """
         return self.created_at + timedelta(seconds=self._get_validity_time_limit()) < timezone.now()

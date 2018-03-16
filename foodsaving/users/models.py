@@ -178,7 +178,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         """
         Delete the user.
 
-        To keep historic pickup infos, keep the user account b clear personal data.
+        To keep historic pickup infos, keep the user account but clear personal data.
         """
         # Emits pre_delete and post_delete signals, they are used to remove the user from pick-ups
         for _ in Group.objects.filter(members__in=[self, ]):
