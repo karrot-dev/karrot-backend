@@ -60,6 +60,7 @@ def check_membership_role_changes(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=GroupMembership)
 def group_member_added(sender, instance, created, **kwargs):
+    # TODO: only send 'join' stat when group member is approved
     membership = instance
     group = membership.group
     if created:

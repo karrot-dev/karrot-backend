@@ -11,7 +11,7 @@ from foodsaving.tests.utils import TestMigrations
 class TestMembershipsGetApprovedRole(TestMigrations):
     migrate_from = [('groups', '0027_auto_20180309_0936'),
                     ('users', '0020_user_mobile_number')]
-    migrate_to = [('groups', '0028_groupmembership_approve_all'),
+    migrate_to = [('groups', '0029_groupmembership_approve_all'),
                   ]
 
     def setUpBeforeMigration(self, apps):
@@ -23,7 +23,7 @@ class TestMembershipsGetApprovedRole(TestMigrations):
         group = Group.objects.create()
         GroupMembership.objects.create(user=user, group=group)
 
-    def test_extract_pickups_from_stores_app(self):
+    def test_every_member_is_approved(self):
         GroupMembership = self.apps.get_model('groups', 'GroupMembership')
         self.assertIn(GROUP_APPROVED_MEMBER, GroupMembership.objects.first().roles)
 
