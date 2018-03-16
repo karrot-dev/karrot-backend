@@ -31,8 +31,10 @@ def random_user():
 def random_group():
     return shuffle_groups().first()
 
+
 def shuffle_groups():
     return Group.objects.order_by('?')
+
 
 def random_message():
     return ConversationMessage.objects.order_by('?').first()

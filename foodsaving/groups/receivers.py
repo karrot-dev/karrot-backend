@@ -3,7 +3,7 @@ from django.dispatch import receiver
 
 from foodsaving.conversations.models import Conversation, ConversationParticipant
 from foodsaving.groups import roles, stats
-from foodsaving.groups.models import Group, GroupMembership, GroupStatus
+from foodsaving.groups.models import Group, GroupMembership
 
 
 @receiver(post_save, sender=Group)
