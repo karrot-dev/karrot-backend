@@ -226,6 +226,7 @@ class TestPlaygroundGroupAPI(APITestCase):
         self.group.refresh_from_db()
         self.assertEqual(self.group.password, '')
 
+
 class TestGroupMembershipRolesAPI(APITestCase):
     def setUp(self):
         self.admin = UserFactory()  # has membership management rights
