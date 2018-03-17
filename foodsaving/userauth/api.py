@@ -37,7 +37,7 @@ class AuthUserView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_permissions(self):
-        # Allow creating user when not logged in
+        # Allow creating and deleting user when not logged in
         if self.request.method.lower() == 'post' or self.request.method.lower() == 'delete':
             return ()
         return super().get_permissions()

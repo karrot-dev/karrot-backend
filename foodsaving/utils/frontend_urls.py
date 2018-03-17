@@ -46,7 +46,7 @@ def invite_url(invitation):
 
 
 def user_delete_url(code):
-    return '{hostname}/#/user/delete?code={code}'.format(
+    return '{hostname}/#/delete-user?code={code}'.format(
         hostname=settings.HOSTNAME,
         code=code
     )
