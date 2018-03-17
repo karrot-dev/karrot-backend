@@ -24,13 +24,17 @@ class TestEmailUtils(TestCase):
             invited_by=self.user
         )
         email = foodsaving.invitations.emails.prepare_emailinvitation_email(invitation)
+
         self.assertEqual(len(email.alternatives), 1)
+        html, mimetype = email.alternatives[0]
+
+        self.assertEqual(mimetype, 'text/html')
         self.assertEqual(email.to[0], 'bla@bla.com')
-        self.assertIn(self.group.name, email.body)
-        self.assertIn(self.user.display_name, email.body)
-        self.assertIn(str(invitation.token), email.body)
-        self.assertIn('/#/signup', email.body)
-        self.assertIn(settings.HOSTNAME, email.body)
+        self.assertIn(self.group.name, html)
+        self.assertIn(self.user.display_name, html)
+        self.assertIn(str(invitation.token), html)
+        self.assertIn('/#/signup', html)
+        self.assertIn(settings.HOSTNAME, html)
         self.assertNotIn('&amp;', email.body)
 
     def test_signup(self):
@@ -45,9 +49,8 @@ class TestEmailUtils(TestCase):
         html, mimetype = email.alternatives[0]
 
         self.assertEqual(mimetype, 'text/html')
-
-        self.assertIn(settings.HOSTNAME, email.body)
-        self.assertIn(verification_code.code, email.body)
+        self.assertIn(settings.HOSTNAME, html)
+        self.assertIn(verification_code.code, html)
 
         self.assertIn('/#/email/verify', html)
         self.assertIn(settings.HOSTNAME, html)
@@ -56,10 +59,13 @@ class TestEmailUtils(TestCase):
     def test_mailverification(self):
         verification_code = VerificationCode.objects.get(user=self.user)
         email = foodsaving.users.emails.prepare_signup_email(self.user, verification_code)
+        html, mimetype = email.alternatives[0]
+
+        self.assertEqual(mimetype, 'text/html')
         self.assertEqual(len(email.alternatives), 1)
         self.assertEqual(email.to[0], self.user.unverified_email)
-        self.assertIn(settings.HOSTNAME, email.body)
-        self.assertIn(verification_code.code, email.body)
+        self.assertIn(settings.HOSTNAME, html)
+        self.assertIn(verification_code.code, html)
 
 
 class TestJinjaFilters(TestCase):
