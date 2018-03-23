@@ -8,7 +8,8 @@ def message_written(message):
         key = c.target_type.name  # e.g. group
         tags[key] = c.target_id
     write_points([{
-        'measurement': 'karrot.conversation.message',
+        'measurement': 'karrot_events',
         'tags': tags,
-        'fields': {'value': 1},
+        'fields': {'message': 1},
     }])
+
