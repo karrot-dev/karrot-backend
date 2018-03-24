@@ -6,7 +6,7 @@ from influxdb_metrics.loader import write_points
 
 def group_joined(group):
     write_points([{
-        'measurement': 'karrot_events',
+        'measurement': 'karrot.events',
         'tags': {
             'group': str(group.id)
         },
@@ -16,7 +16,7 @@ def group_joined(group):
 
 def group_left(group):
     write_points([{
-        'measurement': 'karrot_events',
+        'measurement': 'karrot.events',
         'tags': {
             'group': str(group.id)
         },
@@ -26,7 +26,7 @@ def group_left(group):
 
 def group_activity(group):
     write_points([{
-        'measurement': 'karrot_events',
+        'measurement': 'karrot.events',
         'tags': {
             'group': str(group.id)
         },

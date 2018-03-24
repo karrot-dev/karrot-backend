@@ -8,7 +8,7 @@ def message_written(message):
         key = c.target_type.name  # e.g. group
         tags[key] = c.target_id
     write_points([{
-        'measurement': 'karrot_events',
+        'measurement': 'karrot.events',
         'tags': tags,
         'fields': {'message': 1},
     }])
