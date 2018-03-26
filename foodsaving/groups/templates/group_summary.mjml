@@ -30,7 +30,7 @@
 
                             {% if new_users|length > 0 %}
                                 <li>
-                                    {% trans new_user_count=new_users|length %}{{ new_user_count }} people joined the group{% endtrans %}
+                                    {% trans new_user_count=new_users|length %}{{ new_user_count }} people joined the group{% endtrans %}:
                                     {% for user in new_users %}
                                         <a href="{{ user_url(user) }}">{{ user.display_name }}</a>{% if not loop.last %}, {% else %}.{% endif %}
                                     {% endfor %}
@@ -56,16 +56,13 @@
                             <h3>{% trans %}Pickup feedback{% endtrans %}</h3>
                             {% for feedback in feedbacks %}
                                 <p class="feedback">
+                                    <span class="message-author">{{ feedback.given_by.display_name }}</span>
                                     <em>{{ feedback.comment }}</em>
                                     <br>
                                     <span style="font-size: 14px;">
-                                        {% trans weight=feedback.weight, store_url=store_url(feedback.about.store), store_name=feedback.about.store.name %}
-                                            {{ weight }}kg
-                                            from
-                                            <a href="{{ store_url }}">
-                                                {{ store_name }}
-                                            </a>
-                                        {% endtrans %}
+                                    {% trans weight=feedback.weight, store_url=store_url(feedback.about.store), store_name=feedback.about.store.name -%}
+                                        {{ weight }} kg from <a href="{{ store_url }}">{{ store_name }}</a>
+                                    {% endtrans %}
                                     </span>
                                 </p>
                             {% endfor %}
@@ -87,7 +84,7 @@
                     <mj-text font-size="13px" line-height="18px" color="#777">
                         <p>
                             {% trans %}You are receiving this because you are subscribed to <strong>Weekly summary</strong> emails for this group.{% endtrans %}
-                            {% trans %}<a href="{{ settings_url }}">Change your settings</a>.{% endtrans %}
+                            <a href="{{ settings_url }}">{% trans %}Click here to unsubscribe{%  endtrans %}</a>.
                         </p>
                     </mj-text>
                 </mj-column>

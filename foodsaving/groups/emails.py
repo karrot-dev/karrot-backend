@@ -52,7 +52,12 @@ def prepare_group_summary_data(group, from_date, to_date):
         created_at__lt=to_date,
     )
 
-    return {
+    settings_url = '{hostname}/#/group/{group_id}/settings'.format(
+        hostname=settings.HOSTNAME,
+        group_id=group.id,
+    )
+
+    data = {
         # minus one second so it's displayed as the full day
         'to_date': to_date - relativedelta(seconds=1),
         'from_date': from_date,
@@ -64,6 +69,11 @@ def prepare_group_summary_data(group, from_date, to_date):
         'messages': messages,
         'settings_url': group_settings_url(group),
     }
+
+    data['has_activity'] = any(data[field] > 0 for field in ['pickups_done_count', 'pickups_missed_count']) or \
+        any(len(data[field]) > 0 for field in ['feedbacks', 'messages', 'new_users'])
+
+    return data
 
 
 def prepare_group_summary_emails(group, context):

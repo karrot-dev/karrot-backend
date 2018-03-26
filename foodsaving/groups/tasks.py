@@ -11,7 +11,7 @@ from raven.contrib.django.raven_compat.models import client as sentry_client
 from config import settings
 from foodsaving.groups import stats, emails
 from foodsaving.groups.emails import prepare_user_inactive_in_group_email, prepare_group_summary_data
-from foodsaving.groups.models import Group
+from foodsaving.groups.models import Group, GroupStatus
 from foodsaving.groups.models import GroupMembership
 from foodsaving.utils import stats_utils
 
@@ -36,9 +36,14 @@ def process_inactive_users():
     count_users_flagged_inactive = 0
 
     inactive_threshold_date = now - timedelta(days=settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP)
-    for membership in GroupMembership.objects.filter(lastseen_at__lte=inactive_threshold_date, inactive_at=None):
-        email = prepare_user_inactive_in_group_email(membership.user, membership.group)
-        email.send()
+    for membership in GroupMembership.objects.filter(
+        lastseen_at__lte=inactive_threshold_date,
+        inactive_at=None,
+    ):
+        # only send emails if group itself is marked as active
+        if membership.group.status == GroupStatus.ACTIVE.value:
+            email = prepare_user_inactive_in_group_email(membership.user, membership.group)
+            email.send()
         membership.inactive_at = now
         membership.save()
         count_users_flagged_inactive += 1
@@ -64,15 +69,17 @@ def send_summary_emails():
             email_recipient_count = 0
 
             context = prepare_group_summary_data(group, from_date, to_date)
-            for email in emails.prepare_group_summary_emails(group, context):
-                try:
-                    email.send()
-                    email_count += 1
-                    email_recipient_count += len(email.to)
-                except AnymailAPIError:
-                    sentry_client.captureException()
+            if context['has_activity']:
+                for email in emails.prepare_group_summary_emails(group, context):
+                    try:
+                        email.send()
+                        email_count += 1
+                        email_recipient_count += len(email.to)
+                    except AnymailAPIError:
+                        sentry_client.captureException()
 
-            # we save this even if some of the email sending, no retries right now basically...
+            # we save this even if some of the email sending fails, no retries right now basically...
+            # we also save if no emails were sent due to missing activity, to not try again over and over.
             group.sent_summary_up_to = to_date
             group.save()
 
@@ -84,6 +91,7 @@ def send_summary_emails():
                 new_user_count=context['new_users'].count(),
                 pickups_done_count=context['pickups_done_count'],
                 pickups_missed_count=context['pickups_missed_count'],
+                has_activity=context['has_activity'],
             )
 
             recipient_count += email_recipient_count

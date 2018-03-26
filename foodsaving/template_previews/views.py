@@ -32,7 +32,11 @@ def random_user():
 
 
 def random_group():
-    return Group.objects.order_by('?').first()
+    return shuffle_groups().first()
+
+
+def shuffle_groups():
+    return Group.objects.order_by('?')
 
 
 def random_message():
@@ -68,17 +72,19 @@ class Handlers:
         return foodsaving.invitations.emails.prepare_emailinvitation_email(invitation)
 
     def group_summary(self):
-        group = random_group()
-
         from_date = timezone.now() - relativedelta(days=7)
         to_date = from_date + relativedelta(days=7)
 
-        context = prepare_group_summary_data(group, from_date, to_date)
-        summary_emails = prepare_group_summary_emails(group, context)
-        if len(summary_emails) is 0:
-            raise Exception(
-                'No emails were generated, you need at least one verified user in your db, and some activity data...')
-        return summary_emails[0]
+        for group in shuffle_groups():
+            context = prepare_group_summary_data(group, from_date, to_date)
+            summary_emails = prepare_group_summary_emails(group, context)
+            if len(summary_emails) is 0:
+                continue
+
+            return summary_emails[0]
+
+        raise Exception(
+            'No emails were generated, you need at least one verified user in your db, and some activity data...')
 
     def changemail_request(self):
         return foodsaving.users.emails.prepare_changemail_request_email(
@@ -143,7 +149,7 @@ def list_templates(request):
         for directory, dirnames, filenames in os.walk(directory):
             relative_dir = directory[len(foodsaving_basedir) + 1:]
             for filename in filenames:
-                if re.match(r'.*\.jinja2$', filename):
+                if re.match(r'.*\.jinja2$', filename) and not re.match(r'.*\.nopreview\.jinja2$', filename):
                     path = os.path.join(relative_dir, filename)
 
                     # strip out anything past the first dot for the name
