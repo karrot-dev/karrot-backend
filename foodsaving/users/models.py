@@ -72,7 +72,7 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, BaseModel, LocationModel):
-    email = EmailField(unique=True, null=True)
+    email = EmailField(unique=True, blank=True, null=True)
     is_active = BooleanField(default=True)
     is_staff = BooleanField(default=False)
     is_superuser = BooleanField(default=False)
@@ -96,6 +96,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
+    EMAIL_FIELD = 'email'
 
     def get_full_name(self):
         return self.display_name
@@ -184,20 +185,30 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         for _ in Group.objects.filter(members__in=[self, ]):
             GroupMembership.objects.filter(group=_, user=self).delete()
 
+        success_email = prepare_accountdelete_success_email(self)
+
         self.description = ''
-        self.set_unusable_password()
-        self.mail = None
+        self.email = None
         self.is_active = False
         self.is_staff = False
         self.mail_verified = False
         self.unverified_email = None
+        self.display_name = ''
+        self.address = None
+        self.latitude = None
+        self.longitude = None
+        self.mobile_number = ''
+
         self.deleted_at = timezone.now()
         self.deleted = True
+
         self.delete_photo()
+        self.set_unusable_password()
+
         self.save()
 
         VerificationCode.objects.filter(user=self, type=VerificationCode.ACCOUNT_DELETE).delete()
-        prepare_accountdelete_success_email(self).send()
+        success_email.send()
 
     def has_perm(self, perm, obj=None):
         # temporarily only allow access for admins

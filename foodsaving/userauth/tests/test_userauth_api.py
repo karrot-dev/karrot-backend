@@ -6,6 +6,7 @@ from anymail.exceptions import AnymailAPIError
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import auth
+from django.contrib.auth import get_user_model
 from django.core import mail
 from django.utils import timezone
 from rest_framework import status
@@ -142,6 +143,8 @@ class TestUserDeleteAPI(APITestCase):
         self.assertEqual(len(mail.outbox), 2)
         self.assertIn('Account successfully deleted', mail.outbox[1].subject)
         self.assertEqual(mail.outbox[1].to, [self.user.email])
+
+        self.assertEqual(get_user_model().objects.filter(email=self.user.email).count(), 0)
 
         # actions are disabled when user is deleted
         self.assertEqual(
