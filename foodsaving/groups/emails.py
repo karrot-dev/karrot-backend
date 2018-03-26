@@ -52,11 +52,6 @@ def prepare_group_summary_data(group, from_date, to_date):
         created_at__lt=to_date,
     )
 
-    settings_url = '{hostname}/#/group/{group_id}/settings'.format(
-        hostname=settings.HOSTNAME,
-        group_id=group.id,
-    )
-
     data = {
         # minus one second so it's displayed as the full day
         'to_date': to_date - relativedelta(seconds=1),
