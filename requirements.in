@@ -34,3 +34,4 @@ gevent
 bleach
 bleach_whitelist
 pymdown-extensions
+python-telegram-bot
