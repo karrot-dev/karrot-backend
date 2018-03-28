@@ -98,7 +98,6 @@ class TestGroupSummaryEmails(APITestCase):
 
         self.assertNotIn(self.user_without_notifications.email, to)
 
-
     def test_ignores_deleted_pickups(self):
         a_few_days_ago = timezone.now() - relativedelta(days=4)
 
@@ -114,7 +113,6 @@ class TestGroupSummaryEmails(APITestCase):
         data = foodsaving.groups.emails.prepare_group_summary_data(self.group, from_date, to_date)
 
         self.assertEqual(data['pickups_done_count'], 0)
-
 
     def test_group_summary_data(self):
 
