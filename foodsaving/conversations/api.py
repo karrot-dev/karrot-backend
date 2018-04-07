@@ -21,7 +21,8 @@ from foodsaving.conversations.serializers import (
     ConversationMessageReactionSerializer,
     ConversationMarkSerializer,
     ConversationEmailNotificationsSerializer,
-    EmojiField)
+    EmojiField,
+    ConversationUpdateMessageSerializer)
 
 
 class MessagePagination(CursorPagination):
@@ -164,7 +165,8 @@ class ConversationMessageViewSet(
     @detail_route(
         methods=('POST',),
         filter_fields=('content',),
-        permission_classes=(IsAuthenticated, IsMessageConversationParticipant)
+        permission_classes=(IsAuthenticated, IsMessageConversationParticipant),
+        serializer_class = ConversationUpdateMessageSerializer
     )
     def edit(self, request, pk):
         """route for POST /messages/{id}/edit/"""
@@ -174,9 +176,10 @@ class ConversationMessageViewSet(
 
         # object permissions check has to be triggered manually
         self.check_object_permissions(self.request, message)
-        message.content = request.data.get('content')
-        
-        message.save()
+        serializer = self.get_serializer(message, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
         return Response(status=status.HTTP_201_CREATED)
 
 

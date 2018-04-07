@@ -111,6 +111,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
             'content',
             'conversation',
             'created_at',
+            'updated_at',
             'reactions',
             'received_via'
         ]
@@ -122,11 +123,25 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
         print('validate_convo')
         if self.context['request'].user not in conversation.participants.all():
             raise PermissionDenied(_('You are not in this conversation'))
-        print(conversation)
         return conversation
 
     def create(self, validated_data):
         print("create in serializers.py")
         user = self.context['request'].user
-        print(validated_data)
         return ConversationMessage.objects.create(author=user, **validated_data)
+
+
+class ConversationUpdateMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConversationMessage
+        fields = ('content',)
+
+    def validate_update(self, message):
+        if not self.instance.conversation.messages.filter(id=message.id).exists():
+            raise serializers.ValidationError('Must refer to a message in the conversation')
+        return message
+
+    def update(self, message, validated_data):
+        message.content = validated_data['content']
+        message.save()
+        return message
