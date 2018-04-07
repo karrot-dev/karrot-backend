@@ -1,3 +1,4 @@
+import sys
 from django.utils.translation import ugettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
@@ -149,7 +150,6 @@ class ConversationMessageViewSet(
         """route for DELETE /messages/{id}/reactions/{name}/"""
 
         name = EmojiField.to_internal_value(None, name)
-
         message = get_object_or_404(ConversationMessage, id=pk)
 
         # object permissions check has to be triggered manually
@@ -160,6 +160,24 @@ class ConversationMessageViewSet(
 
         reaction.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @detail_route(
+        methods=('POST',),
+        filter_fields=('content',),
+        permission_classes=(IsAuthenticated, IsMessageConversationParticipant)
+    )
+    def edit(self, request, pk):
+        """route for POST /messages/{id}/edit/"""
+
+        print(pk)
+        message = get_object_or_404(ConversationMessage, id=pk)
+
+        # object permissions check has to be triggered manually
+        self.check_object_permissions(self.request, message)
+        message.content = request.data.get('content')
+        
+        message.save()
+        return Response(status=status.HTTP_201_CREATED)
 
 
 class RetrieveConversationMixin(object):

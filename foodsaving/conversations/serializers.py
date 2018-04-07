@@ -119,10 +119,14 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
     reactions = ConversationMessageReactionSerializer(many=True, read_only=True)
 
     def validate_conversation(self, conversation):
+        print('validate_convo')
         if self.context['request'].user not in conversation.participants.all():
             raise PermissionDenied(_('You are not in this conversation'))
+        print(conversation)
         return conversation
 
     def create(self, validated_data):
+        print("create in serializers.py")
         user = self.context['request'].user
+        print(validated_data)
         return ConversationMessage.objects.create(author=user, **validated_data)
