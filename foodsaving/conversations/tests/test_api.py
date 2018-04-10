@@ -81,38 +81,6 @@ class TestConversationsAPI(APITestCase):
         response = self.client.post('/api/messages/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_edit_message(self):
-        conversation = ConversationFactory()
-        conversation.join(self.participant1)
-        self.client.force_login(user=self.participant1)
-        data = {'conversation': conversation.id, 'content': 'a nice message'}
-        response = self.client.post('/api/messages/', data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
-        self.assertEqual(response.data['content'], data['content'])
-        data['content'] = 'a nicer message'
-        response = self.client.post('/api/messages/edit', data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data['content'], data['content'])
-        self.assertEqual(conversation.messages.first().content, data['content'])
-        self.assertEqual(conversation.messages.first().modified_at, parse(response.data['modified_at']), response.data)
-        self.assertEqual(conversation.messages.first().id, response.data['id'])
-        self.assertEqual(conversation.messages.first().author.id, response.data['author'])
-
-    def test_cannot_edit_message_without_specifying_conversation(self):
-        self.client.force_login(user=self.participant1)
-        data = {'conversation': conversation.id, 'content': 'a nice message'}
-        response = self.client.post('/api/messages/', data, format='json')
-        data = {'content': 'a nicer message'}
-        response = self.client.post('/api/messages/edit', data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_cannot_edit_message_if_not_in_conversation(self):
-        self.client.force_login(user=self.participant1)
-        data = {'conversation': conversation.id, 'content': 'a nice message'}
-        response = self.client.post('/api/messages/', data, format='json')
-        data = {'conversation': self.conversation3.id, 'content': 'a nicer message'}
-        response = self.client.post('/api/messages/edit', data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 class TestConversationsSeenUpToAPI(APITestCase):
     def setUp(self):
@@ -543,3 +511,45 @@ class TestConversationsMessageReactionsDeleteAPI(APITestCase):
             format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+class TestConversationsMessageEditPostAPI(APITestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.user2 = UserFactory()
+        self.group = GroupFactory(members=[self.user])
+        self.conversation = Conversation.objects.get_or_create_for_target(self.group)
+        self.conversation.join(self.user)
+        self.participant = ConversationParticipant.objects.get(conversation=self.conversation, user=self.user)
+        self.message = self.conversation.messages.create(author=self.user, content='hello')
+
+        self.group2 = GroupFactory(members=[self.user, self.user2])
+        self.conversation2 = Conversation.objects.get_or_create_for_target(self.group2)
+        self.conversation2.join(self.user)
+        self.conversation2.join(self.user2)
+        self.message2 = self.conversation2.messages.create(author=self.user, content='hello2')
+
+    def test_edit_message(self):
+        self.client.force_login(user=self.user)
+        data = {'content': 'hi'}
+        response = self.client.post('/api/messages/{}/edit/'.format(self.message.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+    def test_cannot_edit_message_without_specifying_content(self):
+        self.client.force_login(user=self.user)
+        data = {}
+        response = self.client.post('/api/messages/{}/edit/'.format(self.message.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_cannot_edit_message_if_not_in_conversation(self):
+        self.client.force_login(user=self.user2)
+        data = {'content': 'a nice message'}
+        response = self.client.post('/api/messages/{}/edit/'.format(self.message.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    # Even if the participant is in the conversation, 
+    # they cannot edit messages they did not create.
+    def test_cannot_edit_message_if_not_message_author(self):
+        self.client.force_login(user=self.user2)
+        data = {'content': 'a nicer message'}
+        response = self.client.post('/api/messages/{}/edit/'.format(self.message2.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

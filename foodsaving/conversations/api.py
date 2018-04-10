@@ -1,4 +1,3 @@
-import sys
 from django.utils.translation import ugettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
@@ -55,6 +54,15 @@ class IsMessageConversationParticipant(BasePermission):
 
     def has_object_permission(self, request, view, message):
         return message.conversation.participants.filter(id=request.user.id).exists()
+
+
+class IsAuthorConversationMessage(BasePermission):
+    """Is the user the author of the message they wish to update?"""
+
+    message = _('You are not the author of this message')
+
+    def has_object_permission(self, request, view, message):
+        return message.conversation.messages.filter(id=message.id).filter(author=request.user).exists()
 
 
 class ConversationViewSet(
@@ -165,22 +173,20 @@ class ConversationMessageViewSet(
     @detail_route(
         methods=('POST',),
         filter_fields=('content',),
-        permission_classes=(IsAuthenticated, IsMessageConversationParticipant),
-        serializer_class = ConversationUpdateMessageSerializer
+        permission_classes=(IsAuthenticated, IsMessageConversationParticipant, IsAuthorConversationMessage),
     )
     def edit(self, request, pk):
         """route for POST /messages/{id}/edit/"""
 
-        print(pk)
         message = get_object_or_404(ConversationMessage, id=pk)
 
         # object permissions check has to be triggered manually
         self.check_object_permissions(self.request, message)
-        serializer = self.get_serializer(message, data=request.data, partial=True)
+        serializer = ConversationUpdateMessageSerializer(message, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_200_OK)
 
 
 class RetrieveConversationMixin(object):

@@ -57,6 +57,7 @@ class ConversationReceiverTests(ChannelTestCase):
                 'author': message.author.id,
                 'conversation': conversation.id,
                 'created_at': message.created_at,
+                'updated_at': message.updated_at,
                 'received_via': '',
                 'reactions': []
             }
