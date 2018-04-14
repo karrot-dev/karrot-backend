@@ -118,17 +118,22 @@ class ConversationMessageViewSet(
 
     queryset = ConversationMessage.objects
     serializer_class = ConversationMessageSerializer
-    permission_classes = (IsAuthenticated, IsConversationParticipant, IsMessageConversationParticipant, IsAuthorConversationMessage,)
+    permission_classes = (
+        IsAuthenticated,
+        IsConversationParticipant,
+        IsMessageConversationParticipant,
+        IsAuthorConversationMessage,
+    )
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('conversation',)
     pagination_class = MessagePagination
 
     def get_queryset(self):
         return self.queryset.filter(conversation__participants=self.request.user)
-    
-    # def partial_update(self, request, *args, **kwargs):
-    #     """Update one of your messages"""
-    #     return super().partial_update(request)
+
+    def partial_update(self, request, *args, **kwargs):
+        """Update one of your messages"""
+        return super().partial_update(request)
 
     @detail_route(
         methods=('POST',),

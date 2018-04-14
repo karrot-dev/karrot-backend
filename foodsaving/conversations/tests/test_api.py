@@ -512,6 +512,7 @@ class TestConversationsMessageReactionsDeleteAPI(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
+
 class TestConversationsMessageEditPostAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
@@ -528,27 +529,27 @@ class TestConversationsMessageEditPostAPI(APITestCase):
         self.conversation2.join(self.user2)
         self.message2 = self.conversation2.messages.create(author=self.user, content='hello2')
 
-    def test_edit_message(self):
+    def test_update_message(self):
         self.client.force_login(user=self.user)
         data = {'content': 'hi'}
         response = self.client.patch('/api/messages/{}/'.format(self.message.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
-    def test_cannot_edit_message_without_specifying_content(self):
+    def test_cannot_update_message_without_specifying_content(self):
         self.client.force_login(user=self.user)
-        data = {'content':''}
+        data = {'content': ''}
         response = self.client.patch('/api/messages/{}/'.format(self.message.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_cannot_edit_message_if_not_in_conversation(self):
+    def test_cannot_update_message_if_not_in_conversation(self):
         self.client.force_login(user=self.user2)
         data = {'content': 'a nice message'}
         response = self.client.patch('/api/messages/{}/'.format(self.message.id), data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    # Even if the participant is in the conversation, 
+    # Even if the participant is in the conversation,
     # they cannot edit messages they did not create.
-    def test_cannot_edit_message_if_not_message_author(self):
+    def test_cannot_update_message_if_not_message_author(self):
         self.client.force_login(user=self.user2)
         data = {'content': 'a nicer message'}
         response = self.client.patch('/api/messages/{}/'.format(self.message2.id), data, format='json')

@@ -49,6 +49,7 @@ class ConversationReceiverTests(ChannelTestCase):
         # hopefully they receive it!
         response = client.receive(json=True)
         response['payload']['created_at'] = parse(response['payload']['created_at'])
+        response['payload']['updated_at'] = parse(response['payload']['updated_at'])
         self.assertEqual(response, {
             'topic': 'conversations:message',
             'payload': {
