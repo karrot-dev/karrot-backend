@@ -62,7 +62,7 @@ class IsAuthorConversationMessage(BasePermission):
     message = _('You are not the author of this message')
 
     def has_object_permission(self, request, view, message):
-        return message.conversation.messages.filter(id=message.id).filter(author=request.user).exists()
+        return request.user == message.author
 
 
 class ConversationViewSet(
@@ -126,10 +126,9 @@ class ConversationMessageViewSet(
     def get_queryset(self):
         return self.queryset.filter(conversation__participants=self.request.user)
     
-    def partial_update(self, request, *args, **kwargs):
-        print('partial')
-        """Update one of your groups"""
-        return super().partial_update(request, *args, **kwargs)
+    # def partial_update(self, request, *args, **kwargs):
+    #     """Update one of your messages"""
+    #     return super().partial_update(request)
 
     @detail_route(
         methods=('POST',),

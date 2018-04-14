@@ -129,21 +129,21 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         return ConversationMessage.objects.create(author=user, **validated_data)
     
-    # def update(self, message, validated_data):
-    #     changed_data = get_changed_data(message, validated_data)
-    #     message = super().partial_update()
+    def update(self, message, validated_data):
+        changed_data = get_changed_data(message, validated_data)
+        super().update(message, validated_data)
 
-    # #     # if 'weeks_in_advance' in changed_data:
-    # #     #     with transaction.atomic():
-    # #     #         for series in store.series.all():
-    # #     #             series.update_pickup_dates()
+    #     # if 'weeks_in_advance' in changed_data:
+    #     #     with transaction.atomic():
+    #     #         for series in store.series.all():
+    #     #             series.update_pickup_dates()
 
-    # #     # if changed_data:
-    # #     #     History.objects.create(
-    # #     #         typus=HistoryTypus.STORE_MODIFY,
-    # #     #         group=store.group,
-    # #     #         store=store,
-    # #     #         users=[self.context['request'].user, ],
-    # #     #         payload=changed_data,
-    # #     #     )
-    #     return message
+    #     # if changed_data:
+    #     #     History.objects.create(
+    #     #         typus=HistoryTypus.STORE_MODIFY,
+    #     #         group=store.group,
+    #     #         store=store,
+    #     #         users=[self.context['request'].user, ],
+    #     #         payload=changed_data,
+    #     #     )
+        return message
