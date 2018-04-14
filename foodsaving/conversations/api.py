@@ -8,6 +8,7 @@ from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 from foodsaving.conversations.models import (
     Conversation,
@@ -20,8 +21,7 @@ from foodsaving.conversations.serializers import (
     ConversationMessageReactionSerializer,
     ConversationMarkSerializer,
     ConversationEmailNotificationsSerializer,
-    EmojiField,
-    ConversationUpdateMessageSerializer)
+    EmojiField)
 
 
 class MessagePagination(CursorPagination):
@@ -109,6 +109,7 @@ class ConversationViewSet(
 class ConversationMessageViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
+    PartialUpdateModelMixin,
     GenericViewSet
 ):
     """
@@ -117,13 +118,18 @@ class ConversationMessageViewSet(
 
     queryset = ConversationMessage.objects
     serializer_class = ConversationMessageSerializer
-    permission_classes = (IsAuthenticated, IsConversationParticipant)
+    permission_classes = (IsAuthenticated, IsConversationParticipant, IsMessageConversationParticipant, IsAuthorConversationMessage,)
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('conversation',)
     pagination_class = MessagePagination
 
     def get_queryset(self):
         return self.queryset.filter(conversation__participants=self.request.user)
+    
+    def partial_update(self, request, *args, **kwargs):
+        print('partial')
+        """Update one of your groups"""
+        return super().partial_update(request, *args, **kwargs)
 
     @detail_route(
         methods=('POST',),
@@ -169,24 +175,6 @@ class ConversationMessageViewSet(
 
         reaction.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @detail_route(
-        methods=('POST',),
-        filter_fields=('content',),
-        permission_classes=(IsAuthenticated, IsMessageConversationParticipant, IsAuthorConversationMessage),
-    )
-    def edit(self, request, pk):
-        """route for POST /messages/{id}/edit/"""
-
-        message = get_object_or_404(ConversationMessage, id=pk)
-
-        # object permissions check has to be triggered manually
-        self.check_object_permissions(self.request, message)
-        serializer = ConversationUpdateMessageSerializer(message, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(status=status.HTTP_200_OK)
 
 
 class RetrieveConversationMixin(object):

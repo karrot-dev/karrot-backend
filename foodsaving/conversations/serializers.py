@@ -6,6 +6,7 @@ from rest_framework.fields import DateTimeField
 from foodsaving.conversations.models import Conversation, ConversationMessage, \
     ConversationParticipant, ConversationMessageReaction
 from foodsaving.conversations.helpers import normalize_emoji_name
+from foodsaving.history.utils import get_changed_data
 
 
 class ConversationSerializer(serializers.ModelSerializer):
@@ -127,14 +128,22 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context['request'].user
         return ConversationMessage.objects.create(author=user, **validated_data)
+    
+    # def update(self, message, validated_data):
+    #     changed_data = get_changed_data(message, validated_data)
+    #     message = super().partial_update()
 
+    # #     # if 'weeks_in_advance' in changed_data:
+    # #     #     with transaction.atomic():
+    # #     #         for series in store.series.all():
+    # #     #             series.update_pickup_dates()
 
-class ConversationUpdateMessageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ConversationMessage
-        fields = ('content',)
-
-    def update(self, message, validated_data):
-        message.content = validated_data['content']
-        message.save()
-        return message
+    # #     # if changed_data:
+    # #     #     History.objects.create(
+    # #     #         typus=HistoryTypus.STORE_MODIFY,
+    # #     #         group=store.group,
+    # #     #         store=store,
+    # #     #         users=[self.context['request'].user, ],
+    # #     #         payload=changed_data,
+    # #     #     )
+    #     return message

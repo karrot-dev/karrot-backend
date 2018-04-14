@@ -531,19 +531,19 @@ class TestConversationsMessageEditPostAPI(APITestCase):
     def test_edit_message(self):
         self.client.force_login(user=self.user)
         data = {'content': 'hi'}
-        response = self.client.post('/api/messages/{}/edit/'.format(self.message.id), data, format='json')
+        response = self.client.patch('/api/messages/{}/'.format(self.message.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_cannot_edit_message_without_specifying_content(self):
         self.client.force_login(user=self.user)
-        data = {}
-        response = self.client.post('/api/messages/{}/edit/'.format(self.message.id), data, format='json')
+        data = {'content':''}
+        response = self.client.patch('/api/messages/{}/'.format(self.message.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_cannot_edit_message_if_not_in_conversation(self):
         self.client.force_login(user=self.user2)
         data = {'content': 'a nice message'}
-        response = self.client.post('/api/messages/{}/edit/'.format(self.message.id), data, format='json')
+        response = self.client.patch('/api/messages/{}/'.format(self.message.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     # Even if the participant is in the conversation, 
@@ -551,5 +551,5 @@ class TestConversationsMessageEditPostAPI(APITestCase):
     def test_cannot_edit_message_if_not_message_author(self):
         self.client.force_login(user=self.user2)
         data = {'content': 'a nicer message'}
-        response = self.client.post('/api/messages/{}/edit/'.format(self.message2.id), data, format='json')
+        response = self.client.patch('/api/messages/{}/'.format(self.message2.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
