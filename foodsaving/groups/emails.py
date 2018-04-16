@@ -12,6 +12,7 @@ from foodsaving.conversations.models import ConversationMessage
 from foodsaving.groups.models import Group, GroupNotificationType, GroupMembership
 from foodsaving.pickups.models import PickupDate, Feedback
 from foodsaving.utils.email_utils import prepare_email
+from foodsaving.utils.frontend_urls import group_wall_url, group_settings_url
 
 
 def prepare_group_summary_data(group, from_date, to_date):
@@ -20,21 +21,24 @@ def prepare_group_summary_data(group, from_date, to_date):
         groupmembership__created_at__lt=to_date,
     ).all()
 
+    pickup_filters = {
+        'deleted': False,
+        'store__group': group,
+        'date__gte': from_date,
+        'date__lt': to_date,
+    }
+
     pickups_done_count = PickupDate.objects.annotate(
         num_collectors=Count('collectors')
     ).filter(
-        store__group=group,
-        date__gte=from_date,
-        date__lt=to_date,
+        **pickup_filters,
         num_collectors__gt=0,
     ).count()
 
     pickups_missed_count = PickupDate.objects.annotate(
         num_collectors=Count('collectors')
     ).filter(
-        store__group=group,
-        date__gte=from_date,
-        date__lt=to_date,
+        **pickup_filters,
         num_collectors=0,
     ).count()
 
@@ -51,11 +55,6 @@ def prepare_group_summary_data(group, from_date, to_date):
         created_at__lt=to_date,
     )
 
-    settings_url = '{hostname}/#/group/{group_id}/settings'.format(
-        hostname=settings.HOSTNAME,
-        group_id=group.id,
-    )
-
     data = {
         # minus one second so it's displayed as the full day
         'to_date': to_date - relativedelta(seconds=1),
@@ -66,7 +65,7 @@ def prepare_group_summary_data(group, from_date, to_date):
         'pickups_missed_count': pickups_missed_count,
         'feedbacks': feedbacks,
         'messages': messages,
-        'settings_url': settings_url,
+        'settings_url': group_settings_url(group),
     }
 
     data['has_activity'] = any(data[field] > 0 for field in ['pickups_done_count', 'pickups_missed_count']) or \
@@ -116,16 +115,13 @@ def calculate_group_summary_dates(group):
 
 
 def prepare_user_inactive_in_group_email(user, group):
-    group_url = '{hostname}/#/group/{group_id}/'.format(
-        hostname=settings.HOSTNAME,
-        group_id=group.id
-    )
+
     return prepare_email(
         'user_inactive_in_group',
         user=user,
         context={
             'group_name': group.name,
-            'group_url': group_url,
+            'group_url': group_wall_url(group),
             'num_days_inactive': settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP,
         }
     )

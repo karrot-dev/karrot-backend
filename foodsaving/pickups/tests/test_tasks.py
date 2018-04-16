@@ -15,7 +15,7 @@ from foodsaving.pickups.tasks import daily_pickup_notifications, fetch_pickup_no
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.stores.models import StoreStatus
 from foodsaving.users.factories import VerifiedUserFactory, UserFactory
-from foodsaving.utils.email_utils import store_url
+from foodsaving.utils.frontend_urls import store_url
 
 
 @contextmanager
@@ -83,6 +83,16 @@ class TestPickupNotificationTask(APITestCase):
         pickup.save()
         return pickup
 
+    def create_deleted_pickup(self, delta, store=None):
+        if store is None:
+            store = self.store
+        return PickupDate.objects.create(
+            store=store,
+            date=timezone.localtime() + delta,
+            max_collectors=1,
+            deleted=True,
+        )
+
     def test_user_pickups(self):
         with group_timezone_at(self.group, hour=20):
             user_pickup_tonight = self.create_user_pickup(relativedelta(minutes=50), max_collectors=1)
@@ -136,6 +146,12 @@ class TestPickupNotificationTask(APITestCase):
     def test_ignores_not_active_stores(self):
         with group_timezone_at(self.group, hour=20):
             self.create_empty_pickup(delta=relativedelta(minutes=10), store=self.declined_store)
+            daily_pickup_notifications()
+            self.assertEqual(len(mail.outbox), 0)
+
+    def test_ignores_deleted_pickups(self):
+        with group_timezone_at(self.group, hour=20):
+            self.create_deleted_pickup(delta=relativedelta(minutes=10))
             daily_pickup_notifications()
             self.assertEqual(len(mail.outbox), 0)
 
