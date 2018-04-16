@@ -513,7 +513,7 @@ class TestConversationsMessageReactionsDeleteAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
 
-class TestConversationsMessageEditPostAPI(APITestCase):
+class TestConversationsMessageEditPatchAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.user2 = UserFactory()
