@@ -2,6 +2,8 @@ from dateutil.parser import parse
 from django.core import mail
 from rest_framework import status
 from rest_framework.test import APITestCase
+from datetime import timedelta
+from django.utils import timezone
 
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationParticipant, Conversation, ConversationMessage, \
@@ -528,6 +530,7 @@ class TestConversationsMessageEditPatchAPI(APITestCase):
         self.conversation2.join(self.user)
         self.conversation2.join(self.user2)
         self.message2 = self.conversation2.messages.create(author=self.user, content='hello2')
+        self.message3 = self.conversation2.messages.create(author=self.user, content='hello3', created_at=(timezone.now() - timedelta(days=10)))
 
     def test_update_message(self):
         self.client.force_login(user=self.user)
@@ -553,4 +556,10 @@ class TestConversationsMessageEditPatchAPI(APITestCase):
         self.client.force_login(user=self.user2)
         data = {'content': 'a nicer message'}
         response = self.client.patch('/api/messages/{}/'.format(self.message2.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_cannot_update_message_if_past_10_days(self):
+        self.client.force_login(user=self.user)
+        data = {'content': 'a nicer message'}
+        response = self.client.patch('/api/messages/{}/'.format(self.message3.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
