@@ -530,7 +530,10 @@ class TestConversationsMessageEditPatchAPI(APITestCase):
         self.conversation2.join(self.user)
         self.conversation2.join(self.user2)
         self.message2 = self.conversation2.messages.create(author=self.user, content='hello2')
-        self.message3 = self.conversation2.messages.create(author=self.user, content='hello3', created_at=(timezone.now() - timedelta(days=10)))
+        self.message3 = self.conversation2.messages.create(
+            author=self.user, content='hello3',
+            created_at=(timezone.now() - timedelta(days=10)),
+        )
 
     def test_update_message(self):
         self.client.force_login(user=self.user)
