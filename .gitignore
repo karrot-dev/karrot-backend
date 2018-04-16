@@ -39,5 +39,5 @@ foodsaving/frontend/static/*
 uploads
 
 # Mac files
-.DS_Store
+**/.DS_Store
 foodaving/.DS_Store
