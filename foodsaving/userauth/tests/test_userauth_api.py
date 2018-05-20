@@ -519,7 +519,7 @@ class TestResendEMailVerificationCode(APITestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn('Please verify your email', mail.outbox[0].subject)
         self.assertEqual(mail.outbox[0].to, [self.user.email])
-        self.assertNotIn('Thank you for signing up', mail.outbox[0].body)
+        self.assertIn('Thank you for signing up', mail.outbox[0].body)
 
     def test_resend_mail_verification_code_fails_if_already_verified(self):
         self.client.force_login(user=self.verified_user)

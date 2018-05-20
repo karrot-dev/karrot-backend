@@ -143,6 +143,9 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     def _send_mail_change_notification(self):
         prepare_changemail_success_email(self).send()
 
+    def resend_mail_verification_code(self):
+        self._send_welcome_mail()
+
     @transaction.atomic
     def _send_welcome_mail(self):
         self._unverify_mail()

@@ -117,7 +117,7 @@ class ResendMailVerificationCodeView(views.APIView):
         Resend a verification code (via e-mail).
         """
         self.check_object_permissions(request, request.user)
-        request.user.send_mail_verification_code()
+        request.user.resend_mail_verification_code()
         return Response(status=status.HTTP_204_NO_CONTENT, data={})
 
 
