@@ -2,6 +2,7 @@ pip-tools
 ipython
 requests-mock
 tblib
+flake8
 autopep8
 autoflake
 pytest-django

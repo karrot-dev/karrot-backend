@@ -12,7 +12,6 @@ hiredis
 markdown
 psycopg2-binary
 redis
-flake8
 pytz
 django-filter
 django-crispy-forms

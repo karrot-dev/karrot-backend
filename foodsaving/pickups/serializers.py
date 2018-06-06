@@ -222,4 +222,5 @@ class FeedbackSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data.get('comment') is None and data.get('weight') is None:
             raise serializers.ValidationError("Both comment and weight cannot be blank.")
+        data['given_by'] = self.context['request'].user
         return data
