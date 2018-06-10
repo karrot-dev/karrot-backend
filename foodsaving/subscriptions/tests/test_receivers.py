@@ -269,12 +269,19 @@ class PickupDateReceiverTests(ChannelTestCase):
         self.assertEqual(response['topic'], 'pickups:pickupdate')
         self.assertEqual(response['payload']['collector_ids'], [self.member.id])
 
+        response = self.client.receive(json=True)
+        self.assertEqual(response['topic'], 'conversations:conversation')
+        self.assertEqual(response['payload']['participants'], [self.member.id])
+
         # leave
         self.pickup.collectors.remove(self.member)
 
         response = self.client.receive(json=True)
         self.assertEqual(response['topic'], 'pickups:pickupdate')
         self.assertEqual(response['payload']['collector_ids'], [])
+
+        response = self.client.receive(json=True)
+        self.assertEqual(response['topic'], 'conversations:leave')
 
         self.assertIsNone(self.client.receive(json=True))
 

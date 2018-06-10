@@ -23,6 +23,7 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         self.pickup_url = self.url + str(self.pickup.id) + '/'
         self.join_url = self.pickup_url + 'add/'
         self.leave_url = self.pickup_url + 'remove/'
+        self.conversation_url = self.pickup_url + 'conversation/'
 
         # not a member of the group
         self.user = UserFactory()
@@ -190,6 +191,19 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         self.past_pickup.collectors.add(self.member)
         response = self.client.post(self.past_leave_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+    def test_get_conversation_not_as_collector(self):
+        self.client.force_login(user=self.member)
+        response = self.client.get(self.conversation_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data['detail'], 'You are not in this conversation')
+
+    def test_get_conversation_as_collector(self):
+        self.client.force_login(user=self.member)
+        self.pickup.collectors.add(self.member)
+        response = self.client.get(self.conversation_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn(self.member.id, response.data['participants'])
 
 
 class TestPickupDatesListAPI(APITestCase, ExtractPaginationMixin):
