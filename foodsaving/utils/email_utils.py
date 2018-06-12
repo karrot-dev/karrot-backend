@@ -3,6 +3,7 @@ from email.utils import formataddr
 import html2text
 from anymail.message import AnymailMessage
 from babel.dates import format_date, format_time
+from babel.core import Locale, UnknownLocaleError
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string, get_template
 from django.utils import translation
@@ -110,6 +111,11 @@ def prepare_email(template, user=None, context=None, to=None, language=None, **k
 
 
 def prepare_email_content(template, context, language='en'):
+    try:
+        Locale.parse(language)
+    except UnknownLocaleError:
+        language = 'en'
+
     with translation.override(language):
 
         html_content = None
