@@ -8,9 +8,11 @@ from django.utils import timezone
 from freezegun import freeze_time
 
 from config import settings
+from foodsaving.conversations.models import Conversation
 from foodsaving.groups.factories import GroupFactory, PlaygroundGroupFactory, InactiveGroupFactory
-from foodsaving.groups.models import GroupMembership
-from foodsaving.groups.tasks import process_inactive_users, send_summary_emails
+from foodsaving.groups.models import GroupMembership, GroupStatus
+from foodsaving.groups.tasks import process_inactive_users, send_summary_emails, mark_inactive_groups
+from foodsaving.history.models import History, HistoryTypus
 from foodsaving.pickups.factories import PickupDateFactory, FeedbackFactory
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
@@ -154,3 +156,63 @@ class TestSummaryEmailTask(TestCase):
                 'has_activity': False,
             },
         }])
+
+
+class TestMarkInactiveGroupsTask(TestCase):
+    def setUp(self):
+        self.group_no_recent_activity = GroupFactory()
+        self.group_with_recent_activity = GroupFactory()
+        self.user = UserFactory()
+        self.date_old = timezone.now() - timedelta(days=settings.NUMBER_OF_DAYS_GROUP_INACTIVE+3)
+        self.date_new = timezone.now() - timedelta(days=settings.NUMBER_OF_DAYS_GROUP_INACTIVE-3)
+
+    def test_mark_inactive_group_trigger_wall_messages(self):
+        conversation_old = Conversation.objects.get_or_create_for_target(self.group_no_recent_activity)
+        conversation_old.sync_users([self.user])
+        conversation_old.messages.create(author=self.user,
+                                         content='hello',
+                                         created_at=self.date_old)
+        conversation_new = Conversation.objects.get_or_create_for_target(self.group_with_recent_activity)
+        conversation_new.sync_users([self.user])
+        conversation_new.messages.create(author=self.user,
+                                         content='hello',
+                                         created_at=self.date_new)
+        mark_inactive_groups()
+        self.group_no_recent_activity.refresh_from_db()
+        self.group_with_recent_activity.refresh_from_db()
+        self.assertEqual(self.group_no_recent_activity.status, GroupStatus.INACTIVE.value)
+        self.assertEqual(self.group_with_recent_activity.status, GroupStatus.ACTIVE.value)
+
+    def test_mark_inactive_group_trigger_feedback(self):
+        store_old = StoreFactory(group=self.group_no_recent_activity)
+        store_new = StoreFactory(group=self.group_with_recent_activity)
+        pickup_old = PickupDateFactory(store=store_old)
+        pickup_new = PickupDateFactory(store=store_new)
+        FeedbackFactory(about=pickup_old, given_by=self.user, created_at=self.date_old)
+        FeedbackFactory(about=pickup_new, given_by=self.user, created_at=self.date_new)
+        mark_inactive_groups()
+        self.group_no_recent_activity.refresh_from_db()
+        self.group_with_recent_activity.refresh_from_db()
+        self.assertEqual(self.group_no_recent_activity.status, GroupStatus.INACTIVE.value)
+        self.assertEqual(self.group_with_recent_activity.status, GroupStatus.ACTIVE.value)
+
+    def test_mark_inactive_group_trigger_history(self):
+        History.objects.create(
+            typus=HistoryTypus.STORE_CREATE,
+            group=self.group_no_recent_activity,
+            store=StoreFactory(),
+            users=[self.user],
+            date=self.date_old,
+        )
+        History.objects.create(
+            typus=HistoryTypus.STORE_CREATE,
+            group=self.group_with_recent_activity,
+            store=StoreFactory(),
+            users=[self.user],
+            date=self.date_new,
+        )
+        mark_inactive_groups()
+        self.group_no_recent_activity.refresh_from_db()
+        self.group_with_recent_activity.refresh_from_db()
+        self.assertEqual(self.group_no_recent_activity.status, GroupStatus.INACTIVE.value)
+        self.assertEqual(self.group_with_recent_activity.status, GroupStatus.ACTIVE.value)
