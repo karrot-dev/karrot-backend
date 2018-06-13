@@ -163,8 +163,8 @@ class TestMarkInactiveGroupsTask(TestCase):
         self.group_no_recent_activity = GroupFactory()
         self.group_with_recent_activity = GroupFactory()
         self.user = UserFactory()
-        self.date_old = timezone.now() - timedelta(days=settings.NUMBER_OF_DAYS_GROUP_INACTIVE+3)
-        self.date_new = timezone.now() - timedelta(days=settings.NUMBER_OF_DAYS_GROUP_INACTIVE-3)
+        self.date_old = timezone.now() - timedelta(days=settings.NUMBER_OF_DAYS_GROUP_INACTIVE + 3)
+        self.date_new = timezone.now() - timedelta(days=settings.NUMBER_OF_DAYS_GROUP_INACTIVE - 3)
 
     def test_mark_inactive_group_trigger_wall_messages(self):
         conversation_old = Conversation.objects.get_or_create_for_target(self.group_no_recent_activity)
