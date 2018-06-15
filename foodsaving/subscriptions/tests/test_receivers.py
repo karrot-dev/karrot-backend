@@ -135,6 +135,47 @@ class ConversationReceiverTests(ChannelTestCase):
             }
         })
 
+    def test_other_participants_receive_update_on_join(self):
+        client = WSClient()
+        user = UserFactory()
+        joining_user = UserFactory()
+
+        # join a conversation
+        conversation = ConversationFactory()
+        conversation.join(user)
+
+        # login and connect
+        client.force_login(user)
+        client.send_and_consume('websocket.connect', path='/')
+
+        conversation.join(joining_user)
+
+        response = client.receive(json=True)
+
+        self.assertEqual(response['topic'], 'conversations:conversation')
+        self.assertEqual(set(response['payload']['participants']), {user.id, joining_user.id})
+
+    def test_other_participants_receive_update_on_leave(self):
+        client = WSClient()
+        user = UserFactory()
+        leaving_user = UserFactory()
+
+        # join a conversation
+        conversation = ConversationFactory()
+        conversation.join(user)
+        conversation.join(leaving_user)
+
+        # login and connect
+        client.force_login(user)
+        client.send_and_consume('websocket.connect', path='/')
+
+        conversation.leave(leaving_user)
+
+        response = client.receive(json=True)
+
+        self.assertEqual(response['topic'], 'conversations:conversation')
+        self.assertEqual(response['payload']['participants'], [user.id])
+
 
 class GroupReceiverTests(ChannelTestCase):
     def setUp(self):
