@@ -4,7 +4,7 @@ from collections import namedtuple
 from channels import Channel
 from django.conf import settings
 from django.db.models import Q
-from django.db.models.signals import post_save, pre_delete, m2m_changed
+from django.db.models.signals import post_save, pre_delete, m2m_changed, post_delete
 from django.dispatch import receiver
 
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage
@@ -106,6 +106,23 @@ def send_conversation_update(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic, payload)
 
 
+@receiver(post_save, sender=ConversationParticipant)
+def send_participant_joined(sender, instance, created, **kwargs):
+    """Notify other participants when someone joins"""
+    if not created:
+        return
+
+    conversation = instance.conversation
+
+    topic = 'conversations:conversation'
+
+    for subscription in ChannelSubscription.objects.recent() \
+            .filter(user__in=conversation.participants.all()) \
+            .exclude(user=instance.user):
+        payload = ConversationSerializer(conversation, context={'request': MockRequest(user=subscription.user)}).data
+        send_in_channel(subscription.reply_channel, topic, payload)
+
+
 @receiver(pre_delete, sender=ConversationParticipant)
 def remove_participant(sender, instance, **kwargs):
     """When a user is removed from a conversation we will notify them."""
@@ -120,6 +137,20 @@ def remove_participant(sender, instance, **kwargs):
                 'id': conversation.id
             }
         )
+
+
+@receiver(post_delete, sender=ConversationParticipant)
+def send_participant_left(sender, instance, **kwargs):
+    """Notify other conversation participants when someone leaves"""
+    conversation = instance.conversation
+
+    topic = 'conversations:conversation'
+
+    for subscription in ChannelSubscription.objects.recent() \
+            .filter(user__in=conversation.participants.all()) \
+            .exclude(user=instance.user):
+        payload = ConversationSerializer(conversation, context={'request': MockRequest(user=subscription.user)}).data
+        send_in_channel(subscription.reply_channel, topic, payload)
 
 
 # Group
