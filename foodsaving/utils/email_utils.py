@@ -110,6 +110,9 @@ def prepare_email(template, user=None, context=None, to=None, language=None, **k
 
 
 def prepare_email_content(template, context, language='en'):
+    if not translation.check_for_language(language):
+        language = 'en'
+
     with translation.override(language):
 
         html_content = None
