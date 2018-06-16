@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-04-17 15:00+0000\n"
+"POT-Creation-Date: 2018-06-16 10:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Tilmann Becker <tilmann.becker+github@gmail.com>, 2017\n"
 "Language-Team: Chinese (https://www.transifex.com/yunity-1/teams/68631/zh/)\n"
@@ -37,7 +37,8 @@ msgstr ""
 "%(site_name)s團隊"
 
 #: foodsaving/conversations/api.py:33 foodsaving/conversations/api.py:52
-#: foodsaving/conversations/serializers.py:123
+#: foodsaving/conversations/serializers.py:33
+#: foodsaving/conversations/serializers.py:130
 msgid "You are not in this conversation"
 msgstr "你並未加入對話"
 
@@ -321,6 +322,10 @@ msgstr "食物領取任務未完成"
 msgid "You aren't assigned to the pickup."
 msgstr "你並未被分配到此領取任務"
 
+#: foodsaving/pickups/serializers.py:231
+msgid "Both comment and weight cannot be blank."
+msgstr ""
+
 #: foodsaving/pickups/templates/pickup_notification.html.jinja2:4
 #: foodsaving/pickups/templates/pickup_notification.html.jinja2:130
 #: foodsaving/pickups/templates/pickup_notification.subject.jinja2:1
@@ -334,7 +339,7 @@ msgstr "今晚"
 
 #: foodsaving/pickups/templates/pickup_notification.html.jinja2:138
 msgid "The day is not over, there are still pickups to be done!"
-msgstr ""
+msgstr "還沒結束，還有食物要領取!"
 
 #: foodsaving/pickups/templates/pickup_notification.html.jinja2:141
 #: foodsaving/pickups/templates/pickup_notification.html.jinja2:169
@@ -465,8 +470,6 @@ msgid "Please click the following link to confirm your email:"
 msgstr "請底擊以下連結驗證你的電子郵件"
 
 #: foodsaving/users/templates/changemail_request.html.jinja2:111
-#: foodsaving/users/templates/mailverification.html.jinja2:4
-#: foodsaving/users/templates/mailverification.html.jinja2:109
 #: foodsaving/users/templates/signup.html.jinja2:108
 msgid "Verify your email address"
 msgstr "驗證你的電郵地址"
@@ -500,22 +503,6 @@ msgstr "你的新電子郵件地址是%(new_email)s"
 msgid "Your email address changed!"
 msgstr "你的電郵地址已更改"
 
-#: foodsaving/users/templates/mailverification.html.jinja2:108
-#, python-format
-msgid "Thank you for signing up to %(site_name)s!"
-msgstr "感謝你在%(site_name)s註冊"
-
-#: foodsaving/users/templates/mailverification.html.jinja2:108
-#, python-format
-msgid "Welcome to %(site_name)s, %(user_display_name)s!"
-msgstr "歡迎來到%(site_name)s, %(user_display_name)s!"
-
-#: foodsaving/users/templates/mailverification.html.jinja2:109
-msgid ""
-"After we get started, please confirm your email address by clicking the link"
-" below:"
-msgstr "在開通後，請點擊以下連結驗證你的電郵地址:"
-
 #: foodsaving/users/templates/passwordreset_request.html.jinja2:4
 #: foodsaving/users/templates/passwordreset_request.subject.jinja2:1
 msgid "Request to reset your password"
@@ -536,7 +523,7 @@ msgstr "點擊此連結以更改密碼"
 
 #: foodsaving/users/templates/passwordreset_request.html.jinja2:109
 msgid "Change password"
-msgstr ""
+msgstr "更改密碼"
 
 #: foodsaving/users/templates/passwordreset_success.html.jinja2:4
 #: foodsaving/users/templates/passwordreset_success.subject.jinja2:1

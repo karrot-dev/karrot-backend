@@ -8,8 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-04-17 15:00+0000\n"
+"POT-Creation-Date: 2018-06-16 10:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Thiago Mendes, 2018\n"
 "Language-Team: Portuguese (Brazil) (https://www.transifex.com/yunity-1/teams/68631/pt_BR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -24,7 +25,7 @@ msgstr ""
 
 #: foodsaving/base/templates/base-text.jinja2:2
 msgid "Hello,"
-msgstr ""
+msgstr "Oi,"
 
 #: foodsaving/base/templates/base-text.jinja2:5
 #, python-format
@@ -32,16 +33,19 @@ msgid ""
 "Yours,\n"
 "the %(site_name)s team"
 msgstr ""
+"Seu,\n"
+"1%(site_name)s time"
 
 #: foodsaving/conversations/api.py:33 foodsaving/conversations/api.py:52
-#: foodsaving/conversations/serializers.py:123
+#: foodsaving/conversations/serializers.py:33
+#: foodsaving/conversations/serializers.py:130
 msgid "You are not in this conversation"
-msgstr ""
+msgstr "Você não esta nessa conversa"
 
 #: foodsaving/conversations/templates/conversation_message_notification.html.jinja2:90
 msgid ""
 "You are receiving this because you are subscribed to this conversation."
-msgstr ""
+msgstr "Você esta recebendo isso porque você está inscrito nessa conversa."
 
 #: foodsaving/conversations/templates/conversation_message_notification.html.jinja2:91
 #, python-format
@@ -52,19 +56,19 @@ msgstr ""
 
 #: foodsaving/groups/api.py:27
 msgid "You are already a member."
-msgstr ""
+msgstr "Você já é um membro."
 
 #: foodsaving/groups/api.py:34
 msgid "You do not have permission to update memberships."
-msgstr ""
+msgstr "Você não tem permissão para atualizar membros."
 
 #: foodsaving/groups/serializers.py:23
 msgid "Unknown timezone"
-msgstr ""
+msgstr "Fuso horário desconhecido"
 
 #: foodsaving/groups/serializers.py:31
 msgid "Playground"
-msgstr ""
+msgstr "Parque de diversões"
 
 #: foodsaving/groups/serializers.py:100 foodsaving/groups/serializers.py:175
 msgid "You cannot manage agreements"
@@ -309,6 +313,10 @@ msgstr ""
 msgid "You aren't assigned to the pickup."
 msgstr ""
 
+#: foodsaving/pickups/serializers.py:231
+msgid "Both comment and weight cannot be blank."
+msgstr ""
+
 #: foodsaving/pickups/templates/pickup_notification.html.jinja2:4
 #: foodsaving/pickups/templates/pickup_notification.html.jinja2:130
 #: foodsaving/pickups/templates/pickup_notification.subject.jinja2:1
@@ -453,8 +461,6 @@ msgid "Please click the following link to confirm your email:"
 msgstr ""
 
 #: foodsaving/users/templates/changemail_request.html.jinja2:111
-#: foodsaving/users/templates/mailverification.html.jinja2:4
-#: foodsaving/users/templates/mailverification.html.jinja2:109
 #: foodsaving/users/templates/signup.html.jinja2:108
 msgid "Verify your email address"
 msgstr ""
@@ -486,22 +492,6 @@ msgstr ""
 
 #: foodsaving/users/templates/changemail_success.subject.jinja2:1
 msgid "Your email address changed!"
-msgstr ""
-
-#: foodsaving/users/templates/mailverification.html.jinja2:108
-#, python-format
-msgid "Thank you for signing up to %(site_name)s!"
-msgstr ""
-
-#: foodsaving/users/templates/mailverification.html.jinja2:108
-#, python-format
-msgid "Welcome to %(site_name)s, %(user_display_name)s!"
-msgstr ""
-
-#: foodsaving/users/templates/mailverification.html.jinja2:109
-msgid ""
-"After we get started, please confirm your email address by clicking the link"
-" below:"
 msgstr ""
 
 #: foodsaving/users/templates/passwordreset_request.html.jinja2:4
