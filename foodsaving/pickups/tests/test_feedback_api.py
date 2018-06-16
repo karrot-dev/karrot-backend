@@ -109,7 +109,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
 
     def test_create_feedback_fails_as_non_group_member(self):
         """
-        User is not allowed to give feedback when not a member of the stores group.
+        User is not allowed to give feedback when not a member of the store's group.
         """
         self.client.force_login(user=self.user)
         response = self.client.post(self.url, self.feedback_post, format='json')
@@ -118,8 +118,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
 
     def test_create_feedback_fails_as_non_collector(self):
         """
-        Group Member is not allowed to give feedback when he is not assigned to the
-        Pickup.
+        Group Member is not allowed to give feedback when he is not assigned to the pickup.
         """
         self.client.force_login(user=self.member)
         response = self.client.post(self.url, self.feedback_post, format='json')
@@ -178,7 +177,6 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
     def test_weight_and_comment_is_null_fails(self):
         """
         Both comment and weight cannot be empty
-        - non-working test at the moment
         """
         self.client.force_login(user=self.collector3)
         response = self.client.post(self.url, self.feedback_without_weight_comment, format='json')
@@ -315,3 +313,37 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
             response.data['detail'], 'You can\'t give feedback for pickups more than {} days ago.'
                                      .format(settings.FEEDBACK_POSSIBLE_DAYS)
         )
+
+    def test_patch_feedback_to_remove_weight(self):
+        self.client.force_login(user=self.collector)
+        response = self.client.patch(self.feedback_url, {'weight': None}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data['weight'], None)
+
+    def test_patch_feedback_to_remove_weight_fails_if_comment_is_empty(self):
+        self.client.force_login(user=self.collector)
+        self.feedback.comment = ''
+        self.feedback.save()
+        response = self.client.patch(self.feedback_url, {'weight': None}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(response.data, {'non_field_errors': ['Both comment and weight cannot be blank.']})
+
+    def test_patch_feedback_to_remove_comment(self):
+        self.client.force_login(user=self.collector)
+        response = self.client.patch(self.feedback_url, {'comment': ''}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data['comment'], '')
+
+    def test_patch_feedback_to_remove_comment_fails_if_weight_is_empty(self):
+        self.client.force_login(user=self.collector)
+        self.feedback.weight = None
+        self.feedback.save()
+        response = self.client.patch(self.feedback_url, {'comment': ''}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(response.data, {'non_field_errors': ['Both comment and weight cannot be blank.']})
+
+    def test_patch_feedback_to_remove_comment_and_weight_fails(self):
+        self.client.force_login(user=self.collector)
+        response = self.client.patch(self.feedback_url, {'comment': '', 'weight': None}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(response.data, {'non_field_errors': ['Both comment and weight cannot be blank.']})

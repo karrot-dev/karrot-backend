@@ -220,7 +220,14 @@ class FeedbackSerializer(serializers.ModelSerializer):
         return about
 
     def validate(self, data):
-        if data.get('comment') is None and data.get('weight') is None:
-            raise serializers.ValidationError("Both comment and weight cannot be blank.")
+        def get_instance_attr(field):
+            if self.instance is None:
+                return None
+            return getattr(self.instance, field)
+
+        comment = data.get('comment', get_instance_attr('comment'))
+        weight = data.get('weight', get_instance_attr('weight'))
+        if (comment is None or comment is '') and weight is None:
+            raise serializers.ValidationError(_('Both comment and weight cannot be blank.'))
         data['given_by'] = self.context['request'].user
         return data
