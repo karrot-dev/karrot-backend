@@ -10,29 +10,28 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-04-17 15:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Tilmann Becker <tilmann.becker+github@gmail.com>, 2017\n"
-"Language-Team: French (https://www.transifex.com/yunity-1/teams/68631/fr/)\n"
+"Language-Team: Portuguese (https://www.transifex.com/yunity-1/teams/68631/pt/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: fr\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Language: pt\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: foodsaving/base/templates/base-text.jinja2:1
 #, python-format
 msgid "Hello %(full_name)s,"
-msgstr "Salut %(full_name)s,"
+msgstr ""
 
 #: foodsaving/base/templates/base-text.jinja2:2
 msgid "Hello,"
-msgstr "Salut,"
+msgstr ""
 
 #: foodsaving/base/templates/base-text.jinja2:5
 #, python-format
 msgid ""
 "Yours,\n"
 "the %(site_name)s team"
-msgstr "Amicalement, l'équipe de %(site_name)s"
+msgstr ""
 
 #: foodsaving/conversations/api.py:33 foodsaving/conversations/api.py:52
 #: foodsaving/conversations/serializers.py:123
@@ -53,7 +52,7 @@ msgstr ""
 
 #: foodsaving/groups/api.py:27
 msgid "You are already a member."
-msgstr "Tu est déjà membre du groupe."
+msgstr ""
 
 #: foodsaving/groups/api.py:34
 msgid "You do not have permission to update memberships."
@@ -61,7 +60,7 @@ msgstr ""
 
 #: foodsaving/groups/serializers.py:23
 msgid "Unknown timezone"
-msgstr "Fuseau horaire inconnu"
+msgstr ""
 
 #: foodsaving/groups/serializers.py:31
 msgid "Playground"
@@ -81,7 +80,7 @@ msgstr ""
 
 #: foodsaving/groups/serializers.py:240
 msgid "Group password is wrong"
-msgstr "Le mot de passe du groupe privé est incorrect."
+msgstr ""
 
 #: foodsaving/groups/templates/group_summary.html.jinja2:4
 #: foodsaving/groups/templates/group_summary.html.jinja2:108
@@ -223,17 +222,17 @@ msgstr ""
 #: foodsaving/invitations/serializers.py:26
 #: foodsaving/stores/serializers.py:64
 msgid "You are not a member of this group."
-msgstr "Tu n'est pas membre de ce groupe."
+msgstr ""
 
 #: foodsaving/invitations/serializers.py:31
 msgid "User is already member of group"
-msgstr "L'utilisateur est déjà membre du groupe."
+msgstr ""
 
 #: foodsaving/invitations/templates/emailinvitation.html.jinja2:4
 #: foodsaving/invitations/templates/emailinvitation.subject.jinja2:1
 #, python-format
 msgid "Invitation to join %(group_name)s"
-msgstr "Invitation de joinde %(group_name)s"
+msgstr ""
 
 #: foodsaving/invitations/templates/emailinvitation.html.jinja2:108
 #, python-format
@@ -257,23 +256,23 @@ msgstr ""
 
 #: foodsaving/pickups/permissions.py:7
 msgid "The pickup date is in the past."
-msgstr "La date de récolte est dans le passé."
+msgstr ""
 
 #: foodsaving/pickups/permissions.py:18
 msgid "You can only delete empty pickup dates."
-msgstr "Tu peux effacer des récoltes seulement s'ils sont vides."
+msgstr ""
 
 #: foodsaving/pickups/permissions.py:25
 msgid "You have not joined this pickup date."
-msgstr "Tu n'as pas rejoint cette récolte."
+msgstr ""
 
 #: foodsaving/pickups/permissions.py:32
 msgid "You have already joined this pickup date."
-msgstr "Tu as rejoint cette récolte déjà."
+msgstr ""
 
 #: foodsaving/pickups/permissions.py:39
 msgid "Pickup date is already full."
-msgstr "Cette récolte est pleine."
+msgstr ""
 
 #: foodsaving/pickups/permissions.py:46
 msgid "This feedback is given by another user."
@@ -288,11 +287,11 @@ msgstr ""
 #: foodsaving/pickups/serializers.py:37 foodsaving/pickups/serializers.py:171
 #: foodsaving/pickups/serializers.py:210
 msgid "You are not member of the store's group."
-msgstr "Tu n'est pas membre du groupe du magasin."
+msgstr ""
 
 #: foodsaving/pickups/serializers.py:86
 msgid "The date should be in the future."
-msgstr "La date doit être dans le futur."
+msgstr ""
 
 #: foodsaving/pickups/serializers.py:182
 msgid "Invalid recurrence rule."
@@ -300,7 +299,7 @@ msgstr ""
 
 #: foodsaving/pickups/serializers.py:184
 msgid "Only single recurrence rules are allowed."
-msgstr "Seulement des règles de recurrence individuelles sont permises."
+msgstr ""
 
 #: foodsaving/pickups/serializers.py:212
 msgid "The pickup is not done yet"
@@ -352,7 +351,7 @@ msgstr ""
 
 #: foodsaving/stores/serializers.py:69
 msgid "Set at least one week in advance"
-msgstr "Une semaine en avance est minimum!"
+msgstr ""
 
 #: foodsaving/userauth/api.py:91 foodsaving/userauth/serializers.py:79
 #: foodsaving/userauth/serializers.py:124
@@ -364,7 +363,7 @@ msgstr ""
 
 #: foodsaving/userauth/permissions.py:6
 msgid "Mail is already verified."
-msgstr "Adresse mail est déjà verifiée."
+msgstr ""
 
 #: foodsaving/userauth/serializers.py:66
 #: foodsaving/userauth/serializers.py:161
@@ -391,7 +390,7 @@ msgstr ""
 #: foodsaving/users/templates/accountdelete_request.html.jinja2:4
 #: foodsaving/users/templates/accountdelete_request.subject.jinja2:1
 msgid "Request to delete your account"
-msgstr "Demande d'effacer ton compte"
+msgstr ""
 
 #: foodsaving/users/templates/accountdelete_request.html.jinja2:108
 #, python-format
@@ -439,7 +438,7 @@ msgstr ""
 #: foodsaving/users/templates/changemail_request.html.jinja2:4
 #: foodsaving/users/templates/signup.html.jinja2:4
 msgid "Please verify your email"
-msgstr "Verifie ton email s'il te plaît"
+msgstr ""
 
 #: foodsaving/users/templates/changemail_request.html.jinja2:109
 #, python-format
@@ -530,7 +529,7 @@ msgstr ""
 #: foodsaving/users/templates/passwordreset_success.html.jinja2:4
 #: foodsaving/users/templates/passwordreset_success.subject.jinja2:1
 msgid "New password set!"
-msgstr "Nouveau mot de passe créé!"
+msgstr ""
 
 #: foodsaving/users/templates/passwordreset_success.html.jinja2:108
 #, python-format
@@ -539,7 +538,7 @@ msgstr ""
 
 #: foodsaving/users/templates/passwordreset_success.html.jinja2:108
 msgid "Your password has been successfully changed!"
-msgstr "Ton mot de passe a été changé!"
+msgstr ""
 
 #: foodsaving/users/templates/signup.html.jinja2:108
 #, python-format

@@ -6,6 +6,7 @@ from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
+from foodsaving.conversations.api import RetrieveConversationMixin
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.pickups.filters import (
     PickupDatesFilter, PickupDateSeriesFilter, FeedbackFilter
@@ -107,7 +108,8 @@ class PickupDateViewSet(
     PartialUpdateModelMixin,
     mixins.DestroyModelMixin,
     mixins.ListModelMixin,
-    GenericViewSet
+    GenericViewSet,
+    RetrieveConversationMixin
 ):
     """
     Pickup Dates
@@ -162,3 +164,8 @@ class PickupDateViewSet(
     )
     def remove(self, request, pk=None):
         return self.partial_update(request)
+
+    @detail_route()
+    def conversation(self, request, pk=None):
+        """Get conversation ID of this pickup"""
+        return self.retrieve_conversation(request, pk)

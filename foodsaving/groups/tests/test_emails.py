@@ -98,6 +98,30 @@ class TestGroupSummaryEmails(APITestCase):
 
         self.assertNotIn(self.user_without_notifications.email, to)
 
+    def test_creates_emails_unknown_locale(self):
+        n = 5
+
+        for _ in list(range(n)):
+            self.group.add_member(VerifiedUserFactory(language='dummy'))
+
+        from_date, to_date = group_emails.calculate_group_summary_dates(self.group)
+        context = group_emails.prepare_group_summary_data(self.group, from_date, to_date)
+        emails = group_emails.prepare_group_summary_emails(self.group, context)
+        self.assertEqual(len(emails), 1)
+
+        expected_members = self.group.members.filter(
+            groupmembership__in=GroupMembership.objects.active().with_notification_type(
+                GroupNotificationType.WEEKLY_SUMMARY
+            )
+        ).exclude(
+            groupmembership__user__in=get_user_model().objects.unverified_or_ignored()
+        )
+
+        self.assertEqual(
+            sorted(emails[0].to),
+            sorted([member.email for member in expected_members])
+        )
+        self.assertNotIn(self.user_without_notifications.email, emails[0].to)
 
     def test_ignores_deleted_pickups(self):
         a_few_days_ago = timezone.now() - relativedelta(days=4)
@@ -114,7 +138,6 @@ class TestGroupSummaryEmails(APITestCase):
         data = foodsaving.groups.emails.prepare_group_summary_data(self.group, from_date, to_date)
 
         self.assertEqual(data['pickups_done_count'], 0)
-
 
     def test_group_summary_data(self):
 
