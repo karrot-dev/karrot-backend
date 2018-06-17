@@ -23,9 +23,11 @@ from foodsaving.tests.utils import ReceiveAllWSClient
 from foodsaving.users.factories import UserFactory
 from foodsaving.utils.tests.fake import faker
 
+
 def parse_dates(data):
     data['payload']['created_at'] = parse(data['payload']['created_at'])
     data['payload']['updated_at'] = parse(data['payload']['updated_at'])
+
 
 def make_conversation_message_broadcast(message, **kwargs):
     response = {
@@ -44,6 +46,7 @@ def make_conversation_message_broadcast(message, **kwargs):
     }
     response['payload'].update(kwargs)
     return response
+
 
 def make_conversation_broadcast(conversation, **kwargs):
     response = {

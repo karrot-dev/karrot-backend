@@ -62,10 +62,11 @@ def send_messages(sender, instance, **kwargs):
 
     # Send push notifications when a message is created, but not when it is modified
     if kwargs.get('created') is True:
-        tokens = [item.token for item in
-                PushSubscription.objects.filter(
-                    Q(user__in=conversation.participants.all()) & ~Q(user__in=push_exclude_users) & ~Q(
-                        user=message.author))]
+        tokens = [item.token for item in PushSubscription.objects.filter(
+            Q(user__in=conversation.participants.all()) &
+            ~Q(user__in=push_exclude_users) &
+            ~Q(user=message.author)
+        )]
 
         if len(tokens) > 0:
             message_title = message.author.display_name
