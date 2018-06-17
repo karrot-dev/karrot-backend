@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-06-16 10:54+0000\n"
+"POT-Creation-Date: 2018-06-17 10:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Thiago Mendes, 2018\n"
 "Language-Team: Portuguese (Brazil) (https://www.transifex.com/yunity-1/teams/68631/pt_BR/)\n"
@@ -36,11 +36,19 @@ msgstr ""
 "Seu,\n"
 "1%(site_name)s time"
 
-#: foodsaving/conversations/api.py:33 foodsaving/conversations/api.py:52
+#: foodsaving/conversations/api.py:36 foodsaving/conversations/api.py:55
 #: foodsaving/conversations/serializers.py:33
-#: foodsaving/conversations/serializers.py:130
+#: foodsaving/conversations/serializers.py:131
 msgid "You are not in this conversation"
 msgstr "Você não esta nessa conversa"
+
+#: foodsaving/conversations/api.py:64
+msgid "You are not the author of this message"
+msgstr ""
+
+#: foodsaving/conversations/api.py:73
+msgid "You cannot edit a message more than 10 days after its creation."
+msgstr ""
 
 #: foodsaving/conversations/templates/conversation_message_notification.html.jinja2:90
 msgid ""
