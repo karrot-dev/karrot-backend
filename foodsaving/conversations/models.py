@@ -3,11 +3,13 @@ import markdown
 import pymdownx.emoji
 import pymdownx.superfences
 from bleach_whitelist.bleach_whitelist import markdown_tags, markdown_attrs
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import ForeignKey, TextField, ManyToManyField, BooleanField, CharField
+from django.utils import timezone
 from django.utils.text import Truncator
 
 from foodsaving.base.base_models import BaseModel, UpdatedAtMixin
@@ -87,6 +89,9 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
             clean_html = Truncator(clean_html).words(num=truncate_words, html=True)
 
         return clean_html
+
+    def is_recent(self):
+        return self.created_at >= timezone.now() - relativedelta(days=settings.MESSAGE_EDIT_DAYS)
 
 
 class ConversationMixin(object):
