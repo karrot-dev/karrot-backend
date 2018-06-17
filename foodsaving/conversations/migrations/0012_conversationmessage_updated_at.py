@@ -2,6 +2,9 @@
 
 from django.db import migrations, models
 
+def set_updated_at_default(apps, schema_editor):
+    ConversationMessage = apps.get_model('conversations', 'ConversationMessage')
+    ConversationMessage.objects.update(updated_at=models.F('created_at'))
 
 class Migration(migrations.Migration):
 
@@ -15,4 +18,5 @@ class Migration(migrations.Migration):
             name='updated_at',
             field=models.DateTimeField(auto_now=True),
         ),
+        migrations.RunPython(set_updated_at_default)
     ]
