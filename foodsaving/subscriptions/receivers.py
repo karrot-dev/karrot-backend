@@ -50,7 +50,6 @@ def send_messages(sender, instance, **kwargs):
     conversation = message.conversation
 
     topic = 'conversations:message'
-    payload = ConversationMessageSerializer(message).data
 
     push_exclude_users = []
 
@@ -58,27 +57,29 @@ def send_messages(sender, instance, **kwargs):
         if not subscription.away_at:
             push_exclude_users.append(subscription.user)
 
+        payload = ConversationMessageSerializer(message, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
-    tokens = [item.token for item in
-              PushSubscription.objects.filter(
-                  Q(user__in=conversation.participants.all()) & ~Q(user__in=push_exclude_users) & ~Q(
-                      user=message.author))]
+    # Send push notifications when a message is created, but not when it is modified
+    if kwargs.get('created') is True:
+        tokens = [item.token for item in
+                PushSubscription.objects.filter(
+                    Q(user__in=conversation.participants.all()) & ~Q(user__in=push_exclude_users) & ~Q(
+                        user=message.author))]
 
-    if len(tokens) > 0:
+        if len(tokens) > 0:
+            message_title = message.author.display_name
+            if isinstance(conversation.target, Group):
+                message_title = '{} / {}'.format(conversation.target.name, message_title)
 
-        message_title = message.author.display_name
-        if isinstance(conversation.target, Group):
-            message_title = '{} / {}'.format(conversation.target.name, message_title)
-
-        notify_multiple_devices(
-            registration_ids=tokens,
-            message_title=message_title,
-            message_body=message.content,
-            # this causes each notification for a given conversation to replace previous notifications
-            # fancier would be to make the new notifications show a summary not just the latest message
-            tag='conversation:{}'.format(conversation.id)
-        )
+            notify_multiple_devices(
+                registration_ids=tokens,
+                message_title=message_title,
+                message_body=message.content,
+                # this causes each notification for a given conversation to replace previous notifications
+                # fancier would be to make the new notifications show a summary not just the latest message
+                tag='conversation:{}'.format(conversation.id)
+            )
 
     # Send conversations object to participants after sending a message
     # (important for unread_message_count)

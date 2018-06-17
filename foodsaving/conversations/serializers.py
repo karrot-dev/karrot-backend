@@ -120,11 +120,16 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
             'reactions',
-            'received_via'
+            'received_via',
+            'is_editable'
         ]
         read_only_fields = ('author', 'id', 'created_at', 'received_via')
 
     reactions = ConversationMessageReactionSerializer(many=True, read_only=True)
+    is_editable = serializers.SerializerMethodField()
+
+    def get_is_editable(self, message):
+        return message.is_recent() and message.author == self.context['request'].user
 
     def validate_conversation(self, conversation):
         if self.context['request'].user not in conversation.participants.all():
