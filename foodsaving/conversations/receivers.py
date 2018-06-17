@@ -15,7 +15,15 @@ def mark_as_read(sender, instance, **kwargs):
         conversation=message.conversation
     )
 
-    participant.seen_up_to = message
+    # When a message is updated, the participants seen_up_to
+    # member variable gets set to that updated message. Perform the below
+    # check to ensure this does not occur.
+    if participant.seen_up_to:
+        if participant.seen_up_to.id < message.id:
+            participant.seen_up_to = message
+    else:
+        participant.seen_up_to = message
+
     participant.save()
 
 

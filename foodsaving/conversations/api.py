@@ -1,3 +1,5 @@
+from datetime import timedelta
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
@@ -8,6 +10,7 @@ from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 from foodsaving.conversations.models import (
     Conversation,
@@ -55,6 +58,27 @@ class IsMessageConversationParticipant(BasePermission):
         return message.conversation.participants.filter(id=request.user.id).exists()
 
 
+class IsAuthorConversationMessage(BasePermission):
+    """Is the user the author of the message they wish to update?"""
+
+    message = _('You are not the author of this message')
+
+    def has_object_permission(self, request, view, message):
+        return request.user == message.author
+
+
+class IsWithinUpdatePeriod(BasePermission):
+    """Is the message being updated within 10 days of its creation?"""
+
+    message = _('You cannot edit a message more than 10 days after its creation.')
+
+    def has_object_permission(self, request, view, message):
+        earliest_creation_date = timezone.now() - timedelta(days=10)
+        if message.created_at >= earliest_creation_date:
+            return True
+        return False
+
+
 class ConversationViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
@@ -99,6 +123,7 @@ class ConversationViewSet(
 class ConversationMessageViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
+    PartialUpdateModelMixin,
     GenericViewSet
 ):
     """
@@ -107,13 +132,23 @@ class ConversationMessageViewSet(
 
     queryset = ConversationMessage.objects
     serializer_class = ConversationMessageSerializer
-    permission_classes = (IsAuthenticated, IsConversationParticipant)
+    permission_classes = (
+        IsAuthenticated,
+        IsConversationParticipant,
+        IsMessageConversationParticipant,
+        IsAuthorConversationMessage,
+        IsWithinUpdatePeriod,
+    )
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('conversation',)
     pagination_class = MessagePagination
 
     def get_queryset(self):
         return self.queryset.filter(conversation__participants=self.request.user)
+
+    def partial_update(self, request, *args, **kwargs):
+        """Update one of your messages"""
+        return super().partial_update(request)
 
     @detail_route(
         methods=('POST',),
@@ -149,7 +184,6 @@ class ConversationMessageViewSet(
         """route for DELETE /messages/{id}/reactions/{name}/"""
 
         name = EmojiField.to_internal_value(None, name)
-
         message = get_object_or_404(ConversationMessage, id=pk)
 
         # object permissions check has to be triggered manually

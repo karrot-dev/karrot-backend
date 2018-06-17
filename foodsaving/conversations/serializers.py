@@ -118,6 +118,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
             'content',
             'conversation',
             'created_at',
+            'updated_at',
             'reactions',
             'received_via'
         ]

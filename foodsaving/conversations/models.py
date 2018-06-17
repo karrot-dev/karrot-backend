@@ -64,7 +64,7 @@ class ConversationParticipant(BaseModel, UpdatedAtMixin):
     email_notifications = BooleanField(default=True)
 
 
-class ConversationMessage(BaseModel):
+class ConversationMessage(BaseModel, UpdatedAtMixin):
     """A message in the conversation by a particular user."""
     author = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     conversation = ForeignKey(Conversation, related_name='messages', on_delete=models.CASCADE)

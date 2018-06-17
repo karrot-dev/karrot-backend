@@ -2,6 +2,8 @@ from dateutil.parser import parse
 from django.core import mail
 from rest_framework import status
 from rest_framework.test import APITestCase
+from datetime import timedelta
+from django.utils import timezone
 
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationParticipant, Conversation, ConversationMessage, \
@@ -511,3 +513,56 @@ class TestConversationsMessageReactionsDeleteAPI(APITestCase):
             format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+
+class TestConversationsMessageEditPatchAPI(APITestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.user2 = UserFactory()
+        self.group = GroupFactory(members=[self.user])
+        self.conversation = Conversation.objects.get_or_create_for_target(self.group)
+        self.conversation.join(self.user)
+        self.participant = ConversationParticipant.objects.get(conversation=self.conversation, user=self.user)
+        self.message = self.conversation.messages.create(author=self.user, content='hello')
+
+        self.group2 = GroupFactory(members=[self.user, self.user2])
+        self.conversation2 = Conversation.objects.get_or_create_for_target(self.group2)
+        self.conversation2.join(self.user)
+        self.conversation2.join(self.user2)
+        self.message2 = self.conversation2.messages.create(author=self.user, content='hello2')
+        self.message3 = self.conversation2.messages.create(
+            author=self.user, content='hello3',
+            created_at=(timezone.now() - timedelta(days=10)),
+        )
+
+    def test_update_message(self):
+        self.client.force_login(user=self.user)
+        data = {'content': 'hi'}
+        response = self.client.patch('/api/messages/{}/'.format(self.message.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+    def test_cannot_update_message_without_specifying_content(self):
+        self.client.force_login(user=self.user)
+        data = {'content': ''}
+        response = self.client.patch('/api/messages/{}/'.format(self.message.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_cannot_update_message_if_not_in_conversation(self):
+        self.client.force_login(user=self.user2)
+        data = {'content': 'a nice message'}
+        response = self.client.patch('/api/messages/{}/'.format(self.message.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    # Even if the participant is in the conversation,
+    # they cannot edit messages they did not create.
+    def test_cannot_update_message_if_not_message_author(self):
+        self.client.force_login(user=self.user2)
+        data = {'content': 'a nicer message'}
+        response = self.client.patch('/api/messages/{}/'.format(self.message2.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_cannot_update_message_if_past_10_days(self):
+        self.client.force_login(user=self.user)
+        data = {'content': 'a nicer message'}
+        response = self.client.patch('/api/messages/{}/'.format(self.message3.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

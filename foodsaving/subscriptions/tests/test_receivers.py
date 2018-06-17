@@ -49,6 +49,7 @@ class ConversationReceiverTests(ChannelTestCase):
         # hopefully they receive it!
         response = client.receive(json=True)
         response['payload']['created_at'] = parse(response['payload']['created_at'])
+        response['payload']['updated_at'] = parse(response['payload']['updated_at'])
         self.assertEqual(response, {
             'topic': 'conversations:message',
             'payload': {
@@ -57,6 +58,7 @@ class ConversationReceiverTests(ChannelTestCase):
                 'author': message.author.id,
                 'conversation': conversation.id,
                 'created_at': message.created_at,
+                'updated_at': message.updated_at,
                 'received_via': '',
                 'reactions': []
             }
@@ -82,6 +84,7 @@ class ConversationReceiverTests(ChannelTestCase):
         # author should get message & updated conversations object too
         response = author_client.receive(json=True)
         response['payload']['created_at'] = parse(response['payload']['created_at'])
+        response['payload']['updated_at'] = parse(response['payload']['updated_at'])
         self.assertEqual(response, {
             'topic': 'conversations:message',
             'payload': {
@@ -90,6 +93,7 @@ class ConversationReceiverTests(ChannelTestCase):
                 'author': message.author.id,
                 'conversation': conversation.id,
                 'created_at': message.created_at,
+                'updated_at': message.updated_at,
                 'received_via': '',
                 'reactions': []
             }
