@@ -11,6 +11,7 @@ from django.dispatch import Signal
 from django.utils import timezone
 
 from foodsaving.base.base_models import BaseModel
+from foodsaving.conversations.models import ConversationMixin
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.pickups import stats
 
@@ -158,7 +159,7 @@ class PickupDateManager(models.Manager):
             & ~Q(feedback__given_by=user)
 
 
-class PickupDate(BaseModel):
+class PickupDate(BaseModel, ConversationMixin):
     objects = PickupDateManager()
 
     class Meta:

@@ -26,6 +26,13 @@ class ConversationSerializer(serializers.ModelSerializer):
     updated_at = serializers.SerializerMethodField()
     email_notifications = serializers.SerializerMethodField()
 
+    def validate(self, data):
+        """Check the user is a participant"""
+        conversation = self.instance
+        if self.context['request'].user not in conversation.participants.all():
+            raise PermissionDenied(_('You are not in this conversation'))
+        return data
+
     def get_seen_up_to(self, conversation):
         user = self.context['request'].user
         participant = conversation.conversationparticipant_set.get(user=user)

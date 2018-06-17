@@ -40,3 +40,7 @@ class CreatePushSubscriptionSerializer(PushSubscriptionSerializer):
         read_only=True,
         default=CurrentUserDefault()
     )
+
+    def validate(self, attrs):
+        attrs['user'] = self.context['request'].user
+        return attrs

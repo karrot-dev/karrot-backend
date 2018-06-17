@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-27 18:36+0000\n"
+"POT-Creation-Date: 2018-06-16 10:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: Swedish (https://www.transifex.com/yunity-1/teams/68631/sv/)\n"
 "MIME-Version: 1.0\n"
@@ -34,7 +34,8 @@ msgid ""
 msgstr ""
 
 #: foodsaving/conversations/api.py:33 foodsaving/conversations/api.py:52
-#: foodsaving/conversations/serializers.py:123
+#: foodsaving/conversations/serializers.py:33
+#: foodsaving/conversations/serializers.py:130
 msgid "You are not in this conversation"
 msgstr ""
 
@@ -309,6 +310,10 @@ msgstr ""
 msgid "You aren't assigned to the pickup."
 msgstr ""
 
+#: foodsaving/pickups/serializers.py:231
+msgid "Both comment and weight cannot be blank."
+msgstr ""
+
 #: foodsaving/pickups/templates/pickup_notification.html.jinja2:4
 #: foodsaving/pickups/templates/pickup_notification.html.jinja2:130
 #: foodsaving/pickups/templates/pickup_notification.subject.jinja2:1
@@ -318,6 +323,10 @@ msgstr ""
 
 #: foodsaving/pickups/templates/pickup_notification.html.jinja2:134
 msgid "Tonight"
+msgstr ""
+
+#: foodsaving/pickups/templates/pickup_notification.html.jinja2:138
+msgid "The day is not over, there are still pickups to be done!"
 msgstr ""
 
 #: foodsaving/pickups/templates/pickup_notification.html.jinja2:141
@@ -449,9 +458,6 @@ msgid "Please click the following link to confirm your email:"
 msgstr ""
 
 #: foodsaving/users/templates/changemail_request.html.jinja2:111
-#: foodsaving/users/templates/mailverification.html.jinja2:4
-#: foodsaving/users/templates/mailverification.html.jinja2:109
-#: foodsaving/users/templates/passwordreset_request.html.jinja2:109
 #: foodsaving/users/templates/signup.html.jinja2:108
 msgid "Verify your email address"
 msgstr ""
@@ -485,22 +491,6 @@ msgstr ""
 msgid "Your email address changed!"
 msgstr ""
 
-#: foodsaving/users/templates/mailverification.html.jinja2:108
-#, python-format
-msgid "Thank you for signing up to %(site_name)s!"
-msgstr ""
-
-#: foodsaving/users/templates/mailverification.html.jinja2:108
-#, python-format
-msgid "Welcome to %(site_name)s, %(user_display_name)s!"
-msgstr ""
-
-#: foodsaving/users/templates/mailverification.html.jinja2:109
-msgid ""
-"After we get started, please confirm your email address by clicking the link"
-" below:"
-msgstr ""
-
 #: foodsaving/users/templates/passwordreset_request.html.jinja2:4
 #: foodsaving/users/templates/passwordreset_request.subject.jinja2:1
 msgid "Request to reset your password"
@@ -517,6 +507,10 @@ msgstr ""
 
 #: foodsaving/users/templates/passwordreset_request.html.jinja2:109
 msgid "Click this link to change it:"
+msgstr ""
+
+#: foodsaving/users/templates/passwordreset_request.html.jinja2:109
+msgid "Change password"
 msgstr ""
 
 #: foodsaving/users/templates/passwordreset_success.html.jinja2:4
