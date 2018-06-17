@@ -24,6 +24,46 @@ from foodsaving.users.factories import UserFactory
 from foodsaving.utils.tests.fake import faker
 
 
+def parse_dates(data):
+    data['payload']['created_at'] = parse(data['payload']['created_at'])
+    data['payload']['updated_at'] = parse(data['payload']['updated_at'])
+
+
+def make_conversation_message_broadcast(message, **kwargs):
+    response = {
+        'topic': 'conversations:message',
+        'payload': {
+            'id': message.id,
+            'content': message.content,
+            'author': message.author.id,
+            'conversation': message.conversation.id,
+            'created_at': message.created_at,
+            'updated_at': message.updated_at,
+            'received_via': '',
+            'reactions': [],
+            'is_editable': False
+        }
+    }
+    response['payload'].update(kwargs)
+    return response
+
+
+def make_conversation_broadcast(conversation, **kwargs):
+    response = {
+        'topic': 'conversations:conversation',
+        'payload': {
+            'id': conversation.id,
+            'created_at': conversation.created_at,
+            'updated_at': conversation.updated_at,
+            'seen_up_to': None,
+            'unread_message_count': 0,
+            'email_notifications': True,
+        }
+    }
+    response['payload'].update(kwargs)
+    return response
+
+
 class ConversationReceiverTests(ChannelTestCase):
     def test_receives_messages(self):
         self.maxDiff = None
@@ -48,75 +88,39 @@ class ConversationReceiverTests(ChannelTestCase):
 
         # hopefully they receive it!
         response = client.receive(json=True)
-        response['payload']['created_at'] = parse(response['payload']['created_at'])
-        response['payload']['updated_at'] = parse(response['payload']['updated_at'])
-        self.assertEqual(response, {
-            'topic': 'conversations:message',
-            'payload': {
-                'id': message.id,
-                'content': message.content,
-                'author': message.author.id,
-                'conversation': conversation.id,
-                'created_at': message.created_at,
-                'updated_at': message.updated_at,
-                'received_via': '',
-                'reactions': []
-            }
-        })
+        parse_dates(response)
+        self.assertEqual(
+            response,
+            make_conversation_message_broadcast(message)
+        )
 
         # and they should get an updated conversation object
         response = client.receive(json=True)
-        response['payload']['created_at'] = parse(response['payload']['created_at'])
-        response['payload']['updated_at'] = parse(response['payload']['updated_at'])
+        parse_dates(response)
         del response['payload']['participants']
-        self.assertEqual(response, {
-            'topic': 'conversations:conversation',
-            'payload': {
-                'id': conversation.id,
-                'created_at': conversation.created_at,
-                'updated_at': conversation.updated_at,
-                'seen_up_to': None,
-                'unread_message_count': 1,
-                'email_notifications': True,
-            }
-        })
+        self.assertEqual(
+            response,
+            make_conversation_broadcast(conversation, unread_message_count=1)
+        )
 
         # author should get message & updated conversations object too
         response = author_client.receive(json=True)
-        response['payload']['created_at'] = parse(response['payload']['created_at'])
-        response['payload']['updated_at'] = parse(response['payload']['updated_at'])
-        self.assertEqual(response, {
-            'topic': 'conversations:message',
-            'payload': {
-                'id': message.id,
-                'content': message.content,
-                'author': message.author.id,
-                'conversation': conversation.id,
-                'created_at': message.created_at,
-                'updated_at': message.updated_at,
-                'received_via': '',
-                'reactions': []
-            }
-        })
+        parse_dates(response)
+        self.assertEqual(
+            response,
+            make_conversation_message_broadcast(message, is_editable=True)
+        )
 
         # Author receives more recent `update_at` time,
         # because their `seen_up_to` status is set after sending the message.
         author_participant = conversation.conversationparticipant_set.get(user=author)
         response = author_client.receive(json=True)
-        response['payload']['created_at'] = parse(response['payload']['created_at'])
-        response['payload']['updated_at'] = parse(response['payload']['updated_at'])
+        parse_dates(response)
         del response['payload']['participants']
-        self.assertEqual(response, {
-            'topic': 'conversations:conversation',
-            'payload': {
-                'id': conversation.id,
-                'created_at': conversation.created_at,
-                'updated_at': author_participant.updated_at,
-                'seen_up_to': message.id,
-                'unread_message_count': 0,
-                'email_notifications': True,
-            }
-        })
+        self.assertEqual(
+            response,
+            make_conversation_broadcast(conversation, seen_up_to=message.id, updated_at=author_participant.updated_at)
+        )
 
     def tests_receive_message_on_leave(self):
         client = WSClient()

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-06-17 10:07+0000\n"
+"POT-Creation-Date: 2018-06-17 17:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Yashvi Shah <yashvi4100@gmail.com>, 2018\n"
 "Language-Team: Gujarati (https://www.transifex.com/yunity-1/teams/68631/gu/)\n"
@@ -36,18 +36,20 @@ msgstr ""
 "આપનો,\n"
 "%(site_name)sટીમ"
 
-#: foodsaving/conversations/api.py:36 foodsaving/conversations/api.py:55
+#: foodsaving/conversations/api.py:37 foodsaving/conversations/api.py:56
 #: foodsaving/conversations/serializers.py:33
-#: foodsaving/conversations/serializers.py:131
+#: foodsaving/conversations/serializers.py:136
 msgid "You are not in this conversation"
 msgstr "તમે આ વાર્તાલાપમાં નથી"
 
-#: foodsaving/conversations/api.py:64
+#: foodsaving/conversations/api.py:65
 msgid "You are not the author of this message"
 msgstr ""
 
-#: foodsaving/conversations/api.py:73
-msgid "You cannot edit a message more than 10 days after its creation."
+#: foodsaving/conversations/api.py:72
+#, python-format
+msgid ""
+"You can't edit a message more than %(days_number)s days after its creation."
 msgstr ""
 
 #: foodsaving/conversations/templates/conversation_message_notification.html.jinja2:90

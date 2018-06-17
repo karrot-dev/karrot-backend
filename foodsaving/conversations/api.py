@@ -1,5 +1,4 @@
-from datetime import timedelta
-from django.utils import timezone
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
@@ -68,15 +67,11 @@ class IsAuthorConversationMessage(BasePermission):
 
 
 class IsWithinUpdatePeriod(BasePermission):
-    """Is the message being updated within 10 days of its creation?"""
-
-    message = _('You cannot edit a message more than 10 days after its creation.')
+    message = _('You can\'t edit a message more than %(days_number)s days after its creation.') % \
+        {'days_number': settings.MESSAGE_EDIT_DAYS}
 
     def has_object_permission(self, request, view, message):
-        earliest_creation_date = timezone.now() - timedelta(days=10)
-        if message.created_at >= earliest_creation_date:
-            return True
-        return False
+        return message.is_recent()
 
 
 class ConversationViewSet(
