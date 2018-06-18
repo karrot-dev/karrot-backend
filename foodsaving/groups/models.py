@@ -1,3 +1,4 @@
+import datetime
 from enum import Enum
 
 from django.conf import settings
@@ -8,8 +9,9 @@ from django.utils import timezone
 from timezone_field import TimeZoneField
 
 from foodsaving.base.base_models import BaseModel, LocationModel
-from foodsaving.conversations.models import ConversationMixin
+from foodsaving.conversations.models import Conversation, ConversationMixin
 from foodsaving.history.models import History, HistoryTypus
+from foodsaving.pickups.models import Feedback
 
 
 class GroupStatus(Enum):
@@ -75,6 +77,27 @@ class Group(BaseModel, LocationModel, ConversationMixin):
             'invited_at': invited_at.isoformat(),
             'invited_via': 'e-mail'
         })
+
+    def has_recent_activity(self):
+        pickup_actions_triggers = [
+            HistoryTypus.PICKUP_CREATE,
+            HistoryTypus.PICKUP_DELETE,
+            HistoryTypus.PICKUP_MODIFY,
+            HistoryTypus.PICKUP_JOIN,
+            HistoryTypus.PICKUP_LEAVE,
+            HistoryTypus.STORE_CREATE,
+            HistoryTypus.STORE_DELETE,
+            HistoryTypus.STORE_MODIFY
+        ]
+        recent_datetime = timezone.now() - datetime.timedelta(days=settings.NUMBER_OF_DAYS_GROUP_INACTIVE)
+        wall_messages = Conversation.objects.get_for_target(self).messages.\
+            filter(created_at__gt=recent_datetime)
+        pickups_history = History.objects.filter(group=self,
+                                                 date__gt=recent_datetime,
+                                                 typus__in=pickup_actions_triggers)
+        feedbacks = Feedback.objects.filter(created_at__gt=recent_datetime,
+                                            about__store__group=self)
+        return wall_messages.exists() or pickups_history.exists() or feedbacks.exists()
 
 
 class Agreement(BaseModel):
