@@ -43,7 +43,7 @@ def send_in_channel(channel, topic, payload):
 
 
 @receiver(post_save, sender=ConversationMessage)
-def send_messages(sender, instance, **kwargs):
+def send_messages(sender, instance, created, **kwargs):
     """When there is a message in a conversation we need to send it to any subscribed participants."""
 
     message = instance
@@ -61,7 +61,7 @@ def send_messages(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic, payload)
 
     # Send push notifications when a message is created, but not when it is modified
-    if kwargs.get('created') is True:
+    if created:
         tokens = [item.token for item in PushSubscription.objects.filter(
             Q(user__in=conversation.participants.all()) &
             ~Q(user__in=push_exclude_users) &

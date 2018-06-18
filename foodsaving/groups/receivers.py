@@ -25,8 +25,8 @@ def group_deleted(**kwargs):
 
 
 @receiver(post_save, sender=GroupMembership)
-def group_member_added(sender, instance, **kwargs):
-    if kwargs.get('created') is True:
+def group_member_added(sender, instance, created, **kwargs):
+    if created:
         group = instance.group
         user = instance.user
         membership = instance

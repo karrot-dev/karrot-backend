@@ -28,10 +28,13 @@ def mark_as_read(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=ConversationMessage)
-def notify_participants(sender, instance, **kwargs):
+def notify_participants(sender, instance, created, **kwargs):
     message = instance
 
     if not message.conversation.target:
+        return
+
+    if not created:
         return
 
     tasks.notify_participants(message)
@@ -52,8 +55,8 @@ def reaction_created(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=ConversationParticipant)
-def set_conversation_updated_at_on_create(sender, instance, **kwargs):
-    if kwargs['created']:
+def set_conversation_updated_at_on_create(sender, instance, created, **kwargs):
+    if created:
         participant = instance
         participant.conversation.save()
 
