@@ -100,3 +100,11 @@ def send_summary_emails():
         'recipient_count': recipient_count,
         'email_count': email_count,
     })
+
+
+@db_periodic_task(crontab(hour=3, minute=3))  # 3 am every day
+def mark_inactive_groups():
+    for group in Group.objects.filter(status=GroupStatus.ACTIVE.value):
+        if not group.has_recent_activity():
+            group.status = GroupStatus.INACTIVE.value
+            group.save()

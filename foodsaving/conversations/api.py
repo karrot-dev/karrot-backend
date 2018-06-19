@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
@@ -23,6 +24,7 @@ from foodsaving.conversations.serializers import (
     ConversationMarkSerializer,
     ConversationEmailNotificationsSerializer,
     EmojiField)
+from foodsaving.groups.models import Group
 
 
 class MessagePagination(CursorPagination):
@@ -189,6 +191,12 @@ class ConversationMessageViewSet(
 
         reaction.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_create(self, serializer):
+        message = serializer.save()
+        if message.conversation.target_type == ContentType.objects.get_for_model(Group):
+            group = message.conversation.target
+            group.refresh_active_status()
 
 
 class RetrieveConversationMixin(object):

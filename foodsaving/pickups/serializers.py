@@ -46,6 +46,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
             users=[self.context['request'].user, ],
             payload=self.initial_data,
         )
+        pickupdate.store.group.refresh_active_status()
         return pickupdate
 
     def update(self, pickupdate, validated_data):
@@ -79,6 +80,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
                 users=[self.context['request'].user, ],
                 payload=changed_data,
             )
+        pickupdate.store.group.refresh_active_status()
         return pickupdate
 
     def validate_date(self, date):
@@ -105,6 +107,7 @@ class PickupDateJoinSerializer(serializers.ModelSerializer):
             users=[user, ],
             payload=PickupDateSerializer(instance=pickupdate).data,
         )
+        pickupdate.store.group.refresh_active_status()
         return pickupdate
 
 
@@ -126,6 +129,7 @@ class PickupDateLeaveSerializer(serializers.ModelSerializer):
             users=[user, ],
             payload=PickupDateSerializer(instance=pickupdate).data,
         )
+        pickupdate.store.group.refresh_active_status()
         return pickupdate
 
 
@@ -145,6 +149,7 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
             users=[self.context['request'].user, ],
             payload=self.initial_data,
         )
+        series.store.group.refresh_active_status()
         return series
 
     def update(self, series, validated_data):
@@ -164,6 +169,7 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
                 users=[self.context['request'].user, ],
                 payload=changed_data,
             )
+        series.store.group.refresh_active_status()
         return series
 
     def validate_store(self, store):
@@ -199,6 +205,16 @@ class FeedbackSerializer(serializers.ModelSerializer):
         ]
 
     is_editable = serializers.SerializerMethodField()
+
+    def create(self, validated_data):
+        feedback = super().create(validated_data)
+        feedback.about.store.group.refresh_active_status()
+        return feedback
+
+    def update(self, feedback, validated_data):
+        super().update(feedback, validated_data)
+        feedback.about.store.group.refresh_active_status()
+        return feedback
 
     def get_is_editable(self, feedback):
         return feedback.about.is_recent() and feedback.given_by == self.context['request'].user

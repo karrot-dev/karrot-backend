@@ -10,6 +10,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from foodsaving.groups.factories import GroupFactory
+from foodsaving.groups.models import GroupStatus
 from foodsaving.pickups.factories import PickupDateSeriesFactory
 from foodsaving.pickups.models import PickupDate
 from foodsaving.stores.factories import StoreFactory
@@ -113,6 +114,26 @@ class TestPickupDateSeriesCreationAPI(APITestCase, ExtractPaginationMixin):
             })
         self.assertEqual(response.data, created_pickup_dates)
 
+    def test_pickup_series_create_activates_group(self):
+        url = '/api/pickup-date-series/'
+        recurrence = rrule.rrule(
+            freq=rrule.WEEKLY,
+            byweekday=[0, 1]  # Monday and Tuesday
+        )
+        start_date = self.group.timezone.localize(datetime.now().replace(hour=20, minute=0))
+        pickup_series_data = {
+            'max_collectors': 5,
+            'store': self.store.id,
+            'rule': str(recurrence),
+            'start_date': start_date
+        }
+        self.group.status = GroupStatus.INACTIVE.value
+        self.group.save()
+        self.client.force_login(user=self.member)
+        self.client.post(url, pickup_series_data, format='json')
+        self.group.refresh_from_db()
+        self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)
+
 
 class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
     """
@@ -140,6 +161,15 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         for _ in response.data:
             self.assertEqual(_['max_collectors'], 99)
+
+    def test_change_series_activates_group(self):
+        self.group.status = GroupStatus.INACTIVE.value
+        self.group.save()
+        url = '/api/pickup-date-series/{}/'.format(self.series.id)
+        self.client.force_login(user=self.member)
+        self.client.patch(url, {'max_collectors': 99})
+        self.group.refresh_from_db()
+        self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)
 
     def test_change_start_time(self):
         self.client.force_login(user=self.member)

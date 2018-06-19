@@ -1,10 +1,11 @@
 from enum import Enum
+from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import TextField, DateTimeField, QuerySet
-from django.utils import timezone
+from django.utils import timezone as tz
 from timezone_field import TimeZoneField
 
 from foodsaving.base.base_models import BaseModel, LocationModel
@@ -37,6 +38,7 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         null=True,
         on_delete=models.SET_NULL
     )
+    last_active_at = DateTimeField(default=tz.now)
 
     def __str__(self):
         return 'Group {}'.format(self.name)
@@ -75,6 +77,15 @@ class Group(BaseModel, LocationModel, ConversationMixin):
             'invited_at': invited_at.isoformat(),
             'invited_via': 'e-mail'
         })
+
+    def refresh_active_status(self):
+        self.last_active_at = tz.now()
+        if self.status == GroupStatus.INACTIVE.value:
+            self.status = GroupStatus.ACTIVE.value
+        self.save()
+
+    def has_recent_activity(self):
+        return self.last_active_at >= tz.now() - timedelta(days=settings.NUMBER_OF_DAYS_UNTIL_GROUP_INACTIVE)
 
 
 class Agreement(BaseModel):
@@ -116,7 +127,7 @@ class GroupMembership(BaseModel):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     roles = ArrayField(TextField(), default=list)
-    lastseen_at = DateTimeField(default=timezone.now)
+    lastseen_at = DateTimeField(default=tz.now)
     inactive_at = DateTimeField(null=True)
     notification_types = ArrayField(TextField(), default=get_default_notification_types)
 

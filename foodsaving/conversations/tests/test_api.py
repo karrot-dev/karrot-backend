@@ -9,6 +9,7 @@ from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationParticipant, Conversation, ConversationMessage, \
     ConversationMessageReaction
 from foodsaving.groups.factories import GroupFactory
+from foodsaving.groups.models import GroupStatus
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
 from foodsaving.webhooks.models import EmailEvent
 
@@ -566,3 +567,22 @@ class TestConversationsMessageEditPatchAPI(APITestCase):
         data = {'content': 'a nicer message'}
         response = self.client.patch('/api/messages/{}/'.format(self.message3.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class TestWallMessagesUpdateStatus(APITestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.group = GroupFactory(members=[self.user])
+        self.conversation = Conversation.objects.get_or_create_for_target(self.group)
+        self.conversation.join(self.user)
+
+    def test_wall_message_activates_inactive_group(self):
+        self.group.status = GroupStatus.INACTIVE.value
+        self.group.save()
+        self.client.force_login(user=self.user)
+        data = {'conversation': self.conversation.id, 'content': 'a nice message'}
+        response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.assertEqual(response.data['content'], data['content'])
+        self.group.refresh_from_db()
+        self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)

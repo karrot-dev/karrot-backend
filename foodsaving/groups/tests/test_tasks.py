@@ -9,8 +9,8 @@ from freezegun import freeze_time
 
 from config import settings
 from foodsaving.groups.factories import GroupFactory, PlaygroundGroupFactory, InactiveGroupFactory
-from foodsaving.groups.models import GroupMembership
-from foodsaving.groups.tasks import process_inactive_users, send_summary_emails
+from foodsaving.groups.models import GroupMembership, GroupStatus
+from foodsaving.groups.tasks import process_inactive_users, send_summary_emails, mark_inactive_groups
 from foodsaving.pickups.factories import PickupDateFactory, FeedbackFactory
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
@@ -154,3 +154,15 @@ class TestSummaryEmailTask(TestCase):
                 'has_activity': False,
             },
         }])
+
+
+class TestMarkInactiveGroupsTask(TestCase):
+    def test_groups_marked_inactive(self):
+        recent_treshold = timezone.now() - timedelta(days=settings.NUMBER_OF_DAYS_UNTIL_GROUP_INACTIVE)
+        group_without_recent_activity = GroupFactory(last_active_at=recent_treshold - timedelta(days=3))
+        group_with_recent_activity = GroupFactory(last_active_at=recent_treshold + timedelta(days=3))
+        mark_inactive_groups()
+        group_without_recent_activity.refresh_from_db()
+        group_with_recent_activity.refresh_from_db()
+        self.assertEqual(group_without_recent_activity.status, GroupStatus.INACTIVE.value)
+        self.assertEqual(group_with_recent_activity.status, GroupStatus.ACTIVE.value)

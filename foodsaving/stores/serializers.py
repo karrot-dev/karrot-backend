@@ -38,6 +38,7 @@ class StoreSerializer(serializers.ModelSerializer):
             users=[self.context['request'].user, ],
             payload=self.initial_data,
         )
+        store.group.refresh_active_status()
         return store
 
     def update(self, store, validated_data):
@@ -57,6 +58,7 @@ class StoreSerializer(serializers.ModelSerializer):
                 users=[self.context['request'].user, ],
                 payload=changed_data,
             )
+        store.group.refresh_active_status()
         return store
 
     def validate_group(self, group):
