@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
@@ -194,7 +193,7 @@ class ConversationMessageViewSet(
 
     def perform_create(self, serializer):
         message = serializer.save()
-        if message.conversation.target_type == ContentType.objects.get_for_model(Group):
+        if isinstance(message.conversation.target, Group):
             group = message.conversation.target
             group.refresh_active_status()
 
