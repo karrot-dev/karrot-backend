@@ -35,6 +35,8 @@ class PickupDateSerializer(serializers.ModelSerializer):
     def validate_store(self, store):
         if not self.context['request'].user.groups.filter(store=store).exists():
             raise serializers.ValidationError(_('You are not member of the store\'s group.'))
+        if not store.is_active():
+            raise serializers.ValidationError(_('Store is not active'))
         return store
 
     def create(self, validated_data):
@@ -175,6 +177,8 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
     def validate_store(self, store):
         if not store.group.is_member(self.context['request'].user):
             raise serializers.ValidationError(_('You are not member of the store\'s group.'))
+        if not store.is_active():
+            raise serializers.ValidationError(_('Store is not active'))
         return store
 
     def validate_start_date(self, date):

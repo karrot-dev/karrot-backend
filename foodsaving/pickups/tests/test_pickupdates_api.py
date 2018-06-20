@@ -7,6 +7,7 @@ from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership, GroupStatus
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.stores.factories import StoreFactory
+from foodsaving.stores.models import StoreStatus
 from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.users.factories import UserFactory
 
@@ -66,6 +67,13 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)
 
     def test_create_past_pickup_date_fails(self):
+        self.client.force_login(user=self.member)
+        response = self.client.post(self.url, self.past_pickup_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
+    def test_create_pickup_date_inactive_store_fails(self):
+        self.store.status = StoreStatus.ARCHIVED.value
+        self.store.save()
         self.client.force_login(user=self.member)
         response = self.client.post(self.url, self.past_pickup_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
