@@ -14,6 +14,7 @@ from foodsaving.groups.models import GroupStatus
 from foodsaving.pickups.factories import PickupDateSeriesFactory
 from foodsaving.pickups.models import PickupDate
 from foodsaving.stores.factories import StoreFactory
+from foodsaving.stores.models import StoreStatus
 from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.users.factories import UserFactory
 
@@ -133,6 +134,25 @@ class TestPickupDateSeriesCreationAPI(APITestCase, ExtractPaginationMixin):
         self.client.post(url, pickup_series_data, format='json')
         self.group.refresh_from_db()
         self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)
+
+    def test_create_recurring_series_inactive_store_fails(self):
+        self.store.status = StoreStatus.ARCHIVED.value
+        self.store.save()
+        url = '/api/pickup-date-series/'
+        recurrence = rrule.rrule(
+            freq=rrule.WEEKLY,
+            byweekday=[0, 1]  # Monday and Tuesday
+        )
+        start_date = self.group.timezone.localize(datetime.now().replace(hour=20, minute=0))
+        pickup_series_data = {
+            'max_collectors': 5,
+            'store': self.store.id,
+            'rule': str(recurrence),
+            'start_date': start_date
+        }
+        self.client.force_login(user=self.member)
+        response = self.client.post(url, pickup_series_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
 
 class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
