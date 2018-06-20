@@ -12,6 +12,7 @@ from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.pickups.models import Feedback, PickupDateSeries, PickupDate
+from foodsaving.stores.models import StoreStatus
 
 
 class TestFeedbackModel(TestCase):
@@ -50,6 +51,22 @@ class TestPickupDateSeriesModel(TestCase):
         self.recurrence = rrule.rrule(
             freq=rrule.WEEKLY,
         )
+
+    def test_create_all_pickup_dates_inactive_stores(self):
+        self.store.status = StoreStatus.ARCHIVED.value
+        self.store.save()
+
+        start_date = self.store.group.timezone.localize(datetime.now().replace(2017, 3, 18, 15, 0, 0, 0))
+
+        series = PickupDateSeries(
+            store=self.store,
+            rule=str(self.recurrence),
+            start_date=start_date
+        )
+        series.save()
+        PickupDate.objects.all().delete()
+        PickupDateSeries.objects.create_all_pickup_dates()
+        self.assertEqual(PickupDate.objects.count(), 0)
 
     def test_daylight_saving_time_to_summer(self):
         start_date = self.store.group.timezone.localize(datetime.now().replace(2017, 3, 18, 15, 0, 0, 0))

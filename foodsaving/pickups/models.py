@@ -14,6 +14,7 @@ from foodsaving.base.base_models import BaseModel
 from foodsaving.conversations.models import ConversationMixin
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.pickups import stats
+from foodsaving.stores.models import StoreStatus
 
 pickup_done = Signal()
 
@@ -21,7 +22,7 @@ pickup_done = Signal()
 class PickupDateSeriesManager(models.Manager):
     @transaction.atomic
     def create_all_pickup_dates(self):
-        for series in self.all():
+        for series in self.filter(store__status=StoreStatus.ACTIVE.value):
             series.update_pickup_dates()
 
 
