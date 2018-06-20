@@ -23,6 +23,7 @@ from foodsaving.conversations.serializers import (
     ConversationMarkSerializer,
     ConversationEmailNotificationsSerializer,
     EmojiField)
+from foodsaving.groups.models import Group
 
 
 class MessagePagination(CursorPagination):
@@ -189,6 +190,12 @@ class ConversationMessageViewSet(
 
         reaction.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_create(self, serializer):
+        message = serializer.save()
+        if isinstance(message.conversation.target, Group):
+            group = message.conversation.target
+            group.refresh_active_status()
 
 
 class RetrieveConversationMixin(object):

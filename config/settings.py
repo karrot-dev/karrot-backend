@@ -224,6 +224,9 @@ ACCOUNT_DELETE_TIME_LIMIT_MINUTES = 180
 # For marking users inactive
 NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP = 30
 
+# For marking groups inactive
+NUMBER_OF_DAYS_UNTIL_GROUP_INACTIVE = 14
+
 # Default dummy settings, please override in local_settings.py
 DEFAULT_FROM_EMAIL = "testing@example.com"
 SPARKPOST_RELAY_DOMAIN = 'replies.karrot.localhost'

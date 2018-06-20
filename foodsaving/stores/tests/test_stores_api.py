@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from foodsaving.groups.factories import GroupFactory
+from foodsaving.groups.models import GroupStatus
 from foodsaving.pickups.factories import PickupDateSeriesFactory
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.tests.utils import ExtractPaginationMixin
@@ -53,6 +54,14 @@ class TestStoresAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.post(self.url, self.store_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['name'], self.store_data['name'])
+
+    def test_create_store_activates_group(self):
+        self.group.status = GroupStatus.INACTIVE.value
+        self.group.save()
+        self.client.force_login(user=self.member)
+        self.client.post(self.url, self.store_data, format='json')
+        self.group.refresh_from_db()
+        self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)
 
     def test_create_store_with_short_name_fails(self):
         self.client.force_login(user=self.member)
@@ -104,6 +113,14 @@ class TestStoresAPI(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.member)
         response = self.client.patch(self.store_url, self.store_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_patch_store_activates_group(self):
+        self.group.status = GroupStatus.INACTIVE.value
+        self.group.save()
+        self.client.force_login(user=self.member)
+        self.client.patch(self.store_url, self.store_data, format='json')
+        self.group.refresh_from_db()
+        self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)
 
     def test_valid_status(self):
         self.client.force_login(user=self.member)

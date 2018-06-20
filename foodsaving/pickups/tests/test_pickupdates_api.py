@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from foodsaving.groups.factories import GroupFactory
-from foodsaving.groups.models import GroupMembership
+from foodsaving.groups.models import GroupMembership, GroupStatus
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.tests.utils import ExtractPaginationMixin
@@ -57,6 +57,14 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.post(self.url, self.pickup_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
+    def test_create_pickup_as_group_member_activates_group(self):
+        self.client.force_login(user=self.member)
+        self.group.status = GroupStatus.INACTIVE.value
+        self.group.save()
+        self.client.post(self.url, self.pickup_data, format='json')
+        self.group.refresh_from_db()
+        self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)
+
     def test_create_past_pickup_date_fails(self):
         self.client.force_login(user=self.member)
         response = self.client.post(self.url, self.past_pickup_data, format='json')
@@ -106,6 +114,14 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.patch(self.pickup_url, self.pickup_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
+    def test_patch_pickup_as_group_member_activates_group(self):
+        self.client.force_login(user=self.member)
+        self.group.status = GroupStatus.INACTIVE.value
+        self.group.save()
+        self.client.patch(self.pickup_url, self.pickup_data, format='json')
+        self.group.refresh_from_db()
+        self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)
+
     def test_patch_max_collectors_to_negative_value_fails(self):
         self.client.force_login(user=self.member)
         response = self.client.patch(self.pickup_url, {'max_collectors': -1})
@@ -149,6 +165,14 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.post(self.join_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
+    def test_join_pickup_as_member_activates_group(self):
+        self.client.force_login(user=self.member)
+        self.group.status = GroupStatus.INACTIVE.value
+        self.group.save()
+        self.client.post(self.join_url)
+        self.group.refresh_from_db()
+        self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)
+
     def test_join_pickup_without_max_collectors_as_member(self):
         self.client.force_login(user=self.member)
         p = PickupDateFactory(max_collectors=None, store=self.store)
@@ -185,6 +209,15 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         self.pickup.collectors.add(self.member)
         response = self.client.post(self.leave_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+    def test_leave_pickup_activates_group(self):
+        self.client.force_login(user=self.member)
+        self.pickup.collectors.add(self.member)
+        self.group.status = GroupStatus.INACTIVE.value
+        self.group.save()
+        self.client.post(self.leave_url)
+        self.group.refresh_from_db()
+        self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)
 
     def test_leave_past_pickup_fails(self):
         self.client.force_login(user=self.member)

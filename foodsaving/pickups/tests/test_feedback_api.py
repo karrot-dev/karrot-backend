@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from foodsaving.groups.factories import GroupFactory
+from foodsaving.groups.models import GroupStatus
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.pickups.models import Feedback
 from foodsaving.tests.utils import ExtractPaginationMixin
@@ -132,6 +133,14 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.collector3)
         response = self.client.post(self.url, self.feedback_post, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+
+    def test_create_feedback_activates_group(self):
+        self.group.status = GroupStatus.INACTIVE.value
+        self.group.save()
+        self.client.force_login(user=self.collector3)
+        self.client.post(self.url, self.feedback_post, format='json')
+        self.group.refresh_from_db()
+        self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)
 
     def test_create_feedback_twice_fails_for_one_pickup(self):
         """
@@ -296,6 +305,14 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         response = self.client.patch(self.feedback_url, {'weight': 3}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data['weight'], 3)
+
+    def test_patch_feedback_activates_group(self):
+        self.group.status = GroupStatus.INACTIVE.value
+        self.group.save()
+        self.client.force_login(user=self.collector)
+        self.client.patch(self.feedback_url, {'weight': 3}, format='json')
+        self.group.refresh_from_db()
+        self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)
 
     def test_patch_weight_to_negative_value_fails(self):
         """
