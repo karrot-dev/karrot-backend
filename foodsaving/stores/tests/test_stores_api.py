@@ -10,6 +10,7 @@ from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupStatus
 from foodsaving.pickups.factories import PickupDateSeriesFactory
 from foodsaving.stores.factories import StoreFactory
+from foodsaving.stores.models import StoreStatus
 from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.users.factories import UserFactory
 from foodsaving.utils.tests.fake import faker
@@ -211,3 +212,12 @@ class TestStoreChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.member)
         response = self.client.patch(self.store_url, {'weeks_in_advance': 0})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
+    def test_set_store_active_status_updates_pickup_dates(self):
+        self.store.status = StoreStatus.ARCHIVED.value
+        self.store.save()
+        self.store.pickup_dates.all().delete()
+        self.client.force_login(user=self.member)
+        response = self.client.patch(self.store_url, {'status': StoreStatus.ACTIVE.value}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertGreater(self.store.pickup_dates.count(), 0)
