@@ -18,6 +18,21 @@ def user_url(user):
     )
 
 
+def pickup_detail_url(pickup):
+    store = pickup.store
+    group = store.group
+    return '{hostname}/#/group/{group_id}/store/{store_id}/pickups/{pickup_id}/detail'.format(
+        hostname=settings.HOSTNAME,
+        group_id=group.id,
+        store_id=store.id,
+        pickup_id=pickup.id,
+    )
+
+
+def pickup_conversation_mute_url(pickup, conversation):
+    return '{}?mute_conversation={}'.format(pickup_detail_url(pickup), conversation.id)
+
+
 def group_wall_url(group):
     return '{hostname}/#/group/{group_id}/wall'.format(
         hostname=settings.HOSTNAME,
@@ -25,7 +40,7 @@ def group_wall_url(group):
     )
 
 
-def conversation_mute_url(group, conversation):
+def group_conversation_mute_url(group, conversation):
     return '{}?mute_conversation={}'.format(group_wall_url(group), conversation.id)
 
 
