@@ -45,7 +45,8 @@ class StoreSerializer(serializers.ModelSerializer):
         changed_data = get_changed_data(store, validated_data)
         store = super().update(store, validated_data)
 
-        if 'weeks_in_advance' in changed_data:
+        if 'weeks_in_advance' in changed_data or \
+                ('status' in changed_data and store.status == StoreStatus.ACTIVE.value):
             with transaction.atomic():
                 for series in store.series.all():
                     series.update_pickup_dates()
