@@ -1,5 +1,5 @@
 from email.utils import formataddr
-from babel.dates import format_date, format_time, format_datetime
+from babel.dates import format_date, format_time
 
 from django.utils import translation, timezone
 from django.utils.translation import ugettext as _
@@ -8,7 +8,12 @@ from config import settings
 from foodsaving.groups.models import Group
 from foodsaving.pickups.models import PickupDate
 from foodsaving.utils.email_utils import prepare_email
-from foodsaving.utils.frontend_urls import group_wall_url, group_conversation_mute_url, pickup_detail_url, pickup_conversation_mute_url
+from foodsaving.utils.frontend_urls import (
+    group_wall_url,
+    group_conversation_mute_url,
+    pickup_detail_url,
+    pickup_conversation_mute_url,
+)
 from foodsaving.webhooks.api import make_local_part
 
 
