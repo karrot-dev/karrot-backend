@@ -35,7 +35,7 @@ class UserManager(BaseUserManager):
             **extra_fields)
         user.set_password(password)
         user.save()
-        user._send_welcome_mail()
+        user.send_welcome_email()
         return user
 
     def filter_by_similar_email(self, email):
@@ -128,7 +128,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     def update_email(self, unverified_email):
         self.unverified_email = unverified_email
         self._send_mail_change_notification()
-        self.send_mail_verification_code()
+        self.start_update_email()
 
     @transaction.atomic
     def restore_email(self):
@@ -144,13 +144,13 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         prepare_changemail_success_email(self).send()
 
     @transaction.atomic
-    def _send_welcome_mail(self):
+    def send_welcome_email(self):
         self._unverify_mail()
         verification_code = VerificationCode.objects.get(user=self, type=VerificationCode.EMAIL_VERIFICATION)
         prepare_signup_email(user=self, verification_code=verification_code).send()
 
     @transaction.atomic
-    def send_mail_verification_code(self):
+    def start_update_email(self):
         self._unverify_mail()
         verification_code = VerificationCode.objects.get(user=self, type=VerificationCode.EMAIL_VERIFICATION)
         prepare_changemail_request_email(self, verification_code).send()

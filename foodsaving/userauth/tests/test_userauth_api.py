@@ -459,6 +459,20 @@ class TestChangeEMail(APITestCase):
         response = self.client.patch(self.url_patch, {'mail_verified': False})
         self.assertEqual(response.data['mail_verified'], True)
 
+    def test_resend_verification_email(self):
+        self.client.force_login(user=self.verified_user)
+        response = self.client.put(self.url, {'password': self.password, 'new_email': self.new_email})
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        mail.outbox = []
+
+        resend_url = '/api/auth/email/resend_verification_code/'
+        response = self.client.post(resend_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('Please verify your email', mail.outbox[0].subject)
+        self.assertEqual(mail.outbox[0].to, [self.new_email])
+        self.assertNotIn('Thank you for signing up', mail.outbox[0].body)
+
 
 class TestEMailVerification(APITestCase):
     def setUp(self):
@@ -519,7 +533,7 @@ class TestResendEMailVerificationCode(APITestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn('Please verify your email', mail.outbox[0].subject)
         self.assertEqual(mail.outbox[0].to, [self.user.email])
-        self.assertNotIn('Thank you for signing up', mail.outbox[0].body)
+        self.assertIn('Thank you for signing up', mail.outbox[0].body)
 
     def test_resend_mail_verification_code_fails_if_already_verified(self):
         self.client.force_login(user=self.verified_user)
