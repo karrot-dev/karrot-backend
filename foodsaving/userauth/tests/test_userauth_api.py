@@ -474,8 +474,6 @@ class TestChangeEMail(APITestCase):
         self.assertNotIn('Thank you for signing up', mail.outbox[0].body)
 
 
-
-
 class TestEMailVerification(APITestCase):
     def setUp(self):
         self.user = UserFactory()
