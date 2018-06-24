@@ -228,6 +228,8 @@ NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP = 30
 NUMBER_OF_DAYS_UNTIL_GROUP_INACTIVE = 14
 
 TRUST_VALID_TIME = 365/2 # days
+TRUST_RATE_LIMIT_WEEK = 5
+TRUST_RATE_LIMIT_MONTH = 10
 
 # Default dummy settings, please override in local_settings.py
 DEFAULT_FROM_EMAIL = "testing@example.com"

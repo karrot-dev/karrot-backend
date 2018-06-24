@@ -1,5 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+
+
 from rest_framework import filters
 from rest_framework import mixins
 from rest_framework.permissions import IsAuthenticated
@@ -9,6 +11,7 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from foodsaving.users.serializers import UserSerializer
+from foodsaving.users.permissions import IsTrustRateLimited
 
 
 class UserViewSet(
@@ -43,13 +46,13 @@ class UserViewSet(
 
     @detail_route(
         methods=('POST', 'DELETE'),
-        permission_classes=(IsAuthenticated, )
+        permission_classes=(IsAuthenticated, IsTrustRateLimited)
     )
     def trust(self, request, pk):
         user = self.get_object()
 
         if request.method == 'POST':
-            # TODO: rate limit
+
             user.give_trust_by(request.user)
             return Response({}, status=status.HTTP_201_CREATED)
 
