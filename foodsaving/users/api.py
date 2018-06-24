@@ -42,14 +42,17 @@ class UserViewSet(
         return self.queryset.filter(Q(groups__in=users_groups) | Q(id=self.request.user.id)).distinct()
 
     @detail_route(
-        methods=('POST',),
+        methods=('POST', 'DELETE'),
         permission_classes=(IsAuthenticated, )
     )
     def trust(self, request, pk):
-        """route for POST /users/{id}/trust/"""
         user = self.get_object()
 
-        # TODO: rate limit
-        user.give_trust_by(request.user)
+        if request.method == 'POST':
+            # TODO: rate limit
+            user.give_trust_by(request.user)
+            return Response({}, status=status.HTTP_201_CREATED)
 
-        return Response({}, status=status.HTTP_201_CREATED)
+        else:
+            user.revoke_trust_by(request.user)
+            return Response({}, status=status.HTTP_200_OK)

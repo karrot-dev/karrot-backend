@@ -223,6 +223,9 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     def give_trust_by(self, given_by):
         Trust.objects.update_or_create(user=self, given_by=given_by, defaults={'valid_from': timezone.now()})
 
+    def revoke_trust_by(self, given_by):
+        Trust.objects.get(user=self, given_by=given_by).delete()
+
 
 class TrustManager(Manager):
     def valid(self):
