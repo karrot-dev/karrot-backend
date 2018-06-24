@@ -227,6 +227,8 @@ NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP = 30
 # For marking groups inactive
 NUMBER_OF_DAYS_UNTIL_GROUP_INACTIVE = 14
 
+TRUST_VALID_TIME = 365/2 # days
+
 # Default dummy settings, please override in local_settings.py
 DEFAULT_FROM_EMAIL = "testing@example.com"
 SPARKPOST_RELAY_DOMAIN = 'replies.karrot.localhost'

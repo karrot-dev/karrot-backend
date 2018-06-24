@@ -4,6 +4,9 @@ from rest_framework import filters
 from rest_framework import mixins
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
+from rest_framework.decorators import detail_route
+from rest_framework import status
+from rest_framework.response import Response
 
 from foodsaving.users.serializers import UserSerializer
 
@@ -37,3 +40,16 @@ class UserViewSet(
     def get_queryset(self):
         users_groups = self.request.user.groups.values('id')
         return self.queryset.filter(Q(groups__in=users_groups) | Q(id=self.request.user.id)).distinct()
+
+    @detail_route(
+        methods=('POST',),
+        permission_classes=(IsAuthenticated, )
+    )
+    def trust(self, request, pk):
+        """route for POST /users/{id}/trust/"""
+        user = self.get_object()
+
+        # TODO: rate limit
+        user.give_trust_by(request.user)
+
+        return Response({}, status=status.HTTP_201_CREATED)
