@@ -6,6 +6,7 @@ from rest_framework import serializers
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from foodsaving.userauth.models import VerificationCode
+from foodsaving.webhooks.models import EmailEvent
 
 
 class AuthLoginSerializer(serializers.Serializer):
@@ -194,3 +195,18 @@ class RequestResetPasswordSerializer(serializers.Serializer):
         except AnymailAPIError:
             raise serializers.ValidationError(_('We could not send you an e-mail.'))
         return user
+
+
+class FailedEmailDeliverySerialier(serializers.ModelSerializer):
+    class Meta:
+        model = EmailEvent
+        fields = ['created_at', 'address', 'event', 'reason', 'subject']
+
+    reason = serializers.SerializerMethodField()
+    subject = serializers.SerializerMethodField()
+
+    def get_reason(self, event):
+        return event.payload.get('reason')
+
+    def get_subject(self, event):
+        return event.payload.get('subject')

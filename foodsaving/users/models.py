@@ -217,3 +217,6 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     def has_module_perms(self, app_label):
         # temporarily only allow access for admins
         return self.is_superuser
+
+    def failed_email_deliveries(self):
+        return EmailEvent.objects.for_user(self)
