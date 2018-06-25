@@ -230,7 +230,7 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
 
     def test_exclude_bounced_addresses(self):
         bounce_user = VerifiedUserFactory()
-        self.conversation.join(bounce_user)
+        self.group.add_member(bounce_user)
         EmailEvent.objects.create(address=bounce_user.email, event='bounce', payload={})
 
         mail.outbox = []
@@ -238,8 +238,8 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
         self.assertEqual(len(mail.outbox), 0)
 
     def test_exclude_unverified_addresses(self):
-        user = UserFactory()
-        self.conversation.join(user)
+        user = UserFactory() # not verified
+        self.group.add_member(user)
 
         mail.outbox = []
         ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
@@ -277,6 +277,7 @@ class TestConversationsMessageReactionsPostAPI(APITestCase):
         self.group = GroupFactory(members=[self.user, self.user2])
         self.conversation = Conversation.objects.get_or_create_for_target(self.group)
         self.conversation.join(self.user)
+        self.conversation.join(self.user2)
         self.participant = ConversationParticipant.objects.get(conversation=self.conversation, user=self.user)
         self.message = self.conversation.messages.create(author=self.user, content='hello')
         self.reaction = self.message.reactions.create(user=self.user, name='thumbsdown')
