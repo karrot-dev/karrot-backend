@@ -238,7 +238,7 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
         self.assertEqual(len(mail.outbox), 0)
 
     def test_exclude_unverified_addresses(self):
-        user = UserFactory() # not verified
+        user = UserFactory()  # not verified
         self.group.add_member(user)
 
         mail.outbox = []
