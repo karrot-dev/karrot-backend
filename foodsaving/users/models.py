@@ -1,8 +1,10 @@
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import transaction, models
-from django.db.models import EmailField, BooleanField, TextField, CharField, DateTimeField, ForeignKey, Q
+from django.db.models import EmailField, BooleanField, TextField, CharField, DateTimeField, ForeignKey, Q, Manager
 from django.utils import timezone
+from dateutil.relativedelta import relativedelta
+
 from versatileimagefield.fields import VersatileImageField
 
 from foodsaving.base.base_models import BaseModel, LocationModel
@@ -217,3 +219,25 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     def has_module_perms(self, app_label):
         # temporarily only allow access for admins
         return self.is_superuser
+
+    def give_trust_by(self, given_by):
+        Trust.objects.update_or_create(user=self, given_by=given_by, defaults={'valid_from': timezone.now()})
+
+    def revoke_trust_by(self, given_by):
+        Trust.objects.get(user=self, given_by=given_by).delete()
+
+
+class TrustManager(Manager):
+    def valid(self):
+        return self.filter(valid_from__gte=timezone.now() - relativedelta(days=settings.TRUST_VALID_TIME))
+
+
+class Trust(BaseModel):
+    objects = TrustManager()
+    user = ForeignKey(User, on_delete=models.CASCADE, related_name='trusts')
+    given_by = ForeignKey(User, on_delete=models.CASCADE, related_name='trusts_given')
+    valid_from = DateTimeField(default=timezone.now)
+
+    def valid_until(self):
+        return self.valid_from + relativedelta(days=settings.TRUST_VALID_TIME)
+

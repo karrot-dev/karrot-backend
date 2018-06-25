@@ -1,5 +1,4 @@
 import json
-from collections import namedtuple
 
 from channels import Channel
 from django.conf import settings
@@ -24,10 +23,10 @@ from foodsaving.subscriptions.models import ChannelSubscription, PushSubscriptio
 from foodsaving.userauth.serializers import AuthUserSerializer
 from foodsaving.users.serializers import UserSerializer
 
-MockRequest = namedtuple('Request', ['user'])
 
-
-class AbsoluteURIBuildingRequest:
+class MockRequest:
+    def __init__(self, user):
+        self.user = user
 
     def build_absolute_uri(self, path):
         return settings.HOSTNAME + path
@@ -259,7 +258,7 @@ def send_feedback_possible_updates(sender, instance, **kwargs):
 def send_auth_user_updates(sender, instance, **kwargs):
     """Send full details to the user"""
     user = instance
-    payload = AuthUserSerializer(user, context={'request': AbsoluteURIBuildingRequest()}).data
+    payload = AuthUserSerializer(user, context={'request': MockRequest(user=user)}).data
     for subscription in ChannelSubscription.objects.recent().filter(user=user):
         send_in_channel(subscription.reply_channel, topic='auth:user', payload=payload)
 
@@ -268,9 +267,9 @@ def send_auth_user_updates(sender, instance, **kwargs):
 def send_user_updates(sender, instance, **kwargs):
     """Send profile updates to everyone except the user"""
     user = instance
-    payload = UserSerializer(user, context={'request': AbsoluteURIBuildingRequest()}).data
     users_groups = user.groups.values('id')
     for subscription in ChannelSubscription.objects.recent().filter(user__groups__in=users_groups).exclude(user=user):
+        payload = UserSerializer(user, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic='users:user', payload=payload)
 
 
