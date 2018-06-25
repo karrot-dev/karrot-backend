@@ -17,7 +17,6 @@ class EmailEventManager(BaseUserManager):
         )
 
     def ignored_addresses(self):
-        # return []
         return self.ignored().values('address').annotate(count=Count('id')).filter(count__gte=5).values('address')
 
     def for_user(self, user):
