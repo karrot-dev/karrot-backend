@@ -24,7 +24,7 @@ coreschema==0.0.4         # via coreapi
 cssselect==1.0.3          # via talon
 daphne==1.4.2             # via channels
 django-anymail==3.0
-django-cors-headers==2.2.0
+django-cors-headers==2.2.1
 django-crispy-forms==1.7.2
 django-enumfield==1.3b2
 django-extensions==2.0.7
@@ -51,7 +51,7 @@ huey==1.10.0
 hyperlink==18.0.0         # via twisted
 idna==2.7                 # via hyperlink, requests
 incremental==17.5.0       # via twisted
-influxdb==5.0.0           # via django-influxdb-metrics
+influxdb==5.1.0           # via django-influxdb-metrics
 itypes==1.1.0             # via coreapi
 jinja2==2.10              # via coreschema, django-jinja, jinja2
 lxml==4.2.2               # via talon
