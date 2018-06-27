@@ -53,7 +53,7 @@ class GroupInfoViewSet(
     - `?search` - search in name and public description
     - `?include_empty` - set to False to exclude empty groups without members
     """
-    queryset = GroupModel.objects
+    queryset = GroupModel.objects.prefetch_related('members')
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filter_class = GroupsInfoFilter
     search_fields = ('name', 'public_description')

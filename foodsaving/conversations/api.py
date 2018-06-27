@@ -129,7 +129,7 @@ class ConversationMessageViewSet(
     ConversationMessages
     """
 
-    queryset = ConversationMessage.objects
+    queryset = ConversationMessage.objects.prefetch_related('reactions')
     serializer_class = ConversationMessageSerializer
     permission_classes = (
         IsAuthenticated,

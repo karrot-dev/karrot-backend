@@ -125,7 +125,9 @@ class PickupDateViewSet(
     - `?date_0=<from_date>`&`date_1=<to_date>` - filter by date, can also either give date_0 or date_1
     """
     serializer_class = PickupDateSerializer
-    queryset = PickupDateModel.objects.filter(deleted=False)
+    queryset = PickupDateModel.objects \
+        .filter(deleted=False) \
+        .prefetch_related('collectors') # because we have collector_ids field in the serializer
     filter_backends = (DjangoFilterBackend,)
     filter_class = PickupDatesFilter
     permission_classes = (IsAuthenticated, IsUpcoming)

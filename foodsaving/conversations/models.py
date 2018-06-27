@@ -18,12 +18,20 @@ from foodsaving.base.base_models import BaseModel, UpdatedAtMixin
 class ConversationManager(models.Manager):
     @classmethod
     def get_for_target(self, target):
-        return Conversation.objects.filter(target_id=target.id,
-                                           target_type=ContentType.objects.get_for_model(target)).first()
+        return self.filter_for_target(target).prefetch_related('participants').first()
 
     @classmethod
     def get_or_create_for_target(self, target):
         return Conversation.objects.get_for_target(target) or Conversation.objects.create(target=target)
+
+    @classmethod
+    def exists_for_target(self, target):
+        return self.filter_for_target(target).exists()
+
+    @classmethod
+    def filter_for_target(self, target):
+        return Conversation.objects.filter(target_id=target.id,
+                                           target_type=ContentType.objects.get_for_model(target))
 
 
 class Conversation(BaseModel, UpdatedAtMixin):
