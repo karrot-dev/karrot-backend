@@ -3,7 +3,9 @@
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/2.0/topics/http/urls/
 """
+import os
 from django.conf import settings
+from django.conf.urls import url
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import path, re_path, include
@@ -92,3 +94,6 @@ if settings.DEBUG:
         path('_templates', template_preview_views.list_templates),
         path('_templates/show', template_preview_views.show_template),
     ]
+
+if 'USE_SILK' in os.environ:
+    urlpatterns += [url(r'^silk/', include('silk.urls', namespace='silk'))]
