@@ -1,10 +1,13 @@
+from django.core import mail
 from django.db import IntegrityError
 from django.test import TestCase
 
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import Conversation, ConversationMessage, ConversationMessageReaction
 from foodsaving.groups.factories import GroupFactory
-from foodsaving.users.factories import UserFactory
+from foodsaving.pickups.factories import PickupDateFactory
+from foodsaving.stores.factories import StoreFactory
+from foodsaving.users.factories import UserFactory, VerifiedUserFactory
 
 
 class ConversationModelTests(TestCase):
@@ -61,6 +64,48 @@ class ConversationModelTests(TestCase):
         conversation = Conversation.objects.get_or_create_for_target(target)
         self.assertIsNotNone(conversation)
         self.assertEqual(target.conversation, conversation)
+
+
+class TestPickupConversationsEmailNotifications(TestCase):
+    def setUp(self):
+        self.user = VerifiedUserFactory()
+        self.group = GroupFactory(members=[self.user])
+        self.store = StoreFactory(group=self.group)
+        self.pickup = PickupDateFactory(store=self.store, collectors=[self.user])
+        self.conversation = self.pickup.conversation
+
+    def test_send_email_notifications(self):
+        users = [VerifiedUserFactory() for _ in range(2)]
+        [self.pickup.collectors.add(u) for u in users]
+
+        mail.outbox = []
+        ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
+
+        actual_recipients = set(m.to[0] for m in mail.outbox)
+        expected_recipients = set(u.email for u in users)
+
+        self.assertEqual(actual_recipients, expected_recipients)
+
+        self.assertEqual(len(mail.outbox), 2)
+
+
+class TestPrivateUserConversationsEmailNotifications(TestCase):
+    def setUp(self):
+        self.user = VerifiedUserFactory()
+        self.user2 = VerifiedUserFactory()
+        self.conversation = Conversation.objects.get_or_create_for_two_users(self.user, self.user2)
+
+    def test_send_email_notifications(self):
+        mail.outbox = []
+        ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
+
+        self.assertEqual(len(mail.outbox), 1)
+
+        actual_recipient = mail.outbox[0].to[0]
+        expected_recipient = self.user2.email
+        self.assertEqual(actual_recipient, expected_recipient)
+
+        self.assertEqual(len(mail.outbox), 1)
 
 
 class ReactionModelTests(TestCase):

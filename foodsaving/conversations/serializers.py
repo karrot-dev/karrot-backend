@@ -14,7 +14,6 @@ class ConversationSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'participants',
-            'created_at',
             'updated_at',
             'seen_up_to',
             'unread_message_count',

@@ -1,18 +1,17 @@
-from dateutil.relativedelta import relativedelta
+from datetime import timedelta
+
 from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
 from django.core import mail
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
-from datetime import timedelta
-from django.utils import timezone
 
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationParticipant, Conversation, ConversationMessage, \
     ConversationMessageReaction
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupStatus
-from foodsaving.stores.factories import StoreFactory
-from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
 from foodsaving.webhooks.models import EmailEvent
 
@@ -258,30 +257,6 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
         mail.outbox = []
         ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
         self.assertEqual(len(mail.outbox), 0)
-
-
-class TestPickupConversationsEmailNotificationsAPI(APITestCase):
-    def setUp(self):
-        self.user = VerifiedUserFactory()
-        self.group = GroupFactory(members=[self.user])
-        self.store = StoreFactory(group=self.group)
-        self.pickup = PickupDateFactory(store=self.store, collectors=[self.user])
-        self.conversation = self.pickup.conversation
-        self.participant = ConversationParticipant.objects.get(conversation=self.conversation, user=self.user)
-
-    def test_send_email_notifications(self):
-        users = [VerifiedUserFactory() for _ in range(2)]
-        [self.pickup.collectors.add(u) for u in users]
-
-        mail.outbox = []
-        ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
-
-        actual_recipients = set(m.to[0] for m in mail.outbox)
-        expected_recipients = set(u.email for u in users)
-
-        self.assertEqual(actual_recipients, expected_recipients)
-
-        self.assertEqual(len(mail.outbox), 2)
 
 
 class TestConversationsMessageReactionsPostAPI(APITestCase):

@@ -53,3 +53,11 @@ class TestUsersAPI(APITestCase):
         url = self.url + str(self.user_in_another_group.id) + '/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_conversation(self):
+        self.client.force_login(user=self.user)
+        response = self.client.get('/api/users/{}/conversation/'.format(self.user2.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn(self.user.id, response.data['participants'])
+        self.assertIn(self.user2.id, response.data['participants'])
+        self.assertEqual(len(response.data['participants']), 2)

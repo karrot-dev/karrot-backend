@@ -31,9 +31,6 @@ def mark_as_read(sender, instance, **kwargs):
 def notify_participants(sender, instance, created, **kwargs):
     message = instance
 
-    if not message.conversation.target:
-        return
-
     if not created:
         return
 
