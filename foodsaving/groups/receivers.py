@@ -51,7 +51,6 @@ def group_member_removed(sender, instance, **kwargs):
     stats.group_left(group)
 
 
-@receiver(post_init, sender=Group)
 @receiver(post_save, sender=GroupMembership)
 def initialize_group(sender, instance, **kwargs):
     """

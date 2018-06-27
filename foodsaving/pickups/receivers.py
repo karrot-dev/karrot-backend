@@ -26,7 +26,6 @@ def feedback_created(sender, instance, created, **kwargs):
     stats.feedback_given(instance)
 
 
-@receiver(post_init, sender=PickupDate)
 @receiver(post_save, sender=PickupDate)
 def pickup_created(**kwargs):
     """Ensure every pickup has a conversation with the collectors in it."""
