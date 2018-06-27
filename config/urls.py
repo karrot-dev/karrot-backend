@@ -24,7 +24,7 @@ from foodsaving.subscriptions.api import PushSubscriptionViewSet
 from foodsaving.template_previews import views as template_preview_views
 from foodsaving.userauth.api import AuthUserView, AuthView, LogoutView, \
     RequestResetPasswordView, ChangePasswordView, VerifyMailView, ResendMailVerificationCodeView, ResetPasswordView, \
-    ChangeMailView, RequestDeleteUserView
+    ChangeMailView, RequestDeleteUserView, FailedEmailDeliveryView
 from foodsaving.users.api import UserViewSet
 from foodsaving.webhooks.api import IncomingEmailView, EmailEventView
 
@@ -66,6 +66,7 @@ urlpatterns = [
     path('api/auth/logout/', LogoutView.as_view()),
     path('api/auth/user/', AuthUserView.as_view()),
     path('api/auth/user/request_delete/', RequestDeleteUserView.as_view()),
+    path('api/auth/user/failed_email_deliveries/', FailedEmailDeliveryView.as_view()),
     path('api/auth/email/', ChangeMailView.as_view()),
     path('api/auth/email/verify/', VerifyMailView.as_view()),
     path('api/auth/email/resend_verification_code/', ResendMailVerificationCodeView.as_view()),

@@ -15,10 +15,12 @@ from rest_framework.test import APITestCase
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.stores.factories import StoreFactory
+from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.userauth.models import VerificationCode
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
 from foodsaving.utils import email_utils
 from foodsaving.utils.tests.fake import faker
+from foodsaving.webhooks.models import EmailEvent
 
 
 class TestUsersAPI(APITestCase):
@@ -544,3 +546,22 @@ class TestResendEMailVerificationCode(APITestCase):
     def test_resend_mail_verification_code_fails_if_not_logged_in(self):
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class TestFailedEmailDeliveryAPI(APITestCase, ExtractPaginationMixin):
+    def setUp(self):
+        self.user = UserFactory()
+        self.url = '/api/auth/user/failed_email_deliveries/'
+
+    def test_get_no_failed_deliveries(self):
+        self.client.force_login(user=self.user)
+        response = self.get_results(self.url)
+        self.assertEqual(response.data, [])
+
+    def test_get_failed_deliveries(self):
+        EmailEvent.objects.create(address=self.user.email, event='bounce', payload={'reason': 'my reason'})
+        self.client.force_login(user=self.user)
+        response = self.get_results(self.url)
+        self.assertEqual(response.data[0]['address'], self.user.email)
+        self.assertEqual(response.data[0]['reason'], 'my reason')
+        self.assertEqual(response.data[0]['event'], 'bounce')

@@ -3,6 +3,7 @@ from django.contrib.auth import logout, update_session_auth_hash
 from django.utils.translation import ugettext as _
 from django.middleware.csrf import get_token as generate_csrf_token_for_frontend
 from rest_framework import status, generics, views
+from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
@@ -10,7 +11,7 @@ from foodsaving.userauth.models import VerificationCode
 from foodsaving.userauth.permissions import MailIsNotVerified
 from foodsaving.userauth.serializers import AuthLoginSerializer, AuthUserSerializer, \
     ChangePasswordSerializer, RequestResetPasswordSerializer, ChangeMailSerializer, \
-    VerificationCodeSerializer, ResetPasswordSerializer
+    VerificationCodeSerializer, ResetPasswordSerializer, FailedEmailDeliverySerializer
 
 
 class LogoutView(views.APIView):
@@ -186,3 +187,29 @@ class ChangeMailView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=status.HTTP_204_NO_CONTENT, data={})
+
+
+class FailedEmailDeliveryPagination(CursorPagination):
+    # TODO: create an index on 'created_at' for increased speed
+    page_size = 10
+    ordering = '-created_at'
+
+
+class FailedEmailDeliveryView(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = FailedEmailDeliverySerializer
+    pagination_class = FailedEmailDeliveryPagination
+
+    def get(self, request):
+        """
+        Get email bounces etc
+        """
+        queryset = self.filter_queryset(request.user.failed_email_deliveries())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

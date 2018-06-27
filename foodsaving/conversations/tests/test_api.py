@@ -1,3 +1,4 @@
+from dateutil.relativedelta import relativedelta
 from dateutil.parser import parse
 from django.core import mail
 from rest_framework import status
@@ -231,11 +232,24 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
     def test_exclude_bounced_addresses(self):
         bounce_user = VerifiedUserFactory()
         self.group.add_member(bounce_user)
-        EmailEvent.objects.create(address=bounce_user.email, event='bounce', payload={})
+        for _ in range(5):
+            EmailEvent.objects.create(address=bounce_user.email, event='bounce', payload={})
 
         mail.outbox = []
         ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
         self.assertEqual(len(mail.outbox), 0)
+
+    def test_not_exclude_bounced_addresses_if_too_old(self):
+        bounce_user = VerifiedUserFactory()
+        self.group.add_member(bounce_user)
+
+        some_months_ago = timezone.now() - relativedelta(months=4)
+        for _ in range(5):
+            EmailEvent.objects.create(created_at=some_months_ago, address=bounce_user.email, event='bounce', payload={})
+
+        mail.outbox = []
+        ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
+        self.assertEqual(len(mail.outbox), 1)
 
     def test_exclude_unverified_addresses(self):
         user = UserFactory()  # not verified
