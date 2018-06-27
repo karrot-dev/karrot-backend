@@ -197,7 +197,7 @@ class RequestResetPasswordSerializer(serializers.Serializer):
         return user
 
 
-class FailedEmailDeliverySerialier(serializers.ModelSerializer):
+class FailedEmailDeliverySerializer(serializers.ModelSerializer):
     class Meta:
         model = EmailEvent
         fields = ['created_at', 'address', 'event', 'reason', 'subject']

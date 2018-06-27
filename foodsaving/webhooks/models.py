@@ -21,7 +21,7 @@ class EmailEventManager(BaseUserManager):
 
     def for_user(self, user):
         return self.ignored().filter(
-            address=user.address
+            address=user.email
         )
 
 

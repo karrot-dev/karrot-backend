@@ -11,7 +11,7 @@ from foodsaving.userauth.models import VerificationCode
 from foodsaving.userauth.permissions import MailIsNotVerified
 from foodsaving.userauth.serializers import AuthLoginSerializer, AuthUserSerializer, \
     ChangePasswordSerializer, RequestResetPasswordSerializer, ChangeMailSerializer, \
-    VerificationCodeSerializer, ResetPasswordSerializer, FailedEmailDeliverySerialier
+    VerificationCodeSerializer, ResetPasswordSerializer, FailedEmailDeliverySerializer
 
 
 class LogoutView(views.APIView):
@@ -197,7 +197,7 @@ class FailedEmailDeliveryPagination(CursorPagination):
 
 class FailedEmailDeliveryView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = FailedEmailDeliverySerialier
+    serializer_class = FailedEmailDeliverySerializer
     pagination_class = FailedEmailDeliveryPagination
 
     def get(self, request):
