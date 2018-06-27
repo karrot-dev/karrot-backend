@@ -1,4 +1,4 @@
-from django.db.models.signals import pre_delete, post_save, m2m_changed, post_init
+from django.db.models.signals import pre_delete, post_save, m2m_changed
 from django.dispatch import receiver
 from django.utils import timezone
 

@@ -128,7 +128,7 @@ class PickupDateViewSet(
     serializer_class = PickupDateSerializer
     queryset = PickupDateModel.objects \
         .filter(deleted=False) \
-        .prefetch_related('collectors') # because we have collector_ids field in the serializer
+        .prefetch_related('collectors')  # because we have collector_ids field in the serializer
     filter_backends = (DjangoFilterBackend,)
     filter_class = PickupDatesFilter
     permission_classes = (IsAuthenticated, IsUpcoming)

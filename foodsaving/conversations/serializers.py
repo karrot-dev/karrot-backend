@@ -59,7 +59,7 @@ class ConversationSerializer(serializers.ModelSerializer):
 
     def _participant(self, conversation):
         user = self.context['request'].user
-        if not 'participant' in self.context:
+        if 'participant' not in self.context:
             self.context['participant'] = conversation.conversationparticipant_set.get(user=user)
         return self.context['participant']
 

@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save, pre_delete, post_init, post_delete
+from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
 
 from foodsaving.conversations.models import Conversation, ConversationParticipant
