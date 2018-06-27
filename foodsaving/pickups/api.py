@@ -5,7 +5,6 @@ from rest_framework.decorators import detail_route
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
-from rest_framework_extensions.etag.mixins import ReadOnlyETAGMixin
 
 from foodsaving.conversations.api import RetrieveConversationMixin
 from foodsaving.history.models import History, HistoryTypus
@@ -33,7 +32,6 @@ class FeedbackPagination(CursorPagination):
 
 
 class FeedbackViewSet(
-    ReadOnlyETAGMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     PartialUpdateModelMixin,
@@ -68,7 +66,6 @@ class FeedbackViewSet(
 
 
 class PickupDateSeriesViewSet(
-    ReadOnlyETAGMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     PartialUpdateModelMixin,
@@ -106,7 +103,6 @@ class PickupDatePagination(CursorPagination):
 
 
 class PickupDateViewSet(
-    ReadOnlyETAGMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     PartialUpdateModelMixin,

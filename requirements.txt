@@ -37,7 +37,6 @@ django-timezone-field==2.1
 django-versatileimagefield==1.9
 django[argon2]==2.0.6
 djangorestframework==3.8.2
-drf-extensions==0.3.1
 drf-nested-routers==0.90.2
 factory-boy==2.11.1
 faker==0.8.16             # via factory-boy
@@ -54,7 +53,7 @@ incremental==17.5.0       # via twisted
 influxdb==5.1.0           # via django-influxdb-metrics
 itypes==1.1.0             # via coreapi
 jinja2==2.10              # via coreschema, django-jinja, jinja2
-lxml==4.2.2               # via talon
+lxml==4.2.3               # via talon
 markdown==2.6.11
 markupsafe==1.0           # via jinja2
 msgpack-python==0.5.6     # via asgi-redis

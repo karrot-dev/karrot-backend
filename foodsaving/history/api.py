@@ -2,7 +2,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_extensions.etag.mixins import ReadOnlyETAGMixin
 
 from foodsaving.history.filters import HistoryFilter
 from foodsaving.history.models import History
@@ -15,7 +14,7 @@ class HistoryPagination(CursorPagination):
     ordering = '-date'
 
 
-class HistoryViewSet(ReadOnlyETAGMixin, viewsets.ReadOnlyModelViewSet):
+class HistoryViewSet(viewsets.ReadOnlyModelViewSet):
     """
     History of user actions
     """
