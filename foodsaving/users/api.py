@@ -4,13 +4,13 @@ from rest_framework import filters
 from rest_framework import mixins
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
-from rest_framework_extensions.mixins import ReadOnlyCacheResponseAndETAGMixin
+from rest_framework_extensions.etag.mixins import ReadOnlyETAGMixin
 
 from foodsaving.users.serializers import UserSerializer
 
 
 class UserViewSet(
-    ReadOnlyCacheResponseAndETAGMixin,
+    ReadOnlyETAGMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     GenericViewSet

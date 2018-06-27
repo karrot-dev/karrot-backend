@@ -9,7 +9,7 @@ from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from rest_framework_extensions.mixins import ReadOnlyCacheResponseAndETAGMixin
+from rest_framework_extensions.etag.mixins import ReadOnlyETAGMixin
 
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
@@ -78,7 +78,7 @@ class IsWithinUpdatePeriod(BasePermission):
 
 
 class ConversationViewSet(
-    ReadOnlyCacheResponseAndETAGMixin,
+    ReadOnlyETAGMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     GenericViewSet
