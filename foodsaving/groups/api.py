@@ -10,6 +10,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+from rest_framework_extensions.etag.mixins import ReadOnlyETAGMixin
 
 from foodsaving.conversations.api import RetrieveConversationMixin
 from foodsaving.groups import roles, stats
@@ -39,6 +40,7 @@ class CanUpdateMemberships(BasePermission):
 
 
 class GroupInfoViewSet(
+    ReadOnlyETAGMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     GenericViewSet
@@ -51,7 +53,7 @@ class GroupInfoViewSet(
     - `?search` - search in name and public description
     - `?include_empty` - set to False to exclude empty groups without members
     """
-    queryset = GroupModel.objects
+    queryset = GroupModel.objects.prefetch_related('members')
     filter_backends = (SearchFilter, DjangoFilterBackend)
     filter_class = GroupsInfoFilter
     search_fields = ('name', 'public_description')
@@ -59,6 +61,7 @@ class GroupInfoViewSet(
 
 
 class GroupViewSet(
+    ReadOnlyETAGMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     PartialUpdateModelMixin,
@@ -192,6 +195,7 @@ class GroupViewSet(
 
 
 class AgreementViewSet(
+    ReadOnlyETAGMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     PartialUpdateModelMixin,

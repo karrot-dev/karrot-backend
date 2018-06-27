@@ -5,6 +5,7 @@ from rest_framework.decorators import detail_route
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
+from rest_framework_extensions.etag.mixins import ReadOnlyETAGMixin
 
 from foodsaving.conversations.api import RetrieveConversationMixin
 from foodsaving.history.models import History, HistoryTypus
@@ -32,6 +33,7 @@ class FeedbackPagination(CursorPagination):
 
 
 class FeedbackViewSet(
+    ReadOnlyETAGMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     PartialUpdateModelMixin,
@@ -66,6 +68,7 @@ class FeedbackViewSet(
 
 
 class PickupDateSeriesViewSet(
+    ReadOnlyETAGMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     PartialUpdateModelMixin,
@@ -103,6 +106,7 @@ class PickupDatePagination(CursorPagination):
 
 
 class PickupDateViewSet(
+    ReadOnlyETAGMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     PartialUpdateModelMixin,
@@ -122,7 +126,9 @@ class PickupDateViewSet(
     - `?date_0=<from_date>`&`date_1=<to_date>` - filter by date, can also either give date_0 or date_1
     """
     serializer_class = PickupDateSerializer
-    queryset = PickupDateModel.objects.filter(deleted=False)
+    queryset = PickupDateModel.objects \
+        .filter(deleted=False) \
+        .prefetch_related('collectors')  # because we have collector_ids field in the serializer
     filter_backends = (DjangoFilterBackend,)
     filter_class = PickupDatesFilter
     permission_classes = (IsAuthenticated, IsUpcoming)

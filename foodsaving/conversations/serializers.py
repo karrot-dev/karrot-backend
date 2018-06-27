@@ -34,23 +34,20 @@ class ConversationSerializer(serializers.ModelSerializer):
         return data
 
     def get_seen_up_to(self, conversation):
-        user = self.context['request'].user
-        participant = conversation.conversationparticipant_set.get(user=user)
+        participant = self._participant(conversation)
         if not participant.seen_up_to:
             return None
         return participant.seen_up_to.id
 
     def get_unread_message_count(self, conversation):
-        user = self.context['request'].user
-        participant = conversation.conversationparticipant_set.get(user=user)
+        participant = self._participant(conversation)
         messages = conversation.messages
         if participant.seen_up_to:
             messages = messages.filter(id__gt=participant.seen_up_to.id)
         return messages.count()
 
     def get_updated_at(self, conversation):
-        user = self.context['request'].user
-        participant = conversation.conversationparticipant_set.get(user=user)
+        participant = self._participant(conversation)
         if participant.updated_at > conversation.updated_at:
             date = participant.updated_at
         else:
@@ -58,9 +55,13 @@ class ConversationSerializer(serializers.ModelSerializer):
         return DateTimeField().to_representation(date)
 
     def get_email_notifications(self, conversation):
+        return self._participant(conversation).email_notifications
+
+    def _participant(self, conversation):
         user = self.context['request'].user
-        participant = conversation.conversationparticipant_set.get(user=user)
-        return participant.email_notifications
+        if 'participant' not in self.context:
+            self.context['participant'] = conversation.conversationparticipant_set.get(user=user)
+        return self.context['participant']
 
 
 class ConversationMarkSerializer(serializers.ModelSerializer):

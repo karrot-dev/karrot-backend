@@ -3,6 +3,7 @@ from rest_framework import mixins
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
+from rest_framework_extensions.etag.mixins import ReadOnlyETAGMixin
 
 from foodsaving.stores.models import Store as StoreModel
 from foodsaving.stores.serializers import StoreSerializer
@@ -10,6 +11,7 @@ from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 
 class StoreViewSet(
+    ReadOnlyETAGMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     PartialUpdateModelMixin,

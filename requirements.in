@@ -6,6 +6,7 @@ django-redis
 django-rest-swagger
 django-jinja
 djangorestframework
+drf-extensions
 drf-nested-routers
 factory-boy
 hiredis

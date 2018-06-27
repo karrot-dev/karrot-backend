@@ -249,6 +249,10 @@ HUEY = {
     'always_eager': True,
 }
 
+if 'USE_SILK' in os.environ:
+    INSTALLED_APPS += ('silk',)
+    MIDDLEWARE = ('silk.middleware.SilkyMiddleware',) + MIDDLEWARE
+
 # NB: Keep this as the last line, and keep
 # local_settings.py out of version control
 try:
