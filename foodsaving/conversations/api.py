@@ -206,7 +206,7 @@ class RetrieveConversationMixin(object):
 
     def retrieve_conversation(self, request, *args, **kwargs):
         target = self.get_object()
-        conversation = Conversation.objects.get_or_create_for_target(target)
+        conversation = Conversation.objects.filter_for_target(target).prefetch_related('participants').first()
         serializer = ConversationSerializer(conversation, data={}, context={'request': request})
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data)
