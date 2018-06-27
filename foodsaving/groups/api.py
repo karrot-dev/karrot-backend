@@ -10,6 +10,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+from rest_framework_extensions.mixins import ReadOnlyCacheResponseAndETAGMixin
 
 from foodsaving.conversations.api import RetrieveConversationMixin
 from foodsaving.groups import roles, stats
@@ -39,6 +40,7 @@ class CanUpdateMemberships(BasePermission):
 
 
 class GroupInfoViewSet(
+    ReadOnlyCacheResponseAndETAGMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     GenericViewSet
@@ -59,6 +61,7 @@ class GroupInfoViewSet(
 
 
 class GroupViewSet(
+    ReadOnlyCacheResponseAndETAGMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     PartialUpdateModelMixin,
