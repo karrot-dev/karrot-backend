@@ -13,7 +13,7 @@ from foodsaving.utils.frontend_urls import (
     group_conversation_mute_url,
     pickup_detail_url,
     pickup_conversation_mute_url,
-)
+    user_detail_url, user_conversation_mute_url)
 from foodsaving.webhooks.api import make_local_part
 
 
@@ -110,11 +110,12 @@ def prepare_pickup_conversation_message_notification(user, message):
 
 
 def prepare_private_user_conversation_message_notification(user, message):
-    reply_to_name = message.author.display_name
+    author = message.author
+    reply_to_name = author.display_name
 
     local_part = make_local_part(message.conversation, user)
     reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
-    from_email = formataddr((message.author.display_name, settings.DEFAULT_FROM_EMAIL))
+    from_email = formataddr((author.display_name, settings.DEFAULT_FROM_EMAIL))
 
     return prepare_email(
         'conversation_message_notification',
@@ -122,10 +123,10 @@ def prepare_private_user_conversation_message_notification(user, message):
         user=user,
         reply_to=[reply_to],
         context={
-            'conversation_name': message.author.display_name,
+            'conversation_name': author.display_name,
             'author': message.author,
             'message_content': message.content_rendered(),
-            'conversation_url': '',  # TODO insert proper conversation url
-            'mute_url': '',  # TODO insert proper conversation url
+            'conversation_url': user_detail_url(author),
+            'mute_url': user_conversation_mute_url(author, message.conversation),
         }
     )
