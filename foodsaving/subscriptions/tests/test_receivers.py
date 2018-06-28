@@ -508,7 +508,11 @@ class ReceiverPushTests(ChannelTestCase):
         self.conversation.join(self.author)
 
         # add a push subscriber
-        PushSubscription.objects.create(user=self.user, token=self.token, platform=PushSubscriptionPlatform.ANDROID)
+        PushSubscription.objects.create(
+            user=self.user,
+            token=self.token,
+            platform=PushSubscriptionPlatform.ANDROID.value,
+        )
 
     def test_sends_to_push_subscribers(self, m):
         def check_json_data(request):
@@ -562,7 +566,11 @@ class GroupConversationReceiverPushTests(ChannelTestCase):
         self.conversation = self.group.conversation
 
         # add a push subscriber
-        PushSubscription.objects.create(user=self.user, token=self.token, platform=PushSubscriptionPlatform.ANDROID)
+        PushSubscription.objects.create(
+            user=self.user,
+            token=self.token,
+            platform=PushSubscriptionPlatform.ANDROID.value,
+        )
 
     def test_sends_to_push_subscribers(self, m):
         def check_json_data(request):
