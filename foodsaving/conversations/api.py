@@ -208,3 +208,18 @@ class RetrieveConversationMixin(object):
         serializer = ConversationSerializer(conversation, data={}, context={'request': request})
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data)
+
+
+class RetrievePrivateConversationMixin(object):
+    """Retrieve a private user conversation instance."""
+
+    def retrieve_private_conversation(self, request, *args, **kwargs):
+        user2 = self.get_object()
+        try:
+            conversation = Conversation.objects.get_or_create_for_two_users(request.user, user2)
+        except Exception:
+            return Response(status=status.HTTP_404_NOT_FOUND, data={})
+        serializer = ConversationSerializer(conversation, data={}, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data)
+

@@ -33,6 +33,17 @@ def pickup_conversation_mute_url(pickup, conversation):
     return '{}?mute_conversation={}'.format(pickup_detail_url(pickup), conversation.id)
 
 
+def user_detail_url(user):
+    return '{hostname}/#/user/{user_id}/detail'.format(
+        hostname=settings.HOSTNAME,
+        user_id=user.id,
+    )
+
+
+def user_conversation_mute_url(user, conversation):
+    return '{}?mute_conversation={}'.format(user_detail_url(user), conversation.id)
+
+
 def group_wall_url(group):
     return '{hostname}/#/group/{group_id}/wall'.format(
         hostname=settings.HOSTNAME,
