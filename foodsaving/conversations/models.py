@@ -33,6 +33,8 @@ class ConversationManager(models.Manager):
 
     @classmethod
     def get_or_create_for_two_users(cls, user1, user2):
+        if user1.id == user2.id:
+            raise Exception('Users need to be different')
         conv = Conversation.objects.filter(is_private=True, participants=user1)\
             .filter(participants=user2)\
             .prefetch_related('participants')\

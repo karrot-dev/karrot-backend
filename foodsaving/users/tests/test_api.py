@@ -61,3 +61,8 @@ class TestUsersAPI(APITestCase):
         self.assertIn(self.user.id, response.data['participants'])
         self.assertIn(self.user2.id, response.data['participants'])
         self.assertEqual(len(response.data['participants']), 2)
+
+    def test_get_conversation_for_yourself_fails(self):
+        self.client.force_login(user=self.user)
+        response = self.client.get('/api/users/{}/conversation/'.format(self.user.id))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

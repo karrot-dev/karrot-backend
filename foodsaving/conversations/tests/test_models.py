@@ -89,15 +89,15 @@ class TestPickupConversationsEmailNotifications(TestCase):
         self.assertEqual(len(mail.outbox), 2)
 
 
-class TestPrivateUserConversationsEmailNotifications(TestCase):
+class TestPrivateUserConversations(TestCase):
     def setUp(self):
         self.user = VerifiedUserFactory()
         self.user2 = VerifiedUserFactory()
-        self.conversation = Conversation.objects.get_or_create_for_two_users(self.user, self.user2)
 
     def test_send_email_notifications(self):
+        conversation = Conversation.objects.get_or_create_for_two_users(self.user, self.user2)
         mail.outbox = []
-        ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
+        ConversationMessage.objects.create(author=self.user, conversation=conversation, content='asdf')
 
         self.assertEqual(len(mail.outbox), 1)
 
@@ -106,6 +106,24 @@ class TestPrivateUserConversationsEmailNotifications(TestCase):
         self.assertEqual(actual_recipient, expected_recipient)
 
         self.assertEqual(len(mail.outbox), 1)
+
+    def test_get_or_create_conversation(self):
+        new_user = UserFactory()
+        c = Conversation.objects.get_or_create_for_two_users(self.user, new_user)
+        self.assertEqual(Conversation.objects.count(), 1)
+        self.assertEqual(c.participants.count(), 2)
+        self.assertIn(self.user, c.participants.all())
+        self.assertIn(new_user, c.participants.all())
+        conversation_id = c.id
+
+        c = Conversation.objects.get_or_create_for_two_users(self.user, new_user)
+        self.assertEqual(Conversation.objects.count(), 1)
+        self.assertEqual(c.participants.count(), 2)
+        self.assertEqual(conversation_id, c.id)
+
+    def test_get_or_create_conversation_for_yourself_fails(self):
+        with self.assertRaises(Exception):
+            c = Conversation.objects.get_or_create_for_two_users(self.user, self.user)
 
 
 class ReactionModelTests(TestCase):
