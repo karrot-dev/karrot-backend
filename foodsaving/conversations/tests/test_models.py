@@ -123,7 +123,7 @@ class TestPrivateUserConversations(TestCase):
 
     def test_get_or_create_conversation_for_yourself_fails(self):
         with self.assertRaises(Exception):
-            c = Conversation.objects.get_or_create_for_two_users(self.user, self.user)
+            Conversation.objects.get_or_create_for_two_users(self.user, self.user)
 
 
 class ReactionModelTests(TestCase):
