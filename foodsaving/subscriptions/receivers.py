@@ -52,7 +52,7 @@ def send_messages(sender, instance, created, **kwargs):
 
     topic = 'conversations:message'
 
-    conversation_url = frontend_urls.conversation_url(conversation)
+    conversation_url = frontend_urls.conversation_url(conversation, message.author)
 
     push_exclude_users = []
 

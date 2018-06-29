@@ -5,11 +5,13 @@ from foodsaving.groups.models import Group
 from foodsaving.pickups.models import PickupDate
 
 
-def conversation_url(conversation):
+def conversation_url(conversation, user):
     if isinstance(conversation.target, Group):
         return group_wall_url(conversation.target)
     elif isinstance(conversation.target, PickupDate):
         return pickup_detail_url(conversation.target)
+    elif conversation.is_private:
+        return user_detail_url(user)
     raise Exception('dont know how to make a url for conversation {}'.format(conversation.id))
 
 
