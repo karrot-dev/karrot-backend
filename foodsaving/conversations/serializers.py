@@ -28,7 +28,7 @@ class ConversationSerializer(serializers.ModelSerializer):
     def validate(self, data):
         """Check the user is a participant"""
         conversation = self.instance
-        if self.context['request'].user not in conversation.participants.all():
+        if not self._participant(conversation):
             raise PermissionDenied(_('You are not in this conversation'))
         return data
 
@@ -59,7 +59,7 @@ class ConversationSerializer(serializers.ModelSerializer):
     def _participant(self, conversation):
         user = self.context['request'].user
         if 'participant' not in self.context:
-            self.context['participant'] = conversation.conversationparticipant_set.get(user=user)
+            self.context['participant'] = conversation.conversationparticipant_set.filter(user=user).first()
         return self.context['participant']
 
 

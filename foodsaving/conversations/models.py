@@ -37,7 +37,6 @@ class ConversationManager(models.Manager):
             raise Exception('Users need to be different')
         conv = Conversation.objects.filter(is_private=True, participants=user1)\
             .filter(participants=user2)\
-            .prefetch_related('participants')\
             .first()
         if not conv:
             conv = Conversation.objects.create(is_private=True)
