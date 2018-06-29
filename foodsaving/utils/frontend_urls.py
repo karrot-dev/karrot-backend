@@ -12,7 +12,7 @@ def conversation_url(conversation, user):
         return pickup_detail_url(conversation.target)
     elif conversation.is_private:
         return user_detail_url(user)
-    raise Exception('dont know how to make a url for conversation {}'.format(conversation.id))
+    return None
 
 
 def store_url(store):
