@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from rest_framework.fields import SerializerMethodField, CurrentUserDefault
+from rest_framework.fields import CurrentUserDefault
 from rest_framework.validators import UniqueTogetherValidator
 
-from foodsaving.subscriptions.models import PushSubscription, PushSubscriptionPlatform
+from foodsaving.subscriptions.models import PushSubscription
 from foodsaving.users.serializers import UserSerializer
 
 
@@ -14,11 +14,6 @@ class PushSubscriptionSerializer(serializers.ModelSerializer):
             'token',
             'platform'
         ]
-
-    platform = SerializerMethodField()
-
-    def get_platform(self, obj):
-        return PushSubscriptionPlatform.name(obj.platform).lower()
 
 
 class CreatePushSubscriptionSerializer(PushSubscriptionSerializer):

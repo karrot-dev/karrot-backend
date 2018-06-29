@@ -23,6 +23,7 @@ from foodsaving.subscriptions.fcm import notify_multiple_devices
 from foodsaving.subscriptions.models import ChannelSubscription, PushSubscription
 from foodsaving.userauth.serializers import AuthUserSerializer
 from foodsaving.users.serializers import UserSerializer
+from foodsaving.utils import frontend_urls
 
 MockRequest = namedtuple('Request', ['user'])
 
@@ -51,6 +52,8 @@ def send_messages(sender, instance, created, **kwargs):
 
     topic = 'conversations:message'
 
+    conversation_url = frontend_urls.conversation_url(conversation, message.author)
+
     push_exclude_users = []
 
     for subscription in ChannelSubscription.objects.recent().filter(user__in=conversation.participants.all()):
@@ -77,6 +80,7 @@ def send_messages(sender, instance, created, **kwargs):
                 registration_ids=tokens,
                 message_title=message_title,
                 message_body=message.content,
+                click_action=conversation_url,
                 # this causes each notification for a given conversation to replace previous notifications
                 # fancier would be to make the new notifications show a summary not just the latest message
                 tag='conversation:{}'.format(conversation.id)

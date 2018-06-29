@@ -5,7 +5,13 @@ from __future__ import unicode_literals
 from django.conf import settings
 from django.db import migrations
 import django_enumfield.db.fields
+from django_enumfield import enum
+
 import foodsaving.subscriptions.models
+
+
+class PushSubscriptionPlatformLegacy(enum.Enum):
+    ANDROID = 1
 
 
 class Migration(migrations.Migration):
@@ -20,7 +26,7 @@ class Migration(migrations.Migration):
             model_name='pushsubscription',
             name='platform',
             field=django_enumfield.db.fields.EnumField(default=1,
-                                                       enum=foodsaving.subscriptions.models.PushSubscriptionPlatform),
+                                                       enum=PushSubscriptionPlatformLegacy),
         ),
         migrations.AlterUniqueTogether(
             name='pushsubscription',

@@ -3,7 +3,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models import ForeignKey, TextField, DateTimeField, Manager
 from django.utils import timezone
-from django_enumfield import enum
+from enum import Enum
 
 from foodsaving.base.base_models import BaseModel
 
@@ -25,8 +25,9 @@ class ChannelSubscription(BaseModel):
     objects = ChannelSubscriptionManager()
 
 
-class PushSubscriptionPlatform(enum.Enum):
-    ANDROID = 1
+class PushSubscriptionPlatform(Enum):
+    ANDROID = 'android'
+    WEB = 'web'
 
 
 class PushSubscription(BaseModel):
@@ -37,4 +38,8 @@ class PushSubscription(BaseModel):
 
     user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     token = TextField()  # FCM device registration token
-    platform = enum.EnumField(PushSubscriptionPlatform)
+    platform = models.CharField(
+        default=PushSubscriptionPlatform.ANDROID.value,
+        choices=[(platform.value, platform.value) for platform in PushSubscriptionPlatform],
+        max_length=100,
+    )

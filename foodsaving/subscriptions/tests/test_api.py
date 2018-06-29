@@ -46,7 +46,7 @@ class TestSubscriptionsAPI(APITestCase):
         user = UserFactory()
         token = faker.uuid4()
         subscription = PushSubscription.objects.create(user=user, token=token,
-                                                       platform=PushSubscriptionPlatform.ANDROID)
+                                                       platform=PushSubscriptionPlatform.ANDROID.value)
         self.client.force_login(user=user)
         response = self.client.get('/api/subscriptions/push/{}/'.format(subscription.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -58,7 +58,7 @@ class TestSubscriptionsAPI(APITestCase):
         user = UserFactory()
         token = faker.uuid4()
         subscription = PushSubscription.objects.create(user=user, token=token,
-                                                       platform=PushSubscriptionPlatform.ANDROID)
+                                                       platform=PushSubscriptionPlatform.ANDROID.value)
         self.client.force_login(user=user)
         response = self.client.delete('/api/subscriptions/push/{}/'.format(subscription.id))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
