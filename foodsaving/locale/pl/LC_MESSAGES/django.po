@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-06-17 17:54+0000\n"
+"POT-Creation-Date: 2018-06-21 16:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Tomasz Ploch <tomasz.ploch@foodsharing.pl>, 2018\n"
 "Language-Team: Polish (https://www.transifex.com/yunity-1/teams/68631/pl/)\n"
@@ -36,21 +36,27 @@ msgstr ""
 "Pozdrawiamy,\n"
 "%(site_name)s"
 
-#: foodsaving/conversations/api.py:37 foodsaving/conversations/api.py:56
+#: foodsaving/conversations/api.py:36 foodsaving/conversations/api.py:55
 #: foodsaving/conversations/serializers.py:33
 #: foodsaving/conversations/serializers.py:136
 msgid "You are not in this conversation"
 msgstr "Nie ma Cię w tej konwersacji"
 
-#: foodsaving/conversations/api.py:65
+#: foodsaving/conversations/api.py:64
 msgid "You are not the author of this message"
-msgstr ""
+msgstr "Nie jesteś autorką/autorem tej wiadomości"
 
-#: foodsaving/conversations/api.py:72
+#: foodsaving/conversations/api.py:71
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
 msgstr ""
+"Nie możesz edytować wiadomości po %(days_number)s dniach od jej utworzenia"
+
+#: foodsaving/conversations/emails.py:76 foodsaving/conversations/emails.py:79
+#, python-format
+msgid "Pickup %(date)s"
+msgstr "Odbiór %(date)s"
 
 #: foodsaving/conversations/templates/conversation_message_notification.html.jinja2:90
 msgid ""
@@ -250,7 +256,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "Na ten adres e-mail już wcześniej wysłano zaproszenie"
 
 #: foodsaving/invitations/serializers.py:26
-#: foodsaving/stores/serializers.py:64
+#: foodsaving/stores/serializers.py:66
 msgid "You are not a member of this group."
 msgstr "Nie jesteś członkiem tej grupy."
 
@@ -310,7 +316,7 @@ msgstr "Nie ma już miejsc na ten odbiór."
 msgid "This feedback is given by another user."
 msgstr "Ten komentarz został dodany przez innego użytkownika."
 
-#: foodsaving/pickups/permissions.py:53 foodsaving/pickups/serializers.py:217
+#: foodsaving/pickups/permissions.py:53 foodsaving/pickups/serializers.py:233
 #, python-format
 msgid ""
 "You can't give feedback for pickups more than %(days_number)s days ago."
@@ -318,34 +324,36 @@ msgstr ""
 "Nie możesz dodawać komentarzy do odbiorów wcześniejszych niż %(days_number)s"
 " dni temu."
 
-#: foodsaving/pickups/serializers.py:37 foodsaving/pickups/serializers.py:171
-#: foodsaving/pickups/serializers.py:210
+#: foodsaving/pickups/serializers.py:37 foodsaving/pickups/serializers.py:177
+#: foodsaving/pickups/serializers.py:226
 msgid "You are not member of the store's group."
 msgstr "Nie jesteś członkiem grupy tego sklepu."
 
-#: foodsaving/pickups/serializers.py:86
+#: foodsaving/pickups/serializers.py:88
 msgid "The date should be in the future."
 msgstr "Data musi być w przyszłości."
 
-#: foodsaving/pickups/serializers.py:182
+#: foodsaving/pickups/serializers.py:188
 msgid "Invalid recurrence rule."
 msgstr "Nieprawidłowe zasady powtarzających się odbiorów."
 
-#: foodsaving/pickups/serializers.py:184
+#: foodsaving/pickups/serializers.py:190
 msgid "Only single recurrence rules are allowed."
 msgstr "Można zastosować tylko jedną zasadę powtarzających się odbiorów"
 
-#: foodsaving/pickups/serializers.py:212
+#: foodsaving/pickups/serializers.py:228
 msgid "The pickup is not done yet"
 msgstr "Jeszcze nie wykonano tego odbioru"
 
-#: foodsaving/pickups/serializers.py:214
+#: foodsaving/pickups/serializers.py:230
 msgid "You aren't assigned to the pickup."
 msgstr "Nie jesteś zapisana/-y na ten odbiór."
 
-#: foodsaving/pickups/serializers.py:231
+#: foodsaving/pickups/serializers.py:247
 msgid "Both comment and weight cannot be blank."
 msgstr ""
+"Pola komentarza i ilości uratowanego jedzenia nie mogą być jednocześnie "
+"puste"
 
 #: foodsaving/pickups/templates/pickup_notification.html.jinja2:4
 #: foodsaving/pickups/templates/pickup_notification.html.jinja2:130
@@ -389,7 +397,7 @@ msgstr ""
 "Otrzymałaś/-eś tę wiadomość, ponieważ subskrybujesz <strong>powiadomienia o "
 "odbiorach</strong> dla tej grupy."
 
-#: foodsaving/stores/serializers.py:69
+#: foodsaving/stores/serializers.py:71
 msgid "Set at least one week in advance"
 msgstr "Ustaw przynajmniej z tygodniowym wyprzedzeniem"
 
