@@ -13,7 +13,7 @@ from django.utils import timezone
 from pyfcm.baseapi import BaseAPI as FCMApi
 
 from foodsaving.conversations.factories import ConversationFactory
-from foodsaving.conversations.models import ConversationMessage
+from foodsaving.conversations.models import ConversationMessage, ConversationMessageReaction
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.invitations.models import Invitation
 from foodsaving.pickups.factories import PickupDateFactory, PickupDateSeriesFactory, FeedbackFactory
@@ -74,9 +74,7 @@ class ConversationReceiverTests(ChannelTestCase):
         author = UserFactory()
 
         # join a conversation
-        conversation = ConversationFactory()
-        conversation.join(user)
-        conversation.join(author)
+        conversation = ConversationFactory(participants=[user, author])
 
         # login and connect
         client.force_login(user)
@@ -128,8 +126,7 @@ class ConversationReceiverTests(ChannelTestCase):
         user = UserFactory()
 
         # join a conversation
-        conversation = ConversationFactory()
-        conversation.join(user)
+        conversation = ConversationFactory(participants=[user, ])
 
         # login and connect
         client.force_login(user)
@@ -150,9 +147,7 @@ class ConversationReceiverTests(ChannelTestCase):
         joining_user = UserFactory()
 
         # join a conversation
-        conversation = ConversationFactory()
-        conversation.join(user)
-
+        conversation = ConversationFactory(participants=[user, ])
         # login and connect
         client.force_login(user)
         client.send_and_consume('websocket.connect', path='/')
@@ -170,9 +165,7 @@ class ConversationReceiverTests(ChannelTestCase):
         leaving_user = UserFactory()
 
         # join a conversation
-        conversation = ConversationFactory()
-        conversation.join(user)
-        conversation.join(leaving_user)
+        conversation = ConversationFactory(participants=[user, leaving_user])
 
         # login and connect
         client.force_login(user)
@@ -184,6 +177,70 @@ class ConversationReceiverTests(ChannelTestCase):
 
         self.assertEqual(response['topic'], 'conversations:conversation')
         self.assertEqual(response['payload']['participants'], [user.id])
+
+
+class ConversationMessageReactionReceiverTests(ChannelTestCase):
+    def test_receive_reaction_update(self):
+        self.maxDiff = None
+        author, user, reaction_user = [UserFactory() for _ in range(3)]
+        conversation = ConversationFactory(participants=[author, user, reaction_user])
+        message = ConversationMessage.objects.create(conversation=conversation, content='yay', author=author)
+
+        # login and connect
+        client = WSClient()
+        reaction_user_client = WSClient()
+        client.force_login(user)
+        client.send_and_consume('websocket.connect', path='/')
+        reaction_user_client.force_login(reaction_user)
+        reaction_user_client.send_and_consume('websocket.connect', path='/')
+
+        # create reaction
+        ConversationMessageReaction.objects.create(
+            message=message,
+            user=reaction_user,
+            name='carrot',
+        )
+
+        # check if conversation update was received
+        response = client.receive(json=True)
+        parse_dates(response)
+        self.assertEqual(
+            response,
+            make_conversation_message_broadcast(message, reactions=[{'name': 'carrot', 'user': reaction_user.id}])
+        )
+
+    def test_receive_reaction_deletion(self):
+        self.maxDiff = None
+        author, user, reaction_user = [UserFactory() for _ in range(3)]
+        conversation = ConversationFactory(participants=[author, user, reaction_user])
+        message = ConversationMessage.objects.create(
+            conversation=conversation,
+            content='yay',
+            author=author,
+        )
+        reaction = ConversationMessageReaction.objects.create(
+            message=message,
+            user=reaction_user,
+            name='carrot',
+        )
+
+        # login and connect
+        client = WSClient()
+        reaction_user_client = WSClient()
+        client.force_login(user)
+        client.send_and_consume('websocket.connect', path='/')
+        reaction_user_client.force_login(reaction_user)
+        reaction_user_client.send_and_consume('websocket.connect', path='/')
+
+        reaction.delete()
+
+        # check if conversation update was received
+        response = client.receive(json=True)
+        parse_dates(response)
+        self.assertEqual(
+            response,
+            make_conversation_message_broadcast(message)
+        )
 
 
 class GroupReceiverTests(ChannelTestCase):
@@ -503,9 +560,7 @@ class ReceiverPushTests(ChannelTestCase):
         self.content = faker.text()
 
         # join a conversation
-        self.conversation = ConversationFactory()
-        self.conversation.join(self.user)
-        self.conversation.join(self.author)
+        self.conversation = ConversationFactory(participants=[self.user, self.author])
 
         # add a push subscriber
         PushSubscription.objects.create(

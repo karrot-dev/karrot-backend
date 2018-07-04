@@ -62,8 +62,8 @@ class TestConversationsAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_create_message(self):
-        conversation = ConversationFactory()
-        conversation.join(self.participant1)
+        conversation = ConversationFactory(participants=[self.participant1])
+
         self.client.force_login(user=self.participant1)
         data = {'conversation': conversation.id, 'content': 'a nice message'}
         response = self.client.post('/api/messages/', data, format='json')
@@ -89,11 +89,9 @@ class TestConversationsAPI(APITestCase):
 
 class TestConversationsSeenUpToAPI(APITestCase):
     def setUp(self):
-        self.conversation = ConversationFactory()
         self.user = UserFactory()
         self.user2 = UserFactory()
-        self.conversation.join(self.user)
-        self.conversation.join(self.user2)
+        self.conversation = ConversationFactory(participants=[self.user, self.user2])
         self.participant = ConversationParticipant.objects.get(conversation=self.conversation, user=self.user)
 
     def test_message_marked_seen_for_author(self):
@@ -158,8 +156,8 @@ class TestConversationsSeenUpToAPI(APITestCase):
                          'Invalid pk "{}" - object does not exist.'.format(data['seen_up_to']))
 
     def test_mark_seen_up_to_fails_for_message_in_other_conversation(self):
-        conversation = ConversationFactory()
-        conversation.join(self.user)
+        conversation = ConversationFactory(participants=[self.user, ])
+
         message = conversation.messages.create(author=self.user, content='yay')
         self.client.force_login(user=self.user)
 

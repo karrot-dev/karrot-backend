@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete, m2m_changed, post_delete
 from django.dispatch import receiver
 
-from foodsaving.conversations.models import ConversationParticipant, ConversationMessage
+from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction
 from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer
 from foodsaving.groups.models import Group
 from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer
@@ -111,6 +111,23 @@ def send_conversation_update(sender, instance, **kwargs):
     payload = ConversationSerializer(conversation, context={'request': MockRequest(user=instance.user)}).data
 
     for subscription in ChannelSubscription.objects.recent().filter(user=instance.user):
+        send_in_channel(subscription.reply_channel, topic, payload)
+
+
+@receiver(post_save, sender=ConversationMessageReaction)
+@receiver(post_delete, sender=ConversationMessageReaction)
+def send_reaction_update(sender, instance, **kwargs):
+
+    reaction = instance
+    message = reaction.message
+    conversation = message.conversation
+
+    topic = 'conversations:message'
+
+    for subscription in ChannelSubscription.objects.recent()\
+            .filter(user__in=conversation.participants.all())\
+            .exclude(user=reaction.user):
+        payload = ConversationMessageSerializer(message, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
 
