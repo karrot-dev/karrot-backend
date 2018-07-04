@@ -24,6 +24,7 @@ from foodsaving.subscriptions.models import ChannelSubscription, PushSubscriptio
 from foodsaving.userauth.serializers import AuthUserSerializer
 from foodsaving.users.serializers import UserSerializer
 from foodsaving.utils import frontend_urls
+from foodsaving.utils.frontend_urls import logo_url
 
 MockRequest = namedtuple('Request', ['user'])
 
@@ -81,6 +82,7 @@ def send_messages(sender, instance, created, **kwargs):
                 message_title=message_title,
                 message_body=message.content,
                 click_action=conversation_url,
+                message_icon=logo_url(),
                 # this causes each notification for a given conversation to replace previous notifications
                 # fancier would be to make the new notifications show a summary not just the latest message
                 tag='conversation:{}'.format(conversation.id)

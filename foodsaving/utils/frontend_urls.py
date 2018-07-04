@@ -102,3 +102,9 @@ def user_passwordreset_url(code):
         hostname=settings.HOSTNAME,
         code=code
     )
+
+
+def logo_url():
+    return '{hostname}/statics/carrot_logo.png'.format(
+        hostname=settings.HOSTNAME,
+    )
