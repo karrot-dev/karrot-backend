@@ -1,15 +1,18 @@
+from rest_framework.test import APITestCase
+
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
-from django.core.management import call_command
 from django.utils import timezone
-from rest_framework.test import APITestCase
+from foodsaving.tests.utils import ExtractPaginationMixin
 
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership
-from foodsaving.pickups.factories import PickupDateFactory, PickupDateSeriesFactory
+from foodsaving.pickups.factories import PickupDateFactory, \
+    PickupDateSeriesFactory
+from foodsaving.pickups.models import PickupDate
 from foodsaving.stores.factories import StoreFactory
-from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.users.factories import UserFactory
+
 
 history_url = '/api/history/'
 
@@ -199,7 +202,7 @@ class TestHistoryAPIWithDonePickup(APITestCase, ExtractPaginationMixin):
             date=timezone.now() - relativedelta(days=1)
         )
         self.pickup.collectors.add(self.member)
-        call_command('process_finished_pickup_dates')
+        PickupDate.objects.process_finished_pickup_dates()
 
     def test_pickup_done(self):
         self.client.force_login(self.member)
@@ -225,7 +228,7 @@ class TestHistoryAPIWithMissedPickup(APITestCase, ExtractPaginationMixin):
             date=timezone.now() - relativedelta(days=1)
         )
         # No one joined the pickup
-        call_command('process_finished_pickup_dates')
+        PickupDate.objects.process_finished_pickup_dates()
 
     def test_pickup_missed(self):
         self.client.force_login(self.member)
@@ -256,7 +259,7 @@ class TestHistoryAPIPickupForInactiveStore(APITestCase, ExtractPaginationMixin):
             store=self.store,
             date=timezone.now() - relativedelta(days=1)
         )
-        call_command('process_finished_pickup_dates')
+        PickupDate.objects.process_finished_pickup_dates()
 
     def test_no_pickup_done_for_inactive_store(self):
         self.client.force_login(self.member)
@@ -279,7 +282,7 @@ class TestHistoryAPIWithDeletedPickup(APITestCase, ExtractPaginationMixin):
             date=timezone.now() - relativedelta(days=1),
             deleted=True,
         )
-        call_command('process_finished_pickup_dates')
+        PickupDate.objects.process_finished_pickup_dates()
 
     def test_no_history_for_deleted_pickup(self):
         self.client.force_login(self.member)

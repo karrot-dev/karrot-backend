@@ -7,7 +7,7 @@ from huey.contrib.djhuey import db_periodic_task
 from foodsaving.groups.models import Group, GroupMembership, GroupNotificationType
 from foodsaving.pickups import stats
 from foodsaving.pickups.emails import prepare_pickup_notification_email
-from foodsaving.pickups.models import PickupDate
+from foodsaving.pickups.models import PickupDate, PickupDateSeries
 from foodsaving.stores.models import StoreStatus
 from foodsaving.users.models import User
 from foodsaving.utils import stats_utils
@@ -21,6 +21,16 @@ def fetch_user_pickups(group, user, start_date, end_date):
         date__lt=end_date,
         collectors__in=[user],
     ).order_by('date')
+
+
+@db_periodic_task(crontab(minute='*'))  # every minute
+def process_finished_pickup_dates():
+    PickupDate.objects.process_finished_pickup_dates()
+
+
+@db_periodic_task(crontab(minute=0))  # every hour
+def update_pickup_dates():
+    PickupDateSeries.objects.create_all_pickup_dates()
 
 
 @db_periodic_task(crontab(minute=0))  # we check every hour

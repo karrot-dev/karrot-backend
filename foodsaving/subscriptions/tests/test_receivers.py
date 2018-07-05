@@ -1,25 +1,28 @@
 import json
 import os
 import pathlib
+from channels.test import ChannelTestCase, WSClient
 from shutil import copyfile
 
 import requests_mock
-from channels.test import ChannelTestCase, WSClient
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.core.management import call_command
 from django.utils import timezone
+from foodsaving.tests.utils import ReceiveAllWSClient
 from pyfcm.baseapi import BaseAPI as FCMApi
 
 from foodsaving.conversations.factories import ConversationFactory
-from foodsaving.conversations.models import ConversationMessage, ConversationMessageReaction
+from foodsaving.conversations.models import ConversationMessage, \
+    ConversationMessageReaction
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.invitations.models import Invitation
-from foodsaving.pickups.factories import PickupDateFactory, PickupDateSeriesFactory, FeedbackFactory
+from foodsaving.pickups.factories import FeedbackFactory, PickupDateFactory, \
+    PickupDateSeriesFactory
+from foodsaving.pickups.models import PickupDate
 from foodsaving.stores.factories import StoreFactory
-from foodsaving.subscriptions.models import PushSubscriptionPlatform, PushSubscription, ChannelSubscription
-from foodsaving.tests.utils import ReceiveAllWSClient
+from foodsaving.subscriptions.models import ChannelSubscription, \
+    PushSubscription, PushSubscriptionPlatform
 from foodsaving.users.factories import UserFactory
 from foodsaving.utils.tests.fake import faker
 
@@ -480,7 +483,7 @@ class FinishedPickupReceiverTest(ChannelTestCase):
 
         self.client.force_login(self.member)
         self.client.send_and_consume('websocket.connect', path='/')
-        call_command('process_finished_pickup_dates')
+        PickupDate.objects.process_finished_pickup_dates()
 
         response = self.client.receive(json=True)
         self.assertEqual(response['topic'], 'history:history')

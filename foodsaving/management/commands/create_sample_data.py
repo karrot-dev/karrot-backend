@@ -4,7 +4,6 @@ import time
 import pytz
 from dateutil.relativedelta import relativedelta
 from django.core import mail
-from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.http import request
 from django.utils import timezone
@@ -291,7 +290,7 @@ class Command(BaseCommand):
             p.date = p.date - relativedelta(weeks=4)
             p.save()
             print('picked up some food at', p.date)
-        call_command('process_finished_pickup_dates')
+        PickupDate.objects.process_finished_pickup_dates()
 
         # delete
         u = login_user()

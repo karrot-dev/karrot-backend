@@ -1,18 +1,19 @@
 from datetime import datetime
+from django.test import TestCase
 
 from dateutil import rrule
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
-from django.db import DataError
-from django.db import IntegrityError
-from django.test import TestCase
+from django.db import DataError, IntegrityError
 from django.utils import timezone
 
+from foodsaving.history.models import History
+from foodsaving.pickups.factories import PickupDateFactory, \
+    PickupDateSeriesFactory
+from foodsaving.pickups.models import Feedback, PickupDate, PickupDateSeries
 from foodsaving.stores.factories import StoreFactory
-from foodsaving.users.factories import UserFactory
-from foodsaving.pickups.factories import PickupDateFactory
-from foodsaving.pickups.models import Feedback, PickupDateSeries, PickupDate
 from foodsaving.stores.models import StoreStatus
+from foodsaving.users.factories import UserFactory
 
 
 class TestFeedbackModel(TestCase):
@@ -124,3 +125,22 @@ class TestPickupDateSeriesModel(TestCase):
         series.delete()
         self.assertEqual(PickupDate.objects.filter(date__gte=now, deleted=False).count(), 0)
         self.assertEqual(PickupDate.objects.filter(date__lt=now).count(), past_date_count)
+
+
+class TestProcessFinishedPickupDates(TestCase):
+    def setUp(self):
+        self.pickup = PickupDateFactory(date=timezone.now() - relativedelta(weeks=1))
+
+    def test_process_finished_pickup_dates(self):
+        PickupDate.objects.process_finished_pickup_dates()
+        self.assertEqual(PickupDate.objects.count(), 1)
+        self.assertEqual(History.objects.count(), 1)
+
+
+class TestUpdatePickupDatesCommand(TestCase):
+    def setUp(self):
+        self.series = PickupDateSeriesFactory()
+
+    def test_update_pickup_dates(self):
+        PickupDateSeries.objects.create_all_pickup_dates()
+        self.assertGreater(PickupDate.objects.count(), 0)
