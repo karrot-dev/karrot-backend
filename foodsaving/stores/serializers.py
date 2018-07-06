@@ -11,16 +11,25 @@ from foodsaving.stores.models import Store as StoreModel, StoreStatus
 class StoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = StoreModel
-        fields = ['id', 'name', 'description', 'group',
-                  'address', 'latitude', 'longitude',
-                  'weeks_in_advance', 'status']
+        fields = [
+            'id',
+            'name',
+            'description',
+            'group',
+            'address',
+            'latitude',
+            'longitude',
+            'weeks_in_advance',
+            'status',
+        ]
+
         extra_kwargs = {
             'name': {
-                'min_length': 3
+                'min_length': 3,
             },
             'description': {
                 'trim_whitespace': False,
-                'max_length': settings.DESCRIPTION_MAX_LENGTH
+                'max_length': settings.DESCRIPTION_MAX_LENGTH,
             }
         }
 

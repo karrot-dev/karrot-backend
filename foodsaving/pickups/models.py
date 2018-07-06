@@ -154,10 +154,13 @@ class PickupDateManager(models.Manager):
             pickup_done.send(sender=PickupDate.__class__, instance=pickup)
 
     def feedback_possible_q(self, user):
-        return Q(date__lte=timezone.now()) \
+        return Q(done_and_processed=True) \
             & Q(date__gte=timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)) \
             & Q(collectors=user) \
             & ~Q(feedback__given_by=user)
+
+    def done(self):
+        return self.annotate(Count('collectors')).filter(done_and_processed=True).exclude(collectors__count=0)
 
 
 class PickupDate(BaseModel, ConversationMixin):

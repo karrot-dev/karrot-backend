@@ -129,6 +129,8 @@ class TestFeedbackPossibleFilter(APITestCase, ExtractPaginationMixin):
             store=self.store, collectors=[self.member2, ], date=self.oneWeekAgo
         )
 
+        PickupDateModel.objects.process_finished_pickup_dates()
+
     def test_filter_feedback_possible(self):
         self.client.force_login(user=self.member)
         response = self.get_results(self.url, {'feedback_possible': True})
