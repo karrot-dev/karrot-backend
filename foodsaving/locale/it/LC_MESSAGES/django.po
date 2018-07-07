@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-06-17 17:54+0000\n"
+"POT-Creation-Date: 2018-06-21 16:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Sara Brunacci <brunaccisara@gmail.com>, 2018\n"
 "Language-Team: Italian (https://www.transifex.com/yunity-1/teams/68631/it/)\n"
@@ -34,20 +34,27 @@ msgid ""
 "the %(site_name)s team"
 msgstr "Il vostro team %(site_name)s"
 
-#: foodsaving/conversations/api.py:37 foodsaving/conversations/api.py:56
+#: foodsaving/conversations/api.py:36 foodsaving/conversations/api.py:55
 #: foodsaving/conversations/serializers.py:33
 #: foodsaving/conversations/serializers.py:136
 msgid "You are not in this conversation"
 msgstr "Non sei in questa conversazione"
 
-#: foodsaving/conversations/api.py:65
+#: foodsaving/conversations/api.py:64
 msgid "You are not the author of this message"
 msgstr ""
 
-#: foodsaving/conversations/api.py:72
+#: foodsaving/conversations/api.py:71
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
+msgstr ""
+"Non puoi modificare un messaggio più di %(days_number)s giorni dopo la sua "
+"creazione."
+
+#: foodsaving/conversations/emails.py:76 foodsaving/conversations/emails.py:79
+#, python-format
+msgid "Pickup %(date)s"
 msgstr ""
 
 #: foodsaving/conversations/templates/conversation_message_notification.html.jinja2:90
@@ -127,7 +134,7 @@ msgstr "Nessuna recupera è stata saltata"
 #: foodsaving/groups/templates/group_summary.html.jinja2:129
 #, python-format
 msgid "%(new_user_count)s people joined the group"
-msgstr "%(new_user_count)spersone si sono unite a questo gruppo"
+msgstr "%(new_user_count)spersone si sono unite al gruppo"
 
 #: foodsaving/groups/templates/group_summary.html.jinja2:137
 #, python-format
@@ -232,24 +239,24 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr ""
 
 #: foodsaving/invitations/serializers.py:26
-#: foodsaving/stores/serializers.py:64
+#: foodsaving/stores/serializers.py:66
 msgid "You are not a member of this group."
 msgstr "Non sei un membro di questo gruppo."
 
 #: foodsaving/invitations/serializers.py:31
 msgid "User is already member of group"
-msgstr ""
+msgstr "Questo utente è già membro del gruppo"
 
 #: foodsaving/invitations/templates/emailinvitation.html.jinja2:4
 #: foodsaving/invitations/templates/emailinvitation.subject.jinja2:1
 #, python-format
 msgid "Invitation to join %(group_name)s"
-msgstr ""
+msgstr "Invito a unirsi a %(group_name)s"
 
 #: foodsaving/invitations/templates/emailinvitation.html.jinja2:108
 #, python-format
 msgid "You're invited to join %(group_name)s!"
-msgstr ""
+msgstr "Sei stato invitato a unirti a %(group_name)s!"
 
 #: foodsaving/invitations/templates/emailinvitation.html.jinja2:108
 #, python-format
@@ -276,11 +283,11 @@ msgstr ""
 
 #: foodsaving/pickups/permissions.py:25
 msgid "You have not joined this pickup date."
-msgstr ""
+msgstr "Non ti sei unito/a questa data di recupera."
 
 #: foodsaving/pickups/permissions.py:32
 msgid "You have already joined this pickup date."
-msgstr ""
+msgstr "Già ti sei unito/a a questa data di recupera."
 
 #: foodsaving/pickups/permissions.py:39
 msgid "Pickup date is already full."
@@ -290,38 +297,38 @@ msgstr "La data di recupera è già al completo."
 msgid "This feedback is given by another user."
 msgstr ""
 
-#: foodsaving/pickups/permissions.py:53 foodsaving/pickups/serializers.py:217
+#: foodsaving/pickups/permissions.py:53 foodsaving/pickups/serializers.py:233
 #, python-format
 msgid ""
 "You can't give feedback for pickups more than %(days_number)s days ago."
 msgstr ""
 
-#: foodsaving/pickups/serializers.py:37 foodsaving/pickups/serializers.py:171
-#: foodsaving/pickups/serializers.py:210
+#: foodsaving/pickups/serializers.py:37 foodsaving/pickups/serializers.py:177
+#: foodsaving/pickups/serializers.py:226
 msgid "You are not member of the store's group."
-msgstr ""
+msgstr "Non sei un membro del gruppo di questo negozio."
 
-#: foodsaving/pickups/serializers.py:86
+#: foodsaving/pickups/serializers.py:88
 msgid "The date should be in the future."
 msgstr ""
 
-#: foodsaving/pickups/serializers.py:182
+#: foodsaving/pickups/serializers.py:188
 msgid "Invalid recurrence rule."
 msgstr ""
 
-#: foodsaving/pickups/serializers.py:184
+#: foodsaving/pickups/serializers.py:190
 msgid "Only single recurrence rules are allowed."
 msgstr ""
 
-#: foodsaving/pickups/serializers.py:212
+#: foodsaving/pickups/serializers.py:228
 msgid "The pickup is not done yet"
 msgstr ""
 
-#: foodsaving/pickups/serializers.py:214
+#: foodsaving/pickups/serializers.py:230
 msgid "You aren't assigned to the pickup."
 msgstr ""
 
-#: foodsaving/pickups/serializers.py:231
+#: foodsaving/pickups/serializers.py:247
 msgid "Both comment and weight cannot be blank."
 msgstr ""
 
@@ -365,7 +372,7 @@ msgid ""
 "                                <strong>Pickup notification</strong> emails for this group."
 msgstr ""
 
-#: foodsaving/stores/serializers.py:69
+#: foodsaving/stores/serializers.py:71
 msgid "Set at least one week in advance"
 msgstr ""
 
