@@ -1,4 +1,7 @@
 from copy import deepcopy
+from itertools import groupby
+from operator import attrgetter
+from random import choice
 
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
@@ -8,7 +11,7 @@ from rest_framework.test import APITestCase
 
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupStatus
-from foodsaving.pickups.factories import PickupDateSeriesFactory
+from foodsaving.pickups.factories import PickupDateSeriesFactory, PickupDateFactory, FeedbackFactory
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.stores.models import StoreStatus
 from foodsaving.tests.utils import ExtractPaginationMixin
@@ -221,3 +224,46 @@ class TestStoreChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.patch(self.store_url, {'status': StoreStatus.ACTIVE.value}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreater(self.store.pickup_dates.count(), 0)
+
+
+class TestStoreStatisticsAPI(APITestCase):
+    def test_store_statistics(self):
+        user = UserFactory()
+        self.client.force_login(user=user)
+        group = GroupFactory(members=[user])
+        store = StoreFactory(group=group)
+
+        response = self.client.get('/api/stores/{}/statistics/'.format(store.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, {
+            'feedback_count': 0,
+            'feedback_weight': 0,
+            'pickups_done': 0,
+        })
+
+        one_day_ago = timezone.now() - relativedelta(days=1)
+
+        users = [UserFactory() for _ in range(9)]
+        pickups = [PickupDateFactory(
+            store=store,
+            date=one_day_ago,
+            collectors=users,
+            done_and_processed=True,
+        ) for _ in range(3)]
+        feedback = [FeedbackFactory(about=choice(pickups), given_by=u) for u in users]
+
+        # calculate weight from feedback
+        feedback.sort(key=attrgetter('about.id'))
+        weight = 0
+        for _, fs in groupby(feedback, key=attrgetter('about.id')):
+            len_list = [f.weight for f in fs]
+            weight += float(sum(len_list)) / len(len_list)
+        weight = round(weight)
+
+        response = self.client.get('/api/stores/{}/statistics/'.format(store.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, {
+            'feedback_count': len(feedback),
+            'feedback_weight': weight,
+            'pickups_done': len(pickups),
+        })

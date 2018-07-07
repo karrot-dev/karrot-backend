@@ -38,8 +38,8 @@ class StoreViewSet(
         qs = self.queryset.filter(group__members=self.request.user)
         if self.action == 'statistics':
             return qs.annotate(
-                feedback_count=Count('pickup_dates__feedback'),
-                pickups_done=Count('pickup_dates', filter=Q(pickup_dates__in=PickupDate.objects.done()))
+                feedback_count=Count('pickup_dates__feedback', distinct=True),
+                pickups_done=Count('pickup_dates', filter=Q(pickup_dates__in=PickupDate.objects.done()), distinct=True)
             )
         else:
             return qs
