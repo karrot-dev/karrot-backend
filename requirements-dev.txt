@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements-dev.txt requirements-dev.in
 #
-apipkg==1.4               # via execnet
+apipkg==1.5               # via execnet
 atomicwrites==1.1.5       # via pytest
 attrs==18.1.0             # via pytest
 autoflake==1.2
@@ -15,8 +15,8 @@ chardet==3.0.4            # via requests
 click==6.7                # via pip-tools
 coverage==4.5.1           # via pytest-cov
 decorator==4.3.0          # via ipython, traitlets
-django-silk==3.0.0
-django==2.0.6             # via django-silk
+django-silk==3.0.1
+django==2.0.7             # via django-silk
 execnet==1.5.0            # via pytest-xdist
 first==2.0.1              # via pip-tools
 flake8==3.5.0
@@ -25,13 +25,13 @@ gprof2dot==2016.10.13     # via django-silk
 idna==2.7                 # via requests
 ipython-genutils==0.2.0   # via traitlets
 ipython==6.4.0
-jedi==0.12.0              # via ipython
-jinja2==2.10              # via django-silk, jinja2
+jedi==0.12.1              # via ipython
+jinja2==2.10              # via django-silk
 logging-tree==1.7
 markupsafe==1.0           # via jinja2
 mccabe==0.6.1             # via flake8
 more-itertools==4.2.0     # via pytest
-parso==0.2.1              # via jedi
+parso==0.3.0              # via jedi
 pexpect==4.6.0            # via ipython
 pickleshare==0.7.4        # via ipython
 pip-tools==2.0.2
@@ -46,9 +46,9 @@ pytest-cov==2.5.1
 pytest-django==3.3.2
 pytest-forked==0.2        # via pytest-xdist
 pytest-xdist==1.22.2
-pytest==3.6.2             # via pytest-cov, pytest-django, pytest-forked, pytest-xdist
+pytest==3.6.3             # via pytest-cov, pytest-django, pytest-forked, pytest-xdist
 python-dateutil==2.7.3    # via django-silk, freezegun
-pytz==2018.4              # via django, django-silk
+pytz==2018.5              # via django, django-silk
 requests-mock==1.5.0
 requests==2.19.1          # via django-silk, requests-mock
 simplegeneric==0.8.1      # via ipython
