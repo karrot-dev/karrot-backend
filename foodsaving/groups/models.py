@@ -23,6 +23,11 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH, unique=True)
     description = models.TextField(blank=True)
     members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='groups', through='GroupMembership')
+    applications = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='application',
+        through='GroupApplication',
+    )
     password = models.CharField(max_length=255, blank=True)
     public_description = models.TextField(blank=True)
     status = models.CharField(
@@ -154,3 +159,11 @@ class GroupMembership(BaseModel):
         for notification_type in notification_types:
             while notification_type in self.notification_types:
                 self.notification_types.remove(notification_type)
+
+
+class GroupApplication(BaseModel):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = (('user', 'group'),)

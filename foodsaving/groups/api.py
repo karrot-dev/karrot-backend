@@ -14,12 +14,12 @@ from rest_framework.viewsets import GenericViewSet
 from foodsaving.conversations.api import RetrieveConversationMixin
 from foodsaving.groups import roles, stats
 from foodsaving.groups.filters import GroupsFilter, GroupsInfoFilter
-from foodsaving.groups.models import Agreement, Group as GroupModel, GroupMembership
+from foodsaving.groups.models import Agreement, Group as GroupModel, GroupMembership, GroupApplication
 from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer, GroupJoinSerializer, \
     GroupLeaveSerializer, TimezonesSerializer, EmptySerializer, \
     GroupMembershipAddRoleSerializer, GroupMembershipRemoveRoleSerializer, GroupMembershipInfoSerializer, \
     AgreementSerializer, AgreementAgreeSerializer, GroupMembershipAddNotificationTypeSerializer, \
-    GroupMembershipRemoveNotificationTypeSerializer
+    GroupMembershipRemoveNotificationTypeSerializer, GroupApplicationSerializer
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 
@@ -189,6 +189,20 @@ class GroupViewSet(
         self.perform_update(serializer)
 
         return Response(GroupMembershipInfoSerializer(membership).data)
+
+
+class GroupApplicationViewSet(
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet
+):
+    queryset = GroupApplication.objects
+    serializer_class = GroupApplicationSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return self.queryset.filter(group__members=self.request.user)
 
 
 class AgreementViewSet(

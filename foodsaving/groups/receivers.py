@@ -3,7 +3,7 @@ from django.dispatch import receiver
 
 from foodsaving.conversations.models import Conversation, ConversationParticipant
 from foodsaving.groups import roles, stats
-from foodsaving.groups.models import Group, GroupMembership
+from foodsaving.groups.models import Group, GroupMembership, GroupApplication
 
 
 @receiver(post_save, sender=Group)
@@ -49,6 +49,16 @@ def group_member_removed(sender, instance, **kwargs):
     if conversation:
         ConversationParticipant.objects.filter(conversation=conversation, user=user).delete()
     stats.group_left(group)
+
+
+@receiver(post_save, sender=GroupApplication)
+def create_group_application_chat(sender, instance, **kwargs):
+    application = instance
+    group = instance.group
+    applicant = instance.user
+
+    conversation = Conversation.objects.get_or_create_for_target(application)
+    conversation.sync_users(list(group.members.all()) + [applicant])
 
 
 @receiver(post_save, sender=GroupMembership)

@@ -21,20 +21,13 @@ class CreatePushSubscriptionSerializer(PushSubscriptionSerializer):
         fields = PushSubscriptionSerializer.Meta.fields + [
             'user'
         ]
+        extra_kwargs = {'user': {'default': serializers.CurrentUserDefault()}}
         validators = [
             UniqueTogetherValidator(
                 queryset=PushSubscription.objects.all(),
                 fields=PushSubscription._meta.unique_together[0]  # only supports first tuple
             )
         ]
-
-    # user field is only here so make the UniqueTogetherValidator work
-    # https://stackoverflow.com/a/27239870
-    # https://github.com/encode/django-rest-framework/issues/2164#issuecomment-65196943
-    user = UserSerializer(
-        read_only=True,
-        default=CurrentUserDefault()
-    )
 
     def validate(self, attrs):
         attrs['user'] = self.context['request'].user

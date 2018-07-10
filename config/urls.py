@@ -15,7 +15,7 @@ from rest_framework_nested import routers
 from rest_framework_swagger.views import get_swagger_view
 
 from foodsaving.conversations.api import ConversationMessageViewSet, ConversationViewSet
-from foodsaving.groups.api import GroupViewSet, AgreementViewSet, GroupInfoViewSet
+from foodsaving.groups.api import GroupViewSet, AgreementViewSet, GroupInfoViewSet, GroupApplicationViewSet
 from foodsaving.history.api import HistoryViewSet
 from foodsaving.invitations.api import InvitationsViewSet, InvitationAcceptViewSet
 from foodsaving.pickups.api import PickupDateViewSet, PickupDateSeriesViewSet, FeedbackViewSet
@@ -32,6 +32,7 @@ router = routers.DefaultRouter()
 
 router.register('groups', GroupViewSet)
 router.register('groups-info', GroupInfoViewSet, base_name='groupinfo')
+router.register('group-applications', GroupApplicationViewSet, base_name='groupapplication')
 router.register('agreements', AgreementViewSet)
 
 # User endpoints

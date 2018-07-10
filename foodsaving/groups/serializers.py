@@ -4,9 +4,11 @@ from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.validators import UniqueTogetherValidator
 
+from foodsaving.conversations.models import Conversation
 from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
-    GroupNotificationType
+    GroupNotificationType, GroupApplication
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.history.utils import get_changed_data
 from . import roles
@@ -144,6 +146,42 @@ class GroupDetailSerializer(GroupBaseSerializer):
             payload=self.initial_data
         )
         return group
+
+
+class GroupApplicationSerializer(serializers.ModelSerializer):
+    conversation = serializers.SerializerMethodField()
+
+    class Meta:
+        model = GroupApplication
+        fields = [
+            'id',
+            'user',
+            'group',
+            'conversation',
+        ]
+        read_only_fields = [
+            'user',
+        ]
+        extra_kwargs = {'user': {'default': serializers.CurrentUserDefault()}}
+        validators = [
+            UniqueTogetherValidator(
+                queryset=GroupApplication.objects.all(),
+                fields=GroupApplication._meta.unique_together[0],
+                message='You already applied for the group',
+            )
+        ]
+
+    def get_conversation(self, application):
+        return Conversation.objects.get_for_target(application).id
+
+    def validate_group(self, group):
+        if group.is_member(self.context['request'].user):
+            raise serializers.ValidationError('You are already member of the group')
+        return group
+
+    def validate(self, attrs):
+        attrs['user'] = self.context['request'].user
+        return attrs
 
 
 class AgreementSerializer(serializers.ModelSerializer):
