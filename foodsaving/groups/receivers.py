@@ -3,7 +3,7 @@ from django.dispatch import receiver
 
 from foodsaving.conversations.models import Conversation, ConversationParticipant
 from foodsaving.groups import roles, stats
-from foodsaving.groups.models import Group, GroupMembership, GroupApplication
+from foodsaving.groups.models import Group, GroupMembership, GroupApplication, GroupNotificationType
 
 
 @receiver(post_save, sender=Group)
@@ -37,6 +37,10 @@ def group_member_added(sender, instance, created, **kwargs):
         conversation = Conversation.objects.get_or_create_for_target(group)
         conversation.join(user, email_notifications=not group.is_playground())
 
+        for application in group.applications:
+            conversation = Conversation.objects.get_for_target(application)
+            conversation.join(user)
+
         stats.group_joined(group)
 
 
@@ -47,18 +51,36 @@ def group_member_removed(sender, instance, **kwargs):
     user = instance.user
     conversation = Conversation.objects.get_for_target(group)
     if conversation:
+        # TODO should use conversation.leave
         ConversationParticipant.objects.filter(conversation=conversation, user=user).delete()
+    for application in group.applications:
+        conversation = Conversation.objects.get_for_target(application)
+        conversation.leave(user)
     stats.group_left(group)
 
 
 @receiver(post_save, sender=GroupApplication)
-def create_group_application_chat(sender, instance, **kwargs):
+def create_group_application_conversation(sender, instance, created, **kwargs):
+    if not created:
+        return
     application = instance
     group = instance.group
     applicant = instance.user
 
     conversation = Conversation.objects.get_or_create_for_target(application)
-    conversation.sync_users(list(group.members.all()) + [applicant])
+    conversation.join(applicant)
+    for user in group.members.all():
+        membership = GroupMembership.objects.get(user=user, group=group)
+        notifications_enabled = GroupNotificationType.NEW_APPLICATION in membership.notification_types
+        conversation.join(user, email_notifications=notifications_enabled)
+
+
+@receiver(pre_delete, sender=GroupApplication)
+def delete_group_application_conversation(sender, instance, **kwargs):
+    application = instance
+
+    conversation = Conversation.objects.get_for_target(application)
+    conversation.delete()
 
 
 @receiver(post_save, sender=GroupMembership)

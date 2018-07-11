@@ -1,12 +1,13 @@
 import pytz
 from django.conf import settings
+from django.db import transaction
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.validators import UniqueTogetherValidator
 
-from foodsaving.conversations.models import Conversation
+from foodsaving.conversations.models import Conversation, ConversationMessage
 from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
     GroupNotificationType, GroupApplication
 from foodsaving.history.models import History, HistoryTypus
@@ -68,6 +69,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'name',
             'description',
             'public_description',
+            'application_questions',
             'members',
             'memberships',
             'address',
@@ -150,6 +152,10 @@ class GroupDetailSerializer(GroupBaseSerializer):
 
 class GroupApplicationSerializer(serializers.ModelSerializer):
     conversation = serializers.SerializerMethodField()
+    message = serializers.CharField(
+        write_only=True,
+        required=True,
+    )
 
     class Meta:
         model = GroupApplication
@@ -158,11 +164,14 @@ class GroupApplicationSerializer(serializers.ModelSerializer):
             'user',
             'group',
             'conversation',
+            'message',
         ]
         read_only_fields = [
             'user',
         ]
-        extra_kwargs = {'user': {'default': serializers.CurrentUserDefault()}}
+        extra_kwargs = {
+            'user': {'default': serializers.CurrentUserDefault()},
+        }
         validators = [
             UniqueTogetherValidator(
                 queryset=GroupApplication.objects.all(),
@@ -174,6 +183,11 @@ class GroupApplicationSerializer(serializers.ModelSerializer):
     def get_conversation(self, application):
         return Conversation.objects.get_for_target(application).id
 
+    def validate_user(self, user):
+        if not user.mail_verified:
+            raise PermissionDenied(_('You need to verify your email address before you can apply for a group'))
+        return user
+
     def validate_group(self, group):
         if group.is_member(self.context['request'].user):
             raise serializers.ValidationError('You are already member of the group')
@@ -182,6 +196,18 @@ class GroupApplicationSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         attrs['user'] = self.context['request'].user
         return attrs
+
+    @transaction.atomic
+    def create(self, validated_data):
+        message = validated_data.pop('message')
+        application = GroupApplication.objects.create(**validated_data)
+        conversation = Conversation.objects.get_for_target(application)
+        ConversationMessage.objects.create(
+            author=self.context['request'].user,
+            conversation=conversation,
+            content=message,
+        )
+        return application
 
 
 class AgreementSerializer(serializers.ModelSerializer):
@@ -254,6 +280,7 @@ class GroupPreviewSerializer(GroupBaseSerializer):
             'id',
             'name',
             'public_description',
+            'application_questions',
             'address',
             'latitude',
             'longitude',
@@ -335,10 +362,12 @@ class GroupMembershipRemoveRoleSerializer(serializers.Serializer):
 
 class GroupMembershipAddNotificationTypeSerializer(serializers.Serializer):
     notification_type = serializers.ChoiceField(
-        choices=(
+        choices=((choice, choice) for choice in (
             GroupNotificationType.WEEKLY_SUMMARY,
             GroupNotificationType.DAILY_PICKUP_NOTIFICATION,
-        ),
+            GroupNotificationType.NEW_APPLICATION,
+            GroupNotificationType.NEW_PICKUP_CONVERSATION,
+        )),
         required=True,
         write_only=True
     )

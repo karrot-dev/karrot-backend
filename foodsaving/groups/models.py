@@ -3,9 +3,9 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
-from django.db import models
+from django.db import models, transaction
 from django.db.models import TextField, DateTimeField, QuerySet
-from django.utils import timezone as tz
+from django.utils import timezone as tz, timezone
 from timezone_field import TimeZoneField
 
 from foodsaving.base.base_models import BaseModel, LocationModel
@@ -30,6 +30,7 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     )
     password = models.CharField(max_length=255, blank=True)
     public_description = models.TextField(blank=True)
+    application_questions = models.TextField(blank=True)
     status = models.CharField(
         default=GroupStatus.ACTIVE.value,
         choices=[(status.value, status.value) for status in GroupStatus],
@@ -108,12 +109,14 @@ class UserAgreement(BaseModel):
 class GroupNotificationType(object):
     WEEKLY_SUMMARY = 'weekly_summary'
     DAILY_PICKUP_NOTIFICATION = 'daily_pickup_notification'
+    NEW_APPLICATION = 'new_application',
 
 
 def get_default_notification_types():
     return [
         GroupNotificationType.WEEKLY_SUMMARY,
         GroupNotificationType.DAILY_PICKUP_NOTIFICATION,
+        GroupNotificationType.NEW_APPLICATION,
     ]
 
 
@@ -167,3 +170,24 @@ class GroupApplication(BaseModel):
 
     class Meta:
         unique_together = (('user', 'group'),)
+
+    @transaction.atomic
+    def accept(self, accepted_by):
+        self.group.add_member(self.user, history_payload={
+            'accepted_by': accepted_by.id,
+            'application_date': self.created_at.isoformat(),
+        })
+        self.delete()
+
+    @transaction.atomic
+    def decline(self, declined_by):
+        History.objects.create(
+            typus=HistoryTypus.GROUP_APPLICATION_DECLINED,
+            group=self.group,
+            users=[declined_by],
+            payload={
+                'applicant': self.user.id,
+                'application_date': self.created_at.isoformat()
+            }
+        )
+        self.delete()

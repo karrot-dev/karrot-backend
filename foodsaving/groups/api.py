@@ -1,10 +1,11 @@
 import pytz
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
 from rest_framework import status
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, BasePermission
@@ -102,7 +103,8 @@ class GroupViewSet(
             return self.queryset
         return self.queryset.filter(members=self.request.user)
 
-    @detail_route(
+    @action(
+        detail=True,
         methods=['POST'],
         permission_classes=(IsAuthenticated, IsNotMember),
         serializer_class=GroupJoinSerializer
@@ -111,7 +113,8 @@ class GroupViewSet(
         """Join a group"""
         return self.partial_update(request)
 
-    @detail_route(
+    @action(
+        detail=True,
         methods=['POST'],
         serializer_class=GroupLeaveSerializer
     )
@@ -119,7 +122,8 @@ class GroupViewSet(
         """Leave one of your groups"""
         return self.partial_update(request)
 
-    @list_route(
+    @action(
+        detail=False,
         methods=['GET'],
         serializer_class=TimezonesSerializer
     )
@@ -129,12 +133,13 @@ class GroupViewSet(
             {'all_timezones': pytz.all_timezones}
         ).data)
 
-    @detail_route()
+    @action(detail=True)
     def conversation(self, request, pk=None):
         """Get wall conversation ID of this group"""
         return self.retrieve_conversation(request, pk)
 
-    @detail_route(
+    @action(
+        detail=True,
         methods=['POST']
     )
     def mark_user_active(self, request, pk=None):
@@ -146,7 +151,8 @@ class GroupViewSet(
         stats.group_activity(gm.group)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @detail_route(
+    @action(
+        detail=True,
         methods=['PUT', 'DELETE'],
         permission_classes=(IsAuthenticated, CanUpdateMemberships),
         url_name='user-roles',
@@ -168,7 +174,8 @@ class GroupViewSet(
 
         return Response(GroupMembershipInfoSerializer(instance).data)
 
-    @detail_route(
+    @action(
+        detail=True,
         methods=['PUT', 'DELETE'],
         permission_classes=(IsAuthenticated,),
         url_name='notification_types',
@@ -202,7 +209,26 @@ class GroupApplicationViewSet(
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return self.queryset.filter(group__members=self.request.user)
+        q = Q(group__members=self.request.user)
+        if self.action in ('list', 'retrieve'):
+            q |= Q(user=self.request.user)
+        return self.queryset.filter(q)
+
+    @action(
+        detail=True,
+        methods=['POST'],
+    )
+    def accept(self):
+        application = self.get_object()
+        application.accept(self.request.user)
+
+    @action(
+        detail=True,
+        methods=['POST'],
+    )
+    def decline(self):
+        application = self.get_object()
+        application.decline(self.request.user)
 
 
 class AgreementViewSet(
@@ -219,7 +245,8 @@ class AgreementViewSet(
     def get_queryset(self):
         return self.queryset.filter(group__members=self.request.user)
 
-    @detail_route(
+    @action(
+        detail=True,
         methods=['POST'],
         serializer_class=AgreementAgreeSerializer,
     )

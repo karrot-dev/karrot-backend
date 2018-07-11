@@ -1,7 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
 from rest_framework import viewsets
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import action
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
@@ -151,7 +151,8 @@ class PickupDateViewSet(
         )
         pickup.save()
 
-    @detail_route(
+    @action(
+        detail=True,
         methods=['POST'],
         permission_classes=(IsAuthenticated, IsUpcoming, HasNotJoinedPickupDate, IsNotFull),
         serializer_class=PickupDateJoinSerializer
@@ -159,7 +160,8 @@ class PickupDateViewSet(
     def add(self, request, pk=None):
         return self.partial_update(request)
 
-    @detail_route(
+    @action(
+        detail=True,
         methods=['POST'],
         permission_classes=(IsAuthenticated, IsUpcoming, HasJoinedPickupDate),
         serializer_class=PickupDateLeaveSerializer
@@ -167,7 +169,9 @@ class PickupDateViewSet(
     def remove(self, request, pk=None):
         return self.partial_update(request)
 
-    @detail_route()
+    @action(
+        detail=True,
+    )
     def conversation(self, request, pk=None):
         """Get conversation ID of this pickup"""
         return self.retrieve_conversation(request, pk)
