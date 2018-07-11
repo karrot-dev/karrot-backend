@@ -37,7 +37,7 @@ def group_member_added(sender, instance, created, **kwargs):
         conversation = Conversation.objects.get_or_create_for_target(group)
         conversation.join(user, email_notifications=not group.is_playground())
 
-        for application in group.applications:
+        for application in group.applications.all():
             conversation = Conversation.objects.get_for_target(application)
             conversation.join(user)
 
@@ -53,7 +53,7 @@ def group_member_removed(sender, instance, **kwargs):
     if conversation:
         # TODO should use conversation.leave
         ConversationParticipant.objects.filter(conversation=conversation, user=user).delete()
-    for application in group.applications:
+    for application in group.applications.all():
         conversation = Conversation.objects.get_for_target(application)
         conversation.leave(user)
     stats.group_left(group)

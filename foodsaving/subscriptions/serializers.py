@@ -1,9 +1,7 @@
 from rest_framework import serializers
-from rest_framework.fields import CurrentUserDefault
 from rest_framework.validators import UniqueTogetherValidator
 
 from foodsaving.subscriptions.models import PushSubscription
-from foodsaving.users.serializers import UserSerializer
 
 
 class PushSubscriptionSerializer(serializers.ModelSerializer):

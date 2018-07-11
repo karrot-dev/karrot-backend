@@ -362,12 +362,11 @@ class GroupMembershipRemoveRoleSerializer(serializers.Serializer):
 
 class GroupMembershipAddNotificationTypeSerializer(serializers.Serializer):
     notification_type = serializers.ChoiceField(
-        choices=((choice, choice) for choice in (
+        choices=[(choice, choice) for choice in (
             GroupNotificationType.WEEKLY_SUMMARY,
             GroupNotificationType.DAILY_PICKUP_NOTIFICATION,
             GroupNotificationType.NEW_APPLICATION,
-            GroupNotificationType.NEW_PICKUP_CONVERSATION,
-        )),
+        )],
         required=True,
         write_only=True
     )

@@ -1,11 +1,11 @@
-from enum import Enum
 from datetime import timedelta
+from enum import Enum
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models, transaction
 from django.db.models import TextField, DateTimeField, QuerySet
-from django.utils import timezone as tz, timezone
+from django.utils import timezone as tz
 from timezone_field import TimeZoneField
 
 from foodsaving.base.base_models import BaseModel, LocationModel
@@ -109,7 +109,7 @@ class UserAgreement(BaseModel):
 class GroupNotificationType(object):
     WEEKLY_SUMMARY = 'weekly_summary'
     DAILY_PICKUP_NOTIFICATION = 'daily_pickup_notification'
-    NEW_APPLICATION = 'new_application',
+    NEW_APPLICATION = 'new_application'
 
 
 def get_default_notification_types():
