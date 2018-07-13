@@ -3,7 +3,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins
+from rest_framework import mixins, permissions
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
@@ -198,6 +198,13 @@ class GroupViewSet(
         return Response(GroupMembershipInfoSerializer(membership).data)
 
 
+class HasVerifiedEmailAddress(permissions.BasePermission):
+    message = _('You need to have a verified email address')
+
+    def has_permission(self, request, view):
+        return request.user.mail_verified
+
+
 class GroupApplicationViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
@@ -206,29 +213,61 @@ class GroupApplicationViewSet(
 ):
     queryset = GroupApplication.objects
     serializer_class = GroupApplicationSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticated]
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('group',)
+
+    def get_permissions(self):
+        if self.action == 'create':
+            self.permission_classes.append(HasVerifiedEmailAddress)
+        return super().get_permissions()
 
     def get_queryset(self):
         q = Q(group__members=self.request.user)
         if self.action in ('list', 'retrieve'):
             q |= Q(user=self.request.user)
+        if self.action == 'withdraw':
+            q = Q(user=self.request.user)
         return self.queryset.filter(q)
 
     @action(
         detail=True,
         methods=['POST'],
     )
-    def accept(self):
+    def accept(self, request, pk=None):
+        self.check_permissions(request)
         application = self.get_object()
+        self.check_object_permissions(request, application)
+
         application.accept(self.request.user)
+        serializer = self.get_serializer(application)
+        return Response(data=serializer.data)
 
     @action(
         detail=True,
         methods=['POST'],
     )
-    def decline(self):
+    def decline(self, request, pk=None):
+        self.check_permissions(request)
         application = self.get_object()
+        self.check_object_permissions(request, application)
+
         application.decline(self.request.user)
+        serializer = self.get_serializer(application)
+        return Response(data=serializer.data)
+
+    @action(
+        detail=True,
+        methods=['POST'],
+    )
+    def withdraw(self, request, pk=None):
+        self.check_permissions(request)
+        application = self.get_object()
+        self.check_object_permissions(request, application)
+
+        application.withdraw()
+        serializer = self.get_serializer(application)
+        return Response(data=serializer.data)
 
 
 class AgreementViewSet(

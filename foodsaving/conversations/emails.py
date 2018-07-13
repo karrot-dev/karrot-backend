@@ -136,7 +136,6 @@ def prepare_private_user_conversation_message_notification(user, message):
 
 def prepare_group_application_message_notification(user, message):
     application = message.conversation.target
-    group = application.group
 
     language = user.language
 
@@ -145,9 +144,8 @@ def prepare_group_application_message_notification(user, message):
 
     with translation.override(language):
         reply_to_name = application.user.display_name
-        conversation_name = _('%(user)s applies to join %(group)s') % {
-            'user': application.user.display_name,
-            'group': group.name
+        conversation_name = _('New message in %(user_name)s\'s application') % {
+            'user_name': application.user.display_name,
         }
 
         local_part = make_local_part(message.conversation, user)

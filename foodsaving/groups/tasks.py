@@ -1,17 +1,19 @@
 from datetime import timedelta
 
 from anymail.exceptions import AnymailAPIError
+from django.contrib.auth import get_user_model
 from django.db.models import Count
 from django.utils import timezone
 from huey import crontab
-from huey.contrib.djhuey import db_periodic_task
+from huey.contrib.djhuey import db_periodic_task, db_task
 from influxdb_metrics.loader import write_points
 from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from config import settings
 from foodsaving.groups import stats, emails
-from foodsaving.groups.emails import prepare_user_inactive_in_group_email, prepare_group_summary_data
-from foodsaving.groups.models import Group, GroupStatus
+from foodsaving.groups.emails import prepare_user_inactive_in_group_email, prepare_group_summary_data, \
+    prepare_new_application_notification_email, prepare_application_accepted_email, prepare_application_declined_email
+from foodsaving.groups.models import Group, GroupStatus, GroupNotificationType
 from foodsaving.groups.models import GroupMembership
 from foodsaving.utils import stats_utils
 
@@ -108,3 +110,30 @@ def mark_inactive_groups():
         if not group.has_recent_activity():
             group.status = GroupStatus.INACTIVE.value
             group.save()
+
+
+@db_task()
+def notify_members_about_new_application(application):
+    users = application.group.members.filter(
+        groupmembership__in=GroupMembership.objects.active().with_notification_type(
+            GroupNotificationType.NEW_APPLICATION
+        ),
+    ).exclude(
+        groupmembership__user__in=get_user_model().objects.unverified_or_ignored(),
+    )
+
+    for user in users:
+        try:
+            prepare_new_application_notification_email(user, application).send()
+        except AnymailAPIError:
+            sentry_client.captureException()
+
+
+@db_task()
+def notify_about_accepted_application(application):
+    prepare_application_accepted_email(application).send()
+
+
+@db_task()
+def notify_about_declined_application(application):
+    prepare_application_declined_email(application).send()

@@ -4,6 +4,7 @@ from django.dispatch import receiver
 from foodsaving.conversations.models import Conversation, ConversationParticipant
 from foodsaving.groups import roles, stats
 from foodsaving.groups.models import Group, GroupMembership, GroupApplication, GroupNotificationType
+from foodsaving.groups.tasks import notify_members_about_new_application
 
 
 @receiver(post_save, sender=Group)
@@ -37,7 +38,7 @@ def group_member_added(sender, instance, created, **kwargs):
         conversation = Conversation.objects.get_or_create_for_target(group)
         conversation.join(user, email_notifications=not group.is_playground())
 
-        for application in group.applications.all():
+        for application in group.groupapplication_set.all():
             conversation = Conversation.objects.get_for_target(application)
             conversation.join(user)
 
@@ -53,7 +54,7 @@ def group_member_removed(sender, instance, **kwargs):
     if conversation:
         # TODO should use conversation.leave
         ConversationParticipant.objects.filter(conversation=conversation, user=user).delete()
-    for application in group.applications.all():
+    for application in group.groupapplication_set.all():
         conversation = Conversation.objects.get_for_target(application)
         conversation.leave(user)
     stats.group_left(group)
@@ -73,6 +74,8 @@ def create_group_application_conversation(sender, instance, created, **kwargs):
         membership = GroupMembership.objects.get(user=user, group=group)
         notifications_enabled = GroupNotificationType.NEW_APPLICATION in membership.notification_types
         conversation.join(user, email_notifications=notifications_enabled)
+
+    notify_members_about_new_application(application)
 
 
 @receiver(pre_delete, sender=GroupApplication)

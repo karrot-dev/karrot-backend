@@ -16,11 +16,14 @@ from config import settings
 from foodsaving.conversations.models import ConversationMessage
 from foodsaving.groups.emails import prepare_user_inactive_in_group_email, prepare_group_summary_emails, \
     prepare_group_summary_data
-from foodsaving.groups.models import Group
+from foodsaving.groups.factories import GroupApplicationFactory
+from foodsaving.groups.models import Group, GroupApplication
 from foodsaving.invitations.models import Invitation
 from foodsaving.pickups.emails import prepare_pickup_notification_email
 from foodsaving.pickups.models import PickupDate
+from foodsaving.users.factories import VerifiedUserFactory
 from foodsaving.users.models import User
+from foodsaving.utils.tests.fake import faker
 
 foodsaving_basedir = os.path.abspath(os.path.join(settings.BASE_DIR, 'foodsaving'))
 
@@ -47,6 +50,23 @@ def pseudo_verification_code():
     return MockVerificationCode(code='0123456789012345678901234567890123456789')
 
 
+def get_or_create_application():
+    application = GroupApplication.objects.order_by('?').first()
+
+    if application is None:
+        new_user = VerifiedUserFactory()
+        group = random_group()
+        if group.application_questions == '':
+            group.application_questions = faker.text()
+            group.save()
+        application = GroupApplicationFactory(
+            group=group,
+            user=new_user,
+        )
+
+    return application
+
+
 class Handlers:
     def accountdelete_request(self):
         return foodsaving.users.emails.prepare_accountdelete_request_email(user=random_user(),
@@ -54,6 +74,14 @@ class Handlers:
 
     def accountdelete_success(self):
         return foodsaving.users.emails.prepare_accountdelete_success_email(user=random_user())
+
+    def application_accepted(self):
+        application = get_or_create_application()
+        return foodsaving.groups.emails.prepare_application_accepted_email(application)
+
+    def application_declined(self):
+        application = get_or_create_application()
+        return foodsaving.groups.emails.prepare_application_declined_email(application)
 
     def changemail_success(self):
         return foodsaving.users.emails.prepare_changemail_success_email(user=random_user())
@@ -70,6 +98,11 @@ class Handlers:
             invitation = Invitation.objects.create(group=group, invited_by=invited_by,
                                                    email='exampleinvitation@foo.com')
         return foodsaving.invitations.emails.prepare_emailinvitation_email(invitation)
+
+    def new_application(self):
+        application = get_or_create_application()
+        member = application.group.members.first()
+        return foodsaving.groups.emails.prepare_new_application_notification_email(member, application)
 
     def group_summary(self):
         from_date = timezone.now() - relativedelta(days=7)

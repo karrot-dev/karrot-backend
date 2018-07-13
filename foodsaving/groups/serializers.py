@@ -1,15 +1,13 @@
 import pytz
 from django.conf import settings
-from django.db import transaction
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, PermissionDenied
-from rest_framework.validators import UniqueTogetherValidator
 
-from foodsaving.conversations.models import Conversation, ConversationMessage
+from foodsaving.conversations.models import Conversation
 from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
-    GroupNotificationType, GroupApplication
+    GroupNotificationType, GroupApplication, GroupApplicationStatus
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.history.utils import get_changed_data
 from . import roles
@@ -152,10 +150,6 @@ class GroupDetailSerializer(GroupBaseSerializer):
 
 class GroupApplicationSerializer(serializers.ModelSerializer):
     conversation = serializers.SerializerMethodField()
-    message = serializers.CharField(
-        write_only=True,
-        required=True,
-    )
 
     class Meta:
         model = GroupApplication
@@ -164,24 +158,27 @@ class GroupApplicationSerializer(serializers.ModelSerializer):
             'user',
             'group',
             'conversation',
-            'message',
+            'questions',
+            'answers',
+            'status',
         ]
         read_only_fields = [
             'user',
-        ]
-        extra_kwargs = {
-            'user': {'default': serializers.CurrentUserDefault()},
-        }
-        validators = [
-            UniqueTogetherValidator(
-                queryset=GroupApplication.objects.all(),
-                fields=GroupApplication._meta.unique_together[0],
-                message='You already applied for the group',
-            )
+            'questions',
+            'status',
         ]
 
     def get_conversation(self, application):
         return Conversation.objects.get_for_target(application).id
+
+    def validate(self, attrs):
+        if GroupApplication.objects.filter(
+            group=attrs.get('group'),
+            user=self.context['request'].user,
+            status=GroupApplicationStatus.PENDING.value,
+        ).exists():
+            raise serializers.ValidationError('Application is already pending')
+        return attrs
 
     def validate_user(self, user):
         if not user.mail_verified:
@@ -193,21 +190,13 @@ class GroupApplicationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('You are already member of the group')
         return group
 
-    def validate(self, attrs):
-        attrs['user'] = self.context['request'].user
-        return attrs
-
-    @transaction.atomic
-    def create(self, validated_data):
-        message = validated_data.pop('message')
-        application = GroupApplication.objects.create(**validated_data)
-        conversation = Conversation.objects.get_for_target(application)
-        ConversationMessage.objects.create(
-            author=self.context['request'].user,
-            conversation=conversation,
-            content=message,
+    def save(self, **kwargs):
+        group = self.validated_data['group']
+        return super().save(
+            **kwargs,
+            user=self.context['request'].user,
+            questions=group.application_questions,
         )
-        return application
 
 
 class AgreementSerializer(serializers.ModelSerializer):

@@ -46,12 +46,14 @@ class UserViewSet(
         return self.retrieve_private_conversation(request, pk)
 
     def get_queryset(self):
-        users_groups = self.request.user.groups.values('id')
-        return self.queryset.filter(Q(groups__in=users_groups) | Q(id=self.request.user.id)).distinct()
+        return self.queryset.filter(
+            Q(groups__in=self.request.user.groups.all()) |
+            Q(id=self.request.user.id)
+        ).distinct()
 
 
 class UserPagination(CursorPagination):
-    page_size = 2
+    page_size = 20
     ordering = 'id'
 
 
@@ -61,7 +63,7 @@ class UserInfoViewSet(
     GenericViewSet
 ):
     """
-    Public User Profiles
+    Public User Profiles (for now only users that share a conversation)
     """
     queryset = get_user_model().objects.active()
     serializer_class = UserInfoSerializer
@@ -70,4 +72,10 @@ class UserInfoViewSet(
     search_fields = ('display_name',)
     filter_fields = ('conversation', 'groups')
     pagination_class = UserPagination
+
+    def get_queryset(self):
+        return self.queryset.filter(
+            Q(conversation__in=self.request.user.conversation_set.all()) |
+            Q(id=self.request.user.id)
+        ).distinct()
 

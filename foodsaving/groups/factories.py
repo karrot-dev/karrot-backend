@@ -1,6 +1,6 @@
 from factory import DjangoModelFactory, post_generation, LazyAttribute
 
-from foodsaving.groups.models import Group as GroupModel, GroupMembership, GroupStatus
+from foodsaving.groups.models import Group as GroupModel, GroupMembership, GroupStatus, GroupApplication
 from foodsaving.utils.tests.fake import faker
 
 
@@ -20,6 +20,7 @@ class GroupFactory(DjangoModelFactory):
     name = LazyAttribute(lambda x: faker.name())
     description = LazyAttribute(lambda x: faker.sentence(nb_words=40))
     public_description = LazyAttribute(lambda x: faker.sentence(nb_words=20))
+    application_questions = LazyAttribute(lambda x: faker.sentence(nb_words=20))
 
 
 class PlaygroundGroupFactory(GroupFactory):
@@ -28,3 +29,11 @@ class PlaygroundGroupFactory(GroupFactory):
 
 class InactiveGroupFactory(GroupFactory):
     status = GroupStatus.INACTIVE.value
+
+
+class GroupApplicationFactory(DjangoModelFactory):
+    class Meta:
+        model = GroupApplication
+
+    questions = LazyAttribute(lambda application: application.group.application_questions)
+    answers = LazyAttribute(lambda x: faker.text())

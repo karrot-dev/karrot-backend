@@ -10,7 +10,9 @@ from timezone_field import TimeZoneField
 
 from foodsaving.base.base_models import BaseModel, LocationModel
 from foodsaving.conversations.models import ConversationMixin
+from foodsaving.groups import tasks
 from foodsaving.history.models import History, HistoryTypus
+from foodsaving.utils import markdown
 
 
 class GroupStatus(Enum):
@@ -23,11 +25,6 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH, unique=True)
     description = models.TextField(blank=True)
     members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='groups', through='GroupMembership')
-    applications = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name='application',
-        through='GroupApplication',
-    )
     password = models.CharField(max_length=255, blank=True)
     public_description = models.TextField(blank=True)
     application_questions = models.TextField(blank=True)
@@ -164,12 +161,29 @@ class GroupMembership(BaseModel):
                 self.notification_types.remove(notification_type)
 
 
+class GroupApplicationStatus(Enum):
+    PENDING = 'pending'
+    ACCEPTED = 'accepted'
+    DECLINED = 'declined'
+    WITHDRAWN = 'withdrawn'
+
+
 class GroupApplication(BaseModel):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    questions = models.TextField()
+    answers = models.TextField()
+    status = models.CharField(
+        default=GroupApplicationStatus.PENDING.value,
+        choices=[(status.value, status.value) for status in GroupApplicationStatus],
+        max_length=100,
+    )
 
-    class Meta:
-        unique_together = (('user', 'group'),)
+    def questions_rendered(self, **kwargs):
+        return markdown.render(self.questions, **kwargs)
+
+    def answers_rendered(self, **kwargs):
+        return markdown.render(self.answers, **kwargs)
 
     @transaction.atomic
     def accept(self, accepted_by):
@@ -177,7 +191,9 @@ class GroupApplication(BaseModel):
             'accepted_by': accepted_by.id,
             'application_date': self.created_at.isoformat(),
         })
-        self.delete()
+        self.status = GroupApplicationStatus.ACCEPTED.value
+        self.save()
+        tasks.notify_about_accepted_application(self)
 
     @transaction.atomic
     def decline(self, declined_by):
@@ -190,4 +206,11 @@ class GroupApplication(BaseModel):
                 'application_date': self.created_at.isoformat()
             }
         )
-        self.delete()
+        self.status = GroupApplicationStatus.DECLINED.value
+        self.save()
+        tasks.notify_about_declined_application(self)
+
+    @transaction.atomic
+    def withdraw(self):
+        self.status = GroupApplicationStatus.WITHDRAWN.value
+        self.save()
