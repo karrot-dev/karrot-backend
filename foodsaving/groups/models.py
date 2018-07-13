@@ -10,7 +10,6 @@ from timezone_field import TimeZoneField
 
 from foodsaving.base.base_models import BaseModel, LocationModel
 from foodsaving.conversations.models import ConversationMixin
-from foodsaving.groups import tasks
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.utils import markdown
 
@@ -193,6 +192,8 @@ class GroupApplication(BaseModel):
         })
         self.status = GroupApplicationStatus.ACCEPTED.value
         self.save()
+
+        from foodsaving.groups import tasks
         tasks.notify_about_accepted_application(self)
 
     @transaction.atomic
@@ -208,6 +209,8 @@ class GroupApplication(BaseModel):
         )
         self.status = GroupApplicationStatus.DECLINED.value
         self.save()
+
+        from foodsaving.groups import tasks
         tasks.notify_about_declined_application(self)
 
     @transaction.atomic
