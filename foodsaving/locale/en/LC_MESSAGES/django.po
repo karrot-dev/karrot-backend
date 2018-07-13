@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-06-21 16:51+0000\n"
+"POT-Creation-Date: 2018-07-13 20:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,24 +18,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: foodsaving/base/templates/base-text.jinja2:1
-#, python-format
-msgid "Hello %(full_name)s,"
-msgstr ""
-
-#: foodsaving/base/templates/base-text.jinja2:2
-msgid "Hello,"
-msgstr ""
-
-#: foodsaving/base/templates/base-text.jinja2:5
-#, python-format
-msgid ""
-"Yours,\n"
-"the %(site_name)s team"
-msgstr ""
-
 #: foodsaving/conversations/api.py:36 foodsaving/conversations/api.py:55
-#: foodsaving/conversations/serializers.py:33
+#: foodsaving/conversations/serializers.py:32
 #: foodsaving/conversations/serializers.py:136
 msgid "You are not in this conversation"
 msgstr ""
@@ -50,9 +34,14 @@ msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
 msgstr ""
 
-#: foodsaving/conversations/emails.py:76 foodsaving/conversations/emails.py:79
+#: foodsaving/conversations/emails.py:88 foodsaving/conversations/emails.py:91
 #, python-format
 msgid "Pickup %(date)s"
+msgstr ""
+
+#: foodsaving/conversations/emails.py:147
+#, python-format
+msgid "New message in %(user_name)s's application"
 msgstr ""
 
 #: foodsaving/conversations/templates/conversation_message_notification.html.jinja2:90
@@ -60,42 +49,71 @@ msgid "You are receiving this because you are subscribed to this conversation."
 msgstr ""
 
 #: foodsaving/conversations/templates/conversation_message_notification.html.jinja2:91
+#: foodsaving/groups/templates/new_application.html.jinja2:123
 #, python-format
 msgid ""
 "Reply to this email directly, <a href=\"%(conversation_url)s\">view it on "
 "%(site_name)s</a>, or <a href=\"%(mute_url)s\">mute the conversation</a>."
 msgstr ""
 
-#: foodsaving/groups/api.py:27
+#: foodsaving/groups/api.py:28
 msgid "You are already a member."
 msgstr ""
 
-#: foodsaving/groups/api.py:34
+#: foodsaving/groups/api.py:35
 msgid "You do not have permission to update memberships."
 msgstr ""
 
-#: foodsaving/groups/serializers.py:23
+#: foodsaving/groups/api.py:202
+msgid "You need to have a verified email address"
+msgstr ""
+
+#: foodsaving/groups/serializers.py:24
 msgid "Unknown timezone"
 msgstr ""
 
-#: foodsaving/groups/serializers.py:31
+#: foodsaving/groups/serializers.py:32
 msgid "Playground"
 msgstr ""
 
-#: foodsaving/groups/serializers.py:100 foodsaving/groups/serializers.py:175
+#: foodsaving/groups/serializers.py:102 foodsaving/groups/serializers.py:228
 msgid "You cannot manage agreements"
 msgstr ""
 
-#: foodsaving/groups/serializers.py:102
+#: foodsaving/groups/serializers.py:104
 msgid "Agreement is not for this group"
 msgstr ""
 
-#: foodsaving/groups/serializers.py:173
+#: foodsaving/groups/serializers.py:185
+msgid "You need to verify your email address before you can apply for a group"
+msgstr ""
+
+#: foodsaving/groups/serializers.py:226
 msgid "You are not in this group"
 msgstr ""
 
-#: foodsaving/groups/serializers.py:240
+#: foodsaving/groups/serializers.py:294
 msgid "Group password is wrong"
+msgstr ""
+
+#: foodsaving/groups/templates/application_accepted.html.jinja2:4
+#: foodsaving/groups/templates/application_accepted.html.jinja2:108
+#: foodsaving/groups/templates/application_accepted.subject.jinja2:1
+#, python-format
+msgid "Your application to join %(group_name)s was accepted"
+msgstr ""
+
+#: foodsaving/groups/templates/application_accepted.html.jinja2:108
+#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:119
+#, python-format
+msgid "Visit %(group_name)s"
+msgstr ""
+
+#: foodsaving/groups/templates/application_declined.html.jinja2:4
+#: foodsaving/groups/templates/application_declined.html.jinja2:108
+#: foodsaving/groups/templates/application_declined.subject.jinja2:1
+#, python-format
+msgid "Your application to join %(group_name)s was declined"
 msgstr ""
 
 #: foodsaving/groups/templates/group_summary.html.jinja2:4
@@ -173,6 +191,7 @@ msgid ""
 msgstr ""
 
 #: foodsaving/groups/templates/group_summary.html.jinja2:177
+#: foodsaving/groups/templates/new_application.html.jinja2:120
 #: foodsaving/pickups/templates/pickup_notification.html.jinja2:186
 msgid "Click here to unsubscribe"
 msgstr ""
@@ -180,6 +199,28 @@ msgstr ""
 #: foodsaving/groups/templates/group_summary.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s updates for the week of %(day)s"
+msgstr ""
+
+#: foodsaving/groups/templates/new_application.html.jinja2:4
+#: foodsaving/groups/templates/new_application.html.jinja2:108
+#: foodsaving/groups/templates/new_application.subject.jinja2:1
+#, python-format
+msgid "%(user_name)s wants to join %(group_name)s"
+msgstr ""
+
+#: foodsaving/groups/templates/new_application.html.jinja2:110
+msgid "Questions asked by your group"
+msgstr ""
+
+#: foodsaving/groups/templates/new_application.html.jinja2:114
+#, python-format
+msgid "Answers from %(user_name)s"
+msgstr ""
+
+#: foodsaving/groups/templates/new_application.html.jinja2:119
+msgid ""
+"You are receiving this because you are subscribed to <strong>User "
+"application</strong> emails for this group."
 msgstr ""
 
 #: foodsaving/groups/templates/playground_public_description.nopreview.jinja2:1
@@ -212,11 +253,6 @@ msgid ""
 "                                again."
 msgstr ""
 
-#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:119
-#, python-format
-msgid "Visit %(group_name)s"
-msgstr ""
-
 #: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:120
 #, python-format
 msgid ""
@@ -239,7 +275,7 @@ msgstr ""
 msgid "An invitation has already been sent to this e-mail address"
 msgstr ""
 
-#: foodsaving/invitations/serializers.py:26 foodsaving/stores/serializers.py:66
+#: foodsaving/invitations/serializers.py:26 foodsaving/stores/serializers.py:76
 msgid "You are not a member of this group."
 msgstr ""
 
@@ -372,15 +408,15 @@ msgid ""
 "for this group."
 msgstr ""
 
-#: foodsaving/stores/serializers.py:71
+#: foodsaving/stores/serializers.py:81
 msgid "Set at least one week in advance"
 msgstr ""
 
-#: foodsaving/userauth/api.py:91 foodsaving/userauth/serializers.py:79
-#: foodsaving/userauth/serializers.py:124
-#: foodsaving/userauth/serializers.py:145
-#: foodsaving/userauth/serializers.py:174
-#: foodsaving/userauth/serializers.py:195
+#: foodsaving/userauth/api.py:92 foodsaving/userauth/serializers.py:80
+#: foodsaving/userauth/serializers.py:125
+#: foodsaving/userauth/serializers.py:146
+#: foodsaving/userauth/serializers.py:175
+#: foodsaving/userauth/serializers.py:196
 msgid "We could not send you an e-mail."
 msgstr ""
 
@@ -388,24 +424,24 @@ msgstr ""
 msgid "Mail is already verified."
 msgstr ""
 
-#: foodsaving/userauth/serializers.py:66 foodsaving/userauth/serializers.py:161
+#: foodsaving/userauth/serializers.py:67 foodsaving/userauth/serializers.py:162
 msgid "Similar e-mail exists: "
 msgstr ""
 
-#: foodsaving/userauth/serializers.py:102
+#: foodsaving/userauth/serializers.py:103
 msgid "Verification code is invalid"
 msgstr ""
 
-#: foodsaving/userauth/serializers.py:105
+#: foodsaving/userauth/serializers.py:106
 msgid "Verification code has expired"
 msgstr ""
 
-#: foodsaving/userauth/serializers.py:138
-#: foodsaving/userauth/serializers.py:155
+#: foodsaving/userauth/serializers.py:139
+#: foodsaving/userauth/serializers.py:156
 msgid "Wrong password"
 msgstr ""
 
-#: foodsaving/userauth/serializers.py:187
+#: foodsaving/userauth/serializers.py:188
 msgid "Unknown e-mail address"
 msgstr ""
 
