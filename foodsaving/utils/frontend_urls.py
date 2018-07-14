@@ -76,6 +76,13 @@ def group_wall_url(group):
     )
 
 
+def group_applications_url(group):
+    return '{hostname}/#/group/{group_id}/applications'.format(
+        hostname=settings.HOSTNAME,
+        group_id=group.id,
+    )
+
+
 def group_conversation_mute_url(group, conversation):
     return '{}?mute_conversation={}'.format(group_wall_url(group), conversation.id)
 

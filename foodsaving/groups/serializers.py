@@ -177,17 +177,12 @@ class GroupApplicationSerializer(serializers.ModelSerializer):
             user=self.context['request'].user,
             status=GroupApplicationStatus.PENDING.value,
         ).exists():
-            raise serializers.ValidationError('Application is already pending')
+            raise serializers.ValidationError(_('Application is already pending'))
         return attrs
-
-    def validate_user(self, user):
-        if not user.mail_verified:
-            raise PermissionDenied(_('You need to verify your email address before you can apply for a group'))
-        return user
 
     def validate_group(self, group):
         if group.is_member(self.context['request'].user):
-            raise serializers.ValidationError('You are already member of the group')
+            raise serializers.ValidationError(_('You are already member of the group'))
         return group
 
     def save(self, **kwargs):

@@ -119,6 +119,17 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_cannot_apply_when_already_member(self):
+        self.client.force_login(user=self.member)
+        response = self.client.post(
+            '/api/group-applications/',
+            {
+                'group': self.group.id,
+                'answers': faker.text(),
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class TestApplicationNotifications(APITestCase):
     def setUp(self):

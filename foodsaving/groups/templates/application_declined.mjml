@@ -11,7 +11,6 @@
                     <mj-text>
                         <h1>{% trans group_name=group.name %}Your application to join {{ group_name }} was declined{% endtrans %}</h1>
                     </mj-text>
-                    <mj-divider/>
                 </mj-column>
             </mj-section>
             <mj-include path="../../base/templates/_footer.mjml"/>

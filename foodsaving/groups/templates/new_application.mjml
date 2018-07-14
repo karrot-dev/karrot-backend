@@ -21,6 +21,9 @@
                             </div>
                         </div>
                     </mj-text>
+                    <mj-button href="{{ group_applications_url }}">
+                        {% trans %}View applications{% endtrans %}
+                    </mj-button>
                     <mj-divider/>
                     <mj-text font-size="13px" line-height="18px" color="#777">
                         <p>
