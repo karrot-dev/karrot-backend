@@ -10,7 +10,8 @@ from django.dispatch import receiver
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction
 from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer
 from foodsaving.groups.models import Group
-from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer
+from foodsaving.groups.receivers import post_group_application_save
+from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer, GroupApplicationSerializer
 from foodsaving.history.models import history_created
 from foodsaving.history.serializers import HistorySerializer
 from foodsaving.invitations.models import Invitation
@@ -189,6 +190,17 @@ def send_group_updates(sender, instance, **kwargs):
     preview_payload = GroupPreviewSerializer(group).data
     for subscription in ChannelSubscription.objects.recent():
         send_in_channel(subscription.reply_channel, topic='groups:group_preview', payload=preview_payload)
+
+
+# Applications
+@receiver(post_group_application_save)
+def send_group_application_updates(sender, instance, **kwargs):
+    application = instance
+    group = application.group
+    payload = GroupApplicationSerializer(application).data
+    q = Q(user__in=group.members.all()) | Q(user=application.user)
+    for subscription in ChannelSubscription.objects.recent().filter(q):
+        send_in_channel(subscription.reply_channel, topic='applications:update', payload=payload)
 
 
 # Invitations

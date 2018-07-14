@@ -1,21 +1,20 @@
 import json
 import os
 import pathlib
-from channels.test import ChannelTestCase, WSClient
 from shutil import copyfile
 
 import requests_mock
+from channels.test import ChannelTestCase, WSClient
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.utils import timezone
-from foodsaving.tests.utils import ReceiveAllWSClient
 from pyfcm.baseapi import BaseAPI as FCMApi
 
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationMessage, \
     ConversationMessageReaction
-from foodsaving.groups.factories import GroupFactory
+from foodsaving.groups.factories import GroupFactory, GroupApplicationFactory
 from foodsaving.invitations.models import Invitation
 from foodsaving.pickups.factories import FeedbackFactory, PickupDateFactory, \
     PickupDateSeriesFactory
@@ -23,6 +22,7 @@ from foodsaving.pickups.models import PickupDate
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.subscriptions.models import ChannelSubscription, \
     PushSubscription, PushSubscriptionPlatform
+from foodsaving.tests.utils import ReceiveAllWSClient
 from foodsaving.users.factories import UserFactory
 from foodsaving.utils.tests.fake import faker
 
@@ -285,6 +285,53 @@ class GroupReceiverTests(ChannelTestCase):
         self.assertEqual(response['topic'], 'groups:group_preview')
         self.assertEqual(response['payload']['name'], name)
         self.assertTrue('description' not in response['payload'])
+
+        self.assertIsNone(self.client.receive(json=True))
+
+
+class GroupApplicationReceiverTests(ChannelTestCase):
+    def setUp(self):
+        self.client = ReceiveAllWSClient()
+        self.member = UserFactory()
+        self.user = UserFactory()
+        self.group = GroupFactory(members=[self.member])
+
+    def test_member_receives_application_create(self):
+        self.client.force_login(self.member)
+        self.client.send_and_consume('websocket.connect', path='/')
+
+        application = GroupApplicationFactory(user=self.user, group=self.group)
+
+        response = next(r for r in self.client.receive_all(json=True) if r['topic'] == 'applications:update')
+        self.assertEqual(response['payload']['id'], application.id)
+
+        self.assertIsNone(self.client.receive(json=True))
+
+    def test_member_receives_application_update(self):
+        application = GroupApplicationFactory(user=self.user, group=self.group)
+
+        self.client.force_login(self.member)
+        self.client.send_and_consume('websocket.connect', path='/')
+
+        application.status = 'accepted'
+        application.save()
+
+        response = self.client.receive(json=True)
+        self.assertEqual(response['payload']['id'], application.id)
+
+        self.assertIsNone(self.client.receive(json=True))
+
+    def test_applicant_receives_application_update(self):
+        application = GroupApplicationFactory(user=self.user, group=self.group)
+
+        self.client.force_login(self.user)
+        self.client.send_and_consume('websocket.connect', path='/')
+
+        application.status = 'accepted'
+        application.save()
+
+        response = self.client.receive(json=True)
+        self.assertEqual(response['payload']['id'], application.id)
 
         self.assertIsNone(self.client.receive(json=True))
 

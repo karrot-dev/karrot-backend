@@ -1,10 +1,13 @@
 from django.db.models.signals import post_save, pre_delete, post_delete
-from django.dispatch import receiver
+from django.dispatch import receiver, Signal
 
 from foodsaving.conversations.models import Conversation, ConversationParticipant
 from foodsaving.groups import roles, stats
 from foodsaving.groups.models import Group, GroupMembership, GroupApplication, GroupNotificationType
 from foodsaving.groups.tasks import notify_members_about_new_application
+
+
+post_group_application_save = Signal()
 
 
 @receiver(post_save, sender=Group)
@@ -61,21 +64,26 @@ def group_member_removed(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=GroupApplication)
-def create_group_application_conversation(sender, instance, created, **kwargs):
-    if not created:
-        return
-    application = instance
-    group = instance.group
-    applicant = instance.user
+def group_application_saved(sender, instance, created, **kwargs):
+    if created:
+        application = instance
+        group = instance.group
+        applicant = instance.user
 
-    conversation = Conversation.objects.get_or_create_for_target(application)
-    conversation.join(applicant)
-    for user in group.members.all():
-        membership = GroupMembership.objects.get(user=user, group=group)
-        notifications_enabled = GroupNotificationType.NEW_APPLICATION in membership.notification_types
-        conversation.join(user, email_notifications=notifications_enabled)
+        conversation = Conversation.objects.get_or_create_for_target(application)
+        conversation.join(applicant)
+        for user in group.members.all():
+            membership = GroupMembership.objects.get(user=user, group=group)
+            notifications_enabled = GroupNotificationType.NEW_APPLICATION in membership.notification_types
+            conversation.join(user, email_notifications=notifications_enabled)
 
-    notify_members_about_new_application(application)
+        notify_members_about_new_application(application)
+
+    post_group_application_save.send(
+        sender=GroupApplication.__class__,
+        instance=instance,
+        created=created,
+    )
 
 
 @receiver(pre_delete, sender=GroupApplication)
