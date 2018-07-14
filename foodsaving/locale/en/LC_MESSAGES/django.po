@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-07-13 20:51+0000\n"
+"POT-Creation-Date: 2018-07-14 11:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -61,10 +61,14 @@ msgid "You are already a member."
 msgstr ""
 
 #: foodsaving/groups/api.py:35
+msgid "You can only join open groups."
+msgstr ""
+
+#: foodsaving/groups/api.py:42
 msgid "You do not have permission to update memberships."
 msgstr ""
 
-#: foodsaving/groups/api.py:202
+#: foodsaving/groups/api.py:209
 msgid "You need to have a verified email address"
 msgstr ""
 
@@ -76,24 +80,28 @@ msgstr ""
 msgid "Playground"
 msgstr ""
 
-#: foodsaving/groups/serializers.py:102 foodsaving/groups/serializers.py:228
+#: foodsaving/groups/serializers.py:98 foodsaving/groups/serializers.py:221
 msgid "You cannot manage agreements"
 msgstr ""
 
-#: foodsaving/groups/serializers.py:104
+#: foodsaving/groups/serializers.py:100
 msgid "Agreement is not for this group"
 msgstr ""
 
-#: foodsaving/groups/serializers.py:185
-msgid "You need to verify your email address before you can apply for a group"
+#: foodsaving/groups/serializers.py:176
+msgid "Application is already pending"
 msgstr ""
 
-#: foodsaving/groups/serializers.py:226
+#: foodsaving/groups/serializers.py:181
+msgid "You are already member of the group"
+msgstr ""
+
+#: foodsaving/groups/serializers.py:183
+msgid "You cannot apply to open groups"
+msgstr ""
+
+#: foodsaving/groups/serializers.py:219
 msgid "You are not in this group"
-msgstr ""
-
-#: foodsaving/groups/serializers.py:294
-msgid "Group password is wrong"
 msgstr ""
 
 #: foodsaving/groups/templates/application_accepted.html.jinja2:4
@@ -114,6 +122,11 @@ msgstr ""
 #: foodsaving/groups/templates/application_declined.subject.jinja2:1
 #, python-format
 msgid "Your application to join %(group_name)s was declined"
+msgstr ""
+
+#: foodsaving/groups/templates/default_application_questions.nopreview.jinja2:1
+#, python-format
+msgid "What are your motivations for joining %(group_name)s?"
 msgstr ""
 
 #: foodsaving/groups/templates/group_summary.html.jinja2:4
@@ -215,6 +228,10 @@ msgstr ""
 #: foodsaving/groups/templates/new_application.html.jinja2:114
 #, python-format
 msgid "Answers from %(user_name)s"
+msgstr ""
+
+#: foodsaving/groups/templates/new_application.html.jinja2:118
+msgid "View applications"
 msgstr ""
 
 #: foodsaving/groups/templates/new_application.html.jinja2:119

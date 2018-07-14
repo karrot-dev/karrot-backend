@@ -42,3 +42,7 @@ class TestGroupModel(TestCase):
         conversation = Conversation.objects.get_for_target(group)
         conversation_participant = ConversationParticipant.objects.get(conversation=conversation, user=user)
         self.assertFalse(conversation_participant.email_notifications)
+
+    def test_uses_default_application_questions_if_not_specified(self):
+        group = GroupFactory(application_questions='')
+        self.assertIn('What are your motivations', group.get_application_questions_or_default())

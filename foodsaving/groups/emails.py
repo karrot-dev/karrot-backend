@@ -14,7 +14,7 @@ from foodsaving.groups.models import Group, GroupNotificationType, GroupMembersh
 from foodsaving.pickups.models import PickupDate, Feedback
 from foodsaving.utils.email_utils import prepare_email
 from foodsaving.utils.frontend_urls import group_wall_url, group_settings_url, group_application_url, \
-    group_application_mute_url, group_applications_url
+    group_application_mute_url, group_applications_url, group_edit_url
 from foodsaving.webhooks.api import make_local_part
 
 
@@ -154,6 +154,7 @@ def prepare_new_application_notification_email(user, application):
             'mute_url': group_application_mute_url(application, conversation),
             'settings_url': group_settings_url(application.group),
             'group_applications_url': group_applications_url(application.group),
+            'group_edit_url': group_edit_url(application.group),
         }
     )
 

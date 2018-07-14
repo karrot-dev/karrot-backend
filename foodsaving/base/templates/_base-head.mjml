@@ -71,6 +71,11 @@
         font-size: 1.1em;
     }
     .message-content p {
-      margin: 0 0 10px 0;
+        margin: 0 0 10px 0;
+    }
+    .light-text {
+        font-size: 13px;
+        line-height: 18px;
+        color: #777;
     }
 </mj-style>

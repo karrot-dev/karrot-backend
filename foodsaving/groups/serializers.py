@@ -188,7 +188,7 @@ class GroupApplicationSerializer(serializers.ModelSerializer):
         return super().save(
             **kwargs,
             user=self.context['request'].user,
-            questions=group.application_questions,
+            questions=group.get_application_questions_or_default(),
         )
 
 
@@ -255,6 +255,7 @@ class GroupPreviewSerializer(GroupBaseSerializer):
     Public information for all visitors
     should be readonly
     """
+    application_questions = serializers.SerializerMethodField()
 
     class Meta:
         model = GroupModel
@@ -270,6 +271,9 @@ class GroupPreviewSerializer(GroupBaseSerializer):
             'status',
             'is_open',
         ]
+
+    def get_application_questions(self, group):
+        return group.get_application_questions_or_default()
 
 
 class GroupJoinSerializer(GroupBaseSerializer):

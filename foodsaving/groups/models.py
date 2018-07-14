@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models, transaction
 from django.db.models import TextField, DateTimeField, QuerySet
+from django.template.loader import render_to_string
 from django.utils import timezone as tz
 from timezone_field import TimeZoneField
 
@@ -89,6 +90,13 @@ class Group(BaseModel, LocationModel, ConversationMixin):
 
     def has_recent_activity(self):
         return self.last_active_at >= tz.now() - timedelta(days=settings.NUMBER_OF_DAYS_UNTIL_GROUP_INACTIVE)
+
+    def get_application_questions_or_default(self):
+        if not self.application_questions:
+            return render_to_string('default_application_questions.nopreview.jinja2', {
+                'group': self,
+            })
+        return self.application_questions
 
 
 class Agreement(BaseModel):
