@@ -73,7 +73,6 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'address',
             'latitude',
             'longitude',
-            'password',
             'timezone',
             'active_agreement',
             'status',
@@ -87,10 +86,6 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'description': {
                 'trim_whitespace': False,
                 'max_length': settings.DESCRIPTION_MAX_LENGTH
-            },
-            'password': {
-                'trim_whitespace': False,
-                'max_length': 255
             },
         }
         read_only_fields = ['active', 'members', 'memberships', 'notification_types', 'is_open']
@@ -119,7 +114,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
         if group.is_playground():
             # Prevent editing of public fields
             # Password shouldn't get changed and the others get overridden with a translation message
-            for field in ['name', 'password', 'public_description']:
+            for field in ['name', 'public_description']:
                 if field in validated_data:
                     del validated_data[field]
 
@@ -272,26 +267,15 @@ class GroupPreviewSerializer(GroupBaseSerializer):
             'latitude',
             'longitude',
             'members',
-            'protected',
             'status',
             'is_open',
         ]
-
-    protected = serializers.SerializerMethodField()
-
-    def get_protected(self, group):
-        return group.password != ''
 
 
 class GroupJoinSerializer(GroupBaseSerializer):
     class Meta:
         model = GroupModel
-        fields = ['password']
-
-    def validate(self, attrs):
-        if self.instance.password != '' and self.instance.password != attrs.get('password'):
-            raise ValidationError(_('Group password is wrong'))
-        return attrs
+        fields = []
 
     def update(self, instance, validated_data):
         user = self.context['request'].user

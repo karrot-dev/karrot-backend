@@ -9,7 +9,7 @@ from rest_framework.test import APITestCase
 from foodsaving.groups import roles
 from foodsaving.groups.factories import GroupFactory, PlaygroundGroupFactory
 from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
-    GroupNotificationType, get_default_notification_types
+    GroupNotificationType, get_default_notification_types, Group
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory
@@ -26,39 +26,28 @@ class TestGroupsInfoAPI(APITestCase):
     def test_list_groups_as_anon(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertFalse('password' in response.data)
 
     def test_list_groups_as_user(self):
         self.client.force_login(user=self.user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertFalse('password' in response.data)
-
-    def test_list_groups_as_member(self):
-        self.client.force_login(user=self.member)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertFalse('password' in response.data)
 
     def test_retrieve_group_as_anon(self):
         url = self.url + str(self.group.id) + '/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertFalse('password' in response.data)
 
     def test_retrieve_group_as_user(self):
         self.client.force_login(user=self.user)
         url = self.url + str(self.group.id) + '/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertFalse('password' in response.data)
 
     def test_retrieve_group_as_member(self):
         self.client.force_login(user=self.member)
         url = self.url + str(self.group.id) + '/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertFalse('password' in response.data)
 
 
 class TestGroupsAPI(APITestCase):
@@ -115,7 +104,6 @@ class TestGroupsAPI(APITestCase):
         url = self.url + str(self.group.id) + '/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue('password' in response.data)
 
     def test_patch_group(self):
         url = self.url + str(self.group.id) + '/'
@@ -141,6 +129,12 @@ class TestGroupsAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(response.data, {'timezone': ['Unknown timezone']})
 
+    def test_change_is_open_fails(self):
+        self.client.force_login(user=self.member)
+        url = self.url + str(self.group.id) + '/'
+        self.client.patch(url, {'is_open': False})
+        self.assertTrue(Group.objects.get(id=self.group.id).is_open)
+
     def test_get_conversation(self):
         self.client.force_login(user=self.member)
         response = self.client.get('/api/groups/{}/conversation/'.format(self.group.id))
@@ -157,18 +151,14 @@ class TestGroupsAPI(APITestCase):
         response = self.client.post(self.join_password_url, {"password": "abc"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_join_group_with_password_fails_if_wrong(self):
-        self.client.force_login(user=self.user)
-        response = self.client.post(self.join_password_url, {"password": "wrong"})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_join_group_with_password_fails_if_empty(self):
-        self.client.force_login(user=self.user)
-        response = self.client.post(self.join_password_url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
     def test_join_group_fails_if_not_logged_in(self):
         response = self.client.post('/api/groups/{}/join/'.format(self.group.id))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_cannot_join_non_open_group(self):
+        non_open_group = GroupFactory(is_open=False)
+        self.client.force_login(user=self.user)
+        response = self.client.post('/api/groups/{}/join/'.format(non_open_group.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_leave_group(self):
@@ -220,7 +210,7 @@ class TestPlaygroundGroupAPI(APITestCase):
     def test_change_password_has_no_effect(self):
         self.client.force_login(user=self.member)
         url = reverse('group-detail', kwargs={'pk': self.group.id})
-        response = self.client.patch(url, data={'password': 'secret'})
+        response = self.client.patch(url, data={'public_description': 'buy our nice horse'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.group.refresh_from_db()
         self.assertEqual(self.group.password, '')
