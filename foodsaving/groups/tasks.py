@@ -11,8 +11,13 @@ from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from config import settings
 from foodsaving.groups import stats, emails
-from foodsaving.groups.emails import prepare_user_inactive_in_group_email, prepare_group_summary_data, \
-    prepare_new_application_notification_email, prepare_application_accepted_email, prepare_application_declined_email
+from foodsaving.groups.emails import (
+    prepare_user_inactive_in_group_email,
+    prepare_group_summary_data,
+    prepare_new_application_notification_email,
+    prepare_application_accepted_email,
+    prepare_application_declined_email,
+)
 from foodsaving.groups.models import Group, GroupStatus, GroupNotificationType
 from foodsaving.groups.models import GroupMembership
 from foodsaving.utils import stats_utils
@@ -27,6 +32,7 @@ def record_group_stats():
     for group in Group.objects.all():
         points.extend(stats.get_group_members_stats(group))
         points.extend(stats.get_group_stores_stats(group))
+        points.extend(stats.get_group_application_stats(group))
 
     write_points(points)
 

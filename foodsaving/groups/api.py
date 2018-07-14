@@ -248,6 +248,7 @@ class GroupApplicationViewSet(
 
         application.accept(self.request.user)
         serializer = self.get_serializer(application)
+        stats.application_status_update(application)
         return Response(data=serializer.data)
 
     @action(
@@ -261,6 +262,7 @@ class GroupApplicationViewSet(
 
         application.decline(self.request.user)
         serializer = self.get_serializer(application)
+        stats.application_status_update(application)
         return Response(data=serializer.data)
 
     @action(
@@ -274,6 +276,7 @@ class GroupApplicationViewSet(
 
         application.withdraw()
         serializer = self.get_serializer(application)
+        stats.application_status_update(application)
         return Response(data=serializer.data)
 
 
