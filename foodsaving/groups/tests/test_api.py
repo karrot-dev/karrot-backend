@@ -65,8 +65,8 @@ class TestGroupsAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.member = UserFactory()
-        self.group = GroupFactory(members=[self.member, ])
-        self.group_with_password = GroupFactory(password='abc')
+        self.group = GroupFactory(members=[self.member, ], is_open=True)
+        self.group_with_password = GroupFactory(password='abc', is_open=True)
         self.join_password_url = '/api/groups/{}/join/'.format(self.group_with_password.id)
         self.url = '/api/groups/'
         self.group_data = {'name': faker.name(),

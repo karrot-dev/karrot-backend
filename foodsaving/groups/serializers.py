@@ -78,6 +78,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'active_agreement',
             'status',
             'notification_types',
+            'is_open',
         ]
         extra_kwargs = {
             'name': {
@@ -92,7 +93,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
                 'max_length': 255
             },
         }
-        read_only_fields = ['active', 'members', 'memberships', 'notification_types']
+        read_only_fields = ['active', 'members', 'memberships', 'notification_types', 'is_open']
 
     def validate_active_agreement(self, active_agreement):
         user = self.context['request'].user
@@ -183,6 +184,8 @@ class GroupApplicationSerializer(serializers.ModelSerializer):
     def validate_group(self, group):
         if group.is_member(self.context['request'].user):
             raise serializers.ValidationError(_('You are already member of the group'))
+        if group.is_open:
+            raise serializers.ValidationError(_('You cannot apply to open groups'))
         return group
 
     def save(self, **kwargs):
@@ -271,6 +274,7 @@ class GroupPreviewSerializer(GroupBaseSerializer):
             'members',
             'protected',
             'status',
+            'is_open',
         ]
 
     protected = serializers.SerializerMethodField()

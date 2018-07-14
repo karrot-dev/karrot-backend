@@ -31,6 +31,13 @@ class IsNotMember(BasePermission):
         return not obj.is_member(request.user)
 
 
+class IsOpenGroup(BasePermission):
+    message = _('You can only join open groups.')
+
+    def has_object_permission(self, request, view, obj):
+        return obj.is_open
+
+
 class CanUpdateMemberships(BasePermission):
     message = _('You do not have permission to update memberships.')
 
@@ -106,7 +113,7 @@ class GroupViewSet(
     @action(
         detail=True,
         methods=['POST'],
-        permission_classes=(IsAuthenticated, IsNotMember),
+        permission_classes=(IsAuthenticated, IsNotMember, IsOpenGroup),
         serializer_class=GroupJoinSerializer
     )
     def join(self, request, pk=None):

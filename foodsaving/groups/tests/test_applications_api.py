@@ -130,6 +130,18 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_cannot_apply_to_open_group(self):
+        open_group = GroupFactory(members=[self.member], is_open=True)
+        self.client.force_login(user=self.applicant)
+        response = self.client.post(
+            '/api/group-applications/',
+            {
+                'group': open_group.id,
+                'answers': faker.text(),
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class TestApplicationNotifications(APITestCase):
     def setUp(self):

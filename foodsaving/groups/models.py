@@ -41,6 +41,7 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         on_delete=models.SET_NULL
     )
     last_active_at = DateTimeField(default=tz.now)
+    is_open = models.BooleanField(default=False)
 
     def __str__(self):
         return 'Group {}'.format(self.name)
