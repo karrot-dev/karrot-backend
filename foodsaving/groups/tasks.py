@@ -9,10 +9,16 @@ from influxdb_metrics.loader import write_points
 from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from config import settings
-from foodsaving.groups import stats, emails
-from foodsaving.groups.emails import prepare_user_inactive_in_group_email, prepare_group_summary_data
+from foodsaving.applications.stats import get_group_application_stats
+from foodsaving.groups.emails import (
+    prepare_user_inactive_in_group_email,
+    prepare_group_summary_data,
+    calculate_group_summary_dates,
+    prepare_group_summary_emails
+)
 from foodsaving.groups.models import Group, GroupStatus
 from foodsaving.groups.models import GroupMembership
+from foodsaving.groups.stats import get_group_members_stats, get_group_stores_stats, group_summary_email
 from foodsaving.utils import stats_utils
 
 
@@ -23,8 +29,9 @@ def record_group_stats():
     points = []
 
     for group in Group.objects.all():
-        points.extend(stats.get_group_members_stats(group))
-        points.extend(stats.get_group_stores_stats(group))
+        points.extend(get_group_members_stats(group))
+        points.extend(get_group_stores_stats(group))
+        points.extend(get_group_application_stats(group))
 
     write_points(points)
 
@@ -62,7 +69,7 @@ def send_summary_emails():
 
     for group in groups:
 
-        from_date, to_date = emails.calculate_group_summary_dates(group)
+        from_date, to_date = calculate_group_summary_dates(group)
 
         if not group.sent_summary_up_to or group.sent_summary_up_to < to_date:
 
@@ -70,7 +77,7 @@ def send_summary_emails():
 
             context = prepare_group_summary_data(group, from_date, to_date)
             if context['has_activity']:
-                for email in emails.prepare_group_summary_emails(group, context):
+                for email in prepare_group_summary_emails(group, context):
                     try:
                         email.send()
                         email_count += 1
@@ -83,7 +90,7 @@ def send_summary_emails():
             group.sent_summary_up_to = to_date
             group.save()
 
-            stats.group_summary_email(
+            group_summary_email(
                 group,
                 email_recipient_count=email_recipient_count,
                 feedback_count=context['feedbacks'].count(),

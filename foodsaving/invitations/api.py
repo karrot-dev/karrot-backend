@@ -1,7 +1,7 @@
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
@@ -55,7 +55,10 @@ class InvitationAcceptViewSet(GenericViewSet):
     def get_queryset(self):
         return self.queryset.filter(expires_at__gte=timezone.now())
 
-    @detail_route(methods=['POST'])
+    @action(
+        detail=True,
+        methods=['POST']
+    )
     def accept(self, request, **kwargs):
         """
         Accept the invitation

@@ -1,10 +1,11 @@
-from enum import Enum
 from datetime import timedelta
+from enum import Enum
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import TextField, DateTimeField, QuerySet
+from django.template.loader import render_to_string
 from django.utils import timezone as tz
 from timezone_field import TimeZoneField
 
@@ -23,8 +24,9 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH, unique=True)
     description = models.TextField(blank=True)
     members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='groups', through='GroupMembership')
-    password = models.CharField(max_length=255, blank=True)
+    password = models.CharField(max_length=255, blank=True)  # TODO remove soon
     public_description = models.TextField(blank=True)
+    application_questions = models.TextField(blank=True)
     status = models.CharField(
         default=GroupStatus.ACTIVE.value,
         choices=[(status.value, status.value) for status in GroupStatus],
@@ -39,6 +41,7 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         on_delete=models.SET_NULL
     )
     last_active_at = DateTimeField(default=tz.now)
+    is_open = models.BooleanField(default=False)
 
     def __str__(self):
         return 'Group {}'.format(self.name)
@@ -87,6 +90,13 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     def has_recent_activity(self):
         return self.last_active_at >= tz.now() - timedelta(days=settings.NUMBER_OF_DAYS_UNTIL_GROUP_INACTIVE)
 
+    def get_application_questions_or_default(self):
+        if not self.application_questions:
+            return render_to_string('default_application_questions.nopreview.jinja2', {
+                'group': self,
+            })
+        return self.application_questions
+
 
 class Agreement(BaseModel):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
@@ -103,12 +113,14 @@ class UserAgreement(BaseModel):
 class GroupNotificationType(object):
     WEEKLY_SUMMARY = 'weekly_summary'
     DAILY_PICKUP_NOTIFICATION = 'daily_pickup_notification'
+    NEW_APPLICATION = 'new_application'
 
 
 def get_default_notification_types():
     return [
         GroupNotificationType.WEEKLY_SUMMARY,
         GroupNotificationType.DAILY_PICKUP_NOTIFICATION,
+        GroupNotificationType.NEW_APPLICATION,
     ]
 
 

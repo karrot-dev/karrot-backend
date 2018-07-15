@@ -33,8 +33,9 @@ class Migration(migrations.Migration):
         ('groups', '0022_remove_group_slack_webhook'),
         ('users', '0020_user_mobile_number'),
         ('history', '0004_auto_20170701_1555'),
+        ('conversations', '0011_auto_20180303_1748'),
     ]
 
     operations = [
-        migrations.RunPython(set_sensible_lastseen_at, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(set_sensible_lastseen_at, reverse_code=migrations.RunPython.noop, elidable=True),
     ]

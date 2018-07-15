@@ -19,5 +19,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(subscribe_to_daily_pickup_notifications, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(subscribe_to_daily_pickup_notifications, reverse_code=migrations.RunPython.noop, elidable=True),
     ]

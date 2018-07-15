@@ -43,7 +43,7 @@ class TestHistoryAPIOrdering(APITestCase, ExtractPaginationMixin):
 class TestHistoryAPIWithExistingGroup(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
-        self.group = GroupFactory(members=[self.member, ])
+        self.group = GroupFactory(members=[self.member, ], is_open=True)
         self.group_url = '/api/groups/{}/'.format(self.group.id)
 
     def test_modify_group(self):

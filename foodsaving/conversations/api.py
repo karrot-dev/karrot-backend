@@ -3,14 +3,12 @@ from django.utils.translation import ugettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
-from rest_framework.decorators import detail_route
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-
-from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 from foodsaving.conversations.models import (
     Conversation,
@@ -25,6 +23,7 @@ from foodsaving.conversations.serializers import (
     ConversationEmailNotificationsSerializer,
     EmojiField)
 from foodsaving.groups.models import Group
+from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 
 class MessagePagination(CursorPagination):
@@ -92,7 +91,8 @@ class ConversationViewSet(
     def get_queryset(self):
         return self.queryset.filter(participants=self.request.user)
 
-    @detail_route(
+    @action(
+        detail=True,
         methods=['POST'],
         serializer_class=ConversationMarkSerializer
     )
@@ -104,7 +104,8 @@ class ConversationViewSet(
         serializer.save()
         return Response(serializer.data)
 
-    @detail_route(
+    @action(
+        detail=True,
         methods=['POST'],
         serializer_class=ConversationEmailNotificationsSerializer
     )
@@ -147,7 +148,8 @@ class ConversationMessageViewSet(
         """Update one of your messages"""
         return super().partial_update(request)
 
-    @detail_route(
+    @action(
+        detail=True,
         methods=('POST',),
         filter_fields=('name',),
         permission_classes=(IsAuthenticated, IsMessageConversationParticipant)
@@ -171,7 +173,8 @@ class ConversationMessageViewSet(
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @detail_route(
+    @action(
+        detail=True,
         methods=('DELETE',),
         url_path='reactions/(?P<name>[a-z0-9_+-]+)',
         url_name='remove_reaction',

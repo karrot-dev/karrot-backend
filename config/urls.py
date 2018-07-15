@@ -16,6 +16,7 @@ from rest_framework_swagger.views import get_swagger_view
 
 from foodsaving.conversations.api import ConversationMessageViewSet, ConversationViewSet
 from foodsaving.groups.api import GroupViewSet, AgreementViewSet, GroupInfoViewSet
+from foodsaving.applications.api import GroupApplicationViewSet
 from foodsaving.history.api import HistoryViewSet
 from foodsaving.invitations.api import InvitationsViewSet, InvitationAcceptViewSet
 from foodsaving.pickups.api import PickupDateViewSet, PickupDateSeriesViewSet, FeedbackViewSet
@@ -25,17 +26,19 @@ from foodsaving.template_previews import views as template_preview_views
 from foodsaving.userauth.api import AuthUserView, AuthView, LogoutView, \
     RequestResetPasswordView, ChangePasswordView, VerifyMailView, ResendMailVerificationCodeView, ResetPasswordView, \
     ChangeMailView, RequestDeleteUserView, FailedEmailDeliveryView
-from foodsaving.users.api import UserViewSet
+from foodsaving.users.api import UserViewSet, UserInfoViewSet
 from foodsaving.webhooks.api import IncomingEmailView, EmailEventView
 
 router = routers.DefaultRouter()
 
 router.register('groups', GroupViewSet)
 router.register('groups-info', GroupInfoViewSet, base_name='groupinfo')
+router.register('group-applications', GroupApplicationViewSet, base_name='groupapplication')
 router.register('agreements', AgreementViewSet)
 
 # User endpoints
 router.register('users', UserViewSet)
+router.register('users-info', UserInfoViewSet)
 
 # pickup date endpoints
 router.register('pickup-date-series', PickupDateSeriesViewSet)

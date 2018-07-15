@@ -92,6 +92,7 @@ class Command(BaseCommand):
                 'latitude': faker.latitude(),
                 'longitude': faker.longitude()
             }).data
+            Group.objects.filter(id=data['id']).update(is_open=True)
             conversation = c.get('/api/groups/{}/conversation/'.format(data['id']))
             data['conversation'] = conversation
             print('created group: ', data['id'], data['name'])

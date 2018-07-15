@@ -6,8 +6,8 @@
         />
         <mj-text align="center" color="#aaaaaa" font-size="13px" line-height="20px">
             <p>
-                <a class="footer-link" href="https://www.facebook.com/groups/foodsaving.worldwide/">Join our Facebook Group!</a> &bullet;
-                made with love by <a class="footer-link" href="https://foodsaving.world">foodsaving worldwide</a>
+                made with love by <a class="footer-link" href="https://foodsaving.world">foodsaving worldwide</a> &bullet;
+                <a class="footer-link" href="https://community.foodsaving.world/">Join our community!</a>
             </p>
         </mj-text>
     </mj-column>

@@ -1,0 +1,19 @@
+<mjml>
+    <mj-head>
+        <mj-include path="../../base/templates/_base-head.mjml"/>
+        <mj-title>{% trans group_name=group.name %}Your application to join {{ group_name }} was declined{% endtrans %}</mj-title>
+    </mj-head>
+    <mj-body>
+        <mj-container>
+            <mj-include path="../../base/templates/_header.mjml"/>
+            <mj-section background-color="#ffffff" padding="40px 0 40px 0">
+                <mj-column>
+                    <mj-text>
+                        <h1>{% trans group_name=group.name %}Your application to join {{ group_name }} was declined{% endtrans %}</h1>
+                    </mj-text>
+                </mj-column>
+            </mj-section>
+            <mj-include path="../../base/templates/_footer.mjml"/>
+        </mj-container>
+    </mj-body>
+</mjml>

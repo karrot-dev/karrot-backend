@@ -14,3 +14,9 @@ class UserSerializer(serializers.ModelSerializer):
         model = get_user_model()
         fields = ['id', 'display_name', 'email', 'mobile_number', 'address',
                   'latitude', 'longitude', 'description', 'photo_urls']
+
+
+class UserInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ['id', 'display_name']

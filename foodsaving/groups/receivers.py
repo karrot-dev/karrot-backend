@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
 
-from foodsaving.conversations.models import Conversation, ConversationParticipant
+from foodsaving.conversations.models import Conversation
 from foodsaving.groups import roles, stats
 from foodsaving.groups.models import Group, GroupMembership
 
@@ -47,7 +47,8 @@ def group_member_removed(sender, instance, **kwargs):
     user = instance.user
     conversation = Conversation.objects.get_for_target(group)
     if conversation:
-        ConversationParticipant.objects.filter(conversation=conversation, user=user).delete()
+        conversation.leave(user)
+
     stats.group_left(group)
 
 
