@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete, m2m_changed, post_delete
 from django.dispatch import receiver
 
-from foodsaving.applications.receivers import post_group_application_save
+from foodsaving.applications.models import GroupApplication
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction
 from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer
 from foodsaving.groups.models import Group
@@ -194,7 +194,7 @@ def send_group_updates(sender, instance, **kwargs):
 
 
 # Applications
-@receiver(post_group_application_save)
+@receiver(post_save, sender=GroupApplication)
 def send_group_application_updates(sender, instance, **kwargs):
     application = instance
     group = application.group

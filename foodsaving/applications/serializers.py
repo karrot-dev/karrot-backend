@@ -26,7 +26,7 @@ class GroupApplicationSerializer(serializers.ModelSerializer):
         ]
 
     def get_conversation(self, application):
-        return Conversation.objects.get_for_target(application).id
+        return Conversation.objects.get_or_create_for_target(application).id
 
     def validate(self, attrs):
         if GroupApplication.objects.filter(
