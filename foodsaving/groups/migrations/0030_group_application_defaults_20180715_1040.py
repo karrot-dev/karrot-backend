@@ -17,7 +17,7 @@ def migrate_playground_groups_to_be_open(apps, schema_editor):
 
 def migrate_unprotected_groups_to_be_open(apps, schema_editor):
     Group = apps.get_model('groups', 'Group')
-    Group.objects.filter(password=None).update(is_open=True)
+    Group.objects.filter(password='').update(is_open=True)
 
 class Migration(migrations.Migration):
 
