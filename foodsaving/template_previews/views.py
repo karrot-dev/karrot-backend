@@ -17,7 +17,7 @@ from config import settings
 from foodsaving.conversations.models import ConversationMessage
 from foodsaving.groups.emails import prepare_user_inactive_in_group_email, prepare_group_summary_emails, \
     prepare_group_summary_data
-from foodsaving.groups.factories import GroupApplicationFactory
+from foodsaving.applications.factories import GroupApplicationFactory
 from foodsaving.groups.models import Group
 from foodsaving.applications.models import GroupApplication
 from foodsaving.invitations.models import Invitation

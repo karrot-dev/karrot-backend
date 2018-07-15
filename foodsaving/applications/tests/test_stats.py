@@ -5,7 +5,8 @@ from django.test import TestCase
 from django.utils import timezone
 
 from foodsaving.applications import stats
-from foodsaving.groups.factories import GroupFactory, GroupApplicationFactory
+from foodsaving.groups.factories import GroupFactory
+from foodsaving.applications.factories import GroupApplicationFactory
 from foodsaving.users.factories import UserFactory
 
 

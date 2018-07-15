@@ -3,7 +3,8 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from foodsaving.conversations.models import Conversation
-from foodsaving.groups.factories import GroupFactory, GroupApplicationFactory
+from foodsaving.groups.factories import GroupFactory
+from foodsaving.applications.factories import GroupApplicationFactory
 from foodsaving.groups.models import GroupMembership, GroupNotificationType
 from foodsaving.applications.models import GroupApplicationStatus
 from foodsaving.tests.utils import ExtractPaginationMixin

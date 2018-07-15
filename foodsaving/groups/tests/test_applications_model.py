@@ -1,7 +1,8 @@
 from rest_framework.test import APITestCase
 
 from foodsaving.conversations.models import Conversation
-from foodsaving.groups.factories import GroupFactory, GroupApplicationFactory
+from foodsaving.groups.factories import GroupFactory
+from foodsaving.applications.factories import GroupApplicationFactory
 from foodsaving.groups.models import GroupMembership
 from foodsaving.applications.models import GroupApplication
 from foodsaving.users.factories import VerifiedUserFactory

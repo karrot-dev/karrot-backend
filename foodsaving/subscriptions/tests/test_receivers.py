@@ -14,7 +14,8 @@ from pyfcm.baseapi import BaseAPI as FCMApi
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationMessage, \
     ConversationMessageReaction
-from foodsaving.groups.factories import GroupFactory, GroupApplicationFactory
+from foodsaving.groups.factories import GroupFactory
+from foodsaving.applications.factories import GroupApplicationFactory
 from foodsaving.invitations.models import Invitation
 from foodsaving.pickups.factories import FeedbackFactory, PickupDateFactory, \
     PickupDateSeriesFactory
