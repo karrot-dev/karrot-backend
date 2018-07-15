@@ -1,5 +1,4 @@
 import itertools
-from email.utils import formataddr
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
@@ -9,13 +8,11 @@ from django.utils import timezone
 from django.utils.timezone import get_current_timezone
 
 from config import settings
-from foodsaving.conversations.models import ConversationMessage, Conversation
+from foodsaving.conversations.models import ConversationMessage
 from foodsaving.groups.models import Group, GroupNotificationType, GroupMembership
 from foodsaving.pickups.models import PickupDate, Feedback
 from foodsaving.utils.email_utils import prepare_email
-from foodsaving.utils.frontend_urls import group_wall_url, group_settings_url, group_application_url, \
-    group_application_mute_url, group_applications_url, group_edit_url
-from foodsaving.webhooks.api import make_local_part
+from foodsaving.utils.frontend_urls import group_wall_url, group_settings_url
 
 
 def prepare_group_summary_data(group, from_date, to_date):
@@ -126,55 +123,5 @@ def prepare_user_inactive_in_group_email(user, group):
             'group_name': group.name,
             'group_url': group_wall_url(group),
             'num_days_inactive': settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP,
-        }
-    )
-
-
-def prepare_new_application_notification_email(user, application):
-    applicant = application.user
-    conversation = Conversation.objects.get_for_target(application)
-
-    reply_to_name = applicant.display_name
-
-    local_part = make_local_part(conversation, user)
-    reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
-    from_email = formataddr((applicant.display_name, settings.DEFAULT_FROM_EMAIL))
-
-    return prepare_email(
-        'new_application',
-        from_email=from_email,
-        user=user,
-        reply_to=[reply_to],
-        context={
-            'user': applicant,
-            'group': application.group,
-            'questions': application.questions_rendered(),
-            'answers': application.answers_rendered(),
-            'conversation_url': group_application_url(application),
-            'mute_url': group_application_mute_url(application, conversation),
-            'settings_url': group_settings_url(application.group),
-            'group_applications_url': group_applications_url(application.group),
-            'group_edit_url': group_edit_url(application.group),
-        }
-    )
-
-
-def prepare_application_accepted_email(application):
-    return prepare_email(
-        'application_accepted',
-        user=application.user,
-        context={
-            'group': application.group,
-            'group_url': group_wall_url(application.group)
-        }
-    )
-
-
-def prepare_application_declined_email(application):
-    return prepare_email(
-        'application_declined',
-        user=application.user,
-        context={
-            'group': application.group,
         }
     )

@@ -18,5 +18,5 @@ class Migration(migrations.Migration):
             name='updated_at',
             field=models.DateTimeField(auto_now=True),
         ),
-        migrations.RunPython(set_updated_at_default)
+        migrations.RunPython(set_updated_at_default, elidable=True)
     ]

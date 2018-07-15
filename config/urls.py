@@ -15,7 +15,8 @@ from rest_framework_nested import routers
 from rest_framework_swagger.views import get_swagger_view
 
 from foodsaving.conversations.api import ConversationMessageViewSet, ConversationViewSet
-from foodsaving.groups.api import GroupViewSet, AgreementViewSet, GroupInfoViewSet, GroupApplicationViewSet
+from foodsaving.groups.api import GroupViewSet, AgreementViewSet, GroupInfoViewSet
+from foodsaving.applications.api import GroupApplicationViewSet
 from foodsaving.history.api import HistoryViewSet
 from foodsaving.invitations.api import InvitationsViewSet, InvitationAcceptViewSet
 from foodsaving.pickups.api import PickupDateViewSet, PickupDateSeriesViewSet, FeedbackViewSet

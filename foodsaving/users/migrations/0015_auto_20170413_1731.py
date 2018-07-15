@@ -24,6 +24,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(copy_mail_address, migrations.RunPython.noop)
+        migrations.RunPython(copy_mail_address, migrations.RunPython.noop, elidable=True)
     ]
 

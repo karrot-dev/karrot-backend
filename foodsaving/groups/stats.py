@@ -34,20 +34,6 @@ def group_activity(group):
     }])
 
 
-def application_status_update(application):
-    seconds = (timezone.now() - application.created_at).seconds
-    write_points([{
-        'measurement': 'karrot.events',
-        'tags': {
-            'group': str(application.group.id)
-        },
-        'fields': {
-            'application_{}'.format(application.status): 1,
-            'application_{}_seconds'.format(application.status): seconds,
-        },
-    }])
-
-
 def group_summary_email(group, **extra_fields):
     write_points([{
         'measurement': 'karrot.email.group_summary',
@@ -91,23 +77,6 @@ def get_group_stores_stats(group):
 
     return [{
         'measurement': 'karrot.group.stores',
-        'tags': {
-            'group': str(group.id),
-        },
-        'fields': fields,
-    }]
-
-
-def get_group_application_stats(group):
-    fields = {
-        'count_total': group.groupapplication_set.count(),
-    }
-
-    for entry in group.groupapplication_set.values('status').annotate(count=Count('status')):
-        fields['count_status_{}'.format(entry['status'])] = entry['count']
-
-    return [{
-        'measurement': 'karrot.group.applications',
         'tags': {
             'group': str(group.id),
         },

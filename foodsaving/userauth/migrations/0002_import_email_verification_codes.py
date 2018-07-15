@@ -31,5 +31,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(migrate_email_verification_codes, reverse_code=reverse_migration),
+        migrations.RunPython(migrate_email_verification_codes, reverse_code=reverse_migration, elidable=True),
     ]

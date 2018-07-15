@@ -29,6 +29,7 @@ INSTALLED_APPS = (
 
     # Application
     'foodsaving',
+    'foodsaving.applications.ApplicationsConfig',
     'foodsaving.base.BaseConfig',
     'foodsaving.userauth.UserAuthConfig',
     'foodsaving.subscriptions.SubscriptionsConfig',

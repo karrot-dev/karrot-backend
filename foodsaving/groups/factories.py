@@ -1,6 +1,7 @@
 from factory import DjangoModelFactory, post_generation, LazyAttribute
 
-from foodsaving.groups.models import Group as GroupModel, GroupMembership, GroupStatus, GroupApplication
+from foodsaving.groups.models import Group as GroupModel, GroupMembership, GroupStatus
+from foodsaving.applications.models import GroupApplication
 from foodsaving.utils.tests.fake import faker
 
 

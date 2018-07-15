@@ -5,7 +5,8 @@ from django.utils import translation, timezone
 from django.utils.translation import ugettext as _
 
 from config import settings
-from foodsaving.groups.models import Group, GroupApplication
+from foodsaving.groups.models import Group
+from foodsaving.applications.models import GroupApplication
 from foodsaving.pickups.models import PickupDate
 from foodsaving.utils.email_utils import prepare_email
 from foodsaving.utils.frontend_urls import (

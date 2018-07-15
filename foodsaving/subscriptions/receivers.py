@@ -7,11 +7,12 @@ from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete, m2m_changed, post_delete
 from django.dispatch import receiver
 
+from foodsaving.applications.receivers import post_group_application_save
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction
 from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer
 from foodsaving.groups.models import Group
-from foodsaving.groups.receivers import post_group_application_save
-from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer, GroupApplicationSerializer
+from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer
+from foodsaving.applications.serializers import GroupApplicationSerializer
 from foodsaving.history.models import history_created
 from foodsaving.history.serializers import HistorySerializer
 from foodsaving.invitations.models import Invitation

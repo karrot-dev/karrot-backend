@@ -12,12 +12,14 @@ from django.utils import timezone
 import foodsaving.conversations.emails
 import foodsaving.invitations.emails
 import foodsaving.users.emails
+import foodsaving.applications.emails
 from config import settings
 from foodsaving.conversations.models import ConversationMessage
 from foodsaving.groups.emails import prepare_user_inactive_in_group_email, prepare_group_summary_emails, \
     prepare_group_summary_data
 from foodsaving.groups.factories import GroupApplicationFactory
-from foodsaving.groups.models import Group, GroupApplication
+from foodsaving.groups.models import Group
+from foodsaving.applications.models import GroupApplication
 from foodsaving.invitations.models import Invitation
 from foodsaving.pickups.emails import prepare_pickup_notification_email
 from foodsaving.pickups.models import PickupDate
@@ -77,11 +79,11 @@ class Handlers:
 
     def application_accepted(self):
         application = get_or_create_application()
-        return foodsaving.groups.emails.prepare_application_accepted_email(application)
+        return foodsaving.applications.emails.prepare_application_accepted_email(application)
 
     def application_declined(self):
         application = get_or_create_application()
-        return foodsaving.groups.emails.prepare_application_declined_email(application)
+        return foodsaving.applications.emails.prepare_application_declined_email(application)
 
     def changemail_success(self):
         return foodsaving.users.emails.prepare_changemail_success_email(user=random_user())
@@ -102,7 +104,7 @@ class Handlers:
     def new_application(self):
         application = get_or_create_application()
         member = application.group.members.first()
-        return foodsaving.groups.emails.prepare_new_application_notification_email(member, application)
+        return foodsaving.applications.emails.prepare_new_application_notification_email(member, application)
 
     def group_summary(self):
         from_date = timezone.now() - relativedelta(days=7)

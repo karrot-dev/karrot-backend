@@ -20,5 +20,5 @@ class Migration(migrations.Migration):
             name='platform',
             field=models.CharField(choices=[('android', 'android'), ('web', 'web')], default='android', max_length=100),
         ),
-        migrations.RunPython(convert_enum_to_char),
+        migrations.RunPython(convert_enum_to_char, elidable=True),
     ]
