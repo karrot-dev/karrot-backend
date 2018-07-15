@@ -21,6 +21,7 @@ from foodsaving.pickups.models import PickupDate, PickupDateSeries, Feedback, pi
 from foodsaving.pickups.serializers import PickupDateSerializer, PickupDateSeriesSerializer, FeedbackSerializer
 from foodsaving.stores.models import Store
 from foodsaving.stores.serializers import StoreSerializer
+from foodsaving.subscriptions import stats
 from foodsaving.subscriptions.fcm import notify_multiple_devices
 from foodsaving.subscriptions.models import ChannelSubscription, PushSubscription
 from foodsaving.userauth.serializers import AuthUserSerializer
@@ -44,6 +45,7 @@ def send_in_channel(channel, topic, payload):
             'payload': payload
         })
     })
+    stats.pushed_via_websocket(topic)
 
 
 @receiver(post_save, sender=ConversationMessage)
