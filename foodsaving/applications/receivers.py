@@ -38,3 +38,25 @@ def delete_group_application_conversation(sender, instance, **kwargs):
 
     conversation = Conversation.objects.get_for_target(application)
     conversation.delete()
+
+
+@receiver(post_save, sender=GroupMembership)
+def group_member_added(sender, instance, created, **kwargs):
+    if created:
+        group = instance.group
+        user = instance.user
+
+        for application in group.groupapplication_set.all():
+            conversation = Conversation.objects.get_for_target(application)
+            conversation.join(user)
+
+
+@receiver(pre_delete, sender=GroupMembership)
+def group_member_removed(sender, instance, **kwargs):
+    group = instance.group
+    user = instance.user
+
+    for application in group.groupapplication_set.all():
+        conversation = Conversation.objects.get_for_target(application)
+        if conversation:
+            conversation.leave(user)
