@@ -6,10 +6,10 @@ import requests_mock
 from django.test import TestCase
 
 import foodsaving.subscriptions.fcm
-from foodsaving.subscriptions.fcm import notify_multiple_devices
+from foodsaving.subscriptions import fcm
+from foodsaving.subscriptions.factories import PushSubscriptionFactory
+from foodsaving.subscriptions.fcm import _notify_multiple_devices
 from foodsaving.subscriptions.models import PushSubscription
-from foodsaving.users.factories import UserFactory
-from foodsaving.utils.tests.fake import faker
 
 
 @contextmanager
@@ -50,10 +50,12 @@ def override_fcm_key(key=None):
 class FCMTests(TestCase):
     def test_sends_without_error(self, m):
         m.post('https://fcm.googleapis.com/fcm/send', json={})
-        notify_multiple_devices(registration_ids=['mytoken'])
+        _notify_multiple_devices(registration_ids=['mytoken'])
 
     def test_removes_invalid_subscriptions(self, m):
         with override_fcm_key('something'):
+            valid = PushSubscriptionFactory()
+            invalid = PushSubscriptionFactory()
             m.post('https://fcm.googleapis.com/fcm/send', json={
                 'results': [
                     {
@@ -64,20 +66,60 @@ class FCMTests(TestCase):
                     }
                 ]
             })
-            user = UserFactory()
-            valid_token = faker.uuid4()
-            invalid_token = faker.uuid4()
-            PushSubscription.objects.create(user=user, token=valid_token)
-            PushSubscription.objects.create(user=user, token=invalid_token)
-            result = notify_multiple_devices(registration_ids=[valid_token, invalid_token])
+
+            result = fcm.notify_subscribers([valid, invalid], fcm_options={})
             self.assertIsNotNone(result)
-            self.assertEqual(PushSubscription.objects.filter(token=valid_token).count(), 1)
-            self.assertEqual(PushSubscription.objects.filter(token=invalid_token).count(), 0)
+            self.assertEqual(PushSubscription.objects.filter(token=valid.token).count(), 1)
+            self.assertEqual(PushSubscription.objects.filter(token=invalid.token).count(), 0)
 
     def test_continues_if_config_not_present(self, m):
         with logger_warning_mock() as warning_mock:
             with override_fcm_key():
                 warning_mock.assert_called_with(
                     'Please configure FCM_SERVER_KEY in your settings to use push messaging')
-                result = notify_multiple_devices(registration_ids=['mytoken'])
+                result = _notify_multiple_devices(registration_ids=['mytoken'])
                 self.assertIsNone(result)
+
+
+class FCMNotifySubscribersTests(TestCase):
+    @patch('foodsaving.subscriptions.stats.write_points')
+    @patch('foodsaving.subscriptions.fcm._notify_multiple_devices')
+    def test_notify_subscribers(self, _notify_multiple_devices, write_points):
+        web_subscriptions = [PushSubscriptionFactory(platform='web') for _ in range(3)]
+        android_subscriptions = [PushSubscriptionFactory(platform='android') for _ in range(5)]
+        subscriptions = web_subscriptions + android_subscriptions
+
+        write_points.reset_mock()
+
+        fcm.notify_subscribers(
+            subscriptions,
+            fcm_options={
+                'message_title': 'heya',
+            },
+        )
+
+        _notify_multiple_devices.assert_called_with(
+            registration_ids=[item.token for item in subscriptions],
+            message_title='heya',
+        )
+
+        write_points.assert_called_with([
+            {
+                'measurement': 'karrot.events',
+                'tags': {
+                    'platform': 'android',
+                },
+                'fields': {
+                    'subscription_push': len(android_subscriptions),
+                },
+            },
+            {
+                'measurement': 'karrot.events',
+                'tags': {
+                    'platform': 'web',
+                },
+                'fields': {
+                    'subscription_push': len(web_subscriptions),
+                },
+            },
+        ])
