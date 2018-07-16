@@ -3,6 +3,7 @@ import logging
 from django.conf import settings
 from pyfcm import FCMNotification
 
+from foodsaving.subscriptions import stats
 from foodsaving.subscriptions.models import PushSubscription
 
 logger = logging.getLogger(__name__)
@@ -15,7 +16,21 @@ else:
     logger.warning('Please configure FCM_SERVER_KEY in your settings to use push messaging')
 
 
-def notify_multiple_devices(**kwargs):
+def notify_subscribers(subscriptions, fcm_options):
+    tokens = [item.token for item in subscriptions]
+    if len(tokens) < 1:
+        return None
+
+    response = _notify_multiple_devices(
+        registration_ids=tokens,
+        **fcm_options,
+    )
+
+    stats.pushed_via_subscription(subscriptions)
+    return response
+
+
+def _notify_multiple_devices(**kwargs):
     """
     Send a message to multiple devices.
 

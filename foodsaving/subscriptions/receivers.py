@@ -8,11 +8,11 @@ from django.db.models.signals import post_save, pre_delete, m2m_changed, post_de
 from django.dispatch import receiver
 
 from foodsaving.applications.models import GroupApplication
+from foodsaving.applications.serializers import GroupApplicationSerializer
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction
 from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer
 from foodsaving.groups.models import Group
 from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer
-from foodsaving.applications.serializers import GroupApplicationSerializer
 from foodsaving.history.models import history_created
 from foodsaving.history.serializers import HistorySerializer
 from foodsaving.invitations.models import Invitation
@@ -22,7 +22,7 @@ from foodsaving.pickups.serializers import PickupDateSerializer, PickupDateSerie
 from foodsaving.stores.models import Store
 from foodsaving.stores.serializers import StoreSerializer
 from foodsaving.subscriptions import stats
-from foodsaving.subscriptions.fcm import notify_multiple_devices
+from foodsaving.subscriptions.fcm import notify_subscribers
 from foodsaving.subscriptions.models import ChannelSubscription, PushSubscription
 from foodsaving.userauth.serializers import AuthUserSerializer
 from foodsaving.users.serializers import UserSerializer
@@ -70,27 +70,28 @@ def send_messages(sender, instance, created, **kwargs):
 
     # Send push notifications when a message is created, but not when it is modified
     if created:
-        tokens = [item.token for item in PushSubscription.objects.filter(
+        subscriptions = PushSubscription.objects.filter(
             Q(user__in=conversation.participants.all()) &
             ~Q(user__in=push_exclude_users) &
             ~Q(user=message.author)
-        )]
+        )
 
-        if len(tokens) > 0:
-            message_title = message.author.display_name
-            if isinstance(conversation.target, Group):
-                message_title = '{} / {}'.format(conversation.target.name, message_title)
+        message_title = message.author.display_name
+        if isinstance(conversation.target, Group):
+            message_title = '{} / {}'.format(conversation.target.name, message_title)
 
-            notify_multiple_devices(
-                registration_ids=tokens,
-                message_title=message_title,
-                message_body=message.content,
-                click_action=conversation_url,
-                message_icon=logo_url(),
+        notify_subscribers(
+            subscriptions=subscriptions,
+            fcm_options={
+                'message_title': message_title,
+                'message_body': message.content,
+                'click_action': conversation_url,
+                'message_icon': logo_url(),
                 # this causes each notification for a given conversation to replace previous notifications
                 # fancier would be to make the new notifications show a summary not just the latest message
-                tag='conversation:{}'.format(conversation.id)
-            )
+                'tag': 'conversation:{}'.format(conversation.id)
+            }
+        )
 
     # Send conversations object to participants after sending a message
     # (important for unread_message_count)
