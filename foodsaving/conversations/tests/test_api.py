@@ -94,34 +94,66 @@ class TestConversationThreadsAPI(APITestCase):
         self.group = GroupFactory(members=[self.user, self.user2])
         self.conversation = self.group.conversation
         self.message = self.conversation.messages.create(author=self.user, content='yay')
+        self.reply = ConversationMessage.objects.create(
+            conversation=self.conversation,
+            author=self.user,
+            reply_to=self.message,
+            content='default reply',
+        )
 
     def test_reply_to_message(self):
         self.client.force_login(user=self.user)
-        self.assertFalse(self.message.thread_participants.filter(user=self.user).exists())
         data = {'conversation': self.conversation.id, 'content': 'a nice message reply!', 'reply_to': self.message.id}
         response = self.client.post('/api/messages/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['reply_to'], self.message.id)
-        self.assertTrue(self.message.thread_participants.filter(user=self.user).exists())
+
+    def test_reply_adds_thread_participant(self):
+        self.client.force_login(user=self.user2)
+        self.assertFalse(self.message.thread_participants.filter(user=self.user2).exists())
+        data = {'conversation': self.conversation.id, 'content': 'a nice message reply!', 'reply_to': self.message.id}
+        self.client.post('/api/messages/', data, format='json')
+        self.assertTrue(self.message.thread_participants.filter(user=self.user2).exists())
+
+    def test_can_mute_thread(self):
+        self.client.force_login(user=self.user)
+        response = self.client.patch('/api/messages/{}/thread/'.format(self.message.id), {'muted': True}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        thread_participant = self.message.thread_participants.get(user=self.user)
+        self.assertEqual(thread_participant.muted, True)
+
+    def test_cannot_mute_thread_with_no_replies(self):
+        self.client.force_login(user=self.user)
+        another_message = self.conversation.messages.create(author=self.user, content='boo')
+        data = {'muted': True}
+        response = self.client.patch('/api/messages/{}/thread/'.format(another_message.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_get_thread_info(self):
         self.client.force_login(user=self.user)
-        message_reply = ConversationMessage.objects.create(
-            conversation=self.conversation,
-            author=self.user,
-            reply_to=self.message,
-            content='my reply',
-        )
         response = self.client.get('/api/messages/', format='json')
         item = response.data['results'][0]
         self.assertEqual(item['reply_to'], None)
         self.assertEqual(item['thread'], {
             'is_participant': True,
-            'seen_up_to': message_reply.id,
+            'seen_up_to': self.reply.id,
             'muted': False,
             'message_count': 1,
             'unread_message_count': 0,
         })
+
+    def test_cannot_reply_to_a_reply(self):
+        self.client.force_login(user=self.user)
+        data = {'conversation': self.conversation.id, 'content': 'a nice message reply!', 'reply_to': self.reply.id}
+        response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_must_provide_correct_conversation_id(self):
+        another_conversation = ConversationFactory()
+        self.client.force_login(user=self.user)
+        data = {'conversation': another_conversation.id, 'content': 'a nice message reply!', 'reply_to': self.message.id}
+        response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class TestConversationsSeenUpToAPI(APITestCase):

@@ -158,14 +158,16 @@ class ConversationMessageViewSet(
 
     @action(
         detail=True,
-        methods=['POST'],
+        methods=['PATCH'],
         serializer_class=ConversationThreadSerializer
     )
     def thread(self, request, pk=None):
         message = self.get_object()
         if message.reply_to:
             raise ValidationError(_('Message must be top-level'))
-        thread_participant = message.thread_participants.get(user=request.user)
+        thread_participant = message.thread_participants.filter(user=request.user).first()
+        if not thread_participant:
+            raise ValidationError(_('You are not a participant in this thread'))
         serializer = self.get_serializer(thread_participant, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
