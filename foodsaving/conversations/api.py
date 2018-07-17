@@ -34,10 +34,11 @@ class MessagePagination(CursorPagination):
     page_size = 10
     ordering = '-created_at'
 
+
 class ReverseMessagePagination(CursorPagination):
-    # TODO: create an index on 'created_at' for increased speed
     page_size = 10
     ordering = 'created_at'
+
 
 class IsConversationParticipant(BasePermission):
     message = _('You are not in this conversation')
