@@ -2,7 +2,22 @@ from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 from foodsaving.conversations import tasks, stats
-from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction
+from foodsaving.conversations.models import (
+    ConversationParticipant,
+    ConversationMessage,
+    ConversationMessageReaction,
+    ConversationThreadParticipant,
+)
+
+
+@receiver(post_save, sender=ConversationMessage)
+def create_thread_participant(sender, instance, created, **kwargs):
+    if not created:
+        return
+    message = instance
+    if message.reply_to:
+        if not message.thread_participants.filter(user=message.author).exists():
+            message.reply_to.thread_participants.create(user=message.author)
 
 
 @receiver(post_save, sender=ConversationMessage)
@@ -10,10 +25,17 @@ def mark_as_read(sender, instance, **kwargs):
     """Mark sent messages as read for the author"""
 
     message = instance
-    participant = ConversationParticipant.objects.get(
-        user=message.author,
-        conversation=message.conversation
-    )
+
+    if message.reply_to:
+        participant = ConversationThreadParticipant.objects.get(
+            user=message.author,
+            message=message.reply_to,
+        )
+    else:
+        participant = ConversationParticipant.objects.get(
+            user=message.author,
+            conversation=message.conversation
+        )
 
     # When a message is updated, the participants seen_up_to
     # member variable gets set to that updated message. Perform the below

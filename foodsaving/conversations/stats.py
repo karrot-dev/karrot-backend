@@ -7,7 +7,10 @@ from foodsaving.pickups.models import PickupDate
 def message_written(message):
     write_points([{
         'measurement': 'karrot.events',
-        'tags': tags_for_conversation(message.conversation),
+        'tags': {
+            **tags_for_conversation(message.conversation),
+            'is_thread': message.reply_to is not None,
+        },
         'fields': {'message': 1},
     }])
 

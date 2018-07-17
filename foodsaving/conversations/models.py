@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import ForeignKey, TextField, ManyToManyField, BooleanField, CharField
+from django.db.models import ForeignKey, TextField, ManyToManyField, BooleanField, CharField, QuerySet, Count, F, Q
 from django.utils import timezone
 
 from foodsaving.base.base_models import BaseModel, UpdatedAtMixin
@@ -80,10 +80,34 @@ class ConversationParticipant(BaseModel, UpdatedAtMixin):
     email_notifications = BooleanField(default=True)
 
 
+class ConversationMessageQuerySet(QuerySet):
+
+    def replies(self):
+        return self.exclude(reply_to=None)
+
+    def not_replies(self):
+        return self.filter(reply_to=None)
+
+    def with_thread_participant_info_for(self, user):
+        unread_replies_filter = Q(
+            thread_participants__user=user,
+        ) & (
+            Q(thread_participants__seen_up_to=None) | Q(replies__id__gt=F('thread_participants__seen_up_to'))
+        )
+        return self.prefetch_related('thread_participants') \
+            .annotate(
+                replies_count=Count('replies', distinct=True),
+                unread_replies_count=Count('replies', filter=unread_replies_filter, distinct=True))
+
+
 class ConversationMessage(BaseModel, UpdatedAtMixin):
     """A message in the conversation by a particular user."""
+
+    objects = ConversationMessageQuerySet.as_manager()
+
     author = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     conversation = ForeignKey(Conversation, related_name='messages', on_delete=models.CASCADE)
+    reply_to = ForeignKey('self', related_name='replies', null=True, on_delete=models.CASCADE)
 
     content = TextField()
     received_via = CharField(max_length=40, blank=True)
@@ -93,6 +117,13 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 
     def is_recent(self):
         return self.created_at >= timezone.now() - relativedelta(days=settings.MESSAGE_EDIT_DAYS)
+
+
+class ConversationThreadParticipant(BaseModel, UpdatedAtMixin):
+    user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    message = ForeignKey(ConversationMessage, related_name='thread_participants', on_delete=models.CASCADE)
+    seen_up_to = ForeignKey(ConversationMessage, null=True, on_delete=models.SET_NULL)
+    muted = BooleanField(default=False)
 
 
 class ConversationMixin(object):

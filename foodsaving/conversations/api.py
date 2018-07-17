@@ -4,6 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated, BasePermission
@@ -21,7 +22,9 @@ from foodsaving.conversations.serializers import (
     ConversationMessageReactionSerializer,
     ConversationMarkSerializer,
     ConversationEmailNotificationsSerializer,
-    EmojiField)
+    EmojiField,
+    ConversationThreadSerializer,
+)
 from foodsaving.groups.models import Group
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
@@ -138,15 +141,35 @@ class ConversationMessageViewSet(
         IsWithinUpdatePeriod,
     )
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('conversation',)
+    filter_fields = ('conversation', 'reply_to',)
     pagination_class = MessagePagination
 
     def get_queryset(self):
-        return self.queryset.filter(conversation__participants=self.request.user)
+        qs = self.queryset.filter(conversation__participants=self.request.user)
+        # TODO: see if it can move to a filter thing
+        if self.request.query_params.get('reply_to', None):
+            return qs.replies()
+        else:
+            return qs.not_replies().with_thread_participant_info_for(self.request.user)
 
     def partial_update(self, request, *args, **kwargs):
         """Update one of your messages"""
         return super().partial_update(request)
+
+    @action(
+        detail=True,
+        methods=['POST'],
+        serializer_class=ConversationThreadSerializer
+    )
+    def thread(self, request, pk=None):
+        message = self.get_object()
+        if message.reply_to:
+            raise ValidationError(_('Message must be top-level'))
+        thread_participant = message.thread_participants.get(user=request.user)
+        serializer = self.get_serializer(thread_participant, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
     @action(
         detail=True,
