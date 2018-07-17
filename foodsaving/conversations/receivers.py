@@ -16,7 +16,7 @@ def create_thread_participant(sender, instance, created, **kwargs):
         return
     message = instance
     if message.reply_to:
-        if not message.thread_participants.filter(user=message.author).exists():
+        if not message.reply_to.thread_participants.filter(user=message.author).exists():
             message.reply_to.thread_participants.create(user=message.author)
 
 

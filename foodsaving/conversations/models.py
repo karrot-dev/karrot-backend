@@ -137,6 +137,9 @@ class ConversationThreadParticipant(BaseModel, UpdatedAtMixin):
     seen_up_to = ForeignKey(ConversationMessage, null=True, on_delete=models.SET_NULL)
     muted = BooleanField(default=False)
 
+    class Meta:
+        unique_together = ['user', 'message']
+
 
 class ConversationMixin(object):
     # TODO: including this should automatically wireup a signal to create/destroy with target
