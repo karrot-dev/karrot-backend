@@ -87,6 +87,42 @@ class TestConversationsAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
+class TestConversationThreadsAPI(APITestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.user2 = UserFactory()
+        self.group = GroupFactory(members=[self.user, self.user2])
+        self.conversation = self.group.conversation
+        self.message = self.conversation.messages.create(author=self.user, content='yay')
+
+    def test_can_reply_to_message(self):
+        self.client.force_login(user=self.user)
+        self.assertFalse(self.message.thread_participants.filter(user=self.user).exists())
+        data = {'conversation': self.conversation.id, 'content': 'a nice message reply!', 'reply_to': self.message.id}
+        response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['reply_to'], self.message.id)
+        self.assertTrue(self.message.thread_participants.filter(user=self.user).exists())
+
+    def test_can_get_thread_info(self):
+        self.client.force_login(user=self.user)
+        message_reply = ConversationMessage.objects.create(
+            conversation=self.conversation,
+            author=self.user,
+            reply_to=self.message,
+            content='my reply',
+        )
+        response = self.client.get('/api/messages/', format='json')
+        item = response.data['results'][0]
+        self.assertEqual(item['reply_to'], None)
+        self.assertEqual(item['thread'], {
+            'is_participant': True,
+            'seen_up_to': message_reply.id,
+            'muted': False,
+            'message_count': 1,
+            'unread_message_count': 0,
+        })
+
 class TestConversationsSeenUpToAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
