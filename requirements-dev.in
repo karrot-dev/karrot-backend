@@ -11,3 +11,4 @@ pytest-cov
 freezegun
 logging_tree
 django-silk
+transifex-client
