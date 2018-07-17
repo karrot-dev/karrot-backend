@@ -34,6 +34,10 @@ class MessagePagination(CursorPagination):
     page_size = 10
     ordering = '-created_at'
 
+class ReverseMessagePagination(CursorPagination):
+    # TODO: create an index on 'created_at' for increased speed
+    page_size = 10
+    ordering = 'created_at'
 
 class IsConversationParticipant(BasePermission):
     message = _('You are not in this conversation')
@@ -142,6 +146,12 @@ class ConversationMessageViewSet(
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('conversation', 'thread',)
     pagination_class = MessagePagination
+
+    @property
+    def paginator(self):
+        if self.request.query_params.get('thread', None):
+            self.pagination_class = ReverseMessagePagination
+        return super().paginator
 
     def get_permissions(self):
         if self.action == 'partial_update':
