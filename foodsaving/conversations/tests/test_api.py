@@ -123,18 +123,6 @@ class TestConversationThreadsAPI(APITestCase):
             'unread_message_count': 0,
         })
 
-    def test_unread_message_count(self):
-        self.message.thread_participants.create(user=self.user2)
-        n = 4
-        [ConversationMessage.objects.create(
-            conversation=self.conversation,
-            author=self.user,
-            reply_to=self.message,
-            content='my reply',
-        ) for _ in range(n)]
-        message = ConversationMessage.objects.annotate_unread_replies_count_for(self.user2).get(pk=self.message.id)
-        self.assertEqual(message.unread_replies_count, n)
-
 
 class TestConversationsSeenUpToAPI(APITestCase):
     def setUp(self):

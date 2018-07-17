@@ -3,7 +3,8 @@ from django.db import IntegrityError
 from django.test import TestCase
 
 from foodsaving.conversations.factories import ConversationFactory
-from foodsaving.conversations.models import Conversation, ConversationMessage, ConversationMessageReaction
+from foodsaving.conversations.models import Conversation, ConversationMessage, ConversationMessageReaction, \
+    ConversationThreadParticipant
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.stores.factories import StoreFactory
@@ -61,6 +62,53 @@ class ConversationModelTests(TestCase):
         conversation = Conversation.objects.get_or_create_for_target(target)
         self.assertIsNotNone(conversation)
         self.assertEqual(target.conversation, conversation)
+
+
+class ConversationThreadModelTests(TestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.user2 = UserFactory()
+        self.group = GroupFactory(members=[self.user, self.user2])
+        self.conversation = self.group.conversation
+        self.message = self.conversation.messages.create(author=self.user, content='yay')
+
+    def test_replies_count_annotation(self):
+        self.message.thread_participants.create(user=self.user2)
+        n = 4
+        [ConversationMessage.objects.create(
+            conversation=self.conversation,
+            author=self.user,
+            reply_to=self.message,
+            content='my reply',
+        ) for _ in range(n)]
+
+        message = ConversationMessage.objects \
+            .annotate_replies_count() \
+            .get(pk=self.message.id)
+
+        self.assertEqual(message.replies_count, n)
+
+    def test_unread_replies_count_annotation(self):
+        self.message.thread_participants.create(user=self.user2)
+        n = 7
+        read_messages = 2
+        messages = [ConversationMessage.objects.create(
+            conversation=self.conversation,
+            author=self.user,
+            reply_to=self.message,
+            content='my reply',
+        ) for _ in range(n)]
+
+        # "read" some of the messages
+        ConversationThreadParticipant.objects \
+            .filter(user=self.user2, message=self.message.id)\
+            .update(seen_up_to=messages[read_messages - 1])
+
+        message = ConversationMessage.objects \
+            .annotate_unread_replies_count_for(self.user2) \
+            .get(pk=self.message.id)
+
+        self.assertEqual(message.unread_replies_count, n - read_messages)
 
 
 class TestPickupConversationsEmailNotifications(TestCase):
