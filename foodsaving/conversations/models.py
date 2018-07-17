@@ -88,16 +88,17 @@ class ConversationMessageQuerySet(QuerySet):
     def not_replies(self):
         return self.filter(reply_to=None)
 
-    def with_thread_participant_info_for(self, user):
+    def annotate_replies_count(self):
+        return self.annotate(replies_count=Count('replies', distinct=True))
+
+    def annotate_unread_replies_count_for(self, user):
         unread_replies_filter = Q(
             thread_participants__user=user,
         ) & (
             Q(thread_participants__seen_up_to=None) | Q(replies__id__gt=F('thread_participants__seen_up_to'))
         )
         return self.prefetch_related('thread_participants') \
-            .annotate(
-                replies_count=Count('replies', distinct=True),
-                unread_replies_count=Count('replies', filter=unread_replies_filter, distinct=True))
+            .annotate(unread_replies_count=Count('replies', filter=unread_replies_filter, distinct=True))
 
 
 class ConversationMessage(BaseModel, UpdatedAtMixin):
@@ -117,6 +118,17 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 
     def is_recent(self):
         return self.created_at >= timezone.now() - relativedelta(days=settings.MESSAGE_EDIT_DAYS)
+
+    @property
+    def replies_count(self):
+        if hasattr(self, '__replies_count'):
+            return self.__replies_count
+        else:
+            return self.replies.count()
+
+    @replies_count.setter
+    def replies_count(self, value):
+        self.__replies_count = value
 
 
 class ConversationThreadParticipant(BaseModel, UpdatedAtMixin):

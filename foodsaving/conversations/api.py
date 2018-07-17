@@ -131,7 +131,7 @@ class ConversationMessageViewSet(
     ConversationMessages
     """
 
-    queryset = ConversationMessage.objects.prefetch_related('reactions')
+    queryset = ConversationMessage.objects.prefetch_related('reactions').annotate_replies_count()
     serializer_class = ConversationMessageSerializer
     permission_classes = (
         IsAuthenticated,
@@ -150,7 +150,7 @@ class ConversationMessageViewSet(
         if self.request.query_params.get('reply_to', None):
             return qs.replies()
         else:
-            return qs.not_replies().with_thread_participant_info_for(self.request.user)
+            return qs.not_replies().annotate_unread_replies_count_for(self.request.user)
 
     def partial_update(self, request, *args, **kwargs):
         """Update one of your messages"""
