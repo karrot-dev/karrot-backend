@@ -124,6 +124,7 @@ class ConversationViewSet(
 class ConversationMessageViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
     PartialUpdateModelMixin,
     GenericViewSet
 ):
@@ -133,16 +134,22 @@ class ConversationMessageViewSet(
 
     queryset = ConversationMessage.objects.prefetch_related('reactions').annotate_replies_count()
     serializer_class = ConversationMessageSerializer
-    permission_classes = (
+    permission_classes = [
         IsAuthenticated,
         IsConversationParticipant,
         IsMessageConversationParticipant,
-        IsAuthorConversationMessage,
-        IsWithinUpdatePeriod,
-    )
+    ]
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('conversation', 'reply_to',)
     pagination_class = MessagePagination
+
+    def get_permissions(self):
+        if self.action == 'partial_update':
+            self.permission_classes.extend([
+                IsAuthorConversationMessage,
+                IsWithinUpdatePeriod,
+            ])
+        return super().get_permissions()
 
     def get_queryset(self):
         qs = self.queryset.filter(conversation__participants=self.request.user)

@@ -43,6 +43,13 @@ class TestConversationsAPI(APITestCase):
         self.assertEqual(len(response.data['results']), 1)
         self.assertEqual(response.data['results'][0]['content'], 'hello')
 
+    def test_get_message(self):
+        self.client.force_login(user=self.participant1)
+        message_id = self.conversation1.messages.first().id
+        response = self.client.get('/api/messages/{}/'.format(message_id), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['id'], message_id)
+
     def test_can_get_messages_for_all_conversations(self):
         self.client.force_login(user=self.participant1)
         response = self.client.get('/api/messages/', format='json')
@@ -141,19 +148,6 @@ class TestConversationThreadsAPI(APITestCase):
             'message_count': 1,
             'unread_message_count': 0,
         })
-
-    def test_cannot_reply_to_a_reply(self):
-        self.client.force_login(user=self.user)
-        data = {'conversation': self.conversation.id, 'content': 'a nice message reply!', 'reply_to': self.reply.id}
-        response = self.client.post('/api/messages/', data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_must_provide_correct_conversation_id(self):
-        another_conversation = ConversationFactory()
-        self.client.force_login(user=self.user)
-        data = {'conversation': another_conversation.id, 'content': 'a nice message reply!', 'reply_to': self.message.id}
-        response = self.client.post('/api/messages/', data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class TestConversationsSeenUpToAPI(APITestCase):
