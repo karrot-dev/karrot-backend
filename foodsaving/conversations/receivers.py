@@ -15,9 +15,21 @@ def create_thread_participant(sender, instance, created, **kwargs):
     if not created:
         return
     message = instance
-    if message.reply_to:
-        if not message.reply_to.thread_participants.filter(user=message.author).exists():
-            message.reply_to.thread_participants.create(user=message.author)
+    thread = message.thread
+    if thread:
+        if not thread.thread_id:
+            # initialize the thread message
+
+            # ensure it references itself (id=thread_id)
+            thread.thread_id = message.thread_id
+            thread.save()
+
+            # add the author of the thread message as a participant
+            thread.participants.create(user=thread.author)
+
+        if thread.author is not message.author:
+            if not thread.participants.filter(user=message.author).exists():
+                thread.participants.create(user=message.author)
 
 
 @receiver(post_save, sender=ConversationMessage)
@@ -26,10 +38,10 @@ def mark_as_read(sender, instance, **kwargs):
 
     message = instance
 
-    if message.reply_to:
+    if message.thread:
         participant = ConversationThreadParticipant.objects.get(
             user=message.author,
-            message=message.reply_to,
+            thread=message.thread,
         )
     else:
         participant = ConversationParticipant.objects.get(

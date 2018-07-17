@@ -48,8 +48,8 @@ def make_conversation_message_broadcast(message, **kwargs):
             'received_via': '',
             'reactions': [],
             'is_editable': False,
-            'reply_to': None,
-            'thread': {'is_participant': False, 'message_count': 0},
+            'thread': None,
+            'thread_meta': None,
         }
     }
     response['payload'].update(kwargs)

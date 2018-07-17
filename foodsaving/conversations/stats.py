@@ -9,7 +9,7 @@ def message_written(message):
         'measurement': 'karrot.events',
         'tags': {
             **tags_for_conversation(message.conversation),
-            'is_thread': message.reply_to is not None,
+            'is_reply': message.is_thread_reply(),
         },
         'fields': {'message': 1},
     }])

@@ -100,34 +100,49 @@ class TestConversationThreadsAPI(APITestCase):
         self.user2 = UserFactory()
         self.group = GroupFactory(members=[self.user, self.user2])
         self.conversation = self.group.conversation
-        self.message = self.conversation.messages.create(author=self.user, content='yay')
+        self.thread = self.conversation.messages.create(author=self.user, content='yay')
         self.reply = ConversationMessage.objects.create(
             conversation=self.conversation,
             author=self.user,
-            reply_to=self.message,
+            thread=self.thread,
             content='default reply',
         )
 
-    def test_reply_to_message(self):
+    def test_thread_reply(self):
         self.client.force_login(user=self.user)
-        data = {'conversation': self.conversation.id, 'content': 'a nice message reply!', 'reply_to': self.message.id}
+        data = {'conversation': self.conversation.id, 'content': 'a nice message reply!', 'thread': self.thread.id}
         response = self.client.post('/api/messages/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['reply_to'], self.message.id)
+        self.assertEqual(response.data['thread'], self.thread.id)
 
-    def test_reply_adds_thread_participant(self):
+    def test_returns_thread_and_replies(self):
+        self.client.force_login(user=self.user)
+        another_thread = self.conversation.messages.create(author=self.user, content='my own thread')
+        n = 5
+        [ConversationMessage.objects.create(
+            conversation=self.conversation,
+            author=self.user,
+            thread=another_thread,
+            content='default reply',
+        ) for _ in range(n)]
+        response = self.client.get('/api/messages/?thread={}'.format(another_thread.id), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), n + 1)
+
+    def test_reply_adds_participant(self):
         self.client.force_login(user=self.user2)
-        self.assertFalse(self.message.thread_participants.filter(user=self.user2).exists())
-        data = {'conversation': self.conversation.id, 'content': 'a nice message reply!', 'reply_to': self.message.id}
-        self.client.post('/api/messages/', data, format='json')
-        self.assertTrue(self.message.thread_participants.filter(user=self.user2).exists())
+        self.assertFalse(self.thread.participants.filter(user=self.user2).exists())
+        data = {'conversation': self.conversation.id, 'content': 'a nice message reply!', 'thread': self.thread.id}
+        response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(self.thread.participants.filter(user=self.user2).exists())
 
     def test_can_mute_thread(self):
         self.client.force_login(user=self.user)
-        response = self.client.patch('/api/messages/{}/thread/'.format(self.message.id), {'muted': True}, format='json')
+        response = self.client.patch('/api/messages/{}/thread/'.format(self.thread.id), {'muted': True}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        thread_participant = self.message.thread_participants.get(user=self.user)
-        self.assertEqual(thread_participant.muted, True)
+        participant = self.thread.participants.get(user=self.user)
+        self.assertEqual(participant.muted, True)
 
     def test_cannot_mute_thread_with_no_replies(self):
         self.client.force_login(user=self.user)
@@ -140,13 +155,13 @@ class TestConversationThreadsAPI(APITestCase):
         self.client.force_login(user=self.user)
         response = self.client.get('/api/messages/', format='json')
         item = response.data['results'][0]
-        self.assertEqual(item['reply_to'], None)
-        self.assertEqual(item['thread'], {
+        self.assertEqual(item['thread'], self.thread.id)
+        self.assertEqual(item['thread_meta'], {
             'is_participant': True,
+            'reply_count': 1,
             'seen_up_to': self.reply.id,
             'muted': False,
-            'message_count': 1,
-            'unread_message_count': 0,
+            'unread_reply_count': 0,
         })
 
 

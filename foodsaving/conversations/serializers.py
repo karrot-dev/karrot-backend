@@ -138,27 +138,27 @@ class ConversationThreadSerializer(serializers.ModelSerializer):
         model = ConversationThreadParticipant
         fields = [
             'is_participant',
-            'message_count',
+            'reply_count',
             'seen_up_to',
             'muted',
-            'unread_message_count',
+            'unread_reply_count',
         ]
 
     is_participant = serializers.SerializerMethodField()
-    message_count = serializers.SerializerMethodField()
-    unread_message_count = serializers.SerializerMethodField()
+    reply_count = serializers.SerializerMethodField()
+    unread_reply_count = serializers.SerializerMethodField()
 
-    def get_is_participant(self, thread_participant):
+    def get_is_participant(self, participant):
         return True
 
-    def get_message_count(self, thread_participant):
-        return thread_participant.message.replies_count
+    def get_reply_count(self, participant):
+        return participant.thread.replies_count
 
-    def get_unread_message_count(self, thread_participant):
-        return thread_participant.message.unread_replies_count
+    def get_unread_reply_count(self, participant):
+        return participant.thread.unread_replies_count
 
     def validate_seen_up_to(self, seen_up_to):
-        if not self.instance.message.replies.filter(id=seen_up_to.id).exists():
+        if not self.instance.thread.thread_messages.filter(id=seen_up_to.id).exists():
             raise serializers.ValidationError('Must refer to a message in the thread')
         return seen_up_to
 
@@ -184,20 +184,20 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
             'reactions',
             'received_via',
             'is_editable',
-            'reply_to',  # TODO: investigate making this only writable on create
-            'thread',
+            'thread',  # ideally would only be writable on create
+            'thread_meta',
         ]
-        read_only_fields = ('author', 'id', 'created_at', 'received_via', 'thread',)
+        read_only_fields = ('author', 'id', 'created_at', 'received_via', 'thread_meta',)
 
-    thread = serializers.SerializerMethodField()
+    thread_meta = serializers.SerializerMethodField()
 
-    def get_thread(self, message):
-        if message.reply_to:
+    def get_thread_meta(self, message):
+        if not message.is_first_in_thread():
             return None
         user = self.context['request'].user
-        thread_participant = message.thread_participants.filter(user=user).first()
-        if thread_participant:
-            return ConversationThreadSerializer(thread_participant).data
+        participant = message.participants.filter(user=user).first()
+        if participant:
+            return ConversationThreadSerializer(participant).data
         return ConversationThreadNonParticipantSerializer(message).data
 
     reactions = ConversationMessageReactionSerializer(many=True, read_only=True)
@@ -212,17 +212,21 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
         return conversation
 
     def validate(self, data):
-        if 'reply_to' in data:
+        if 'thread' in data:
+            thread = data['thread']
+            conversation = data['conversation']
 
+            # only some types of messages can have threads
             if not isinstance(data['conversation'].target, Group):
                 raise serializers.ValidationError(_('You can only reply to Group messages'))
 
-            if not ConversationMessage.objects.filter(
-                pk=data['reply_to'].id,
-                conversation=data['conversation'],
-                reply_to=None
-            ).exists():
-                raise serializers.ValidationError(_('Invalid reply target'))
+            # the thread must be in the correct conversation
+            if thread.conversation.id != conversation.id:
+                raise serializers.ValidationError(_('Thread is not in the same conversation'))
+
+            # you cannot reply to replies
+            if not thread.is_first_in_thread():
+                raise serializers.ValidationError(_('You cannot reply to replies'))
 
         return data
 

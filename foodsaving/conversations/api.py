@@ -140,7 +140,7 @@ class ConversationMessageViewSet(
         IsMessageConversationParticipant,
     ]
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('conversation', 'reply_to',)
+    filter_fields = ('conversation', 'thread',)
     pagination_class = MessagePagination
 
     def get_permissions(self):
@@ -152,12 +152,14 @@ class ConversationMessageViewSet(
         return super().get_permissions()
 
     def get_queryset(self):
-        qs = self.queryset.filter(conversation__participants=self.request.user)
-        # TODO: see if it can move to a filter thing
-        if self.request.query_params.get('reply_to', None):
-            return qs.replies()
+        qs = self.queryset \
+            .filter(conversation__participants=self.request.user) \
+            .annotate_unread_replies_count_for(self.request.user)
+
+        if self.request.query_params.get('thread', None):
+            return qs.only_threads_and_replies()
         else:
-            return qs.not_replies().annotate_unread_replies_count_for(self.request.user)
+            return qs.exclude_replies()
 
     def partial_update(self, request, *args, **kwargs):
         """Update one of your messages"""
@@ -170,12 +172,12 @@ class ConversationMessageViewSet(
     )
     def thread(self, request, pk=None):
         message = self.get_object()
-        if message.reply_to:
-            raise ValidationError(_('Message must be top-level'))
-        thread_participant = message.thread_participants.filter(user=request.user).first()
-        if not thread_participant:
+        if not message.is_first_in_thread():
+            raise ValidationError(_('Must be first in thread'))
+        participant = message.participants.filter(user=request.user).first()
+        if not participant:
             raise ValidationError(_('You are not a participant in this thread'))
-        serializer = self.get_serializer(thread_participant, data=request.data, partial=True)
+        serializer = self.get_serializer(participant, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)

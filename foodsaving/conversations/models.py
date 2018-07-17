@@ -82,23 +82,29 @@ class ConversationParticipant(BaseModel, UpdatedAtMixin):
 
 class ConversationMessageQuerySet(QuerySet):
 
-    def replies(self):
-        return self.exclude(reply_to=None)
+    def exclude_replies(self):
+        return self.filter(Q(thread_id=None) | Q(id=F('thread_id')))
 
-    def not_replies(self):
-        return self.filter(reply_to=None)
+    def only_threads_and_replies(self):
+        return self.exclude(thread_id=None)
+
+    def only_replies(self):
+        return self.filter(~Q(thread_id=None) & ~Q(id=F('thread_id')))
 
     def annotate_replies_count(self):
-        return self.annotate(replies_count=Count('replies', distinct=True))
+        return self.annotate(replies_count=Count('thread_messages', filter=~Q(id=F('thread_id')), distinct=True))
 
     def annotate_unread_replies_count_for(self, user):
         unread_replies_filter = Q(
-            thread_participants__user=user,
+            participants__user=user,
+        ) & ~Q(
+            thread_messages__id=F('thread_id')  # replies have id != thread_id
         ) & (
-            Q(thread_participants__seen_up_to=None) | Q(replies__id__gt=F('thread_participants__seen_up_to'))
+            Q(participants__seen_up_to=None) |
+            Q(thread_messages__id__gt=F('participants__seen_up_to'))
         )
-        return self.prefetch_related('thread_participants') \
-            .annotate(unread_replies_count=Count('replies', filter=unread_replies_filter, distinct=True))
+        return self.prefetch_related('participants') \
+            .annotate(unread_replies_count=Count('thread_messages', filter=unread_replies_filter, distinct=True))
 
 
 class ConversationMessage(BaseModel, UpdatedAtMixin):
@@ -108,7 +114,7 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 
     author = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     conversation = ForeignKey(Conversation, related_name='messages', on_delete=models.CASCADE)
-    reply_to = ForeignKey('self', related_name='replies', null=True, on_delete=models.CASCADE)
+    thread = ForeignKey('self', related_name='thread_messages', null=True, on_delete=models.CASCADE)
 
     content = TextField()
     received_via = CharField(max_length=40, blank=True)
@@ -119,12 +125,18 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
     def is_recent(self):
         return self.created_at >= timezone.now() - relativedelta(days=settings.MESSAGE_EDIT_DAYS)
 
+    def is_first_in_thread(self):
+        return self.id == self.thread_id
+
+    def is_thread_reply(self):
+        return self.thread_id and self.id is not self.thread_id
+
     @property
     def replies_count(self):
         if hasattr(self, '__replies_count'):
             return self.__replies_count
         else:
-            return self.replies.count()
+            return self.thread_messages.only_replies().count()
 
     @replies_count.setter
     def replies_count(self, value):
@@ -133,12 +145,12 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 
 class ConversationThreadParticipant(BaseModel, UpdatedAtMixin):
     user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    message = ForeignKey(ConversationMessage, related_name='thread_participants', on_delete=models.CASCADE)
+    thread = ForeignKey(ConversationMessage, related_name='participants', on_delete=models.CASCADE)
     seen_up_to = ForeignKey(ConversationMessage, null=True, on_delete=models.SET_NULL)
     muted = BooleanField(default=False)
 
     class Meta:
-        unique_together = ['user', 'message']
+        unique_together = ['user', 'thread']
 
 
 class ConversationMixin(object):

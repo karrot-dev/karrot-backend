@@ -11,9 +11,9 @@ from foodsaving.users.models import User
 @db_task()
 def notify_participants(message):
 
-    if message.reply_to:
+    if message.thread:
         participants_to_notify = ConversationThreadParticipant.objects.filter(
-            message=message.reply_to,
+            thread=message.thread,
             muted=False,
         )
     else:
