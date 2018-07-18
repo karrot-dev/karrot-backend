@@ -103,8 +103,7 @@ class ConversationMessageQuerySet(QuerySet):
             Q(participants__seen_up_to=None) |
             Q(thread_messages__id__gt=F('participants__seen_up_to'))
         )
-        return self.prefetch_related('participants') \
-            .annotate(unread_replies_count=Count('thread_messages', filter=unread_replies_filter, distinct=True))
+        return self.annotate(unread_replies_count=Count('thread_messages', filter=unread_replies_filter, distinct=True))
 
 
 class ConversationMessage(BaseModel, UpdatedAtMixin):

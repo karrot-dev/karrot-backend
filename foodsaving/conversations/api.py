@@ -137,7 +137,11 @@ class ConversationMessageViewSet(
     ConversationMessages
     """
 
-    queryset = ConversationMessage.objects.prefetch_related('reactions').annotate_replies_count()
+    queryset = ConversationMessage.objects \
+        .prefetch_related('reactions') \
+        .prefetch_related('participants') \
+        .annotate_replies_count()
+
     serializer_class = ConversationMessageSerializer
     permission_classes = [
         IsAuthenticated,

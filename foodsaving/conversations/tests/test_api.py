@@ -173,6 +173,7 @@ class TestConversationThreadsAPI(APITestCase):
         self.assertEqual(item['thread'], self.thread.id)
         self.assertEqual(item['thread_meta'], {
             'is_participant': True,
+            'participants': [self.user.id],
             'reply_count': 1,
             'seen_up_to': reply.id,
             'muted': False,
@@ -187,6 +188,7 @@ class TestConversationThreadsAPI(APITestCase):
         self.assertEqual(item['thread'], self.thread.id)
         self.assertEqual(item['thread_meta'], {
             'is_participant': False,
+            'participants': [self.user.id],
             'reply_count': 1,
         })
 

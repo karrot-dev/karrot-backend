@@ -120,17 +120,22 @@ class ConversationThreadNonParticipantSerializer(serializers.ModelSerializer):
         model = ConversationMessage
         fields = [
             'is_participant',
+            'participants',
             'reply_count',
         ]
 
     is_participant = serializers.SerializerMethodField()
+    participants = serializers.SerializerMethodField()
     reply_count = serializers.SerializerMethodField()
 
-    def get_is_participant(self, message):
+    def get_is_participant(self, thread):
         return False
 
-    def get_reply_count(self, message):
-        return message.replies_count
+    def get_participants(self, thread):
+        return [participants.user_id for participants in thread.participants.all()]
+
+    def get_reply_count(self, thread):
+        return thread.replies_count
 
 
 class ConversationThreadSerializer(serializers.ModelSerializer):
@@ -138,6 +143,7 @@ class ConversationThreadSerializer(serializers.ModelSerializer):
         model = ConversationThreadParticipant
         fields = [
             'is_participant',
+            'participants',
             'reply_count',
             'seen_up_to',
             'muted',
@@ -145,11 +151,15 @@ class ConversationThreadSerializer(serializers.ModelSerializer):
         ]
 
     is_participant = serializers.SerializerMethodField()
+    participants = serializers.SerializerMethodField()
     reply_count = serializers.SerializerMethodField()
     unread_reply_count = serializers.SerializerMethodField()
 
     def get_is_participant(self, participant):
         return True
+
+    def get_participants(self, participant):
+        return [participants.user_id for participants in participant.thread.participants.all()]
 
     def get_reply_count(self, participant):
         return participant.thread.replies_count
