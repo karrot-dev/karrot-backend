@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-07-15 11:54+0000\n"
+"POT-Creation-Date: 2018-07-18 09:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -101,20 +101,28 @@ msgid ""
 "%(site_name)s</a>, or <a href=\"%(mute_url)s\">mute the conversation</a>."
 msgstr ""
 
-#: foodsaving/conversations/api.py:36 foodsaving/conversations/api.py:55
-#: foodsaving/conversations/serializers.py:32
-#: foodsaving/conversations/serializers.py:136
+#: foodsaving/conversations/api.py:44 foodsaving/conversations/api.py:63
+#: foodsaving/conversations/serializers.py:38
+#: foodsaving/conversations/serializers.py:211
 msgid "You are not in this conversation"
 msgstr ""
 
-#: foodsaving/conversations/api.py:64
+#: foodsaving/conversations/api.py:72
 msgid "You are not the author of this message"
 msgstr ""
 
-#: foodsaving/conversations/api.py:71
+#: foodsaving/conversations/api.py:79
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
+msgstr ""
+
+#: foodsaving/conversations/api.py:187
+msgid "Must be first in thread"
+msgstr ""
+
+#: foodsaving/conversations/api.py:190
+msgid "You are not a participant in this thread"
 msgstr ""
 
 #: foodsaving/conversations/emails.py:89 foodsaving/conversations/emails.py:92
@@ -125,6 +133,18 @@ msgstr ""
 #: foodsaving/conversations/emails.py:148
 #, python-format
 msgid "New message in %(user_name)s's application"
+msgstr ""
+
+#: foodsaving/conversations/serializers.py:221
+msgid "Thread is not in the same conversation"
+msgstr ""
+
+#: foodsaving/conversations/serializers.py:225
+msgid "You can only reply to Group messages"
+msgstr ""
+
+#: foodsaving/conversations/serializers.py:229
+msgid "You cannot reply to replies"
 msgstr ""
 
 #: foodsaving/conversations/templates/conversation_message_notification.html.jinja2:95
@@ -293,6 +313,32 @@ msgstr ""
 #: foodsaving/groups/templates/user_inactive_in_group.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s is missing you!"
+msgstr ""
+
+#: foodsaving/groups/templates/user_removed_from_group.html.jinja2:109
+msgid "Hey,"
+msgstr ""
+
+#: foodsaving/groups/templates/user_removed_from_group.html.jinja2:112
+#, python-format
+msgid ""
+"It has been over %(inactivity_deletion_days)s days since you visited "
+"\"%(group_name)s\"."
+msgstr ""
+
+#: foodsaving/groups/templates/user_removed_from_group.html.jinja2:115
+msgid ""
+"For that reason, we have removed your account from that particular group. "
+msgstr ""
+
+#: foodsaving/groups/templates/user_removed_from_group.html.jinja2:118
+msgid ""
+"You're still on the site though, just click on the button below to visit!"
+msgstr ""
+
+#: foodsaving/groups/templates/user_removed_from_group.html.jinja2:119
+#, python-format
+msgid "Visit %(site_name)s"
 msgstr ""
 
 #: foodsaving/invitations/serializers.py:20
@@ -536,6 +582,8 @@ msgid "Please click the following link to confirm your email:"
 msgstr ""
 
 #: foodsaving/users/templates/changemail_request.html.jinja2:116
+#: foodsaving/users/templates/mailverification.html.jinja2:4
+#: foodsaving/users/templates/mailverification.html.jinja2:109
 #: foodsaving/users/templates/signup.html.jinja2:113
 msgid "Verify your email address"
 msgstr ""
@@ -566,6 +614,22 @@ msgstr ""
 
 #: foodsaving/users/templates/changemail_success.subject.jinja2:1
 msgid "Your email address changed!"
+msgstr ""
+
+#: foodsaving/users/templates/mailverification.html.jinja2:108
+#, python-format
+msgid "Thank you for signing up to %(site_name)s!"
+msgstr ""
+
+#: foodsaving/users/templates/mailverification.html.jinja2:108
+#, python-format
+msgid "Welcome to %(site_name)s, %(user_display_name)s!"
+msgstr ""
+
+#: foodsaving/users/templates/mailverification.html.jinja2:109
+msgid ""
+"After we get started, please confirm your email address by clicking the link "
+"below:"
 msgstr ""
 
 #: foodsaving/users/templates/passwordreset_request.html.jinja2:4
