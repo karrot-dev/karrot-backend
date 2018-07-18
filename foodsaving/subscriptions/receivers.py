@@ -46,7 +46,7 @@ channel_layer = get_channel_layer()
 channel_layer_send_sync = async_to_sync(channel_layer.send)
 
 
-def send_in_channel(channel, topic, payload):
+async def send_in_channel(channel, topic, payload):
     message = {
         'type': 'message.send',
         'text': json.dumps({
@@ -55,7 +55,8 @@ def send_in_channel(channel, topic, payload):
         }),
     }
     try:
-        channel_layer_send_sync(channel, message)
+        # channel_layer_send_sync(channel, message)
+        await channel_layer.send(channel, message)
     except ChannelFull:
         # maybe this means the subscription is invalid now?
         sentry_client.captureException()

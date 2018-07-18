@@ -4,7 +4,6 @@ import pathlib
 from shutil import copyfile
 
 import requests_mock
-from channels.test import ChannelTestCase, WSClient
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings

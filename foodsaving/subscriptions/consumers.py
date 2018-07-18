@@ -53,25 +53,8 @@ class WebsocketConsumer(AsyncJsonWebsocketConsumer):
             user = self.scope['user']
             if not user.is_anonymous:
                 await self.create_subscription(user)
-                #ChannelSubscription.objects.create(user=user, reply_channel=self.channel_name)
 
         await self.accept()
-
-    @database_sync_to_async
-    def create_subscription(self, user):
-        return ChannelSubscription.objects.create(user=user, reply_channel=self.channel_name)
-
-    @database_sync_to_async
-    def fetch_subscriptions(self, user):
-        return ChannelSubscription.objects.filter(user=user, reply_channel=self.channel_name)
-
-    @database_sync_to_async
-    def update_subscriptions(self, subscriptions, update_attrs):
-        return subscriptions.update(**update_attrs)
-
-    @database_sync_to_async
-    def delete_subscriptions(self, user):
-        return ChannelSubscription.objects.filter(user=user, reply_channel=self.channel_name).delete()
 
     async def message_send(self, content, **kwargs):
         if 'text' not in content:
@@ -90,7 +73,6 @@ class WebsocketConsumer(AsyncJsonWebsocketConsumer):
                     update_attrs['away_at'] = timezone.now()
                 elif message_type == 'back':
                     update_attrs['away_at'] = None
-                #subscriptions.update(**update_attrs)
                 await self.update_subscriptions(subscriptions, update_attrs)
 
     async def disconnect(self, close_code):
@@ -98,8 +80,23 @@ class WebsocketConsumer(AsyncJsonWebsocketConsumer):
         if 'user' in self.scope:
             user = self.scope['user']
             if not user.is_anonymous:
-                #ChannelSubscription.objects.filter(user=user, reply_channel=self.channel_name).delete()
                 await self.delete_subscriptions(self.scope['user'])
+
+    @database_sync_to_async
+    def create_subscription(self, user):
+        return ChannelSubscription.objects.create(user=user, reply_channel=self.channel_name)
+
+    @database_sync_to_async
+    def fetch_subscriptions(self, user):
+        return ChannelSubscription.objects.filter(user=user, reply_channel=self.channel_name)
+
+    @database_sync_to_async
+    def update_subscriptions(self, subscriptions, update_attrs):
+        return subscriptions.update(**update_attrs)
+
+    @database_sync_to_async
+    def delete_subscriptions(self, user):
+        return ChannelSubscription.objects.filter(user=user, reply_channel=self.channel_name).delete()
 
 
 class WebsocketConsumerSync(JsonWebsocketConsumer):
