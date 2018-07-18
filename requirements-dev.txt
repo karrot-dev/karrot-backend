@@ -5,6 +5,7 @@
 #    pip-compile --output-file requirements-dev.txt requirements-dev.in
 #
 apipkg==1.5               # via execnet
+asynctest==0.12.2
 atomicwrites==1.1.5       # via pytest
 attrs==18.1.0             # via pytest
 autoflake==1.2
@@ -26,7 +27,7 @@ idna==2.7                 # via requests
 ipython-genutils==0.2.0   # via traitlets
 ipython==6.4.0
 jedi==0.12.1              # via ipython
-jinja2==2.10              # via django-silk
+jinja2==2.10              # via django-silk, jinja2
 logging-tree==1.7
 markupsafe==1.0           # via jinja2
 mccabe==0.6.1             # via flake8

@@ -1,7 +1,9 @@
 import json
 from collections import namedtuple
 
-from channels import Channel
+from asgiref.sync import async_to_sync
+from channels.exceptions import ChannelFull
+from channels.layers import get_channel_layer
 from django.conf import settings
 from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete, m2m_changed, post_delete
@@ -29,6 +31,8 @@ from foodsaving.users.serializers import UserSerializer
 from foodsaving.utils import frontend_urls
 from foodsaving.utils.frontend_urls import logo_url
 
+from raven.contrib.django.raven_compat.models import client as sentry_client
+
 MockRequest = namedtuple('Request', ['user'])
 
 
@@ -38,14 +42,28 @@ class AbsoluteURIBuildingRequest:
         return settings.HOSTNAME + path
 
 
+channel_layer = get_channel_layer()
+channel_layer_send_sync = async_to_sync(channel_layer.send)
+
+
 def send_in_channel(channel, topic, payload):
-    Channel(channel).send({
+    message = {
+        'type': 'message.send',
         'text': json.dumps({
             'topic': topic,
-            'payload': payload
-        })
-    })
-    stats.pushed_via_websocket(topic)
+            'payload': payload,
+        }),
+    }
+    try:
+        channel_layer_send_sync(channel, message)
+    except ChannelFull:
+        # maybe this means the subscription is invalid now?
+        sentry_client.captureException()
+
+    #event_loop.create_task(channel_layer.send(channel, message))
+
+    #await channel_layer.send(channel, message)
+    #stats.pushed_via_websocket(topic)
 
 
 @receiver(post_save, sender=ConversationMessage)

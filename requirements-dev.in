@@ -12,3 +12,4 @@ freezegun
 logging_tree
 django-silk
 transifex-client
+asynctest

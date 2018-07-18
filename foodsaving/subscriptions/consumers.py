@@ -1,7 +1,8 @@
 from base64 import b64decode
+from channels.db import database_sync_to_async
 from urllib.parse import unquote
 
-from channels.generic.websockets import JsonWebsocketConsumer
+from channels.generic.websocket import JsonWebsocketConsumer, AsyncJsonWebsocketConsumer
 from django.utils import timezone
 from rest_framework.authentication import TokenAuthentication
 
@@ -10,9 +11,9 @@ from foodsaving.subscriptions.models import ChannelSubscription
 token_auth = TokenAuthentication()
 
 
-def check_for_auth_token_header(message):
+def get_auth_token_from_headers(headers):
     prefix = 'karrot.token.value.'
-    for header, value in message['headers']:
+    for header, value in headers:
         if header == b'sec-websocket-protocol':
             protocols = [x.strip() for x in unquote(value.decode('ascii')).split(",")]
             for protocol in protocols:
@@ -21,48 +22,119 @@ def check_for_auth_token_header(message):
                     if len(value) % 4:
                         # not a multiple of 4, add padding:
                         value += '=' * (4 - len(value) % 4)
-                    token = b64decode(value).decode('ascii')
-                    message.channel_session['auth_token'] = token
+                    return b64decode(value).decode('ascii')
+    return None
 
 
-def check_for_token_user(message):
-    if not message.user or message.user.is_anonymous:
-        auth_token = message.channel_session.get('auth_token', None)
-        if auth_token:
-            user, _ = token_auth.authenticate_credentials(auth_token)
-            if user:
-                message.user = user
+class TokenAuthMiddleware:
+    """
+    Middleware which populates scope["user"] from a auth token provided as websocket protocol header
+    Used by the cordova app
+    """
+
+    def __init__(self, inner):
+        self.inner = inner
+
+    def __call__(self, scope):
+        if 'user' not in scope:
+            token = get_auth_token_from_headers(scope.get('headers', []))
+            if token:
+                user, _ = token_auth.authenticate_credentials(token)
+                if user:
+                    scope['user'] = user
+        return self.inner(scope)
 
 
-class Consumer(JsonWebsocketConsumer):
-    http_user = True
+class WebsocketConsumer(AsyncJsonWebsocketConsumer):
 
-    def connect(self, message, **kwargs):
+    async def connect(self):
         """The user has connected! Register their channel subscription."""
-        check_for_auth_token_header(message)
-        check_for_token_user(message)
-        user = message.user
-        if not user.is_anonymous:
-            ChannelSubscription.objects.create(user=user, reply_channel=message.reply_channel)
-        message.reply_channel.send({"accept": True})
+        if 'user' in self.scope:
+            user = self.scope['user']
+            if not user.is_anonymous:
+                await self.create_subscription(user)
+                #ChannelSubscription.objects.create(user=user, reply_channel=self.channel_name)
 
-    def receive(self, content, **kwargs):
+        await self.accept()
+
+    @database_sync_to_async
+    def create_subscription(self, user):
+        return ChannelSubscription.objects.create(user=user, reply_channel=self.channel_name)
+
+    @database_sync_to_async
+    def fetch_subscriptions(self, user):
+        return ChannelSubscription.objects.filter(user=user, reply_channel=self.channel_name)
+
+    @database_sync_to_async
+    def update_subscriptions(self, subscriptions, update_attrs):
+        return subscriptions.update(**update_attrs)
+
+    @database_sync_to_async
+    def delete_subscriptions(self, user):
+        return ChannelSubscription.objects.filter(user=user, reply_channel=self.channel_name).delete()
+
+    async def message_send(self, content, **kwargs):
+        if 'text' not in content:
+            raise Exception('you must set text_data on the content')
+        await self.send(content['text'])
+
+    async def receive_json(self, content, **kwargs):
         """They sent us a websocket message!"""
-        check_for_token_user(self.message)
-        user = self.message.user
-        if not user.is_anonymous:
-            reply_channel = self.message.reply_channel.name
-            subscriptions = ChannelSubscription.objects.filter(user=user, reply_channel=reply_channel)
-            update_attrs = {'lastseen_at': timezone.now()}
-            message_type = content.get('type', None)
-            if message_type == 'away':
-                update_attrs['away_at'] = timezone.now()
-            elif message_type == 'back':
-                update_attrs['away_at'] = None
-            subscriptions.update(**update_attrs)
+        if 'user' in self.scope:
+            user = self.scope['user']
+            if not user.is_anonymous:
+                subscriptions = await self.fetch_subscriptions(self.scope['user'])
+                update_attrs = {'lastseen_at': timezone.now()}
+                message_type = content.get('type', None)
+                if message_type == 'away':
+                    update_attrs['away_at'] = timezone.now()
+                elif message_type == 'back':
+                    update_attrs['away_at'] = None
+                #subscriptions.update(**update_attrs)
+                await self.update_subscriptions(subscriptions, update_attrs)
 
-    def disconnect(self, message, **kwargs):
+    async def disconnect(self, close_code):
         """The user has disconnected so we remove all their ChannelSubscriptions"""
-        user = message.user
-        if not user.is_anonymous:
-            ChannelSubscription.objects.filter(user=user, reply_channel=message.reply_channel).delete()
+        if 'user' in self.scope:
+            user = self.scope['user']
+            if not user.is_anonymous:
+                #ChannelSubscription.objects.filter(user=user, reply_channel=self.channel_name).delete()
+                await self.delete_subscriptions(self.scope['user'])
+
+
+class WebsocketConsumerSync(JsonWebsocketConsumer):
+
+    def connect(self):
+        """The user has connected! Register their channel subscription."""
+        if 'user' in self.scope:
+            user = self.scope['user']
+            if not user.is_anonymous:
+                ChannelSubscription.objects.create(user=user, reply_channel=self.channel_name)
+
+        self.accept()
+
+    def message_send(self, content, **kwargs):
+        if 'text' not in content:
+            raise Exception('you must set text_data on the content')
+        self.send(content['text'])
+
+    def receive_json(self, content, **kwargs):
+        """They sent us a websocket message!"""
+        if 'user' in self.scope:
+            user = self.scope['user']
+            if not user.is_anonymous:
+                subscriptions = ChannelSubscription.objects.filter(user=user, reply_channel=self.channel_name)
+                update_attrs = {'lastseen_at': timezone.now()}
+                message_type = content.get('type', None)
+                if message_type == 'away':
+                    update_attrs['away_at'] = timezone.now()
+                elif message_type == 'back':
+                    update_attrs['away_at'] = None
+                subscriptions.update(**update_attrs)
+
+    def disconnect(self, close_code):
+        """The user has disconnected so we remove all their ChannelSubscriptions"""
+        if 'user' in self.scope:
+            user = self.scope['user']
+            if not user.is_anonymous:
+                ChannelSubscription.objects.filter(user=user, reply_channel=self.channel_name).delete()
