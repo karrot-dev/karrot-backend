@@ -68,6 +68,18 @@ def send_messages(sender, instance, created, **kwargs):
         payload = ConversationMessageSerializer(message, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
+        if message.thread:
+            thread = ConversationMessage.objects\
+                .annotate_unread_replies_count_for(subscription.user)\
+                .get(id=message.thread.id)
+
+            payload = ConversationMessageSerializer(
+                thread,
+                context={'request': MockRequest(user=subscription.user)}
+            ).data
+
+            send_in_channel(subscription.reply_channel, topic, payload)
+
     # Send push notifications when a message is created, but not when it is modified
     if created:
         subscriptions = PushSubscription.objects.filter(
