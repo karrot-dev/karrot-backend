@@ -62,3 +62,4 @@ transifex-client==0.13.4
 unidecode==1.0.22         # via python-slugify
 urllib3==1.23             # via requests, transifex-client
 wcwidth==0.1.7            # via prompt-toolkit
+yapf==0.22.0
