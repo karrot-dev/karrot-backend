@@ -16,20 +16,16 @@ def create_thread_participant(sender, instance, created, **kwargs):
         return
     message = instance
     thread = message.thread
+
     if thread:
         if not thread.thread_id:
-            # initialize the thread message
-
-            # ensure it references itself (id=thread_id)
-            thread.thread_id = message.thread_id
+            # initialize thread
+            thread.participants.create(user=thread.author)
+            thread.thread_id = thread.id
             thread.save()
 
-            # add the author of the thread message as a participant
-            thread.participants.create(user=thread.author)
-
-        if thread.author is not message.author:
-            if not thread.participants.filter(user=message.author).exists():
-                thread.participants.create(user=message.author)
+        if message.author != thread.author and not thread.participants.filter(user=message.author).exists():
+            thread.participants.create(user=message.author)
 
 
 @receiver(post_save, sender=ConversationMessage)

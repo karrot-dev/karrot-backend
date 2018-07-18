@@ -139,10 +139,19 @@ class TestConversationThreadsAPI(APITestCase):
 
     def test_can_mute_thread(self):
         self.client.force_login(user=self.user)
-        response = self.client.patch('/api/messages/{}/thread/'.format(self.thread.id), {'muted': True}, format='json')
+        data = {'muted': True}
+        response = self.client.patch('/api/messages/{}/thread/'.format(self.thread.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         participant = self.thread.participants.get(user=self.user)
         self.assertEqual(participant.muted, True)
+
+    def test_can_mark_seen_up_to(self):
+        self.client.force_login(user=self.user)
+        data = {'seen_up_to': self.reply.id}
+        response = self.client.patch('/api/messages/{}/thread/'.format(self.thread.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        participant = self.thread.participants.get(user=self.user)
+        self.assertEqual(participant.seen_up_to, self.reply)
 
     def test_cannot_mute_thread_with_no_replies(self):
         self.client.force_login(user=self.user)
@@ -151,7 +160,7 @@ class TestConversationThreadsAPI(APITestCase):
         response = self.client.patch('/api/messages/{}/thread/'.format(another_message.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_get_thread_info(self):
+    def test_get_thread_meta_for_particiant(self):
         self.client.force_login(user=self.user)
         response = self.client.get('/api/messages/', format='json')
         item = response.data['results'][0]
@@ -163,6 +172,45 @@ class TestConversationThreadsAPI(APITestCase):
             'muted': False,
             'unread_reply_count': 0,
         })
+
+    def test_get_thread_meta_for_non_participant(self):
+        self.client.force_login(user=self.user2)
+        response = self.client.get('/api/messages/', format='json')
+        item = response.data['results'][0]
+        self.assertEqual(item['thread'], self.thread.id)
+        self.assertEqual(item['thread_meta'], {
+            'is_participant': False,
+            'reply_count': 1,
+        })
+
+    def test_cannot_create_private_conversation_threads(self):
+        self.client.force_login(user=self.user)
+        private_conversation = Conversation.objects.get_or_create_for_two_users(self.user, self.user2)
+        private_message = private_conversation.messages.create(author=self.user, content='hey there, you look nice')
+        data = {
+            'conversation': private_conversation.id,
+            'content': 'a nice message reply!',
+            'thread': private_message.id,
+        }
+        response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_fails_with_incorrect_conversation(self):
+        self.client.force_login(user=self.user)
+        another_conversation = Conversation.objects.get_or_create_for_two_users(self.user, self.user2)
+        data = {
+            'conversation': another_conversation.id,
+            'content': 'a nice message reply!',
+            'thread': self.thread.id,
+        }
+        response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_cannot_reply_to_replies(self):
+        self.client.force_login(user=self.user)
+        data = {'conversation': self.conversation.id, 'content': 'a nice message reply!', 'thread': self.reply.id}
+        response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class TestConversationsSeenUpToAPI(APITestCase):

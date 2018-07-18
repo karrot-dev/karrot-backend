@@ -110,6 +110,31 @@ class ConversationThreadModelTests(TestCase):
 
         self.assertEqual(message.unread_replies_count, n - read_messages)
 
+    def test_default_replies_count_property(self):
+        self.assertEqual(self.thread.replies_count, 0)
+        n = 5
+        [ConversationMessage.objects.create(
+            conversation=self.conversation,
+            author=self.user,
+            thread=self.thread,
+            content='my reply',
+        ) for _ in range(n)]
+        self.assertEqual(self.thread.replies_count, n)
+
+    def test_annotation_replies_count_property(self):
+        self.thread = ConversationMessage.objects \
+            .annotate_replies_count() \
+            .get(pk=self.thread.id)
+        self.assertEqual(self.thread.replies_count, 0)
+        n = 5
+        [ConversationMessage.objects.create(
+            conversation=self.conversation,
+            author=self.user,
+            thread=self.thread,
+            content='my reply',
+        ) for _ in range(n)]
+        self.assertEqual(self.thread.replies_count, n)
+
 
 class TestPickupConversationsEmailNotifications(TestCase):
     def setUp(self):

@@ -120,16 +120,16 @@ class ConversationThreadNonParticipantSerializer(serializers.ModelSerializer):
         model = ConversationMessage
         fields = [
             'is_participant',
-            'message_count',
+            'reply_count',
         ]
 
     is_participant = serializers.SerializerMethodField()
-    message_count = serializers.SerializerMethodField()
+    reply_count = serializers.SerializerMethodField()
 
     def get_is_participant(self, message):
         return False
 
-    def get_message_count(self, message):
+    def get_reply_count(self, message):
         return message.replies_count
 
 
@@ -216,13 +216,13 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
             thread = data['thread']
             conversation = data['conversation']
 
-            # only some types of messages can have threads
-            if not isinstance(data['conversation'].target, Group):
-                raise serializers.ValidationError(_('You can only reply to Group messages'))
-
             # the thread must be in the correct conversation
             if thread.conversation.id != conversation.id:
                 raise serializers.ValidationError(_('Thread is not in the same conversation'))
+
+            # only some types of messages can have threads
+            if not isinstance(data['conversation'].target, Group):
+                raise serializers.ValidationError(_('You can only reply to Group messages'))
 
             # you cannot reply to replies
             if not thread.is_first_in_thread():
