@@ -44,6 +44,9 @@ class IsConversationParticipant(BasePermission):
     message = _('You are not in this conversation')
 
     def has_permission(self, request, view):
+        """If the user asks to filter messages by conversation, return an error if
+        they are not part of the conversation (instead of returning empty result)
+        """
         conversation_id = request.GET.get('conversation', None)
 
         # if they specify a conversation, check they are in it
@@ -56,12 +59,6 @@ class IsConversationParticipant(BasePermission):
         # otherwise it is fine (messages will be filtered for the users conversations)
         return True
 
-
-class IsMessageConversationParticipant(BasePermission):
-    """Is the specified message in a conversation which user participates in?"""
-
-    message = _('You are not in this conversation')
-
     def has_object_permission(self, request, view, message):
         return message.conversation.participants.filter(id=request.user.id).exists()
 
@@ -72,6 +69,8 @@ class IsAuthorConversationMessage(BasePermission):
     message = _('You are not the author of this message')
 
     def has_object_permission(self, request, view, message):
+        if view.action != 'partial_update':
+            return True
         return request.user == message.author
 
 
@@ -80,6 +79,8 @@ class IsWithinUpdatePeriod(BasePermission):
         {'days_number': settings.MESSAGE_EDIT_DAYS}
 
     def has_object_permission(self, request, view, message):
+        if view.action != 'partial_update':
+            return True
         return message.is_recent()
 
 
@@ -143,11 +144,12 @@ class ConversationMessageViewSet(
         .annotate_replies_count()
 
     serializer_class = ConversationMessageSerializer
-    permission_classes = [
+    permission_classes = (
         IsAuthenticated,
         IsConversationParticipant,
-        IsMessageConversationParticipant,
-    ]
+        IsAuthorConversationMessage,
+        IsWithinUpdatePeriod,
+    )
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('conversation', 'thread',)
     pagination_class = MessagePagination
@@ -157,14 +159,6 @@ class ConversationMessageViewSet(
         if self.request.query_params.get('thread', None):
             self.pagination_class = ReverseMessagePagination
         return super().paginator
-
-    def get_permissions(self):
-        if self.action == 'partial_update':
-            self.permission_classes.extend([
-                IsAuthorConversationMessage,
-                IsWithinUpdatePeriod,
-            ])
-        return super().get_permissions()
 
     def get_queryset(self):
         qs = self.queryset \
@@ -201,7 +195,6 @@ class ConversationMessageViewSet(
         detail=True,
         methods=('POST',),
         filter_fields=('name',),
-        permission_classes=(IsAuthenticated, IsMessageConversationParticipant)
     )
     def reactions(self, request, pk):
         """route for POST /messages/{id}/reactions/ with body {"name":"emoji_name"}"""
@@ -227,7 +220,6 @@ class ConversationMessageViewSet(
         methods=('DELETE',),
         url_path='reactions/(?P<name>[a-z0-9_+-]+)',
         url_name='remove_reaction',
-        permission_classes=(IsAuthenticated, IsMessageConversationParticipant)
     )
     def remove_reaction(self, request, pk, name):
         """route for DELETE /messages/{id}/reactions/{name}/"""

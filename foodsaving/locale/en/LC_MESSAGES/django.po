@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-07-18 09:59+0000\n"
+"POT-Creation-Date: 2018-07-18 11:15+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -101,27 +101,27 @@ msgid ""
 "%(site_name)s</a>, or <a href=\"%(mute_url)s\">mute the conversation</a>."
 msgstr ""
 
-#: foodsaving/conversations/api.py:44 foodsaving/conversations/api.py:63
+#: foodsaving/conversations/api.py:44
 #: foodsaving/conversations/serializers.py:38
 #: foodsaving/conversations/serializers.py:211
 msgid "You are not in this conversation"
 msgstr ""
 
-#: foodsaving/conversations/api.py:72
+#: foodsaving/conversations/api.py:69
 msgid "You are not the author of this message"
 msgstr ""
 
-#: foodsaving/conversations/api.py:79
+#: foodsaving/conversations/api.py:78
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
 msgstr ""
 
-#: foodsaving/conversations/api.py:187
+#: foodsaving/conversations/api.py:181
 msgid "Must be first in thread"
 msgstr ""
 
-#: foodsaving/conversations/api.py:190
+#: foodsaving/conversations/api.py:184
 msgid "You are not a participant in this thread"
 msgstr ""
 
@@ -313,32 +313,6 @@ msgstr ""
 #: foodsaving/groups/templates/user_inactive_in_group.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s is missing you!"
-msgstr ""
-
-#: foodsaving/groups/templates/user_removed_from_group.html.jinja2:109
-msgid "Hey,"
-msgstr ""
-
-#: foodsaving/groups/templates/user_removed_from_group.html.jinja2:112
-#, python-format
-msgid ""
-"It has been over %(inactivity_deletion_days)s days since you visited "
-"\"%(group_name)s\"."
-msgstr ""
-
-#: foodsaving/groups/templates/user_removed_from_group.html.jinja2:115
-msgid ""
-"For that reason, we have removed your account from that particular group. "
-msgstr ""
-
-#: foodsaving/groups/templates/user_removed_from_group.html.jinja2:118
-msgid ""
-"You're still on the site though, just click on the button below to visit!"
-msgstr ""
-
-#: foodsaving/groups/templates/user_removed_from_group.html.jinja2:119
-#, python-format
-msgid "Visit %(site_name)s"
 msgstr ""
 
 #: foodsaving/invitations/serializers.py:20
@@ -582,8 +556,6 @@ msgid "Please click the following link to confirm your email:"
 msgstr ""
 
 #: foodsaving/users/templates/changemail_request.html.jinja2:116
-#: foodsaving/users/templates/mailverification.html.jinja2:4
-#: foodsaving/users/templates/mailverification.html.jinja2:109
 #: foodsaving/users/templates/signup.html.jinja2:113
 msgid "Verify your email address"
 msgstr ""
@@ -614,22 +586,6 @@ msgstr ""
 
 #: foodsaving/users/templates/changemail_success.subject.jinja2:1
 msgid "Your email address changed!"
-msgstr ""
-
-#: foodsaving/users/templates/mailverification.html.jinja2:108
-#, python-format
-msgid "Thank you for signing up to %(site_name)s!"
-msgstr ""
-
-#: foodsaving/users/templates/mailverification.html.jinja2:108
-#, python-format
-msgid "Welcome to %(site_name)s, %(user_display_name)s!"
-msgstr ""
-
-#: foodsaving/users/templates/mailverification.html.jinja2:109
-msgid ""
-"After we get started, please confirm your email address by clicking the link "
-"below:"
 msgstr ""
 
 #: foodsaving/users/templates/passwordreset_request.html.jinja2:4
