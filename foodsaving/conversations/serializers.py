@@ -225,7 +225,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(_('You can only reply to Group messages'))
 
             # you cannot reply to replies
-            if not thread.is_first_in_thread():
+            if thread.is_thread_reply():
                 raise serializers.ValidationError(_('You cannot reply to replies'))
 
         return data
