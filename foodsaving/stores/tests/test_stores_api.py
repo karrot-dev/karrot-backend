@@ -34,15 +34,19 @@ class TestStoresAPI(APITestCase, ExtractPaginationMixin):
         self.user = UserFactory()
 
         # another store for above group
-        self.store_data = {'name': faker.name(),
-                           'description': faker.name(),
-                           'group': self.group.id,
-                           'address': faker.address(),
-                           'latitude': faker.latitude(),
-                           'longitude': faker.longitude()}
+        self.store_data = {
+            'name': faker.name(),
+            'description': faker.name(),
+            'group': self.group.id,
+            'address': faker.address(),
+            'latitude': faker.latitude(),
+            'longitude': faker.longitude()
+        }
 
         # another group
-        self.different_group = GroupFactory(members=[self.member2, ])
+        self.different_group = GroupFactory(members=[
+            self.member2,
+        ])
 
     def test_create_store(self):
         response = self.client.post(self.url, self.store_data, format='json')
@@ -169,7 +173,9 @@ class TestStoreChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
         self.now = timezone.now()
         self.url = '/api/stores/'
         self.member = UserFactory()
-        self.group = GroupFactory(members=[self.member, ])
+        self.group = GroupFactory(members=[
+            self.member,
+        ])
         self.store = StoreFactory(group=self.group)
         self.store_url = self.url + str(self.store.id) + '/'
         self.series = PickupDateSeriesFactory(max_collectors=3, store=self.store)
@@ -244,12 +250,14 @@ class TestStoreStatisticsAPI(APITestCase):
         one_day_ago = timezone.now() - relativedelta(days=1)
 
         users = [UserFactory() for _ in range(9)]
-        pickups = [PickupDateFactory(
-            store=store,
-            date=one_day_ago,
-            collectors=users,
-            done_and_processed=True,
-        ) for _ in range(3)]
+        pickups = [
+            PickupDateFactory(
+                store=store,
+                date=one_day_ago,
+                collectors=users,
+                done_and_processed=True,
+            ) for _ in range(3)
+        ]
         feedback = [FeedbackFactory(about=choice(pickups), given_by=u) for u in users]
 
         # calculate weight from feedback
@@ -262,8 +270,10 @@ class TestStoreStatisticsAPI(APITestCase):
 
         response = self.client.get('/api/stores/{}/statistics/'.format(store.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, {
-            'feedback_count': len(feedback),
-            'feedback_weight': weight,
-            'pickups_done': len(pickups),
-        })
+        self.assertEqual(
+            response.data, {
+                'feedback_count': len(feedback),
+                'feedback_weight': weight,
+                'pickups_done': len(pickups),
+            }
+        )

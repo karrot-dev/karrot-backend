@@ -31,13 +31,11 @@ def iter_modules(root_module_path, excludes=None):
 
 
 class PythonIsValidTestCase(TestCase):
-
     def test_all_modules_import_cleanly(self):
         excludes = {
-            'foodsaving.tests.integration.test_integration',      # integration test runner has side-effects
+            'foodsaving.tests.integration.test_integration',  # integration test runner has side-effects
         }
-        self.data = {'root_module_path': foodsaving.__path__[0],
-                     'excludes': excludes}
+        self.data = {'root_module_path': foodsaving.__path__[0], 'excludes': excludes}
         self.when_importing_modules()
         self.then_all_modules_import_cleanly()
 

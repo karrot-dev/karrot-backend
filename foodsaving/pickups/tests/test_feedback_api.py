@@ -46,18 +46,14 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.old_pickup = PickupDateFactory(
             store=self.store,
             date=timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS + 2),
-            collectors=[self.collector3, ]
+            collectors=[
+                self.collector3,
+            ]
         )
-        self.old_feedback = FeedbackFactory(
-            about=self.old_pickup, given_by=self.collector3
-        )
+        self.old_feedback = FeedbackFactory(about=self.old_pickup, given_by=self.collector3)
 
         # create feedback for POST method
-        self.feedback_post = {
-            'about': self.past_pickup.id,
-            'weight': 2,
-            'comment': 'asfjk'
-        }
+        self.feedback_post = {'about': self.past_pickup.id, 'weight': 2, 'comment': 'asfjk'}
 
         # create feedback for POST method without weight and comment
         self.feedback_without_weight_comment = {
@@ -65,33 +61,15 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         }
 
         # create feedback to future pickup
-        self.future_feedback_post = {
-            'about': self.pickup.id,
-            'weight': 2,
-            'comment': 'asfjk'
-        }
+        self.future_feedback_post = {'about': self.pickup.id, 'weight': 2, 'comment': 'asfjk'}
 
         # create feedback for an old pickup
-        self.feedback_for_old_pickup = {
-            'about': self.old_pickup.id,
-            'weight': 5,
-            'comment': 'this is long ago'
-        }
+        self.feedback_for_old_pickup = {'about': self.old_pickup.id, 'weight': 5, 'comment': 'this is long ago'}
 
         # create feedback for GET method
-        self.feedback_get = {
-            'given_by': self.collector,
-            'about': self.past_pickup,
-            'weight': 2,
-            'comment': 'asfjk2'
-        }
+        self.feedback_get = {'given_by': self.collector, 'about': self.past_pickup, 'weight': 2, 'comment': 'asfjk2'}
 
-        self.feedback_get_2 = {
-            'given_by': self.collector2,
-            'about': self.past_pickup,
-            'weight': 2,
-            'comment': 'asfjk'
-        }
+        self.feedback_get_2 = {'given_by': self.collector2, 'about': self.past_pickup, 'weight': 2, 'comment': 'asfjk'}
 
         # create 2 instances of feedback for GET method
         self.feedback = Feedback.objects.create(**self.feedback_get)
@@ -105,8 +83,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         Non-User is not allowed to give feedback.
         """
         response = self.client.post(self.url, self.feedback_post, format='json')
-        self.assertEqual(
-            response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_create_feedback_fails_as_non_group_member(self):
         """
@@ -161,8 +138,12 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         response = self.client.post(self.url, self.feedback_for_old_pickup, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(
-            response.data, {'about': ['You can\'t give feedback for pickups more than {} days ago.'
-                                      .format(settings.FEEDBACK_POSSIBLE_DAYS)]}
+            response.data, {
+                'about': [
+                    'You can\'t give feedback for pickups more than {} days ago.'
+                    .format(settings.FEEDBACK_POSSIBLE_DAYS)
+                ]
+            }
         )
 
     def test_create_feedback_without_weight(self):
@@ -328,7 +309,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
         self.assertEqual(
             response.data['detail'], 'You can\'t give feedback for pickups more than {} days ago.'
-                                     .format(settings.FEEDBACK_POSSIBLE_DAYS)
+            .format(settings.FEEDBACK_POSSIBLE_DAYS)
         )
 
     def test_patch_feedback_to_remove_weight(self):

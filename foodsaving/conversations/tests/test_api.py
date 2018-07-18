@@ -25,14 +25,10 @@ class TestConversationsAPI(APITestCase):
         self.not_participant2 = UserFactory()
         self.not_participant3 = UserFactory()
         self.conversation1 = ConversationFactory()
-        self.conversation1.sync_users([
-            self.participant1, self.participant2, self.participant3
-        ])
+        self.conversation1.sync_users([self.participant1, self.participant2, self.participant3])
         self.conversation1.messages.create(author=self.participant1, content='hello')
         self.conversation2 = ConversationFactory()
-        self.conversation2.sync_users([
-            self.participant1
-        ])
+        self.conversation2.sync_users([self.participant1])
         self.conversation2.messages.create(author=self.participant1, content='hello2')
         self.conversation3 = ConversationFactory()  # conversation noone is in
 
@@ -152,11 +148,14 @@ class TestConversationsSeenUpToAPI(APITestCase):
         data = {'seen_up_to': 9817298172}
         response = self.client.post('/api/conversations/{}/mark/'.format(self.conversation.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['seen_up_to'][0],
-                         'Invalid pk "{}" - object does not exist.'.format(data['seen_up_to']))
+        self.assertEqual(
+            response.data['seen_up_to'][0], 'Invalid pk "{}" - object does not exist.'.format(data['seen_up_to'])
+        )
 
     def test_mark_seen_up_to_fails_for_message_in_other_conversation(self):
-        conversation = ConversationFactory(participants=[self.user, ])
+        conversation = ConversationFactory(participants=[
+            self.user,
+        ])
 
         message = conversation.messages.create(author=self.user, content='yay')
         self.client.force_login(user=self.user)
@@ -182,9 +181,7 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
 
         data = {'email_notifications': False}
         response = self.client.post(
-            '/api/conversations/{}/email_notifications/'.format(self.conversation.id),
-            data,
-            format='json'
+            '/api/conversations/{}/email_notifications/'.format(self.conversation.id), data, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['email_notifications'], False)
@@ -202,9 +199,7 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
 
         data = {'email_notifications': True}
         response = self.client.post(
-            '/api/conversations/{}/email_notifications/'.format(self.conversation.id),
-            data,
-            format='json'
+            '/api/conversations/{}/email_notifications/'.format(self.conversation.id), data, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['email_notifications'], True)
@@ -242,7 +237,9 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
 
         some_months_ago = timezone.now() - relativedelta(months=4)
         for _ in range(5):
-            EmailEvent.objects.create(created_at=some_months_ago, address=bounce_user.email, event='bounce', payload={})
+            EmailEvent.objects.create(
+                created_at=some_months_ago, address=bounce_user.email, event='bounce', payload={}
+            )
 
         mail.outbox = []
         ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
@@ -280,11 +277,7 @@ class TestConversationsMessageReactionsPostAPI(APITestCase):
         # log in is missing
 
         data = {'name': 'thumbsup'}
-        response = self.client.post(
-            '/api/messages/{}/reactions/'.format(self.message.id),
-            data,
-            format='json'
-        )
+        response = self.client.post('/api/messages/{}/reactions/'.format(self.message.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_add_emoji_to_message_of_other_group(self):
@@ -293,42 +286,27 @@ class TestConversationsMessageReactionsPostAPI(APITestCase):
         # log in as user who didn't join the conversation
         self.client.force_login(user=self.user2)
         data = {'name': 'thumbsup'}
-        response = self.client.post(
-            '/api/messages/{}/reactions/'.format(self.message2.id),
-            data,
-            format='json'
-        )
+        response = self.client.post('/api/messages/{}/reactions/'.format(self.message2.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_add_to_message_with_invalid_id(self):
         """It should fail predictably when message has invalid id. (respond status 404)"""
         self.client.force_login(user=self.user)
         data = {'name': 'thumbsup'}
-        response = self.client.post(
-            '/api/messages/{}/reactions/'.format('invalid'),
-            data,
-            format='json'
-        )
+        response = self.client.post('/api/messages/{}/reactions/'.format('invalid'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_add_nonexistent_emoji(self):
         """It should be impossible to add an unsupported emoji. (respond 400)"""
         self.client.force_login(user=self.user)
         data = {'name': 'nonexistent_emoji'}
-        response = self.client.post(
-            '/api/messages/{}/reactions/'.format(self.message.id),
-            data,
-            format='json'
-        )
+        response = self.client.post('/api/messages/{}/reactions/'.format(self.message.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_empty_request_fails(self):
         """If no emoji is given, the request should fail (respond 400)"""
         self.client.force_login(user=self.user)
-        response = self.client.post(
-            '/api/messages/{}/reactions/'.format(self.message.id),
-            format='json'
-        )
+        response = self.client.post('/api/messages/{}/reactions/'.format(self.message.id), format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_reaction_to_nonexistent_message(self):
@@ -338,11 +316,7 @@ class TestConversationsMessageReactionsPostAPI(APITestCase):
         self.client.force_login(user=self.user)
 
         data = {'name': 'thumbsup'}
-        response = self.client.post(
-            '/api/messages/{}/reactions/'.format(1735),
-            data,
-            format='json'
-        )
+        response = self.client.post('/api/messages/{}/reactions/'.format(1735), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_dont_react_twice_with_the_same_emoji(self):
@@ -350,29 +324,17 @@ class TestConversationsMessageReactionsPostAPI(APITestCase):
         self.client.force_login(user=self.user)
         data = {'name': 'thumbsup'}
 
-        response = self.client.post(
-            '/api/messages/{}/reactions/'.format(self.message.id),
-            data,
-            format='json'
-        )
+        response = self.client.post('/api/messages/{}/reactions/'.format(self.message.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        response = self.client.post(
-            '/api/messages/{}/reactions/'.format(self.message.id),
-            data,
-            format='json'
-        )
+        response = self.client.post('/api/messages/{}/reactions/'.format(self.message.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_react_to_message_with_emoji(self):
         """User who can participate in conversation can react to a message with emoji."""
         self.client.force_login(user=self.user)
         data = {'name': 'tada'}
-        response = self.client.post(
-            '/api/messages/{}/reactions/'.format(self.message.id),
-            data,
-            format='json'
-        )
+        response = self.client.post('/api/messages/{}/reactions/'.format(self.message.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['name'], 'tada')
         self.assertTrue(
@@ -385,19 +347,13 @@ class TestConversationsMessageReactionsPostAPI(APITestCase):
         # log in
         self.client.force_login(user=self.user)
         data = {'name': '+1'}
-        response = self.client.post(
-            '/api/messages/{}/reactions/'.format(self.message.id),
-            data,
-            format='json'
-        )
+        response = self.client.post('/api/messages/{}/reactions/'.format(self.message.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['name'], 'thumbsup')
 
         # and the base form can't be saved now
         response = self.client.post(
-            '/api/messages/{}/reactions/'.format(self.message.id),
-            {'name': 'thumbsup'},
-            format='json'
+            '/api/messages/{}/reactions/'.format(self.message.id), {'name': 'thumbsup'}, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -406,17 +362,13 @@ class TestConversationsMessageReactionsPostAPI(APITestCase):
         self.client.force_login(user=self.user)
 
         response = self.client.post(
-            '/api/messages/{}/reactions/'.format(self.message.id),
-            {'name': 'thumbsup'},
-            format='json'
+            '/api/messages/{}/reactions/'.format(self.message.id), {'name': 'thumbsup'}, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # second request with different emoji is ok
         response = self.client.post(
-            '/api/messages/{}/reactions/'.format(self.message.id),
-            {'name': 'tada'},
-            format='json'
+            '/api/messages/{}/reactions/'.format(self.message.id), {'name': 'tada'}, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -454,8 +406,7 @@ class TestConversationsMessageReactionsDeleteAPI(APITestCase):
         """Unauthenticated user can't remove a reaction."""
 
         response = self.client.delete(
-            '/api/messages/{}/reactions/{}/'.format(self.message.id, 'thumbsup'),
-            format='json'
+            '/api/messages/{}/reactions/{}/'.format(self.message.id, 'thumbsup'), format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -464,8 +415,7 @@ class TestConversationsMessageReactionsDeleteAPI(APITestCase):
         self.client.force_login(user=self.user2)
 
         response = self.client.delete(
-            '/api/messages/{}/reactions/{}/'.format(self.message.id, 'thumbsup'),
-            format='json'
+            '/api/messages/{}/reactions/{}/'.format(self.message.id, 'thumbsup'), format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -473,10 +423,7 @@ class TestConversationsMessageReactionsDeleteAPI(APITestCase):
         """When message has invalid name, it should fail predictably. (404)"""
         self.client.force_login(user=self.user)
 
-        response = self.client.delete(
-            '/api/messages/{}/reactions/{}/'.format('hello', 'thumbsup'),
-            format='json'
-        )
+        response = self.client.delete('/api/messages/{}/reactions/{}/'.format('hello', 'thumbsup'), format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_remove_reaction_invalid_emoji_name(self):
@@ -484,8 +431,7 @@ class TestConversationsMessageReactionsDeleteAPI(APITestCase):
         self.client.force_login(user=self.user)
 
         response = self.client.delete(
-            '/api/messages/{}/reactions/{}/'.format(self.message.id, 'invalid_emoji'),
-            format='json'
+            '/api/messages/{}/reactions/{}/'.format(self.message.id, 'invalid_emoji'), format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -493,20 +439,14 @@ class TestConversationsMessageReactionsDeleteAPI(APITestCase):
         """When message with given id doesn't exist, respond with 404."""
         self.client.force_login(user=self.user)
 
-        response = self.client.delete(
-            '/api/messages/{}/reactions/{}/'.format(7321, 'thumbsup'),
-            format='json'
-        )
+        response = self.client.delete('/api/messages/{}/reactions/{}/'.format(7321, 'thumbsup'), format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_remove_nonexisting_reaction(self):
         """When we try to remove nonexisting reaction, response should be 404."""
         self.client.force_login(user=self.user)
 
-        response = self.client.delete(
-            '/api/messages/{}/reactions/{}/'.format(self.message.id, '-1'),
-            format='json'
-        )
+        response = self.client.delete('/api/messages/{}/reactions/{}/'.format(self.message.id, '-1'), format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_remove_existing_reaction(self):
@@ -514,8 +454,7 @@ class TestConversationsMessageReactionsDeleteAPI(APITestCase):
         self.client.force_login(user=self.user)
 
         response = self.client.delete(
-            '/api/messages/{}/reactions/{}/'.format(self.message.id, 'thumbsup'),
-            format='json'
+            '/api/messages/{}/reactions/{}/'.format(self.message.id, 'thumbsup'), format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -523,10 +462,7 @@ class TestConversationsMessageReactionsDeleteAPI(APITestCase):
         """Can remove +1, -1, which removes thumbsup, thumbsdown, etc."""
         self.client.force_login(user=self.user)
 
-        response = self.client.delete(
-            '/api/messages/{}/reactions/{}/'.format(self.message.id, '+1'),
-            format='json'
-        )
+        response = self.client.delete('/api/messages/{}/reactions/{}/'.format(self.message.id, '+1'), format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
 
@@ -546,7 +482,8 @@ class TestConversationsMessageEditPatchAPI(APITestCase):
         self.conversation2.join(self.user2)
         self.message2 = self.conversation2.messages.create(author=self.user, content='hello2')
         self.message3 = self.conversation2.messages.create(
-            author=self.user, content='hello3',
+            author=self.user,
+            content='hello3',
             created_at=(timezone.now() - timedelta(days=10)),
         )
 

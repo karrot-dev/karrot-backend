@@ -8,7 +8,6 @@ from foodsaving.stores.factories import StoreFactory
 
 
 class TestConversationStats(TestCase):
-
     def test_tags_for_group_conversation(self):
         group = GroupFactory()
         tags = tags_for_conversation(group.conversation)

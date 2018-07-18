@@ -8,7 +8,9 @@ def message_written(message):
     write_points([{
         'measurement': 'karrot.events',
         'tags': tags_for_conversation(message.conversation),
-        'fields': {'message': 1},
+        'fields': {
+            'message': 1
+        },
     }])
 
 
@@ -16,7 +18,9 @@ def reaction_given(reaction):
     write_points([{
         'measurement': 'karrot.events',
         'tags': tags_for_conversation(reaction.message.conversation),
-        'fields': {'message_reaction': 1},
+        'fields': {
+            'message_reaction': 1
+        },
     }])
 
 

@@ -31,9 +31,7 @@ class TestPickupNotificationTask(APITestCase):
         self.user = VerifiedUserFactory()
         self.other_user = VerifiedUserFactory()
         self.non_verified_user = UserFactory()
-        self.group = GroupFactory(
-            members=[self.user, self.other_user, self.non_verified_user]
-        )
+        self.group = GroupFactory(members=[self.user, self.other_user, self.non_verified_user])
         self.store = StoreFactory(group=self.group)
 
         self.declined_store = StoreFactory(group=self.group, status=StoreStatus.DECLINED.value)

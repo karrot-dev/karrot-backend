@@ -35,7 +35,7 @@ class AuthView(generics.GenericAPIView):
 
 class AuthUserView(generics.GenericAPIView):
     serializer_class = AuthUserSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
 
     def get_permissions(self):
         # Allow creating and deleting user when not logged in
@@ -80,7 +80,7 @@ class AuthUserView(generics.GenericAPIView):
 
 
 class RequestDeleteUserView(views.APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
 
     def post(self, request):
         """
@@ -96,7 +96,7 @@ class RequestDeleteUserView(views.APIView):
 class VerifyMailView(generics.GenericAPIView):
     # No need to add the MailIsNotVerified permission because e-mail
     # verification codes only exist for unverified users anyway.
-    permission_classes = (AllowAny,)
+    permission_classes = (AllowAny, )
     serializer_class = VerificationCodeSerializer
 
     def post(self, request):
@@ -127,7 +127,7 @@ class ResendMailVerificationCodeView(views.APIView):
 
 
 class RequestResetPasswordView(generics.GenericAPIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (AllowAny, )
     serializer_class = RequestResetPasswordSerializer
 
     def post(self, request):
@@ -141,7 +141,7 @@ class RequestResetPasswordView(generics.GenericAPIView):
 
 
 class ResetPasswordView(generics.GenericAPIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (AllowAny, )
     serializer_class = ResetPasswordSerializer
 
     def post(self, request):
@@ -156,7 +156,7 @@ class ResetPasswordView(generics.GenericAPIView):
 
 
 class ChangePasswordView(generics.GenericAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
     serializer_class = ChangePasswordSerializer
 
     def put(self, request):
@@ -175,7 +175,7 @@ class ChangePasswordView(generics.GenericAPIView):
 
 
 class ChangeMailView(generics.GenericAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
     serializer_class = ChangeMailSerializer
 
     def put(self, request):
@@ -196,7 +196,7 @@ class FailedEmailDeliveryPagination(CursorPagination):
 
 
 class FailedEmailDeliveryView(generics.GenericAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
     serializer_class = FailedEmailDeliverySerializer
     pagination_class = FailedEmailDeliveryPagination
 

@@ -5,15 +5,14 @@ from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 class UserSerializer(serializers.ModelSerializer):
 
-    photo_urls = VersatileImageFieldSerializer(
-        sizes='user_profile',
-        source='photo'
-    )
+    photo_urls = VersatileImageFieldSerializer(sizes='user_profile', source='photo')
 
     class Meta:
         model = get_user_model()
-        fields = ['id', 'display_name', 'email', 'mobile_number', 'address',
-                  'latitude', 'longitude', 'description', 'photo_urls']
+        fields = [
+            'id', 'display_name', 'email', 'mobile_number', 'address', 'latitude', 'longitude', 'description',
+            'photo_urls'
+        ]
 
 
 class UserInfoSerializer(serializers.ModelSerializer):

@@ -14,9 +14,13 @@ class TestGroupsInfoAPIFilter(APITestCase):
 
         # two groups with different members
         self.member = UserFactory()
-        self.group = GroupFactory(members=[self.member, ])
+        self.group = GroupFactory(members=[
+            self.member,
+        ])
         self.member2 = UserFactory()
-        self.group2 = GroupFactory(members=[self.member2, ])
+        self.group2 = GroupFactory(members=[
+            self.member2,
+        ])
         self.empty_group = GroupFactory()
 
     def test_filter_by_member(self):

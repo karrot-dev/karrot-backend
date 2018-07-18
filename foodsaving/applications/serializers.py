@@ -30,9 +30,9 @@ class GroupApplicationSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if GroupApplication.objects.filter(
-            group=attrs.get('group'),
-            user=self.context['request'].user,
-            status=GroupApplicationStatus.PENDING.value,
+                group=attrs.get('group'),
+                user=self.context['request'].user,
+                status=GroupApplicationStatus.PENDING.value,
         ).exists():
             raise serializers.ValidationError(_('Application is already pending'))
         return attrs

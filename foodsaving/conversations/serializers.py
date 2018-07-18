@@ -11,14 +11,7 @@ from foodsaving.conversations.helpers import normalize_emoji_name
 class ConversationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversation
-        fields = [
-            'id',
-            'participants',
-            'updated_at',
-            'seen_up_to',
-            'unread_message_count',
-            'email_notifications'
-        ]
+        fields = ['id', 'participants', 'updated_at', 'seen_up_to', 'unread_message_count', 'email_notifications']
 
     seen_up_to = serializers.SerializerMethodField()
     unread_message_count = serializers.SerializerMethodField()
@@ -66,7 +59,7 @@ class ConversationSerializer(serializers.ModelSerializer):
 class ConversationMarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConversationParticipant
-        fields = ('seen_up_to',)
+        fields = ('seen_up_to', )
 
     def validate_seen_up_to(self, message):
         if not self.instance.conversation.messages.filter(id=message.id).exists():
@@ -82,7 +75,7 @@ class ConversationMarkSerializer(serializers.ModelSerializer):
 class ConversationEmailNotificationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConversationParticipant
-        fields = ('email_notifications',)
+        fields = ('email_notifications', )
 
 
 class EmojiField(serializers.Field):
@@ -102,9 +95,7 @@ class ConversationMessageReactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConversationMessageReaction
         fields = ('user', 'name', 'message')
-        extra_kwargs = {
-            'message': {'write_only': True}
-        }
+        extra_kwargs = {'message': {'write_only': True}}
 
     name = EmojiField()
 
@@ -113,14 +104,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConversationMessage
         fields = [
-            'id',
-            'author',
-            'content',
-            'conversation',
-            'created_at',
-            'updated_at',
-            'reactions',
-            'received_via',
+            'id', 'author', 'content', 'conversation', 'created_at', 'updated_at', 'reactions', 'received_via',
             'is_editable'
         ]
         read_only_fields = ('author', 'id', 'created_at', 'received_via')

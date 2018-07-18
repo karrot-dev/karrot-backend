@@ -6,13 +6,10 @@ from foodsaving.utils.tests.fake import faker
 
 
 class TestExtractPickupsFromStoresApp(TestMigrations):
-    migrate_from = [('groups', '0016_auto_20171101_0840'),
-                    ('users', '0016_user_language'),
+    migrate_from = [('groups', '0016_auto_20171101_0840'), ('users', '0016_user_language'),
                     ('stores', '0027_auto_20171031_0942')]
-    migrate_to = [('groups', '0016_auto_20171101_0840'),
-                  ('users', '0016_user_language'),
-                  ('stores', '0028_extract_pickups_app'),
-                  ('pickups', '0001_initial')]
+    migrate_to = [('groups', '0016_auto_20171101_0840'), ('users', '0016_user_language'),
+                  ('stores', '0028_extract_pickups_app'), ('pickups', '0001_initial')]
 
     def setUpBeforeMigration(self, apps):
         User = apps.get_model('users', 'User')

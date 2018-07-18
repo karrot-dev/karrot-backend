@@ -23,12 +23,16 @@ class TestPickupdatesAPIFilter(APITestCase, ExtractPaginationMixin):
 
         # pickup date for group with one member and one store
         self.member = UserFactory()
-        self.group = GroupFactory(members=[self.member, ])
+        self.group = GroupFactory(members=[
+            self.member,
+        ])
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(store=self.store)
 
         # and another store + group + pick-update
-        self.group2 = GroupFactory(members=[self.member, ])
+        self.group2 = GroupFactory(members=[
+            self.member,
+        ])
         self.store2 = StoreFactory(group=self.group2)
         self.pickup2 = PickupDateFactory(store=self.store2)
 
@@ -55,10 +59,7 @@ class TestPickupdatesAPIFilter(APITestCase, ExtractPaginationMixin):
         store_ids = [_.id for _ in self.group.store.all()]
         for _ in response.data:
             self.assertTrue(_['store'] in store_ids)
-        self.assertEqual(
-            len(response.data),
-            sum([store.pickup_dates.count() for store in self.group.store.all()])
-        )
+        self.assertEqual(len(response.data), sum([store.pickup_dates.count() for store in self.group.store.all()]))
 
     def test_filter_by_series(self):
         self.client.force_login(user=self.member)
@@ -107,26 +108,36 @@ class TestFeedbackPossibleFilter(APITestCase, ExtractPaginationMixin):
         self.store2 = StoreFactory(group=self.group2)
 
         self.pickupFeedbackPossible = PickupDateFactory(
-            store=self.store,
-            collectors=[self.member, ],
-            date=self.oneWeekAgo
+            store=self.store, collectors=[
+                self.member,
+            ], date=self.oneWeekAgo
         )
 
         # now the cases where no feedback can be given
-        self.pickupUpcoming = PickupDateFactory(store=self.store, collectors=[self.member, ])
+        self.pickupUpcoming = PickupDateFactory(
+            store=self.store, collectors=[
+                self.member,
+            ]
+        )
         self.pickupNotCollector = PickupDateFactory(store=self.store, date=self.oneWeekAgo)
         self.pickupTooLongAgo = PickupDateFactory(store=self.store, date=self.tooLongAgo)
 
         self.pickupFeedbackAlreadyGiven = PickupDateFactory(
-            store=self.store, collectors=[self.member, ], date=self.oneWeekAgo
+            store=self.store, collectors=[
+                self.member,
+            ], date=self.oneWeekAgo
         )
         self.feedback = FeedbackFactory(about=self.pickupFeedbackAlreadyGiven, given_by=self.member)
 
         self.pickupCollectorLeftGroup = PickupDateFactory(
-            store=self.store2, collectors=[self.member, ], date=self.oneWeekAgo
+            store=self.store2, collectors=[
+                self.member,
+            ], date=self.oneWeekAgo
         )
         self.pickupDoneByAnotherUser = PickupDateFactory(
-            store=self.store, collectors=[self.member2, ], date=self.oneWeekAgo
+            store=self.store, collectors=[
+                self.member2,
+            ], date=self.oneWeekAgo
         )
 
         PickupDateModel.objects.process_finished_pickup_dates()

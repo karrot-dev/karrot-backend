@@ -22,10 +22,16 @@ class TestEmailReplyAPI(APITestCase):
         reply_token = make_local_part(self.conversation, self.user)
         response = self.client.post(
             '/api/webhooks/incoming_email/',
-            data=[{'msys': {'relay_message': {
-                'rcpt_to': '{}@example.com'.format(reply_token),
-                'content': {'text': 'message body'}
-            }}}],
+            data=[{
+                'msys': {
+                    'relay_message': {
+                        'rcpt_to': '{}@example.com'.format(reply_token),
+                        'content': {
+                            'text': 'message body'
+                        }
+                    }
+                }
+            }],
             HTTP_X_MESSAGESYSTEMS_WEBHOOK_TOKEN='test_key',
             format='json'
         )
@@ -36,17 +42,20 @@ class TestEmailReplyAPI(APITestCase):
 
 
 class TestEmailEventAPI(APITestCase):
-
     @override_settings(SPARKPOST_WEBHOOK_SECRET='test_key')
     def test_receive_incoming_email(self):
         basic_auth = 'basic {}'.format(b64encode('asdf:test_key'.encode()).decode())
         response = self.client.post(
             '/api/webhooks/email_event/',
-            data=[{'msys': {'message_event': {
-                'event_id': 4,
-                'type': 'bounce',
-                'rcpt_to': 'spam@example.com'
-            }}}],
+            data=[{
+                'msys': {
+                    'message_event': {
+                        'event_id': 4,
+                        'type': 'bounce',
+                        'rcpt_to': 'spam@example.com'
+                    }
+                }
+            }],
             HTTP_AUTHORIZATION=basic_auth,
             format='json'
         )
@@ -54,4 +63,3 @@ class TestEmailEventAPI(APITestCase):
         event = EmailEvent.objects.first()
         self.assertEqual(event.address, 'spam@example.com')
         self.assertEqual(event.event, 'bounce')
-

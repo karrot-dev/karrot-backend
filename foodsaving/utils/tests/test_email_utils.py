@@ -18,11 +18,7 @@ class TestEmailUtils(TestCase):
         self.user = UserFactory()
 
     def test_emailinvitation(self):
-        invitation = Invitation.objects.create(
-            email='bla@bla.com',
-            group=self.group,
-            invited_by=self.user
-        )
+        invitation = Invitation.objects.create(email='bla@bla.com', group=self.group, invited_by=self.user)
         email = foodsaving.invitations.emails.prepare_emailinvitation_email(invitation)
 
         self.assertEqual(len(email.alternatives), 1)
@@ -69,7 +65,6 @@ class TestEmailUtils(TestCase):
 
 
 class TestJinjaFilters(TestCase):
-
     def test_time_filter_uses_timezone(self):
         hour = 5
         datetime = timezone.now().replace(
