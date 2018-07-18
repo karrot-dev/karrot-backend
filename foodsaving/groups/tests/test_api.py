@@ -20,7 +20,11 @@ class TestGroupsInfoAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.member = UserFactory()
-        self.group = GroupFactory(members=[self.member, ], application_questions='')
+        self.group = GroupFactory(
+            members=[
+                self.member,
+            ], application_questions=''
+        )
         self.url = '/api/groups-info/'
 
     def test_list_groups_as_anon(self):
@@ -55,16 +59,22 @@ class TestGroupsAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.member = UserFactory()
-        self.group = GroupFactory(members=[self.member, ], is_open=True)
+        self.group = GroupFactory(
+            members=[
+                self.member,
+            ], is_open=True
+        )
         self.group_with_password = GroupFactory(password='abc', is_open=True)
         self.join_password_url = '/api/groups/{}/join/'.format(self.group_with_password.id)
         self.url = '/api/groups/'
-        self.group_data = {'name': faker.name(),
-                           'description': faker.text(),
-                           'address': faker.address(),
-                           'latitude': faker.latitude(),
-                           'longitude': faker.longitude(),
-                           'timezone': 'Europe/Berlin'}
+        self.group_data = {
+            'name': faker.name(),
+            'description': faker.text(),
+            'address': faker.address(),
+            'latitude': faker.latitude(),
+            'longitude': faker.longitude(),
+            'timezone': 'Europe/Berlin'
+        }
 
     def test_create_group(self):
         self.client.force_login(user=self.user)
@@ -79,8 +89,9 @@ class TestGroupsAPI(APITestCase):
         response = self.client.post(self.url, self.group_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['name'], self.group_data['name'])
-        self.assertEqual(GroupModel.objects.get(name=self.group_data['name']).description,
-                         self.group_data['description'])
+        self.assertEqual(
+            GroupModel.objects.get(name=self.group_data['name']).description, self.group_data['description']
+        )
         self.assertEqual(response.data['address'], self.group_data['address'])
 
     def test_create_group_fails_if_not_logged_in(self):
@@ -165,17 +176,18 @@ class TestGroupsAPI(APITestCase):
     def test_leave_group(self):
         store = StoreFactory(group=self.group)
         pickupdate = PickupDateFactory(
-            store=store,
-            collectors=[self.member, self.user],
-            date=timezone.now() + relativedelta(weeks=1))
+            store=store, collectors=[self.member, self.user], date=timezone.now() + relativedelta(weeks=1)
+        )
         past_pickupdate = PickupDateFactory(
-            store=store,
-            collectors=[self.member, ],
-            date=timezone.now() - relativedelta(weeks=1)
+            store=store, collectors=[
+                self.member,
+            ], date=timezone.now() - relativedelta(weeks=1)
         )
         unrelated_pickupdate = PickupDateFactory(
             date=timezone.now() + relativedelta(weeks=1),
-            collectors=[self.member, ],
+            collectors=[
+                self.member,
+            ],
         )
         GroupMembership.objects.create(group=unrelated_pickupdate.store.group, user=self.member)
 
@@ -276,8 +288,9 @@ class TestGroupMembershipRolesAPI(APITestCase):
 
     def test_add_invalid_role_fails(self):
         self.client.force_login(user=self.admin)
-        response = self.client.put('/api/groups/{}/users/{}/roles/{}/'
-                                   .format(self.group.id, self.member.id, 'does not exist'))
+        response = self.client.put(
+            '/api/groups/{}/users/{}/roles/{}/'.format(self.group.id, self.member.id, 'does not exist')
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.membership.refresh_from_db()
         self.assertNotIn('does not exist', self.membership.roles)
@@ -372,7 +385,8 @@ class TestGroupNotificationTypes(APITestCase):
         self.membership.save()
 
         response = self.client.put(
-            '/api/groups/{}/notification_types/{}/'.format(self.group.id, GroupNotificationType.WEEKLY_SUMMARY))
+            '/api/groups/{}/notification_types/{}/'.format(self.group.id, GroupNotificationType.WEEKLY_SUMMARY)
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.membership.refresh_from_db()
         self.assertEqual(self.membership.notification_types, [GroupNotificationType.WEEKLY_SUMMARY])
@@ -382,15 +396,15 @@ class TestGroupNotificationTypes(APITestCase):
         self.membership.notification_types = [GroupNotificationType.WEEKLY_SUMMARY]
         self.membership.save()
         response = self.client.delete(
-            '/api/groups/{}/notification_types/{}/'.format(self.group.id, GroupNotificationType.WEEKLY_SUMMARY))
+            '/api/groups/{}/notification_types/{}/'.format(self.group.id, GroupNotificationType.WEEKLY_SUMMARY)
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.membership.refresh_from_db()
         self.assertEqual(self.membership.notification_types, [])
 
     def test_appears_in_group_detail(self):
         self.client.force_login(user=self.user)
-        response = self.client.get(
-            '/api/groups/{}/'.format(self.group.id))
+        response = self.client.get('/api/groups/{}/'.format(self.group.id))
         self.assertEqual(response.data['notification_types'], get_default_notification_types())
 
 
@@ -398,7 +412,10 @@ class TestAgreementsAPI(APITestCase):
     def setUp(self):
         self.normal_member = UserFactory()
         self.agreement_manager = UserFactory()
-        self.group = GroupFactory(members=[self.normal_member, self.agreement_manager, ])
+        self.group = GroupFactory(members=[
+            self.normal_member,
+            self.agreement_manager,
+        ])
         self.agreement = Agreement.objects.create(group=self.group, title=faker.text(), content=faker.text())
         membership = GroupMembership.objects.get(group=self.group, user=self.agreement_manager)
         membership.roles.append(roles.GROUP_AGREEMENT_MANAGER)
@@ -406,19 +423,32 @@ class TestAgreementsAPI(APITestCase):
 
         # other group/agreement that neither user is part of
         self.other_group = GroupFactory()
-        self.other_agreement = Agreement.objects.create(group=self.other_group, title=faker.text(),
-                                                        content=faker.text())
+        self.other_agreement = Agreement.objects.create(
+            group=self.other_group, title=faker.text(), content=faker.text()
+        )
 
     def test_can_create_agreement(self):
         self.client.force_login(user=self.agreement_manager)
-        response = self.client.post('/api/agreements/',
-                                    {'title': faker.text(), 'content': faker.text(), 'group': self.group.id})
+        response = self.client.post(
+            '/api/agreements/',
+            {
+                'title': faker.text(),
+                'content': faker.text(),
+                'group': self.group.id
+            }
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_cannot_create_agreement_for_another_group(self):
         self.client.force_login(user=self.agreement_manager)
-        response = self.client.post('/api/agreements/',
-                                    {'title': faker.text(), 'content': faker.text(), 'group': self.other_group.id})
+        response = self.client.post(
+            '/api/agreements/',
+            {
+                'title': faker.text(),
+                'content': faker.text(),
+                'group': self.other_group.id
+            }
+        )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_can_update_agreement(self):
@@ -428,8 +458,14 @@ class TestAgreementsAPI(APITestCase):
 
     def test_normal_member_cannot_create_agreement(self):
         self.client.force_login(user=self.normal_member)
-        response = self.client.post('/api/agreements/',
-                                    {'title': faker.name(), 'content': faker.text(), 'group': self.group.id})
+        response = self.client.post(
+            '/api/agreements/',
+            {
+                'title': faker.name(),
+                'content': faker.text(),
+                'group': self.group.id
+            }
+        )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_list_agreements(self):
@@ -480,16 +516,23 @@ class TestAgreementsAPI(APITestCase):
         self.group.active_agreement = self.agreement
         self.group.save()
         # using json.dumps as otherwise it sends an empty string, but we want it to send json value "null"
-        response = self.client.patch('/api/groups/{}/'.format(self.group.id), json.dumps({'active_agreement': None}),
-                                     content_type='application/json')
+        response = self.client.patch(
+            '/api/groups/{}/'.format(self.group.id),
+            json.dumps({
+                'active_agreement': None
+            }),
+            content_type='application/json'
+        )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['active_agreement'], None)
 
     def test_cannot_set_group_agreement_if_for_wrong_group(self):
         self.client.force_login(user=self.agreement_manager)
-        response = self.client.patch('/api/groups/{}/'.format(self.group.id),
-                                     {'active_agreement': self.other_agreement.id})
+        response = self.client.patch(
+            '/api/groups/{}/'.format(self.group.id),
+            {'active_agreement': self.other_agreement.id}
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_normal_user_cannot_group_agreement(self):

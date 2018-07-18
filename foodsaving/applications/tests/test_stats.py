@@ -11,7 +11,6 @@ from foodsaving.users.factories import UserFactory
 
 
 class TestApplicationStats(TestCase):
-
     def test_group_application_stats(self):
         group = GroupFactory()
 
@@ -22,19 +21,21 @@ class TestApplicationStats(TestCase):
 
         points = stats.get_group_application_stats(group)
 
-        self.assertEqual(points, [{
-            'measurement': 'karrot.group.applications',
-            'tags': {
-                'group': str(group.id),
-            },
-            'fields': {
-                'count_total': 18,
-                'count_status_pending': 3,
-                'count_status_accepted': 4,
-                'count_status_declined': 5,
-                'count_status_withdrawn': 6,
-            },
-        }])
+        self.assertEqual(
+            points, [{
+                'measurement': 'karrot.group.applications',
+                'tags': {
+                    'group': str(group.id),
+                },
+                'fields': {
+                    'count_total': 18,
+                    'count_status_pending': 3,
+                    'count_status_accepted': 4,
+                    'count_status_declined': 5,
+                    'count_status_withdrawn': 6,
+                },
+            }]
+        )
 
     @patch('foodsaving.applications.stats.write_points')
     def test_group_application_status_update(self, write_points):

@@ -34,8 +34,7 @@ class StoreSerializer(serializers.ModelSerializer):
         }
 
     status = serializers.ChoiceField(
-        choices=[status.value for status in StoreStatus],
-        default=StoreModel.DEFAULT_STATUS
+        choices=[status.value for status in StoreStatus], default=StoreModel.DEFAULT_STATUS
     )
 
     def create(self, validated_data):
@@ -44,7 +43,9 @@ class StoreSerializer(serializers.ModelSerializer):
             typus=HistoryTypus.STORE_CREATE,
             group=store.group,
             store=store,
-            users=[self.context['request'].user, ],
+            users=[
+                self.context['request'].user,
+            ],
             payload=self.initial_data,
         )
         store.group.refresh_active_status()
@@ -65,7 +66,9 @@ class StoreSerializer(serializers.ModelSerializer):
                 typus=HistoryTypus.STORE_MODIFY,
                 group=store.group,
                 store=store,
-                users=[self.context['request'].user, ],
+                users=[
+                    self.context['request'].user,
+                ],
                 payload=changed_data,
             )
         store.group.refresh_active_status()

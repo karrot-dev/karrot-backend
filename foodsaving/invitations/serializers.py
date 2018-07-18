@@ -10,9 +10,7 @@ class InvitationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invitation
         fields = ['id', 'email', 'group', 'invited_by', 'expires_at', 'created_at']
-        extra_kwargs = {
-            'invited_by': {'read_only': True}
-        }
+        extra_kwargs = {'invited_by': {'read_only': True}}
         validators = [
             UniqueTogetherValidator(
                 queryset=Invitation.objects.filter(expires_at__gte=timezone.now()),

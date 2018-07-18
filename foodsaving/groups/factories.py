@@ -5,7 +5,6 @@ from foodsaving.utils.tests.fake import faker
 
 
 class GroupFactory(DjangoModelFactory):
-
     class Meta:
         model = GroupModel
 

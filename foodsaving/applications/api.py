@@ -19,17 +19,13 @@ class HasVerifiedEmailAddress(permissions.BasePermission):
         return request.user.mail_verified
 
 
-class GroupApplicationViewSet(
-    mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.ListModelMixin,
-    GenericViewSet
-):
+class GroupApplicationViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.ListModelMixin,
+                              GenericViewSet):
     queryset = GroupApplication.objects
     serializer_class = GroupApplicationSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('group',)
+    filter_backends = (DjangoFilterBackend, )
+    filter_fields = ('group', )
 
     def get_permissions(self):
         if self.action == 'create':

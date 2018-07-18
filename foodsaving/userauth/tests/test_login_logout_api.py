@@ -32,25 +32,35 @@ class TestUserAuthAPI(APITestCase):
         data = {}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, {'email': ['This field is required.'],
-                                         'password': ['This field is required.']})
+        self.assertEqual(
+            response.data, {
+                'email': ['This field is required.'],
+                'password': ['This field is required.']
+            }
+        )
 
     def test_wrong_password(self):
         data = {'email': self.user.email, 'password': 'wrong_password'}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['non_field_errors'], ['Unable to login with provided credentials.', ])
+        self.assertEqual(response.data['non_field_errors'], [
+            'Unable to login with provided credentials.',
+        ])
 
     def test_wrong_email(self):
         data = {'email': 'nonexisting@email.com', 'password': 'wrong_password'}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['non_field_errors'], ['Unable to login with provided credentials.', ])
+        self.assertEqual(response.data['non_field_errors'], [
+            'Unable to login with provided credentials.',
+        ])
 
     def test_login_as_disabled_user_fails(self):
         data = {'email': self.disabled_user.email, 'password': self.disabled_user.display_name}
         response = self.client.post(self.url, data, format='json')
-        self.assertEqual(response.data['non_field_errors'], ['Unable to login with provided credentials.', ])
+        self.assertEqual(response.data['non_field_errors'], [
+            'Unable to login with provided credentials.',
+        ])
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         user = auth.get_user(self.client)
         self.assertFalse(user.is_authenticated)
@@ -89,9 +99,6 @@ class TestTokenAuthAPI(APITestCase):
 
     def test_use_token(self):
         token = Token.objects.create(user=self.user)
-        response = self.client.get(
-            '/api/auth/user/',
-            **{'HTTP_AUTHORIZATION': 'Token {}'.format(token.key)}
-        )
+        response = self.client.get('/api/auth/user/', **{'HTTP_AUTHORIZATION': 'Token {}'.format(token.key)})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data['email'], self.user.email)

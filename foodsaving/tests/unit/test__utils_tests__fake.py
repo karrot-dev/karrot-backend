@@ -3,7 +3,6 @@ from foodsaving.utils.tests.fake import Faker
 
 
 class FakerTestCase(TestCase):
-
     def test_faker_is_deterministic(self):
         self.given_new_faker()
         self.when_creating_fake_data()

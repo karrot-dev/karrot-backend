@@ -17,7 +17,9 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
 
         # pickup date for group with one member and one store
         self.member = UserFactory()
-        self.group = GroupFactory(members=[self.member, ])
+        self.group = GroupFactory(members=[
+            self.member,
+        ])
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(store=self.store)
         self.pickup_url = self.url + str(self.pickup.id) + '/'
@@ -29,14 +31,18 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         self.user = UserFactory()
 
         # another pickup date for above store
-        self.pickup_data = {'date': timezone.now() + relativedelta(days=2),
-                            'max_collectors': 5,
-                            'store': self.store.id}
+        self.pickup_data = {
+            'date': timezone.now() + relativedelta(days=2),
+            'max_collectors': 5,
+            'store': self.store.id
+        }
 
         # past pickup date
-        self.past_pickup_data = {'date': timezone.now() - relativedelta(days=1),
-                                 'max_collectors': 5,
-                                 'store': self.store.id}
+        self.past_pickup_data = {
+            'date': timezone.now() - relativedelta(days=1),
+            'max_collectors': 5,
+            'store': self.store.id
+        }
         self.past_pickup = PickupDateFactory(store=self.store, date=timezone.now() - relativedelta(days=1))
         self.past_pickup_url = self.url + str(self.past_pickup.id) + '/'
         self.past_join_url = self.past_pickup_url + 'add/'
@@ -245,7 +251,9 @@ class TestPickupDatesListAPI(APITestCase, ExtractPaginationMixin):
 
         # pickup date for group with one member and one store
         self.member = UserFactory()
-        self.group = GroupFactory(members=[self.member, ])
+        self.group = GroupFactory(members=[
+            self.member,
+        ])
         self.active_store = StoreFactory(group=self.group, status='active')
         self.inactive_store = StoreFactory(group=self.group, status='created')
 
@@ -263,4 +271,3 @@ class TestPickupDatesListAPI(APITestCase, ExtractPaginationMixin):
         response = self.get_results(self.url, {'store': self.inactive_store.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 0)
-

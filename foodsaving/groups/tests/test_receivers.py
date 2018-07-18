@@ -13,7 +13,9 @@ from foodsaving.users.factories import UserFactory
 class TestConversationReceiver(TestCase):
     def setUp(self):
         self.invited_by = UserFactory()
-        self.group = GroupFactory(members=[self.invited_by, ])
+        self.group = GroupFactory(members=[
+            self.invited_by,
+        ])
         self.user = UserFactory()
         self.invited_at = timezone.now()
 
@@ -44,8 +46,9 @@ class TestConversationReceiver(TestCase):
         self.assertNotIn(user, conversation.participants.all(), 'Conversation still had user in')
 
     def get_conversation_for_group(self, group):
-        return Conversation.objects.filter(target_id=group.id,
-                                           target_type=ContentType.objects.get_for_model(group)).first()
+        return Conversation.objects.filter(
+            target_id=group.id, target_type=ContentType.objects.get_for_model(group)
+        ).first()
 
 
 class TestSendStatistics(TestCase):

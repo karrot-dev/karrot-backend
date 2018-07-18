@@ -33,18 +33,12 @@ MockRequest = namedtuple('Request', ['user'])
 
 
 class AbsoluteURIBuildingRequest:
-
     def build_absolute_uri(self, path):
         return settings.HOSTNAME + path
 
 
 def send_in_channel(channel, topic, payload):
-    Channel(channel).send({
-        'text': json.dumps({
-            'topic': topic,
-            'payload': payload
-        })
-    })
+    Channel(channel).send({'text': json.dumps({'topic': topic, 'payload': payload})})
     stats.pushed_via_websocket(topic)
 
 
@@ -71,9 +65,7 @@ def send_messages(sender, instance, created, **kwargs):
     # Send push notifications when a message is created, but not when it is modified
     if created:
         subscriptions = PushSubscription.objects.filter(
-            Q(user__in=conversation.participants.all()) &
-            ~Q(user__in=push_exclude_users) &
-            ~Q(user=message.author)
+            Q(user__in=conversation.participants.all()) & ~Q(user__in=push_exclude_users) & ~Q(user=message.author)
         )
 
         message_title = message.author.display_name
@@ -160,13 +152,7 @@ def remove_participant(sender, instance, **kwargs):
     user = instance.user
     conversation = instance.conversation
     for subscription in ChannelSubscription.objects.filter(user=user):
-        send_in_channel(
-            subscription.reply_channel,
-            topic='conversations:leave',
-            payload={
-                'id': conversation.id
-            }
-        )
+        send_in_channel(subscription.reply_channel, topic='conversations:leave', payload={'id': conversation.id})
 
 
 @receiver(post_delete, sender=ConversationParticipant)
@@ -320,4 +306,3 @@ def send_history_updates(sender, instance, **kwargs):
     payload = HistorySerializer(history).data
     for subscription in ChannelSubscription.objects.recent().filter(user__in=history.group.members.all()):
         send_in_channel(subscription.reply_channel, topic='history:history', payload=payload)
-

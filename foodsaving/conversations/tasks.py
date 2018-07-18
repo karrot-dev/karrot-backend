@@ -13,9 +13,7 @@ def notify_participants(message):
     participants_to_notify = ConversationParticipant.objects.filter(
         conversation=message.conversation,
         email_notifications=True,
-    ).exclude(
-        user=message.author
-    ).exclude(
+    ).exclude(user=message.author).exclude(
         user__in=User.objects.unverified_or_ignored(),
     )
 
@@ -28,7 +26,8 @@ def notify_participants(message):
 
     for participant in participants_to_notify:
         try:
-            foodsaving.conversations.emails.prepare_conversation_message_notification(user=participant.user,
-                                                                                      message=message).send()
+            foodsaving.conversations.emails.prepare_conversation_message_notification(
+                user=participant.user, message=message
+            ).send()
         except AnymailAPIError:
             sentry_client.captureException()

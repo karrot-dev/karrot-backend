@@ -9,20 +9,16 @@ from foodsaving.base.base_models import BaseModel
 
 
 class EmailEventManager(BaseUserManager):
-
     def ignored(self):
         return self.filter(
-            created_at__gte=timezone.now() - relativedelta(months=3),
-            event__in=settings.EMAIL_EVENTS_AVOID
+            created_at__gte=timezone.now() - relativedelta(months=3), event__in=settings.EMAIL_EVENTS_AVOID
         )
 
     def ignored_addresses(self):
         return self.ignored().values('address').annotate(count=Count('id')).filter(count__gte=5).values('address')
 
     def for_user(self, user):
-        return self.ignored().filter(
-            address=user.email
-        )
+        return self.ignored().filter(address=user.email)
 
 
 class EmailEvent(BaseModel):

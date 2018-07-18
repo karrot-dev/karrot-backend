@@ -7,18 +7,12 @@ from foodsaving.subscriptions.models import PushSubscription
 class PushSubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = PushSubscription
-        fields = [
-            'id',
-            'token',
-            'platform'
-        ]
+        fields = ['id', 'token', 'platform']
 
 
 class CreatePushSubscriptionSerializer(PushSubscriptionSerializer):
     class Meta(PushSubscriptionSerializer.Meta):
-        fields = PushSubscriptionSerializer.Meta.fields + [
-            'user'
-        ]
+        fields = PushSubscriptionSerializer.Meta.fields + ['user']
         extra_kwargs = {'user': {'default': serializers.CurrentUserDefault()}}
         validators = [
             UniqueTogetherValidator(

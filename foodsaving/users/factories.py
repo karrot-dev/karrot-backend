@@ -4,7 +4,6 @@ from foodsaving.utils.tests.fake import faker
 
 
 class UserFactory(DjangoModelFactory):
-
     class Meta:
         model = get_user_model()
         strategy = CREATE_STRATEGY

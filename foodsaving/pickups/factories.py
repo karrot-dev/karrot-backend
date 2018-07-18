@@ -19,7 +19,6 @@ def in_one_day():
 
 
 class PickupDateFactory(DjangoModelFactory):
-
     class Meta:
         model = PickupDateModel
 
@@ -37,7 +36,6 @@ class PickupDateFactory(DjangoModelFactory):
 
 
 class PickupDateSeriesFactory(DjangoModelFactory):
-
     class Meta:
         model = PickupDateSeriesModel
 
@@ -47,7 +45,6 @@ class PickupDateSeriesFactory(DjangoModelFactory):
 
 
 class FeedbackFactory(DjangoModelFactory):
-
     class Meta:
         model = FeedbackModel
 

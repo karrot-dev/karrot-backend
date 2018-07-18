@@ -25,7 +25,4 @@ class TestApplicationConversationModel(APITestCase):
 
     def test_deleting_application_deletes_conversation(self):
         GroupApplication.objects.filter(user=self.applicant, group=self.group).delete()
-        self.assertIsNone(
-            Conversation.objects.get_for_target(self.application)
-        )
-
+        self.assertIsNone(Conversation.objects.get_for_target(self.application))

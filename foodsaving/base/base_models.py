@@ -11,8 +11,10 @@ class NicelyFormattedModel(Model):
         """
         :rtype: list
         """
-        return [field.name for field in self._meta.get_fields()
-                if isinstance(field, Field) and not isinstance(field, RelatedField)]
+        return [
+            field.name for field in self._meta.get_fields()
+            if isinstance(field, Field) and not isinstance(field, RelatedField)
+        ]
 
     def to_dict(self):
         """
@@ -23,8 +25,7 @@ class NicelyFormattedModel(Model):
 
     def __repr__(self):
         model = str(self.__class__.__name__)
-        columns = ', '.join('{}="{}"'.format(field, value)
-                            for field, value in self.to_dict().items())
+        columns = ', '.join('{}="{}"'.format(field, value) for field, value in self.to_dict().items())
         return '{}({})'.format(model, columns)
 
 

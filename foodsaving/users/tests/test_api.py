@@ -25,7 +25,9 @@ class TestUsersAPI(APITestCase):
         self.group = GroupFactory(members=[self.user, self.user2])
         self.another_common_group = GroupFactory(members=[self.user, self.user2])
         self.user_in_another_group = UserFactory()
-        self.another_group = GroupFactory(members=[self.user_in_another_group, ])
+        self.another_group = GroupFactory(members=[
+            self.user_in_another_group,
+        ])
         mail.outbox = []
 
     def test_list_users_forbidden(self):
@@ -88,9 +90,7 @@ class TestPublicUserProfilesAPI(APITestCase, ExtractPaginationMixin):
             'display_name': self.user.display_name,
             'id': self.user.id,
         })
-        self.assertFalse(
-            any(r['id'] == self.user_not_in_conversation.id for r in response.data)
-        )
+        self.assertFalse(any(r['id'] == self.user_not_in_conversation.id for r in response.data))
 
     def test_access_forbidden_if_not_logged_in(self):
         response = self.get_results('/api/users-info/')
@@ -103,4 +103,3 @@ class TestPublicUserProfilesAPI(APITestCase, ExtractPaginationMixin):
         response = self.get_results('/api/users-info/?conversation={}'.format(another_conversation.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), len(more_users))
-

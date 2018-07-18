@@ -45,8 +45,8 @@ def daily_pickup_notifications():
             for data in fetch_pickup_notification_data_for_group(group):
                 prepare_pickup_notification_email(**data).send()
                 stats.pickup_notification_email(
-                    group=data['group'],
-                    **{k: v.count() for k, v in data.items() if isinstance(v, QuerySet)}
+                    group=data['group'], **{k: v.count()
+                                            for k, v in data.items() if isinstance(v, QuerySet)}
                 )
 
 

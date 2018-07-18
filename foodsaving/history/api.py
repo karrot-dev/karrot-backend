@@ -20,9 +20,9 @@ class HistoryViewSet(viewsets.ReadOnlyModelViewSet):
     """
     serializer_class = HistorySerializer
     queryset = History.objects
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, )
     filter_class = HistoryFilter
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
     pagination_class = HistoryPagination
 
     def get_queryset(self):

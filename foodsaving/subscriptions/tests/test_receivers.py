@@ -92,27 +92,18 @@ class ConversationReceiverTests(ChannelTestCase):
         # hopefully they receive it!
         response = client.receive(json=True)
         parse_dates(response)
-        self.assertEqual(
-            response,
-            make_conversation_message_broadcast(message)
-        )
+        self.assertEqual(response, make_conversation_message_broadcast(message))
 
         # and they should get an updated conversation object
         response = client.receive(json=True)
         parse_dates(response)
         del response['payload']['participants']
-        self.assertEqual(
-            response,
-            make_conversation_broadcast(conversation, unread_message_count=1)
-        )
+        self.assertEqual(response, make_conversation_broadcast(conversation, unread_message_count=1))
 
         # author should get message & updated conversations object too
         response = author_client.receive(json=True)
         parse_dates(response)
-        self.assertEqual(
-            response,
-            make_conversation_message_broadcast(message, is_editable=True)
-        )
+        self.assertEqual(response, make_conversation_message_broadcast(message, is_editable=True))
 
         # Author receives more recent `update_at` time,
         # because their `seen_up_to` status is set after sending the message.
@@ -130,7 +121,9 @@ class ConversationReceiverTests(ChannelTestCase):
         user = UserFactory()
 
         # join a conversation
-        conversation = ConversationFactory(participants=[user, ])
+        conversation = ConversationFactory(participants=[
+            user,
+        ])
 
         # login and connect
         client.force_login(user)
@@ -138,12 +131,14 @@ class ConversationReceiverTests(ChannelTestCase):
 
         conversation.leave(user)
 
-        self.assertEqual(client.receive(json=True), {
-            'topic': 'conversations:leave',
-            'payload': {
-                'id': conversation.id
+        self.assertEqual(
+            client.receive(json=True), {
+                'topic': 'conversations:leave',
+                'payload': {
+                    'id': conversation.id
+                }
             }
-        })
+        )
 
     def test_other_participants_receive_update_on_join(self):
         client = WSClient()
@@ -151,7 +146,9 @@ class ConversationReceiverTests(ChannelTestCase):
         joining_user = UserFactory()
 
         # join a conversation
-        conversation = ConversationFactory(participants=[user, ])
+        conversation = ConversationFactory(participants=[
+            user,
+        ])
         # login and connect
         client.force_login(user)
         client.send_and_consume('websocket.connect', path='/')
@@ -210,7 +207,10 @@ class ConversationMessageReactionReceiverTests(ChannelTestCase):
         parse_dates(response)
         self.assertEqual(
             response,
-            make_conversation_message_broadcast(message, reactions=[{'name': 'carrot', 'user': reaction_user.id}])
+            make_conversation_message_broadcast(message, reactions=[{
+                'name': 'carrot',
+                'user': reaction_user.id
+            }])
         )
 
     def test_receive_reaction_deletion(self):
@@ -241,10 +241,7 @@ class ConversationMessageReactionReceiverTests(ChannelTestCase):
         # check if conversation update was received
         response = client.receive(json=True)
         parse_dates(response)
-        self.assertEqual(
-            response,
-            make_conversation_message_broadcast(message)
-        )
+        self.assertEqual(response, make_conversation_message_broadcast(message))
 
 
 class GroupReceiverTests(ChannelTestCase):
@@ -347,11 +344,7 @@ class InvitationReceiverTests(ChannelTestCase):
         self.client.force_login(self.member)
         self.client.send_and_consume('websocket.connect', path='/')
 
-        invitation = Invitation.objects.create(
-            email='bla@bla.com',
-            group=self.group,
-            invited_by=self.member
-        )
+        invitation = Invitation.objects.create(email='bla@bla.com', group=self.group, invited_by=self.member)
 
         response = self.client.receive(json=True)
         self.assertEqual(response['topic'], 'invitations:invitation')
@@ -360,11 +353,7 @@ class InvitationReceiverTests(ChannelTestCase):
         self.assertIsNone(self.client.receive(json=True))
 
     def test_receive_invitation_accept(self):
-        invitation = Invitation.objects.create(
-            email='bla@bla.com',
-            group=self.group,
-            invited_by=self.member
-        )
+        invitation = Invitation.objects.create(email='bla@bla.com', group=self.group, invited_by=self.member)
         user = UserFactory()
 
         self.client.force_login(self.member)
@@ -552,8 +541,9 @@ class UserReceiverTest(ChannelTestCase):
         self.unrelated_user = UserFactory()
         self.group = GroupFactory(members=[self.member, self.other_member])
         pathlib.Path(settings.MEDIA_ROOT).mkdir(exist_ok=True)
-        copyfile(os.path.join(os.path.dirname(__file__), './photo.jpg'),
-                 os.path.join(settings.MEDIA_ROOT, 'photo.jpg'))
+        copyfile(
+            os.path.join(os.path.dirname(__file__), './photo.jpg'), os.path.join(settings.MEDIA_ROOT, 'photo.jpg')
+        )
         self.member.photo = 'photo.jpg'
         self.member.save()
         self.other_member.photo = 'photo.jpg'

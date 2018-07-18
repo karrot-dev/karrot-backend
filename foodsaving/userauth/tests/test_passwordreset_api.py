@@ -88,8 +88,13 @@ class TestPasswordReset(APITestCase):
         verification_code = VerificationCode.objects.get(user=self.verified_user, type=self.type)
         verification_code.created_at = timezone.now() - timedelta(days=8)
         verification_code.save()
-        response = self.client.post(self.url_password_reset, {'code': verification_code.code,
-                                                              'new_password': self.new_password})
+        response = self.client.post(
+            self.url_password_reset,
+            {
+                'code': verification_code.code,
+                'new_password': self.new_password
+            }
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['code'], ['Verification code has expired'])
         self.assertEqual(len(mail.outbox), 1)

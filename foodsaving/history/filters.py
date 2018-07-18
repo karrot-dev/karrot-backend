@@ -14,9 +14,7 @@ class ISODateTimeField(forms.DateTimeField):
 
 class DateTimeRangeField(RangeField):
     def __init__(self, *args, **kwargs):
-        fields = (
-            ISODateTimeField(),
-            ISODateTimeField())
+        fields = (ISODateTimeField(), ISODateTimeField())
         super(DateTimeRangeField, self).__init__(fields, *args, **kwargs)
 
 
@@ -35,4 +33,3 @@ class HistoryFilter(FilterSet):
     class Meta:
         model = History
         fields = ('group', 'store', 'users', 'typus', 'date')
-
