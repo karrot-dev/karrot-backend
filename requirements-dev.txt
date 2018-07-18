@@ -26,7 +26,7 @@ idna==2.7                 # via requests
 ipython-genutils==0.2.0   # via traitlets
 ipython==6.4.0
 jedi==0.12.1              # via ipython
-jinja2==2.10              # via django-silk
+jinja2==2.10              # via django-silk, jinja2
 logging-tree==1.7
 markupsafe==1.0           # via jinja2
 mccabe==0.6.1             # via flake8
@@ -61,3 +61,4 @@ transifex-client==0.13.4
 unidecode==1.0.22         # via python-slugify
 urllib3==1.23             # via requests, transifex-client
 wcwidth==0.1.7            # via prompt-toolkit
+yapf==0.22.0
