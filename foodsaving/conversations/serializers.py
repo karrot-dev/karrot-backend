@@ -165,7 +165,13 @@ class ConversationThreadSerializer(serializers.ModelSerializer):
         return participant.thread.replies_count
 
     def get_unread_reply_count(self, participant):
-        return participant.thread.unread_replies_count
+        count = getattr(participant.thread, 'unread_replies_count', None)
+        if count is None:
+            messages = participant.thread.thread_messages.only_replies()
+            if participant.seen_up_to:
+                messages = messages.filter(id__gt=participant.seen_up_to.id)
+            return messages.count()
+        return count
 
     def validate_seen_up_to(self, seen_up_to):
         if not self.instance.thread.thread_messages.filter(id=seen_up_to.id).exists():

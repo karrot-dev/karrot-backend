@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save, pre_delete
+from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 
 from foodsaving.conversations import tasks, stats
@@ -10,19 +10,17 @@ from foodsaving.conversations.models import (
 )
 
 
-@receiver(post_save, sender=ConversationMessage)
-def create_thread_participant(sender, instance, created, **kwargs):
-    if not created:
-        return
+@receiver(pre_save, sender=ConversationMessage)
+def create_thread_participant(sender, instance, **kwargs):
     message = instance
     thread = message.thread
 
-    if thread:
+    if message.is_thread_reply():
         if not thread.thread_id:
             # initialize thread
             thread.participants.create(user=thread.author)
-            thread.thread_id = thread.id
-            thread.save()
+            ConversationMessage.objects.filter(id=thread.id).update(thread=thread)
+            del thread.thread_id  # will be refreshed on next access
 
         if message.author != thread.author and not thread.participants.filter(user=message.author).exists():
             thread.participants.create(user=message.author)
