@@ -46,7 +46,7 @@ class ConversationSerializer(serializers.ModelSerializer):
 
     def get_unread_message_count(self, conversation):
         participant = self._participant(conversation)
-        messages = conversation.messages
+        messages = conversation.messages.exclude_replies()
         if participant.seen_up_to:
             messages = messages.filter(id__gt=participant.seen_up_to.id)
         return messages.count()
