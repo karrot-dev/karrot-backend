@@ -9,7 +9,7 @@ from foodsaving.groups.factories import GroupFactory
 from foodsaving.invitations.models import Invitation
 from foodsaving.userauth.models import VerificationCode
 from foodsaving.users.factories import UserFactory
-from foodsaving.utils.email_utils import time_filter, date_filter
+from foodsaving.utils.email_utils import time_filter, date_filter, generate_plaintext_from_html
 
 
 class TestEmailUtils(TestCase):
@@ -62,6 +62,16 @@ class TestEmailUtils(TestCase):
         self.assertEqual(email.to[0], self.user.unverified_email)
         self.assertIn(settings.HOSTNAME, html)
         self.assertIn(verification_code.code, html)
+
+
+class TestHTMLToPlainText(TestCase):
+    def test_does_not_split_links(self):
+        # token that causes html2text to make a line break if wrap_links option is not set
+        token = '4522e1fa-9827-44ec-bf76-f7fa8fb132ff'
+        url = 'http://localhost:8080/#/signup?invite={}&email=please%40join.com'.format(token)
+        html = '<a href="{}">some link</a>'.format(url)
+        text = generate_plaintext_from_html(html)
+        self.assertIn(url, text)
 
 
 class TestJinjaFilters(TestCase):
