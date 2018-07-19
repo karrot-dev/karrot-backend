@@ -163,6 +163,23 @@ class TestConversationThreadsAPI(APITestCase):
         response = self.client.patch('/api/messages/{}/thread/'.format(another_message.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_can_edit_reply(self):
+        self.client.force_login(user=self.user)
+        reply = self.create_reply()
+        response = self.client.patch('/api/messages/{}/'.format(reply.id), {
+            'content': 'edited!'
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['content'], 'edited!')
+
+    def test_can_react_to_reply(self):
+        self.client.force_login(user=self.user)
+        reply = self.create_reply()
+        response = self.client.post('/api/messages/{}/reactions/'.format(reply.id), {
+            'name': 'smile'
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
     def test_get_thread_meta_for_particiant(self):
         self.client.force_login(user=self.user)
         reply = self.create_reply()
@@ -608,7 +625,7 @@ class TestConversationsMessageReactionsDeleteAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
 
-class TestConversationsMessageEditPatchAPI(APITestCase):
+class TestConversationsMessageEditAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.user2 = UserFactory()
@@ -645,10 +662,8 @@ class TestConversationsMessageEditPatchAPI(APITestCase):
         self.client.force_login(user=self.user2)
         data = {'content': 'a nice message'}
         response = self.client.patch('/api/messages/{}/'.format(self.message.id), data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    # Even if the participant is in the conversation,
-    # they cannot edit messages they did not create.
     def test_cannot_update_message_if_not_message_author(self):
         self.client.force_login(user=self.user2)
         data = {'content': 'a nicer message'}

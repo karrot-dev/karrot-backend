@@ -143,6 +143,8 @@ class ConversationMessageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
         return super().paginator
 
     def get_queryset(self):
+        if self.action == 'partial_update':
+            return self.queryset
         qs = self.queryset \
             .filter(conversation__participants=self.request.user) \
             .annotate_unread_replies_count_for(self.request.user)
@@ -178,8 +180,6 @@ class ConversationMessageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
         """route for POST /messages/{id}/reactions/ with body {"name":"emoji_name"}"""
 
         message = get_object_or_404(ConversationMessage, id=pk)
-
-        # object permissions check has to be triggered manually
         self.check_object_permissions(self.request, message)
 
         data = {
