@@ -49,8 +49,10 @@ class TestUsersAPI(APITestCase):
         self.assertIn('Thank you for signing up', mail.outbox[0].body)
 
         response = self.client.post(
-            '/api/auth/',
-            {'email': self.user_data['email'], 'password': self.user_data['password']}
+            '/api/auth/', {
+                'email': self.user_data['email'],
+                'password': self.user_data['password']
+            }
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -93,13 +95,14 @@ class TestUserDeleteAPI(APITestCase):
         self.group = GroupFactory(members=[self.user, self.user2])
         self.store = StoreFactory(group=self.group)
         self.pickupdate = PickupDateFactory(
-            store=self.store,
-            date=timezone.now() + relativedelta(days=1),
-            collectors=[self.user, ])
+            store=self.store, date=timezone.now() + relativedelta(days=1), collectors=[
+                self.user,
+            ]
+        )
         self.past_pickupdate = PickupDateFactory(
-            store=self.store,
-            date=timezone.now() - relativedelta(days=1),
-            collectors=[self.user, ]
+            store=self.store, date=timezone.now() - relativedelta(days=1), collectors=[
+                self.user,
+            ]
         )
         self.url_user = '/api/auth/user/'
         self.url_delete = '/api/auth/user/?code={:s}'
@@ -150,12 +153,17 @@ class TestUserDeleteAPI(APITestCase):
 
         # actions are disabled when user is deleted
         self.assertEqual(
-            self.client.post('/api/auth/', {'email': self.user.email, 'password': self.user.display_name}).status_code,
-            status.HTTP_400_BAD_REQUEST
+            self.client.post('/api/auth/',
+                             {
+                                 'email': self.user.email,
+                                 'password': self.user.display_name
+                             }).status_code, status.HTTP_400_BAD_REQUEST
         )
         self.assertEqual(
-            self.client.post('/api/auth/password/reset/', {'email': self.user.email}).status_code,
-            status.HTTP_400_BAD_REQUEST
+            self.client.post('/api/auth/password/reset/',
+                             {
+                                 'email': self.user.email
+                             }).status_code, status.HTTP_400_BAD_REQUEST
         )
 
     def test_deletion_fails_without_verification_code(self):
@@ -194,18 +202,22 @@ class TestCreateUserErrors(APITestCase):
         self.url = '/api/auth/user/'
 
     def test_create_user_with_similar_cased_email_fails(self):
-        response = self.client.post(self.url, {
-            'email': 'fancy@example.com',
-            'password': faker.name(),
-            'display_name': faker.name()
-        })
+        response = self.client.post(
+            self.url, {
+                'email': 'fancy@example.com',
+                'password': faker.name(),
+                'display_name': faker.name()
+            }
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        response = self.client.post(self.url, {
-            'email': 'Fancy@example.com',
-            'password': faker.name(),
-            'display_name': faker.name()
-        })
+        response = self.client.post(
+            self.url, {
+                'email': 'Fancy@example.com',
+                'password': faker.name(),
+                'display_name': faker.name()
+            }
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(response.data['email'], ['Similar e-mail exists: fancy@example.com'])
 
@@ -255,17 +267,23 @@ class TestRejectedAddress(APITestCase):
         self.mail_class.send = self._original_send
 
     def test_sign_up_with_rejected_address_fails(self):
-        response = self.client.post(self.url_user, {
-            'email': 'bad@test.com',
-            'password': faker.name(),
-            'display_name': faker.name()
-        })
+        response = self.client.post(
+            self.url_user, {
+                'email': 'bad@test.com',
+                'password': faker.name(),
+                'display_name': faker.name()
+            }
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_change_to_rejected_address_fails(self):
         self.client.force_login(user=self.user)
-        response = self.client.put(self.url_change_email, {'password': self.user.display_name,
-                                                           'new_email': 'bad@test.com'})
+        response = self.client.put(
+            self.url_change_email, {
+                'password': self.user.display_name,
+                'new_email': 'bad@test.com'
+            }
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_request_account_deletion_fails(self):
@@ -288,21 +306,27 @@ class TestRejectedAddress(APITestCase):
 class TestSetCurrentGroup(APITestCase):
     def setUp(self):
         self.user = UserFactory()
-        self.group = GroupFactory(members=[self.user, ])
+        self.group = GroupFactory(members=[
+            self.user,
+        ])
         self.unrelated_group = GroupFactory()
 
     def test_set_current_group_succeeds(self):
         self.client.force_login(user=self.user)
         self.assertEqual(
-            self.client.patch('/api/auth/user/', {'current_group': self.group.id}).status_code,
-            status.HTTP_200_OK
+            self.client.patch('/api/auth/user/',
+                              {
+                                  'current_group': self.group.id
+                              }).status_code, status.HTTP_200_OK
         )
 
     def test_set_current_group_as_non_member_fails(self):
         self.client.force_login(user=self.user)
         self.assertEqual(
-            self.client.patch('/api/auth/user/', {'current_group': self.unrelated_group.id}).status_code,
-            status.HTTP_400_BAD_REQUEST
+            self.client.patch('/api/auth/user/',
+                              {
+                                  'current_group': self.unrelated_group.id
+                              }).status_code, status.HTTP_400_BAD_REQUEST
         )
 
 
@@ -375,11 +399,7 @@ class TestChangeEMail(APITestCase):
         self.assertIn('Your email address changed', mail.outbox[0].subject)
         self.assertEqual(mail.outbox[0].to, [self.old_email], 'error: change notice sent to wrong address')
         self.assertIn('Please verify your email', mail.outbox[1].subject)
-        self.assertEqual(
-            mail.outbox[1].to,
-            [self.new_email],
-            'error: verification request sent to wrong address'
-        )
+        self.assertEqual(mail.outbox[1].to, [self.new_email], 'error: verification request sent to wrong address')
         self.assertNotIn('Thank you for signing up', mail.outbox[1].body)
 
         self.verified_user.refresh_from_db()

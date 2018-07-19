@@ -56,16 +56,19 @@ class FCMTests(TestCase):
         with override_fcm_key('something'):
             valid = PushSubscriptionFactory()
             invalid = PushSubscriptionFactory()
-            m.post('https://fcm.googleapis.com/fcm/send', json={
-                'results': [
-                    {
-                        # not an error
-                    },
-                    {
-                        'error': 'InvalidRegistration'
-                    }
-                ]
-            })
+            m.post(
+                'https://fcm.googleapis.com/fcm/send',
+                json={
+                    'results': [
+                        {
+                            # not an error
+                        },
+                        {
+                            'error': 'InvalidRegistration'
+                        }
+                    ]
+                }
+            )
 
             result = fcm.notify_subscribers([valid, invalid], fcm_options={})
             self.assertIsNotNone(result)
@@ -76,7 +79,8 @@ class FCMTests(TestCase):
         with logger_warning_mock() as warning_mock:
             with override_fcm_key():
                 warning_mock.assert_called_with(
-                    'Please configure FCM_SERVER_KEY in your settings to use push messaging')
+                    'Please configure FCM_SERVER_KEY in your settings to use push messaging'
+                )
                 result = _notify_multiple_devices(registration_ids=['mytoken'])
                 self.assertIsNone(result)
 

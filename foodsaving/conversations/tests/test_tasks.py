@@ -8,7 +8,6 @@ from foodsaving.users.factories import VerifiedUserFactory, UserFactory
 
 
 class TestConversationNotificationTask(TestCase):
-
     def setUp(self):
         self.user = VerifiedUserFactory()
         self.unverified_user = UserFactory()

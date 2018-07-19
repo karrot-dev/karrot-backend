@@ -35,10 +35,13 @@ class GroupApplication(BaseModel):
 
     @transaction.atomic
     def accept(self, accepted_by):
-        self.group.add_member(self.user, history_payload={
-            'accepted_by': accepted_by.id,
-            'application_date': self.created_at.isoformat(),
-        })
+        self.group.add_member(
+            self.user,
+            history_payload={
+                'accepted_by': accepted_by.id,
+                'application_date': self.created_at.isoformat(),
+            }
+        )
         self.status = GroupApplicationStatus.ACCEPTED.value
         self.save()
 

@@ -10,7 +10,9 @@ def group_joined(group):
         'tags': {
             'group': str(group.id)
         },
-        'fields': {'group_joined': 1},
+        'fields': {
+            'group_joined': 1
+        },
     }])
 
 
@@ -20,7 +22,9 @@ def group_left(group):
         'tags': {
             'group': str(group.id)
         },
-        'fields': {'group_left': 1},
+        'fields': {
+            'group_left': 1
+        },
     }])
 
 
@@ -30,7 +34,9 @@ def group_activity(group):
         'tags': {
             'group': str(group.id)
         },
-        'fields': {'group_activity': 1},
+        'fields': {
+            'group_activity': 1
+        },
     }])
 
 
@@ -40,7 +46,10 @@ def group_summary_email(group, **extra_fields):
         'tags': {
             'group': str(group.id)
         },
-        'fields': {'value': 1, **extra_fields},
+        'fields': {
+            'value': 1,
+            **extra_fields
+        },
     }])
 
 

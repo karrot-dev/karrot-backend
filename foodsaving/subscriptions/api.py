@@ -6,19 +6,14 @@ from foodsaving.subscriptions.models import PushSubscription
 from foodsaving.subscriptions.serializers import PushSubscriptionSerializer, CreatePushSubscriptionSerializer
 
 
-class PushSubscriptionViewSet(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    GenericViewSet
-):
+class PushSubscriptionViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,
+                              mixins.DestroyModelMixin, GenericViewSet):
     """
     PushSubscriptions
     """
     queryset = PushSubscription.objects
     serializer_class = PushSubscriptionSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
 
     def get_serializer_class(self):
         if self.action == 'create':

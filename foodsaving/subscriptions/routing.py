@@ -5,7 +5,8 @@ from channels.security.websocket import AllowedHostsOriginValidator
 from .consumers import WebsocketConsumer, TokenAuthMiddleware
 
 application = ProtocolTypeRouter({
-    'websocket': AllowedHostsOriginValidator(
+    'websocket':
+    AllowedHostsOriginValidator(
         TokenAuthMiddleware(
             AuthMiddlewareStack(
                 WebsocketConsumer,

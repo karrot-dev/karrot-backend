@@ -37,22 +37,21 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
         del data['id']
         conversation_id = data['conversation']
         del data['conversation']
-        self.assertEqual(data, {
-            'questions': self.group.application_questions,
-            'answers': answers,
-            'user': self.applicant.id,
-            'group': self.group.id,
-            'status': 'pending',
-        })
+        self.assertEqual(
+            data, {
+                'questions': self.group.application_questions,
+                'answers': answers,
+                'user': self.applicant.id,
+                'group': self.group.id,
+                'status': 'pending',
+            }
+        )
 
         # check conversation
         conversation_response = self.client.get('/api/conversations/{}/'.format(conversation_id))
         self.assertEqual(conversation_response.status_code, status.HTTP_200_OK)
         for user_id in (self.applicant.id, self.member.id):
-            self.assertIn(
-                user_id,
-                conversation_response.data['participants']
-            )
+            self.assertIn(user_id, conversation_response.data['participants'])
         message_response = self.get_results('/api/messages/?conversation={}'.format(conversation_id))
         self.assertEqual(len(message_response.data), 0)
 
@@ -60,15 +59,17 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
         application_list_response = self.client.get('/api/group-applications/')
         self.assertEqual(application_list_response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(application_list_response.data), 1)
-        self.assertEqual(application_list_response.data[0], {
-            'id': application_id,
-            'questions': self.group.application_questions,
-            'answers': answers,
-            'user': self.applicant.id,
-            'group': self.group.id,
-            'conversation': conversation_id,
-            'status': 'pending',
-        })
+        self.assertEqual(
+            application_list_response.data[0], {
+                'id': application_id,
+                'questions': self.group.application_questions,
+                'answers': answers,
+                'user': self.applicant.id,
+                'group': self.group.id,
+                'conversation': conversation_id,
+                'status': 'pending',
+            }
+        )
 
         # check email notifications
         notification = mail.outbox[0]
@@ -154,10 +155,12 @@ class TestApplicationNotifications(APITestCase):
 
     def test_disable_notifications(self):
         self.client.force_login(user=self.member)
-        response = self.client.delete('/api/groups/{}/notification_types/{}/'.format(
-            self.group.id,
-            GroupNotificationType.NEW_APPLICATION,
-        ))
+        response = self.client.delete(
+            '/api/groups/{}/notification_types/{}/'.format(
+                self.group.id,
+                GroupNotificationType.NEW_APPLICATION,
+            )
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # create application
@@ -184,10 +187,12 @@ class TestApplicationConversation(APITestCase):
     def test_member_replies_in_conversation(self):
         self.client.force_login(user=self.member)
         chat_message = faker.sentence()
-        response = self.client.post('/api/messages/', {
-            'conversation': self.conversation.id,
-            'content': chat_message,
-        })
+        response = self.client.post(
+            '/api/messages/', {
+                'conversation': self.conversation.id,
+                'content': chat_message,
+            }
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         notification = mail.outbox[0]
         self.assertEqual(notification.to[0], self.applicant.email)
@@ -197,10 +202,12 @@ class TestApplicationConversation(APITestCase):
     def test_applicant_replies_in_conversation(self):
         self.client.force_login(user=self.applicant)
         chat_message = faker.sentence()
-        response = self.client.post('/api/messages/', {
-            'conversation': self.conversation.id,
-            'content': chat_message,
-        })
+        response = self.client.post(
+            '/api/messages/', {
+                'conversation': self.conversation.id,
+                'content': chat_message,
+            }
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         notification = mail.outbox[0]
         self.assertEqual(notification.to[0], self.member.email)
@@ -220,6 +227,7 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
             applicant = VerifiedUserFactory()
             group = GroupFactory(members=[self.member])
             GroupApplicationFactory(group=group, user=applicant)
+
         [make_application() for _ in range(5)]
 
         mail.outbox = []

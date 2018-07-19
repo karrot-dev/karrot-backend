@@ -13,12 +13,16 @@ from foodsaving.users.factories import UserFactory, VerifiedUserFactory
 class ConversationModelTests(TestCase):
     def test_join(self):
         user = UserFactory()
-        conversation = ConversationFactory(participants=[user, ])
+        conversation = ConversationFactory(participants=[
+            user,
+        ])
         self.assertIn(user, conversation.participants.all())
 
     def test_leave(self):
         user = UserFactory()
-        conversation = ConversationFactory(participants=[user, ])
+        conversation = ConversationFactory(participants=[
+            user,
+        ])
         self.assertIn(user, conversation.participants.all())
         conversation.leave(user)
         self.assertNotIn(user, conversation.participants.all())
@@ -41,7 +45,9 @@ class ConversationModelTests(TestCase):
 
     def test_message_create(self):
         user = UserFactory()
-        conversation = ConversationFactory(participants=[user, ])
+        conversation = ConversationFactory(participants=[
+            user,
+        ])
         conversation.messages.create(author=user, content='yay')
         self.assertEqual(ConversationMessage.objects.filter(author=user).count(), 1)
 
@@ -124,7 +130,6 @@ class TestPrivateUserConversations(TestCase):
 
 
 class ReactionModelTests(TestCase):
-
     def test_reaction_create(self):
         user = UserFactory()
         conversation = ConversationFactory()

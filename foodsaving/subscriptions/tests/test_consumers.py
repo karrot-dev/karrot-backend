@@ -43,8 +43,7 @@ class ConsumerTests(asynctest.TestCase):
         subscription = ChannelSubscription.objects.filter(user=user).first()
         self.assertIsNotNone(subscription.reply_channel)
         await get_channel_layer().send(
-            subscription.reply_channel,
-            {
+            subscription.reply_channel, {
                 'type': 'message.send',
                 'text': json.dumps({
                     'message': 'hey! whaatsup?',
@@ -120,13 +119,9 @@ class TokenAuthTests(asynctest.TestCase):
 
 class TokenUtilTests(TestCase):
     def test_get_auth_token_from_headers(self):
-        token = get_auth_token_from_headers([
-            [b'sec-websocket-protocol', b'karrot.token,karrot.token.value.Zm9v']
-        ])
+        token = get_auth_token_from_headers([[b'sec-websocket-protocol', b'karrot.token,karrot.token.value.Zm9v']])
         self.assertEqual(token, 'foo')
 
     def test_get_auth_token_from_headers_with_removed_base64_padding(self):
-        token = get_auth_token_from_headers([
-            [b'sec-websocket-protocol', b'karrot.token,karrot.token.value.Zm9vMQ']
-        ])
+        token = get_auth_token_from_headers([[b'sec-websocket-protocol', b'karrot.token,karrot.token.value.Zm9vMQ']])
         self.assertEqual(token, 'foo1')

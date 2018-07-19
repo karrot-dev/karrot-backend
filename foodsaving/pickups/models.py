@@ -29,11 +29,7 @@ class PickupDateSeriesManager(models.Manager):
 class PickupDateSeries(BaseModel):
     objects = PickupDateSeriesManager()
 
-    store = models.ForeignKey(
-        'stores.Store',
-        related_name='series',
-        on_delete=models.CASCADE
-    )
+    store = models.ForeignKey('stores.Store', related_name='series', on_delete=models.CASCADE)
     max_collectors = models.PositiveIntegerField(blank=True, null=True)
     rule = models.TextField()
     start_date = models.DateTimeField()
@@ -76,10 +72,8 @@ class PickupDateSeries(BaseModel):
         # shift start time slightly into future to avoid pickup dates which are only valid for very short time
         start_date = start() + relativedelta(minutes=5)
 
-        for pickup, new_date in zip_longest(
-            self.pickup_dates.filter(date__gte=start_date),
-            self.get_dates_for_rule(start_date=start_date)
-        ):
+        for pickup, new_date in zip_longest(self.pickup_dates.filter(date__gte=start_date),
+                                            self.get_dates_for_rule(start_date=start_date)):
             if not pickup:
                 # does not yet exist
                 PickupDate.objects.create(
@@ -169,23 +163,11 @@ class PickupDate(BaseModel, ConversationMixin):
     class Meta:
         ordering = ['date']
 
-    series = models.ForeignKey(
-        'PickupDateSeries',
-        related_name='pickup_dates',
-        on_delete=models.SET_NULL,
-        null=True
-    )
-    store = models.ForeignKey(
-        'stores.Store',
-        related_name='pickup_dates',
-        on_delete=models.CASCADE
-    )
+    series = models.ForeignKey('PickupDateSeries', related_name='pickup_dates', on_delete=models.SET_NULL, null=True)
+    store = models.ForeignKey('stores.Store', related_name='pickup_dates', on_delete=models.CASCADE)
     date = models.DateTimeField()
 
-    collectors = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name='pickup_dates'
-    )
+    collectors = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='pickup_dates')
     description = models.TextField(blank=True)
     max_collectors = models.PositiveIntegerField(null=True)
     deleted = models.BooleanField(default=False)
@@ -228,9 +210,8 @@ class Feedback(BaseModel):
     given_by = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='feedback')
     about = models.ForeignKey('PickupDate', on_delete=models.CASCADE)
     weight = models.FloatField(
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(-0.01), MaxValueValidator(10000.0)]
+        blank=True, null=True, validators=[MinValueValidator(-0.01),
+                                           MaxValueValidator(10000.0)]
     )
     comment = models.CharField(max_length=settings.DESCRIPTION_MAX_LENGTH, blank=True)
 

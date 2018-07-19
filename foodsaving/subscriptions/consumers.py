@@ -46,7 +46,6 @@ class TokenAuthMiddleware:
 
 
 class WebsocketConsumer(AsyncJsonWebsocketConsumer):
-
     async def connect(self):
         """The user has connected! Register their channel subscription."""
         if 'user' in self.scope:
@@ -100,7 +99,6 @@ class WebsocketConsumer(AsyncJsonWebsocketConsumer):
 
 
 class WebsocketConsumerSync(JsonWebsocketConsumer):
-
     def connect(self):
         """The user has connected! Register their channel subscription."""
         if 'user' in self.scope:

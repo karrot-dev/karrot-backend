@@ -71,8 +71,9 @@ def get_or_create_application():
 
 class Handlers:
     def accountdelete_request(self):
-        return foodsaving.users.emails.prepare_accountdelete_request_email(user=random_user(),
-                                                                           verification_code=pseudo_verification_code())
+        return foodsaving.users.emails.prepare_accountdelete_request_email(
+            user=random_user(), verification_code=pseudo_verification_code()
+        )
 
     def accountdelete_success(self):
         return foodsaving.users.emails.prepare_accountdelete_success_email(user=random_user())
@@ -89,16 +90,18 @@ class Handlers:
         return foodsaving.users.emails.prepare_changemail_success_email(user=random_user())
 
     def conversation_message_notification(self):
-        return foodsaving.conversations.emails.prepare_conversation_message_notification(user=random_user(),
-                                                                                         message=random_message())
+        return foodsaving.conversations.emails.prepare_conversation_message_notification(
+            user=random_user(), message=random_message()
+        )
 
     def emailinvitation(self):
         invitation = Invitation.objects.first()
         if invitation is None:
             invited_by = random_user()
             group = Group.objects.first()
-            invitation = Invitation.objects.create(group=group, invited_by=invited_by,
-                                                   email='exampleinvitation@foo.com')
+            invitation = Invitation.objects.create(
+                group=group, invited_by=invited_by, email='exampleinvitation@foo.com'
+            )
         return foodsaving.invitations.emails.prepare_emailinvitation_email(invitation)
 
     def new_application(self):
@@ -119,23 +122,23 @@ class Handlers:
             return summary_emails[0]
 
         raise Exception(
-            'No emails were generated, you need at least one verified user in your db, and some activity data...')
+            'No emails were generated, you need at least one verified user in your db, and some activity data...'
+        )
 
     def changemail_request(self):
         return foodsaving.users.emails.prepare_changemail_request_email(
-            user=random_user(),
-            verification_code=pseudo_verification_code()
+            user=random_user(), verification_code=pseudo_verification_code()
         )
 
     def signup(self):
         return foodsaving.users.emails.prepare_signup_email(
-            user=random_user(),
-            verification_code=pseudo_verification_code()
+            user=random_user(), verification_code=pseudo_verification_code()
         )
 
     def passwordreset_request(self):
-        return foodsaving.users.emails.prepare_passwordreset_request_email(user=random_user(),
-                                                                           verification_code=pseudo_verification_code())
+        return foodsaving.users.emails.prepare_passwordreset_request_email(
+            user=random_user(), verification_code=pseudo_verification_code()
+        )
 
     def passwordreset_success(self):
         return foodsaving.users.emails.prepare_passwordreset_success_email(user=random_user())
@@ -164,10 +167,7 @@ class Handlers:
         )
 
     def user_inactive_in_group(self):
-        return prepare_user_inactive_in_group_email(
-            user=random_user(),
-            group=random_group()
-        )
+        return prepare_user_inactive_in_group_email(user=random_user(), group=random_group())
 
 
 handlers = Handlers()
@@ -211,9 +211,11 @@ def list_templates(request):
                                 'formats': formats,
                             }
 
-    return HttpResponse(render_to_string('template_preview_list.jinja2', {
-        'templates': sorted(templates.values(), key=lambda t: t['name'])
-    }))
+    return HttpResponse(
+        render_to_string(
+            'template_preview_list.jinja2', {'templates': sorted(templates.values(), key=lambda t: t['name'])}
+        )
+    )
 
 
 def show_template(request):
@@ -227,7 +229,8 @@ def show_template(request):
 
     if not has_handler:
         return HttpResponseNotFound(
-            'Please setup a handler for the <strong>{}</strong> in <strong>{}</strong>'.format(name, __file__))
+            'Please setup a handler for the <strong>{}</strong> in <strong>{}</strong>'.format(name, __file__)
+        )
 
     email = getattr(handlers, name)()
 

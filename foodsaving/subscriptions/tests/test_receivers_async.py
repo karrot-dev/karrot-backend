@@ -74,32 +74,36 @@ class ConversationReceiverTests(asynctest.TestCase):
         responses[0]['payload']['created_at'] = parse(responses[0]['payload']['created_at'])
         responses[0]['payload']['updated_at'] = parse(responses[0]['payload']['updated_at'])
         del responses[0]['payload']['participants']
-        self.assertEqual(responses[0], {
-            'topic': 'conversations:conversation',
-            'payload': {
-                'id': conversation.id,
-                'created_at': conversation.created_at,
-                'updated_at': conversation.updated_at,
-                'seen_up_to': None,
-                'unread_message_count': 1,
-                'email_notifications': True,
+        self.assertEqual(
+            responses[0], {
+                'topic': 'conversations:conversation',
+                'payload': {
+                    'id': conversation.id,
+                    'created_at': conversation.created_at,
+                    'updated_at': conversation.updated_at,
+                    'seen_up_to': None,
+                    'unread_message_count': 1,
+                    'email_notifications': True,
+                }
             }
-        })
+        )
 
         # and the message
         responses[1]['payload']['created_at'] = parse(responses[1]['payload']['created_at'])
-        self.assertEqual(responses[1], {
-            'topic': 'conversations:message',
-            'payload': {
-                'id': message.id,
-                'content': message.content,
-                'author': message.author.id,
-                'conversation': conversation.id,
-                'created_at': message.created_at,
-                'received_via': '',
-                'reactions': []
+        self.assertEqual(
+            responses[1], {
+                'topic': 'conversations:message',
+                'payload': {
+                    'id': message.id,
+                    'content': message.content,
+                    'author': message.author.id,
+                    'conversation': conversation.id,
+                    'created_at': message.created_at,
+                    'received_via': '',
+                    'reactions': []
+                }
             }
-        })
+        )
 
         # author should get message & updated conversations object too
 
@@ -111,31 +115,35 @@ class ConversationReceiverTests(asynctest.TestCase):
         author_responses[0]['payload']['created_at'] = parse(author_responses[0]['payload']['created_at'])
         author_responses[0]['payload']['updated_at'] = parse(author_responses[0]['payload']['updated_at'])
         del author_responses[0]['payload']['participants']
-        self.assertEqual(author_responses[0], {
-            'topic': 'conversations:conversation',
-            'payload': {
-                'id': conversation.id,
-                'created_at': conversation.created_at,
-                'updated_at': author_participant.updated_at,
-                'seen_up_to': message.id,
-                'unread_message_count': 0,
-                'email_notifications': True,
+        self.assertEqual(
+            author_responses[0], {
+                'topic': 'conversations:conversation',
+                'payload': {
+                    'id': conversation.id,
+                    'created_at': conversation.created_at,
+                    'updated_at': author_participant.updated_at,
+                    'seen_up_to': message.id,
+                    'unread_message_count': 0,
+                    'email_notifications': True,
+                }
             }
-        })
+        )
 
         author_responses[1]['payload']['created_at'] = parse(author_responses[1]['payload']['created_at'])
-        self.assertEqual(author_responses[1], {
-            'topic': 'conversations:message',
-            'payload': {
-                'id': message.id,
-                'content': message.content,
-                'author': message.author.id,
-                'conversation': conversation.id,
-                'created_at': message.created_at,
-                'received_via': '',
-                'reactions': []
+        self.assertEqual(
+            author_responses[1], {
+                'topic': 'conversations:message',
+                'payload': {
+                    'id': message.id,
+                    'content': message.content,
+                    'author': message.author.id,
+                    'conversation': conversation.id,
+                    'created_at': message.created_at,
+                    'received_via': '',
+                    'reactions': []
+                }
             }
-        })
+        )
 
     async def tests_receive_message_on_leave(self):
         communicator = WebsocketCommunicator(WebsocketConsumer, '/')
@@ -153,12 +161,7 @@ class ConversationReceiverTests(asynctest.TestCase):
 
         response = await communicator.receive_json_from()
 
-        self.assertEqual(response, {
-            'topic': 'conversations:leave',
-            'payload': {
-                'id': conversation.id
-            }
-        })
+        self.assertEqual(response, {'topic': 'conversations:leave', 'payload': {'id': conversation.id}})
 
 
 class GroupReceiverTests(asynctest.TestCase):
@@ -216,22 +219,14 @@ class InvitationReceiverTests(asynctest.TestCase):
         self.communicator.scope['user'] = self.member
         await self.communicator.connect()
 
-        invitation = Invitation.objects.create(
-            email='bla@bla.com',
-            group=self.group,
-            invited_by=self.member
-        )
+        invitation = Invitation.objects.create(email='bla@bla.com', group=self.group, invited_by=self.member)
 
         response = await self.communicator.receive_json_from()
         self.assertEqual(response['topic'], 'invitations:invitation')
         self.assertEqual(response['payload']['email'], invitation.email)
 
     async def test_receive_invitation_accept(self):
-        invitation = Invitation.objects.create(
-            email='bla@bla.com',
-            group=self.group,
-            invited_by=self.member
-        )
+        invitation = Invitation.objects.create(email='bla@bla.com', group=self.group, invited_by=self.member)
         user = UserFactory()
 
         self.communicator.scope['user'] = self.member
@@ -424,8 +419,9 @@ class UserReceiverTest(asynctest.TestCase):
         self.unrelated_user = UserFactory()
         self.group = GroupFactory(members=[self.member, self.other_member])
         pathlib.Path(settings.MEDIA_ROOT).mkdir(exist_ok=True)
-        copyfile(os.path.join(os.path.dirname(__file__), './photo.jpg'),
-                 os.path.join(settings.MEDIA_ROOT, 'photo.jpg'))
+        copyfile(
+            os.path.join(os.path.dirname(__file__), './photo.jpg'), os.path.join(settings.MEDIA_ROOT, 'photo.jpg')
+        )
         self.member.photo = 'photo.jpg'
         self.member.save()
         self.other_member.photo = 'photo.jpg'

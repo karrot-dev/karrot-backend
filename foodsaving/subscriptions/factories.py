@@ -9,7 +9,6 @@ from foodsaving.utils.tests.fake import faker
 
 
 class PushSubscriptionFactory(DjangoModelFactory):
-
     class Meta:
         model = PushSubscription
 

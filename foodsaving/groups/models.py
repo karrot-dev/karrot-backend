@@ -35,10 +35,7 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     sent_summary_up_to = DateTimeField(null=True)
     timezone = TimeZoneField(default='Europe/Berlin', null=True, blank=True)
     active_agreement = models.OneToOneField(
-        'groups.Agreement',
-        related_name='active_group',
-        null=True,
-        on_delete=models.SET_NULL
+        'groups.Agreement', related_name='active_group', null=True, on_delete=models.SET_NULL
     )
     last_active_at = DateTimeField(default=tz.now)
     is_open = models.BooleanField(default=False)
@@ -49,18 +46,17 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     def add_member(self, user, history_payload=None):
         membership = GroupMembership.objects.create(group=self, user=user)
         History.objects.create(
-            typus=HistoryTypus.GROUP_JOIN,
-            group=self,
-            users=[user, ],
-            payload=history_payload
+            typus=HistoryTypus.GROUP_JOIN, group=self, users=[
+                user,
+            ], payload=history_payload
         )
         return membership
 
     def remove_member(self, user):
         History.objects.create(
-            typus=HistoryTypus.GROUP_LEAVE,
-            group=self,
-            users=[user, ]
+            typus=HistoryTypus.GROUP_LEAVE, group=self, users=[
+                user,
+            ]
         )
         GroupMembership.objects.filter(group=self, user=user).delete()
 
@@ -68,18 +64,22 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         return not user.is_anonymous and GroupMembership.objects.filter(group=self, user=user).exists()
 
     def is_member_with_role(self, user, role_name):
-        return not user.is_anonymous and GroupMembership.objects.filter(group=self, user=user,
-                                                                        roles__contains=[role_name]).exists()
+        return not user.is_anonymous and GroupMembership.objects.filter(
+            group=self, user=user, roles__contains=[role_name]
+        ).exists()
 
     def is_playground(self):
         return self.status == GroupStatus.PLAYGROUND.value
 
     def accept_invite(self, user, invited_by, invited_at):
-        self.add_member(user, history_payload={
-            'invited_by': invited_by.id,
-            'invited_at': invited_at.isoformat(),
-            'invited_via': 'e-mail'
-        })
+        self.add_member(
+            user,
+            history_payload={
+                'invited_by': invited_by.id,
+                'invited_at': invited_at.isoformat(),
+                'invited_via': 'e-mail'
+            }
+        )
 
     def refresh_active_status(self):
         self.last_active_at = tz.now()
@@ -125,7 +125,6 @@ def get_default_notification_types():
 
 
 class GroupMembershipQuerySet(QuerySet):
-
     def with_notification_type(self, type):
         return self.filter(notification_types__contains=[type])
 
@@ -145,7 +144,7 @@ class GroupMembership(BaseModel):
 
     class Meta:
         db_table = 'groups_group_members'
-        unique_together = (('group', 'user'),)
+        unique_together = (('group', 'user'), )
 
     def add_roles(self, roles):
         for role in roles:

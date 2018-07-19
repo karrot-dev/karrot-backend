@@ -10,7 +10,6 @@ from foodsaving.users.factories import UserFactory
 
 
 class TestGroupStats(TestCase):
-
     def test_group_members_stats_foo(self):
         def update_member_activity(user, **kwargs):
             GroupMembership.objects.filter(user=user).update(lastseen_at=timezone.now() - relativedelta(**kwargs))
@@ -26,20 +25,22 @@ class TestGroupStats(TestCase):
 
         points = stats.get_group_members_stats(group)
 
-        self.assertEqual(points, [{
-            'measurement': 'karrot.group.members',
-            'tags': {
-                'group': str(group.id),
-            },
-            'fields': {
-                'count_active_1d': 5,
-                'count_active_7d': 6,
-                'count_active_30d': 7,
-                'count_active_60d': 8,
-                'count_active_90d': 9,
-                'count_total': 10,
-            },
-        }])
+        self.assertEqual(
+            points, [{
+                'measurement': 'karrot.group.members',
+                'tags': {
+                    'group': str(group.id),
+                },
+                'fields': {
+                    'count_active_1d': 5,
+                    'count_active_7d': 6,
+                    'count_active_30d': 7,
+                    'count_active_60d': 8,
+                    'count_active_90d': 9,
+                    'count_total': 10,
+                },
+            }]
+        )
 
     def test_group_stores_stats(self):
         group = GroupFactory()
@@ -50,15 +51,17 @@ class TestGroupStats(TestCase):
 
         points = stats.get_group_stores_stats(group)
 
-        self.assertEqual(points, [{
-            'measurement': 'karrot.group.stores',
-            'tags': {
-                'group': str(group.id),
-            },
-            'fields': {
-                'count_total': 20,
-                'count_status_active': 3,
-                'count_status_negotiating': 7,
-                'count_status_archived': 10,
-            },
-        }])
+        self.assertEqual(
+            points, [{
+                'measurement': 'karrot.group.stores',
+                'tags': {
+                    'group': str(group.id),
+                },
+                'fields': {
+                    'count_total': 20,
+                    'count_status_active': 3,
+                    'count_status_negotiating': 7,
+                    'count_status_archived': 10,
+                },
+            }]
+        )

@@ -14,9 +14,7 @@ class ISODateTimeField(forms.DateTimeField):
 
 class DateTimeRangeField(RangeField):
     def __init__(self, *args, **kwargs):
-        fields = (
-            ISODateTimeField(),
-            ISODateTimeField())
+        fields = (ISODateTimeField(), ISODateTimeField())
         super(DateTimeRangeField, self).__init__(fields, *args, **kwargs)
 
 
@@ -27,7 +25,9 @@ class DateTimeFromToRangeFilter(RangeFilter):
 class PickupDateSeriesFilter(FilterSet):
     class Meta:
         model = PickupDateSeries
-        fields = ['store', ]
+        fields = [
+            'store',
+        ]
 
 
 class PickupDatesFilter(FilterSet):

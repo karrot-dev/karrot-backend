@@ -28,16 +28,12 @@ def prepare_group_summary_data(group, from_date, to_date):
         'date__lt': to_date,
     }
 
-    pickups_done_count = PickupDate.objects.annotate(
-        num_collectors=Count('collectors')
-    ).filter(
+    pickups_done_count = PickupDate.objects.annotate(num_collectors=Count('collectors')).filter(
         **pickup_filters,
         num_collectors__gt=0,
     ).count()
 
-    pickups_missed_count = PickupDate.objects.annotate(
-        num_collectors=Count('collectors')
-    ).filter(
+    pickups_missed_count = PickupDate.objects.annotate(num_collectors=Count('collectors')).filter(
         **pickup_filters,
         num_collectors=0,
     ).count()
@@ -78,20 +74,14 @@ def prepare_group_summary_emails(group, context):
     """Prepares one email per language"""
 
     members = group.members.filter(
-        groupmembership__in=GroupMembership.objects.active().with_notification_type(
-            GroupNotificationType.WEEKLY_SUMMARY
-        )
-    ).exclude(
-        groupmembership__user__in=get_user_model().objects.unverified_or_ignored()
-    )
+        groupmembership__in=GroupMembership.objects.active()
+        .with_notification_type(GroupNotificationType.WEEKLY_SUMMARY)
+    ).exclude(groupmembership__user__in=get_user_model().objects.unverified_or_ignored())
 
     grouped_members = itertools.groupby(members.order_by('language'), key=lambda member: member.language)
     return [
         prepare_email(
-            template='group_summary',
-            context=context,
-            to=[member.email for member in members],
-            language=language
+            template='group_summary', context=context, to=[member.email for member in members], language=language
         ) for (language, members) in grouped_members
     ]
 
@@ -101,9 +91,7 @@ def calculate_group_summary_dates(group):
         tz = get_current_timezone()
 
         # midnight last night in the groups local timezone
-        midnight = tz.localize(timezone.now().replace(
-            tzinfo=None, hour=0, minute=0, second=0, microsecond=0
-        ))
+        midnight = tz.localize(timezone.now().replace(tzinfo=None, hour=0, minute=0, second=0, microsecond=0))
 
         # 7 days before that
         from_date = midnight - relativedelta(days=7)

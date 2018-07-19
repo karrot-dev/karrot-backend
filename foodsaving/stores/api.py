@@ -13,13 +13,8 @@ from foodsaving.stores.serializers import StoreSerializer
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 
-class StoreViewSet(
-    mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
-    PartialUpdateModelMixin,
-    mixins.ListModelMixin,
-    GenericViewSet
-):
+class StoreViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUpdateModelMixin, mixins.ListModelMixin,
+                   GenericViewSet):
     """
     Stores
 
@@ -32,14 +27,16 @@ class StoreViewSet(
     filter_fields = ('group', 'name')
     filter_backends = (SearchFilter, DjangoFilterBackend)
     search_fields = ('name', 'description')
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
 
     def get_queryset(self):
         qs = self.queryset.filter(group__members=self.request.user)
         if self.action == 'statistics':
             return qs.annotate(
                 feedback_count=Count('pickup_dates__feedback', distinct=True),
-                pickups_done=Count('pickup_dates', filter=Q(pickup_dates__in=PickupDate.objects.done()), distinct=True)
+                pickups_done=Count(
+                    'pickup_dates', filter=Q(pickup_dates__in=PickupDate.objects.done()), distinct=True
+                )
             )
         else:
             return qs

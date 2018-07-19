@@ -7,7 +7,6 @@ from foodsaving.utils.tests.fake import faker
 
 
 class StoreFactory(DjangoModelFactory):
-
     class Meta:
         model = StoreModel
 

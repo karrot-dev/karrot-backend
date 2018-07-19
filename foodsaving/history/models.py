@@ -33,11 +33,7 @@ class HistoryTypus(enum.Enum):
 
 class HistoryManager(models.Manager):
     def create(self, typus, group, **kwargs):
-        a = super().create(
-            typus=typus,
-            group=group,
-            **without_keys(kwargs, {'users'})
-        )
+        a = super().create(typus=typus, group=group, **without_keys(kwargs, {'users'}))
         if kwargs.get('users') is not None:
             a.users.add(*kwargs['users'])
 
@@ -59,4 +55,3 @@ class History(NicelyFormattedModel):
 
     def __str__(self):
         return 'History {} - {} ({})'.format(self.date, HistoryTypus.name(self.typus), self.group)
-

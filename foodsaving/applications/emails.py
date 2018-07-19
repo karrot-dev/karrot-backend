@@ -50,9 +50,7 @@ def prepare_application_accepted_email(application):
 
 def prepare_application_declined_email(application):
     return prepare_email(
-        'application_declined',
-        user=application.user,
-        context={
+        'application_declined', user=application.user, context={
             'group': application.group,
         }
     )

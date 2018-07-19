@@ -10,18 +10,11 @@ from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from foodsaving.conversations.models import (
-    Conversation,
-    ConversationMessage,
-    ConversationMessageReaction
-)
+from foodsaving.conversations.models import (Conversation, ConversationMessage, ConversationMessageReaction)
 from foodsaving.conversations.serializers import (
-    ConversationSerializer,
-    ConversationMessageSerializer,
-    ConversationMessageReactionSerializer,
-    ConversationMarkSerializer,
-    ConversationEmailNotificationsSerializer,
-    EmojiField)
+    ConversationSerializer, ConversationMessageSerializer, ConversationMessageReactionSerializer,
+    ConversationMarkSerializer, ConversationEmailNotificationsSerializer, EmojiField
+)
 from foodsaving.groups.models import Group
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
@@ -75,27 +68,19 @@ class IsWithinUpdatePeriod(BasePermission):
         return message.is_recent()
 
 
-class ConversationViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    GenericViewSet
-):
+class ConversationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
     """
     Conversations
     """
 
     queryset = Conversation.objects
     serializer_class = ConversationSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
 
     def get_queryset(self):
         return self.queryset.filter(participants=self.request.user)
 
-    @action(
-        detail=True,
-        methods=['POST'],
-        serializer_class=ConversationMarkSerializer
-    )
+    @action(detail=True, methods=['POST'], serializer_class=ConversationMarkSerializer)
     def mark(self, request, pk=None):
         conversation = self.get_object()
         participant = conversation.conversationparticipant_set.get(user=request.user)
@@ -104,11 +89,7 @@ class ConversationViewSet(
         serializer.save()
         return Response(serializer.data)
 
-    @action(
-        detail=True,
-        methods=['POST'],
-        serializer_class=ConversationEmailNotificationsSerializer
-    )
+    @action(detail=True, methods=['POST'], serializer_class=ConversationEmailNotificationsSerializer)
     def email_notifications(self, request, pk=None):
         conversation = self.get_object()
         participant = conversation.conversationparticipant_set.get(user=request.user)
@@ -118,12 +99,8 @@ class ConversationViewSet(
         return Response(serializer.data)
 
 
-class ConversationMessageViewSet(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    PartialUpdateModelMixin,
-    GenericViewSet
-):
+class ConversationMessageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, PartialUpdateModelMixin,
+                                 GenericViewSet):
     """
     ConversationMessages
     """
@@ -137,8 +114,8 @@ class ConversationMessageViewSet(
         IsAuthorConversationMessage,
         IsWithinUpdatePeriod,
     )
-    filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('conversation',)
+    filter_backends = (DjangoFilterBackend, )
+    filter_fields = ('conversation', )
     pagination_class = MessagePagination
 
     def get_queryset(self):
@@ -150,8 +127,8 @@ class ConversationMessageViewSet(
 
     @action(
         detail=True,
-        methods=('POST',),
-        filter_fields=('name',),
+        methods=('POST', ),
+        filter_fields=('name', ),
         permission_classes=(IsAuthenticated, IsMessageConversationParticipant)
     )
     def reactions(self, request, pk):
@@ -175,7 +152,7 @@ class ConversationMessageViewSet(
 
     @action(
         detail=True,
-        methods=('DELETE',),
+        methods=('DELETE', ),
         url_path='reactions/(?P<name>[a-z0-9_+-]+)',
         url_name='remove_reaction',
         permission_classes=(IsAuthenticated, IsMessageConversationParticipant)
@@ -189,8 +166,7 @@ class ConversationMessageViewSet(
         # object permissions check has to be triggered manually
         self.check_object_permissions(self.request, message)
 
-        reaction = get_object_or_404(ConversationMessageReaction, name=name, message=message,
-                                     user=request.user)
+        reaction = get_object_or_404(ConversationMessageReaction, name=name, message=message, user=request.user)
 
         reaction.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -225,4 +201,3 @@ class RetrievePrivateConversationMixin(object):
         serializer = ConversationSerializer(conversation, data={}, context={'request': request})
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data)
-
