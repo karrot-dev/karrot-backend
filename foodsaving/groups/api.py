@@ -45,11 +45,7 @@ class CanUpdateMemberships(BasePermission):
         return obj.group.is_member_with_role(request.user, roles.GROUP_MEMBERSHIP_MANAGER)
 
 
-class GroupInfoViewSet(
-    mixins.RetrieveModelMixin,
-    mixins.ListModelMixin,
-    GenericViewSet
-):
+class GroupInfoViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
     """
     Group Info - public information
 
@@ -65,14 +61,8 @@ class GroupInfoViewSet(
     serializer_class = GroupPreviewSerializer
 
 
-class GroupViewSet(
-    mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
-    PartialUpdateModelMixin,
-    mixins.ListModelMixin,
-    RetrieveConversationMixin,
-    GenericViewSet
-):
+class GroupViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUpdateModelMixin, mixins.ListModelMixin,
+                   RetrieveConversationMixin, GenericViewSet):
     """
     Your groups: list, create, update
     """
@@ -81,7 +71,7 @@ class GroupViewSet(
     filter_class = GroupsFilter
     search_fields = ('name', 'public_description')
     serializer_class = GroupDetailSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
 
     def create(self, request, *args, **kwargs):
         """Create a new group"""
@@ -119,35 +109,22 @@ class GroupViewSet(
         """Join a group"""
         return self.partial_update(request)
 
-    @action(
-        detail=True,
-        methods=['POST'],
-        serializer_class=GroupLeaveSerializer
-    )
+    @action(detail=True, methods=['POST'], serializer_class=GroupLeaveSerializer)
     def leave(self, request, pk=None):
         """Leave one of your groups"""
         return self.partial_update(request)
 
-    @action(
-        detail=False,
-        methods=['GET'],
-        serializer_class=TimezonesSerializer
-    )
+    @action(detail=False, methods=['GET'], serializer_class=TimezonesSerializer)
     def timezones(self, request, pk=None):
         """List all accepted timezones"""
-        return Response(self.get_serializer(
-            {'all_timezones': pytz.all_timezones}
-        ).data)
+        return Response(self.get_serializer({'all_timezones': pytz.all_timezones}).data)
 
     @action(detail=True)
     def conversation(self, request, pk=None):
         """Get wall conversation ID of this group"""
         return self.retrieve_conversation(request, pk)
 
-    @action(
-        detail=True,
-        methods=['POST']
-    )
+    @action(detail=True, methods=['POST'])
     def mark_user_active(self, request, pk=None):
         """Mark that the logged-in user is active in the group"""
         gm = get_object_or_404(GroupMembership.objects, group=pk, user=request.user)
@@ -183,7 +160,7 @@ class GroupViewSet(
     @action(
         detail=True,
         methods=['PUT', 'DELETE'],
-        permission_classes=(IsAuthenticated,),
+        permission_classes=(IsAuthenticated, ),
         url_name='notification_types',
         url_path='notification_types/(?P<notification_type>[^/.]+)',
         serializer_class=EmptySerializer  # for Swagger
@@ -204,16 +181,11 @@ class GroupViewSet(
         return Response(GroupMembershipInfoSerializer(membership).data)
 
 
-class AgreementViewSet(
-    mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
-    PartialUpdateModelMixin,
-    mixins.ListModelMixin,
-    GenericViewSet
-):
+class AgreementViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUpdateModelMixin,
+                       mixins.ListModelMixin, GenericViewSet):
     queryset = Agreement.objects
     serializer_class = AgreementSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
 
     def get_queryset(self):
         return self.queryset.filter(group__members=self.request.user)

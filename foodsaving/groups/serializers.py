@@ -37,7 +37,11 @@ class GroupBaseSerializer(serializers.ModelSerializer):
 class GroupMembershipInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupMembership
-        fields = ('created_at', 'roles', 'active',)
+        fields = (
+            'created_at',
+            'roles',
+            'active',
+        )
         extra_kwargs = {
             'created_at': {
                 'read_only': True
@@ -123,10 +127,9 @@ class GroupDetailSerializer(GroupBaseSerializer):
         if changed_data:
             user = self.context['request'].user
             History.objects.create(
-                typus=HistoryTypus.GROUP_MODIFY,
-                group=group,
-                users=[user, ],
-                payload=changed_data
+                typus=HistoryTypus.GROUP_MODIFY, group=group, users=[
+                    user,
+                ], payload=changed_data
             )
         return group
 
@@ -135,10 +138,9 @@ class GroupDetailSerializer(GroupBaseSerializer):
         group = GroupModel.objects.create(**validated_data)
         GroupMembership.objects.create(group=group, user=user)
         History.objects.create(
-            typus=HistoryTypus.GROUP_CREATE,
-            group=group,
-            users=[user, ],
-            payload=self.initial_data
+            typus=HistoryTypus.GROUP_CREATE, group=group, users=[
+                user,
+            ], payload=self.initial_data
         )
         return group
 
@@ -250,10 +252,7 @@ class GroupLeaveSerializer(GroupBaseSerializer):
 
 
 class TimezonesSerializer(serializers.Serializer):
-    all_timezones = serializers.ListField(
-        child=serializers.CharField(),
-        read_only=True
-    )
+    all_timezones = serializers.ListField(child=serializers.CharField(), read_only=True)
 
 
 class EmptySerializer(serializers.Serializer):
@@ -262,9 +261,10 @@ class EmptySerializer(serializers.Serializer):
 
 class GroupMembershipAddRoleSerializer(serializers.Serializer):
     role_name = serializers.ChoiceField(
-        choices=(roles.GROUP_MEMBERSHIP_MANAGER, roles.GROUP_AGREEMENT_MANAGER,),
-        required=True,
-        write_only=True
+        choices=(
+            roles.GROUP_MEMBERSHIP_MANAGER,
+            roles.GROUP_AGREEMENT_MANAGER,
+        ), required=True, write_only=True
     )
 
     def update(self, instance, validated_data):
@@ -275,10 +275,7 @@ class GroupMembershipAddRoleSerializer(serializers.Serializer):
 
 
 class GroupMembershipRemoveRoleSerializer(serializers.Serializer):
-    role_name = serializers.CharField(
-        required=True,
-        write_only=True
-    )
+    role_name = serializers.CharField(required=True, write_only=True)
 
     def update(self, instance, validated_data):
         role = validated_data['role_name']
@@ -306,10 +303,7 @@ class GroupMembershipAddNotificationTypeSerializer(serializers.Serializer):
 
 
 class GroupMembershipRemoveNotificationTypeSerializer(serializers.Serializer):
-    notification_type = serializers.CharField(
-        required=True,
-        write_only=True
-    )
+    notification_type = serializers.CharField(required=True, write_only=True)
 
     def update(self, instance, validated_data):
         notification_type = validated_data['notification_type']

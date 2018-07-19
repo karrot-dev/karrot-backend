@@ -81,7 +81,6 @@ class ConversationParticipant(BaseModel, UpdatedAtMixin):
 
 
 class ConversationMessageQuerySet(QuerySet):
-
     def exclude_replies(self):
         return self.filter(Q(thread_id=None) | Q(id=F('thread_id')))
 
@@ -97,13 +96,11 @@ class ConversationMessageQuerySet(QuerySet):
     def annotate_unread_replies_count_for(self, user):
         unread_replies_filter = Q(
             participants__user=user,
-        ) & ~Q(
-            thread_messages__id=F('thread_id')  # replies have id != thread_id
-        ) & (
-            Q(participants__seen_up_to=None) |
-            Q(thread_messages__id__gt=F('participants__seen_up_to'))
+        ) & ~Q(thread_messages__id=F('thread_id')  # replies have id != thread_id
+               ) & (Q(participants__seen_up_to=None) | Q(thread_messages__id__gt=F('participants__seen_up_to')))
+        return self.annotate(
+            unread_replies_count=Count('thread_messages', filter=unread_replies_filter, distinct=True)
         )
-        return self.annotate(unread_replies_count=Count('thread_messages', filter=unread_replies_filter, distinct=True))
 
 
 class ConversationMessage(BaseModel, UpdatedAtMixin):

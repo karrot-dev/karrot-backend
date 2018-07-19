@@ -18,7 +18,9 @@ base_url = '/api/invitations/'
 class TestInvitationAPIIntegration(APITestCase):
     def setUp(self):
         self.member = UserFactory()
-        self.group = GroupFactory(members=[self.member, ])
+        self.group = GroupFactory(members=[
+            self.member,
+        ])
         self.non_member = UserFactory()
 
         # effectively disable throttling
@@ -42,9 +44,7 @@ class TestInvitationAPIIntegration(APITestCase):
         # check if email has been sent
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn('invite=', mail.outbox[0].body)
-        token = furl(
-            re.search(r'(/#/signup.*)\n', mail.outbox[0].body).group(1)
-        ).fragment.args['invite']
+        token = furl(re.search(r'(/#/signup.*)\n', mail.outbox[0].body).group(1)).fragment.args['invite']
 
         # accept the invite
         self.client.force_login(self.non_member)
@@ -67,7 +67,9 @@ class TestInviteCreate(APITestCase):
         self.member = UserFactory()
         self.member2 = UserFactory()
         self.group = GroupFactory(members=[self.member, self.member2])
-        self.group2 = GroupFactory(members=[self.member, ])
+        self.group2 = GroupFactory(members=[
+            self.member,
+        ])
 
         # effectively disable throttling
         from foodsaving.invitations.api import InvitesPerDayThrottle
@@ -161,7 +163,9 @@ class TestInvitationAPI(APITestCase):
 class TestInvitationAcceptAPI(APITestCase):
     def setUp(self):
         self.member = UserFactory()
-        self.group = GroupFactory(members=[self.member, ])
+        self.group = GroupFactory(members=[
+            self.member,
+        ])
         self.non_member = UserFactory()
 
         # effectively disable throttling
@@ -179,9 +183,7 @@ class TestInvitationAcceptAPI(APITestCase):
         i.expires_at = timezone.now() - relativedelta(days=1)
         i.save()
 
-        token = furl(
-            re.search(r'(/#/signup.*)\n', mail.outbox[0].body).group(1)
-        ).fragment.args['invite']
+        token = furl(re.search(r'(/#/signup.*)\n', mail.outbox[0].body).group(1)).fragment.args['invite']
 
         # accept the invite
         self.client.force_login(self.non_member)
@@ -193,9 +195,7 @@ class TestInvitationAcceptAPI(APITestCase):
         self.client.force_login(self.member)
         self.client.post(base_url, {'email': 'someother@mail.com', 'group': self.group.id})
 
-        token = furl(
-            re.search(r'(/#/signup.*)\n', mail.outbox[0].body).group(1)
-        ).fragment.args['invite']
+        token = furl(re.search(r'(/#/signup.*)\n', mail.outbox[0].body).group(1)).fragment.args['invite']
 
         # accidentally accept the invite even though you are already in the group
         response = self.client.post(base_url + token + '/accept/')
@@ -209,9 +209,7 @@ class TestInvitationAcceptAPI(APITestCase):
         self.client.force_login(self.member)
         self.client.post(base_url, {'email': 'someother@mail.com', 'group': self.group.id})
 
-        token = furl(
-            re.search(r'(/#/signup.*)\n', mail.outbox[0].body).group(1)
-        ).fragment.args['invite']
+        token = furl(re.search(r'(/#/signup.*)\n', mail.outbox[0].body).group(1)).fragment.args['invite']
 
         self.client.logout()
         response = self.client.post(base_url + token + '/accept/')

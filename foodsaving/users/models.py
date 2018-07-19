@@ -28,11 +28,7 @@ class UserManager(BaseUserManager):
         email = self._validate_email(email)
         extra_fields['unverified_email'] = email
 
-        user = self.model(
-            email=email,
-            is_active=is_active,
-            display_name=display_name,
-            **extra_fields)
+        user = self.model(email=email, is_active=is_active, display_name=display_name, **extra_fields)
         user.set_password(password)
         user.save()
         user.send_welcome_email()
@@ -59,8 +55,7 @@ class UserManager(BaseUserManager):
             raise ValueError('The email field must be set')
         return self.normalize_email(email)
 
-    def create_user(self, email=None, password=None, display_name=None,
-                    **extra_fields):
+    def create_user(self, email=None, password=None, display_name=None, **extra_fields):
         return self._create_user(email, password, display_name, **extra_fields)
 
     def create_superuser(self, email, password, **extra_fields):
@@ -182,7 +177,9 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         To keep historic pickup infos, keep the user account but clear personal data.
         """
         # Emits pre_delete and post_delete signals, they are used to remove the user from pick-ups
-        for _ in Group.objects.filter(members__in=[self, ]):
+        for _ in Group.objects.filter(members__in=[
+                self,
+        ]):
             GroupMembership.objects.filter(group=_, user=self).delete()
 
         success_email = prepare_accountdelete_success_email(self)

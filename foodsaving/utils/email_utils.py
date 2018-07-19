@@ -52,7 +52,6 @@ def generate_plaintext_from_html(html):
 
 
 class StatCollectingAnymailMessage(AnymailMessage):
-
     def send(self, *args, **kwargs):
         try:
             super(StatCollectingAnymailMessage, self).send(*args, **kwargs)

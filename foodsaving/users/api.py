@@ -12,20 +12,15 @@ from foodsaving.conversations.api import RetrievePrivateConversationMixin
 from foodsaving.users.serializers import UserSerializer, UserInfoSerializer
 
 
-class UserViewSet(
-    mixins.RetrieveModelMixin,
-    mixins.ListModelMixin,
-    RetrievePrivateConversationMixin,
-    GenericViewSet
-):
+class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, RetrievePrivateConversationMixin, GenericViewSet):
     """
     User Profiles
     """
     queryset = get_user_model().objects.active()
     serializer_class = UserSerializer
-    filter_backends = (filters.SearchFilter,)
-    permission_classes = (IsAuthenticated,)
-    search_fields = ('display_name',)
+    filter_backends = (filters.SearchFilter, )
+    permission_classes = (IsAuthenticated, )
+    search_fields = ('display_name', )
     filter_fields = ('conversation', 'groups')
 
     def retrieve(self, request, *args, **kwargs):
@@ -46,10 +41,8 @@ class UserViewSet(
         return self.retrieve_private_conversation(request, pk)
 
     def get_queryset(self):
-        return self.queryset.filter(
-            Q(groups__in=self.request.user.groups.all()) |
-            Q(id=self.request.user.id)
-        ).distinct()
+        return self.queryset.filter(Q(groups__in=self.request.user.groups.all()) |
+                                    Q(id=self.request.user.id)).distinct()
 
 
 class UserPagination(CursorPagination):
@@ -57,25 +50,19 @@ class UserPagination(CursorPagination):
     ordering = 'id'
 
 
-class UserInfoViewSet(
-    mixins.RetrieveModelMixin,
-    mixins.ListModelMixin,
-    GenericViewSet
-):
+class UserInfoViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
     """
     Public User Profiles (for now only users that share a conversation)
     """
     queryset = get_user_model().objects.active()
     serializer_class = UserInfoSerializer
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)
-    permission_classes = (IsAuthenticated,)
-    search_fields = ('display_name',)
+    permission_classes = (IsAuthenticated, )
+    search_fields = ('display_name', )
     filter_fields = ('conversation', 'groups')
     pagination_class = UserPagination
 
     def get_queryset(self):
         return self.queryset.filter(
-            Q(conversation__in=self.request.user.conversation_set.all()) |
-            Q(id=self.request.user.id)
+            Q(conversation__in=self.request.user.conversation_set.all()) | Q(id=self.request.user.id)
         ).distinct()
-

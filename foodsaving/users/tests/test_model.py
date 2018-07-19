@@ -15,7 +15,9 @@ from foodsaving.utils.tests.fake import faker
 class TestUserModel(TestCase):
     def setUp(self):
         self.user = UserFactory()
-        self.group = GroupFactory(members=[self.user, ])
+        self.group = GroupFactory(members=[
+            self.user,
+        ])
         self.exampleuser = {
             'display_name': 'bla',
             'email': 'user@example.com',
@@ -82,9 +84,5 @@ class TestSendMail(TestCase):
 
     def test_send_to_fake_email(self):
         with self.assertRaises(AnymailAPIError):
-            get_user_model().objects.create_user(
-                email='shabab@test.com',
-                password='123',
-                display_name='lalala'
-            )
+            get_user_model().objects.create_user(email='shabab@test.com', password='123', display_name='lalala')
         self.assertEqual(get_user_model().objects.filter(email='shabab@test.com').count(), 0)

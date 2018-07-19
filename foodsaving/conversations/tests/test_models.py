@@ -14,12 +14,16 @@ from foodsaving.users.factories import UserFactory, VerifiedUserFactory
 class ConversationModelTests(TestCase):
     def test_join(self):
         user = UserFactory()
-        conversation = ConversationFactory(participants=[user, ])
+        conversation = ConversationFactory(participants=[
+            user,
+        ])
         self.assertIn(user, conversation.participants.all())
 
     def test_leave(self):
         user = UserFactory()
-        conversation = ConversationFactory(participants=[user, ])
+        conversation = ConversationFactory(participants=[
+            user,
+        ])
         self.assertIn(user, conversation.participants.all())
         conversation.leave(user)
         self.assertNotIn(user, conversation.participants.all())
@@ -42,7 +46,9 @@ class ConversationModelTests(TestCase):
 
     def test_message_create(self):
         user = UserFactory()
-        conversation = ConversationFactory(participants=[user, ])
+        conversation = ConversationFactory(participants=[
+            user,
+        ])
         conversation.messages.create(author=user, content='yay')
         self.assertEqual(ConversationMessage.objects.filter(author=user).count(), 1)
 
@@ -75,12 +81,14 @@ class ConversationThreadModelTests(TestCase):
     def test_replies_count_annotation(self):
         self.thread.participants.create(user=self.user2)
         n = 4
-        [ConversationMessage.objects.create(
-            conversation=self.conversation,
-            author=self.user,
-            thread=self.thread,
-            content='my reply',
-        ) for _ in range(n)]
+        [
+            ConversationMessage.objects.create(
+                conversation=self.conversation,
+                author=self.user,
+                thread=self.thread,
+                content='my reply',
+            ) for _ in range(n)
+        ]
 
         message = ConversationMessage.objects \
             .annotate_replies_count() \
@@ -92,12 +100,14 @@ class ConversationThreadModelTests(TestCase):
         self.thread.participants.create(user=self.user2)
         n = 7
         read_messages = 2
-        messages = [ConversationMessage.objects.create(
-            conversation=self.conversation,
-            author=self.user,
-            thread=self.thread,
-            content='my reply',
-        ) for _ in range(n)]
+        messages = [
+            ConversationMessage.objects.create(
+                conversation=self.conversation,
+                author=self.user,
+                thread=self.thread,
+                content='my reply',
+            ) for _ in range(n)
+        ]
 
         # "read" some of the messages
         ConversationThreadParticipant.objects \
@@ -113,12 +123,14 @@ class ConversationThreadModelTests(TestCase):
     def test_default_replies_count_property(self):
         self.assertEqual(self.thread.replies_count, 0)
         n = 5
-        [ConversationMessage.objects.create(
-            conversation=self.conversation,
-            author=self.user,
-            thread=self.thread,
-            content='my reply',
-        ) for _ in range(n)]
+        [
+            ConversationMessage.objects.create(
+                conversation=self.conversation,
+                author=self.user,
+                thread=self.thread,
+                content='my reply',
+            ) for _ in range(n)
+        ]
         self.assertEqual(self.thread.replies_count, n)
 
     def test_annotation_replies_count_property(self):
@@ -127,12 +139,14 @@ class ConversationThreadModelTests(TestCase):
             .get(pk=self.thread.id)
         self.assertEqual(self.thread.replies_count, 0)
         n = 5
-        [ConversationMessage.objects.create(
-            conversation=self.conversation,
-            author=self.user,
-            thread=self.thread,
-            content='my reply',
-        ) for _ in range(n)]
+        [
+            ConversationMessage.objects.create(
+                conversation=self.conversation,
+                author=self.user,
+                thread=self.thread,
+                content='my reply',
+            ) for _ in range(n)
+        ]
         self.assertEqual(self.thread.replies_count, n)
 
 
@@ -197,7 +211,6 @@ class TestPrivateUserConversations(TestCase):
 
 
 class ReactionModelTests(TestCase):
-
     def test_reaction_create(self):
         user = UserFactory()
         conversation = ConversationFactory()

@@ -38,10 +38,7 @@ def mark_as_read(sender, instance, **kwargs):
             thread=message.thread,
         )
     else:
-        participant = ConversationParticipant.objects.get(
-            user=message.author,
-            conversation=message.conversation
-        )
+        participant = ConversationParticipant.objects.get(user=message.author, conversation=message.conversation)
 
     # When a message is updated, the participants seen_up_to
     # member variable gets set to that updated message. Perform the below

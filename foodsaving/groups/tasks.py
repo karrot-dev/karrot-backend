@@ -11,9 +11,7 @@ from raven.contrib.django.raven_compat.models import client as sentry_client
 from config import settings
 from foodsaving.applications.stats import get_group_application_stats
 from foodsaving.groups.emails import (
-    prepare_user_inactive_in_group_email,
-    prepare_group_summary_data,
-    calculate_group_summary_dates,
+    prepare_user_inactive_in_group_email, prepare_group_summary_data, calculate_group_summary_dates,
     prepare_group_summary_emails
 )
 from foodsaving.groups.models import Group, GroupStatus
@@ -44,8 +42,8 @@ def process_inactive_users():
 
     inactive_threshold_date = now - timedelta(days=settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP)
     for membership in GroupMembership.objects.filter(
-        lastseen_at__lte=inactive_threshold_date,
-        inactive_at=None,
+            lastseen_at__lte=inactive_threshold_date,
+            inactive_at=None,
     ):
         # only send emails if group itself is marked as active
         if membership.group.status == GroupStatus.ACTIVE.value:
@@ -55,9 +53,11 @@ def process_inactive_users():
         membership.save()
         count_users_flagged_inactive += 1
 
-    stats_utils.periodic_task('group__process_inactive_users', {
-        'count_users_flagged_inactive': count_users_flagged_inactive,
-    })
+    stats_utils.periodic_task(
+        'group__process_inactive_users', {
+            'count_users_flagged_inactive': count_users_flagged_inactive,
+        }
+    )
 
 
 @db_periodic_task(crontab(day_of_week=0, hour=8, minute=0))  # send 8am every Sunday
@@ -103,10 +103,12 @@ def send_summary_emails():
 
             recipient_count += email_recipient_count
 
-    stats_utils.periodic_task('group__send_summary_emails', {
-        'recipient_count': recipient_count,
-        'email_count': email_count,
-    })
+    stats_utils.periodic_task(
+        'group__send_summary_emails', {
+            'recipient_count': recipient_count,
+            'email_count': email_count,
+        }
+    )
 
 
 @db_periodic_task(crontab(hour=3, minute=3))  # 3 am every day

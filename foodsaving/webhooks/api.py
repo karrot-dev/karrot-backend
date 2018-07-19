@@ -28,7 +28,7 @@ def make_local_part(conversation, user):
 
 
 class IncomingEmailView(views.APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (AllowAny, )
 
     def post(self, request):
         """
@@ -62,17 +62,14 @@ class IncomingEmailView(views.APIView):
                 reply_plain = quotations.extract_from_plain(text_content)
 
                 ConversationMessage.objects.create(
-                    author=user,
-                    conversation=conversation,
-                    content=reply_plain,
-                    received_via='email'
+                    author=user, conversation=conversation, content=reply_plain, received_via='email'
                 )
 
         return Response(status=status.HTTP_200_OK, data={})
 
 
 class EmailEventView(views.APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (AllowAny, )
 
     def authenticate(self, request):
         if 'HTTP_AUTHORIZATION' in request.META:
@@ -88,18 +85,12 @@ class EmailEventView(views.APIView):
         """
 
         if not self.authenticate(request):
-            return Response(
-                status=status.HTTP_403_FORBIDDEN,
-                data={'message': 'Invalid authorization header'}
-            )
+            return Response(status=status.HTTP_403_FORBIDDEN, data={'message': 'Invalid authorization header'})
 
         for events in [e['msys'].values() for e in request.data]:
             for event in events:
                 EmailEvent.objects.get_or_create(
-                    id=event['event_id'],
-                    address=event['rcpt_to'],
-                    event=event['type'],
-                    payload=event
+                    id=event['event_id'], address=event['rcpt_to'], event=event['type'], payload=event
                 )
 
         return Response(status=status.HTTP_200_OK, data={})

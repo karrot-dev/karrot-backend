@@ -10,11 +10,9 @@ from foodsaving.applications.models import GroupApplication
 from foodsaving.pickups.models import PickupDate
 from foodsaving.utils.email_utils import prepare_email
 from foodsaving.utils.frontend_urls import (
-    group_wall_url,
-    group_conversation_mute_url,
-    pickup_detail_url,
-    pickup_conversation_mute_url,
-    user_detail_url, user_conversation_mute_url, group_application_url, group_application_mute_url)
+    group_wall_url, group_conversation_mute_url, pickup_detail_url, pickup_conversation_mute_url, user_detail_url,
+    user_conversation_mute_url, group_application_url, group_application_mute_url
+)
 from foodsaving.webhooks.api import make_local_part
 
 

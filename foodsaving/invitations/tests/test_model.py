@@ -10,11 +10,7 @@ class TestAcceptInvite(TestCase):
     def test_invite_accepted_joins_group_and_adds_history(self):
         g = GroupFactory()
         u = UserFactory()
-        i = Invitation.objects.create(
-            email='bla@bla.com',
-            group=g,
-            invited_by=u
-        )
+        i = Invitation.objects.create(email='bla@bla.com', group=g, invited_by=u)
         invited_user = UserFactory()
 
         i.accept(invited_user)

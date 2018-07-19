@@ -9,7 +9,9 @@ def pushed_via_websocket(topic):
         'tags': {
             'topic': topic,
         },
-        'fields': {'websocket_push': 1},
+        'fields': {
+            'websocket_push': 1
+        },
     }])
 
 

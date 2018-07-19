@@ -2,7 +2,6 @@ from django_jinja.management.commands.makemessages import Command as DjangoJinja
 
 
 class Command(DjangoJinjaMakeMessagesCommand):
-
     @classmethod
     def update_options(cls, **options):
         if options.get('extensions', None) is None:

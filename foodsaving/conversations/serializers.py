@@ -17,14 +17,7 @@ from foodsaving.groups.models import Group
 class ConversationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversation
-        fields = [
-            'id',
-            'participants',
-            'updated_at',
-            'seen_up_to',
-            'unread_message_count',
-            'email_notifications'
-        ]
+        fields = ['id', 'participants', 'updated_at', 'seen_up_to', 'unread_message_count', 'email_notifications']
 
     seen_up_to = serializers.SerializerMethodField()
     unread_message_count = serializers.SerializerMethodField()
@@ -72,7 +65,7 @@ class ConversationSerializer(serializers.ModelSerializer):
 class ConversationMarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConversationParticipant
-        fields = ('seen_up_to',)
+        fields = ('seen_up_to', )
 
     def validate_seen_up_to(self, message):
         if not self.instance.conversation.messages.filter(id=message.id).exists():
@@ -88,7 +81,7 @@ class ConversationMarkSerializer(serializers.ModelSerializer):
 class ConversationEmailNotificationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConversationParticipant
-        fields = ('email_notifications',)
+        fields = ('email_notifications', )
 
 
 class EmojiField(serializers.Field):
@@ -108,9 +101,7 @@ class ConversationMessageReactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConversationMessageReaction
         fields = ('user', 'name', 'message')
-        extra_kwargs = {
-            'message': {'write_only': True}
-        }
+        extra_kwargs = {'message': {'write_only': True}}
 
     name = EmojiField()
 
@@ -203,7 +194,13 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
             'thread',  # ideally would only be writable on create
             'thread_meta',
         ]
-        read_only_fields = ('author', 'id', 'created_at', 'received_via', 'thread_meta',)
+        read_only_fields = (
+            'author',
+            'id',
+            'created_at',
+            'received_via',
+            'thread_meta',
+        )
 
     thread_meta = serializers.SerializerMethodField()
 

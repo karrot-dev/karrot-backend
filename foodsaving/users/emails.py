@@ -11,9 +11,13 @@ def prepare_accountdelete_success_email(user):
 
 
 def prepare_changemail_request_email(user, verification_code):
-    return prepare_email('changemail_request', user, {
-        'url': user_emailverification_url(verification_code.code),
-    }, to=user.unverified_email)
+    return prepare_email(
+        'changemail_request',
+        user, {
+            'url': user_emailverification_url(verification_code.code),
+        },
+        to=user.unverified_email
+    )
 
 
 def prepare_changemail_success_email(user):
@@ -29,5 +33,6 @@ def prepare_passwordreset_success_email(user):
 
 
 def prepare_signup_email(user, verification_code):
-    return prepare_email('signup', user, {'url': user_emailverification_url(verification_code.code)},
-                         to=user.unverified_email)
+    return prepare_email(
+        'signup', user, {'url': user_emailverification_url(verification_code.code)}, to=user.unverified_email
+    )
