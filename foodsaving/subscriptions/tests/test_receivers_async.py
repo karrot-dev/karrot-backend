@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import pathlib
+from channels.db import database_sync_to_async
 from shutil import copyfile
 
 import asynctest
@@ -49,13 +50,14 @@ class ConversationReceiverTests(asynctest.TestCase):
         self.maxDiff = None
         communicator = self.communicator
         author_communicator = self.author_communicator
-        user = UserFactory()
-        author = UserFactory()
+
+        user = await database_sync_to_async(UserFactory)()
+        author = await database_sync_to_async(UserFactory)()
 
         # join a conversation
-        conversation = ConversationFactory()
-        conversation.join(user)
-        conversation.join(author)
+        conversation = await database_sync_to_async(ConversationFactory)()
+        await database_sync_to_async(conversation.join)(user)
+        await database_sync_to_async(conversation.join)(author)
 
         # login and connect
 
@@ -66,7 +68,8 @@ class ConversationReceiverTests(asynctest.TestCase):
         await author_communicator.connect()
 
         # add a message to the conversation
-        message = ConversationMessage.objects.create(conversation=conversation, content='yay', author=author)
+        message = await database_sync_to_async(ConversationMessage.objects.create
+                                               )(conversation=conversation, content='yay', author=author)
 
         responses = await receive_responses_sorted_by_topic(communicator, 2)
 

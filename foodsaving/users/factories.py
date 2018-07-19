@@ -1,3 +1,4 @@
+from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 from factory import DjangoModelFactory, CREATE_STRATEGY, LazyAttribute, PostGeneration
 from foodsaving.utils.tests.fake import faker
@@ -30,3 +31,6 @@ class VerifiedUserFactory(UserFactory):
         user = super()._create(model_class, *args, **kwargs)
         user.verify_mail()
         return user
+
+
+AsyncUserFactory = database_sync_to_async(UserFactory)

@@ -45,7 +45,7 @@ class TokenAuthMiddleware:
         return self.inner(scope)
 
 
-class WebsocketConsumer(AsyncJsonWebsocketConsumer):
+class AsyncWebsocketConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         """The user has connected! Register their channel subscription."""
         if 'user' in self.scope:
@@ -98,7 +98,7 @@ class WebsocketConsumer(AsyncJsonWebsocketConsumer):
         return ChannelSubscription.objects.filter(user=user, reply_channel=self.channel_name).delete()
 
 
-class WebsocketConsumerSync(JsonWebsocketConsumer):
+class SyncWebsocketConsumer(JsonWebsocketConsumer):
     def connect(self):
         """The user has connected! Register their channel subscription."""
         if 'user' in self.scope:
@@ -133,3 +133,6 @@ class WebsocketConsumerSync(JsonWebsocketConsumer):
             user = self.scope['user']
             if not user.is_anonymous:
                 ChannelSubscription.objects.filter(user=user, reply_channel=self.channel_name).delete()
+
+
+WebsocketConsumer = SyncWebsocketConsumer

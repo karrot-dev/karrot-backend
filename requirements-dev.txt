@@ -5,7 +5,6 @@
 #    pip-compile --output-file requirements-dev.txt requirements-dev.in
 #
 apipkg==1.5               # via execnet
-asynctest==0.12.2
 atomicwrites==1.1.5       # via pytest
 attrs==18.1.0             # via pytest
 autoflake==1.2
@@ -43,11 +42,12 @@ py==1.5.4                 # via pytest
 pycodestyle==2.3.1        # via autopep8, flake8
 pyflakes==1.6.0           # via autoflake, flake8
 pygments==2.2.0           # via django-silk, ipython
+pytest-asyncio==0.8.0
 pytest-cov==2.5.1
 pytest-django==3.3.2
 pytest-forked==0.2        # via pytest-xdist
 pytest-xdist==1.22.2
-pytest==3.6.3             # via pytest-cov, pytest-django, pytest-forked, pytest-xdist
+pytest==3.6.3             # via pytest-asyncio, pytest-cov, pytest-django, pytest-forked, pytest-xdist
 python-dateutil==2.7.3    # via django-silk, freezegun
 python-slugify==1.2.5     # via transifex-client
 pytz==2018.5              # via django, django-silk

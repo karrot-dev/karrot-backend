@@ -5,6 +5,7 @@ tblib
 flake8
 autopep8
 autoflake
+pytest-asyncio
 pytest-django
 pytest-xdist
 pytest-cov
@@ -12,5 +13,4 @@ freezegun
 logging_tree
 django-silk
 transifex-client
-asynctest
 yapf

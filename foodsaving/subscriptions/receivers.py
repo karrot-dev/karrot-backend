@@ -1,6 +1,6 @@
-import json
 from collections import namedtuple
 
+import json
 from asgiref.sync import async_to_sync
 from channels.exceptions import ChannelFull
 from channels.layers import get_channel_layer
@@ -8,6 +8,7 @@ from django.conf import settings
 from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete, m2m_changed, post_delete
 from django.dispatch import receiver
+from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from foodsaving.applications.models import GroupApplication
 from foodsaving.applications.serializers import GroupApplicationSerializer
@@ -23,15 +24,12 @@ from foodsaving.pickups.models import PickupDate, PickupDateSeries, Feedback, pi
 from foodsaving.pickups.serializers import PickupDateSerializer, PickupDateSeriesSerializer, FeedbackSerializer
 from foodsaving.stores.models import Store
 from foodsaving.stores.serializers import StoreSerializer
-from foodsaving.subscriptions import stats
 from foodsaving.subscriptions.fcm import notify_subscribers
 from foodsaving.subscriptions.models import ChannelSubscription, PushSubscription
 from foodsaving.userauth.serializers import AuthUserSerializer
 from foodsaving.users.serializers import UserSerializer
 from foodsaving.utils import frontend_urls
 from foodsaving.utils.frontend_urls import logo_url
-
-from raven.contrib.django.raven_compat.models import client as sentry_client
 
 MockRequest = namedtuple('Request', ['user'])
 
@@ -45,7 +43,7 @@ channel_layer = get_channel_layer()
 channel_layer_send_sync = async_to_sync(channel_layer.send)
 
 
-async def send_in_channel(channel, topic, payload):
+def send_in_channel(channel, topic, payload):
     message = {
         'type': 'message.send',
         'text': json.dumps({
@@ -54,16 +52,10 @@ async def send_in_channel(channel, topic, payload):
         }),
     }
     try:
-        # channel_layer_send_sync(channel, message)
-        await channel_layer.send(channel, message)
+        channel_layer_send_sync(channel, message)
     except ChannelFull:
         # maybe this means the subscription is invalid now?
         sentry_client.captureException()
-
-    #event_loop.create_task(channel_layer.send(channel, message))
-
-    #await channel_layer.send(channel, message)
-    #stats.pushed_via_websocket(topic)
 
 
 @receiver(post_save, sender=ConversationMessage)
@@ -115,8 +107,8 @@ def send_messages(sender, instance, created, **kwargs):
     # so they will receive the `send_conversation_update` message
     topic = 'conversations:conversation'
 
-    for subscription in ChannelSubscription.objects.recent()\
-            .filter(user__in=conversation.participants.all())\
+    for subscription in ChannelSubscription.objects.recent() \
+            .filter(user__in=conversation.participants.all()) \
             .exclude(user=message.author):
         payload = ConversationSerializer(conversation, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic, payload)
@@ -138,15 +130,14 @@ def send_conversation_update(sender, instance, **kwargs):
 @receiver(post_save, sender=ConversationMessageReaction)
 @receiver(post_delete, sender=ConversationMessageReaction)
 def send_reaction_update(sender, instance, **kwargs):
-
     reaction = instance
     message = reaction.message
     conversation = message.conversation
 
     topic = 'conversations:message'
 
-    for subscription in ChannelSubscription.objects.recent()\
-            .filter(user__in=conversation.participants.all())\
+    for subscription in ChannelSubscription.objects.recent() \
+            .filter(user__in=conversation.participants.all()) \
             .exclude(user=reaction.user):
         payload = ConversationMessageSerializer(message, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic, payload)
