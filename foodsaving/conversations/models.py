@@ -125,7 +125,7 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
         return self.id == self.thread_id
 
     def is_thread_reply(self):
-        return self.thread_id and self.id is not self.thread_id
+        return self.thread_id is not None and self.id != self.thread_id
 
     @property
     def replies_count(self):
