@@ -1,3 +1,4 @@
+import threading
 from base64 import b64decode
 from channels.db import database_sync_to_async
 from urllib.parse import unquote
@@ -104,6 +105,7 @@ class SyncWebsocketConsumer(JsonWebsocketConsumer):
         if 'user' in self.scope:
             user = self.scope['user']
             if not user.is_anonymous:
+                print('creating subscription in thread', threading.get_ident())
                 ChannelSubscription.objects.create(user=user, reply_channel=self.channel_name)
 
         self.accept()
