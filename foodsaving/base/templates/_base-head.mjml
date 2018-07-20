@@ -78,4 +78,10 @@
         line-height: 18px;
         color: #777;
     }
+    blockquote {
+        padding: 8px 16px;
+        margin: 0;
+        font-size: 16px;
+        border-left: 4px solid #4a3520;
+    }
 </mj-style>

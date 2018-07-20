@@ -47,7 +47,9 @@ def make_conversation_message_broadcast(message, **kwargs):
             'updated_at': message.updated_at,
             'received_via': '',
             'reactions': [],
-            'is_editable': False
+            'is_editable': False,
+            'thread': None,
+            'thread_meta': None,
         }
     }
     response['payload'].update(kwargs)
@@ -178,6 +180,84 @@ class ConversationReceiverTests(ChannelTestCase):
 
         self.assertEqual(response['topic'], 'conversations:conversation')
         self.assertEqual(response['payload']['participants'], [user.id])
+
+
+class ConversationThreadReceiverTests(ChannelTestCase):
+    def test_receives_messages(self):
+        self.maxDiff = None
+        client = WSClient()
+        user = UserFactory()
+        author_client = WSClient()
+        author = UserFactory()
+
+        conversation = ConversationFactory(participants=[user, author])
+        thread = conversation.messages.create(author=user, content='yay')
+
+        # login and connect
+        client.force_login(user)
+        client.send_and_consume('websocket.connect', path='/')
+        author_client.force_login(author)
+        author_client.send_and_consume('websocket.connect', path='/')
+
+        reply = ConversationMessage.objects.create(
+            conversation=conversation,
+            thread=thread,
+            content='really yay?',
+            author=author,
+        )
+
+        # user receive message
+        response = client.receive(json=True)
+        parse_dates(response)
+        self.assertEqual(response, make_conversation_message_broadcast(
+            reply,
+            thread=thread.id,
+        ))
+
+        # and they should get an updated thread object
+        response = client.receive(json=True)
+        parse_dates(response)
+        self.assertEqual(
+            response,
+            make_conversation_message_broadcast(
+                thread,
+                thread_meta={
+                    'is_participant': True,
+                    'muted': False,
+                    'participants': [user.id, author.id],
+                    'reply_count': 1,
+                    'seen_up_to': None,
+                    'unread_reply_count': 1
+                },
+                thread=thread.id,
+                is_editable=True,  # user is author of thread message
+            )
+        )
+
+        # reply author should get message too
+        response = author_client.receive(json=True)
+        parse_dates(response)
+        self.assertEqual(response, make_conversation_message_broadcast(reply, is_editable=True, thread=thread.id))
+
+        # Author receives more recent `update_at` time,
+        # because their `seen_up_to` status is set after sending the message.
+        response = author_client.receive(json=True)
+        parse_dates(response)
+        self.assertEqual(
+            response,
+            make_conversation_message_broadcast(
+                thread,
+                thread=thread.id,
+                thread_meta={
+                    'is_participant': True,
+                    'muted': False,
+                    'participants': [user.id, author.id],
+                    'reply_count': 1,
+                    'seen_up_to': reply.id,
+                    'unread_reply_count': 0,
+                }
+            )
+        )
 
 
 class ConversationMessageReactionReceiverTests(ChannelTestCase):

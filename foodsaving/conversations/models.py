@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import ForeignKey, TextField, ManyToManyField, BooleanField, CharField
+from django.db.models import ForeignKey, TextField, ManyToManyField, BooleanField, CharField, QuerySet, Count, F, Q
 from django.utils import timezone
 
 from foodsaving.base.base_models import BaseModel, UpdatedAtMixin
@@ -80,10 +80,37 @@ class ConversationParticipant(BaseModel, UpdatedAtMixin):
     email_notifications = BooleanField(default=True)
 
 
+class ConversationMessageQuerySet(QuerySet):
+    def exclude_replies(self):
+        return self.filter(Q(thread_id=None) | Q(id=F('thread_id')))
+
+    def only_threads_and_replies(self):
+        return self.exclude(thread_id=None)
+
+    def only_replies(self):
+        return self.filter(~Q(thread_id=None) & ~Q(id=F('thread_id')))
+
+    def annotate_replies_count(self):
+        return self.annotate(replies_count=Count('thread_messages', filter=~Q(id=F('thread_id')), distinct=True))
+
+    def annotate_unread_replies_count_for(self, user):
+        unread_replies_filter = Q(
+            participants__user=user,
+        ) & ~Q(thread_messages__id=F('thread_id')  # replies have id != thread_id
+               ) & (Q(participants__seen_up_to=None) | Q(thread_messages__id__gt=F('participants__seen_up_to')))
+        return self.annotate(
+            unread_replies_count=Count('thread_messages', filter=unread_replies_filter, distinct=True)
+        )
+
+
 class ConversationMessage(BaseModel, UpdatedAtMixin):
     """A message in the conversation by a particular user."""
+
+    objects = ConversationMessageQuerySet.as_manager()
+
     author = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     conversation = ForeignKey(Conversation, related_name='messages', on_delete=models.CASCADE)
+    thread = ForeignKey('self', related_name='thread_messages', null=True, on_delete=models.CASCADE)
 
     content = TextField()
     received_via = CharField(max_length=40, blank=True)
@@ -93,6 +120,33 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 
     def is_recent(self):
         return self.created_at >= timezone.now() - relativedelta(days=settings.MESSAGE_EDIT_DAYS)
+
+    def is_first_in_thread(self):
+        return self.id == self.thread_id
+
+    def is_thread_reply(self):
+        return self.thread_id and self.id is not self.thread_id
+
+    @property
+    def replies_count(self):
+        if hasattr(self, '__replies_count'):
+            return self.__replies_count
+        else:
+            return self.thread_messages.only_replies().count()
+
+    @replies_count.setter
+    def replies_count(self, value):
+        self.__replies_count = value
+
+
+class ConversationThreadParticipant(BaseModel, UpdatedAtMixin):
+    user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    thread = ForeignKey(ConversationMessage, related_name='participants', on_delete=models.CASCADE)
+    seen_up_to = ForeignKey(ConversationMessage, null=True, on_delete=models.SET_NULL)
+    muted = BooleanField(default=False)
+
+    class Meta:
+        unique_together = ['user', 'thread']
 
 
 class ConversationMixin(object):

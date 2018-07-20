@@ -9,7 +9,8 @@ from django.dispatch import receiver
 
 from foodsaving.applications.models import GroupApplication
 from foodsaving.applications.serializers import GroupApplicationSerializer
-from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction
+from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction, \
+    ConversationThreadParticipant
 from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer
 from foodsaving.groups.models import Group
 from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer
@@ -45,7 +46,6 @@ def send_in_channel(channel, topic, payload):
 @receiver(post_save, sender=ConversationMessage)
 def send_messages(sender, instance, created, **kwargs):
     """When there is a message in a conversation we need to send it to any subscribed participants."""
-
     message = instance
     conversation = message.conversation
 
@@ -62,34 +62,48 @@ def send_messages(sender, instance, created, **kwargs):
         payload = ConversationMessageSerializer(message, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
-    # Send push notifications when a message is created, but not when it is modified
-    if created:
-        subscriptions = PushSubscription.objects.filter(
-            Q(user__in=conversation.participants.all()) & ~Q(user__in=push_exclude_users) & ~Q(user=message.author)
-        )
+        if created and message.is_thread_reply() and subscription.user != message.author:
+            payload = ConversationMessageSerializer(
+                message.thread, context={
+                    'request': MockRequest(user=subscription.user)
+                }
+            ).data
+            send_in_channel(subscription.reply_channel, topic, payload)
 
-        message_title = message.author.display_name
-        if isinstance(conversation.target, Group):
-            message_title = '{} / {}'.format(conversation.target.name, message_title)
+    # Send push notification and conversation updates when a message is created, but not when it is modified
+    if not created:
+        return
 
-        notify_subscribers(
-            subscriptions=subscriptions,
-            fcm_options={
-                'message_title': message_title,
-                'message_body': message.content,
-                'click_action': conversation_url,
-                'message_icon': logo_url(),
-                # this causes each notification for a given conversation to replace previous notifications
-                # fancier would be to make the new notifications show a summary not just the latest message
-                'tag': 'conversation:{}'.format(conversation.id)
-            }
-        )
+    subscriptions = PushSubscription.objects.filter(
+        Q(user__in=conversation.participants.all()) & ~Q(user__in=push_exclude_users) & ~Q(user=message.author)
+    )
+
+    message_title = message.author.display_name
+    if isinstance(conversation.target, Group):
+        message_title = '{} / {}'.format(conversation.target.name, message_title)
+
+    notify_subscribers(
+        subscriptions=subscriptions,
+        fcm_options={
+            'message_title': message_title,
+            'message_body': message.content,
+            'click_action': conversation_url,
+            'message_icon': logo_url(),
+            # this causes each notification for a given conversation to replace previous notifications
+            # fancier would be to make the new notifications show a summary not just the latest message
+            'tag': 'conversation:{}'.format(conversation.id)
+        }
+    )
 
     # Send conversations object to participants after sending a message
     # (important for unread_message_count)
     # Exclude the author because their seen_up_to status gets updated,
     # so they will receive the `send_conversation_update` message
     topic = 'conversations:conversation'
+
+    # Can be skipped for thread replies, as they don't alter the conversations object
+    if message.is_thread_reply():
+        return
 
     for subscription in ChannelSubscription.objects.recent()\
             .filter(user__in=conversation.participants.all())\
@@ -106,6 +120,24 @@ def send_conversation_update(sender, instance, **kwargs):
 
     topic = 'conversations:conversation'
     payload = ConversationSerializer(conversation, context={'request': MockRequest(user=instance.user)}).data
+
+    for subscription in ChannelSubscription.objects.recent().filter(user=instance.user):
+        send_in_channel(subscription.reply_channel, topic, payload)
+
+
+@receiver(post_save, sender=ConversationThreadParticipant)
+def send_thread_update(sender, instance, created, **kwargs):
+    # Update thread object for user after updating their participation
+    # (important for seen_up_to and unread_message_count)
+
+    # Saves a few unnecessary messages if we only send on modify
+    if created:
+        return
+
+    thread = instance.thread
+
+    topic = 'conversations:message'
+    payload = ConversationMessageSerializer(thread, context={'request': MockRequest(user=instance.user)}).data
 
     for subscription in ChannelSubscription.objects.recent().filter(user=instance.user):
         send_in_channel(subscription.reply_channel, topic, payload)

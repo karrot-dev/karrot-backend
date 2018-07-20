@@ -16,6 +16,8 @@ class HasVerifiedEmailAddress(permissions.BasePermission):
     message = _('You need to have a verified email address')
 
     def has_permission(self, request, view):
+        if view.action != 'create':
+            return True
         return request.user.mail_verified
 
 
@@ -23,14 +25,12 @@ class GroupApplicationViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin
                               GenericViewSet):
     queryset = GroupApplication.objects
     serializer_class = GroupApplicationSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = (
+        IsAuthenticated,
+        HasVerifiedEmailAddress,
+    )
     filter_backends = (DjangoFilterBackend, )
     filter_fields = ('group', )
-
-    def get_permissions(self):
-        if self.action == 'create':
-            self.permission_classes.append(HasVerifiedEmailAddress)
-        return super().get_permissions()
 
     def get_queryset(self):
         q = Q(group__members=self.request.user)
