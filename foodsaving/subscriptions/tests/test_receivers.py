@@ -1,24 +1,22 @@
 import json
 import os
 import pathlib
-import random
-import string
-from django.test import TestCase
-from shutil import copyfile
-
 import requests_mock
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
+from django.test import TestCase
 from django.utils import timezone
+from django.utils.crypto import get_random_string
 from pyfcm.baseapi import BaseAPI as FCMApi
+from shutil import copyfile
 from unittest.mock import patch
 
+from foodsaving.applications.factories import GroupApplicationFactory
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationMessage, \
     ConversationMessageReaction
 from foodsaving.groups.factories import GroupFactory
-from foodsaving.applications.factories import GroupApplicationFactory
 from foodsaving.invitations.models import Invitation
 from foodsaving.pickups.factories import FeedbackFactory, PickupDateFactory, \
     PickupDateSeriesFactory
@@ -72,7 +70,7 @@ def make_conversation_broadcast(conversation, **kwargs):
 
 
 def generate_channel_name():
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=20))
+    return get_random_string()
 
 
 class WSClient:
@@ -155,7 +153,6 @@ class ConversationReceiverTests(WSTestCase):
         )
 
     def tests_receive_message_on_leave(self):
-
         user = UserFactory()
 
         # join a conversation
@@ -171,7 +168,6 @@ class ConversationReceiverTests(WSTestCase):
         self.assertEqual(client.messages[0], {'topic': 'conversations:leave', 'payload': {'id': conversation.id}})
 
     def test_other_participants_receive_update_on_join(self):
-
         user = UserFactory()
         joining_user = UserFactory()
 
@@ -190,7 +186,6 @@ class ConversationReceiverTests(WSTestCase):
         self.assertEqual(set(response['payload']['participants']), {user.id, joining_user.id})
 
     def test_other_participants_receive_update_on_leave(self):
-
         user = UserFactory()
         leaving_user = UserFactory()
 
