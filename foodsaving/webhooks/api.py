@@ -16,7 +16,10 @@ from foodsaving.webhooks.models import EmailEvent
 def parse_local_part(part):
     signed_part = b64decode(part)
     signed_part_decoded = signed_part.decode('utf8')
-    return signing.loads(signed_part_decoded)
+    parts = signing.loads(signed_part_decoded)
+    if len(parts) == 2:
+        parts.append(None)  # in place of thread id
+    return parts
 
 
 def make_local_part(conversation, user, thread=None):
