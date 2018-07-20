@@ -1,11 +1,9 @@
-import threading
 from base64 import b64decode
 from channels.db import database_sync_to_async
-from urllib.parse import unquote
-
 from channels.generic.websocket import JsonWebsocketConsumer, AsyncJsonWebsocketConsumer
 from django.utils import timezone
 from rest_framework.authentication import TokenAuthentication
+from urllib.parse import unquote
 
 from foodsaving.subscriptions.models import ChannelSubscription
 
