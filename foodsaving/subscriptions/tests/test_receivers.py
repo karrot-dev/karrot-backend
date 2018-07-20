@@ -217,7 +217,6 @@ class ConversationMessageReactionReceiverTests(WSTestCase):
 
         # login and connect
         client = self.connect_as(user)
-        reaction_user_client = self.connect_as(reaction_user)
 
         # create reaction
         ConversationMessageReaction.objects.create(
@@ -254,7 +253,6 @@ class ConversationMessageReactionReceiverTests(WSTestCase):
 
         # login and connect
         client = self.connect_as(user)
-        reaction_user_client = self.connect_as(reaction_user)
 
         reaction.delete()
 
