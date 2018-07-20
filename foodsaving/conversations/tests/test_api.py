@@ -166,18 +166,14 @@ class TestConversationThreadsAPI(APITestCase):
     def test_can_edit_reply(self):
         self.client.force_login(user=self.user)
         reply = self.create_reply()
-        response = self.client.patch('/api/messages/{}/'.format(reply.id), {
-            'content': 'edited!'
-        }, format='json')
+        response = self.client.patch('/api/messages/{}/'.format(reply.id), {'content': 'edited!'}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['content'], 'edited!')
 
     def test_can_react_to_reply(self):
         self.client.force_login(user=self.user)
         reply = self.create_reply()
-        response = self.client.post('/api/messages/{}/reactions/'.format(reply.id), {
-            'name': 'smile'
-        }, format='json')
+        response = self.client.post('/api/messages/{}/reactions/'.format(reply.id), {'name': 'smile'}, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_get_thread_meta_for_particiant(self):
@@ -239,6 +235,14 @@ class TestConversationThreadsAPI(APITestCase):
         reply = self.create_reply()
         data = {'conversation': self.conversation.id, 'content': 'a nice message reply!', 'thread': reply.id}
         response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_cannot_move_replies_between_threads(self):
+        self.client.force_login(user=self.user)
+        another_message = self.conversation.messages.create(author=self.user, content='yay')
+        reply = self.create_reply()
+        data = {'thread': another_message.id}
+        response = self.client.patch('/api/messages/{}/'.format(reply.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 

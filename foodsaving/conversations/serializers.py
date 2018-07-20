@@ -227,15 +227,20 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if 'thread' in data:
             thread = data['thread']
-            conversation = data['conversation']
 
-            # the thread must be in the correct conversation
-            if thread.conversation.id != conversation.id:
-                raise serializers.ValidationError(_('Thread is not in the same conversation'))
+            if 'view' in self.context and self.context['view'].action == 'partial_update':
+                raise serializers.ValidationError(_('You cannot change the thread of a message'))
 
-            # only some types of messages can have threads
-            if not isinstance(data['conversation'].target, Group):
-                raise serializers.ValidationError(_('You can only reply to Group messages'))
+            if 'conversation' in data:
+                conversation = data['conversation']
+
+                # the thread must be in the correct conversation
+                if thread.conversation.id != conversation.id:
+                    raise serializers.ValidationError(_('Thread is not in the same conversation'))
+
+                # only some types of messages can have threads
+                if not isinstance(conversation.target, Group):
+                    raise serializers.ValidationError(_('You can only reply to Group messages'))
 
             # you cannot reply to replies
             if thread.is_thread_reply():
