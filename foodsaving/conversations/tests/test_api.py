@@ -131,7 +131,6 @@ class TestConversationThreadsAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['thread'], self.thread.id)
 
-
     def test_returns_thread_and_replies(self):
         self.client.force_login(user=self.user)
         another_thread = self.conversation.messages.create(author=self.user, content='my own thread')
