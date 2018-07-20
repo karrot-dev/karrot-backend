@@ -2,6 +2,7 @@ from email.utils import formataddr
 from babel.dates import format_date, format_time
 
 from django.utils import translation, timezone
+from django.utils.text import Truncator
 from django.utils.translation import ugettext as _
 
 from config import settings
@@ -11,13 +12,15 @@ from foodsaving.pickups.models import PickupDate
 from foodsaving.utils.email_utils import prepare_email
 from foodsaving.utils.frontend_urls import (
     group_wall_url, group_conversation_mute_url, pickup_detail_url, pickup_conversation_mute_url, user_detail_url,
-    user_conversation_mute_url, group_application_url, group_application_mute_url
-)
+    user_conversation_mute_url, group_application_url, group_application_mute_url,
+    thread_url, thread_mute_url)
 from foodsaving.webhooks.api import make_local_part
 
 
 def prepare_conversation_message_notification(user, message):
     if isinstance(message.conversation.target, Group):
+        if message.is_thread_reply():
+            return prepare_group_thread_message_notification(user, message)
         return prepare_group_conversation_message_notification(user, message)
     if isinstance(message.conversation.target, PickupDate):
         return prepare_pickup_conversation_message_notification(user, message)
@@ -26,6 +29,35 @@ def prepare_conversation_message_notification(user, message):
     if not message.conversation.target and message.conversation.is_private:
         return prepare_private_user_conversation_message_notification(user, message)
     raise Exception('Cannot send message notification because conversation doesn\'t have a known target')
+
+
+def prepare_group_thread_message_notification(user, message):
+    thread = message.thread
+
+    thread_text_beginning = Truncator(thread.content).chars(num=60)
+
+    reply_to_name = thread.author.display_name
+    conversation_name = thread_text_beginning
+
+    local_part = make_local_part(message.conversation, user, thread)
+    reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
+    from_email = formataddr((message.author.display_name, settings.DEFAULT_FROM_EMAIL))
+
+    return prepare_email(
+        'thread_message_notification',
+        from_email=from_email,
+        user=user,
+        reply_to=[reply_to],
+        context={
+            'conversation_name': conversation_name,
+            'thread_author': thread.author,
+            'thread_message_content': thread.content_rendered(truncate_words=40),
+            'author': message.author,
+            'message_content': message.content_rendered(),
+            'thread_url': thread_url(thread),
+            'mute_url': thread_mute_url(thread),
+        }
+    )
 
 
 def prepare_group_conversation_message_notification(user, message):

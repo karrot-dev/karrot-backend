@@ -45,7 +45,11 @@ def shuffle_groups():
 
 
 def random_message():
-    return ConversationMessage.objects.order_by('?').first()
+    return ConversationMessage.objects.exclude_replies().order_by('?').first()
+
+
+def random_reply():
+    return ConversationMessage.objects.only_replies().order_by('?').first()
 
 
 def pseudo_verification_code():
@@ -133,6 +137,11 @@ class Handlers:
     def signup(self):
         return foodsaving.users.emails.prepare_signup_email(
             user=random_user(), verification_code=pseudo_verification_code()
+        )
+
+    def thread_message_notification(self):
+        return foodsaving.conversations.emails.prepare_group_thread_message_notification(
+            user=random_user(), message=random_reply()
         )
 
     def passwordreset_request(self):
