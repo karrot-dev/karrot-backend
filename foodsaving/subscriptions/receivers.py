@@ -51,8 +51,6 @@ def send_messages(sender, instance, created, **kwargs):
 
     topic = 'conversations:message'
 
-    conversation_url = frontend_urls.conversation_url(conversation, message.author)
-
     push_exclude_users = []
 
     for subscription in ChannelSubscription.objects.recent().filter(user__in=conversation.participants.all()):
@@ -82,12 +80,18 @@ def send_messages(sender, instance, created, **kwargs):
     if isinstance(conversation.target, Group):
         message_title = '{} / {}'.format(conversation.target.name, message_title)
 
+    click_action = None
+    if message.is_thread_reply():
+        click_action = frontend_urls.thread_url(message.thread)
+    else:
+        click_action = frontend_urls.conversation_url(conversation, message.author)
+
     notify_subscribers(
         subscriptions=subscriptions,
         fcm_options={
             'message_title': message_title,
             'message_body': message.content,
-            'click_action': conversation_url,
+            'click_action': click_action,
             'message_icon': logo_url(),
             # this causes each notification for a given conversation to replace previous notifications
             # fancier would be to make the new notifications show a summary not just the latest message
