@@ -11,10 +11,17 @@ from rest_framework.authtoken.models import Token
 
 from foodsaving.subscriptions.consumers import SyncWebsocketConsumer, TokenAuthMiddleware, get_auth_token_from_headers
 from foodsaving.subscriptions.models import ChannelSubscription
-# noinspection PyUnresolvedReferences
-from foodsaving.subscriptions.tests.test_receivers_async_pytest import communicator  # noqa: F401
 from foodsaving.users.factories import AsyncUserFactory
 
+
+@pytest.fixture
+async def communicator():
+    communicator = WebsocketCommunicator(SyncWebsocketConsumer, '/')
+    yield communicator
+    await communicator.disconnect()
+
+
+author_communicator = communicator
 
 @pytest.mark.asyncio
 @pytest.mark.django_db
