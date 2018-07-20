@@ -48,6 +48,7 @@ def generate_plaintext_from_html(html):
     h.ignore_tables = True
     h.inline_links = False
     h.ignore_images = True
+    h.wrap_links = False
     return h.handle(html)
 
 
