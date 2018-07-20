@@ -71,7 +71,7 @@ def user_conversation_mute_url(user, conversation):
 
 def thread_url(thread):
     """
-    Assumes that message.conversation.target is a group
+    Assumes that thread.conversation.target is a group
     """
     return '{hostname}/#/group/{group_id}/message/{message_id}/replies'.format(
         hostname=settings.HOSTNAME,
