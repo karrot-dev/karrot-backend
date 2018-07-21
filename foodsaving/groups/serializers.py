@@ -61,6 +61,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
     "use this also for creating and updating a group"
     memberships = serializers.SerializerMethodField()
     notification_types = serializers.SerializerMethodField()
+    application_questions_default = serializers.SerializerMethodField()
     timezone = TimezoneField()
 
     class Meta:
@@ -71,6 +72,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'description',
             'public_description',
             'application_questions',
+            'application_questions_default',
             'members',
             'memberships',
             'address',
@@ -112,6 +114,9 @@ class GroupDetailSerializer(GroupBaseSerializer):
         user = self.context['request'].user
         membership = group.groupmembership_set.get(user=user)
         return membership.notification_types
+
+    def get_application_questions_default(self, group):
+        return group.get_application_questions_default()
 
     def update(self, group, validated_data):
         if group.is_playground():

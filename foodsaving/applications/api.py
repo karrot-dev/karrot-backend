@@ -30,7 +30,7 @@ class GroupApplicationViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin
         HasVerifiedEmailAddress,
     )
     filter_backends = (DjangoFilterBackend, )
-    filter_fields = ('group', )
+    filter_fields = ('group', 'user')
 
     def get_queryset(self):
         q = Q(group__members=self.request.user)
