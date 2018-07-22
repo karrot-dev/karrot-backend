@@ -60,9 +60,13 @@
                                     <em>{{ feedback.comment }}</em>
                                     <br>
                                     <span style="font-size: 14px;">
-                                    {% trans weight=feedback.weight, store_url=store_url(feedback.about.store), store_name=feedback.about.store.name -%}
-                                        {{ weight }} kg from <a href="{{ store_url }}">{{ store_name }}</a>
-                                    {% endtrans %}
+                                    {% if feedback.weight is not none %}
+                                        {% trans weight=feedback.weight, store_url=store_url(feedback.about.store), store_name=feedback.about.store.name -%}
+                                            {{ weight }} kg from <a href="{{ store_url }}">{{ store_name }}</a>
+                                        {% endtrans %}
+                                    {% else %}
+                                        <a href="{{ store_url(feedback.about.store) }}">{{ feedback.about.store.name }}</a>
+                                    {% endif %}
                                     </span>
                                 </p>
                             {% endfor %}
