@@ -49,7 +49,11 @@ class TestInvitationAPIIntegration(APITestCase):
         # accept the invite
         self.client.force_login(self.non_member)
         response = self.client.post(base_url + token + '/accept/')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+            'token {} not valid'.format(token),
+        )
         self.assertIn(self.non_member, self.group.members.all())
 
         # check if current_group is set to invited group

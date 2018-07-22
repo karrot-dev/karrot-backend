@@ -39,6 +39,13 @@ class TestConversationsAPI(APITestCase):
         self.assertEqual(len(response.data['results']), 1)
         self.assertEqual(response.data['results'][0]['content'], 'hello')
 
+    def test_get_message(self):
+        self.client.force_login(user=self.participant1)
+        message_id = self.conversation1.messages.first().id
+        response = self.client.get('/api/messages/{}/'.format(message_id), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['id'], message_id)
+
     def test_can_get_messages_for_all_conversations(self):
         self.client.force_login(user=self.participant1)
         response = self.client.get('/api/messages/', format='json')
@@ -81,6 +88,179 @@ class TestConversationsAPI(APITestCase):
         data = {'conversation': self.conversation3.id, 'content': 'a nice message'}
         response = self.client.post('/api/messages/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class TestConversationThreadsAPI(APITestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.user2 = UserFactory()
+        self.group = GroupFactory(members=[self.user, self.user2])
+        self.conversation = self.group.conversation
+        self.thread = self.conversation.messages.create(author=self.user, content='yay')
+
+    def create_reply(self, **kwargs):
+        return ConversationMessage.objects.create(
+            conversation=self.conversation,
+            author=self.user,
+            thread=self.thread,
+            content='default reply',
+            **kwargs,
+        )
+
+    def test_thread_reply(self):
+        self.client.force_login(user=self.user)
+        data = {'conversation': self.conversation.id, 'content': 'a nice message reply!', 'thread': self.thread.id}
+        response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['thread'], self.thread.id)
+
+    def test_thread_reply_a_few_times(self):
+        self.client.force_login(user=self.user)
+        data = {'conversation': self.conversation.id, 'content': 'a nice message reply!', 'thread': self.thread.id}
+        response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['thread'], self.thread.id)
+
+        data = {'conversation': self.conversation.id, 'content': 'a nice message reply!', 'thread': self.thread.id}
+        response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['thread'], self.thread.id)
+
+        data = {'conversation': self.conversation.id, 'content': 'a nice message reply!', 'thread': self.thread.id}
+        response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['thread'], self.thread.id)
+
+    def test_returns_thread_and_replies(self):
+        self.client.force_login(user=self.user)
+        another_thread = self.conversation.messages.create(author=self.user, content='my own thread')
+        n = 5
+        [
+            ConversationMessage.objects.create(
+                conversation=self.conversation,
+                author=self.user,
+                thread=another_thread,
+                content='default reply',
+            ) for _ in range(n)
+        ]
+        response = self.client.get('/api/messages/?thread={}'.format(another_thread.id), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), n + 1)
+
+    def test_reply_adds_participant(self):
+        self.client.force_login(user=self.user2)
+        self.assertFalse(self.thread.participants.filter(user=self.user2).exists())
+        data = {'conversation': self.conversation.id, 'content': 'a nice message reply!', 'thread': self.thread.id}
+        response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(self.thread.participants.filter(user=self.user2).exists())
+
+    def test_can_mute_thread(self):
+        self.client.force_login(user=self.user)
+        data = {'muted': True}
+        self.create_reply()
+        response = self.client.patch('/api/messages/{}/thread/'.format(self.thread.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        participant = self.thread.participants.get(user=self.user)
+        self.assertEqual(participant.muted, True)
+
+    def test_can_mark_seen_up_to(self):
+        self.client.force_login(user=self.user)
+        reply = self.create_reply()
+        data = {'seen_up_to': reply.id}
+        response = self.client.patch('/api/messages/{}/thread/'.format(self.thread.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        participant = self.thread.participants.get(user=self.user)
+        self.assertEqual(participant.seen_up_to, reply)
+
+    def test_cannot_mute_thread_with_no_replies(self):
+        self.client.force_login(user=self.user)
+        another_message = self.conversation.messages.create(author=self.user, content='boo')
+        data = {'muted': True}
+        response = self.client.patch('/api/messages/{}/thread/'.format(another_message.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_can_edit_reply(self):
+        self.client.force_login(user=self.user)
+        reply = self.create_reply()
+        response = self.client.patch('/api/messages/{}/'.format(reply.id), {'content': 'edited!'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['content'], 'edited!')
+
+    def test_can_react_to_reply(self):
+        self.client.force_login(user=self.user)
+        reply = self.create_reply()
+        response = self.client.post('/api/messages/{}/reactions/'.format(reply.id), {'name': 'smile'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_get_thread_meta_for_particiant(self):
+        self.client.force_login(user=self.user)
+        reply = self.create_reply()
+        response = self.client.get('/api/messages/', format='json')
+        item = response.data['results'][0]
+        self.assertEqual(item['thread'], self.thread.id)
+        self.assertEqual(
+            item['thread_meta'], {
+                'is_participant': True,
+                'participants': [self.user.id],
+                'reply_count': 1,
+                'seen_up_to': reply.id,
+                'muted': False,
+                'unread_reply_count': 0,
+            }
+        )
+
+    def test_get_thread_meta_for_non_participant(self):
+        self.client.force_login(user=self.user2)
+        self.create_reply()
+        response = self.client.get('/api/messages/', format='json')
+        item = response.data['results'][0]
+        self.assertEqual(item['thread'], self.thread.id)
+        self.assertEqual(
+            item['thread_meta'], {
+                'is_participant': False,
+                'participants': [self.user.id],
+                'reply_count': 1,
+            }
+        )
+
+    def test_cannot_create_private_conversation_threads(self):
+        self.client.force_login(user=self.user)
+        private_conversation = Conversation.objects.get_or_create_for_two_users(self.user, self.user2)
+        private_message = private_conversation.messages.create(author=self.user, content='hey there, you look nice')
+        data = {
+            'conversation': private_conversation.id,
+            'content': 'a nice message reply!',
+            'thread': private_message.id,
+        }
+        response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_fails_with_incorrect_conversation(self):
+        self.client.force_login(user=self.user)
+        another_conversation = Conversation.objects.get_or_create_for_two_users(self.user, self.user2)
+        data = {
+            'conversation': another_conversation.id,
+            'content': 'a nice message reply!',
+            'thread': self.thread.id,
+        }
+        response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_cannot_reply_to_replies(self):
+        self.client.force_login(user=self.user)
+        reply = self.create_reply()
+        data = {'conversation': self.conversation.id, 'content': 'a nice message reply!', 'thread': reply.id}
+        response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_cannot_move_replies_between_threads(self):
+        self.client.force_login(user=self.user)
+        another_message = self.conversation.messages.create(author=self.user, content='yay')
+        reply = self.create_reply()
+        data = {'thread': another_message.id}
+        response = self.client.patch('/api/messages/{}/'.format(reply.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class TestConversationsSeenUpToAPI(APITestCase):
@@ -466,7 +646,7 @@ class TestConversationsMessageReactionsDeleteAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
 
-class TestConversationsMessageEditPatchAPI(APITestCase):
+class TestConversationsMessageEditAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.user2 = UserFactory()
@@ -503,10 +683,8 @@ class TestConversationsMessageEditPatchAPI(APITestCase):
         self.client.force_login(user=self.user2)
         data = {'content': 'a nice message'}
         response = self.client.patch('/api/messages/{}/'.format(self.message.id), data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    # Even if the participant is in the conversation,
-    # they cannot edit messages they did not create.
     def test_cannot_update_message_if_not_message_author(self):
         self.client.force_login(user=self.user2)
         data = {'content': 'a nicer message'}

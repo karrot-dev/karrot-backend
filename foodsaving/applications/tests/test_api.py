@@ -238,8 +238,9 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
         self.assertEqual(len(response.data), 1)
 
     def test_list_own_applications(self):
+        [GroupApplicationFactory(group=self.group, user=UserFactory()) for _ in range(4)]
         self.client.force_login(user=self.applicant)
-        response = self.get_results('/api/group-applications/')
+        response = self.get_results('/api/group-applications/?user={}'.format(self.applicant.id))
         self.assertEqual(len(response.data), 1)
 
     def test_accept_application(self):

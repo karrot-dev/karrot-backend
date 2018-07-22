@@ -69,6 +69,21 @@ def user_conversation_mute_url(user, conversation):
     return '{}?mute_conversation={}'.format(user_detail_url(user), conversation.id)
 
 
+def thread_url(thread):
+    """
+    Assumes that thread.conversation.target is a group
+    """
+    return '{hostname}/#/group/{group_id}/message/{message_id}/replies'.format(
+        hostname=settings.HOSTNAME,
+        group_id=thread.conversation.target_id,
+        message_id=thread.id,
+    )
+
+
+def thread_mute_url(thread):
+    return '{}?mute'.format(thread_url(thread))
+
+
 def group_wall_url(group):
     return '{hostname}/#/group/{group_id}/wall'.format(hostname=settings.HOSTNAME, group_id=group.id)
 

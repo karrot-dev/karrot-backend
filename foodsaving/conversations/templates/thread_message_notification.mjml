@@ -1,0 +1,35 @@
+<mjml>
+    <mj-head>
+        <mj-include path="../../base/templates/_base-head.mjml"/>
+        <mj-title>{{ conversation_name }}</mj-title>
+    </mj-head>
+    <mj-body>
+        <mj-container>
+            <mj-section>
+                <mj-column>
+                    <mj-text>
+                        <div class="message">
+                            <a class="message-author" href="{{ user_url(author) }}">{{ author.display_name }}</a><br>
+                            <div class="message-content">{{ message_content | safe }}</div>
+                        </div>
+                    </mj-text>
+                    <mj-text>
+                        <h3>{% trans %}In reply to:{% endtrans %}</h3>
+                        <div class="message">
+                            <a class="message-author" href="{{ user_url(thread_author) }}">{{ thread_author.display_name }}</a><br>
+                            <div class="message-content">{{ thread_message_content | safe }}</div>
+                        </div>
+                    </mj-text>
+                    <mj-divider/>
+                    <mj-text font-size="13px" line-height="18px" color="#777">
+                        <p>
+                            {% trans %}You are receiving this because you are subscribed to replies in this conversation.{% endtrans %}<br/>
+                            {% trans %}Reply to this email directly, <a href="{{ thread_url }}">view replies on {{ site_name }}</a>, or <a href="{{ mute_url }}">mute further replies</a>.{% endtrans %}
+                        </p>
+                    </mj-text>
+                </mj-column>
+            </mj-section>
+            <mj-include path="../../base/templates/_footer.mjml"/>
+        </mj-container>
+    </mj-body>
+</mjml>

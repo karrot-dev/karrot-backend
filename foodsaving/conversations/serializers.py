@@ -3,9 +3,15 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.fields import DateTimeField
 
-from foodsaving.conversations.models import Conversation, ConversationMessage, \
-    ConversationParticipant, ConversationMessageReaction
+from foodsaving.conversations.models import (
+    Conversation,
+    ConversationMessage,
+    ConversationParticipant,
+    ConversationMessageReaction,
+    ConversationThreadParticipant,
+)
 from foodsaving.conversations.helpers import normalize_emoji_name
+from foodsaving.groups.models import Group
 
 
 class ConversationSerializer(serializers.ModelSerializer):
@@ -33,7 +39,7 @@ class ConversationSerializer(serializers.ModelSerializer):
 
     def get_unread_message_count(self, conversation):
         participant = self._participant(conversation)
-        messages = conversation.messages
+        messages = conversation.messages.exclude_replies()
         if participant.seen_up_to:
             messages = messages.filter(id__gt=participant.seen_up_to.id)
         return messages.count()
@@ -100,14 +106,112 @@ class ConversationMessageReactionSerializer(serializers.ModelSerializer):
     name = EmojiField()
 
 
+class ConversationThreadNonParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConversationMessage
+        fields = [
+            'is_participant',
+            'participants',
+            'reply_count',
+        ]
+
+    is_participant = serializers.SerializerMethodField()
+    participants = serializers.SerializerMethodField()
+    reply_count = serializers.SerializerMethodField()
+
+    def get_is_participant(self, thread):
+        return False
+
+    def get_participants(self, thread):
+        return [participants.user_id for participants in thread.participants.all()]
+
+    def get_reply_count(self, thread):
+        return thread.replies_count
+
+
+class ConversationThreadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConversationThreadParticipant
+        fields = [
+            'is_participant',
+            'participants',
+            'reply_count',
+            'seen_up_to',
+            'muted',
+            'unread_reply_count',
+        ]
+
+    is_participant = serializers.SerializerMethodField()
+    participants = serializers.SerializerMethodField()
+    reply_count = serializers.SerializerMethodField()
+    unread_reply_count = serializers.SerializerMethodField()
+
+    def get_is_participant(self, participant):
+        return True
+
+    def get_participants(self, participant):
+        return [participants.user_id for participants in participant.thread.participants.all()]
+
+    def get_reply_count(self, participant):
+        return participant.thread.replies_count
+
+    def get_unread_reply_count(self, participant):
+        count = getattr(participant.thread, 'unread_replies_count', None)
+        if count is None:
+            messages = participant.thread.thread_messages.only_replies()
+            if participant.seen_up_to:
+                messages = messages.filter(id__gt=participant.seen_up_to.id)
+            return messages.count()
+        return count
+
+    def validate_seen_up_to(self, seen_up_to):
+        if not self.instance.thread.thread_messages.filter(id=seen_up_to.id).exists():
+            raise serializers.ValidationError('Must refer to a message in the thread')
+        return seen_up_to
+
+    def update(self, participant, validated_data):
+        if 'seen_up_to' in validated_data:
+            participant.seen_up_to = validated_data['seen_up_to']
+        if 'muted' in validated_data:
+            participant.muted = validated_data['muted']
+        participant.save()
+        return participant
+
+
 class ConversationMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConversationMessage
         fields = [
-            'id', 'author', 'content', 'conversation', 'created_at', 'updated_at', 'reactions', 'received_via',
-            'is_editable'
+            'id',
+            'author',
+            'content',
+            'conversation',
+            'created_at',
+            'updated_at',
+            'reactions',
+            'received_via',
+            'is_editable',
+            'thread',  # ideally would only be writable on create
+            'thread_meta',
         ]
-        read_only_fields = ('author', 'id', 'created_at', 'received_via')
+        read_only_fields = (
+            'author',
+            'id',
+            'created_at',
+            'received_via',
+            'thread_meta',
+        )
+
+    thread_meta = serializers.SerializerMethodField()
+
+    def get_thread_meta(self, message):
+        if not message.is_first_in_thread():
+            return None
+        user = self.context['request'].user
+        participant = message.participants.filter(user=user).first()
+        if participant:
+            return ConversationThreadSerializer(participant).data
+        return ConversationThreadNonParticipantSerializer(message).data
 
     reactions = ConversationMessageReactionSerializer(many=True, read_only=True)
     is_editable = serializers.SerializerMethodField()
@@ -119,6 +223,30 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
         if self.context['request'].user not in conversation.participants.all():
             raise PermissionDenied(_('You are not in this conversation'))
         return conversation
+
+    def validate(self, data):
+        if 'thread' in data:
+            thread = data['thread']
+
+            if 'view' in self.context and self.context['view'].action == 'partial_update':
+                raise serializers.ValidationError(_('You cannot change the thread of a message'))
+
+            if 'conversation' in data:
+                conversation = data['conversation']
+
+                # the thread must be in the correct conversation
+                if thread.conversation.id != conversation.id:
+                    raise serializers.ValidationError(_('Thread is not in the same conversation'))
+
+                # only some types of messages can have threads
+                if not isinstance(conversation.target, Group):
+                    raise serializers.ValidationError(_('You can only reply to Group messages'))
+
+            # you cannot reply to replies
+            if thread.is_thread_reply():
+                raise serializers.ValidationError(_('You cannot reply to replies'))
+
+        return data
 
     def create(self, validated_data):
         user = self.context['request'].user

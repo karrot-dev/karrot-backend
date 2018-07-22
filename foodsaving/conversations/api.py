@@ -4,6 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated, BasePermission
@@ -12,8 +13,13 @@ from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.conversations.models import (Conversation, ConversationMessage, ConversationMessageReaction)
 from foodsaving.conversations.serializers import (
-    ConversationSerializer, ConversationMessageSerializer, ConversationMessageReactionSerializer,
-    ConversationMarkSerializer, ConversationEmailNotificationsSerializer, EmojiField
+    ConversationSerializer,
+    ConversationMessageSerializer,
+    ConversationMessageReactionSerializer,
+    ConversationMarkSerializer,
+    ConversationEmailNotificationsSerializer,
+    EmojiField,
+    ConversationThreadSerializer,
 )
 from foodsaving.groups.models import Group
 from foodsaving.utils.mixins import PartialUpdateModelMixin
@@ -25,10 +31,18 @@ class MessagePagination(CursorPagination):
     ordering = '-created_at'
 
 
+class ReverseMessagePagination(CursorPagination):
+    page_size = 10
+    ordering = 'created_at'
+
+
 class IsConversationParticipant(BasePermission):
     message = _('You are not in this conversation')
 
     def has_permission(self, request, view):
+        """If the user asks to filter messages by conversation, return an error if
+        they are not part of the conversation (instead of returning empty result)
+        """
         conversation_id = request.GET.get('conversation', None)
 
         # if they specify a conversation, check they are in it
@@ -41,12 +55,6 @@ class IsConversationParticipant(BasePermission):
         # otherwise it is fine (messages will be filtered for the users conversations)
         return True
 
-
-class IsMessageConversationParticipant(BasePermission):
-    """Is the specified message in a conversation which user participates in?"""
-
-    message = _('You are not in this conversation')
-
     def has_object_permission(self, request, view, message):
         return message.conversation.participants.filter(id=request.user.id).exists()
 
@@ -57,6 +65,8 @@ class IsAuthorConversationMessage(BasePermission):
     message = _('You are not the author of this message')
 
     def has_object_permission(self, request, view, message):
+        if view.action != 'partial_update':
+            return True
         return request.user == message.author
 
 
@@ -65,6 +75,8 @@ class IsWithinUpdatePeriod(BasePermission):
         {'days_number': settings.MESSAGE_EDIT_DAYS}
 
     def has_object_permission(self, request, view, message):
+        if view.action != 'partial_update':
+            return True
         return message.is_recent()
 
 
@@ -99,44 +111,75 @@ class ConversationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Gene
         return Response(serializer.data)
 
 
-class ConversationMessageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, PartialUpdateModelMixin,
-                                 GenericViewSet):
+class ConversationMessageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,
+                                 PartialUpdateModelMixin, GenericViewSet):
     """
     ConversationMessages
     """
 
-    queryset = ConversationMessage.objects.prefetch_related('reactions')
+    queryset = ConversationMessage.objects \
+        .prefetch_related('reactions') \
+        .prefetch_related('participants') \
+        .annotate_replies_count()
+
     serializer_class = ConversationMessageSerializer
     permission_classes = (
         IsAuthenticated,
         IsConversationParticipant,
-        IsMessageConversationParticipant,
         IsAuthorConversationMessage,
         IsWithinUpdatePeriod,
     )
     filter_backends = (DjangoFilterBackend, )
-    filter_fields = ('conversation', )
+    filter_fields = (
+        'conversation',
+        'thread',
+    )
     pagination_class = MessagePagination
 
+    @property
+    def paginator(self):
+        if self.request.query_params.get('thread', None):
+            self.pagination_class = ReverseMessagePagination
+        return super().paginator
+
     def get_queryset(self):
-        return self.queryset.filter(conversation__participants=self.request.user)
+        if self.action == 'partial_update':
+            return self.queryset
+        qs = self.queryset \
+            .filter(conversation__participants=self.request.user) \
+            .annotate_unread_replies_count_for(self.request.user)
+
+        if self.request.query_params.get('thread', None):
+            return qs.only_threads_and_replies()
+        else:
+            return qs.exclude_replies()
 
     def partial_update(self, request, *args, **kwargs):
         """Update one of your messages"""
         return super().partial_update(request)
 
+    @action(detail=True, methods=['PATCH'], serializer_class=ConversationThreadSerializer)
+    def thread(self, request, pk=None):
+        message = self.get_object()
+        if not message.is_first_in_thread():
+            raise ValidationError(_('Must be first in thread'))
+        participant = message.participants.filter(user=request.user).first()
+        if not participant:
+            raise ValidationError(_('You are not a participant in this thread'))
+        serializer = self.get_serializer(participant, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
     @action(
         detail=True,
         methods=('POST', ),
         filter_fields=('name', ),
-        permission_classes=(IsAuthenticated, IsMessageConversationParticipant)
     )
     def reactions(self, request, pk):
         """route for POST /messages/{id}/reactions/ with body {"name":"emoji_name"}"""
 
         message = get_object_or_404(ConversationMessage, id=pk)
-
-        # object permissions check has to be triggered manually
         self.check_object_permissions(self.request, message)
 
         data = {
@@ -155,7 +198,6 @@ class ConversationMessageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
         methods=('DELETE', ),
         url_path='reactions/(?P<name>[a-z0-9_+-]+)',
         url_name='remove_reaction',
-        permission_classes=(IsAuthenticated, IsMessageConversationParticipant)
     )
     def remove_reaction(self, request, pk, name):
         """route for DELETE /messages/{id}/reactions/{name}/"""
