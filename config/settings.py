@@ -215,8 +215,6 @@ CHANNEL_LAYERS = {
 
 ASGI_APPLICATION = 'foodsaving.subscriptions.routing.application'
 
-CHANNELS_WS_PROTOCOLS = ['karrot.token']
-
 # Verification codes:
 # Time until a verification code expires
 EMAIL_VERIFICATION_TIME_LIMIT_HOURS = 7 * 24
