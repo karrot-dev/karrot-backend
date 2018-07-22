@@ -9,9 +9,11 @@ from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
-from foodsaving.subscriptions.consumers import SyncWebsocketConsumer, TokenAuthMiddleware, get_auth_token_from_headers
+from foodsaving.subscriptions.consumers import WebsocketConsumer, TokenAuthMiddleware, get_auth_token_from_headers
 from foodsaving.subscriptions.models import ChannelSubscription
-from foodsaving.users.factories import AsyncUserFactory
+from foodsaving.users.factories import UserFactory
+
+AsyncUserFactory = database_sync_to_async(UserFactory)
 
 # These async fixtures only work for python 3.6+ (needs async yield)
 #
@@ -46,7 +48,7 @@ from foodsaving.users.factories import AsyncUserFactory
 
 class Communicator():
     async def __aenter__(self):
-        self.communicator = WebsocketCommunicator(SyncWebsocketConsumer, '/')
+        self.communicator = WebsocketCommunicator(WebsocketConsumer, '/')
         return self.communicator
 
     async def __aexit__(self, exc_type, exc, tb):
@@ -59,7 +61,7 @@ class TokenCommunicator():
         token = Token.objects.create(user=user)
         encoded = b64encode(token.key.encode('ascii')).decode('ascii')
         self.communicator = WebsocketCommunicator(
-            TokenAuthMiddleware(SyncWebsocketConsumer),
+            TokenAuthMiddleware(WebsocketConsumer),
             '/',
             headers=[[
                 b'sec-websocket-protocol',
