@@ -34,22 +34,6 @@ class UserManager(BaseUserManager):
         user.send_welcome_email()
         return user
 
-    def filter_by_similar_email(self, email):
-        return self.filter(email__iexact=email)
-
-    def unverified_or_ignored(self):
-        return self.filter(Q(mail_verified=False) | Q(email__in=EmailEvent.objects.ignored_addresses()))
-
-    def active(self):
-        return self.filter(deleted=False, is_active=True)
-
-    def get_by_natural_key(self, email):
-        """
-        As we don't allow sign-ups with similarly cased email addresses,
-        we can allow users to login with case spelling mistakes
-        """
-        return self.get(email__iexact=email)
-
     def _validate_email(self, email):
         if email is None:
             raise ValueError('The email field must be set')
@@ -65,8 +49,28 @@ class UserManager(BaseUserManager):
         user.save()
         return user
 
+    def get_by_natural_key(self, email):
+        """
+        As we don't allow sign-ups with similarly cased email addresses,
+        we can allow users to login with case spelling mistakes
+        """
+        return self.get(email__iexact=email)
+
+
+class UserQuerySet(models.QuerySet):
+    def filter_by_similar_email(self, email):
+        return self.filter(email__iexact=email)
+
+    def unverified_or_ignored(self):
+        return self.filter(Q(mail_verified=False) | Q(email__in=EmailEvent.objects.ignored_addresses()))
+
+    def active(self):
+        return self.filter(deleted=False, is_active=True)
+
 
 class User(AbstractBaseUser, BaseModel, LocationModel):
+    objects = UserManager.from_queryset(UserQuerySet)()
+
     email = EmailField(unique=True, blank=True, null=True)
     is_active = BooleanField(default=True)
     is_staff = BooleanField(default=False)
@@ -87,8 +91,6 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         upload_to='user__photos',
         null=True,
     )
-
-    objects = UserManager()
 
     USERNAME_FIELD = 'email'
     EMAIL_FIELD = 'email'

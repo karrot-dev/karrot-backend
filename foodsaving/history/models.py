@@ -31,7 +31,7 @@ class HistoryTypus(enum.Enum):
     GROUP_APPLICATION_DECLINED = 17
 
 
-class HistoryManager(models.Manager):
+class HistoryQuerySet(models.QuerySet):
     def create(self, typus, group, **kwargs):
         a = super().create(typus=typus, group=group, **without_keys(kwargs, {'users'}))
         if kwargs.get('users') is not None:
@@ -41,7 +41,7 @@ class HistoryManager(models.Manager):
 
 
 class History(NicelyFormattedModel):
-    objects = HistoryManager()
+    objects = HistoryQuerySet.as_manager()
 
     class Meta:
         ordering = ['-date']

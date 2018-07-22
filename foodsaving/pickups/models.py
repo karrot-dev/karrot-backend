@@ -19,7 +19,7 @@ from foodsaving.stores.models import StoreStatus
 pickup_done = Signal()
 
 
-class PickupDateSeriesManager(models.Manager):
+class PickupDateSeriesQuerySet(models.QuerySet):
     @transaction.atomic
     def create_all_pickup_dates(self):
         for series in self.filter(store__status=StoreStatus.ACTIVE.value):
@@ -27,7 +27,7 @@ class PickupDateSeriesManager(models.Manager):
 
 
 class PickupDateSeries(BaseModel):
-    objects = PickupDateSeriesManager()
+    objects = PickupDateSeriesQuerySet.as_manager()
 
     store = models.ForeignKey('stores.Store', related_name='series', on_delete=models.CASCADE)
     max_collectors = models.PositiveIntegerField(blank=True, null=True)
@@ -105,7 +105,34 @@ class PickupDateSeries(BaseModel):
         self.update_pickup_dates()
 
 
-class PickupDateManager(models.Manager):
+class PickupDateQuerySet(models.QuerySet):
+    def _feedback_possible_q(self, user):
+        return Q(done_and_processed=True) \
+               & Q(date__gte=timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)) \
+               & Q(collectors=user) \
+               & ~Q(feedback__given_by=user)
+
+    def only_feedback_possible(self, user):
+        return self.filter(self._feedback_possible_q(user))
+
+    def exclude_feedback_possible(self, user):
+        return self.filter(~self._feedback_possible_q(user))
+
+    def annotate_num_collectors(self):
+        return self.annotate(num_collectors=Count('collectors'))
+
+    def exclude_deleted(self):
+        return self.filter(deleted=False)
+
+    def in_group(self, group):
+        return self.filter(store__group=group)
+
+    def missed(self):
+        return self.exclude_deleted().annotate_num_collectors().filter(date__lt=timezone.now(), num_collectors=0)
+
+    def done(self):
+        return self.exclude_deleted().annotate_num_collectors().filter(date__lt=timezone.now(), num_collectors__gt=0)
+
     @transaction.atomic
     def process_finished_pickup_dates(self):
         """find all pickup dates that are in the past and didn't get processed yet and add them to history
@@ -113,8 +140,7 @@ class PickupDateManager(models.Manager):
         for pickup in self.filter(
                 done_and_processed=False,
                 date__lt=timezone.now(),
-                deleted=False,
-        ):
+        ).exclude_deleted():
             if pickup.store.is_active():
                 payload = {}
                 payload['pickup_date'] = pickup.id
@@ -147,18 +173,9 @@ class PickupDateManager(models.Manager):
 
             pickup_done.send(sender=PickupDate.__class__, instance=pickup)
 
-    def feedback_possible_q(self, user):
-        return Q(done_and_processed=True) \
-            & Q(date__gte=timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)) \
-            & Q(collectors=user) \
-            & ~Q(feedback__given_by=user)
-
-    def done(self):
-        return self.annotate(Count('collectors')).filter(done_and_processed=True).exclude(collectors__count=0)
-
 
 class PickupDate(BaseModel, ConversationMixin):
-    objects = PickupDateManager()
+    objects = PickupDateQuerySet.as_manager()
 
     class Meta:
         ordering = ['date']

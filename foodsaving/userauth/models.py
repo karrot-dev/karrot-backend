@@ -1,19 +1,19 @@
 from datetime import timedelta
 
-from django.db.models import CharField, ForeignKey, Manager
-from django.db import models
 from django.conf import settings
+from django.db import models
+from django.db.models import CharField, ForeignKey
 from django.utils import crypto, timezone
 
 from foodsaving.base.base_models import BaseModel
 
 
-class VerificationCodeManager(Manager):
+class VerificationCodeQuerySet(models.QuerySet):
     def create(self, *args, **kwargs):
         if 'code' not in kwargs or not kwargs['code']:
             url_safe_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
             kwargs['code'] = crypto.get_random_string(length=VerificationCode.LENGTH, allowed_chars=url_safe_chars)
-        return super(VerificationCodeManager, self).create(*args, **kwargs)
+        return super().create(*args, **kwargs)
 
 
 class VerificationCode(BaseModel):
@@ -29,7 +29,7 @@ class VerificationCode(BaseModel):
 
     LENGTH = 40
 
-    objects = VerificationCodeManager()
+    objects = VerificationCodeQuerySet.as_manager()
 
     user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     code = CharField('actual verification code', unique=True, max_length=50)

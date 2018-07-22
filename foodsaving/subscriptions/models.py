@@ -1,14 +1,13 @@
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.db import models
-from django.db.models import ForeignKey, TextField, DateTimeField, Manager
 from django.utils import timezone
 from enum import Enum
 
 from foodsaving.base.base_models import BaseModel
 
 
-class ChannelSubscriptionManager(Manager):
+class ChannelSubscriptionQuerySet(models.QuerySet):
     def old(self):
         return self.filter(lastseen_at__lt=timezone.now() - relativedelta(minutes=5))
 
@@ -18,11 +17,12 @@ class ChannelSubscriptionManager(Manager):
 
 class ChannelSubscription(BaseModel):
     """A subscription to receive messages over a django channel."""
-    user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    reply_channel = TextField()  # django channels channel
-    lastseen_at = DateTimeField(default=timezone.now, null=True)
-    away_at = DateTimeField(null=True)
-    objects = ChannelSubscriptionManager()
+    objects = ChannelSubscriptionQuerySet.as_manager()
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    reply_channel = models.TextField()  # django channels channel
+    lastseen_at = models.DateTimeField(default=timezone.now, null=True)
+    away_at = models.DateTimeField(null=True)
 
 
 class PushSubscriptionPlatform(Enum):
@@ -36,8 +36,8 @@ class PushSubscription(BaseModel):
     class Meta:
         unique_together = ('user', 'token')
 
-    user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    token = TextField()  # FCM device registration token
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    token = models.TextField()  # FCM device registration token
     platform = models.CharField(
         default=PushSubscriptionPlatform.ANDROID.value,
         choices=[(platform.value, platform.value) for platform in PushSubscriptionPlatform],
