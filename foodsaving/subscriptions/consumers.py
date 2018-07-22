@@ -1,6 +1,5 @@
 from base64 import b64decode
-from channels.db import database_sync_to_async
-from channels.generic.websocket import JsonWebsocketConsumer, AsyncJsonWebsocketConsumer
+from channels.generic.websocket import JsonWebsocketConsumer
 from django.utils import timezone
 from rest_framework.authentication import TokenAuthentication
 from urllib.parse import unquote
@@ -44,60 +43,7 @@ class TokenAuthMiddleware:
         return self.inner(scope)
 
 
-class AsyncWebsocketConsumer(AsyncJsonWebsocketConsumer):
-    async def connect(self):
-        """The user has connected! Register their channel subscription."""
-        if 'user' in self.scope:
-            user = self.scope['user']
-            if not user.is_anonymous:
-                await self.create_subscription(user)
-
-        await self.accept()
-
-    async def message_send(self, content, **kwargs):
-        if 'text' not in content:
-            raise Exception('you must set text_data on the content')
-        await self.send(content['text'])
-
-    async def receive_json(self, content, **kwargs):
-        """They sent us a websocket message!"""
-        if 'user' in self.scope:
-            user = self.scope['user']
-            if not user.is_anonymous:
-                subscriptions = await self.fetch_subscriptions(self.scope['user'])
-                update_attrs = {'lastseen_at': timezone.now()}
-                message_type = content.get('type', None)
-                if message_type == 'away':
-                    update_attrs['away_at'] = timezone.now()
-                elif message_type == 'back':
-                    update_attrs['away_at'] = None
-                await self.update_subscriptions(subscriptions, update_attrs)
-
-    async def disconnect(self, close_code):
-        """The user has disconnected so we remove all their ChannelSubscriptions"""
-        if 'user' in self.scope:
-            user = self.scope['user']
-            if not user.is_anonymous:
-                await self.delete_subscriptions(self.scope['user'])
-
-    @database_sync_to_async
-    def create_subscription(self, user):
-        return ChannelSubscription.objects.create(user=user, reply_channel=self.channel_name)
-
-    @database_sync_to_async
-    def fetch_subscriptions(self, user):
-        return ChannelSubscription.objects.filter(user=user, reply_channel=self.channel_name)
-
-    @database_sync_to_async
-    def update_subscriptions(self, subscriptions, update_attrs):
-        return subscriptions.update(**update_attrs)
-
-    @database_sync_to_async
-    def delete_subscriptions(self, user):
-        return ChannelSubscription.objects.filter(user=user, reply_channel=self.channel_name).delete()
-
-
-class SyncWebsocketConsumer(JsonWebsocketConsumer):
+class WebsocketConsumer(JsonWebsocketConsumer):
     def connect(self):
         """The user has connected! Register their channel subscription."""
         if 'user' in self.scope:
@@ -132,6 +78,3 @@ class SyncWebsocketConsumer(JsonWebsocketConsumer):
             user = self.scope['user']
             if not user.is_anonymous:
                 ChannelSubscription.objects.filter(user=user, reply_channel=self.channel_name).delete()
-
-
-WebsocketConsumer = SyncWebsocketConsumer
