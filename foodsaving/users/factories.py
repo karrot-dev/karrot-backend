@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from factory import DjangoModelFactory, CREATE_STRATEGY, LazyAttribute, PostGeneration
+
 from foodsaving.utils.tests.fake import faker
 
 

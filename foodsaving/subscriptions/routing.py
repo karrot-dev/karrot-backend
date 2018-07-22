@@ -1,5 +1,16 @@
-from channels.routing import route_class
+from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter
+from channels.security.websocket import AllowedHostsOriginValidator
 
-from .consumers import Consumer
+from .consumers import WebsocketConsumer, TokenAuthMiddleware
 
-channel_routing = [route_class(Consumer)]
+application = ProtocolTypeRouter({
+    'websocket':
+    AllowedHostsOriginValidator(
+        TokenAuthMiddleware(
+            AuthMiddlewareStack(
+                WebsocketConsumer,
+            ),
+        ),
+    ),
+})

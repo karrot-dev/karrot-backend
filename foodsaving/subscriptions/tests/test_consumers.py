@@ -1,110 +1,176 @@
-from channels import Channel
-from channels.test import ChannelTestCase, WSClient
+import asyncio
+import json
+import pytest
+from base64 import b64encode
+from channels.db import database_sync_to_async
+from channels.layers import get_channel_layer
+from channels.testing import WebsocketCommunicator
 from dateutil.relativedelta import relativedelta
-from django.test import TestCase
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
-from foodsaving.subscriptions.consumers import check_for_auth_token_header, check_for_token_user
+from foodsaving.subscriptions.consumers import WebsocketConsumer, TokenAuthMiddleware, get_auth_token_from_subprotocols
 from foodsaving.subscriptions.models import ChannelSubscription
 from foodsaving.users.factories import UserFactory
 
+AsyncUserFactory = database_sync_to_async(UserFactory)
 
-class ConsumerTests(ChannelTestCase):
-    def test_adds_subscription(self):
-        client = WSClient()
-        user = UserFactory()
-        client.force_login(user)
-        self.assertEqual(ChannelSubscription.objects.filter(user=user).count(), 0)
-        client.send_and_consume('websocket.connect', path='/')
-        self.assertEqual(ChannelSubscription.objects.filter(user=user).count(), 1, 'Did not add subscription')
-
-    def test_accepts_anonymous_connections(self):
-        client = WSClient()
-        qs = ChannelSubscription.objects
-        original_count = qs.count()
-        client.send_and_consume('websocket.connect', path='/')
-        self.assertEqual(qs.count(), original_count)
-
-    def test_saves_reply_channel(self):
-        client = WSClient()
-        user = UserFactory()
-        client.force_login(user)
-        client.send_and_consume('websocket.connect', path='/')
-        subscription = ChannelSubscription.objects.filter(user=user).first()
-        self.assertIsNotNone(subscription.reply_channel)
-
-        # send a message on it
-        Channel(subscription.reply_channel).send({'message': 'hey! whaatsup?'})
-        self.assertEqual(client.receive(json=True), {'message': 'hey! whaatsup?'})
-
-    def test_updates_lastseen(self):
-        client = WSClient()
-        user = UserFactory()
-        client.force_login(user)
-        client.send_and_consume('websocket.connect', path='/')
-
-        # update the lastseen timestamp to ages ago
-        the_past = timezone.now() - relativedelta(hours=6)
-        ChannelSubscription.objects.filter(user=user).update(lastseen_at=the_past)
-
-        # send a message, and it should update
-        client.send_and_consume('websocket.receive', text={'message': 'hey'}, path='/')
-        subscription = ChannelSubscription.objects.filter(user=user).first()
-        difference = subscription.lastseen_at - the_past
-        self.assertGreater(difference.seconds, 1000)
-
-    def test_updates_away(self):
-        client = WSClient()
-        user = UserFactory()
-        client.force_login(user)
-        client.send_and_consume('websocket.connect', path='/')
-
-        client.send_and_consume('websocket.receive', text={'type': 'away'}, path='/')
-        subscription = ChannelSubscription.objects.get(user=user)
-        self.assertIsNotNone(subscription.away_at)
-
-        client.send_and_consume('websocket.receive', text={'type': 'back'}, path='/')
-        subscription.refresh_from_db()
-        self.assertIsNone(subscription.away_at)
-
-    def test_removes_subscription(self):
-        client = WSClient()
-        user = UserFactory()
-        client.force_login(user)
-        client.send_and_consume('websocket.connect', path='/')
-        self.assertEqual(ChannelSubscription.objects.filter(user=user).count(), 1, 'Did not add subscription')
-
-        client.send_and_consume('websocket.disconnect', path='/')
-        self.assertEqual(ChannelSubscription.objects.filter(user=user).count(), 0, 'Did not remove subscription')
+# These async fixtures only work for python 3.6+ (needs async yield)
+#
+# @pytest.fixture
+# async def communicator(request):
+#     communicator = WebsocketCommunicator(SyncWebsocketConsumer, '/')
+#     yield communicator
+#     await communicator.disconnect()
+#
+# @pytest.fixture
+# async def user():
+#     yield await AsyncUserFactory()
+#
+#
+# @pytest.fixture
+# async def token_communicator(user):  # noqa: F811
+#     token = Token.objects.create(user=user)
+#     encoded = b64encode(token.key.encode('ascii')).decode('ascii')
+#     token_communicator = WebsocketCommunicator(
+#         TokenAuthMiddleware(SyncWebsocketConsumer),
+#         '/',
+#         headers=[[
+#             b'sec-websocket-protocol',
+#             'karrot.token,karrot.token.value.{}'.format(encoded.rstrip('=')).encode('ascii'),
+#         ]],
+#     )
+#     yield token_communicator
+#     await token_communicator.disconnect()
+#
+# ... so have implemented async context managers instead
 
 
-class MockMessage(dict):
-    def __init__(self, *args, **kwargs):
-        self.update(*args, **kwargs)
-        self.session = {}
-        self.user = None
+class Communicator():
+    async def __aenter__(self):
+        self.communicator = WebsocketCommunicator(WebsocketConsumer, '/')
+        return self.communicator
 
-    @property
-    def channel_session(self):
-        return self.session
+    async def __aexit__(self, exc_type, exc, tb):
+        await self.communicator.disconnect()
 
 
-class TokenUtilTests(TestCase):
-    def test_check_for_auth_token_header(self):
-        message = MockMessage({'headers': [[b'sec-websocket-protocol', b'karrot.token,karrot.token.value.Zm9v']]})
-        check_for_auth_token_header(message)
-        self.assertEqual(message.channel_session['auth_token'], 'foo')
-
-    def test_check_for_auth_token_header_with_removed_base64_padding(self):
-        message = MockMessage({'headers': [[b'sec-websocket-protocol', b'karrot.token,karrot.token.value.Zm9vMQ']]})
-        check_for_auth_token_header(message)
-        self.assertEqual(message.channel_session['auth_token'], 'foo1')
-
-    def test_check_for_token_user(self):
-        user = UserFactory()
+class TokenCommunicator():
+    async def __aenter__(self):
+        user = await AsyncUserFactory()
         token = Token.objects.create(user=user)
-        message = MockMessage()
-        message.channel_session['auth_token'] = token.key
-        check_for_token_user(message)
-        self.assertEqual(message.user, user)
+        encoded = b64encode(token.key.encode('ascii')).decode('ascii')
+        self.communicator = WebsocketCommunicator(
+            TokenAuthMiddleware(WebsocketConsumer),
+            '/',
+            subprotocols=['karrot.token', 'karrot.token.value.{}'.format(encoded.rstrip('='))],
+        )
+        return self.communicator, user
+
+    async def __aexit__(self, exc_type, exc, tb):
+        await self.communicator.disconnect()
+
+
+@pytest.mark.asyncio
+@pytest.mark.django_db
+class TestConsumer:
+    async def test_adds_subscription(self):  # noqa: F811
+        async with Communicator() as communicator:
+            user = await AsyncUserFactory()
+            communicator.scope['user'] = user
+            assert ChannelSubscription.objects.filter(user=user).count() == 0
+            await communicator.connect()
+            assert ChannelSubscription.objects.filter(user=user).count() == 1, 'Did not add subscription'
+
+    async def test_accepts_anonymous_connections(self):
+        async with Communicator() as communicator:
+            qs = ChannelSubscription.objects
+            original_count = qs.count()
+            await communicator.connect()
+            assert qs.count() == original_count
+
+    async def test_saves_reply_channel(self):
+        async with Communicator() as communicator:
+            user = await AsyncUserFactory()
+            communicator.scope['user'] = user
+            await communicator.connect()
+            subscription = ChannelSubscription.objects.filter(user=user).first()
+            assert subscription.reply_channel is not None
+            await get_channel_layer().send(
+                subscription.reply_channel, {
+                    'type': 'message.send',
+                    'text': json.dumps({
+                        'message': 'hey! whaatsup?',
+                    }),
+                }
+            )
+            response = await communicator.receive_json_from()
+            assert response == {'message': 'hey! whaatsup?'}
+
+    async def test_updates_lastseen(self):
+        async with Communicator() as communicator:
+            user = await AsyncUserFactory()
+            communicator.scope['user'] = user
+            await communicator.connect()
+
+            # update the lastseen timestamp to ages ago
+            the_past = timezone.now() - relativedelta(hours=6)
+            await database_sync_to_async(ChannelSubscription.objects.filter(user=user).update)(lastseen_at=the_past)
+
+            await communicator.send_json_to({'message': 'hey'})
+            await asyncio.sleep(0.1)
+
+            subscription = ChannelSubscription.objects.filter(user=user).first()
+            difference = subscription.lastseen_at - the_past
+            assert difference.seconds > 1000
+
+    async def test_updates_away(self):
+        async with Communicator() as communicator:
+            user = await AsyncUserFactory()
+            communicator.scope['user'] = user
+            await communicator.connect()
+
+            await communicator.send_json_to({'type': 'away'})
+            await asyncio.sleep(0.1)
+            subscription = ChannelSubscription.objects.get(user=user)
+            assert subscription.away_at is not None
+
+            await communicator.send_json_to({'type': 'back'})
+            await asyncio.sleep(0.1)
+            subscription.refresh_from_db()
+            assert subscription.away_at is None
+
+    async def test_removes_subscription(self):
+        async with Communicator() as communicator:
+            user = await AsyncUserFactory()
+            communicator.scope['user'] = user
+            await communicator.connect()
+            assert ChannelSubscription.objects.filter(user=user).count() == 1, 'Did not add subscription'
+
+            await communicator.disconnect()
+            assert ChannelSubscription.objects.filter(user=user).count() == 0, 'Did not remove subscription'
+
+
+@pytest.mark.asyncio
+@pytest.mark.django_db
+class TestTokenAuth:
+    async def test_user_is_added_to_scope(self):
+        async with TokenCommunicator() as (communicator, user):
+            await communicator.connect()
+            assert communicator.scope['user'] == user
+
+
+class TestTokenUtil:
+    def test_get_auth_token_from_subprotocols(self):
+        token = get_auth_token_from_subprotocols([
+            'karrot.token',
+            'karrot.token.value.Zm9v',
+        ])
+        assert token == 'foo'
+
+    def test_get_auth_token_from_headers_with_removed_base64_padding(self):
+        token = get_auth_token_from_subprotocols([
+            'karrot.token',
+            'karrot.token.value.Zm9vMQ',
+        ])
+        assert token == 'foo1'

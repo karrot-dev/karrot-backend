@@ -57,9 +57,9 @@ INSTALLED_APPS = (
     'anymail',
     'influxdb_metrics',
     'timezone_field',
-    'raven.contrib.django.raven_compat',
     'django_jinja',
     'channels',
+    'raven.contrib.django.raven_compat',
     'versatileimagefield',
     'huey.contrib.djhuey',
 )
@@ -206,15 +206,14 @@ MESSAGE_EDIT_DAYS = 2
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "asgi_redis.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [(REDIS_HOST, 6379)],
-        },
-        "ROUTING": "foodsaving.subscriptions.routing.channel_routing",
+         "BACKEND": "channels_redis.core.RedisChannelLayer",
+         "CONFIG": {
+             "hosts": [(REDIS_HOST, 6379)],
+         },
     },
 }
 
-CHANNELS_WS_PROTOCOLS = ['karrot.token']
+ASGI_APPLICATION = 'foodsaving.subscriptions.routing.application'
 
 # Verification codes:
 # Time until a verification code expires
