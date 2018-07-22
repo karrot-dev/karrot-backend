@@ -206,11 +206,10 @@ MESSAGE_EDIT_DAYS = 2
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
-        # "BACKEND": "channels_redis.core.RedisChannelLayer",
-        # "CONFIG": {
-        #     "hosts": [(REDIS_HOST, 6379)],
-        # },
+         "BACKEND": "channels_redis.core.RedisChannelLayer",
+         "CONFIG": {
+             "hosts": [(REDIS_HOST, 6379)],
+         },
     },
 }
 
