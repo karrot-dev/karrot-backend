@@ -304,6 +304,25 @@ class TestGroupMembershipRolesAPI(APITestCase):
         self.membership.refresh_from_db()
         self.assertNotIn(role, self.membership.roles)
 
+    def test_cannot_add_full_member_role(self):
+        self.client.force_login(user=self.admin)
+        role = roles.GROUP_FULL_MEMBER
+        self.assertNotIn(role, self.membership.roles)
+        response = self.client.put('/api/groups/{}/users/{}/roles/{}/'.format(self.group.id, self.member.id, role))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.membership.refresh_from_db()
+        self.assertNotIn(role, self.membership.roles)
+
+    def test_cannot_remove_full_member_role(self):
+        self.client.force_login(user=self.admin)
+        role = roles.GROUP_FULL_MEMBER
+        self.membership.roles.append(role)
+        self.membership.save()
+        response = self.client.put('/api/groups/{}/users/{}/roles/{}/'.format(self.group.id, self.member.id, role))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.membership.refresh_from_db()
+        self.assertIn(role, self.membership.roles)
+
 
 class TestGroupMembershipsAPI(APITestCase):
     def setUp(self):

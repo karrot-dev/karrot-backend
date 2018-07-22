@@ -7,6 +7,7 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 
 from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
     GroupNotificationType
+from foodsaving.groups.roles import GROUP_FULL_MEMBER
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.history.utils import get_changed_data
 from . import roles
@@ -272,6 +273,11 @@ class GroupMembershipAddRoleSerializer(serializers.Serializer):
         ), required=True, write_only=True
     )
 
+    def validate_role_name(self, role_name):
+        if role_name == GROUP_FULL_MEMBER:
+            raise serializers.ValidationError('You cannot change the full_member role')
+        return role_name
+
     def update(self, instance, validated_data):
         role = validated_data['role_name']
         instance.add_roles([role])
@@ -281,6 +287,11 @@ class GroupMembershipAddRoleSerializer(serializers.Serializer):
 
 class GroupMembershipRemoveRoleSerializer(serializers.Serializer):
     role_name = serializers.CharField(required=True, write_only=True)
+
+    def validate_role_name(self, role_name):
+        if role_name == GROUP_FULL_MEMBER:
+            raise serializers.ValidationError('You cannot change the full_member role')
+        return role_name
 
     def update(self, instance, validated_data):
         role = validated_data['role_name']
