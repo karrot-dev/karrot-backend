@@ -57,9 +57,9 @@ INSTALLED_APPS = (
     'anymail',
     'influxdb_metrics',
     'timezone_field',
-    'raven.contrib.django.raven_compat',
     'django_jinja',
     'channels',
+    'raven.contrib.django.raven_compat',
     'versatileimagefield',
     'huey.contrib.djhuey',
 )
