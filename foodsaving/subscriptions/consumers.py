@@ -51,7 +51,7 @@ class WebsocketConsumer(JsonWebsocketConsumer):
 
     def message_send(self, content, **kwargs):
         if 'text' not in content:
-            raise Exception('you must set text_data on the content')
+            raise Exception('you must set text on the content')
         self.send(content['text'])
 
     def receive_json(self, content, **kwargs):
