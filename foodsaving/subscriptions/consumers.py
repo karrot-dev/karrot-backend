@@ -2,25 +2,21 @@ from base64 import b64decode
 from channels.generic.websocket import JsonWebsocketConsumer
 from django.utils import timezone
 from rest_framework.authentication import TokenAuthentication
-from urllib.parse import unquote
 
 from foodsaving.subscriptions.models import ChannelSubscription
 
 token_auth = TokenAuthentication()
 
 
-def get_auth_token_from_headers(headers):
+def get_auth_token_from_subprotocols(subprotocols):
     prefix = 'karrot.token.value.'
-    for header, value in headers:
-        if header == b'sec-websocket-protocol':
-            protocols = [x.strip() for x in unquote(value.decode('ascii')).split(",")]
-            for protocol in protocols:
-                if protocol.startswith(prefix):
-                    value = protocol[len(prefix):]
-                    if len(value) % 4:
-                        # not a multiple of 4, add padding:
-                        value += '=' * (4 - len(value) % 4)
-                    return b64decode(value).decode('ascii')
+    for protocol in subprotocols:
+        if protocol.startswith(prefix):
+            value = protocol[len(prefix):]
+            if len(value) % 4:
+                # not a multiple of 4, add padding:
+                value += '=' * (4 - len(value) % 4)
+            return b64decode(value).decode('ascii')
     return None
 
 
@@ -35,7 +31,7 @@ class TokenAuthMiddleware:
 
     def __call__(self, scope):
         if 'user' not in scope:
-            token = get_auth_token_from_headers(scope.get('headers', []))
+            token = get_auth_token_from_subprotocols(scope.get('subprotocols', []))
             if token:
                 user, _ = token_auth.authenticate_credentials(token)
                 if user:

@@ -9,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
-from foodsaving.subscriptions.consumers import WebsocketConsumer, TokenAuthMiddleware, get_auth_token_from_headers
+from foodsaving.subscriptions.consumers import WebsocketConsumer, TokenAuthMiddleware, get_auth_token_from_subprotocols
 from foodsaving.subscriptions.models import ChannelSubscription
 from foodsaving.users.factories import UserFactory
 
@@ -63,10 +63,7 @@ class TokenCommunicator():
         self.communicator = WebsocketCommunicator(
             TokenAuthMiddleware(WebsocketConsumer),
             '/',
-            headers=[[
-                b'sec-websocket-protocol',
-                'karrot.token,karrot.token.value.{}'.format(encoded.rstrip('=')).encode('ascii'),
-            ]],
+            subprotocols=['karrot.token', 'karrot.token.value.{}'.format(encoded.rstrip('='))],
         )
         return self.communicator, user
 
@@ -164,16 +161,16 @@ class TestTokenAuth:
 
 
 class TestTokenUtil:
-    def test_get_auth_token_from_headers(self):
-        token = get_auth_token_from_headers([[
-            b'sec-websocket-protocol',
-            b'karrot.token,karrot.token.value.Zm9v',
-        ]])
+    def test_get_auth_token_from_subprotocols(self):
+        token = get_auth_token_from_subprotocols([
+            'karrot.token',
+            'karrot.token.value.Zm9v',
+        ])
         assert token == 'foo'
 
     def test_get_auth_token_from_headers_with_removed_base64_padding(self):
-        token = get_auth_token_from_headers([[
-            b'sec-websocket-protocol',
-            b'karrot.token,karrot.token.value.Zm9vMQ',
-        ]])
+        token = get_auth_token_from_subprotocols([
+            'karrot.token',
+            'karrot.token.value.Zm9vMQ',
+        ])
         assert token == 'foo1'
