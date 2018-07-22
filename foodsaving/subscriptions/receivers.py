@@ -25,6 +25,7 @@ from foodsaving.pickups.models import PickupDate, PickupDateSeries, Feedback, pi
 from foodsaving.pickups.serializers import PickupDateSerializer, PickupDateSeriesSerializer, FeedbackSerializer
 from foodsaving.stores.models import Store
 from foodsaving.stores.serializers import StoreSerializer
+from foodsaving.subscriptions import stats
 from foodsaving.subscriptions.fcm import notify_subscribers
 from foodsaving.subscriptions.models import ChannelSubscription, PushSubscription
 from foodsaving.userauth.serializers import AuthUserSerializer
@@ -54,6 +55,7 @@ def send_in_channel(channel, topic, payload):
     }
     try:
         channel_layer_send_sync(channel, message)
+        stats.pushed_via_websocket(topic)
     except ChannelFull:
         # maybe this means the subscription is invalid now?
         sentry_client.captureException()
