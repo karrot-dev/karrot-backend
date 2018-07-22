@@ -1,5 +1,6 @@
 from factory import DjangoModelFactory, post_generation, LazyAttribute
 
+from foodsaving.groups import roles
 from foodsaving.groups.models import Group as GroupModel, GroupMembership, GroupStatus
 from foodsaving.utils.tests.fake import faker
 
@@ -14,7 +15,7 @@ class GroupFactory(DjangoModelFactory):
             return
         if members:
             for member in members:
-                GroupMembership.objects.create(group=self, user=member)
+                GroupMembership.objects.create(group=self, user=member, roles=[roles.GROUP_FULL_MEMBER])
 
     name = LazyAttribute(lambda x: faker.name())
     description = LazyAttribute(lambda x: faker.sentence(nb_words=40))

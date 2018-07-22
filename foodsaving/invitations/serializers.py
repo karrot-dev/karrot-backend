@@ -19,10 +19,12 @@ class InvitationSerializer(serializers.ModelSerializer):
             )
         ]
 
-    def validate_group(self, group_id):
-        if group_id not in self.context['request'].user.groups.all():
+    def validate_group(self, group):
+        if not group.is_full_member(self.context['request'].user):
+            raise serializers.ValidationError('Can only invite as full member')
+        if not group.is_member(self.context['request'].user):
             raise serializers.ValidationError(_('You are not a member of this group.'))
-        return group_id
+        return group
 
     def validate(self, attrs):
         if attrs['group'].members.filter(email=attrs['email']).exists():

@@ -10,6 +10,7 @@ from rest_framework.viewsets import GenericViewSet
 from foodsaving.applications import stats
 from foodsaving.applications.models import GroupApplication
 from foodsaving.applications.serializers import GroupApplicationSerializer
+from foodsaving.groups.models import Group
 
 
 class HasVerifiedEmailAddress(permissions.BasePermission):
@@ -33,7 +34,7 @@ class GroupApplicationViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin
     filter_fields = ('group', 'user')
 
     def get_queryset(self):
-        q = Q(group__members=self.request.user)
+        q = Q(group__in=Group.objects.user_is_full_member(self.request.user))
         if self.action in ('list', 'retrieve'):
             q |= Q(user=self.request.user)
         if self.action == 'withdraw':

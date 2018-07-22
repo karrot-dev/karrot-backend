@@ -324,7 +324,6 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         url = '/api/pickup-date-series/{}/'.format(self.series.id)
         response = self.client.patch(url, {'store': unrelated_store.id})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        self.assertEqual(response.data, {'store': ["You are not member of the store's group."]})
 
     def test_set_multiple_rules_fails(self):
         self.client.force_login(user=self.member)
@@ -466,7 +465,6 @@ class TestPickupDateSeriesAPIAuth(APITestCase):
             }
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        self.assertEqual(response.data, {'store': ["You are not member of the store's group."]})
 
     def test_list_as_anonymous_fails(self):
         response = self.client.get(self.url)

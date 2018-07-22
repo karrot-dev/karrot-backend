@@ -11,6 +11,7 @@ from timezone_field import TimeZoneField
 
 from foodsaving.base.base_models import BaseModel, LocationModel
 from foodsaving.conversations.models import ConversationMixin
+from foodsaving.groups import roles
 from foodsaving.history.models import History, HistoryTypus
 
 
@@ -20,7 +21,17 @@ class GroupStatus(Enum):
     PLAYGROUND = 'playground'
 
 
+class GroupQuerySet(models.QuerySet):
+    def user_is_full_member(self, user):
+        return self.filter(
+            groupmembership__roles__contains=[roles.GROUP_FULL_MEMBER],
+            groupmembership__user=user,
+        )
+
+
 class Group(BaseModel, LocationModel, ConversationMixin):
+    objects = GroupQuerySet.as_manager()
+
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH, unique=True)
     description = models.TextField(blank=True)
     members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='groups', through='GroupMembership')
@@ -62,6 +73,9 @@ class Group(BaseModel, LocationModel, ConversationMixin):
 
     def is_member(self, user):
         return not user.is_anonymous and GroupMembership.objects.filter(group=self, user=user).exists()
+
+    def is_full_member(self, user):
+        return self.is_member_with_role(user, roles.GROUP_FULL_MEMBER)
 
     def is_member_with_role(self, user, role_name):
         return not user.is_anonymous and GroupMembership.objects.filter(
@@ -129,8 +143,14 @@ class GroupMembershipQuerySet(QuerySet):
     def with_notification_type(self, type):
         return self.filter(notification_types__contains=[type])
 
+    def with_role(self, role):
+        return self.filter(roles__contains=[role])
+
     def active(self):
         return self.filter(inactive_at__isnull=True)
+
+    def full_members(self):
+        return self.with_role(roles.GROUP_FULL_MEMBER)
 
 
 class GroupMembership(BaseModel):

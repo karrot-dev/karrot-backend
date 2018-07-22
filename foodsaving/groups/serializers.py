@@ -120,6 +120,8 @@ class GroupDetailSerializer(GroupBaseSerializer):
         return group.get_application_questions_default()
 
     def update(self, group, validated_data):
+        if not group.is_full_member(self.context['request'].user):
+            raise serializers.ValidationError('Can only edit group as full member')
         if group.is_playground():
             # Prevent editing of public fields
             # Password shouldn't get changed and the others get overridden with a translation message
@@ -142,7 +144,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
     def create(self, validated_data):
         user = self.context['request'].user
         group = GroupModel.objects.create(**validated_data)
-        GroupMembership.objects.create(group=group, user=user)
+        GroupMembership.objects.create(group=group, user=user, roles=[roles.GROUP_FULL_MEMBER])
         History.objects.create(
             typus=HistoryTypus.GROUP_CREATE, group=group, users=[
                 user,

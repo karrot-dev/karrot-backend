@@ -9,7 +9,8 @@ from django.http import request
 from django.utils import timezone
 from rest_framework.test import APIClient
 
-from foodsaving.groups.models import Group
+from foodsaving.groups.models import Group, GroupMembership
+from foodsaving.groups.roles import GROUP_FULL_MEMBER
 from foodsaving.pickups.models import PickupDate, PickupDateSeries
 from foodsaving.stores.models import Store
 from foodsaving.users.models import User
@@ -114,7 +115,11 @@ class Command(BaseCommand):
 
         def join_group(group):
             print('joined group {}'.format(group))
-            return c.post('/api/groups/{}/join/'.format(group)).data
+            joined = c.post('/api/groups/{}/join/'.format(group)).data
+            user = c.get('/api/auth/user/').data
+            membership = GroupMembership.objects.get(user=user['id'], group=group)
+            membership.roles.append(GROUP_FULL_MEMBER)
+            return joined
 
         def leave_group(group):
             print('left group {}'.format(group))
