@@ -1,11 +1,14 @@
-import json
 from collections import namedtuple
 
-from channels import Channel
+import json
+from asgiref.sync import async_to_sync
+from channels.exceptions import ChannelFull
+from channels.layers import get_channel_layer
 from django.conf import settings
 from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete, m2m_changed, post_delete
 from django.dispatch import receiver
+from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from foodsaving.applications.models import GroupApplication
 from foodsaving.applications.serializers import GroupApplicationSerializer
@@ -38,9 +41,24 @@ class AbsoluteURIBuildingRequest:
         return settings.HOSTNAME + path
 
 
+channel_layer = get_channel_layer()
+channel_layer_send_sync = async_to_sync(channel_layer.send)
+
+
 def send_in_channel(channel, topic, payload):
-    Channel(channel).send({'text': json.dumps({'topic': topic, 'payload': payload})})
-    stats.pushed_via_websocket(topic)
+    message = {
+        'type': 'message.send',
+        'text': json.dumps({
+            'topic': topic,
+            'payload': payload,
+        }),
+    }
+    try:
+        channel_layer_send_sync(channel, message)
+        stats.pushed_via_websocket(topic)
+    except ChannelFull:
+        # maybe this means the subscription is invalid now?
+        sentry_client.captureException()
 
 
 @receiver(post_save, sender=ConversationMessage)
@@ -150,15 +168,14 @@ def send_thread_update(sender, instance, created, **kwargs):
 @receiver(post_save, sender=ConversationMessageReaction)
 @receiver(post_delete, sender=ConversationMessageReaction)
 def send_reaction_update(sender, instance, **kwargs):
-
     reaction = instance
     message = reaction.message
     conversation = message.conversation
 
     topic = 'conversations:message'
 
-    for subscription in ChannelSubscription.objects.recent()\
-            .filter(user__in=conversation.participants.all())\
+    for subscription in ChannelSubscription.objects.recent() \
+            .filter(user__in=conversation.participants.all()) \
             .exclude(user=reaction.user):
         payload = ConversationMessageSerializer(message, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic, payload)
