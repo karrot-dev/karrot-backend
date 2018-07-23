@@ -32,7 +32,7 @@ class InvitationsViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mix
     throttle_classes = ()
 
     def get_queryset(self):
-        users_groups = self.request.user.groups.user_is_full_member(self.request.user)
+        users_groups = self.request.user.groups.user_is_editor(self.request.user)
         return self.queryset.filter(group__in=users_groups, expires_at__gte=timezone.now())
 
     def get_throttles(self):

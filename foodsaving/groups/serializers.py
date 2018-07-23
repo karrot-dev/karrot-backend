@@ -7,7 +7,7 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 
 from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
     GroupNotificationType
-from foodsaving.groups.roles import GROUP_FULL_MEMBER
+from foodsaving.groups.roles import GROUP_EDITOR
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.history.utils import get_changed_data
 from . import roles
@@ -120,7 +120,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
         return group.get_application_questions_default()
 
     def update(self, group, validated_data):
-        if not group.is_full_member(self.context['request'].user):
+        if not group.is_editor(self.context['request'].user):
             raise serializers.ValidationError('Can only edit group as full member')
         if group.is_playground():
             # Prevent editing of public fields
@@ -144,7 +144,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
     def create(self, validated_data):
         user = self.context['request'].user
         group = GroupModel.objects.create(**validated_data)
-        GroupMembership.objects.create(group=group, user=user, roles=[roles.GROUP_FULL_MEMBER])
+        GroupMembership.objects.create(group=group, user=user, roles=[roles.GROUP_EDITOR])
         History.objects.create(
             typus=HistoryTypus.GROUP_CREATE, group=group, users=[
                 user,
@@ -276,8 +276,8 @@ class GroupMembershipAddRoleSerializer(serializers.Serializer):
     )
 
     def validate_role_name(self, role_name):
-        if role_name == GROUP_FULL_MEMBER:
-            raise serializers.ValidationError('You cannot change the full_member role')
+        if role_name == GROUP_EDITOR:
+            raise serializers.ValidationError('You cannot change the editor role')
         return role_name
 
     def update(self, instance, validated_data):
@@ -291,8 +291,8 @@ class GroupMembershipRemoveRoleSerializer(serializers.Serializer):
     role_name = serializers.CharField(required=True, write_only=True)
 
     def validate_role_name(self, role_name):
-        if role_name == GROUP_FULL_MEMBER:
-            raise serializers.ValidationError('You cannot change the full_member role')
+        if role_name == GROUP_EDITOR:
+            raise serializers.ValidationError('You cannot change the editor role')
         return role_name
 
     def update(self, instance, validated_data):

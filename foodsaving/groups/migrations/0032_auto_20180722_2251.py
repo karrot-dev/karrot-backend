@@ -3,12 +3,12 @@
 from django.db import migrations
 
 
-def make_all_full_members(apps, schema_editor):
+def make_all_editors(apps, schema_editor):
     GroupMembership = apps.get_model('groups', 'GroupMembership')
 
     for membership in GroupMembership.objects.all():
-        if 'full_member' not in membership.roles:
-            membership.roles.append('full_member')
+        if 'editor' not in membership.roles:
+            membership.roles.append('editor')
             membership.save()
 
 
@@ -19,5 +19,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(make_all_full_members, migrations.RunPython.noop)
+        migrations.RunPython(make_all_editors, migrations.RunPython.noop)
     ]

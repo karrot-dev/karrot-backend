@@ -22,9 +22,9 @@ class GroupStatus(Enum):
 
 
 class GroupQuerySet(models.QuerySet):
-    def user_is_full_member(self, user):
+    def user_is_editor(self, user):
         return self.filter(
-            groupmembership__roles__contains=[roles.GROUP_FULL_MEMBER],
+            groupmembership__roles__contains=[roles.GROUP_EDITOR],
             groupmembership__user=user,
         )
 
@@ -74,8 +74,8 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     def is_member(self, user):
         return not user.is_anonymous and GroupMembership.objects.filter(group=self, user=user).exists()
 
-    def is_full_member(self, user):
-        return self.is_member_with_role(user, roles.GROUP_FULL_MEMBER)
+    def is_editor(self, user):
+        return self.is_member_with_role(user, roles.GROUP_EDITOR)
 
     def is_member_with_role(self, user, role_name):
         return not user.is_anonymous and GroupMembership.objects.filter(
@@ -149,8 +149,8 @@ class GroupMembershipQuerySet(QuerySet):
     def active(self):
         return self.filter(inactive_at__isnull=True)
 
-    def full_members(self):
-        return self.with_role(roles.GROUP_FULL_MEMBER)
+    def editors(self):
+        return self.with_role(roles.GROUP_EDITOR)
 
 
 class GroupMembership(BaseModel):

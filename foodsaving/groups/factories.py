@@ -15,7 +15,7 @@ class GroupFactory(DjangoModelFactory):
             return
         if members:
             for member in members:
-                GroupMembership.objects.create(group=self, user=member, roles=[roles.GROUP_FULL_MEMBER])
+                GroupMembership.objects.create(group=self, user=member, roles=[roles.GROUP_EDITOR])
 
     name = LazyAttribute(lambda x: faker.name())
     description = LazyAttribute(lambda x: faker.sentence(nb_words=40))

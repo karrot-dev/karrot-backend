@@ -52,7 +52,7 @@ class StoreSerializer(serializers.ModelSerializer):
         return store
 
     def update(self, store, validated_data):
-        if not store.group.is_full_member(self.context['request'].user):
+        if not store.group.is_editor(self.context['request'].user):
             raise serializers.ValidationError('Can only edit store as full member')
         changed_data = get_changed_data(store, validated_data)
         store = super().update(store, validated_data)
@@ -77,7 +77,7 @@ class StoreSerializer(serializers.ModelSerializer):
         return store
 
     def validate_group(self, group):
-        if not group.is_full_member(self.context['request'].user):
+        if not group.is_editor(self.context['request'].user):
             raise serializers.ValidationError('Can only create store as full member')
         if not group.is_member(self.context['request'].user):
             raise serializers.ValidationError(_('You are not a member of this group.'))

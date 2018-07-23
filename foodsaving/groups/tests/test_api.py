@@ -304,9 +304,9 @@ class TestGroupMembershipRolesAPI(APITestCase):
         self.membership.refresh_from_db()
         self.assertNotIn(role, self.membership.roles)
 
-    def test_cannot_add_full_member_role(self):
+    def test_cannot_add_editor_role(self):
         self.client.force_login(user=self.admin)
-        role = roles.GROUP_FULL_MEMBER
+        role = roles.GROUP_EDITOR
         self.membership.roles.remove(role)
         self.membership.save()
         response = self.client.put('/api/groups/{}/users/{}/roles/{}/'.format(self.group.id, self.member.id, role))
@@ -314,9 +314,9 @@ class TestGroupMembershipRolesAPI(APITestCase):
         self.membership.refresh_from_db()
         self.assertNotIn(role, self.membership.roles)
 
-    def test_cannot_remove_full_member_role(self):
+    def test_cannot_remove_editor_role(self):
         self.client.force_login(user=self.admin)
-        role = roles.GROUP_FULL_MEMBER
+        role = roles.GROUP_EDITOR
         self.membership.roles.append(role)
         self.membership.save()
         response = self.client.put('/api/groups/{}/users/{}/roles/{}/'.format(self.group.id, self.member.id, role))

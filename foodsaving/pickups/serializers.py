@@ -31,7 +31,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
     collector_ids = serializers.PrimaryKeyRelatedField(source='collectors', many=True, read_only=True)
 
     def validate_store(self, store):
-        if not store.group.is_full_member(self.context['request'].user):
+        if not store.group.is_editor(self.context['request'].user):
             raise serializers.ValidationError('Can only create pickup dates as full member')
         if not self.context['request'].user.groups.filter(store=store).exists():
             raise serializers.ValidationError(_('You are not member of the store\'s group.'))
@@ -52,7 +52,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
         return pickupdate
 
     def update(self, pickupdate, validated_data):
-        if not pickupdate.store.group.is_full_member(self.context['request'].user):
+        if not pickupdate.store.group.is_editor(self.context['request'].user):
             raise serializers.ValidationError('Can only edit pickup dates as full member')
 
         selected_validated_data = {}
@@ -166,7 +166,7 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
         return series
 
     def update(self, series, validated_data):
-        if not series.store.group.is_full_member(self.context['request'].user):
+        if not series.store.group.is_editor(self.context['request'].user):
             raise serializers.ValidationError('Can only edit series as full member')
         selected_validated_data = {}
         for attr in self.Meta.update_fields:
@@ -190,7 +190,7 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
         return series
 
     def validate_store(self, store):
-        if not store.group.is_full_member(self.context['request'].user):
+        if not store.group.is_editor(self.context['request'].user):
             raise serializers.ValidationError('Can only create series as full member')
         if not store.group.is_member(self.context['request'].user):
             raise serializers.ValidationError(_('You are not member of the store\'s group.'))

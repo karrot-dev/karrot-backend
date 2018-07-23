@@ -34,7 +34,7 @@ class GroupApplicationViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin
     filter_fields = ('group', 'user')
 
     def get_queryset(self):
-        q = Q(group__in=Group.objects.user_is_full_member(self.request.user))
+        q = Q(group__in=Group.objects.user_is_editor(self.request.user))
         if self.action in ('list', 'retrieve'):
             q |= Q(user=self.request.user)
         if self.action == 'withdraw':
