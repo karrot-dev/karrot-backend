@@ -1,5 +1,5 @@
 from dateutil.relativedelta import relativedelta
-from django.db.models import Count, F, QuerySet
+from django.db.models import F, QuerySet
 from django.utils import timezone
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task
@@ -63,9 +63,7 @@ def fetch_pickup_notification_data_for_group(group):
     empty = {'num_collectors': 0}
     not_full = {'num_collectors__gt': 0, 'num_collectors__lt': F('max_collectors')}
 
-    pickups = PickupDate.objects.annotate(
-        num_collectors=Count('collectors'),
-    ).filter(
+    pickups = PickupDate.objects.annotate_num_collectors().filter(
         deleted=False,
         store__status=StoreStatus.ACTIVE.value,
         store__group=group,

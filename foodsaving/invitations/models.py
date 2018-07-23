@@ -10,7 +10,7 @@ import foodsaving.invitations.emails
 from foodsaving.base.base_models import BaseModel
 
 
-class InvitationManager(models.Manager):
+class InvitationQuerySet(models.QuerySet):
     def create_and_send(self, **kwargs):
         # Delete all expired invitations before creating new ones.
         # Makes re-sending invitations after expiration possible and saves us from running a periodic cleanup command
@@ -22,10 +22,7 @@ class InvitationManager(models.Manager):
         return invitation
 
     def all_expired(self):
-        return self.filter(self.expired_q())
-
-    def expired_q(self):
-        return Q(expires_at__lt=timezone.now())
+        return self.filter(Q(expires_at__lt=timezone.now()))
 
     def delete_expired_invitations(self):
         self.all_expired().delete()
@@ -36,6 +33,8 @@ def get_default_expiry_date():
 
 
 class Invitation(BaseModel):
+    objects = InvitationQuerySet.as_manager()
+
     class Meta:
         unique_together = ('email', 'group')
 
@@ -44,8 +43,6 @@ class Invitation(BaseModel):
     invited_by = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE)
     expires_at = models.DateTimeField(default=get_default_expiry_date)
-
-    objects = InvitationManager()
 
     def send_mail(self):
         foodsaving.invitations.emails.prepare_emailinvitation_email(self).send()

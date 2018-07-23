@@ -11,7 +11,9 @@ from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from foodsaving.conversations.models import (Conversation, ConversationMessage, ConversationMessageReaction)
+from foodsaving.conversations.models import (
+    Conversation, ConversationMessage, ConversationMessageReaction, ConversationParticipant
+)
 from foodsaving.conversations.serializers import (
     ConversationSerializer,
     ConversationMessageSerializer,
@@ -47,10 +49,7 @@ class IsConversationParticipant(BasePermission):
 
         # if they specify a conversation, check they are in it
         if conversation_id:
-            conversation = Conversation.objects.filter(pk=conversation_id).first()  # Conversation or None
-            if not conversation:
-                return False
-            return request.user in conversation.participants.all()
+            return ConversationParticipant.objects.filter(conversation=conversation_id, user=request.user).exists()
 
         # otherwise it is fine (messages will be filtered for the users conversations)
         return True

@@ -10,33 +10,29 @@ from foodsaving.base.base_models import BaseModel, UpdatedAtMixin
 from foodsaving.utils import markdown
 
 
-class ConversationManager(models.Manager):
-    @classmethod
-    def get_for_target(cls, target):
-        return cls.filter_for_target(target).first()
+class ConversationQuerySet(models.QuerySet):
+    def get_for_target(self, target):
+        return self.filter_for_target(target).first()
 
-    @classmethod
-    def get_or_create_for_target(cls, target):
-        return Conversation.objects.get_for_target(target) or Conversation.objects.create(target=target)
+    def get_or_create_for_target(self, target):
+        return self.get_for_target(target) or self.create(target=target)
 
-    @classmethod
-    def filter_for_target(cls, target):
-        return Conversation.objects.filter(
+    def get_or_create_for_two_users(self, user1, user2):
+        if user1.id == user2.id:
+            raise Exception('Users need to be different')
+        conv = self.filter(is_private=True, participants=user1) \
+            .filter(participants=user2) \
+            .first()
+        if not conv:
+            conv = self.create(is_private=True)
+            conv.sync_users([user1, user2])
+        return conv
+
+    def filter_for_target(self, target):
+        return self.filter(
             target_id=target.id,
             target_type=ContentType.objects.get_for_model(target),
         )
-
-    @classmethod
-    def get_or_create_for_two_users(cls, user1, user2):
-        if user1.id == user2.id:
-            raise Exception('Users need to be different')
-        conv = Conversation.objects.filter(is_private=True, participants=user1)\
-            .filter(participants=user2)\
-            .first()
-        if not conv:
-            conv = Conversation.objects.create(is_private=True)
-            conv.sync_users([user1, user2])
-        return conv
 
 
 class Conversation(BaseModel, UpdatedAtMixin):
@@ -45,7 +41,7 @@ class Conversation(BaseModel, UpdatedAtMixin):
     class Meta:
         unique_together = ('target_type', 'target_id')
 
-    objects = ConversationManager()
+    objects = ConversationQuerySet.as_manager()
 
     participants = ManyToManyField(settings.AUTH_USER_MODEL, through='ConversationParticipant')
     is_private = models.BooleanField(default=False)
