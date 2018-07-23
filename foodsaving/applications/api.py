@@ -38,7 +38,7 @@ class GroupApplicationViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin
             q |= Q(user=self.request.user)
         if self.action == 'withdraw':
             q = Q(user=self.request.user)
-        return self.queryset.filter(q)
+        return self.queryset.filter(q).distinct()
 
     @action(
         detail=True,
