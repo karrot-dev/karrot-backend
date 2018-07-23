@@ -3,7 +3,6 @@ import itertools
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Count
 from django.utils import timezone
 from django.utils.timezone import get_current_timezone
 
@@ -21,22 +20,13 @@ def prepare_group_summary_data(group, from_date, to_date):
         groupmembership__created_at__lt=to_date,
     ).all()
 
-    pickup_filters = {
-        'deleted': False,
-        'store__group': group,
-        'date__gte': from_date,
-        'date__lt': to_date,
-    }
+    pickup_dates = PickupDate.objects.in_group(group).exclude_deleted().filter(
+        date__gte=from_date, date__lt=to_date
+    ).annotate_num_collectors()
 
-    pickups_done_count = PickupDate.objects.annotate(num_collectors=Count('collectors')).filter(
-        **pickup_filters,
-        num_collectors__gt=0,
-    ).count()
+    pickups_done_count = pickup_dates.done().count()
 
-    pickups_missed_count = PickupDate.objects.annotate(num_collectors=Count('collectors')).filter(
-        **pickup_filters,
-        num_collectors=0,
-    ).count()
+    pickups_missed_count = pickup_dates.missed().count()
 
     feedbacks = Feedback.objects.filter(
         created_at__gte=from_date,

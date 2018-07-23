@@ -41,10 +41,9 @@ class PickupDatesFilter(FilterSet):
         fields = ['store', 'group', 'date', 'series', 'feedback_possible']
 
     def filter_feedback_possible(self, qs, name, value):
-        q = self.Meta.model.objects.feedback_possible_q(self.request.user)
         if value is True:
-            return qs.filter(q)
-        return qs.filter(~q)
+            return qs.only_feedback_possible(self.request.user)
+        return qs.exclude_feedback_possible(self.request.user)
 
 
 class FeedbackFilter(FilterSet):

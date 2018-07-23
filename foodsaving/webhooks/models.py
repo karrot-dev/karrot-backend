@@ -1,14 +1,14 @@
 from dateutil.relativedelta import relativedelta
-from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.postgres.fields import JSONField
-from django.db.models import CharField, TextField, BigAutoField, Count
+from django.db import models
+from django.db.models import Count
 from django.utils import timezone
 
 from config import settings
 from foodsaving.base.base_models import BaseModel
 
 
-class EmailEventManager(BaseUserManager):
+class EmailEventQuerySet(models.QuerySet):
     def ignored(self):
         return self.filter(
             created_at__gte=timezone.now() - relativedelta(months=3), event__in=settings.EMAIL_EVENTS_AVOID
@@ -22,9 +22,9 @@ class EmailEventManager(BaseUserManager):
 
 
 class EmailEvent(BaseModel):
-    objects = EmailEventManager()
+    objects = EmailEventQuerySet.as_manager()
 
-    id = BigAutoField(primary_key=True)
-    address = TextField()
-    event = CharField(max_length=255)
+    id = models.BigAutoField(primary_key=True)
+    address = models.TextField()
+    event = models.CharField(max_length=255)
     payload = JSONField()
