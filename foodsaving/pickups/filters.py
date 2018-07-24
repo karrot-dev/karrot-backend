@@ -1,8 +1,4 @@
-from django import forms
-from django.utils.dateparse import parse_datetime
-from django.utils.encoding import force_str
-from django_filters.fields import RangeField
-from django_filters.rest_framework import FilterSet, RangeFilter, NumberFilter, BooleanFilter
+from django_filters.rest_framework import FilterSet, NumberFilter, BooleanFilter
 
 from foodsaving.base.filters import ISODateTimeFromToRangeFilter
 from foodsaving.pickups.models import PickupDate, PickupDateSeries, Feedback
