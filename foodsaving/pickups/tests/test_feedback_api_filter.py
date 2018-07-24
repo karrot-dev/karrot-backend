@@ -103,12 +103,12 @@ class TestFeedbackAPIFilter(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.collector)
         # self.feedback is older than self.feedback2
         # first, get all that are newer than self.feedback
-        response = self.get_results(self.url, {'created_at_0': self.feedback.created_at})
+        response = self.get_results(self.url, {'created_at_min': self.feedback.created_at})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
         self.assertEqual(response.data[0]['id'], self.feedback2.id)
         # second, get all that are older than self.feedback
-        response = self.get_results(self.url, {'created_at_1': self.feedback.created_at})
+        response = self.get_results(self.url, {'created_at_max': self.feedback.created_at})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['id'], self.feedback.id)

@@ -185,7 +185,7 @@ class TestStoreChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.member)
 
         url = '/api/pickup-dates/'
-        response = self.get_results(url, {'series': self.series.id, 'date_0': self.now})
+        response = self.get_results(url, {'series': self.series.id, 'date_min': self.now})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
         response = self.client.patch(self.store_url, {'weeks_in_advance': 2})
@@ -202,7 +202,7 @@ class TestStoreChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.member)
 
         url = '/api/pickup-dates/'
-        response = self.get_results(url, {'series': self.series.id, 'date_0': self.now})
+        response = self.get_results(url, {'series': self.series.id, 'date_min': self.now})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         original_dates = [parse(_['date']) for _ in response.data]
 

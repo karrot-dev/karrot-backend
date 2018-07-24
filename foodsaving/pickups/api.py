@@ -39,12 +39,12 @@ class FeedbackViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, Partia
     - `?about` - filter by pickup id
     - `?store` - filter by store id
     - `?group` - filter by group id
-    - `?created_at_0` and `?created_at_1` - filter by creation date
+    - `?created_at_min` and `?created_at_max` - filter by creation date
     """
     serializer_class = FeedbackSerializer
     queryset = FeedbackModel.objects.all()
     filter_backends = (DjangoFilterBackend, )
-    filter_class = FeedbackFilter
+    filterset_class = FeedbackFilter
     permission_classes = (IsAuthenticated, )
     pagination_class = FeedbackPagination
 
@@ -64,7 +64,7 @@ class PickupDateSeriesViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin
     serializer_class = PickupDateSeriesSerializer
     queryset = PickupDateSeriesModel.objects
     filter_backends = (DjangoFilterBackend, )
-    filter_class = PickupDateSeriesFilter
+    filterset_class = PickupDateSeriesFilter
     permission_classes = (IsAuthenticated, )
 
     def get_queryset(self):
@@ -101,14 +101,14 @@ class PickupDateViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, Part
     - `?series` - filter by pickup date series id
     - `?store` - filter by store id
     - `?group` - filter by group id
-    - `?date_0=<from_date>`&`date_1=<to_date>` - filter by date, can also either give date_0 or date_1
+    - `?date_min=<from_date>`&`date_max=<to_date>` - filter by date, can also either give either date_min or date_max
     """
     serializer_class = PickupDateSerializer
     queryset = PickupDateModel.objects \
         .filter(deleted=False) \
         .prefetch_related('collectors')  # because we have collector_ids field in the serializer
     filter_backends = (DjangoFilterBackend, )
-    filter_class = PickupDatesFilter
+    filterset_class = PickupDatesFilter
     permission_classes = (IsAuthenticated, IsUpcoming)
     pagination_class = PickupDatePagination
 

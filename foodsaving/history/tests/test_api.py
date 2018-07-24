@@ -308,7 +308,7 @@ class TestHistoryAPIDateFiltering(APITestCase, ExtractPaginationMixin):
     def test_filter_by_date(self):
         self.client.force_login(self.member)
         self.client.post('/api/groups/', {'name': 'xyzabc', 'timezone': 'Europe/Berlin'})
-        response = self.get_results(history_url, data={'date_1': timezone.now()})
+        response = self.get_results(history_url, data={'date_max': timezone.now()})
         self.assertEqual(len(response.data), 1)
-        response = self.get_results(history_url, data={'date_0': timezone.now()})
+        response = self.get_results(history_url, data={'date_min': timezone.now()})
         self.assertEqual(len(response.data), 0)

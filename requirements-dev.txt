@@ -26,7 +26,7 @@ idna==2.7                 # via requests
 ipython-genutils==0.2.0   # via traitlets
 ipython==6.4.0
 jedi==0.12.1              # via ipython
-jinja2==2.10              # via django-silk, jinja2
+jinja2==2.10              # via django-silk
 logging-tree==1.7
 markupsafe==1.0           # via jinja2
 mccabe==0.6.1             # via flake8
@@ -46,12 +46,12 @@ pytest-asyncio==0.8.0
 pytest-cov==2.5.1
 pytest-django==3.3.2
 pytest-forked==0.2        # via pytest-xdist
-pytest-xdist==1.22.2
+pytest-xdist==1.22.3
 pytest==3.6.3             # via pytest-asyncio, pytest-cov, pytest-django, pytest-forked, pytest-xdist
 python-dateutil==2.7.3    # via django-silk, freezegun
 python-slugify==1.2.5     # via transifex-client
 pytz==2018.5              # via django, django-silk
-requests-mock==1.5.0
+requests-mock==1.5.2
 requests==2.19.1          # via django-silk, requests-mock, transifex-client
 simplegeneric==0.8.1      # via ipython
 six==1.11.0               # via freezegun, more-itertools, pip-tools, prompt-toolkit, pytest, python-dateutil, requests-mock, traitlets, transifex-client
