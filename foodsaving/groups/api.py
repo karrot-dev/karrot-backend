@@ -56,7 +56,7 @@ class GroupInfoViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, Generic
     """
     queryset = GroupModel.objects.prefetch_related('members')
     filter_backends = (SearchFilter, DjangoFilterBackend)
-    filter_class = GroupsInfoFilter
+    filterset_class = GroupsInfoFilter
     search_fields = ('name', 'public_description')
     serializer_class = GroupPreviewSerializer
 
@@ -68,7 +68,7 @@ class GroupViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUp
     """
     queryset = GroupModel.objects
     filter_backends = (SearchFilter, DjangoFilterBackend)
-    filter_class = GroupsFilter
+    filterset_class = GroupsFilter
     search_fields = ('name', 'public_description')
     serializer_class = GroupDetailSerializer
     permission_classes = (IsAuthenticated, )
