@@ -37,6 +37,11 @@ def group_member_added(sender, instance, created, **kwargs):
         conversation = Conversation.objects.get_or_create_for_target(group)
         conversation.join(user, email_notifications=not group.is_playground())
 
+        # Bootstrap mode, grant editor rights immediately
+        if group.groupmembership_set.members().count() <= 5:
+            membership.add_roles([roles.GROUP_EDITOR])
+            membership.save()
+
         stats.group_joined(group)
 
 
