@@ -30,6 +30,11 @@ class TrustSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(_('User is not member of group'))
         return attrs
 
+    def validate_user(self, user):
+        if user == self.context['request'].user:
+            raise serializers.ValidationError(_('You cannot give trust to yourself'))
+        return user
+
     def validate_group(self, group):
         if not group.is_member(self.context['request'].user):
             raise serializers.ValidationError(_('You need to be a member of the group'))

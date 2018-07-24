@@ -11,6 +11,7 @@ class GroupFactory(DjangoModelFactory):
 
     @post_generation
     def members(self, created, members, **kwargs):
+        # TODO rename to "editors"
         if not created:
             return
         if members:
