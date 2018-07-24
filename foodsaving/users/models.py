@@ -17,7 +17,18 @@ from foodsaving.webhooks.models import EmailEvent
 MAX_DISPLAY_NAME_LENGTH = 80
 
 
-class UserManager(BaseUserManager):
+class UserQuerySet(models.QuerySet):
+    def filter_by_similar_email(self, email):
+        return self.filter(email__iexact=email)
+
+    def unverified_or_ignored(self):
+        return self.filter(Q(mail_verified=False) | Q(email__in=EmailEvent.objects.ignored_addresses()))
+
+    def active(self):
+        return self.filter(deleted=False, is_active=True)
+
+
+class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
     use_in_migrations = True
 
     @transaction.atomic
@@ -57,19 +68,8 @@ class UserManager(BaseUserManager):
         return self.get(email__iexact=email)
 
 
-class UserQuerySet(models.QuerySet):
-    def filter_by_similar_email(self, email):
-        return self.filter(email__iexact=email)
-
-    def unverified_or_ignored(self):
-        return self.filter(Q(mail_verified=False) | Q(email__in=EmailEvent.objects.ignored_addresses()))
-
-    def active(self):
-        return self.filter(deleted=False, is_active=True)
-
-
 class User(AbstractBaseUser, BaseModel, LocationModel):
-    objects = UserManager.from_queryset(UserQuerySet)()
+    objects = UserManager()
 
     email = EmailField(unique=True, blank=True, null=True)
     is_active = BooleanField(default=True)
