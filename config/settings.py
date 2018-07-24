@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'foodsaving.stores.StoresConfig',
     'foodsaving.pickups.PickupsConfig',
     'foodsaving.invitations.InvitationsConfig',
+    'foodsaving.trust.TrustConfig',
     'foodsaving.template_previews',
     'foodsaving.webhooks',
 
