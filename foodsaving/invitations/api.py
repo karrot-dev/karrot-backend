@@ -27,7 +27,7 @@ class InvitationsViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mix
     queryset = Invitation.objects
     serializer_class = InvitationSerializer
     filter_backends = (DjangoFilterBackend, )
-    filter_fields = ('group', )
+    filterset_fields = ('group', )
     permission_classes = (IsAuthenticated, )
     throttle_classes = ()
 

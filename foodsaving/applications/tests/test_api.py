@@ -243,6 +243,12 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
         response = self.get_results('/api/group-applications/?user={}'.format(self.applicant.id))
         self.assertEqual(len(response.data), 1)
 
+    def test_list_pending_applications(self):
+        [GroupApplicationFactory(group=self.group, user=self.applicant, status='withdrawn') for _ in range(4)]
+        self.client.force_login(user=self.applicant)
+        response = self.get_results('/api/group-applications/?status={}'.format(self.applicant.id))
+        self.assertEqual(len(response.data), 1)
+
     def test_accept_application(self):
         self.client.force_login(user=self.member)
         response = self.client.post('/api/group-applications/{}/accept/'.format(self.application.id))

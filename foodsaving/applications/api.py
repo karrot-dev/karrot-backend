@@ -21,8 +21,12 @@ class HasVerifiedEmailAddress(permissions.BasePermission):
         return request.user.mail_verified
 
 
-class GroupApplicationViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.ListModelMixin,
-                              GenericViewSet):
+class GroupApplicationViewSet(
+        mixins.CreateModelMixin,
+        mixins.RetrieveModelMixin,
+        mixins.ListModelMixin,
+        GenericViewSet,
+):
     queryset = GroupApplication.objects
     serializer_class = GroupApplicationSerializer
     permission_classes = (
@@ -30,7 +34,7 @@ class GroupApplicationViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin
         HasVerifiedEmailAddress,
     )
     filter_backends = (DjangoFilterBackend, )
-    filter_fields = ('group', 'user')
+    filterset_fields = ('group', 'user', 'status')
 
     def get_queryset(self):
         q = Q(group__members=self.request.user)

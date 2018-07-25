@@ -21,7 +21,7 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, RetrievePriv
     filter_backends = (filters.SearchFilter, )
     permission_classes = (IsAuthenticated, )
     search_fields = ('display_name', )
-    filter_fields = ('conversation', 'groups')
+    filterset_fields = ('conversation', 'groups')
 
     def retrieve(self, request, *args, **kwargs):
         """Get one user profile"""
@@ -59,7 +59,7 @@ class UserInfoViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericV
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)
     permission_classes = (IsAuthenticated, )
     search_fields = ('display_name', )
-    filter_fields = ('conversation', 'groups')
+    filterset_fields = ('conversation', 'groups')
     pagination_class = UserPagination
 
     def get_queryset(self):

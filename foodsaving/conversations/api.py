@@ -129,7 +129,7 @@ class ConversationMessageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
         IsWithinUpdatePeriod,
     )
     filter_backends = (DjangoFilterBackend, )
-    filter_fields = (
+    filterset_fields = (
         'conversation',
         'thread',
     )
@@ -173,7 +173,7 @@ class ConversationMessageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
     @action(
         detail=True,
         methods=('POST', ),
-        filter_fields=('name', ),
+        filterset_fields=('name', ),
     )
     def reactions(self, request, pk):
         """route for POST /messages/{id}/reactions/ with body {"name":"emoji_name"}"""
