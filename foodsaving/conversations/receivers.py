@@ -59,7 +59,7 @@ def notify_participants(sender, instance, created, **kwargs):
     if not created:
         return
 
-    tasks.notify_participants(message)
+    tasks.notify_participants.schedule(args=(message, ), delay=5 * 60)
 
 
 @receiver(post_save, sender=ConversationMessage)

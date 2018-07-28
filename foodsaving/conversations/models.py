@@ -72,8 +72,27 @@ class ConversationParticipant(BaseModel, UpdatedAtMixin):
     """The join table between Conversation and User."""
     user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     conversation = ForeignKey(Conversation, on_delete=models.CASCADE)
-    seen_up_to = ForeignKey('ConversationMessage', null=True, on_delete=models.SET_NULL)
+    seen_up_to = ForeignKey(
+        'ConversationMessage',
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='conversationparticipants_seen_up_to',
+    )
+    notified_up_to = ForeignKey(
+        'ConversationMessage',
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='conversationparticipants_notified_up_to',
+    )
     email_notifications = BooleanField(default=True)
+
+    def unseen_and_unnotified_messages(self):
+        messages = self.conversation.messages
+        if self.seen_up_to_id is not None:
+            messages = messages.filter(id__gt=self.seen_up_to_id)
+        if self.notified_up_to_id is not None:
+            messages = messages.filter(id__gt=self.notified_up_to_id)
+        return messages
 
 
 class ConversationMessageQuerySet(QuerySet):
@@ -138,11 +157,30 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 class ConversationThreadParticipant(BaseModel, UpdatedAtMixin):
     user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     thread = ForeignKey(ConversationMessage, related_name='participants', on_delete=models.CASCADE)
-    seen_up_to = ForeignKey(ConversationMessage, null=True, on_delete=models.SET_NULL)
+    seen_up_to = ForeignKey(
+        ConversationMessage,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='threadparticipants_seen_up_to',
+    )
+    notified_up_to = ForeignKey(
+        ConversationMessage,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='threadparticipants_notified_up_to',
+    )
     muted = BooleanField(default=False)
 
     class Meta:
         unique_together = ['user', 'thread']
+
+    def unseen_and_unnotified_messages(self):
+        messages = self.thread.thread_messages.only_replies()
+        if self.seen_up_to_id is not None:
+            messages = messages.filter(id__gt=self.seen_up_to_id)
+        if self.notified_up_to_id is not None:
+            messages = messages.filter(id__gt=self.notified_up_to_id)
+        return messages
 
 
 class ConversationMixin(object):

@@ -10,8 +10,16 @@ from foodsaving.users.models import User
 
 @db_task()
 def notify_participants(message):
+    # skip this notification if this is not the most recent message
+    all_messages = message.conversation.messages
+    if message.is_thread_reply():
+        latest_message = all_messages.only_replies().latest('created_at')
+    else:
+        latest_message = all_messages.exclude_replies().latest('created_at')
+    if latest_message.id != message.id:
+        return
 
-    if message.thread:
+    if message.is_thread_reply():
         participants_to_notify = ConversationThreadParticipant.objects.filter(
             thread=message.thread,
             muted=False,
@@ -22,8 +30,12 @@ def notify_participants(message):
             email_notifications=True,
         )
 
-    participants_to_notify = participants_to_notify.exclude(user=message.author).exclude(
+    participants_to_notify = participants_to_notify.exclude(
+        user=message.author,
+    ).exclude(
         user__in=User.objects.unverified_or_ignored(),
+    ).exclude(
+        seen_up_to=message,
     )
 
     # TODO: consider if we want to always send thread notifications even to inactive users
@@ -34,10 +46,15 @@ def notify_participants(message):
             user__groupmembership__group=message.conversation.target,
         )
 
-    for participant in participants_to_notify:
+    for participant in participants_to_notify.distinct():
+        messages = participant.unseen_and_unnotified_messages().all()
         try:
             foodsaving.conversations.emails.prepare_conversation_message_notification(
-                user=participant.user, message=message
+                user=participant.user,
+                messages=messages,
             ).send()
         except AnymailAPIError:
             sentry_client.captureException()
+        else:
+            participant.notified_up_to = message
+            participant.save()

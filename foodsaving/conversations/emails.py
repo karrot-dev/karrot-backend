@@ -17,31 +17,42 @@ from foodsaving.utils.frontend_urls import (
 from foodsaving.webhooks.api import make_local_part
 
 
-def prepare_conversation_message_notification(user, message):
-    if isinstance(message.conversation.target, Group):
-        if message.is_thread_reply():
-            return prepare_group_thread_message_notification(user, message)
-        return prepare_group_conversation_message_notification(user, message)
-    if isinstance(message.conversation.target, PickupDate):
-        return prepare_pickup_conversation_message_notification(user, message)
-    if isinstance(message.conversation.target, GroupApplication):
-        return prepare_group_application_message_notification(user, message)
-    if not message.conversation.target and message.conversation.is_private:
-        return prepare_private_user_conversation_message_notification(user, message)
+def nice_from_email_text(messages):
+    return ', '.join(set(message.author.display_name for message in messages))
+
+
+def prepare_conversation_message_notification(user, messages):
+    assert len(messages) > 0
+    first_message = messages[0]
+    target = first_message.conversation.target
+
+    if isinstance(target, Group):
+        if first_message.is_thread_reply():
+            return prepare_group_thread_message_notification(user, messages)
+        return prepare_group_conversation_message_notification(user, messages)
+    if isinstance(target, PickupDate):
+        return prepare_pickup_conversation_message_notification(user, messages)
+    if isinstance(target, GroupApplication):
+        return prepare_group_application_message_notification(user, messages)
+    if not target and first_message.conversation.is_private:
+        return prepare_private_user_conversation_message_notification(user, messages)
     raise Exception('Cannot send message notification because conversation doesn\'t have a known target')
 
 
-def prepare_group_thread_message_notification(user, message):
-    thread = message.thread
+def prepare_group_thread_message_notification(user, messages):
+    first_message = messages[0]
+    conversation = first_message.conversation
+    thread = first_message.thread
 
     thread_text_beginning = Truncator(thread.content).chars(num=60)
 
+    from_text = nice_from_email_text(messages)
     reply_to_name = thread.author.display_name
     conversation_name = thread_text_beginning
 
-    local_part = make_local_part(message.conversation, user, thread)
+    local_part = make_local_part(conversation, user, thread)
     reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
-    from_email = formataddr((message.author.display_name, settings.DEFAULT_FROM_EMAIL))
+    from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
     return prepare_email(
         'thread_message_notification',
@@ -49,26 +60,28 @@ def prepare_group_thread_message_notification(user, message):
         user=user,
         reply_to=[reply_to],
         context={
+            'messages': messages,
             'conversation_name': conversation_name,
             'thread_author': thread.author,
             'thread_message_content': thread.content_rendered(truncate_words=40),
-            'author': message.author,
-            'message_content': message.content_rendered(),
             'thread_url': thread_url(thread),
             'mute_url': thread_mute_url(thread),
         }
     )
 
 
-def prepare_group_conversation_message_notification(user, message):
-    group = message.conversation.target
+def prepare_group_conversation_message_notification(user, messages):
+    first_message = messages[0]
+    conversation = first_message.conversation
+    group = conversation.target
 
+    from_text = nice_from_email_text(messages)
     reply_to_name = group.name
     conversation_name = group.name
 
-    local_part = make_local_part(message.conversation, user)
+    local_part = make_local_part(conversation, user)
     reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
-    from_email = formataddr((message.author.display_name, settings.DEFAULT_FROM_EMAIL))
+    from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
     return prepare_email(
         'conversation_message_notification',
@@ -76,17 +89,18 @@ def prepare_group_conversation_message_notification(user, message):
         user=user,
         reply_to=[reply_to],
         context={
+            'messages': messages,
             'conversation_name': conversation_name,
-            'author': message.author,
-            'message_content': message.content_rendered(),
             'conversation_url': group_wall_url(group),
-            'mute_url': group_conversation_mute_url(group, message.conversation),
+            'mute_url': group_conversation_mute_url(group, conversation),
         }
     )
 
 
-def prepare_pickup_conversation_message_notification(user, message):
-    pickup = message.conversation.target
+def prepare_pickup_conversation_message_notification(user, messages):
+    first_message = messages[0]
+    conversation = first_message.conversation
+    pickup = conversation.target
     group_tz = pickup.store.group.timezone
 
     language = user.language
@@ -123,9 +137,11 @@ def prepare_pickup_conversation_message_notification(user, message):
                 'date': long_date,
             }
 
-            local_part = make_local_part(message.conversation, user)
+            from_text = nice_from_email_text(messages)
+
+            local_part = make_local_part(conversation, user)
             reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
-            from_email = formataddr((message.author.display_name, settings.DEFAULT_FROM_EMAIL))
+            from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
             return prepare_email(
                 'conversation_message_notification',
@@ -133,20 +149,21 @@ def prepare_pickup_conversation_message_notification(user, message):
                 user=user,
                 reply_to=[reply_to],
                 context={
+                    'messages': messages,
                     'conversation_name': conversation_name,
-                    'author': message.author,
-                    'message_content': message.content_rendered(),
                     'conversation_url': pickup_detail_url(pickup),
-                    'mute_url': pickup_conversation_mute_url(pickup, message.conversation),
+                    'mute_url': pickup_conversation_mute_url(pickup, conversation),
                 }
             )
 
 
-def prepare_private_user_conversation_message_notification(user, message):
-    author = message.author
+def prepare_private_user_conversation_message_notification(user, messages):
+    first_message = messages[0]
+    conversation = first_message.conversation
+    author = first_message.author
     reply_to_name = author.display_name
 
-    local_part = make_local_part(message.conversation, user)
+    local_part = make_local_part(conversation, user)
     reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
     from_email = formataddr((author.display_name, settings.DEFAULT_FROM_EMAIL))
 
@@ -156,17 +173,18 @@ def prepare_private_user_conversation_message_notification(user, message):
         user=user,
         reply_to=[reply_to],
         context={
+            'messages': messages,
             'conversation_name': author.display_name,
-            'author': message.author,
-            'message_content': message.content_rendered(),
             'conversation_url': user_detail_url(author),
-            'mute_url': user_conversation_mute_url(author, message.conversation),
+            'mute_url': user_conversation_mute_url(author, conversation),
         }
     )
 
 
-def prepare_group_application_message_notification(user, message):
-    application = message.conversation.target
+def prepare_group_application_message_notification(user, messages):
+    first_message = messages[0]
+    conversation = first_message.conversation
+    application = conversation.target
 
     language = user.language
 
@@ -179,9 +197,11 @@ def prepare_group_application_message_notification(user, message):
             'user_name': application.user.display_name,
         }
 
-        local_part = make_local_part(message.conversation, user)
+        from_text = nice_from_email_text(messages)
+
+        local_part = make_local_part(conversation, user)
         reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
-        from_email = formataddr((message.author.display_name, settings.DEFAULT_FROM_EMAIL))
+        from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
         return prepare_email(
             'conversation_message_notification',
@@ -189,10 +209,9 @@ def prepare_group_application_message_notification(user, message):
             user=user,
             reply_to=[reply_to],
             context={
+                'messages': messages,
                 'conversation_name': conversation_name,
-                'author': message.author,
-                'message_content': message.content_rendered(),
                 'conversation_url': group_application_url(application),
-                'mute_url': group_application_mute_url(application, message.conversation),
+                'mute_url': group_application_mute_url(application, conversation),
             }
         )
