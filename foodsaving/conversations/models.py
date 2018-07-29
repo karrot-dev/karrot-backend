@@ -87,7 +87,7 @@ class ConversationParticipant(BaseModel, UpdatedAtMixin):
     email_notifications = BooleanField(default=True)
 
     def unseen_and_unnotified_messages(self):
-        messages = self.conversation.messages
+        messages = self.conversation.messages.exclude_replies()
         if self.seen_up_to_id is not None:
             messages = messages.filter(id__gt=self.seen_up_to_id)
         if self.notified_up_to_id is not None:

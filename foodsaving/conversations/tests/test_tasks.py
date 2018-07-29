@@ -76,6 +76,15 @@ class TestConversationNotificationTask(TestCase):
         participant = ConversationParticipant.objects.get(conversation=self.group.conversation, user=self.user)
         self.assertEqual(participant.notified_up_to.id, recent_message.id)
 
+    def test_exclude_thread_replies_from_conversation_notification(self):
+        with patch('foodsaving.conversations.receivers.tasks.notify_participants'):
+            self.group.conversation.messages.create(
+                author=self.user, thread=self.message, content='first thread reply'
+            )
+        self.group.conversation.messages.create(author=self.author, content='conversation')
+
+        self.assertNotIn('first thread reply', mail.outbox[0].body)
+
     def test_does_notification_batching_in_threads(self):
         with patch('foodsaving.conversations.receivers.tasks.notify_participants'):
             self.group.conversation.messages.create(
@@ -91,3 +100,23 @@ class TestConversationNotificationTask(TestCase):
         self.assertEqual(mail.outbox[0].to[0], self.author.email)
         participant = ConversationThreadParticipant.objects.get(thread=self.message, user=self.author)
         self.assertEqual(participant.notified_up_to.id, recent_message.id)
+
+    def test_exclude_seen_message_in_thread(self):
+        with patch('foodsaving.conversations.receivers.tasks.notify_participants'):
+            another_message = self.group.conversation.messages.create(
+                author=self.user, thread=self.message, content='first thread reply'
+            )
+        ConversationThreadParticipant.objects.filter(
+            thread=self.message, user=self.author
+        ).update(seen_up_to=another_message)
+
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_exclude_already_notified_in_thread(self):
+        self.group.conversation.messages.create(author=self.user, thread=self.message, content='first thread reply')
+        mail.outbox = []
+        self.group.conversation.messages.create(author=self.user, thread=self.message, content='second thread reply')
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('second thread reply', mail.outbox[0].body)
+        self.assertNotIn('first thread reply', mail.outbox[0].body)
