@@ -12,6 +12,7 @@ class GroupApplicationSerializer(serializers.ModelSerializer):
         model = GroupApplication
         fields = [
             'id',
+            'created_at',
             'user',
             'group',
             'conversation',
