@@ -35,7 +35,9 @@ def notify_participants(message):
     ).exclude(
         user__in=User.objects.unverified_or_ignored(),
     ).exclude(
-        seen_up_to=message,
+        seen_up_to__id__gte=message.id,
+    ).exclude(
+        notified_up_to__id__gte=message.id,
     )
 
     # TODO: consider if we want to always send thread notifications even to inactive users

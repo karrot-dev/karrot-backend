@@ -17,12 +17,11 @@ from foodsaving.utils.frontend_urls import (
 from foodsaving.webhooks.api import make_local_part
 
 
-def nice_from_email_text(messages):
+def author_names(messages):
     return ', '.join(set(message.author.display_name for message in messages))
 
 
 def prepare_conversation_message_notification(user, messages):
-    assert len(messages) > 0
     first_message = messages[0]
     target = first_message.conversation.target
 
@@ -46,7 +45,7 @@ def prepare_group_thread_message_notification(user, messages):
 
     thread_text_beginning = Truncator(thread.content).chars(num=60)
 
-    from_text = nice_from_email_text(messages)
+    from_text = author_names(messages)
     reply_to_name = thread.author.display_name
     conversation_name = thread_text_beginning
 
@@ -75,7 +74,7 @@ def prepare_group_conversation_message_notification(user, messages):
     conversation = first_message.conversation
     group = conversation.target
 
-    from_text = nice_from_email_text(messages)
+    from_text = author_names(messages)
     reply_to_name = group.name
     conversation_name = group.name
 
@@ -137,7 +136,7 @@ def prepare_pickup_conversation_message_notification(user, messages):
                 'date': long_date,
             }
 
-            from_text = nice_from_email_text(messages)
+            from_text = author_names(messages)
 
             local_part = make_local_part(conversation, user)
             reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
@@ -197,7 +196,7 @@ def prepare_group_application_message_notification(user, messages):
             'user_name': application.user.display_name,
         }
 
-        from_text = nice_from_email_text(messages)
+        from_text = author_names(messages)
 
         local_part = make_local_part(conversation, user)
         reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
