@@ -1,3 +1,4 @@
+from dateutil.parser import parse
 from django.core import mail
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -36,14 +37,17 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
         application_id = data['id']
         del data['id']
         conversation_id = data['conversation']
-        del data['conversation']
+        created_at = parse(data['created_at'])
+        data['created_at'] = created_at
         self.assertEqual(
             data, {
                 'questions': self.group.application_questions,
                 'answers': answers,
                 'user': self.applicant.id,
                 'group': self.group.id,
+                'conversation': conversation_id,
                 'status': 'pending',
+                'created_at': created_at,
             }
         )
 
@@ -59,8 +63,10 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
         application_list_response = self.client.get('/api/group-applications/')
         self.assertEqual(application_list_response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(application_list_response.data), 1)
+        data = application_list_response.data[0]
+        data['created_at'] = parse(data['created_at'])
         self.assertEqual(
-            application_list_response.data[0], {
+            data, {
                 'id': application_id,
                 'questions': self.group.application_questions,
                 'answers': answers,
@@ -68,6 +74,7 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
                 'group': self.group.id,
                 'conversation': conversation_id,
                 'status': 'pending',
+                'created_at': created_at,
             }
         )
 
@@ -241,6 +248,12 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
         [GroupApplicationFactory(group=self.group, user=UserFactory()) for _ in range(4)]
         self.client.force_login(user=self.applicant)
         response = self.get_results('/api/group-applications/?user={}'.format(self.applicant.id))
+        self.assertEqual(len(response.data), 1)
+
+    def test_list_pending_applications(self):
+        [GroupApplicationFactory(group=self.group, user=self.applicant, status='withdrawn') for _ in range(4)]
+        self.client.force_login(user=self.applicant)
+        response = self.get_results('/api/group-applications/?status={}'.format(self.applicant.id))
         self.assertEqual(len(response.data), 1)
 
     def test_accept_application(self):

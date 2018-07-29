@@ -92,20 +92,21 @@ class TestConversationsAPI(APITestCase):
 
 class TestConversationThreadsAPI(APITestCase):
     def setUp(self):
-        self.user = UserFactory()
-        self.user2 = UserFactory()
+        self.user = VerifiedUserFactory()
+        self.user2 = VerifiedUserFactory()
         self.group = GroupFactory(members=[self.user, self.user2])
         self.conversation = self.group.conversation
         self.thread = self.conversation.messages.create(author=self.user, content='yay')
 
     def create_reply(self, **kwargs):
-        return ConversationMessage.objects.create(
-            conversation=self.conversation,
-            author=self.user,
-            thread=self.thread,
-            content='default reply',
-            **kwargs,
-        )
+        args = {
+            'conversation': self.conversation,
+            'author': self.user,
+            'thread': self.thread,
+            'content': 'my default reply',
+        }
+        args.update(kwargs)
+        return ConversationMessage.objects.create(**args)
 
     def test_thread_reply(self):
         self.client.force_login(user=self.user)
@@ -261,6 +262,14 @@ class TestConversationThreadsAPI(APITestCase):
         data = {'thread': another_message.id}
         response = self.client.patch('/api/messages/{}/'.format(reply.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_send_reply_notifications(self):
+        mail.outbox = []
+        self.create_reply(author=self.user2)
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn(self.thread.content, mail.outbox[0].subject)
+        self.assertIn('In reply to', mail.outbox[0].body)
 
 
 class TestConversationsSeenUpToAPI(APITestCase):

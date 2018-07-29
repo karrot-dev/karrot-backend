@@ -2,7 +2,7 @@ import uuid
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
 
@@ -11,6 +11,7 @@ from foodsaving.base.base_models import BaseModel
 
 
 class InvitationQuerySet(models.QuerySet):
+    @transaction.atomic
     def create_and_send(self, **kwargs):
         # Delete all expired invitations before creating new ones.
         # Makes re-sending invitations after expiration possible and saves us from running a periodic cleanup command
