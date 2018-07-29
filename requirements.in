@@ -33,3 +33,4 @@ gevent
 bleach
 bleach_whitelist
 pymdown-extensions
+-e git+https://github.com/django/daphne@2f94210#egg=daphne
