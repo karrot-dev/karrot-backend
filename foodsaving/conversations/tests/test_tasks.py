@@ -9,8 +9,10 @@ from foodsaving.conversations.models import ConversationParticipant, Conversatio
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.users.factories import VerifiedUserFactory, UserFactory
 
+
 def suppressed_notifications():
     return patch('foodsaving.conversations.receivers.tasks.notify_participants')
+
 
 class TestConversationNotificationTask(TestCase):
     def setUp(self):
