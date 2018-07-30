@@ -34,7 +34,7 @@ def prepare_group_summary_data(group, from_date, to_date):
         about__store__group=group,
     )
 
-    messages = ConversationMessage.objects.filter(
+    messages = ConversationMessage.objects.exclude_replies().filter(
         conversation__target_type=ContentType.objects.get_for_model(Group),
         conversation__target_id=group.id,
         created_at__gte=from_date,
