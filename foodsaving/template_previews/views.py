@@ -9,17 +9,17 @@ from django.template.loader import render_to_string
 from django.template.utils import get_app_template_dirs
 from django.utils import timezone
 
+import foodsaving.applications.emails
 import foodsaving.conversations.emails
 import foodsaving.invitations.emails
 import foodsaving.users.emails
-import foodsaving.applications.emails
 from config import settings
+from foodsaving.applications.factories import GroupApplicationFactory
+from foodsaving.applications.models import GroupApplication
 from foodsaving.conversations.models import ConversationMessage
 from foodsaving.groups.emails import prepare_user_inactive_in_group_email, prepare_group_summary_emails, \
     prepare_group_summary_data
-from foodsaving.applications.factories import GroupApplicationFactory
 from foodsaving.groups.models import Group
-from foodsaving.applications.models import GroupApplication
 from foodsaving.invitations.models import Invitation
 from foodsaving.pickups.emails import prepare_pickup_notification_email
 from foodsaving.pickups.models import PickupDate
@@ -44,8 +44,12 @@ def shuffle_groups():
     return Group.objects.order_by('?')
 
 
-def random_message():
-    return ConversationMessage.objects.exclude_replies().order_by('?').first()
+def random_messages():
+    conversation = ConversationMessage.objects.order_by('?').first().conversation
+    messages = conversation.messages.exclude_replies().all()
+    if len(messages) > 5:
+        messages = messages[:4]
+    return messages
 
 
 def random_reply():
@@ -95,7 +99,7 @@ class Handlers:
 
     def conversation_message_notification(self):
         return foodsaving.conversations.emails.prepare_conversation_message_notification(
-            user=random_user(), message=random_message()
+            user=random_user(), messages=random_messages()
         )
 
     def emailinvitation(self):
@@ -141,7 +145,7 @@ class Handlers:
 
     def thread_message_notification(self):
         return foodsaving.conversations.emails.prepare_group_thread_message_notification(
-            user=random_user(), message=random_reply()
+            user=random_user(), messages=[random_reply()]
         )
 
     def passwordreset_request(self):

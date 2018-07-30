@@ -4,6 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
+-e git+https://github.com/django/daphne@2f94210#egg=daphne
 aioredis==1.1.0           # via channels-redis
 argon2-cffi==18.1.0       # via django
 asgiref==2.3.2            # via channels, channels-redis
@@ -24,7 +25,6 @@ constantly==15.1.0        # via twisted
 coreapi==2.3.3            # via django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via coreapi
 cssselect==1.0.3          # via talon
-daphne==2.2.0             # via channels
 django-anymail==3.0
 django-cors-headers==2.4.0
 django-crispy-forms==1.7.2
