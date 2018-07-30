@@ -16,7 +16,7 @@ class GroupFactory(DjangoModelFactory):
             for member in members:
                 GroupMembership.objects.create(group=self, user=member)
 
-    name = LazyAttribute(lambda x: faker.name())
+    name = LazyAttribute(lambda x: 'Group ' + faker.name())
     description = LazyAttribute(lambda x: faker.sentence(nb_words=40))
     public_description = LazyAttribute(lambda x: faker.sentence(nb_words=20))
     application_questions = LazyAttribute(lambda x: faker.sentence(nb_words=20))

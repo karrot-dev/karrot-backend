@@ -35,6 +35,8 @@ class GroupApplication(BaseModel):
 
     @transaction.atomic
     def accept(self, accepted_by):
+        self.status = GroupApplicationStatus.ACCEPTED.value
+        self.save()
         self.group.add_member(
             self.user,
             history_payload={
@@ -42,13 +44,12 @@ class GroupApplication(BaseModel):
                 'application_date': self.created_at.isoformat(),
             }
         )
-        self.status = GroupApplicationStatus.ACCEPTED.value
-        self.save()
-
         notify_about_accepted_application(self)
 
     @transaction.atomic
     def decline(self, declined_by):
+        self.status = GroupApplicationStatus.DECLINED.value
+        self.save()
         History.objects.create(
             typus=HistoryTypus.GROUP_APPLICATION_DECLINED,
             group=self.group,
@@ -58,8 +59,6 @@ class GroupApplication(BaseModel):
                 'application_date': self.created_at.isoformat()
             }
         )
-        self.status = GroupApplicationStatus.DECLINED.value
-        self.save()
 
         notify_about_declined_application(self)
 
