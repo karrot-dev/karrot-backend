@@ -40,7 +40,6 @@ INSTALLED_APPS = (
     'foodsaving.stores.StoresConfig',
     'foodsaving.pickups.PickupsConfig',
     'foodsaving.invitations.InvitationsConfig',
-    'foodsaving.trust.TrustConfig',
     'foodsaving.template_previews',
     'foodsaving.webhooks',
 
@@ -204,6 +203,7 @@ DESCRIPTION_MAX_LENGTH = 100000
 NAME_MAX_LENGTH = 80
 FEEDBACK_POSSIBLE_DAYS = 30
 MESSAGE_EDIT_DAYS = 2
+GROUP_EDITOR_TRUST_THRESHOLD = 3
 
 CHANNEL_LAYERS = {
     "default": {

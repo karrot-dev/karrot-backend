@@ -162,6 +162,7 @@ class GroupMembership(BaseModel):
     lastseen_at = DateTimeField(default=tz.now)
     inactive_at = DateTimeField(null=True)
     notification_types = ArrayField(TextField(), default=get_default_notification_types)
+    trusted_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='membership', through='Trust')
 
     class Meta:
         db_table = 'groups_group_members'
@@ -186,3 +187,8 @@ class GroupMembership(BaseModel):
         for notification_type in notification_types:
             while notification_type in self.notification_types:
                 self.notification_types.remove(notification_type)
+
+
+class Trust(BaseModel):
+    membership = models.ForeignKey('groups.GroupMembership', on_delete=models.CASCADE)
+    given_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='trust_given')

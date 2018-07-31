@@ -1,9 +1,10 @@
+from django.conf import settings
 from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
 
 from foodsaving.conversations.models import Conversation
 from foodsaving.groups import roles, stats
-from foodsaving.groups.models import Group, GroupMembership
+from foodsaving.groups.models import Group, GroupMembership, Trust
 
 
 @receiver(post_save, sender=Group)
@@ -37,10 +38,10 @@ def group_member_added(sender, instance, created, **kwargs):
         conversation = Conversation.objects.get_or_create_for_target(group)
         conversation.join(user, email_notifications=not group.is_playground())
 
-        # Bootstrap mode, grant editor rights immediately
-        if group.groupmembership_set.members().count() <= 5:
-            membership.add_roles([roles.GROUP_EDITOR])
-            membership.save()
+        # TODO Bootstrap mode, grant editor rights immediately
+        # if group.groupmembership_set.members().count() <= 5:
+        #     membership.add_roles([roles.GROUP_EDITOR])
+        #     membership.save()
 
         stats.group_joined(group)
 
@@ -74,3 +75,18 @@ def initialize_group(sender, instance, **kwargs):
         if oldest:
             oldest.roles.append(roles.GROUP_MEMBERSHIP_MANAGER)
             oldest.save()
+
+
+@receiver(post_save, sender=Trust)
+def maybe_make_editor(sender, instance, created, **kwargs):
+    if not created:
+        return
+    membership = instance.membership
+    relevant_trust = Trust.objects.filter(
+        membership=membership,
+        # given_by__groupmembership__roles__contains=[roles.GROUP_EDITOR],
+    )
+
+    if relevant_trust.count() >= settings.GROUP_EDITOR_TRUST_THRESHOLD:
+        membership.add_roles([roles.GROUP_EDITOR])
+        membership.save()

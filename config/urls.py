@@ -23,7 +23,6 @@ from foodsaving.pickups.api import PickupDateViewSet, PickupDateSeriesViewSet, F
 from foodsaving.stores.api import StoreViewSet
 from foodsaving.subscriptions.api import PushSubscriptionViewSet
 from foodsaving.template_previews import views as template_preview_views
-from foodsaving.trust.api import TrustViewSet
 from foodsaving.userauth.api import AuthUserView, AuthView, LogoutView, \
     RequestResetPasswordView, ChangePasswordView, VerifyMailView, ResendMailVerificationCodeView, ResetPasswordView, \
     ChangeMailView, RequestDeleteUserView, FailedEmailDeliveryView
@@ -36,7 +35,6 @@ router.register('groups', GroupViewSet)
 router.register('groups-info', GroupInfoViewSet, base_name='groupinfo')
 router.register('group-applications', GroupApplicationViewSet, base_name='groupapplication')
 router.register('agreements', AgreementViewSet)
-router.register('trust', TrustViewSet)
 
 # User endpoints
 router.register('users', UserViewSet)

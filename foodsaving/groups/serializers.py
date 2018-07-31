@@ -6,7 +6,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, PermissionDenied
 
 from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
-    GroupNotificationType
+    GroupNotificationType, Trust
 from foodsaving.groups.roles import GROUP_EDITOR
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.history.utils import get_changed_data
@@ -42,6 +42,7 @@ class GroupMembershipInfoSerializer(serializers.ModelSerializer):
             'created_at',
             'roles',
             'active',
+            'trust',
         )
         extra_kwargs = {
             'created_at': {
@@ -53,9 +54,16 @@ class GroupMembershipInfoSerializer(serializers.ModelSerializer):
         }
 
     active = serializers.SerializerMethodField()
+    # newcomer_progress = serializers.SerializerMethodField()
 
     def get_active(self, membership):
         return membership.inactive_at is None
+
+    # def get_newcomer_progress(self, membership):
+    #     if roles.GROUP_EDITOR in membership.roles:
+    #         return 100
+    #     trust_count = Trust.objects.filter(user=membership.user, group=membership.group).count()
+    #     return round(100 * trust_count / settings.GROUP_EDITOR_TRUST_THRESHOLD)
 
 
 class GroupDetailSerializer(GroupBaseSerializer):

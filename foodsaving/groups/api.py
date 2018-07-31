@@ -1,4 +1,5 @@
 import pytz
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
@@ -14,7 +15,7 @@ from rest_framework.viewsets import GenericViewSet
 from foodsaving.conversations.api import RetrieveConversationMixin
 from foodsaving.groups import roles, stats
 from foodsaving.groups.filters import GroupsFilter, GroupsInfoFilter
-from foodsaving.groups.models import Agreement, Group as GroupModel, GroupMembership
+from foodsaving.groups.models import Agreement, Group as GroupModel, GroupMembership, Trust
 from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer, GroupJoinSerializer, \
     GroupLeaveSerializer, TimezonesSerializer, EmptySerializer, \
     GroupMembershipAddRoleSerializer, GroupMembershipRemoveRoleSerializer, GroupMembershipInfoSerializer, \
@@ -43,6 +44,13 @@ class CanUpdateMemberships(BasePermission):
     def has_object_permission(self, request, view, obj):
         # we get a membership object
         return obj.group.is_member_with_role(request.user, roles.GROUP_MEMBERSHIP_MANAGER)
+
+
+class IsOtherUser(BasePermission):
+    message = _('You cannot give trust to yourself')
+
+    def has_object_permission(self, request, view, membership):
+        return membership.user != request.user
 
 
 class GroupInfoViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
@@ -127,11 +135,12 @@ class GroupViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUp
     @action(detail=True, methods=['POST'])
     def mark_user_active(self, request, pk=None):
         """Mark that the logged-in user is active in the group"""
-        gm = get_object_or_404(GroupMembership.objects, group=pk, user=request.user)
-        gm.lastseen_at = timezone.now()
-        gm.inactive_at = None
-        gm.save()
-        stats.group_activity(gm.group)
+        self.check_permissions(request)
+        membership = get_object_or_404(GroupMembership.objects, group=pk, user=request.user)
+        membership.lastseen_at = timezone.now()
+        membership.inactive_at = None
+        membership.save()
+        stats.group_activity(membership.group)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
@@ -143,7 +152,8 @@ class GroupViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUp
         serializer_class=EmptySerializer  # for Swagger
     )
     def modify_user_roles(self, request, pk, user_id, role_name):
-        """add (POST) or remove (DELETE) a membership role"""
+        """add (PUT) or remove (DELETE) a membership role"""
+        self.check_permissions(request)
         instance = get_object_or_404(GroupMembership.objects, group=pk, user=user_id)
         self.check_object_permissions(request, instance)
         serializer_class = None
@@ -159,6 +169,26 @@ class GroupViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUp
 
     @action(
         detail=True,
+        methods=['POST'],
+        permission_classes=(IsAuthenticated, IsOtherUser),
+        url_name='trust-user',
+        url_path='users/(?P<user_id>[^/.]+)/trust',
+        serializer_class=EmptySerializer
+    )
+    def trust_user(self, request, pk, user_id):
+        """trust the user in a group"""
+        self.check_permissions(request)
+        membership = get_object_or_404(GroupMembership.objects, group=pk, user=user_id)
+        self.check_object_permissions(request, membership)
+        Trust.objects.create(
+            membership=membership,
+            given_by=self.request.user,
+        )
+
+        return Response(data={})
+
+    @action(
+        detail=True,
         methods=['PUT', 'DELETE'],
         permission_classes=(IsAuthenticated, ),
         url_name='notification_types',
@@ -167,6 +197,7 @@ class GroupViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUp
     )
     def modify_notification_types(self, request, pk, notification_type):
         """add (POST) or remove (DELETE) a notification type"""
+        self.check_permissions(request)
         membership = get_object_or_404(GroupMembership.objects, group=self.get_object(), user=request.user)
         self.check_object_permissions(request, membership)
         serializer_class = None
