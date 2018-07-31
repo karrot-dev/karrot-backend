@@ -71,7 +71,10 @@ def prepare_group_summary_emails(group, context):
     grouped_members = itertools.groupby(members.order_by('language'), key=lambda member: member.language)
     return [
         prepare_email(
-            template='group_summary', context=context, to=[member.email for member in members], language=language
+            template='group_summary',
+            context=context,
+            to=[member.email for member in members],
+            language=language,
         ) for (language, members) in grouped_members
     ]
 
@@ -95,11 +98,11 @@ def calculate_group_summary_dates(group):
 def prepare_user_inactive_in_group_email(user, group):
 
     return prepare_email(
-        'user_inactive_in_group',
+        template='user_inactive_in_group',
         user=user,
         context={
             'group_name': group.name,
             'group_url': group_wall_url(group),
             'num_days_inactive': settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP,
-        }
+        },
     )

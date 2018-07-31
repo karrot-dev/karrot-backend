@@ -4,12 +4,13 @@ from foodsaving.utils.frontend_urls import invite_url
 
 def prepare_emailinvitation_email(invitation):
     return prepare_email(
-        'emailinvitation',
-        None, {
+        template='emailinvitation',
+        user=None,
+        context={
             'group_name': invitation.group.name,
             'invite_url': invite_url(invitation),
             'email': invitation.email,
             'invited_by_name': invitation.invited_by.display_name,
         },
-        to=invitation.email
+        to=invitation.email,
     )

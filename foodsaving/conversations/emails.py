@@ -54,7 +54,7 @@ def prepare_group_thread_message_notification(user, messages):
     from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
     return prepare_email(
-        'thread_message_notification',
+        template='thread_message_notification',
         from_email=from_email,
         user=user,
         reply_to=[reply_to],
@@ -83,7 +83,7 @@ def prepare_group_conversation_message_notification(user, messages):
     from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
     return prepare_email(
-        'conversation_message_notification',
+        template='conversation_message_notification',
         from_email=from_email,
         user=user,
         reply_to=[reply_to],
@@ -143,7 +143,7 @@ def prepare_pickup_conversation_message_notification(user, messages):
             from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
             return prepare_email(
-                'conversation_message_notification',
+                template='conversation_message_notification',
                 from_email=from_email,
                 user=user,
                 reply_to=[reply_to],
@@ -167,7 +167,7 @@ def prepare_private_user_conversation_message_notification(user, messages):
     from_email = formataddr((author.display_name, settings.DEFAULT_FROM_EMAIL))
 
     return prepare_email(
-        'conversation_message_notification',
+        template='conversation_message_notification',
         from_email=from_email,
         user=user,
         reply_to=[reply_to],
@@ -203,7 +203,7 @@ def prepare_group_application_message_notification(user, messages):
         from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
         return prepare_email(
-            'conversation_message_notification',
+            template='conversation_message_notification',
             from_email=from_email,
             user=user,
             reply_to=[reply_to],
