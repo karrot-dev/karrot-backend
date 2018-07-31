@@ -45,5 +45,5 @@ def prepare_pickup_notification_email(
             'tomorrow_user': tomorrow_user,
             'tomorrow_empty': tomorrow_empty,
             'tomorrow_not_full': tomorrow_not_full,
-        }
+        },
     )

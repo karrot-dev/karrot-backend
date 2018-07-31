@@ -19,7 +19,7 @@ def prepare_new_application_notification_email(user, application):
     from_email = formataddr((applicant.display_name, settings.DEFAULT_FROM_EMAIL))
 
     return prepare_email(
-        'new_application',
+        template='new_application',
         from_email=from_email,
         user=user,
         reply_to=[reply_to],
@@ -39,7 +39,7 @@ def prepare_new_application_notification_email(user, application):
 
 def prepare_application_accepted_email(application):
     return prepare_email(
-        'application_accepted',
+        template='application_accepted',
         user=application.user,
         context={
             'group': application.group,
@@ -50,7 +50,9 @@ def prepare_application_accepted_email(application):
 
 def prepare_application_declined_email(application):
     return prepare_email(
-        'application_declined', user=application.user, context={
+        template='application_declined',
+        user=application.user,
+        context={
             'group': application.group,
-        }
+        },
     )

@@ -21,7 +21,7 @@ class TestEmailUtils(TestCase):
         user = UserFactory()
         with self.assertRaisesMessage(Exception, 'email context should not redefine defaults: user'):
             prepare_email(
-                'accountdelete_success',
+                template='accountdelete_success',
                 user=user,
                 context={
                     'user': user,
