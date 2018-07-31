@@ -1,7 +1,7 @@
 <mjml>
     <mj-head>
         <mj-include path="../../base/templates/_base-head.mjml"/>
-        <mj-title>{% trans user_name=user.display_name, group_name=group.name %}{{ user_name }} wants to join {{ group_name }}{% endtrans %}</mj-title>
+        <mj-title>{% trans user_name=applicant.display_name, group_name=group.name %}{{ user_name }} wants to join {{ group_name }}{% endtrans %}</mj-title>
     </mj-head>
     <mj-body>
         <mj-container>
@@ -9,7 +9,7 @@
             <mj-section background-color="#ffffff" padding="40px 0 40px 0">
                 <mj-column>
                     <mj-text>
-                        <h1>{% trans user_name=user.display_name, group_name=group.name %}{{ user_name }} wants to join {{ group_name }}{% endtrans %}</h1>
+                        <h1>{% trans user_name=applicant.display_name, group_name=group.name %}{{ user_name }} wants to join {{ group_name }}{% endtrans %}</h1>
                         <div class="message">
                             <h2>{% trans %}Questions asked by your group{% endtrans %}</h2>
                             <div class="message-content">
@@ -18,7 +18,7 @@
                             <p class="light-text">
                                 {% trans %}You can edit the questions for new applications on the <a href="{{ group_edit_url }}">group edit page</a>.{% endtrans %}
                             </p>
-                            <h2>{% trans user_name=user.display_name %}Answers from {{ user_name }}{% endtrans %}</h2>
+                            <h2>{% trans user_name=applicant.display_name %}Answers from {{ user_name }}{% endtrans %}</h2>
                             <div class="message-content">
                                 {{ answers | safe }}
                             </div>

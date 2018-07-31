@@ -24,7 +24,7 @@ def prepare_new_application_notification_email(user, application):
         user=user,
         reply_to=[reply_to],
         context={
-            'user': applicant,
+            'applicant': applicant,
             'group': application.group,
             'questions': application.questions_rendered(),
             'answers': application.answers_rendered(),

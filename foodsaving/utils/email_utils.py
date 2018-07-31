@@ -65,16 +65,22 @@ class StatCollectingAnymailMessage(AnymailMessage):
 def prepare_email(template, user=None, context=None, to=None, language=None, **kwargs):
     context = dict(context) if context else {}
 
-    context.update({
+    default_context = {
         'site_name': settings.SITE_NAME,
         'hostname': settings.HOSTNAME,
-    })
+    }
 
     if user:
-        context.update({
+        default_context.update({
             'user': user,
             'user_display_name': user.get_full_name(),
         })
+
+    # Merge context, but fail if a default key was redefined
+    redefined_keys = set(default_context.keys()).intersection(context.keys())
+    if len(redefined_keys) > 0:
+        raise Exception('email context should not redefine defaults: ' + ', '.join(redefined_keys))
+    context.update(default_context)
 
     if not to:
         if not user:

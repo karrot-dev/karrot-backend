@@ -9,13 +9,24 @@ from foodsaving.groups.factories import GroupFactory
 from foodsaving.invitations.models import Invitation
 from foodsaving.userauth.models import VerificationCode
 from foodsaving.users.factories import UserFactory
-from foodsaving.utils.email_utils import time_filter, date_filter, generate_plaintext_from_html
+from foodsaving.utils.email_utils import time_filter, date_filter, generate_plaintext_from_html, prepare_email
 
 
 class TestEmailUtils(TestCase):
     def setUp(self):
         self.group = GroupFactory()
         self.user = UserFactory()
+
+    def test_raises_exception_on_redefined_context(self):
+        user = UserFactory()
+        with self.assertRaisesMessage(Exception, 'email context should not redefine defaults: user'):
+            prepare_email(
+                'accountdelete_success',
+                user=user,
+                context={
+                    'user': user,
+                },
+            )
 
     def test_emailinvitation(self):
         invitation = Invitation.objects.create(email='bla@bla.com', group=self.group, invited_by=self.user)
