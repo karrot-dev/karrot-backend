@@ -42,7 +42,7 @@ class GroupMembershipInfoSerializer(serializers.ModelSerializer):
             'created_at',
             'roles',
             'active',
-            'trust',
+            'trusted_by',
         )
         extra_kwargs = {
             'created_at': {
@@ -54,16 +54,9 @@ class GroupMembershipInfoSerializer(serializers.ModelSerializer):
         }
 
     active = serializers.SerializerMethodField()
-    # newcomer_progress = serializers.SerializerMethodField()
 
     def get_active(self, membership):
         return membership.inactive_at is None
-
-    # def get_newcomer_progress(self, membership):
-    #     if roles.GROUP_EDITOR in membership.roles:
-    #         return 100
-    #     trust_count = Trust.objects.filter(user=membership.user, group=membership.group).count()
-    #     return round(100 * trust_count / settings.GROUP_EDITOR_TRUST_THRESHOLD)
 
 
 class GroupDetailSerializer(GroupBaseSerializer):
@@ -71,6 +64,8 @@ class GroupDetailSerializer(GroupBaseSerializer):
     memberships = serializers.SerializerMethodField()
     notification_types = serializers.SerializerMethodField()
     application_questions_default = serializers.SerializerMethodField()
+    trust_threshold_for_newcomer = serializers.SerializerMethodField()
+
     timezone = TimezoneField()
 
     class Meta:
@@ -92,6 +87,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'status',
             'notification_types',
             'is_open',
+            'trust_threshold_for_newcomer',
         ]
         extra_kwargs = {
             'name': {
@@ -126,6 +122,9 @@ class GroupDetailSerializer(GroupBaseSerializer):
 
     def get_application_questions_default(self, group):
         return group.get_application_questions_default()
+
+    def get_trust_threshold_for_newcomer(self, group):
+        return group.get_trust_threshold_for_newcomer()
 
     def update(self, group, validated_data):
         if not group.is_editor(self.context['request'].user):

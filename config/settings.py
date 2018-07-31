@@ -65,17 +65,14 @@ INSTALLED_APPS = (
 )
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.AllowAny',
-    ),
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
-    ),
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny', ),
+    'DEFAULT_RENDERER_CLASSES': ('rest_framework.renderers.JSONRenderer', ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ),
-    'EXCEPTION_HANDLER': 'foodsaving.utils.misc.custom_exception_handler'
+    'EXCEPTION_HANDLER':
+    'foodsaving.utils.misc.custom_exception_handler'
 }
 
 MIDDLEWARE = (
@@ -108,8 +105,7 @@ TEMPLATES = [
     },
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-        ],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -203,14 +199,14 @@ DESCRIPTION_MAX_LENGTH = 100000
 NAME_MAX_LENGTH = 80
 FEEDBACK_POSSIBLE_DAYS = 30
 MESSAGE_EDIT_DAYS = 2
-GROUP_EDITOR_TRUST_THRESHOLD = 3
+GROUP_EDITOR_TRUST_MAX_THRESHOLD = 3
 
 CHANNEL_LAYERS = {
     "default": {
-         "BACKEND": "channels_redis.core.RedisChannelLayer",
-         "CONFIG": {
-             "hosts": [(REDIS_HOST, 6379)],
-         },
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(REDIS_HOST, 6379)],
+        },
     },
 }
 
@@ -251,8 +247,8 @@ HUEY = {
 }
 
 if 'USE_SILK' in os.environ:
-    INSTALLED_APPS += ('silk',)
-    MIDDLEWARE = ('silk.middleware.SilkyMiddleware',) + MIDDLEWARE
+    INSTALLED_APPS += ('silk', )
+    MIDDLEWARE = ('silk.middleware.SilkyMiddleware', ) + MIDDLEWARE
 
 # NB: Keep this as the last line, and keep
 # local_settings.py out of version control
@@ -260,4 +256,5 @@ try:
     from .local_settings import *
 except ImportError:
     raise Exception(
-        "config/local_settings.py is missing! Copy the provided example file and adapt it to your own config.")
+        "config/local_settings.py is missing! Copy the provided example file and adapt it to your own config."
+    )

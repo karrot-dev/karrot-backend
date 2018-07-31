@@ -6,6 +6,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, BasePermission
@@ -180,10 +181,13 @@ class GroupViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUp
         self.check_permissions(request)
         membership = get_object_or_404(GroupMembership.objects, group=pk, user=user_id)
         self.check_object_permissions(request, membership)
-        Trust.objects.create(
+
+        trust, created = Trust.objects.get_or_create(
             membership=membership,
             given_by=self.request.user,
         )
+        if not created:
+            raise ValidationError(_('You already gave trust to this user'))
 
         return Response(data={})
 

@@ -1,12 +1,13 @@
 from datetime import timedelta
 from enum import Enum
 
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import TextField, DateTimeField, QuerySet
 from django.template.loader import render_to_string
-from django.utils import timezone as tz
+from django.utils import timezone as tz, timezone
 from timezone_field import TimeZoneField
 
 from foodsaving.base.base_models import BaseModel, LocationModel
@@ -112,6 +113,12 @@ class Group(BaseModel, LocationModel, ConversationMixin):
             'group': self,
         })
 
+    def get_trust_threshold_for_newcomer(self):
+        one_day_ago = timezone.now() - relativedelta(days=1)
+        dynamic_threshold = max(1, self.groupmembership_set.active().filter(created_at__lte=one_day_ago).count() // 2)
+        trust_threshold = min(settings.GROUP_EDITOR_TRUST_MAX_THRESHOLD, dynamic_threshold)
+        return trust_threshold
+
 
 class Agreement(BaseModel):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
@@ -158,11 +165,11 @@ class GroupMembership(BaseModel):
 
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    trusted_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='membership', through='Trust')
     roles = ArrayField(TextField(), default=list)
     lastseen_at = DateTimeField(default=tz.now)
     inactive_at = DateTimeField(null=True)
     notification_types = ArrayField(TextField(), default=get_default_notification_types)
-    trusted_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='membership', through='Trust')
 
     class Meta:
         db_table = 'groups_group_members'
@@ -192,3 +199,6 @@ class GroupMembership(BaseModel):
 class Trust(BaseModel):
     membership = models.ForeignKey('groups.GroupMembership', on_delete=models.CASCADE)
     given_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='trust_given')
+
+    class Meta:
+        unique_together = (('membership', 'given_by'), )
