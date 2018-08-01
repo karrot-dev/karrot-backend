@@ -15,7 +15,7 @@ from foodsaving.applications.serializers import GroupApplicationSerializer
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction, \
     ConversationThreadParticipant
 from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer
-from foodsaving.groups.models import Group
+from foodsaving.groups.models import Group, Trust
 from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer
 from foodsaving.history.models import history_created
 from foodsaving.history.serializers import HistorySerializer
@@ -244,6 +244,13 @@ def send_group_application_updates(sender, instance, **kwargs):
     q = Q(user__in=group.members.all()) | Q(user=application.user)
     for subscription in ChannelSubscription.objects.recent().filter(q):
         send_in_channel(subscription.reply_channel, topic='applications:update', payload=payload)
+
+
+# Trust
+@receiver(post_save, sender=Trust)
+def send_trust_updates(sender, instance, **kwargs):
+    send_group_updates(sender, instance.membership.group)
+    send_user_updates(sender, instance.membership.user)
 
 
 # Invitations
