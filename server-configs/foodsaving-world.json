@@ -1,8 +1,0 @@
-{
-  "name": "foodsaving-world",
-  "domain" : "foodsaving.world",
-  "user": "foodsaving-world",
-  "group": "foodsaving-world",
-  "frontend": "release",
-  "workers": 4
-}
