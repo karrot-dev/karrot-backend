@@ -167,11 +167,13 @@ class TestConversationThreadsAPI(APITestCase):
 
     def test_can_mark_seen_up_to(self):
         self.client.force_login(user=self.user)
-        reply = self.create_reply()
+        reply = self.create_reply(author=self.user2)
         data = {'seen_up_to': reply.id}
         response = self.client.patch('/api/messages/{}/thread/'.format(self.thread.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        participant = self.thread.participants.get(user=self.user)
+        self.assertEqual(response.data['seen_up_to'], reply.id)
+        self.assertEqual(response.data['unread_reply_count'], 0)
+        participant = self.thread.participants.get(user=self.user2)
         self.assertEqual(participant.seen_up_to, reply)
 
     def test_cannot_mute_thread_with_no_replies(self):

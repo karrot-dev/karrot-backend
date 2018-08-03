@@ -118,8 +118,7 @@ class ConversationMessageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
 
     queryset = ConversationMessage.objects \
         .prefetch_related('reactions') \
-        .prefetch_related('participants') \
-        .annotate_replies_count()
+        .prefetch_related('participants')
 
     serializer_class = ConversationMessageSerializer
     permission_classes = (
@@ -142,10 +141,11 @@ class ConversationMessageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
         return super().paginator
 
     def get_queryset(self):
-        if self.action == 'partial_update':
+        if self.action in ('partial_update', 'thread'):
             return self.queryset
         qs = self.queryset \
             .filter(conversation__participants=self.request.user) \
+            .annotate_replies_count() \
             .annotate_unread_replies_count_for(self.request.user)
 
         if self.request.query_params.get('thread', None):
