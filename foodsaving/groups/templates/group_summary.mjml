@@ -61,7 +61,7 @@
                                     <br>
                                     <span style="font-size: 14px;">
                                     {% if feedback.weight is not none %}
-                                        {% trans weight=feedback.weight, store_url=store_url(feedback.about.store), store_name=feedback.about.store.name -%}
+                                        {% trans trimmed weight=feedback.weight, store_url=store_url(feedback.about.store), store_name=feedback.about.store.name %}
                                             {{ weight }} kg from <a href="{{ store_url }}">{{ store_name }}</a>
                                         {% endtrans %}
                                     {% else %}

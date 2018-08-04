@@ -13,7 +13,7 @@
                             {% trans %}You became editor in {{ group_name }}!{% endtrans %}
                         </h1>
                         <p>
-                            {% trans -%}
+                            {% trans trimmed %}
                                 You've received enough trust from fellow group members to grant you <strong>editing permissions</strong>.
                                 For example, you can now modify your group, stores and pickup dates, or create new ones.
                             {% endtrans %}
