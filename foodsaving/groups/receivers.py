@@ -1,8 +1,5 @@
-from dateutil.relativedelta import relativedelta
-from django.conf import settings
 from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
-from django.utils import timezone
 
 from foodsaving.conversations.models import Conversation
 from foodsaving.groups import roles, stats
@@ -75,19 +72,16 @@ def initialize_group(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=Trust)
-def maybe_make_editor(sender, instance, created, **kwargs):
+def trust_given(sender, instance, created, **kwargs):
     if not created:
         return
 
     membership = instance.membership
-    relevant_trust = Trust.objects.filter(
-        membership=membership,
-        # given_by__groupmembership__roles__contains=[roles.GROUP_EDITOR],
-    )
-
-    # Also add to newcomer_progress
+    relevant_trust = Trust.objects.filter(membership=membership)
     trust_threshold = membership.group.get_trust_threshold_for_newcomer()
 
     if relevant_trust.count() >= trust_threshold:
         membership.add_roles([roles.GROUP_EDITOR])
         membership.save()
+
+    stats.trust_given(membership.group)

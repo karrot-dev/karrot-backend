@@ -1,6 +1,4 @@
-from dateutil.relativedelta import relativedelta
 from django.db.models import Count
-from django.utils import timezone
 from influxdb_metrics.loader import write_points
 
 
@@ -53,25 +51,42 @@ def group_summary_email(group, **extra_fields):
     }])
 
 
-def get_group_members_stats(group):
-    now = timezone.now()
+def trust_given(group):
+    write_points([{
+        'measurement': 'karrot.events',
+        'tags': {
+            'group': str(group.id)
+        },
+        'fields': {
+            'trust_given': 1
+        },
+    }])
 
-    def members_active_within(**kwargs):
-        return group.members.filter(groupmembership__lastseen_at__gte=now - relativedelta(**kwargs)).count()
+
+def get_group_members_stats(group):
+
+    memberships = group.groupmembership_set
+
+    fields = {
+        'count_total': memberships.count(),
+        'count_newcomers_total': memberships.newcomers().count(),
+        'count_editors_total': memberships.editors().count(),
+    }
+
+    for n in (1, 7, 30, 60, 90):
+        active_memberships = memberships.active_within(days=n)
+        fields.update({
+            'count_active_{}d'.format(n): active_memberships.count(),
+            'count_active_newcomers_{}d'.format(n): active_memberships.newcomers().count(),
+            'count_active_editors_{}d'.format(n): active_memberships.editors().count(),
+        })
 
     return [{
         'measurement': 'karrot.group.members',
         'tags': {
             'group': str(group.id)
         },
-        'fields': {
-            'count_total': group.members.count(),
-            'count_active_1d': members_active_within(days=1),
-            'count_active_7d': members_active_within(days=7),
-            'count_active_30d': members_active_within(days=30),
-            'count_active_60d': members_active_within(days=60),
-            'count_active_90d': members_active_within(days=90),
-        },
+        'fields': fields,
     }]
 
 

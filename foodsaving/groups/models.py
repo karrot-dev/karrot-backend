@@ -153,11 +153,21 @@ class GroupMembershipQuerySet(QuerySet):
     def with_role(self, role):
         return self.filter(roles__contains=[role])
 
+    def without_role(self, role):
+        return self.exclude(roles__contains=[role])
+
     def active(self):
         return self.filter(inactive_at__isnull=True)
 
+    def active_within(self, **kwargs):
+        now = timezone.now()
+        return self.filter(lastseen_at__gte=now - relativedelta(**kwargs))
+
     def editors(self):
         return self.with_role(roles.GROUP_EDITOR)
+
+    def newcomers(self):
+        return self.without_role(roles.GROUP_EDITOR)
 
 
 class GroupMembership(BaseModel):

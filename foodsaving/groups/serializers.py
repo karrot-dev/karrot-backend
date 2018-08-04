@@ -6,7 +6,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, PermissionDenied
 
 from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
-    GroupNotificationType, Trust
+    GroupNotificationType
 from foodsaving.groups.roles import GROUP_EDITOR
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.history.utils import get_changed_data
