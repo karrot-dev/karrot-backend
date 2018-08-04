@@ -3,10 +3,12 @@ from rest_framework import serializers
 
 from foodsaving.applications.models import GroupApplication, GroupApplicationStatus
 from foodsaving.conversations.models import Conversation
+from foodsaving.users.serializers import UserSerializer
 
 
 class GroupApplicationSerializer(serializers.ModelSerializer):
     conversation = serializers.SerializerMethodField()
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = GroupApplication

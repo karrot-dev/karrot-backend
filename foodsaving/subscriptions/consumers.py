@@ -42,12 +42,16 @@ class TokenAuthMiddleware:
 class WebsocketConsumer(JsonWebsocketConsumer):
     def connect(self):
         """The user has connected! Register their channel subscription."""
+        subprotocol = None
         if 'user' in self.scope:
             user = self.scope['user']
             if not user.is_anonymous:
                 ChannelSubscription.objects.create(user=user, reply_channel=self.channel_name)
 
-        self.accept()
+                if 'karrot.token' in self.scope['subprotocols']:
+                    subprotocol = 'karrot.token'
+
+        self.accept(subprotocol)
 
     def message_send(self, content, **kwargs):
         if 'text' not in content:

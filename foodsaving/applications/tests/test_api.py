@@ -10,6 +10,7 @@ from foodsaving.groups.models import GroupMembership, GroupNotificationType
 from foodsaving.applications.models import GroupApplicationStatus
 from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
+from foodsaving.users.serializers import UserSerializer
 from foodsaving.utils.tests.fake import faker
 
 
@@ -40,15 +41,16 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
         created_at = parse(data['created_at'])
         data['created_at'] = created_at
         self.assertEqual(
-            data, {
+            data,
+            {
                 'questions': self.group.application_questions,
                 'answers': answers,
-                'user': self.applicant.id,
+                'user': UserSerializer(self.applicant).data,
                 'group': self.group.id,
                 'conversation': conversation_id,
                 'status': 'pending',
                 'created_at': created_at,
-            }
+            },
         )
 
         # check conversation
@@ -66,16 +68,17 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
         data = application_list_response.data[0]
         data['created_at'] = parse(data['created_at'])
         self.assertEqual(
-            data, {
+            data,
+            {
                 'id': application_id,
                 'questions': self.group.application_questions,
                 'answers': answers,
-                'user': self.applicant.id,
+                'user': UserSerializer(self.applicant).data,
                 'group': self.group.id,
                 'conversation': conversation_id,
                 'status': 'pending',
                 'created_at': created_at,
-            }
+            },
         )
 
         # check email notifications
