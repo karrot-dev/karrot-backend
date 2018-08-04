@@ -92,7 +92,7 @@ class TestUserDeleteAPI(APITestCase):
         self.type = VerificationCode.ACCOUNT_DELETE
         self.user = UserFactory()
         self.user2 = UserFactory()
-        self.group = GroupFactory(members=[self.user, self.user2])
+        self.group = GroupFactory(editors=[self.user, self.user2])
         self.store = StoreFactory(group=self.group)
         self.pickupdate = PickupDateFactory(
             store=self.store, date=timezone.now() + relativedelta(days=1), collectors=[
@@ -306,7 +306,7 @@ class TestRejectedAddress(APITestCase):
 class TestSetCurrentGroup(APITestCase):
     def setUp(self):
         self.user = UserFactory()
-        self.group = GroupFactory(members=[
+        self.group = GroupFactory(editors=[
             self.user,
         ])
         self.unrelated_group = GroupFactory()

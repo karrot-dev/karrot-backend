@@ -7,7 +7,7 @@ from foodsaving.users.factories import UserFactory
 
 class TestGroupSerializer(TestCase):
     def setUp(self):
-        self.group = GroupFactory(members=[UserFactory() for _ in range(3)])
+        self.group = GroupFactory(editors=[UserFactory() for _ in range(3)])
 
     def test_detail(self):
         serializer = GroupDetailSerializer(self.group)

@@ -13,7 +13,7 @@ from foodsaving.users.factories import UserFactory
 class TestTrustThreshold(TestCase):
     def create_group_with_members(self, member_count):
         self.members = [UserFactory() for _ in range(member_count)]
-        self.group = GroupFactory(members=self.members)
+        self.group = GroupFactory(editors=self.members)
         two_days_ago = timezone.now() - relativedelta(days=2)
         GroupMembership.objects.filter(group=self.group).update(created_at=two_days_ago)
 
@@ -51,7 +51,7 @@ class TestTrustAPI(APITestCase):
     def setUp(self):
         self.member1 = UserFactory()
         self.member2 = UserFactory()
-        self.group = GroupFactory(members=[self.member1, self.member2])
+        self.group = GroupFactory(editors=[self.member1, self.member2])
 
     def test_give_trust(self):
         self.client.force_login(user=self.member1)
@@ -98,7 +98,7 @@ class TestTrustList(APITestCase):
     def setUp(self):
         self.member1 = UserFactory()
         self.member2 = UserFactory()
-        self.group = GroupFactory(members=[self.member1, self.member2])
+        self.group = GroupFactory(editors=[self.member1, self.member2])
 
         membership = GroupMembership.objects.get(user=self.member2, group=self.group)
         Trust.objects.create(membership=membership, given_by=self.member1)

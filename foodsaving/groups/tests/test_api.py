@@ -21,7 +21,7 @@ class TestGroupsInfoAPI(APITestCase):
         self.user = UserFactory()
         self.member = UserFactory()
         self.group = GroupFactory(
-            members=[
+            editors=[
                 self.member,
             ], application_questions=''
         )
@@ -59,11 +59,7 @@ class TestGroupsAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.member = UserFactory()
-        self.group = GroupFactory(
-            members=[
-                self.member,
-            ], is_open=True
-        )
+        self.group = GroupFactory(editors=[self.member], is_open=True)
         self.group_with_password = GroupFactory(password='abc', is_open=True)
         self.join_password_url = '/api/groups/{}/join/'.format(self.group_with_password.id)
         self.url = '/api/groups/'
@@ -218,7 +214,7 @@ class TestGroupsAPI(APITestCase):
 class TestPlaygroundGroupAPI(APITestCase):
     def setUp(self):
         self.member = UserFactory()
-        self.group = PlaygroundGroupFactory(members=[self.member], password='')
+        self.group = PlaygroundGroupFactory(editors=[self.member], password='')
 
     def test_change_password_has_no_effect(self):
         self.client.force_login(user=self.member)
@@ -233,7 +229,7 @@ class TestGroupMembershipRolesAPI(APITestCase):
     def setUp(self):
         self.admin = UserFactory()  # has membership management rights
         self.member = UserFactory()
-        self.group = GroupFactory(members=[self.admin, self.member])
+        self.group = GroupFactory(editors=[self.admin, self.member])
         self.membership = GroupMembership.objects.get(group=self.group, user=self.member)
 
     def test_add_membership_role(self):
@@ -329,7 +325,7 @@ class TestGroupMembershipsAPI(APITestCase):
     def setUp(self):
         self.active_user = UserFactory()
         self.inactive_user = UserFactory()
-        self.group = GroupFactory(members=[self.active_user, self.inactive_user])
+        self.group = GroupFactory(editors=[self.active_user, self.inactive_user])
         self.active_membership = self.group.groupmembership_set.get(user=self.active_user)
         self.inactive_membership = self.group.groupmembership_set.get(user=self.inactive_user)
         self.inactive_membership.inactive_at = timezone.now()
@@ -349,7 +345,7 @@ class TestGroupMembershipsAPI(APITestCase):
 class TestGroupMemberLastSeenAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
-        self.group = GroupFactory(members=[self.user])
+        self.group = GroupFactory(editors=[self.user])
         self.membership = self.group.groupmembership_set.get(user=self.user)
 
     def test_mark_user_as_seen_in_group(self):
@@ -395,7 +391,7 @@ class TestDefaultGroupMembership(APITestCase):
 class TestGroupNotificationTypes(APITestCase):
     def setUp(self):
         self.user = UserFactory()
-        self.group = GroupFactory(members=[self.user])
+        self.group = GroupFactory(editors=[self.user])
         self.membership = GroupMembership.objects.get(group=self.group, user=self.user)
 
     def test_add_notification_type(self):
@@ -432,7 +428,7 @@ class TestAgreementsAPI(APITestCase):
     def setUp(self):
         self.normal_member = UserFactory()
         self.agreement_manager = UserFactory()
-        self.group = GroupFactory(members=[
+        self.group = GroupFactory(editors=[
             self.normal_member,
             self.agreement_manager,
         ])

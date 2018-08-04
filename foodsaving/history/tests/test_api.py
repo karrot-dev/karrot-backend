@@ -42,11 +42,7 @@ class TestHistoryAPIOrdering(APITestCase, ExtractPaginationMixin):
 class TestHistoryAPIWithExistingGroup(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
-        self.group = GroupFactory(
-            members=[
-                self.member,
-            ], is_open=True
-        )
+        self.group = GroupFactory(editors=[self.member], is_open=True)
         self.group_url = '/api/groups/{}/'.format(self.group.id)
 
     def test_modify_group(self):
@@ -89,7 +85,7 @@ class TestHistoryAPIWithExistingGroup(APITestCase, ExtractPaginationMixin):
 class TestHistoryAPIWithExistingStore(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
-        self.group = GroupFactory(members=[
+        self.group = GroupFactory(editors=[
             self.member,
         ])
         self.store = StoreFactory(group=self.group)
@@ -144,7 +140,7 @@ class TestHistoryAPIWithExistingStore(APITestCase, ExtractPaginationMixin):
 class TestHistoryAPIWithExistingPickups(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
-        self.group = GroupFactory(members=[
+        self.group = GroupFactory(editors=[
             self.member,
         ])
         self.store = StoreFactory(group=self.group)
@@ -210,7 +206,7 @@ class TestHistoryAPIWithExistingPickups(APITestCase, ExtractPaginationMixin):
 class TestHistoryAPIWithDonePickup(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
-        self.group = GroupFactory(members=[
+        self.group = GroupFactory(editors=[
             self.member,
         ])
         self.store = StoreFactory(group=self.group)
@@ -235,7 +231,7 @@ class TestHistoryAPIWithDonePickup(APITestCase, ExtractPaginationMixin):
 class TestHistoryAPIWithMissedPickup(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
-        self.group = GroupFactory(members=[
+        self.group = GroupFactory(editors=[
             self.member,
         ])
         self.store = StoreFactory(group=self.group)
@@ -260,7 +256,7 @@ class TestHistoryAPIWithMissedPickup(APITestCase, ExtractPaginationMixin):
 class TestHistoryAPIPickupForInactiveStore(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
-        self.group = GroupFactory(members=[
+        self.group = GroupFactory(editors=[
             self.member,
         ])
         self.store = StoreFactory(group=self.group, status='archived')
@@ -284,7 +280,7 @@ class TestHistoryAPIPickupForInactiveStore(APITestCase, ExtractPaginationMixin):
 class TestHistoryAPIWithDeletedPickup(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
-        self.group = GroupFactory(members=[
+        self.group = GroupFactory(editors=[
             self.member,
         ])
         self.store = StoreFactory(group=self.group)

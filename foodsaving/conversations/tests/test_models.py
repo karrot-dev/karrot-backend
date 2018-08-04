@@ -74,7 +74,7 @@ class ConversationThreadModelTests(TestCase):
     def setUp(self):
         self.user = UserFactory()
         self.user2 = UserFactory()
-        self.group = GroupFactory(members=[self.user, self.user2])
+        self.group = GroupFactory(editors=[self.user, self.user2])
         self.conversation = self.group.conversation
         self.thread = self.conversation.messages.create(author=self.user, content='yay')
 
@@ -153,7 +153,7 @@ class ConversationThreadModelTests(TestCase):
 class TestPickupConversationsEmailNotifications(TestCase):
     def setUp(self):
         self.user = VerifiedUserFactory()
-        self.group = GroupFactory(members=[self.user])
+        self.group = GroupFactory(editors=[self.user])
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(store=self.store, collectors=[self.user])
         self.conversation = self.pickup.conversation

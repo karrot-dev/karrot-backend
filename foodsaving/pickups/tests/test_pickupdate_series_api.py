@@ -34,7 +34,7 @@ class TestPickupDateSeriesCreationAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):
 
         self.member = UserFactory()
-        self.group = GroupFactory(members=[
+        self.group = GroupFactory(editors=[
             self.member,
         ])
         self.store = StoreFactory(group=self.group)
@@ -145,7 +145,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.now = timezone.now()
         self.member = UserFactory()
-        self.group = GroupFactory(members=[
+        self.group = GroupFactory(editors=[
             self.member,
         ])
         self.store = StoreFactory(group=self.group)

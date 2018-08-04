@@ -18,11 +18,11 @@ class TestFeedbackAPIFilter(APITestCase, ExtractPaginationMixin):
         # create a group with a user and two stores
         self.collector = UserFactory()
         self.collector2 = UserFactory()
-        self.group = GroupFactory(members=[
+        self.group = GroupFactory(editors=[
             self.collector,
             self.collector2,
         ])
-        self.group2 = GroupFactory(members=[
+        self.group2 = GroupFactory(editors=[
             self.collector,
             self.collector2,
         ])

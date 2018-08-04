@@ -18,7 +18,7 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.applicant = VerifiedUserFactory()
         self.member = VerifiedUserFactory()
-        self.group = GroupFactory(members=[self.member])
+        self.group = GroupFactory(editors=[self.member])
         mail.outbox = []
 
     def test_apply_for_group(self):
@@ -144,7 +144,7 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_cannot_apply_to_open_group(self):
-        open_group = GroupFactory(members=[self.member], is_open=True)
+        open_group = GroupFactory(editors=[self.member], is_open=True)
         self.client.force_login(user=self.applicant)
         response = self.client.post(
             '/api/group-applications/',
@@ -160,7 +160,7 @@ class TestApplicationNotifications(APITestCase):
     def setUp(self):
         self.applicant = VerifiedUserFactory()
         self.member = VerifiedUserFactory()
-        self.group = GroupFactory(members=[self.member])
+        self.group = GroupFactory(editors=[self.member])
         mail.outbox = []
 
     def test_disable_notifications(self):
@@ -189,7 +189,7 @@ class TestApplicationConversation(APITestCase):
     def setUp(self):
         self.applicant = VerifiedUserFactory()
         self.member = VerifiedUserFactory()
-        self.group = GroupFactory(members=[self.member])
+        self.group = GroupFactory(editors=[self.member])
         self.application = GroupApplicationFactory(group=self.group, user=self.applicant)
         self.conversation = Conversation.objects.get_for_target(self.application)
         mail.outbox = []
@@ -229,13 +229,13 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.applicant = VerifiedUserFactory()
         self.member = VerifiedUserFactory()
-        self.group = GroupFactory(members=[self.member])
+        self.group = GroupFactory(editors=[self.member])
         self.application = GroupApplicationFactory(group=self.group, user=self.applicant)
         self.conversation = Conversation.objects.get_for_target(self.application)
 
         def make_application():
             applicant = VerifiedUserFactory()
-            group = GroupFactory(members=[self.member])
+            group = GroupFactory(editors=[self.member])
             GroupApplicationFactory(group=group, user=applicant)
 
         [make_application() for _ in range(5)]
@@ -277,7 +277,7 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
     def test_applicant_cannot_accept_application(self):
         self.client.force_login(user=self.applicant)
         response = self.client.post('/api/group-applications/{}/accept/'.format(self.application.id))
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_decline_application(self):
         self.client.force_login(user=self.member)
@@ -297,7 +297,7 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
     def test_applicant_cannot_decline_application(self):
         self.client.force_login(user=self.applicant)
         response = self.client.post('/api/group-applications/{}/decline/'.format(self.application.id))
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_withdraw_application(self):
         self.client.force_login(user=self.applicant)
@@ -312,4 +312,4 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
     def test_group_member_cannot_withdraw_application(self):
         self.client.force_login(user=self.member)
         response = self.client.post('/api/group-applications/{}/withdraw/'.format(self.application.id))
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

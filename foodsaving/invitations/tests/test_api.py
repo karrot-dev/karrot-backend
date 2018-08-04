@@ -18,7 +18,7 @@ base_url = '/api/invitations/'
 class TestInvitationAPIIntegration(APITestCase):
     def setUp(self):
         self.member = UserFactory()
-        self.group = GroupFactory(members=[
+        self.group = GroupFactory(editors=[
             self.member,
         ])
         self.non_member = UserFactory()
@@ -66,8 +66,8 @@ class TestInviteCreate(APITestCase):
     def setUp(self):
         self.member = UserFactory()
         self.member2 = UserFactory()
-        self.group = GroupFactory(members=[self.member, self.member2])
-        self.group2 = GroupFactory(members=[
+        self.group = GroupFactory(editors=[self.member, self.member2])
+        self.group2 = GroupFactory(editors=[
             self.member,
         ])
 
@@ -132,7 +132,7 @@ class TestInvitationAPI(APITestCase):
     def setUp(self):
         self.member = UserFactory()
         self.member2 = UserFactory()
-        self.group = GroupFactory(members=[self.member, self.member2])
+        self.group = GroupFactory(editors=[self.member, self.member2])
         self.non_member = UserFactory()
 
     def test_list_invitations(self):
@@ -163,7 +163,7 @@ class TestInvitationAPI(APITestCase):
 class TestInvitationAcceptAPI(APITestCase):
     def setUp(self):
         self.member = UserFactory()
-        self.group = GroupFactory(members=[
+        self.group = GroupFactory(editors=[
             self.member,
         ])
         self.non_member = UserFactory()

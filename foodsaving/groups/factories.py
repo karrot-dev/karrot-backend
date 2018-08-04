@@ -10,13 +10,16 @@ class GroupFactory(DjangoModelFactory):
         model = GroupModel
 
     @post_generation
-    def members(self, created, members, **kwargs):
-        # TODO rename to "editors"
-        if not created:
-            return
-        if members:
-            for member in members:
+    def editors(self, created, extracted, **kwargs):
+        if created and extracted:
+            for member in extracted:
                 GroupMembership.objects.create(group=self, user=member, roles=[roles.GROUP_EDITOR])
+
+    @post_generation
+    def newcomers(self, created, extracted, **kwargs):
+        if created and extracted:
+            for member in extracted:
+                GroupMembership.objects.create(group=self, user=member)
 
     name = LazyAttribute(lambda x: 'Group ' + faker.name())
     description = LazyAttribute(lambda x: faker.sentence(nb_words=40))

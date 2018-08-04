@@ -23,7 +23,7 @@ class InvitationSerializer(serializers.ModelSerializer):
         if not group.is_member(self.context['request'].user):
             raise serializers.ValidationError(_('You are not a member of this group.'))
         if not group.is_editor(self.context['request'].user):
-            raise serializers.ValidationError('Can only invite as full member')
+            raise serializers.ValidationError('Can only invite as editor')
         return group
 
     def validate(self, attrs):

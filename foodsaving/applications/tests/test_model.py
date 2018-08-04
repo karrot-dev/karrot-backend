@@ -12,7 +12,7 @@ class TestApplicationConversationModel(APITestCase):
     def setUp(self):
         self.applicant = VerifiedUserFactory()
         self.member = VerifiedUserFactory()
-        self.group = GroupFactory(members=[self.member])
+        self.group = GroupFactory(editors=[self.member])
         self.application = GroupApplicationFactory(group=self.group, user=self.applicant)
         self.conversation = Conversation.objects.get_for_target(self.application)
 

@@ -7,18 +7,19 @@ from foodsaving.groups.models import Group, GroupMembership, Trust
 
 
 @receiver(post_save, sender=Group)
-def group_created(**kwargs):
+def group_created(sender, instance, created, **kwargs):
     """Ensure every group has a conversation."""
-    group = kwargs.get('instance')
-    # TODO: limit this to only run on creation
+    if not created:
+        return
+    group = instance
     conversation = Conversation.objects.get_or_create_for_target(group)
     conversation.sync_users(group.members.all())
 
 
 @receiver(pre_delete, sender=Group)
-def group_deleted(**kwargs):
+def group_deleted(sender, instance, **kwargs):
     """Delete the conversation when the group is deleted."""
-    group = kwargs.get('instance')
+    group = instance
     conversation = Conversation.objects.get_for_target(group)
     if conversation:
         conversation.delete()
@@ -26,18 +27,19 @@ def group_deleted(**kwargs):
 
 @receiver(post_save, sender=GroupMembership)
 def group_member_added(sender, instance, created, **kwargs):
-    if created:
-        group = instance.group
-        user = instance.user
-        membership = instance
-        if group.is_playground():
-            membership.notification_types = []
-            membership.save()
+    if not created:
+        return
+    group = instance.group
+    user = instance.user
+    membership = instance
+    if group.is_playground():
+        membership.notification_types = []
+        membership.save()
 
-        conversation = Conversation.objects.get_or_create_for_target(group)
-        conversation.join(user, email_notifications=not group.is_playground())
+    conversation = Conversation.objects.get_or_create_for_target(group)
+    conversation.join(user, email_notifications=not group.is_playground())
 
-        stats.group_joined(group)
+    stats.group_joined(group)
 
 
 @receiver(pre_delete, sender=GroupMembership)

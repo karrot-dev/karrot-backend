@@ -26,7 +26,7 @@ class TestStoresAPI(APITestCase, ExtractPaginationMixin):
         # group with two members and one store
         self.member = UserFactory()
         self.member2 = UserFactory()
-        self.group = GroupFactory(members=[self.member, self.member2])
+        self.group = GroupFactory(editors=[self.member, self.member2])
         self.store = StoreFactory(group=self.group)
         self.store_url = self.url + str(self.store.id) + '/'
 
@@ -44,7 +44,7 @@ class TestStoresAPI(APITestCase, ExtractPaginationMixin):
         }
 
         # another group
-        self.different_group = GroupFactory(members=[
+        self.different_group = GroupFactory(editors=[
             self.member2,
         ])
 
@@ -173,7 +173,7 @@ class TestStoreChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
         self.now = timezone.now()
         self.url = '/api/stores/'
         self.member = UserFactory()
-        self.group = GroupFactory(members=[
+        self.group = GroupFactory(editors=[
             self.member,
         ])
         self.store = StoreFactory(group=self.group)
@@ -236,7 +236,7 @@ class TestStoreStatisticsAPI(APITestCase):
     def test_store_statistics(self):
         user = UserFactory()
         self.client.force_login(user=user)
-        group = GroupFactory(members=[user])
+        group = GroupFactory(editors=[user])
         store = StoreFactory(group=group)
 
         response = self.client.get('/api/stores/{}/statistics/'.format(store.id))
