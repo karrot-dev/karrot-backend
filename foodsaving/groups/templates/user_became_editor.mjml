@@ -1,0 +1,40 @@
+<mjml>
+    <mj-head>
+        <mj-include path="../../base/templates/_base-head.mjml"/>
+        <mj-title>{% trans %}You became editor in {{ group_name }}!{% endtrans %}</mj-title>
+    </mj-head>
+    <mj-body>
+        <mj-container>
+            <mj-include path="../../base/templates/_header.mjml"/>
+            <mj-section>
+                <mj-column>
+                    <mj-text>
+                        <h1>
+                            {% trans %}You became editor in {{ group_name }}!{% endtrans %}
+                        </h1>
+                        <p>
+                            {% trans -%}
+                                You've received enough trust from fellow group members to grant you <strong>editing permissions</strong>.
+                                For example, you can now modify your group, stores and pickup dates, or create new ones.
+                            {% endtrans %}
+                        </p>
+                        <p>
+                            {% trans %}Use your power wisely!{% endtrans %}
+                        </p>
+                    </mj-text>
+                    <mj-button href="{{ group_url }}">
+                        {% trans %}Visit {{ group_name }}{% endtrans %}
+                    </mj-button>
+                    <mj-divider/>
+                    <mj-text font-size="13px" line-height="18px" color="#777">
+                        <p>
+                            {% trans %}You are receiving this because you are a member of <strong>{{ group_name }}</strong>.{% endtrans %}
+                            {% trans %}You can leave the group from the <a href="{{ group_url }}">group page</a>.{% endtrans %}
+                        </p>
+                    </mj-text>
+                </mj-column>
+            </mj-section>
+            <mj-include path="../../base/templates/_footer.mjml"/>
+        </mj-container>
+    </mj-body>
+</mjml>

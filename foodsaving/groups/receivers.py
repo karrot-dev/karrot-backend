@@ -3,6 +3,7 @@ from django.dispatch import receiver
 
 from foodsaving.conversations.models import Conversation
 from foodsaving.groups import roles, stats
+from foodsaving.groups.emails import prepare_user_became_editor_email
 from foodsaving.groups.models import Group, GroupMembership, Trust, GroupNotificationType
 
 
@@ -88,6 +89,7 @@ def trust_given(sender, instance, created, **kwargs):
         # new editors should also get informed about new applications
         membership.add_notification_types([GroupNotificationType.NEW_APPLICATION])
         membership.save()
+        prepare_user_became_editor_email(user=membership.user, group=membership.group).send()
 
     stats.trust_given(membership.group)
 

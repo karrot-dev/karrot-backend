@@ -1,4 +1,5 @@
 from dateutil.relativedelta import relativedelta
+from django.core import mail
 from django.test import TestCase
 from django.utils import timezone
 from rest_framework import status
@@ -55,12 +56,15 @@ class TestTrustReceiver(TestCase):
         group = GroupFactory(editors=[editor], newcomers=[newcomer])
         two_days_ago = timezone.now() - relativedelta(days=2)
         GroupMembership.objects.filter(group=group).update(created_at=two_days_ago)
+        mail.outbox = []
 
         membership = GroupMembership.objects.get(user=newcomer, group=group)
         Trust.objects.create(membership=membership, given_by=editor)
 
         self.assertTrue(group.is_editor(newcomer))
         self.assertIn(GroupNotificationType.NEW_APPLICATION, membership.notification_types)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('You became editor', mail.outbox[0].subject)
 
     def test_remove_trust_when_giver_leaves_group(self):
         editor = UserFactory()
