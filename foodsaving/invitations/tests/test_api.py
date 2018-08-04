@@ -122,12 +122,12 @@ class TestInviteCreate(APITestCase):
     def test_invite_when_inviting_user_is_not_member_of_group(self):
         self.client.force_login(self.member2)
         response = self.client.post(base_url, {'email': 'please@join.com', 'group': self.group2.id})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_invite_as_newcomer_fails(self):
         self.client.force_login(self.newcomer)
         response = self.client.post(base_url, {'email': 'please@join.com', 'group': self.group2.id})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class TestInvitationAPI(APITestCase):

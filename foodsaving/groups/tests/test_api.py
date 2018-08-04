@@ -132,7 +132,7 @@ class TestGroupsAPI(APITestCase):
         self.client.force_login(user=newcomer)
         url = self.url + str(self.group.id) + '/'
         response = self.client.patch(url, self.group_data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_change_timezone_to_invalid_value_fails(self):
         self.client.force_login(user=self.member)

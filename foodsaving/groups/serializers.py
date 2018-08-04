@@ -127,8 +127,6 @@ class GroupDetailSerializer(GroupBaseSerializer):
         return group.get_trust_threshold_for_newcomer()
 
     def update(self, group, validated_data):
-        if not group.is_editor(self.context['request'].user):
-            raise serializers.ValidationError('Can only edit group as editor')
         if group.is_playground():
             # Prevent editing of public fields
             # Password shouldn't get changed and the others get overridden with a translation message

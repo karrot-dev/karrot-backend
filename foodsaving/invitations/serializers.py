@@ -1,6 +1,7 @@
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.validators import UniqueTogetherValidator
 
 from foodsaving.invitations.models import Invitation
@@ -21,9 +22,9 @@ class InvitationSerializer(serializers.ModelSerializer):
 
     def validate_group(self, group):
         if not group.is_member(self.context['request'].user):
-            raise serializers.ValidationError(_('You are not a member of this group.'))
+            raise PermissionDenied(_('You are not a member of this group.'))
         if not group.is_editor(self.context['request'].user):
-            raise serializers.ValidationError('Can only invite as editor')
+            raise PermissionDenied(_('You need to be a group editor'))
         return group
 
     def validate(self, attrs):

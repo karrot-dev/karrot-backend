@@ -53,6 +53,15 @@ class IsOtherUser(BasePermission):
         return membership.user != request.user
 
 
+class IsGroupEditor(BasePermission):
+    message = _('You need to be a group editor')
+
+    def has_object_permission(self, request, view, obj):
+        if view.action == 'partial_update':
+            return obj.is_editor(request.user)
+        return True
+
+
 class GroupInfoViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
     """
     Group Info - public information
@@ -79,7 +88,7 @@ class GroupViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUp
     filterset_class = GroupsFilter
     search_fields = ('name', 'public_description')
     serializer_class = GroupDetailSerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated, IsGroupEditor)
 
     def create(self, request, *args, **kwargs):
         """Create a new group"""
