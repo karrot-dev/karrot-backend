@@ -10,7 +10,6 @@ from rest_framework.viewsets import GenericViewSet
 from foodsaving.applications import stats
 from foodsaving.applications.models import GroupApplication
 from foodsaving.applications.serializers import GroupApplicationSerializer
-from foodsaving.groups.models import Group
 
 
 class HasVerifiedEmailAddress(permissions.BasePermission):
