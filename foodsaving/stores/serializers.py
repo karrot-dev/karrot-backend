@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import transaction
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.history.utils import get_changed_data
@@ -52,8 +53,6 @@ class StoreSerializer(serializers.ModelSerializer):
         return store
 
     def update(self, store, validated_data):
-        if not store.group.is_editor(self.context['request'].user):
-            raise serializers.ValidationError('Can only edit store as editor')
         changed_data = get_changed_data(store, validated_data)
         store = super().update(store, validated_data)
 
@@ -77,10 +76,10 @@ class StoreSerializer(serializers.ModelSerializer):
         return store
 
     def validate_group(self, group):
-        if not group.is_editor(self.context['request'].user):
-            raise serializers.ValidationError('Can only create store as editor')
         if not group.is_member(self.context['request'].user):
-            raise serializers.ValidationError(_('You are not a member of this group.'))
+            raise PermissionDenied(_('You are not a member of this group.'))
+        if not group.is_editor(self.context['request'].user):
+            raise PermissionDenied(_('You need to be a group editor'))
         return group
 
     def validate_weeks_in_advance(self, w):

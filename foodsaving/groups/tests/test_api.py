@@ -130,6 +130,14 @@ class TestGroupsAPI(APITestCase):
         response = self.client.patch(url, self.group_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_patch_group_as_newcomer(self):
+        newcomer = UserFactory()
+        self.group.groupmembership_set.create(user=newcomer)
+        self.client.force_login(user=newcomer)
+        url = self.url + str(self.group.id) + '/'
+        response = self.client.patch(url, self.group_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_change_timezone_to_invalid_value_fails(self):
         self.client.force_login(user=self.member)
         url = self.url + str(self.group.id) + '/'

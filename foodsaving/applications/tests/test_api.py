@@ -209,6 +209,23 @@ class TestApplicationConversation(APITestCase):
         self.assertIn('New message in', notification.subject)
         self.assertIn(chat_message, notification.body)
 
+    def test_newcomer_replies_in_conversation(self):
+        newcomer = UserFactory()
+        self.group.groupmembership_set.create(user=newcomer)
+        mail.outbox = []
+        self.client.force_login(user=newcomer)
+        chat_message = faker.sentence()
+        response = self.client.post(
+            '/api/messages/', {
+                'conversation': self.conversation.id,
+                'content': chat_message,
+            }
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        notification = mail.outbox[0]
+        self.assertIn('New message in', notification.subject)
+        self.assertIn(chat_message, notification.body)
+
     def test_applicant_replies_in_conversation(self):
         self.client.force_login(user=self.applicant)
         chat_message = faker.sentence()
@@ -229,7 +246,8 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.applicant = VerifiedUserFactory()
         self.member = VerifiedUserFactory()
-        self.group = GroupFactory(editors=[self.member])
+        self.newcomer = VerifiedUserFactory()
+        self.group = GroupFactory(editors=[self.member], newcomers=[self.newcomer])
         self.application = GroupApplicationFactory(group=self.group, user=self.applicant)
         self.conversation = Conversation.objects.get_for_target(self.application)
 
@@ -244,6 +262,13 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
 
     def test_list_applications_for_group(self):
         self.client.force_login(user=self.member)
+        response = self.get_results('/api/group-applications/?group={}'.format(self.group.id))
+        self.assertEqual(len(response.data), 1)
+
+    def test_list_applications_for_group_as_newcomer(self):
+        newcomer = UserFactory()
+        self.group.groupmembership_set.create(user=newcomer)
+        self.client.force_login(user=newcomer)
         response = self.get_results('/api/group-applications/?group={}'.format(self.group.id))
         self.assertEqual(len(response.data), 1)
 
@@ -274,6 +299,11 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
         self.assertEqual(notification.to[0], self.applicant.email)
         self.assertIn('was accepted', notification.subject)
 
+    def test_newcomer_cannot_accept_application(self):
+        self.client.force_login(user=self.newcomer)
+        response = self.client.post('/api/group-applications/{}/accept/'.format(self.application.id))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_applicant_cannot_accept_application(self):
         self.client.force_login(user=self.applicant)
         response = self.client.post('/api/group-applications/{}/accept/'.format(self.application.id))
@@ -293,6 +323,11 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
         notification = mail.outbox[0]
         self.assertEqual(notification.to[0], self.applicant.email)
         self.assertIn('was declined', notification.subject)
+
+    def test_newcomer_cannot_decline_application(self):
+        self.client.force_login(user=self.newcomer)
+        response = self.client.post('/api/group-applications/{}/decline/'.format(self.application.id))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_applicant_cannot_decline_application(self):
         self.client.force_login(user=self.applicant)

@@ -55,13 +55,20 @@ class TestStoresAPI(APITestCase, ExtractPaginationMixin):
     def test_create_store_as_user(self):
         self.client.force_login(user=self.user)
         response = self.client.post(self.url, self.store_data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_create_store_as_group_member(self):
         self.client.force_login(user=self.member)
         response = self.client.post(self.url, self.store_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['name'], self.store_data['name'])
+
+    def test_create_store_as_newcomer_fails(self):
+        newcomer = UserFactory()
+        self.group.groupmembership_set.create(user=newcomer)
+        self.client.force_login(user=newcomer)
+        response = self.client.post(self.url, self.store_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_create_store_activates_group(self):
         self.group.status = GroupStatus.INACTIVE.value
@@ -122,6 +129,13 @@ class TestStoresAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.patch(self.store_url, self.store_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_edit_store_as_newcomer_fails(self):
+        newcomer = UserFactory()
+        self.group.groupmembership_set.create(user=newcomer)
+        self.client.force_login(user=newcomer)
+        response = self.client.patch(self.store_url, self.store_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_patch_store_activates_group(self):
         self.group.status = GroupStatus.INACTIVE.value
         self.group.save()
@@ -143,7 +157,7 @@ class TestStoresAPI(APITestCase, ExtractPaginationMixin):
     def test_change_group_as_member_in_one(self):
         self.client.force_login(user=self.member)
         response = self.client.patch(self.store_url, {'group': self.different_group.id}, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_change_group_as_member_in_both(self):
         self.client.force_login(user=self.member2)

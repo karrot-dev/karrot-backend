@@ -3,7 +3,7 @@ from django.dispatch import receiver
 
 from foodsaving.conversations.models import Conversation
 from foodsaving.groups import roles, stats
-from foodsaving.groups.models import Group, GroupMembership, Trust
+from foodsaving.groups.models import Group, GroupMembership, Trust, GroupNotificationType
 
 
 @receiver(post_save, sender=Group)
@@ -84,6 +84,16 @@ def trust_given(sender, instance, created, **kwargs):
 
     if relevant_trust.count() >= trust_threshold:
         membership.add_roles([roles.GROUP_EDITOR])
+
+        # new editors should also get informed about new applications
+        membership.add_notification_types([GroupNotificationType.NEW_APPLICATION])
         membership.save()
 
     stats.trust_given(membership.group)
+
+
+@receiver(pre_delete, sender=GroupMembership)
+def remove_trust(sender, instance, **kwargs):
+    membership = instance
+
+    Trust.objects.filter(given_by=membership.user).delete()

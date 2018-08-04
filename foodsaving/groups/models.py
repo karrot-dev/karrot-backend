@@ -57,11 +57,7 @@ class Group(BaseModel, LocationModel, ConversationMixin):
 
     def add_member(self, user, history_payload=None):
         membership = GroupMembership.objects.create(group=self, user=user)
-        History.objects.create(
-            typus=HistoryTypus.GROUP_JOIN, group=self, users=[
-                user,
-            ], payload=history_payload
-        )
+        History.objects.create(typus=HistoryTypus.GROUP_JOIN, group=self, users=[user], payload=history_payload)
         return membership
 
     def remove_member(self, user):

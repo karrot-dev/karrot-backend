@@ -1,6 +1,7 @@
 from django.db.models import Avg, Count, Q, Sum
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins
+from django.utils.translation import ugettext_lazy as _
+from rest_framework import mixins, permissions
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
@@ -13,8 +14,22 @@ from foodsaving.stores.serializers import StoreSerializer
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 
-class StoreViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUpdateModelMixin, mixins.ListModelMixin,
-                   GenericViewSet):
+class IsGroupEditor(permissions.BasePermission):
+    message = _('You need to be a group editor')
+
+    def has_object_permission(self, request, view, obj):
+        if view.action == 'partial_update':
+            return obj.group.is_editor(request.user)
+        return True
+
+
+class StoreViewSet(
+        mixins.CreateModelMixin,
+        mixins.RetrieveModelMixin,
+        PartialUpdateModelMixin,
+        mixins.ListModelMixin,
+        GenericViewSet,
+):
     """
     Stores
 
@@ -27,7 +42,7 @@ class StoreViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUp
     filterset_fields = ('group', 'name')
     filter_backends = (SearchFilter, DjangoFilterBackend)
     search_fields = ('name', 'description')
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated, IsGroupEditor)
 
     def get_queryset(self):
         qs = self.queryset.filter(group__members=self.request.user)

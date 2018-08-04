@@ -6,7 +6,7 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
 
 from foodsaving.groups.factories import GroupFactory
-from foodsaving.groups.models import GroupMembership, Trust
+from foodsaving.groups.models import GroupMembership, Trust, GroupNotificationType
 from foodsaving.users.factories import UserFactory
 
 
@@ -14,6 +14,7 @@ class TestTrustThreshold(TestCase):
     def create_group_with_members(self, member_count):
         self.members = [UserFactory() for _ in range(member_count)]
         self.group = GroupFactory(editors=self.members)
+        # trust threshold calculation ignores recently joined users, so we need to create users before that
         two_days_ago = timezone.now() - relativedelta(days=2)
         GroupMembership.objects.filter(group=self.group).update(created_at=two_days_ago)
 
@@ -45,6 +46,32 @@ class TestTrustThreshold(TestCase):
             self.group.get_trust_threshold_for_newcomer(),
             1,
         )
+
+
+class TestTrustReceiver(TestCase):
+    def test_newcomer_becomes_editor(self):
+        editor = UserFactory()
+        newcomer = UserFactory()
+        group = GroupFactory(editors=[editor], newcomers=[newcomer])
+        two_days_ago = timezone.now() - relativedelta(days=2)
+        GroupMembership.objects.filter(group=group).update(created_at=two_days_ago)
+
+        membership = GroupMembership.objects.get(user=newcomer, group=group)
+        Trust.objects.create(membership=membership, given_by=editor)
+
+        self.assertTrue(group.is_editor(newcomer))
+        self.assertIn(GroupNotificationType.NEW_APPLICATION, membership.notification_types)
+
+    def test_remove_trust_when_giver_leaves_group(self):
+        editor = UserFactory()
+        newcomer = UserFactory()
+        group = GroupFactory(editors=[editor], newcomers=[newcomer])
+        membership = GroupMembership.objects.get(user=newcomer, group=group)
+        Trust.objects.create(membership=membership, given_by=editor)
+
+        group.remove_member(editor)
+
+        self.assertEqual(0, Trust.objects.filter(membership=membership).count())
 
 
 class TestTrustAPI(APITestCase):
