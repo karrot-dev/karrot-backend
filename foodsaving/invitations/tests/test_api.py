@@ -18,9 +18,7 @@ base_url = '/api/invitations/'
 class TestInvitationAPIIntegration(APITestCase):
     def setUp(self):
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[
-            self.member,
-        ])
+        self.group = GroupFactory(editors=[self.member])
         self.non_member = UserFactory()
 
         # effectively disable throttling
@@ -68,9 +66,7 @@ class TestInviteCreate(APITestCase):
         self.member2 = UserFactory()
         self.newcomer = UserFactory()
         self.group = GroupFactory(editors=[self.member, self.member2], newcomers=[self.newcomer])
-        self.group2 = GroupFactory(editors=[
-            self.member,
-        ])
+        self.group2 = GroupFactory(editors=[self.member])
 
         # effectively disable throttling
         from foodsaving.invitations.api import InvitesPerDayThrottle
@@ -169,9 +165,7 @@ class TestInvitationAPI(APITestCase):
 class TestInvitationAcceptAPI(APITestCase):
     def setUp(self):
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[
-            self.member,
-        ])
+        self.group = GroupFactory(editors=[self.member])
         self.non_member = UserFactory()
 
         # effectively disable throttling

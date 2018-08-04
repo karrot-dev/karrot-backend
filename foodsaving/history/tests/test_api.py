@@ -85,9 +85,7 @@ class TestHistoryAPIWithExistingGroup(APITestCase, ExtractPaginationMixin):
 class TestHistoryAPIWithExistingStore(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[
-            self.member,
-        ])
+        self.group = GroupFactory(editors=[self.member])
         self.store = StoreFactory(group=self.group)
         self.store_url = '/api/stores/{}/'.format(self.store.id)
 
@@ -140,9 +138,7 @@ class TestHistoryAPIWithExistingStore(APITestCase, ExtractPaginationMixin):
 class TestHistoryAPIWithExistingPickups(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[
-            self.member,
-        ])
+        self.group = GroupFactory(editors=[self.member])
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(store=self.store)
         self.pickup_url = '/api/pickup-dates/{}/'.format(self.pickup.id)
@@ -206,9 +202,7 @@ class TestHistoryAPIWithExistingPickups(APITestCase, ExtractPaginationMixin):
 class TestHistoryAPIWithDonePickup(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[
-            self.member,
-        ])
+        self.group = GroupFactory(editors=[self.member])
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(store=self.store, date=timezone.now() - relativedelta(days=1))
         self.pickup.collectors.add(self.member)
@@ -231,9 +225,7 @@ class TestHistoryAPIWithDonePickup(APITestCase, ExtractPaginationMixin):
 class TestHistoryAPIWithMissedPickup(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[
-            self.member,
-        ])
+        self.group = GroupFactory(editors=[self.member])
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(store=self.store, date=timezone.now() - relativedelta(days=1))
         # No one joined the pickup
@@ -256,9 +248,7 @@ class TestHistoryAPIWithMissedPickup(APITestCase, ExtractPaginationMixin):
 class TestHistoryAPIPickupForInactiveStore(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[
-            self.member,
-        ])
+        self.group = GroupFactory(editors=[self.member])
         self.store = StoreFactory(group=self.group, status='archived')
         self.pickup = PickupDateFactory(store=self.store, date=timezone.now() - relativedelta(days=1))
         self.pickup.collectors.add(self.member)
@@ -280,9 +270,7 @@ class TestHistoryAPIPickupForInactiveStore(APITestCase, ExtractPaginationMixin):
 class TestHistoryAPIWithDeletedPickup(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[
-            self.member,
-        ])
+        self.group = GroupFactory(editors=[self.member])
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(
             store=self.store,

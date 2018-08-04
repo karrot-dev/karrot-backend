@@ -15,9 +15,7 @@ from foodsaving.utils.tests.fake import faker
 class TestUserModel(TestCase):
     def setUp(self):
         self.user = UserFactory()
-        self.group = GroupFactory(editors=[
-            self.user,
-        ])
+        self.group = GroupFactory(editors=[self.user])
         self.exampleuser = {
             'display_name': 'bla',
             'email': 'user@example.com',

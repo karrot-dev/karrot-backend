@@ -306,9 +306,7 @@ class TestRejectedAddress(APITestCase):
 class TestSetCurrentGroup(APITestCase):
     def setUp(self):
         self.user = UserFactory()
-        self.group = GroupFactory(editors=[
-            self.user,
-        ])
+        self.group = GroupFactory(editors=[self.user])
         self.unrelated_group = GroupFactory()
 
     def test_set_current_group_succeeds(self):

@@ -12,12 +12,8 @@ class TestStoresAPIFilter(APITestCase):
 
         # two groups one store
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[
-            self.member,
-        ])
-        self.group2 = GroupFactory(editors=[
-            self.member,
-        ])
+        self.group = GroupFactory(editors=[self.member])
+        self.group2 = GroupFactory(editors=[self.member])
         self.store = StoreFactory(group=self.group)
         self.store2 = StoreFactory(group=self.group2)
 

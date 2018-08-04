@@ -20,11 +20,7 @@ class TestGroupsInfoAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.member = UserFactory()
-        self.group = GroupFactory(
-            editors=[
-                self.member,
-            ], application_questions=''
-        )
+        self.group = GroupFactory(editors=[self.member], application_questions='')
         self.url = '/api/groups-info/'
 
     def test_list_groups_as_anon(self):
@@ -436,10 +432,7 @@ class TestAgreementsAPI(APITestCase):
     def setUp(self):
         self.normal_member = UserFactory()
         self.agreement_manager = UserFactory()
-        self.group = GroupFactory(editors=[
-            self.normal_member,
-            self.agreement_manager,
-        ])
+        self.group = GroupFactory(editors=[self.normal_member, self.agreement_manager])
         self.agreement = Agreement.objects.create(group=self.group, title=faker.text(), content=faker.text())
         membership = GroupMembership.objects.get(group=self.group, user=self.agreement_manager)
         membership.roles.append(roles.GROUP_AGREEMENT_MANAGER)
