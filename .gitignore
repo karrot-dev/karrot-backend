@@ -15,6 +15,7 @@ foodsaving/*/templates/*.html.jinja2
 /dump.rdb
 /db.sqlite3
 *.pid
+*.pot
 *.mo
 mjml/node_modules
 
