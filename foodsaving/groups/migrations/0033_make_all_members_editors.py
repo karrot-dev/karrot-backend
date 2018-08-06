@@ -15,9 +15,7 @@ def make_all_editors(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('groups', '0031_add_default_notification_20180715_1040'),
+        ('groups', '0032_groupmembership_added_by'),
     ]
 
-    operations = [
-        migrations.RunPython(make_all_editors, migrations.RunPython.noop)
-    ]
+    operations = [migrations.RunPython(make_all_editors, migrations.RunPython.noop)]

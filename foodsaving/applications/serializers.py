@@ -21,6 +21,8 @@ class GroupApplicationSerializer(serializers.ModelSerializer):
             'questions',
             'answers',
             'status',
+            'decided_by',
+            'decided_at',
         ]
         read_only_fields = [
             'user',

@@ -1,5 +1,7 @@
 from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
 from django.core import mail
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -50,6 +52,8 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
                 'conversation': conversation_id,
                 'status': 'pending',
                 'created_at': created_at,
+                'decided_by': None,
+                'decided_at': None,
             },
         )
 
@@ -78,6 +82,8 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
                 'conversation': conversation_id,
                 'status': 'pending',
                 'created_at': created_at,
+                'decided_by': None,
+                'decided_at': None,
             },
         )
 
@@ -289,6 +295,8 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
         response = self.client.post('/api/group-applications/{}/accept/'.format(self.application.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['status'], 'accepted')
+        self.assertEqual(response.data['decided_by'], self.member.id)
+        self.assertGreaterEqual(parse(response.data['decided_at']), timezone.now() - relativedelta(seconds=5))
         self.assertTrue(GroupMembership.objects.filter(
             group=self.group,
             user=self.applicant,
@@ -299,13 +307,14 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
         self.assertEqual(notification.to[0], self.applicant.email)
         self.assertIn('was accepted', notification.subject)
 
+        # accepting user gets saved to group membership entry
+        self.assertEqual(GroupMembership.objects.get(
+            group=self.group,
+            user=self.applicant,
+        ).added_by, self.member)
+
     def test_newcomer_cannot_accept_application(self):
         self.client.force_login(user=self.newcomer)
-        response = self.client.post('/api/group-applications/{}/accept/'.format(self.application.id))
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_applicant_cannot_accept_application(self):
-        self.client.force_login(user=self.applicant)
         response = self.client.post('/api/group-applications/{}/accept/'.format(self.application.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -314,6 +323,8 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
         response = self.client.post('/api/group-applications/{}/decline/'.format(self.application.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['status'], 'declined')
+        self.assertEqual(response.data['decided_by'], self.member.id)
+        self.assertGreaterEqual(parse(response.data['decided_at']), timezone.now() - relativedelta(seconds=5))
         self.assertFalse(GroupMembership.objects.filter(
             group=self.group,
             user=self.applicant,
