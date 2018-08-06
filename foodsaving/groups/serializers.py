@@ -39,17 +39,11 @@ class GroupMembershipInfoSerializer(serializers.ModelSerializer):
         model = GroupMembership
         fields = (
             'created_at',
+            'added_by',
             'roles',
             'active',
         )
-        extra_kwargs = {
-            'created_at': {
-                'read_only': True
-            },
-            'roles': {
-                'read_only': True
-            },
-        }
+        read_only_fields = ['created_at', 'roles', 'added_by']
 
     active = serializers.SerializerMethodField()
 

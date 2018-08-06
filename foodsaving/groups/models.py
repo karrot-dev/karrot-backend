@@ -23,7 +23,12 @@ class GroupStatus(Enum):
 class Group(BaseModel, LocationModel, ConversationMixin):
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH, unique=True)
     description = models.TextField(blank=True)
-    members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='groups', through='GroupMembership')
+    members = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='groups',
+        through='GroupMembership',
+        through_fields=('group', 'user'),
+    )
     password = models.CharField(max_length=255, blank=True)  # TODO remove soon
     public_description = models.TextField(blank=True)
     application_questions = models.TextField(blank=True)
@@ -43,8 +48,8 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     def __str__(self):
         return 'Group {}'.format(self.name)
 
-    def add_member(self, user, history_payload=None):
-        membership = GroupMembership.objects.create(group=self, user=user)
+    def add_member(self, user, added_by=None, history_payload=None):
+        membership = GroupMembership.objects.create(group=self, user=user, added_by=added_by)
         History.objects.create(
             typus=HistoryTypus.GROUP_JOIN, group=self, users=[
                 user,
@@ -74,6 +79,7 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     def accept_invite(self, user, invited_by, invited_at):
         self.add_member(
             user,
+            added_by=invited_by,
             history_payload={
                 'invited_by': invited_by.id,
                 'invited_at': invited_at.isoformat(),
@@ -136,8 +142,20 @@ class GroupMembershipQuerySet(QuerySet):
 class GroupMembership(BaseModel):
     objects = GroupMembershipQuerySet.as_manager()
 
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    group = models.ForeignKey(
+        Group,
+        on_delete=models.CASCADE,
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    added_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='groupmembership_added',
+    )
     roles = ArrayField(TextField(), default=list)
     lastseen_at = DateTimeField(default=tz.now)
     inactive_at = DateTimeField(null=True)

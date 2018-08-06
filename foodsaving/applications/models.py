@@ -2,6 +2,7 @@ from enum import Enum
 
 from django.conf import settings
 from django.db import models, transaction
+from django.utils import timezone
 
 from foodsaving.applications.tasks import notify_about_accepted_application, notify_about_declined_application
 from foodsaving.base.base_models import BaseModel
@@ -19,6 +20,13 @@ class GroupApplicationStatus(Enum):
 class GroupApplication(BaseModel):
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    decided_at = models.DateTimeField(null=True)
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='groupapplication_decided',
+    )
     questions = models.TextField()
     answers = models.TextField()
     status = models.CharField(
@@ -36,9 +44,12 @@ class GroupApplication(BaseModel):
     @transaction.atomic
     def accept(self, accepted_by):
         self.status = GroupApplicationStatus.ACCEPTED.value
+        self.decided_by = accepted_by
+        self.decided_at = timezone.now()
         self.save()
         self.group.add_member(
             self.user,
+            added_by=accepted_by,
             history_payload={
                 'accepted_by': accepted_by.id,
                 'application_date': self.created_at.isoformat(),
@@ -49,6 +60,8 @@ class GroupApplication(BaseModel):
     @transaction.atomic
     def decline(self, declined_by):
         self.status = GroupApplicationStatus.DECLINED.value
+        self.decided_by = declined_by
+        self.decided_at = timezone.now()
         self.save()
         History.objects.create(
             typus=HistoryTypus.GROUP_APPLICATION_DECLINED,
