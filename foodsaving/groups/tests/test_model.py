@@ -45,4 +45,4 @@ class TestGroupModel(TestCase):
 
     def test_uses_default_application_questions_if_not_specified(self):
         group = GroupFactory(application_questions='')
-        self.assertIn('What are your motivations', group.get_application_questions_or_default())
+        self.assertIn('Hey there', group.get_application_questions_or_default())

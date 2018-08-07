@@ -40,7 +40,7 @@ class TestGroupsInfoAPI(APITestCase):
         url = self.url + str(self.group.id) + '/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('What are your motivations', response.data['application_questions'])
+        self.assertIn('Hey there', response.data['application_questions'])
 
     def test_retrieve_group_as_user(self):
         self.client.force_login(user=self.user)
