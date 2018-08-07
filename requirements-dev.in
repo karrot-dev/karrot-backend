@@ -9,6 +9,7 @@ pytest-asyncio
 pytest-django
 pytest-xdist
 pytest-cov
+pathlib2>=2.2.0 # needed by pytest in python 3.5 env: https://github.com/pytest-dev/pytest/commit/f25683354e95ea13801e4984873bbf3352b97ff1
 freezegun
 logging_tree
 django-silk
