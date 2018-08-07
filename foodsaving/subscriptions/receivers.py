@@ -55,10 +55,11 @@ def send_in_channel(channel, topic, payload):
     }
     try:
         channel_layer_send_sync(channel, message)
-        stats.pushed_via_websocket(topic)
     except ChannelFull:
         # maybe this means the subscription is invalid now?
         sentry_client.captureException()
+    else:
+        stats.pushed_via_websocket(topic)
 
 
 @receiver(post_save, sender=ConversationMessage)
