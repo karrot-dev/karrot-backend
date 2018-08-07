@@ -72,7 +72,8 @@ def send_messages(sender, instance, created, **kwargs):
 
     push_exclude_users = []
 
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=conversation.participants.all()):
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=conversation.participants.all()
+                                                                    ).distinct():
         if not subscription.away_at:
             push_exclude_users.append(subscription.user)
 
@@ -93,7 +94,7 @@ def send_messages(sender, instance, created, **kwargs):
 
     subscriptions = PushSubscription.objects.filter(
         Q(user__in=conversation.participants.all()) & ~Q(user__in=push_exclude_users) & ~Q(user=message.author)
-    )
+    ).distinct()
 
     message_title = message.author.display_name
     if isinstance(conversation.target, Group):
@@ -130,7 +131,7 @@ def send_messages(sender, instance, created, **kwargs):
 
     for subscription in ChannelSubscription.objects.recent()\
             .filter(user__in=conversation.participants.all())\
-            .exclude(user=message.author):
+            .exclude(user=message.author).distinct():
         payload = ConversationSerializer(conversation, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
@@ -177,7 +178,7 @@ def send_reaction_update(sender, instance, **kwargs):
 
     for subscription in ChannelSubscription.objects.recent() \
             .filter(user__in=conversation.participants.all()) \
-            .exclude(user=reaction.user):
+            .exclude(user=reaction.user).distinct():
         payload = ConversationMessageSerializer(message, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
@@ -194,7 +195,7 @@ def send_participant_joined(sender, instance, created, **kwargs):
 
     for subscription in ChannelSubscription.objects.recent() \
             .filter(user__in=conversation.participants.all()) \
-            .exclude(user=instance.user):
+            .exclude(user=instance.user).distinct():
         payload = ConversationSerializer(conversation, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
@@ -218,7 +219,7 @@ def send_participant_left(sender, instance, **kwargs):
 
     for subscription in ChannelSubscription.objects.recent() \
             .filter(user__in=conversation.participants.all()) \
-            .exclude(user=instance.user):
+            .exclude(user=instance.user).distinct():
         payload = ConversationSerializer(conversation, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
@@ -228,7 +229,7 @@ def send_participant_left(sender, instance, **kwargs):
 def send_group_updates(sender, instance, **kwargs):
     group = instance
     detail_payload = GroupDetailSerializer(group).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=group.members.all()):
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=group.members.all()).distinct():
         send_in_channel(subscription.reply_channel, topic='groups:group_detail', payload=detail_payload)
 
     preview_payload = GroupPreviewSerializer(group).data
@@ -243,7 +244,7 @@ def send_group_application_updates(sender, instance, **kwargs):
     group = application.group
     payload = GroupApplicationSerializer(application).data
     q = Q(user__in=group.members.all()) | Q(user=application.user)
-    for subscription in ChannelSubscription.objects.recent().filter(q):
+    for subscription in ChannelSubscription.objects.recent().filter(q).distinct():
         send_in_channel(subscription.reply_channel, topic='applications:update', payload=payload)
 
 
@@ -252,7 +253,8 @@ def send_group_application_updates(sender, instance, **kwargs):
 def send_invitation_updates(sender, instance, **kwargs):
     invitation = instance
     payload = InvitationSerializer(invitation).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=invitation.group.members.all()):
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=invitation.group.members.all()
+                                                                    ).distinct():
         send_in_channel(subscription.reply_channel, topic='invitations:invitation', payload=payload)
 
 
@@ -260,7 +262,8 @@ def send_invitation_updates(sender, instance, **kwargs):
 def send_invitation_accept(sender, instance, **kwargs):
     invitation = instance
     payload = InvitationSerializer(invitation).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=invitation.group.members.all()):
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=invitation.group.members.all()
+                                                                    ).distinct():
         send_in_channel(subscription.reply_channel, topic='invitations:invitation_accept', payload=payload)
 
 
@@ -269,7 +272,7 @@ def send_invitation_accept(sender, instance, **kwargs):
 def send_store_updates(sender, instance, **kwargs):
     store = instance
     payload = StoreSerializer(store).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=store.group.members.all()):
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=store.group.members.all()).distinct():
         send_in_channel(subscription.reply_channel, topic='stores:store', payload=payload)
 
 
@@ -282,7 +285,8 @@ def send_pickup_updates(sender, instance, **kwargs):
         return
 
     payload = PickupDateSerializer(pickup).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.store.group.members.all()):
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.store.group.members.all()
+                                                                    ).distinct():
         if not pickup.deleted:
             send_in_channel(subscription.reply_channel, topic='pickups:pickupdate', payload=payload)
         else:
@@ -295,7 +299,8 @@ def send_pickup_collector_updates(sender, instance, **kwargs):
     if action and (action == 'post_add' or action == 'post_remove'):
         pickup = instance
         payload = PickupDateSerializer(pickup).data
-        for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.store.group.members.all()):
+        for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.store.group.members.all()
+                                                                        ).distinct():
             send_in_channel(subscription.reply_channel, topic='pickups:pickupdate', payload=payload)
 
 
@@ -304,7 +309,8 @@ def send_pickup_collector_updates(sender, instance, **kwargs):
 def send_pickup_series_updates(sender, instance, **kwargs):
     series = instance
     payload = PickupDateSeriesSerializer(series).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=series.store.group.members.all()):
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=series.store.group.members.all()
+                                                                    ).distinct():
         send_in_channel(subscription.reply_channel, topic='pickups:series', payload=payload)
 
 
@@ -312,7 +318,8 @@ def send_pickup_series_updates(sender, instance, **kwargs):
 def send_pickup_series_delete(sender, instance, **kwargs):
     series = instance
     payload = PickupDateSeriesSerializer(series).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=series.store.group.members.all()):
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=series.store.group.members.all()
+                                                                    ).distinct():
         send_in_channel(subscription.reply_channel, topic='pickups:series_deleted', payload=payload)
 
 
@@ -320,7 +327,8 @@ def send_pickup_series_delete(sender, instance, **kwargs):
 @receiver(post_save, sender=Feedback)
 def send_feedback_updates(sender, instance, **kwargs):
     feedback = instance
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=feedback.about.store.group.members.all()):
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=feedback.about.store.group.members.all()
+                                                                    ).distinct():
         payload = FeedbackSerializer(feedback, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic='feedback:feedback', payload=payload)
 
@@ -329,7 +337,7 @@ def send_feedback_updates(sender, instance, **kwargs):
 def send_feedback_possible_updates(sender, instance, **kwargs):
     pickup = instance
     payload = PickupDateSerializer(pickup).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.collectors.all()):
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.collectors.all()).distinct():
         send_in_channel(subscription.reply_channel, topic='pickups:feedback_possible', payload=payload)
 
 
@@ -348,8 +356,9 @@ def send_user_updates(sender, instance, **kwargs):
     """Send profile updates to everyone except the user"""
     user = instance
     payload = UserSerializer(user, context={'request': AbsoluteURIBuildingRequest()}).data
-    users_groups = user.groups.values('id')
-    for subscription in ChannelSubscription.objects.recent().filter(user__groups__in=users_groups).exclude(user=user):
+    user_groups = user.groups.values('id')
+    for subscription in ChannelSubscription.objects.recent().filter(user__groups__in=user_groups).exclude(user=user
+                                                                                                          ).distinct():
         send_in_channel(subscription.reply_channel, topic='users:user', payload=payload)
 
 
@@ -358,5 +367,5 @@ def send_user_updates(sender, instance, **kwargs):
 def send_history_updates(sender, instance, **kwargs):
     history = instance
     payload = HistorySerializer(history).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=history.group.members.all()):
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=history.group.members.all()).distinct():
         send_in_channel(subscription.reply_channel, topic='history:history', payload=payload)
