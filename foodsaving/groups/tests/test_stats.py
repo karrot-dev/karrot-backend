@@ -36,6 +36,7 @@ class TestGroupStats(TestCase):
                 'measurement': 'karrot.group.members',
                 'tags': {
                     'group': str(group.id),
+                    'group_status': 'active',
                 },
                 'fields': {
                     'count_active_1d': 5,
@@ -74,6 +75,7 @@ class TestGroupStats(TestCase):
                 'measurement': 'karrot.group.stores',
                 'tags': {
                     'group': str(group.id),
+                    'group_status': 'active',
                 },
                 'fields': {
                     'count_total': 20,

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-08-06 14:25+0000\n"
+"POT-Creation-Date: 2018-08-08 15:06+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,11 +17,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.6.0\n"
 
-#: foodsaving/applications/api.py:16
+#: foodsaving/applications/api.py:15
 msgid "You need to have a verified email address"
 msgstr ""
 
-#: foodsaving/applications/api.py:25 foodsaving/groups/api.py:57
+#: foodsaving/applications/api.py:24 foodsaving/groups/api.py:57
 #: foodsaving/invitations/serializers.py:27
 #: foodsaving/pickups/permissions.py:67 foodsaving/pickups/serializers.py:38
 #: foodsaving/pickups/serializers.py:190 foodsaving/stores/api.py:18
@@ -29,7 +29,7 @@ msgstr ""
 msgid "You need to be a group editor"
 msgstr ""
 
-#: foodsaving/applications/api.py:33
+#: foodsaving/applications/api.py:32
 msgid "You need to be the applicant"
 msgstr ""
 
@@ -228,8 +228,10 @@ msgid "You are not in this group"
 msgstr ""
 
 #: foodsaving/groups/templates/default_application_questions.nopreview.jinja2:1
-#, python-format
-msgid "What are your motivations for joining %(group_name)s?"
+msgid ""
+"Hey there! Before you can join our group we'd like to know a bit about "
+"you and your motivation. Please tell us how you got to know about us and "
+"what you wish to do here!"
 msgstr ""
 
 #: foodsaving/groups/templates/group_summary.html.jinja2:4

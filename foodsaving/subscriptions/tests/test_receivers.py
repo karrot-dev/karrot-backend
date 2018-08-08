@@ -654,6 +654,19 @@ class UserReceiverTest(WSTestCase):
 
         self.assertEqual(len(self.client.messages), 1)
 
+    def test_do_not_send_too_many_updates(self):
+        [GroupFactory(editors=[self.member, self.other_member]) for _ in range(3)]
+
+        self.client = self.connect_as(self.member)
+
+        name = faker.name()
+        self.other_member.display_name = name
+        self.other_member.save()
+
+        self.assertEqual(len(self.client.messages), 1)
+        response = self.client.messages[0]
+        self.assertEqual(response['topic'], 'users:user')
+
     def test_unrelated_user_receives_no_changes(self):
         self.client = self.connect_as(self.unrelated_user)
 

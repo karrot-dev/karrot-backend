@@ -123,9 +123,7 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         return self.application_questions or self.get_application_questions_default()
 
     def get_application_questions_default(self):
-        return render_to_string('default_application_questions.nopreview.jinja2', {
-            'group': self,
-        })
+        return render_to_string('default_application_questions.nopreview.jinja2')
 
     def get_trust_threshold_for_newcomer(self):
         one_day_ago = timezone.now() - relativedelta(days=1)

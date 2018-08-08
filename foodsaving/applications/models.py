@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db import models, transaction
 from django.utils import timezone
 
+from foodsaving.applications.stats import application_status_update
 from foodsaving.applications.tasks import notify_about_accepted_application, notify_about_declined_application
 from foodsaving.base.base_models import BaseModel
 from foodsaving.history.models import History, HistoryTypus
@@ -40,6 +41,12 @@ class GroupApplication(BaseModel):
 
     def answers_rendered(self, **kwargs):
         return markdown.render(self.answers, **kwargs)
+
+    def save(self, **kwargs):
+        old = type(self).objects.get(pk=self.pk) if self.pk else None
+        super().save(**kwargs)
+        if old is None or old.status != self.status:
+            application_status_update(self)
 
     @transaction.atomic
     def accept(self, accepted_by):

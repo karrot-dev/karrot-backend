@@ -7,7 +7,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from foodsaving.applications import stats
 from foodsaving.applications.models import GroupApplication
 from foodsaving.applications.serializers import GroupApplicationSerializer
 
@@ -67,7 +66,6 @@ class GroupApplicationViewSet(
 
         application.accept(self.request.user)
         serializer = self.get_serializer(application)
-        stats.application_status_update(application)
         return Response(data=serializer.data)
 
     @action(
@@ -82,7 +80,6 @@ class GroupApplicationViewSet(
 
         application.decline(self.request.user)
         serializer = self.get_serializer(application)
-        stats.application_status_update(application)
         return Response(data=serializer.data)
 
     @action(
@@ -97,5 +94,4 @@ class GroupApplicationViewSet(
 
         application.withdraw()
         serializer = self.get_serializer(application)
-        stats.application_status_update(application)
         return Response(data=serializer.data)

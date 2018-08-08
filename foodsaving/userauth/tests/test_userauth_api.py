@@ -49,10 +49,11 @@ class TestUsersAPI(APITestCase):
         self.assertIn('Thank you for signing up', mail.outbox[0].body)
 
         response = self.client.post(
-            '/api/auth/', {
+            '/api/auth/',
+            {
                 'email': self.user_data['email'],
                 'password': self.user_data['password']
-            }
+            },
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -95,14 +96,14 @@ class TestUserDeleteAPI(APITestCase):
         self.group = GroupFactory(editors=[self.user, self.user2])
         self.store = StoreFactory(group=self.group)
         self.pickupdate = PickupDateFactory(
-            store=self.store, date=timezone.now() + relativedelta(days=1), collectors=[
-                self.user,
-            ]
+            store=self.store,
+            date=timezone.now() + relativedelta(days=1),
+            collectors=[self.user],
         )
         self.past_pickupdate = PickupDateFactory(
-            store=self.store, date=timezone.now() - relativedelta(days=1), collectors=[
-                self.user,
-            ]
+            store=self.store,
+            date=timezone.now() - relativedelta(days=1),
+            collectors=[self.user],
         )
         self.url_user = '/api/auth/user/'
         self.url_delete = '/api/auth/user/?code={:s}'
@@ -255,7 +256,7 @@ class TestRejectedAddress(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.url_user = '/api/auth/user/'
-        self.url_change_email = '/api/auth/password/'
+        self.url_change_email = '/api/auth/password/'  # Should be url_change_password ?
         self.url_request_account_deletion = '/api/auth/user/request_delete/'
 
         # Mock AnymailMessage to throw error on send

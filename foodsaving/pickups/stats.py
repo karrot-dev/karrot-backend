@@ -1,11 +1,14 @@
 from influxdb_metrics.loader import write_points
 
+from foodsaving.groups.stats import group_tags
+
 
 def pickup_tags(pickup):
-    return {
-        'group': str(pickup.store.group.id),
+    tags = group_tags(pickup.store.group)
+    tags.update({
         'store': str(pickup.store.id),
-    }
+    })
+    return tags
 
 
 def pickup_joined(pickup):
@@ -61,9 +64,7 @@ def feedback_given(feedback):
 def pickup_notification_email(group, **kwargs):
     write_points([{
         'measurement': 'karrot.email.pickup_notification',
-        'tags': {
-            'group': str(group.id)
-        },
+        'tags': group_tags(group),
         'fields': {
             'value': 1,
             **kwargs

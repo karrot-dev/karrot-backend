@@ -2,12 +2,17 @@ from django.db.models import Count
 from influxdb_metrics.loader import write_points
 
 
+def group_tags(group):
+    return {
+        'group': str(group.id),
+        'group_status': group.status,
+    }
+
+
 def group_joined(group):
     write_points([{
         'measurement': 'karrot.events',
-        'tags': {
-            'group': str(group.id)
-        },
+        'tags': group_tags(group),
         'fields': {
             'group_joined': 1
         },
@@ -17,9 +22,7 @@ def group_joined(group):
 def group_left(group):
     write_points([{
         'measurement': 'karrot.events',
-        'tags': {
-            'group': str(group.id)
-        },
+        'tags': group_tags(group),
         'fields': {
             'group_left': 1
         },
@@ -29,9 +32,7 @@ def group_left(group):
 def group_activity(group):
     write_points([{
         'measurement': 'karrot.events',
-        'tags': {
-            'group': str(group.id)
-        },
+        'tags': group_tags(group),
         'fields': {
             'group_activity': 1
         },
@@ -41,9 +42,7 @@ def group_activity(group):
 def group_summary_email(group, **extra_fields):
     write_points([{
         'measurement': 'karrot.email.group_summary',
-        'tags': {
-            'group': str(group.id)
-        },
+        'tags': group_tags(group),
         'fields': {
             'value': 1,
             **extra_fields
@@ -83,9 +82,7 @@ def get_group_members_stats(group):
 
     return [{
         'measurement': 'karrot.group.members',
-        'tags': {
-            'group': str(group.id)
-        },
+        'tags': group_tags(group),
         'fields': fields,
     }]
 
@@ -101,8 +98,6 @@ def get_group_stores_stats(group):
 
     return [{
         'measurement': 'karrot.group.stores',
-        'tags': {
-            'group': str(group.id),
-        },
+        'tags': group_tags(group),
         'fields': fields,
     }]
