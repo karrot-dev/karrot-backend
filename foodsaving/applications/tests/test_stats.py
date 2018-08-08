@@ -44,6 +44,7 @@ class TestApplicationStats(TestCase):
 
         write_points.reset_mock()
         application = GroupApplicationFactory(group=GroupFactory(), user=UserFactory(), created_at=two_hours_ago)
+
         write_points.assert_called_with([{
             'measurement': 'karrot.events',
             'tags': {
@@ -58,14 +59,17 @@ class TestApplicationStats(TestCase):
         write_points.reset_mock()
         application.status = 'accepted'
         application.save()
+
         write_points.assert_called_with([{
             'measurement': 'karrot.events',
             'tags': {
                 'group': str(application.group.id),
                 'group_status': application.group.status,
+                'application_status': application.status,
             },
             'fields': {
                 'application_accepted': 1,
-                'application_accepted_seconds': 60 * 60 * 2,
+                'application_alive_seconds': 60 * 60 * 2,
+                'application_accepted_alive_seconds': 60 * 60 * 2,
             },
         }])

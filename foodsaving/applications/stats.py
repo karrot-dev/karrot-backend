@@ -6,16 +6,20 @@ from foodsaving.groups.stats import group_tags
 
 
 def application_status_update(application):
+    tags = group_tags(application.group)
     fields = {
         'application_{}'.format(application.status): 1,
     }
 
     if application.status != 'pending':
-        fields['application_{}_seconds'.format(application.status)] = (timezone.now() - application.created_at).seconds
+        seconds = (timezone.now() - application.created_at).seconds
+        fields['application_alive_seconds'] = seconds
+        fields['application_{}_alive_seconds'.format(application.status)] = seconds
+        tags['application_status'] = application.status
 
     write_points([{
         'measurement': 'karrot.events',
-        'tags': group_tags(application.group),
+        'tags': tags,
         'fields': fields,
     }])
 
