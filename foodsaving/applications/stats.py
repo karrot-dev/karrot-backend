@@ -2,6 +2,8 @@ from django.db.models import Count
 from django.utils import timezone
 from influxdb_metrics.loader import write_points
 
+from foodsaving.groups.stats import group_tags
+
 
 def application_status_update(application):
     fields = {
@@ -13,9 +15,7 @@ def application_status_update(application):
 
     write_points([{
         'measurement': 'karrot.events',
-        'tags': {
-            'group': str(application.group.id)
-        },
+        'tags': group_tags(application.group),
         'fields': fields,
     }])
 
@@ -30,8 +30,6 @@ def get_group_application_stats(group):
 
     return [{
         'measurement': 'karrot.group.applications',
-        'tags': {
-            'group': str(group.id),
-        },
+        'tags': group_tags(group),
         'fields': fields,
     }]

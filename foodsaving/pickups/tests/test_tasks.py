@@ -170,6 +170,7 @@ class TestPickupNotificationTask(APITestCase):
                 'measurement': 'karrot.email.pickup_notification',
                 'tags': {
                     'group': str(self.group.id),
+                    'group_status': self.group.status,
                 },
                 'fields': {
                     'value': 1,

@@ -114,7 +114,8 @@ class TestSummaryEmailTask(TestCase):
         write_points.assert_called_with([{
             'measurement': 'karrot.email.group_summary',
             'tags': {
-                'group': str(group.id)
+                'group': str(group.id),
+                'group_status': 'active',
             },
             'fields': {
                 'value': 1,
@@ -141,7 +142,8 @@ class TestSummaryEmailTask(TestCase):
         write_points.assert_called_with([{
             'measurement': 'karrot.email.group_summary',
             'tags': {
-                'group': str(group.id)
+                'group': str(group.id),
+                'group_status': 'active',
             },
             'fields': {
                 'value': 1,

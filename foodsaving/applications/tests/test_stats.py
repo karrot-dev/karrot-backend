@@ -26,6 +26,7 @@ class TestApplicationStats(TestCase):
                 'measurement': 'karrot.group.applications',
                 'tags': {
                     'group': str(group.id),
+                    'group_status': 'active',
                 },
                 'fields': {
                     'count_total': 18,
@@ -46,7 +47,8 @@ class TestApplicationStats(TestCase):
         write_points.assert_called_with([{
             'measurement': 'karrot.events',
             'tags': {
-                'group': str(application.group.id)
+                'group': str(application.group.id),
+                'group_status': application.group.status,
             },
             'fields': {
                 'application_pending': 1,
@@ -59,7 +61,8 @@ class TestApplicationStats(TestCase):
         write_points.assert_called_with([{
             'measurement': 'karrot.events',
             'tags': {
-                'group': str(application.group.id)
+                'group': str(application.group.id),
+                'group_status': application.group.status,
             },
             'fields': {
                 'application_accepted': 1,
