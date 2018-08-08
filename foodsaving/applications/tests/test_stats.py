@@ -40,12 +40,22 @@ class TestApplicationStats(TestCase):
     @patch('foodsaving.applications.stats.write_points')
     def test_group_application_status_update(self, write_points):
         two_hours_ago = timezone.now() - relativedelta(hours=2)
-        application = GroupApplicationFactory(group=GroupFactory(), user=UserFactory(), created_at=two_hours_ago)
-        application.status = 'accepted'
-        application.save()
 
         write_points.reset_mock()
-        stats.application_status_update(application)
+        application = GroupApplicationFactory(group=GroupFactory(), user=UserFactory(), created_at=two_hours_ago)
+        write_points.assert_called_with([{
+            'measurement': 'karrot.events',
+            'tags': {
+                'group': str(application.group.id)
+            },
+            'fields': {
+                'application_pending': 1,
+            },
+        }])
+
+        write_points.reset_mock()
+        application.status = 'accepted'
+        application.save()
         write_points.assert_called_with([{
             'measurement': 'karrot.events',
             'tags': {

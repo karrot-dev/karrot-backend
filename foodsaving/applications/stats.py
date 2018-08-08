@@ -4,16 +4,19 @@ from influxdb_metrics.loader import write_points
 
 
 def application_status_update(application):
-    seconds = (timezone.now() - application.created_at).seconds
+    fields = {
+        'application_{}'.format(application.status): 1,
+    }
+
+    if application.status != 'pending':
+        fields['application_{}_seconds'.format(application.status)] = (timezone.now() - application.created_at).seconds
+
     write_points([{
         'measurement': 'karrot.events',
         'tags': {
             'group': str(application.group.id)
         },
-        'fields': {
-            'application_{}'.format(application.status): 1,
-            'application_{}_seconds'.format(application.status): seconds,
-        },
+        'fields': fields,
     }])
 
 
