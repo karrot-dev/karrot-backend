@@ -23,6 +23,8 @@ class UserSerializer(serializers.ModelSerializer):
             'id',
             'display_name',
             'photo_urls',
+            'latitude',
+            'longitude',
         ]
 
 
