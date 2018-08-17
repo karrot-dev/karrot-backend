@@ -46,8 +46,7 @@ def pickup_conversation_mute_url(pickup, conversation):
 
 
 def group_application_url(application):
-    # TODO check before merging
-    return '{hostname}/#/group/{group_id}/applications/{application_id}/'.format(
+    return '{hostname}/#/group/{group_id}/applications/{application_id}'.format(
         hostname=settings.HOSTNAME,
         group_id=application.group.id,
         application_id=application.id,
