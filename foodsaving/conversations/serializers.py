@@ -204,6 +204,7 @@ class ConversationSerializer(serializers.ModelSerializer):
             'email_notifications',
             'latest_message',
             'type',
+            'target_id',
         ]
 
     seen_up_to = serializers.SerializerMethodField()
