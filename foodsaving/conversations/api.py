@@ -99,8 +99,10 @@ class ConversationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Gene
     def get_queryset(self):
         qs = self.queryset.filter(participants=self.request.user)
         if self.action == 'list':
-            qs = qs.order_by_latest_message_first().annotate_unread_message_count_for(self.request.user
-                                                                                      ).prefetch_for_serializer()
+            qs = qs.order_by_latest_message_first()\
+                .annotate_unread_message_count_for(self.request.user)\
+                .prefetch_for_serializer()\
+                .exclude(target_type__model='group')  # TODO make into query param
         return qs
 
     @action(detail=True, methods=['POST'], serializer_class=ConversationMarkSerializer)
