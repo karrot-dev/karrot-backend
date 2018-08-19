@@ -1,3 +1,4 @@
+import coreapi
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
@@ -6,9 +7,10 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
-from rest_framework.pagination import CursorPagination
+from rest_framework.pagination import CursorPagination, PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
+from rest_framework.schemas import AutoSchema
 from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.conversations.models import (
@@ -23,8 +25,13 @@ from foodsaving.conversations.serializers import (
     EmojiField,
     ConversationThreadSerializer,
 )
-from foodsaving.groups.models import Group
 from foodsaving.utils.mixins import PartialUpdateModelMixin
+
+
+class ConversationPagination(PageNumberPagination):
+    page_size = 10
+    # Stay compatible with cursor pagination:
+    page_query_param = 'cursor'
 
 
 class MessagePagination(CursorPagination):
@@ -87,9 +94,14 @@ class ConversationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Gene
     queryset = Conversation.objects
     serializer_class = ConversationSerializer
     permission_classes = (IsAuthenticated, )
+    pagination_class = ConversationPagination
 
     def get_queryset(self):
-        return self.queryset.filter(participants=self.request.user)
+        qs = self.queryset.filter(participants=self.request.user)
+        if self.action == 'list':
+            qs = qs.order_by_latest_message_first().annotate_unread_message_count_for(self.request.user
+                                                                                      ).prefetch_for_serializer()
+        return qs
 
     @action(detail=True, methods=['POST'], serializer_class=ConversationMarkSerializer)
     def mark(self, request, pk=None):
@@ -110,8 +122,13 @@ class ConversationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Gene
         return Response(serializer.data)
 
 
-class ConversationMessageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,
-                                 PartialUpdateModelMixin, GenericViewSet):
+class ConversationMessageViewSet(
+        mixins.CreateModelMixin,
+        mixins.ListModelMixin,
+        mixins.RetrieveModelMixin,
+        PartialUpdateModelMixin,
+        GenericViewSet,
+):
     """
     ConversationMessages
     """
@@ -133,10 +150,17 @@ class ConversationMessageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
         'thread',
     )
     pagination_class = MessagePagination
+    schema = AutoSchema(
+        manual_fields=[
+            coreapi.Field('my_threads', location='query', description='Set any value to show only your threads'),
+        ]
+    )
 
     @property
     def paginator(self):
-        if self.request.query_params.get('thread', None):
+        if self.request.query_params.get('my_threads', None):
+            self.pagination_class = ConversationPagination
+        elif self.request.query_params.get('thread', None):
             self.pagination_class = ReverseMessagePagination
         return super().paginator
 
@@ -148,6 +172,8 @@ class ConversationMessageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
             .annotate_replies_count() \
             .annotate_unread_replies_count_for(self.request.user)
 
+        if self.request.query_params.get('my_threads', None):
+            return qs.only_threads_with_user(self.request.user).order_by_latest_message_first()
         if self.request.query_params.get('thread', None):
             return qs.only_threads_and_replies()
         else:
@@ -214,7 +240,7 @@ class ConversationMessageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
 
     def perform_create(self, serializer):
         message = serializer.save()
-        if isinstance(message.conversation.target, Group):
+        if message.conversation.type() == 'group':
             group = message.conversation.target
             group.refresh_active_status()
 

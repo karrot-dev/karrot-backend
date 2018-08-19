@@ -136,17 +136,25 @@ class TestConversationThreadsAPI(APITestCase):
         self.client.force_login(user=self.user)
         another_thread = self.conversation.messages.create(author=self.user, content='my own thread')
         n = 5
-        [
-            ConversationMessage.objects.create(
-                conversation=self.conversation,
-                author=self.user,
-                thread=another_thread,
-                content='default reply',
-            ) for _ in range(n)
-        ]
+        [self.create_reply(thread=another_thread) for _ in range(n)]
+
         response = self.client.get('/api/messages/?thread={}'.format(another_thread.id), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), n + 1)
+
+    def test_list_my_recently_active_threads(self):
+        self.client.force_login(user=self.user)
+        most_recent_thread = self.conversation.messages.create(author=self.user, content='my own thread')
+        self.create_reply(author=self.user2)
+        another_thread = self.conversation.messages.create(author=self.user, content='my own thread')
+        [self.create_reply(thread=another_thread) for _ in range(2)]
+        self.conversation.messages.create(author=self.user, content='no replies yet')
+        self.create_reply(thread=most_recent_thread)
+
+        response = self.client.get('/api/messages/?my_threads=1', format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual([thread['id'] for thread in response.data['results']],
+                         [most_recent_thread.id, another_thread.id, self.thread.id])
 
     def test_reply_adds_participant(self):
         self.client.force_login(user=self.user2)
@@ -298,6 +306,8 @@ class TestConversationsSeenUpToAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['seen_up_to'], None)
         self.assertEqual(response.data['unread_message_count'], 1)
+        self.assertEqual(response.data['type'], None)
+        self.assertEqual(response.data['latest_message']['content'], message.content)
 
         self.participant.seen_up_to = message
         self.participant.save()
@@ -306,6 +316,13 @@ class TestConversationsSeenUpToAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['seen_up_to'], message.id)
         self.assertEqual(response.data['unread_message_count'], 0)
+
+    def test_conversation_get_without_messages(self):
+        self.client.force_login(user=self.user)
+
+        response = self.client.get('/api/conversations/{}/'.format(self.conversation.id), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['latest_message'], None)
 
     def test_conversation_list(self):
         message = self.conversation.messages.create(author=self.user, content='yay')
@@ -316,7 +333,23 @@ class TestConversationsSeenUpToAPI(APITestCase):
 
         response = self.client.get('/api/conversations/'.format(self.conversation.id), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data[0]['seen_up_to'], message.id)
+        self.assertEqual(response.data['results'][0]['seen_up_to'], message.id)
+
+    def test_conversation_list_is_ordered_by_latest_message(self):
+        self.conversation.messages.create(author=self.user, content='yay')
+        second_message = self.conversation.messages.create(author=self.user, content='second!')
+        empty_conversation = ConversationFactory(participants=[self.user, self.user2])
+        conversation2 = ConversationFactory(participants=[self.user, self.user2])
+        conversation2.messages.create(author=self.user, content='yay')
+        self.client.force_login(user=self.user)
+
+        response = self.client.get('/api/conversations/'.format(self.conversation.id), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            [conversation['id'] for conversation in response.data['results']],
+            [conversation2.id, self.conversation.id, empty_conversation.id],
+        )
+        self.assertEqual(response.data['results'][1]['latest_message']['id'], second_message.id)
 
     def test_mark_seen_up_to(self):
         message = self.conversation.messages.create(author=self.user2, content='yay')

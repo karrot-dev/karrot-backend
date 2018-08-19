@@ -243,6 +243,7 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.get(self.conversation_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(self.member.id, response.data['participants'])
+        self.assertEqual(response.data['type'], 'pickup')
 
 
 class TestPickupDatesListAPI(APITestCase, ExtractPaginationMixin):

@@ -3,7 +3,9 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import ForeignKey, TextField, ManyToManyField, BooleanField, CharField, QuerySet, Count, F, Q
+from django.db.models import ForeignKey, TextField, ManyToManyField, BooleanField, CharField, QuerySet, Count, F, Q, \
+    Max, Prefetch
+from django.db.models.manager import BaseManager
 from django.utils import timezone
 
 from foodsaving.base.base_models import BaseModel, UpdatedAtMixin
@@ -33,6 +35,26 @@ class ConversationQuerySet(models.QuerySet):
             target_id=target.id,
             target_type=ContentType.objects.get_for_model(target),
         )
+
+    def order_by_latest_message_first(self):
+        # TODO duplicated with prefetch_for_serializer, maybe can be simplified?
+        return self.annotate(last_message_id=Max('messages__id')).order_by(F('last_message_id').desc(nulls_last=True))
+
+    def prefetch_for_serializer(self):
+        latest_messages = ConversationMessage.objects.annotate(max_id=Max('conversation__messages__id')
+                                                               ).filter(id=F('max_id'))
+        return self.prefetch_related(
+            Prefetch('messages', queryset=latest_messages, to_attr='latest_messages'),
+            'target_type',
+            'participants',
+            'latest_messages__reactions',  # TODO move into latest_messages queryset
+        )
+
+    def annotate_unread_message_count_for(self, user):
+        unread_message_filter = Q(conversationparticipant__user=user) & (
+            Q(conversationparticipant__seen_up_to=None) | Q(messages__id__gt=F('conversationparticipant__seen_up_to'))
+        )
+        return self.annotate(unread_message_count=Count('messages', filter=unread_message_filter, distinct=True))
 
 
 class Conversation(BaseModel, UpdatedAtMixin):
@@ -67,6 +89,31 @@ class Conversation(BaseModel, UpdatedAtMixin):
             if user not in desired_users:
                 self.leave(user)
 
+    def latest_message(self):
+        prefetched = getattr(self, 'latest_messages', None)
+        if prefetched is not None:
+            if len(prefetched) == 0:
+                return None
+            return prefetched[0]
+        try:
+            return self.messages.latest('id')
+        except ConversationMessage.DoesNotExist:
+            return None
+
+    def type(self):
+        if self.is_private:
+            return 'private'
+        if self.target_type is None:
+            return None
+
+        type = str(self.target_type)
+        if type == 'pickup date':
+            return 'pickup'
+        if type == 'group application':
+            return 'application'
+
+        return type
+
 
 class ConversationParticipant(BaseModel, UpdatedAtMixin):
     """The join table between Conversation and User."""
@@ -99,6 +146,9 @@ class ConversationMessageQuerySet(QuerySet):
     def exclude_replies(self):
         return self.filter(Q(thread_id=None) | Q(id=F('thread_id')))
 
+    def only_threads_with_user(self, user):
+        return self.filter(participants__user=user)
+
     def only_threads_and_replies(self):
         return self.exclude(thread_id=None)
 
@@ -106,7 +156,9 @@ class ConversationMessageQuerySet(QuerySet):
         return self.filter(~Q(thread_id=None) & ~Q(id=F('thread_id')))
 
     def annotate_replies_count(self):
-        return self.annotate(replies_count=Count('thread_messages', filter=~Q(id=F('thread_id')), distinct=True))
+        return self.annotate(
+            replies_count=Count('thread_messages', filter=~Q(thread_messages__id=F('thread_id')), distinct=True)
+        )
 
     def annotate_unread_replies_count_for(self, user):
         unread_replies_filter = Q(
@@ -117,11 +169,24 @@ class ConversationMessageQuerySet(QuerySet):
             unread_replies_count=Count('thread_messages', filter=unread_replies_filter, distinct=True)
         )
 
+    def order_by_latest_message_first(self):
+        return self.annotate(last_message_id=Max('thread_messages__id')).order_by(
+            F('last_message_id').desc(nulls_last=True)
+        )
+
+
+class ConversationMessageManager(BaseManager.from_queryset(ConversationMessageQuerySet)):
+    def create(self, **kwargs):
+        obj = super().create(**kwargs)
+        if obj.thread and hasattr(obj.thread, '_replies_count'):
+            del obj.thread._replies_count
+        return obj
+
 
 class ConversationMessage(BaseModel, UpdatedAtMixin):
     """A message in the conversation by a particular user."""
 
-    objects = ConversationMessageQuerySet.as_manager()
+    objects = ConversationMessageManager()
 
     author = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     conversation = ForeignKey(Conversation, related_name='messages', on_delete=models.CASCADE)
@@ -144,14 +209,14 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 
     @property
     def replies_count(self):
-        if hasattr(self, '__replies_count'):
-            return self.__replies_count
+        if hasattr(self, '_replies_count'):
+            return self._replies_count
         else:
             return self.thread_messages.only_replies().count()
 
     @replies_count.setter
     def replies_count(self, value):
-        self.__replies_count = value
+        self._replies_count = value
 
 
 class ConversationThreadParticipant(BaseModel, UpdatedAtMixin):

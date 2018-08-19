@@ -57,6 +57,7 @@ def make_conversation_message_broadcast(message, **kwargs):
 
 
 def make_conversation_broadcast(conversation, **kwargs):
+    """ does not include participants and latest message"""
     response = {
         'topic': 'conversations:conversation',
         'payload': {
@@ -65,6 +66,7 @@ def make_conversation_broadcast(conversation, **kwargs):
             'seen_up_to': None,
             'unread_message_count': 0,
             'email_notifications': True,
+            'type': None,
         }
     }
     response['payload'].update(kwargs)
@@ -136,6 +138,7 @@ class ConversationReceiverTests(WSTestCase):
         response = client.messages[1]
         parse_dates(response)
         del response['payload']['participants']
+        del response['payload']['latest_message']
         self.assertEqual(response, make_conversation_broadcast(conversation, unread_message_count=1))
 
         # author should get message & updated conversations object too
@@ -149,6 +152,7 @@ class ConversationReceiverTests(WSTestCase):
         response = author_client.messages[1]
         parse_dates(response)
         del response['payload']['participants']
+        del response['payload']['latest_message']
         self.assertEqual(
             response,
             make_conversation_broadcast(conversation, seen_up_to=message.id, updated_at=author_participant.updated_at)

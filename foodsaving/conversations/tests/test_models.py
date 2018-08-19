@@ -95,6 +95,7 @@ class ConversationThreadModelTests(TestCase):
             .get(pk=self.thread.id)
 
         self.assertEqual(message.replies_count, n)
+        self.assertEqual(message._replies_count, n)
 
     def test_unread_replies_count_annotation(self):
         self.thread.participants.create(user=self.user2)
@@ -204,6 +205,7 @@ class TestPrivateUserConversations(TestCase):
         self.assertEqual(Conversation.objects.count(), 1)
         self.assertEqual(c.participants.count(), 2)
         self.assertEqual(conversation_id, c.id)
+        self.assertEqual(c.type(), 'private')
 
     def test_get_or_create_conversation_for_yourself_fails(self):
         with self.assertRaises(Exception):

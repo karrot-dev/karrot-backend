@@ -4,7 +4,7 @@ from raven.contrib.django.raven_compat.models import client as sentry_client
 
 import foodsaving.conversations.emails
 from foodsaving.conversations.models import ConversationParticipant, ConversationThreadParticipant
-from foodsaving.groups.models import Group, GroupMembership
+from foodsaving.groups.models import GroupMembership
 from foodsaving.users.models import User
 
 
@@ -41,7 +41,7 @@ def notify_participants(message):
     )
 
     # TODO: consider if we want to always send thread notifications even to inactive users
-    if isinstance(message.conversation.target, Group):
+    if message.conversation.type() == 'group':
         # if it's a group conversation, only send to users who are active in that group
         participants_to_notify = participants_to_notify.filter(
             user__groupmembership__in=GroupMembership.objects.active(),

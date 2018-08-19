@@ -3,6 +3,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.fields import DateTimeField
 
+from foodsaving.conversations.helpers import normalize_emoji_name
 from foodsaving.conversations.models import (
     Conversation,
     ConversationMessage,
@@ -10,78 +11,6 @@ from foodsaving.conversations.models import (
     ConversationMessageReaction,
     ConversationThreadParticipant,
 )
-from foodsaving.conversations.helpers import normalize_emoji_name
-from foodsaving.groups.models import Group
-
-
-class ConversationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Conversation
-        fields = ['id', 'participants', 'updated_at', 'seen_up_to', 'unread_message_count', 'email_notifications']
-
-    seen_up_to = serializers.SerializerMethodField()
-    unread_message_count = serializers.SerializerMethodField()
-    updated_at = serializers.SerializerMethodField()
-    email_notifications = serializers.SerializerMethodField()
-
-    def validate(self, data):
-        """Check the user is a participant"""
-        conversation = self.instance
-        if not self._participant(conversation):
-            raise PermissionDenied(_('You are not in this conversation'))
-        return data
-
-    def get_seen_up_to(self, conversation):
-        participant = self._participant(conversation)
-        if not participant.seen_up_to:
-            return None
-        return participant.seen_up_to.id
-
-    def get_unread_message_count(self, conversation):
-        participant = self._participant(conversation)
-        messages = conversation.messages.exclude_replies()
-        if participant.seen_up_to:
-            messages = messages.filter(id__gt=participant.seen_up_to.id)
-        return messages.count()
-
-    def get_updated_at(self, conversation):
-        participant = self._participant(conversation)
-        if participant.updated_at > conversation.updated_at:
-            date = participant.updated_at
-        else:
-            date = conversation.updated_at
-        return DateTimeField().to_representation(date)
-
-    def get_email_notifications(self, conversation):
-        return self._participant(conversation).email_notifications
-
-    def _participant(self, conversation):
-        user = self.context['request'].user
-        if 'participant' not in self.context:
-            self.context['participant'] = conversation.conversationparticipant_set.filter(user=user).first()
-        return self.context['participant']
-
-
-class ConversationMarkSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ConversationParticipant
-        fields = ('seen_up_to', )
-
-    def validate_seen_up_to(self, message):
-        if not self.instance.conversation.messages.filter(id=message.id).exists():
-            raise serializers.ValidationError('Must refer to a message in the conversation')
-        return message
-
-    def update(self, participant, validated_data):
-        participant.seen_up_to = validated_data['seen_up_to']
-        participant.save()
-        return participant
-
-
-class ConversationEmailNotificationsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ConversationParticipant
-        fields = ('email_notifications', )
 
 
 class EmojiField(serializers.Field):
@@ -160,7 +89,7 @@ class ConversationThreadSerializer(serializers.ModelSerializer):
         if count is None:
             messages = participant.thread.thread_messages.only_replies()
             if participant.seen_up_to:
-                messages = messages.filter(id__gt=participant.seen_up_to.id)
+                messages = messages.filter(id__gt=participant.seen_up_to_id)
             return messages.count()
         return count
 
@@ -208,7 +137,8 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
         if not message.is_first_in_thread():
             return None
         user = self.context['request'].user
-        participant = message.participants.filter(user=user).first()
+        # we are filtering in python to make use of prefetched data
+        participant = next((p for p in message.participants.all() if p.user_id == user.id), None)
         if participant:
             return ConversationThreadSerializer(participant).data
         return ConversationThreadNonParticipantSerializer(message).data
@@ -239,7 +169,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(_('Thread is not in the same conversation'))
 
                 # only some types of messages can have threads
-                if not isinstance(conversation.target, Group):
+                if conversation.type() != 'group':
                     raise serializers.ValidationError(_('You can only reply to Group messages'))
 
             # you cannot reply to replies
@@ -251,3 +181,87 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context['request'].user
         return ConversationMessage.objects.create(author=user, **validated_data)
+
+
+class ConversationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Conversation
+        fields = [
+            'id',
+            'participants',
+            'updated_at',
+            'seen_up_to',
+            'unread_message_count',
+            'email_notifications',
+            'latest_message',
+            'type',
+        ]
+
+    seen_up_to = serializers.SerializerMethodField()
+    unread_message_count = serializers.SerializerMethodField()
+    updated_at = serializers.SerializerMethodField()
+    email_notifications = serializers.SerializerMethodField()
+    latest_message = ConversationMessageSerializer(read_only=True)
+    type = serializers.CharField(read_only=True)
+
+    def validate(self, data):
+        """Check the user is a participant"""
+        conversation = self.instance
+        if not self._participant(conversation):
+            raise PermissionDenied(_('You are not in this conversation'))
+        return data
+
+    def get_seen_up_to(self, conversation):
+        participant = self._participant(conversation)
+        if participant.seen_up_to_id is None:
+            return None
+        return participant.seen_up_to_id
+
+    def get_unread_message_count(self, conversation):
+        annotated = getattr(conversation, 'unread_message_count', None)
+        if annotated is not None:
+            return annotated
+        participant = self._participant(conversation)
+        messages = conversation.messages.exclude_replies()
+        if participant.seen_up_to:
+            messages = messages.filter(id__gt=participant.seen_up_to_id)
+        return messages.count()
+
+    def get_updated_at(self, conversation):
+        participant = self._participant(conversation)
+        if participant.updated_at > conversation.updated_at:
+            date = participant.updated_at
+        else:
+            date = conversation.updated_at
+        return DateTimeField().to_representation(date)
+
+    def get_email_notifications(self, conversation):
+        return self._participant(conversation).email_notifications
+
+    def _participant(self, conversation):
+        if 'participant' not in self.context:
+            user = self.context['request'].user
+            self.context['participant'] = conversation.conversationparticipant_set.filter(user=user).first()
+        return self.context['participant']
+
+
+class ConversationMarkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConversationParticipant
+        fields = ('seen_up_to', )
+
+    def validate_seen_up_to(self, message):
+        if not self.instance.conversation.messages.filter(id=message.id).exists():
+            raise serializers.ValidationError('Must refer to a message in the conversation')
+        return message
+
+    def update(self, participant, validated_data):
+        participant.seen_up_to = validated_data['seen_up_to']
+        participant.save()
+        return participant
+
+
+class ConversationEmailNotificationsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConversationParticipant
+        fields = ('email_notifications', )
