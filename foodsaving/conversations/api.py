@@ -1,7 +1,7 @@
 import coreapi
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
-from django_filters.rest_framework import DjangoFilterBackend
+from django_filters.rest_framework import DjangoFilterBackend, FilterSet, BooleanFilter
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework.decorators import action
@@ -86,6 +86,25 @@ class IsWithinUpdatePeriod(BasePermission):
         return message.is_recent()
 
 
+class ConversationsFilter(FilterSet):
+    exclude_wall = BooleanFilter(method='exclude_wall')
+    exclude_empty = BooleanFilter(method='exclude_empty')
+
+    class Meta:
+        model = Conversation
+        fields = ['exclude_wall', 'exclude_empty', 'group']
+
+    def exclude_wall(self, qs, name, value):
+        if value is True:
+            return qs.exclude(target_type__model='group')
+        return qs
+
+    def exclude_empty(self, qs, name, value):
+        if value is True:
+            return qs.exclude(last_message_id=None)
+        return qs
+
+
 class ConversationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
     """
     Conversations
@@ -95,14 +114,14 @@ class ConversationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Gene
     serializer_class = ConversationSerializer
     permission_classes = (IsAuthenticated, )
     pagination_class = ConversationPagination
+    filterset_class = ConversationsFilter
 
     def get_queryset(self):
         qs = self.queryset.filter(participants=self.request.user)
         if self.action == 'list':
             qs = qs.order_by_latest_message_first()\
                 .annotate_unread_message_count_for(self.request.user)\
-                .prefetch_for_serializer()\
-                .exclude(target_type__model='group')  # TODO make into query param
+                .prefetch_for_serializer()
         return qs
 
     @action(detail=True, methods=['POST'], serializer_class=ConversationMarkSerializer)
