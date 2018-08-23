@@ -72,6 +72,8 @@ class Conversation(BaseModel, UpdatedAtMixin):
     target_id = models.PositiveIntegerField(null=True)
     target = GenericForeignKey('target_type', 'target_id')
 
+    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, null=True)
+
     def join(self, user, **kwargs):
         if not self.conversationparticipant_set.filter(user=user).exists():
             ConversationParticipant.objects.create(user=user, conversation=self, **kwargs)
@@ -113,6 +115,15 @@ class Conversation(BaseModel, UpdatedAtMixin):
             return 'application'
 
         return type
+
+    def save(self, **kwargs):
+        # try to keep group in sync when target changes
+        if self.target_id is not None:
+            old = type(self).objects.get(pk=self.pk) if self.pk else None
+            if old is None or old.target_id != self.target_id or old.target_type_id != self.target_type_id:
+                self.group = self.target.group
+
+        super().save(**kwargs)
 
 
 class ConversationParticipant(BaseModel, UpdatedAtMixin):

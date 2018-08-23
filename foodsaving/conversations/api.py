@@ -87,19 +87,19 @@ class IsWithinUpdatePeriod(BasePermission):
 
 
 class ConversationsFilter(FilterSet):
-    exclude_wall = BooleanFilter(method='exclude_wall')
-    exclude_empty = BooleanFilter(method='exclude_empty')
+    exclude_wall = BooleanFilter(method='filter_exclude_wall')
+    exclude_empty = BooleanFilter(method='filter_exclude_empty')
 
     class Meta:
         model = Conversation
         fields = ['exclude_wall', 'exclude_empty', 'group']
 
-    def exclude_wall(self, qs, name, value):
+    def filter_exclude_wall(self, qs, name, value):
         if value is True:
             return qs.exclude(target_type__model='group')
         return qs
 
-    def exclude_empty(self, qs, name, value):
+    def filter_exclude_empty(self, qs, name, value):
         if value is True:
             return qs.exclude(last_message_id=None)
         return qs

@@ -199,6 +199,10 @@ class PickupDate(BaseModel, ConversationMixin):
     # e.g. logged to history as PICKUP_DONE or PICKUP_MISSED
     done_and_processed = models.BooleanField(default=False)
 
+    @property
+    def group(self):
+        return self.store.group
+
     def __str__(self):
         return 'PickupDate {} - {}'.format(self.date, self.store)
 
