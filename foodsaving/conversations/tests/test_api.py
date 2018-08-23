@@ -32,6 +32,54 @@ class TestConversationsAPI(APITestCase):
         self.conversation2.messages.create(author=self.participant1, content='hello2')
         self.conversation3 = ConversationFactory()  # conversation noone is in
 
+    def test_conversations_list(self):
+        self.conversation1.messages.create(author=self.participant1, content='yay')
+        self.conversation1.messages.create(author=self.participant1, content='second!')
+        conversation2 = ConversationFactory(participants=[self.participant1, self.participant2])
+        conversation2.messages.create(author=self.participant1, content='yay')
+        self.client.force_login(user=self.participant1)
+
+        response = self.client.get('/api/conversations/', format='json')
+        response_conversations = response.data['results']['conversations']
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # is ordered by latest message first
+        self.assertEqual(
+            [conversation['id'] for conversation in response_conversations],
+            [conversation2.id, self.conversation1.id, self.conversation2.id],
+        )
+
+    def test_list_conversations_by_group(self):
+        user = UserFactory()
+        group1 = GroupFactory(members=[user])
+        conversation1 = Conversation.objects.get_or_create_for_target(group1)
+        conversation1.messages.create(author=user, content='bu')
+        group2 = GroupFactory(members=[user])
+        conversation2 = Conversation.objects.get_or_create_for_target(group2)
+        conversation2.messages.create(author=user, content='bu')
+
+        self.client.force_login(user=user)
+
+        response = self.client.get('/api/conversations/', {'group': group1.id}, format='json')
+        response_conversations = response.data['results']['conversations']
+        self.assertEqual(len(response_conversations), 1, response.data)
+        self.assertEqual(response_conversations[0]['id'], conversation1.id)
+
+        response = self.client.get('/api/conversations/', {'group': group2.id}, format='json')
+        response_conversations = response.data['results']['conversations']
+        self.assertEqual(len(response_conversations), 1, response.data)
+        self.assertEqual(response_conversations[0]['id'], conversation2.id)
+
+    def test_list_conversations_without_wall(self):
+        user = UserFactory()
+        group = GroupFactory(members=[user])
+        conversation = Conversation.objects.get_or_create_for_target(group)
+        conversation.messages.create(author=user, content='bu')
+        self.client.force_login(user=user)
+
+        response = self.client.get('/api/conversations/', {'exclude_wall': True}, format='json')
+        response_conversations = response.data['results']['conversations']
+        self.assertEqual(len(response_conversations), 0)
+
     def test_get_messages(self):
         self.client.force_login(user=self.participant1)
         response = self.client.get('/api/messages/?conversation={}'.format(self.conversation1.id), format='json')
@@ -151,9 +199,9 @@ class TestConversationThreadsAPI(APITestCase):
         self.conversation.messages.create(author=self.user, content='no replies yet')
         self.create_reply(thread=most_recent_thread)
 
-        response = self.client.get('/api/messages/?my_threads=1', format='json')
+        response = self.client.get('/api/messages/my_threads/', format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual([thread['id'] for thread in response.data['results']],
+        self.assertEqual([thread['id'] for thread in response.data['results']['threads']],
                          [most_recent_thread.id, another_thread.id, self.thread.id])
 
     def test_reply_adds_participant(self):
@@ -307,7 +355,6 @@ class TestConversationsSeenUpToAPI(APITestCase):
         self.assertEqual(response.data['seen_up_to'], None)
         self.assertEqual(response.data['unread_message_count'], 1)
         self.assertEqual(response.data['type'], None)
-        self.assertEqual(response.data['latest_message']['content'], message.content)
 
         self.participant.seen_up_to = message
         self.participant.save()
@@ -316,13 +363,6 @@ class TestConversationsSeenUpToAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['seen_up_to'], message.id)
         self.assertEqual(response.data['unread_message_count'], 0)
-
-    def test_conversation_get_without_messages(self):
-        self.client.force_login(user=self.user)
-
-        response = self.client.get('/api/conversations/{}/'.format(self.conversation.id), format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['latest_message'], None)
 
     def test_conversation_list(self):
         message = self.conversation.messages.create(author=self.user, content='yay')
@@ -333,23 +373,7 @@ class TestConversationsSeenUpToAPI(APITestCase):
 
         response = self.client.get('/api/conversations/'.format(self.conversation.id), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['results'][0]['seen_up_to'], message.id)
-
-    def test_conversation_list_is_ordered_by_latest_message(self):
-        self.conversation.messages.create(author=self.user, content='yay')
-        second_message = self.conversation.messages.create(author=self.user, content='second!')
-        empty_conversation = ConversationFactory(participants=[self.user, self.user2])
-        conversation2 = ConversationFactory(participants=[self.user, self.user2])
-        conversation2.messages.create(author=self.user, content='yay')
-        self.client.force_login(user=self.user)
-
-        response = self.client.get('/api/conversations/'.format(self.conversation.id), format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            [conversation['id'] for conversation in response.data['results']],
-            [conversation2.id, self.conversation.id, empty_conversation.id],
-        )
-        self.assertEqual(response.data['results'][1]['latest_message']['id'], second_message.id)
+        self.assertEqual(response.data['results']['conversations'][0]['seen_up_to'], message.id)
 
     def test_mark_seen_up_to(self):
         message = self.conversation.messages.create(author=self.user2, content='yay')

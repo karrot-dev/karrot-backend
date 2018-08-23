@@ -122,7 +122,6 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
             'is_editable',
             'thread',  # ideally would only be writable on create
             'thread_meta',
-            'latest_message',
         ]
         read_only_fields = (
             'author',
@@ -133,7 +132,6 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
         )
 
     thread_meta = serializers.SerializerMethodField()
-    latest_message = serializers.SerializerMethodField()
 
     def get_thread_meta(self, message):
         if not message.is_first_in_thread():
@@ -145,18 +143,11 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
             return ConversationThreadSerializer(participant).data
         return ConversationThreadNonParticipantSerializer(message).data
 
-    def get_latest_message(self, message):
-        if not message.is_first_in_thread():
-            return None
-        # TODO: make more efficient
-        latest = message.thread_messages.latest('id')
-        return ConversationMessageSerializer(latest, context=self.context).data
-
     reactions = ConversationMessageReactionSerializer(many=True, read_only=True)
     is_editable = serializers.SerializerMethodField()
 
     def get_is_editable(self, message):
-        return message.is_recent() and message.author == self.context['request'].user
+        return message.is_recent() and message.author_id == self.context['request'].user.id
 
     def validate_conversation(self, conversation):
         if self.context['request'].user not in conversation.participants.all():
@@ -202,7 +193,6 @@ class ConversationSerializer(serializers.ModelSerializer):
             'seen_up_to',
             'unread_message_count',
             'email_notifications',
-            'latest_message',
             'type',
             'target_id',
         ]
@@ -211,7 +201,6 @@ class ConversationSerializer(serializers.ModelSerializer):
     unread_message_count = serializers.SerializerMethodField()
     updated_at = serializers.SerializerMethodField()
     email_notifications = serializers.SerializerMethodField()
-    latest_message = ConversationMessageSerializer(read_only=True)
     type = serializers.CharField(read_only=True)
 
     def validate(self, data):

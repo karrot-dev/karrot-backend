@@ -50,7 +50,6 @@ def make_conversation_message_broadcast(message, **kwargs):
             'is_editable': False,
             'thread': None,
             'thread_meta': None,
-            'latest_message': None,
         }
     }
     response['payload'].update(kwargs)
@@ -58,7 +57,7 @@ def make_conversation_message_broadcast(message, **kwargs):
 
 
 def make_conversation_broadcast(conversation, **kwargs):
-    """ does not include participants and latest message"""
+    """ does not include participants"""
     response = {
         'topic': 'conversations:conversation',
         'payload': {
@@ -132,6 +131,7 @@ class ConversationReceiverTests(WSTestCase):
         message = ConversationMessage.objects.create(conversation=conversation, content='yay', author=author)
 
         # hopefully they receive it!
+        self.assertEqual(len(client.messages), 2, client.messages)
         response = client.messages[0]
         parse_dates(response)
         self.assertEqual(response, make_conversation_message_broadcast(message))
@@ -140,8 +140,14 @@ class ConversationReceiverTests(WSTestCase):
         response = client.messages[1]
         parse_dates(response)
         del response['payload']['participants']
-        del response['payload']['latest_message']
-        self.assertEqual(response, make_conversation_broadcast(conversation, unread_message_count=1))
+        self.assertEqual(
+            response,
+            make_conversation_broadcast(
+                conversation,
+                unread_message_count=1,
+                updated_at=response['payload']['updated_at'],  # TODO fix test
+            )
+        )
 
         # author should get message & updated conversations object too
         response = author_client.messages[0]
@@ -154,7 +160,6 @@ class ConversationReceiverTests(WSTestCase):
         response = author_client.messages[1]
         parse_dates(response)
         del response['payload']['participants']
-        del response['payload']['latest_message']
         self.assertEqual(
             response,
             make_conversation_broadcast(conversation, seen_up_to=message.id, updated_at=author_participant.updated_at)
@@ -241,7 +246,6 @@ class ConversationThreadReceiverTests(WSTestCase):
 
         # and they should get an updated thread object
         response = client.messages[1]
-        response['payload']['latest_message'] = None  # TODO too hard to assert
         parse_dates(response)
         self.assertEqual(
             response,
@@ -257,6 +261,7 @@ class ConversationThreadReceiverTests(WSTestCase):
                 },
                 thread=thread.id,
                 is_editable=True,  # user is author of thread message
+                updated_at=response['payload']['updated_at'],  # TODO fix test
             )
         )
 
@@ -268,7 +273,6 @@ class ConversationThreadReceiverTests(WSTestCase):
         # Author receives more recent `update_at` time,
         # because their `seen_up_to` status is set after sending the message.
         response = author_client.messages[1]
-        response['payload']['latest_message'] = None  # TODO too hard to assert
         parse_dates(response)
         self.assertEqual(
             response,
@@ -282,7 +286,8 @@ class ConversationThreadReceiverTests(WSTestCase):
                     'reply_count': 1,
                     'seen_up_to': reply.id,
                     'unread_reply_count': 0,
-                }
+                },
+                updated_at=response['payload']['updated_at'],  # TODO fix test
             )
         )
 

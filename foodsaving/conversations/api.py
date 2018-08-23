@@ -1,5 +1,6 @@
-import coreapi
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import prefetch_related_objects
 from django.utils.translation import ugettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, BooleanFilter
 from rest_framework import mixins
@@ -7,31 +8,28 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
-from rest_framework.pagination import CursorPagination, PageNumberPagination
+from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
-from rest_framework.schemas import AutoSchema
 from rest_framework.viewsets import GenericViewSet
 
+from foodsaving.applications.models import GroupApplication
+from foodsaving.applications.serializers import GroupApplicationSerializer
 from foodsaving.conversations.models import (
     Conversation, ConversationMessage, ConversationMessageReaction, ConversationParticipant
 )
 from foodsaving.conversations.serializers import (
-    ConversationSerializer,
-    ConversationMessageSerializer,
-    ConversationMessageReactionSerializer,
-    ConversationMarkSerializer,
-    ConversationEmailNotificationsSerializer,
-    EmojiField,
-    ConversationThreadSerializer,
+    ConversationSerializer, ConversationMessageSerializer, ConversationMessageReactionSerializer,
+    ConversationMarkSerializer, ConversationEmailNotificationsSerializer, EmojiField, ConversationThreadSerializer
 )
+from foodsaving.pickups.models import PickupDate
+from foodsaving.pickups.serializers import PickupDateSerializer
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 
-class ConversationPagination(PageNumberPagination):
+class ConversationPagination(CursorPagination):
     page_size = 10
-    # Stay compatible with cursor pagination:
-    page_query_param = 'cursor'
+    ordering = '-latest_message_id'
 
 
 class MessagePagination(CursorPagination):
@@ -88,24 +86,18 @@ class IsWithinUpdatePeriod(BasePermission):
 
 class ConversationsFilter(FilterSet):
     exclude_wall = BooleanFilter(method='filter_exclude_wall')
-    exclude_empty = BooleanFilter(method='filter_exclude_empty')
 
     class Meta:
         model = Conversation
-        fields = ['exclude_wall', 'exclude_empty', 'group']
+        fields = ['exclude_wall', 'group']
 
     def filter_exclude_wall(self, qs, name, value):
         if value is True:
             return qs.exclude(target_type__model='group')
         return qs
 
-    def filter_exclude_empty(self, qs, name, value):
-        if value is True:
-            return qs.exclude(last_message_id=None)
-        return qs
 
-
-class ConversationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
+class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
     """
     Conversations
     """
@@ -114,15 +106,54 @@ class ConversationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Gene
     serializer_class = ConversationSerializer
     permission_classes = (IsAuthenticated, )
     pagination_class = ConversationPagination
+    filter_backends = (DjangoFilterBackend, )
     filterset_class = ConversationsFilter
 
     def get_queryset(self):
-        qs = self.queryset.filter(participants=self.request.user)
-        if self.action == 'list':
-            qs = qs.order_by_latest_message_first()\
-                .annotate_unread_message_count_for(self.request.user)\
-                .prefetch_for_serializer()
-        return qs
+        return self.queryset.filter(participants=self.request.user)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset() \
+            .exclude(latest_message_id=None) \
+            .annotate_unread_message_count_for(self.request.user) \
+            .prefetch_related(
+                'latest_message',
+                'latest_message__reactions',
+                'target_type',
+                'participants'
+            )
+
+        queryset = self.filter_queryset(queryset)
+
+        pickup_ct = ContentType.objects.get_for_model(PickupDate)
+        applications_ct = ContentType.objects.get_for_model(GroupApplication)
+
+        conversations = self.paginate_queryset(queryset)
+
+        pickup_conversations = [item for item in conversations if item.target_type == pickup_ct]
+        application_conversations = [item for item in conversations if item.target_type == applications_ct]
+
+        prefetch_related_objects(pickup_conversations, 'target')
+        prefetch_related_objects(application_conversations, 'target')
+
+        messages = [c.latest_message for c in conversations if c.latest_message is not None]
+        pickups = [c.target for c in pickup_conversations]
+        applications = [c.target for c in application_conversations]
+
+        prefetch_related_objects(pickups, 'collectors')
+
+        context = self.get_serializer_context()
+        serializer = self.get_serializer(conversations, many=True)
+        message_serializer = ConversationMessageSerializer(messages, many=True, context=context)
+        pickups_serializer = PickupDateSerializer(pickups, many=True, context=context)
+        application_serializer = GroupApplicationSerializer(applications, many=True, context=context)
+
+        return self.get_paginated_response({
+            'conversations': serializer.data,
+            'messages': message_serializer.data,
+            'pickups': pickups_serializer.data,
+            'applications': application_serializer.data,
+        })
 
     @action(detail=True, methods=['POST'], serializer_class=ConversationMarkSerializer)
     def mark(self, request, pk=None):
@@ -154,10 +185,7 @@ class ConversationMessageViewSet(
     ConversationMessages
     """
 
-    queryset = ConversationMessage.objects \
-        .prefetch_related('reactions') \
-        .prefetch_related('participants')
-
+    queryset = ConversationMessage.objects
     serializer_class = ConversationMessageSerializer
     permission_classes = (
         IsAuthenticated,
@@ -171,17 +199,11 @@ class ConversationMessageViewSet(
         'thread',
     )
     pagination_class = MessagePagination
-    schema = AutoSchema(
-        manual_fields=[
-            coreapi.Field('my_threads', location='query', description='Set any value to show only your threads'),
-        ]
-    )
+    prefetch_lookups = ('reactions', 'participants')
 
     @property
     def paginator(self):
-        if self.request.query_params.get('my_threads', None):
-            self.pagination_class = ConversationPagination
-        elif self.request.query_params.get('thread', None):
+        if self.request.query_params.get('thread', None):
             self.pagination_class = ReverseMessagePagination
         return super().paginator
 
@@ -193,12 +215,31 @@ class ConversationMessageViewSet(
             .annotate_replies_count() \
             .annotate_unread_replies_count_for(self.request.user)
 
-        if self.request.query_params.get('my_threads', None):
-            return qs.only_threads_with_user(self.request.user).order_by_latest_message_first()
+        if self.action == 'my_threads':
+            return qs
+
+        if self.action == 'list':
+            qs = qs.prefetch_related(*self.prefetch_lookups)
+
         if self.request.query_params.get('thread', None):
             return qs.only_threads_and_replies()
-        else:
-            return qs.exclude_replies()
+
+        return qs.exclude_replies()
+
+    @action(detail=False)
+    def my_threads(self, request):
+        queryset = self.get_queryset() \
+            .only_threads_with_user(request.user) \
+            .prefetch_related(*self.prefetch_lookups, 'latest_message', 'latest_message__reactions')
+        queryset = self.filter_queryset(queryset)
+        paginator = ConversationPagination()
+
+        threads = paginator.paginate_queryset(queryset, request, view=self)
+        messages = [t.latest_message for t in threads if t.latest_message is not None]
+
+        serializer = self.get_serializer(threads, many=True)
+        message_serializer = self.get_serializer(messages, many=True)
+        return paginator.get_paginated_response({'threads': serializer.data, 'messages': message_serializer.data})
 
     def partial_update(self, request, *args, **kwargs):
         """Update one of your messages"""

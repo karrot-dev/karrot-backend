@@ -3,8 +3,7 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import ForeignKey, TextField, ManyToManyField, BooleanField, CharField, QuerySet, Count, F, Q, \
-    Max, Prefetch
+from django.db.models import ForeignKey, TextField, ManyToManyField, BooleanField, CharField, QuerySet, Count, F, Q
 from django.db.models.manager import BaseManager
 from django.utils import timezone
 
@@ -36,20 +35,6 @@ class ConversationQuerySet(models.QuerySet):
             target_type=ContentType.objects.get_for_model(target),
         )
 
-    def order_by_latest_message_first(self):
-        # TODO duplicated with prefetch_for_serializer, maybe can be simplified?
-        return self.annotate(last_message_id=Max('messages__id')).order_by(F('last_message_id').desc(nulls_last=True))
-
-    def prefetch_for_serializer(self):
-        latest_messages = ConversationMessage.objects.annotate(max_id=Max('conversation__messages__id')
-                                                               ).filter(id=F('max_id'))
-        return self.prefetch_related(
-            Prefetch('messages', queryset=latest_messages, to_attr='latest_messages'),
-            'target_type',
-            'participants',
-            'latest_messages__reactions',  # TODO move into latest_messages queryset
-        )
-
     def annotate_unread_message_count_for(self, user):
         unread_message_filter = Q(conversationparticipant__user=user) & (
             Q(conversationparticipant__seen_up_to=None) | Q(messages__id__gt=F('conversationparticipant__seen_up_to'))
@@ -73,6 +58,12 @@ class Conversation(BaseModel, UpdatedAtMixin):
     target = GenericForeignKey('target_type', 'target_id')
 
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, null=True)
+    latest_message = models.ForeignKey(
+        'conversations.ConversationMessage',
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='conversation_latest_message'
+    )
 
     def join(self, user, **kwargs):
         if not self.conversationparticipant_set.filter(user=user).exists():
@@ -91,17 +82,6 @@ class Conversation(BaseModel, UpdatedAtMixin):
             if user not in desired_users:
                 self.leave(user)
 
-    def latest_message(self):
-        prefetched = getattr(self, 'latest_messages', None)
-        if prefetched is not None:
-            if len(prefetched) == 0:
-                return None
-            return prefetched[0]
-        try:
-            return self.messages.latest('id')
-        except ConversationMessage.DoesNotExist:
-            return None
-
     def type(self):
         if self.is_private:
             return 'private'
@@ -117,7 +97,8 @@ class Conversation(BaseModel, UpdatedAtMixin):
         return type
 
     def save(self, **kwargs):
-        # try to keep group in sync when target changes
+        # keep group reference updated, even when target might change
+        # (but can't keep track if target changes group - should not happen, too)
         if self.target_id is not None:
             old = type(self).objects.get(pk=self.pk) if self.pk else None
             if old is None or old.target_id != self.target_id or old.target_type_id != self.target_type_id:
@@ -180,15 +161,11 @@ class ConversationMessageQuerySet(QuerySet):
             unread_replies_count=Count('thread_messages', filter=unread_replies_filter, distinct=True)
         )
 
-    def order_by_latest_message_first(self):
-        return self.annotate(last_message_id=Max('thread_messages__id')).order_by(
-            F('last_message_id').desc(nulls_last=True)
-        )
-
 
 class ConversationMessageManager(BaseManager.from_queryset(ConversationMessageQuerySet)):
     def create(self, **kwargs):
         obj = super().create(**kwargs)
+        # clear cached value
         if obj.thread and hasattr(obj.thread, '_replies_count'):
             del obj.thread._replies_count
         return obj
@@ -205,6 +182,29 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 
     content = TextField()
     received_via = CharField(max_length=40, blank=True)
+
+    latest_message = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='thread_latest_message',
+    )
+
+    def save(self, **kwargs):
+        creating = self.pk is None
+        super().save(**kwargs)
+        if creating:
+            # keep latest_message reference up-to-date
+            if self.is_thread_reply():
+                # update thread
+                thread = self.thread
+                thread.latest_message = self
+                thread.save()
+            else:
+                # update conversation
+                conversation = self.conversation
+                conversation.latest_message = self
+                conversation.save()
 
     def content_rendered(self, **kwargs):
         return markdown.render(self.content, **kwargs)
