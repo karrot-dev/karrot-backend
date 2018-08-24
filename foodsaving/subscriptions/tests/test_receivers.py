@@ -68,6 +68,7 @@ def make_conversation_broadcast(conversation, **kwargs):
             'email_notifications': True,
             'type': None,
             'target_id': None,
+            'group': None,
         }
     }
     response['payload'].update(kwargs)
