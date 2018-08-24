@@ -239,10 +239,9 @@ class ConversationSerializer(serializers.ModelSerializer):
         return self._participant(conversation).email_notifications
 
     def _participant(self, conversation):
-        if 'participant' not in self.context:
-            user = self.context['request'].user
-            self.context['participant'] = conversation.conversationparticipant_set.filter(user=user).first()
-        return self.context['participant']
+        user = self.context['request'].user
+        participant = next((p for p in conversation.conversationparticipant_set.all() if p.user_id == user.id), None)
+        return participant
 
 
 class ConversationMarkSerializer(serializers.ModelSerializer):

@@ -111,6 +111,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
                 'latest_message__reactions',
                 'target_type',
                 'participants',
+                'conversationparticipant_set',
              )
 
         queryset = self.filter_queryset(queryset)
@@ -131,6 +132,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
         applications = [c.target for c in application_conversations]
 
         prefetch_related_objects(pickups, 'collectors')
+        prefetch_related_objects(applications, 'user')
 
         context = self.get_serializer_context()
         serializer = self.get_serializer(conversations, many=True)
