@@ -1,8 +1,9 @@
+import coreapi
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import prefetch_related_objects
 from django.utils.translation import ugettext_lazy as _
-from django_filters.rest_framework import DjangoFilterBackend, FilterSet, BooleanFilter
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework.decorators import action
@@ -11,10 +12,12 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
+from rest_framework.schemas import ManualSchema
 from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.applications.models import GroupApplication
 from foodsaving.applications.serializers import GroupApplicationSerializer
+from foodsaving.conversations.filters import ConversationsFilter, ConversationMessageFilter
 from foodsaving.conversations.models import (
     Conversation, ConversationMessage, ConversationMessageReaction, ConversationParticipant
 )
@@ -82,19 +85,6 @@ class IsWithinUpdatePeriod(BasePermission):
         if view.action != 'partial_update':
             return True
         return message.is_recent()
-
-
-class ConversationsFilter(FilterSet):
-    exclude_wall = BooleanFilter(method='filter_exclude_wall')
-
-    class Meta:
-        model = Conversation
-        fields = ['exclude_wall', 'group']
-
-    def filter_exclude_wall(self, qs, name, value):
-        if value is True:
-            return qs.exclude(target_type__model='group')
-        return qs
 
 
 class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
@@ -194,10 +184,7 @@ class ConversationMessageViewSet(
         IsWithinUpdatePeriod,
     )
     filter_backends = (DjangoFilterBackend, )
-    filterset_fields = (
-        'conversation',
-        'thread',
-    )
+    filterset_class = ConversationMessageFilter
     pagination_class = MessagePagination
     prefetch_lookups = ('reactions', 'participants')
 
@@ -226,7 +213,16 @@ class ConversationMessageViewSet(
 
         return qs.exclude_replies()
 
-    @action(detail=False)
+    @action(
+        detail=False,
+        schema=ManualSchema(
+            description='Lists threads the user has participated in',
+            fields=[
+                coreapi.Field('group', location='query'),
+                coreapi.Field('conversation', location='query'),
+            ]
+        )
+    )
     def my_threads(self, request):
         queryset = self.get_queryset() \
             .only_threads_with_user(request.user) \
@@ -261,7 +257,6 @@ class ConversationMessageViewSet(
     @action(
         detail=True,
         methods=('POST', ),
-        filterset_fields=('name', ),
     )
     def reactions(self, request, pk):
         """route for POST /messages/{id}/reactions/ with body {"name":"emoji_name"}"""
