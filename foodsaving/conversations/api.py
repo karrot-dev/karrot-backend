@@ -120,8 +120,8 @@ class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
                 'latest_message',
                 'latest_message__reactions',
                 'target_type',
-                'participants'
-            )
+                'participants',
+             )
 
         queryset = self.filter_queryset(queryset)
 
