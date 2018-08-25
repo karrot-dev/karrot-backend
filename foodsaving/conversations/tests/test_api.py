@@ -7,11 +7,14 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from foodsaving.applications.factories import GroupApplicationFactory
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationParticipant, Conversation, ConversationMessage, \
     ConversationMessageReaction
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupStatus
+from foodsaving.pickups.factories import PickupDateFactory
+from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
 from foodsaving.webhooks.models import EmailEvent
 
@@ -79,6 +82,26 @@ class TestConversationsAPI(APITestCase):
         response = self.client.get('/api/conversations/', {'exclude_wall': True}, format='json')
         response_conversations = response.data['results']['conversations']
         self.assertEqual(len(response_conversations), 0)
+
+    def test_list_conversations_with_related_data_efficiently(self):
+        user = UserFactory()
+        group = GroupFactory(members=[user])
+        store = StoreFactory(group=group)
+        pickup = PickupDateFactory(store=store)
+        application = GroupApplicationFactory(user=UserFactory(), group=group)
+
+        conversations = [Conversation.objects.get_or_create_for_target(t) for t in (group, pickup, application)]
+        [c.sync_users([user]) for c in conversations]
+        [c.messages.create(content='hey', author=user) for c in conversations]
+
+        self.client.force_login(user=user)
+        with self.assertNumQueries(10):
+            response = self.client.get('/api/conversations/', {'group': group.id}, format='json')
+        results = response.data['results']
+
+        self.assertEqual(len(results['conversations']), len(conversations))
+        self.assertEqual(results['pickups'][0]['id'], pickup.id)
+        self.assertEqual(results['applications'][0]['id'], application.id)
 
     def test_get_messages(self):
         self.client.force_login(user=self.participant1)
@@ -199,10 +222,14 @@ class TestConversationThreadsAPI(APITestCase):
         self.conversation.messages.create(author=self.user, content='no replies yet')
         self.create_reply(thread=most_recent_thread)
 
-        response = self.client.get('/api/messages/my_threads/', format='json')
+        with self.assertNumQueries(4):
+            response = self.client.get('/api/messages/my_threads/', format='json')
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual([thread['id'] for thread in response.data['results']['threads']],
+        results = response.data['results']
+        self.assertEqual([thread['id'] for thread in results['threads']],
                          [most_recent_thread.id, another_thread.id, self.thread.id])
+        self.assertEqual(len(results['threads']), len(results['messages']))
 
     def test_reply_adds_participant(self):
         self.client.force_login(user=self.user2)

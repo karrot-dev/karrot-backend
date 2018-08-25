@@ -103,36 +103,35 @@ class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
         return self.queryset.filter(participants=self.request.user)
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset() \
-            .exclude(latest_message_id=None) \
-            .annotate_unread_message_count_for(self.request.user) \
-            .prefetch_related(
+        queryset = self.get_queryset(). \
+            exclude(latest_message_id=None). \
+            annotate_unread_message_count_for(self.request.user). \
+            select_related(
                 'latest_message',
-                'latest_message__reactions',
                 'target_type',
+            ). \
+            prefetch_related(
+                'latest_message__reactions',
                 'participants',
                 'conversationparticipant_set',
-             )
+            )
 
         queryset = self.filter_queryset(queryset)
-
-        pickup_ct = ContentType.objects.get_for_model(PickupDate)
-        applications_ct = ContentType.objects.get_for_model(GroupApplication)
-
         conversations = self.paginate_queryset(queryset)
 
+        # Prefetch related objects per target type
+        pickup_ct = ContentType.objects.get_for_model(PickupDate)
+        applications_ct = ContentType.objects.get_for_model(GroupApplication)
         pickup_conversations = [item for item in conversations if item.target_type == pickup_ct]
         application_conversations = [item for item in conversations if item.target_type == applications_ct]
 
-        prefetch_related_objects(pickup_conversations, 'target')
-        prefetch_related_objects(application_conversations, 'target')
-
         messages = [c.latest_message for c in conversations if c.latest_message is not None]
-        pickups = [c.target for c in pickup_conversations]
-        applications = [c.target for c in application_conversations]
-
-        prefetch_related_objects(pickups, 'collectors')
-        prefetch_related_objects(applications, 'user')
+        pickups = PickupDate.objects. \
+            filter(id__in=[c.target_id for c in pickup_conversations]). \
+            prefetch_related('collectors')
+        applications = GroupApplication.objects. \
+            filter(id__in=[c.target_id for c in application_conversations]). \
+            select_related('user')
 
         context = self.get_serializer_context()
         serializer = self.get_serializer(conversations, many=True)
@@ -188,7 +187,6 @@ class ConversationMessageViewSet(
     filter_backends = (DjangoFilterBackend, )
     filterset_class = ConversationMessageFilter
     pagination_class = MessagePagination
-    prefetch_lookups = ('reactions', 'participants')
 
     @property
     def paginator(self):
@@ -208,7 +206,7 @@ class ConversationMessageViewSet(
             return qs
 
         if self.action == 'list':
-            qs = qs.prefetch_related(*self.prefetch_lookups)
+            qs = qs.prefetch_related('reactions', 'participants')
 
         if self.request.query_params.get('thread', None):
             return qs.only_threads_and_replies()
@@ -228,12 +226,15 @@ class ConversationMessageViewSet(
     def my_threads(self, request):
         queryset = self.get_queryset() \
             .only_threads_with_user(request.user) \
-            .prefetch_related(*self.prefetch_lookups, 'latest_message', 'latest_message__reactions')
+            .select_related('latest_message') \
+            .prefetch_related('participants')
         queryset = self.filter_queryset(queryset)
         paginator = ConversationPagination()
 
-        threads = paginator.paginate_queryset(queryset, request, view=self)
+        threads = list(paginator.paginate_queryset(queryset, request, view=self))
         messages = [t.latest_message for t in threads if t.latest_message is not None]
+
+        prefetch_related_objects(threads + messages, 'reactions')
 
         serializer = self.get_serializer(threads, many=True)
         message_serializer = self.get_serializer(messages, many=True)
