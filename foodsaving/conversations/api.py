@@ -103,18 +103,18 @@ class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
         return self.queryset.filter(participants=self.request.user)
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset(). \
-            exclude(latest_message_id=None). \
-            annotate_unread_message_count_for(self.request.user). \
-            select_related(
+        queryset = self.get_queryset() \
+            .exclude(latest_message_id=None) \
+            .annotate_unread_message_count_for(self.request.user) \
+            .select_related(
                 'latest_message',
                 'target_type',
-            ). \
-            prefetch_related(
+             ) \
+            .prefetch_related(
                 'latest_message__reactions',
                 'participants',
                 'conversationparticipant_set',
-            )
+             )
 
         queryset = self.filter_queryset(queryset)
         conversations = self.paginate_queryset(queryset)

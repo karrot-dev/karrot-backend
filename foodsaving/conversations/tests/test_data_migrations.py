@@ -1,9 +1,7 @@
 import logging
 
-from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 
-from foodsaving.history.models import HistoryTypus
 from foodsaving.tests.utils import TestMigrations
 from foodsaving.utils.tests.fake import faker
 
