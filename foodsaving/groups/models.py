@@ -45,6 +45,10 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     last_active_at = DateTimeField(default=tz.now)
     is_open = models.BooleanField(default=False)
 
+    @property
+    def group(self):
+        return self
+
     def __str__(self):
         return 'Group {}'.format(self.name)
 

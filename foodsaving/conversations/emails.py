@@ -1,14 +1,11 @@
 from email.utils import formataddr
-from babel.dates import format_date, format_time
 
+from babel.dates import format_date, format_time
 from django.utils import translation, timezone
 from django.utils.text import Truncator
 from django.utils.translation import ugettext as _
 
 from config import settings
-from foodsaving.groups.models import Group
-from foodsaving.applications.models import GroupApplication
-from foodsaving.pickups.models import PickupDate
 from foodsaving.utils.email_utils import prepare_email
 from foodsaving.utils.frontend_urls import (
     group_wall_url, group_conversation_mute_url, pickup_detail_url, pickup_conversation_mute_url, user_detail_url,
@@ -23,19 +20,19 @@ def author_names(messages):
 
 def prepare_conversation_message_notification(user, messages):
     first_message = messages[0]
-    target = first_message.conversation.target
+    type = first_message.conversation.type()
 
-    if isinstance(target, Group):
+    if type == 'group':
         if first_message.is_thread_reply():
             return prepare_group_thread_message_notification(user, messages)
         return prepare_group_conversation_message_notification(user, messages)
-    if isinstance(target, PickupDate):
+    if type == 'pickup':
         return prepare_pickup_conversation_message_notification(user, messages)
-    if isinstance(target, GroupApplication):
+    if type == 'application':
         return prepare_group_application_message_notification(user, messages)
-    if not target and first_message.conversation.is_private:
+    if type == 'private':
         return prepare_private_user_conversation_message_notification(user, messages)
-    raise Exception('Cannot send message notification because conversation doesn\'t have a known target')
+    raise Exception('Cannot send message notification because conversation doesn\'t have a known type')
 
 
 def prepare_group_thread_message_notification(user, messages):

@@ -1,4 +1,7 @@
+import coreapi
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import prefetch_related_objects
 from django.utils.translation import ugettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
@@ -9,22 +12,27 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
+from rest_framework.schemas import ManualSchema
 from rest_framework.viewsets import GenericViewSet
 
+from foodsaving.applications.models import GroupApplication
+from foodsaving.applications.serializers import GroupApplicationSerializer
+from foodsaving.conversations.filters import ConversationsFilter, ConversationMessageFilter
 from foodsaving.conversations.models import (
     Conversation, ConversationMessage, ConversationMessageReaction, ConversationParticipant
 )
 from foodsaving.conversations.serializers import (
-    ConversationSerializer,
-    ConversationMessageSerializer,
-    ConversationMessageReactionSerializer,
-    ConversationMarkSerializer,
-    ConversationEmailNotificationsSerializer,
-    EmojiField,
-    ConversationThreadSerializer,
+    ConversationSerializer, ConversationMessageSerializer, ConversationMessageReactionSerializer,
+    ConversationMarkSerializer, ConversationEmailNotificationsSerializer, EmojiField, ConversationThreadSerializer
 )
-from foodsaving.groups.models import Group
+from foodsaving.pickups.models import PickupDate
+from foodsaving.pickups.serializers import PickupDateSerializer
 from foodsaving.utils.mixins import PartialUpdateModelMixin
+
+
+class ConversationPagination(CursorPagination):
+    page_size = 10
+    ordering = '-latest_message_id'
 
 
 class MessagePagination(CursorPagination):
@@ -79,7 +87,7 @@ class IsWithinUpdatePeriod(BasePermission):
         return message.is_recent()
 
 
-class ConversationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
+class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
     """
     Conversations
     """
@@ -87,9 +95,56 @@ class ConversationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Gene
     queryset = Conversation.objects
     serializer_class = ConversationSerializer
     permission_classes = (IsAuthenticated, )
+    pagination_class = ConversationPagination
+    filter_backends = (DjangoFilterBackend, )
+    filterset_class = ConversationsFilter
 
     def get_queryset(self):
         return self.queryset.filter(participants=self.request.user)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset() \
+            .exclude(latest_message_id=None) \
+            .annotate_unread_message_count_for(self.request.user) \
+            .select_related(
+                'latest_message',
+                'target_type',
+             ) \
+            .prefetch_related(
+                'latest_message__reactions',
+                'participants',
+                'conversationparticipant_set',
+             )
+
+        queryset = self.filter_queryset(queryset)
+        conversations = self.paginate_queryset(queryset)
+
+        # Prefetch related objects per target type
+        pickup_ct = ContentType.objects.get_for_model(PickupDate)
+        applications_ct = ContentType.objects.get_for_model(GroupApplication)
+        pickup_conversations = [item for item in conversations if item.target_type == pickup_ct]
+        application_conversations = [item for item in conversations if item.target_type == applications_ct]
+
+        messages = [c.latest_message for c in conversations if c.latest_message is not None]
+        pickups = PickupDate.objects. \
+            filter(id__in=[c.target_id for c in pickup_conversations]). \
+            prefetch_related('collectors')
+        applications = GroupApplication.objects. \
+            filter(id__in=[c.target_id for c in application_conversations]). \
+            select_related('user')
+
+        context = self.get_serializer_context()
+        serializer = self.get_serializer(conversations, many=True)
+        message_serializer = ConversationMessageSerializer(messages, many=True, context=context)
+        pickups_serializer = PickupDateSerializer(pickups, many=True, context=context)
+        application_serializer = GroupApplicationSerializer(applications, many=True, context=context)
+
+        return self.get_paginated_response({
+            'conversations': serializer.data,
+            'messages': message_serializer.data,
+            'pickups': pickups_serializer.data,
+            'applications': application_serializer.data,
+        })
 
     @action(detail=True, methods=['POST'], serializer_class=ConversationMarkSerializer)
     def mark(self, request, pk=None):
@@ -110,16 +165,18 @@ class ConversationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Gene
         return Response(serializer.data)
 
 
-class ConversationMessageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,
-                                 PartialUpdateModelMixin, GenericViewSet):
+class ConversationMessageViewSet(
+        mixins.CreateModelMixin,
+        mixins.ListModelMixin,
+        mixins.RetrieveModelMixin,
+        PartialUpdateModelMixin,
+        GenericViewSet,
+):
     """
     ConversationMessages
     """
 
-    queryset = ConversationMessage.objects \
-        .prefetch_related('reactions') \
-        .prefetch_related('participants')
-
+    queryset = ConversationMessage.objects
     serializer_class = ConversationMessageSerializer
     permission_classes = (
         IsAuthenticated,
@@ -128,10 +185,7 @@ class ConversationMessageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
         IsWithinUpdatePeriod,
     )
     filter_backends = (DjangoFilterBackend, )
-    filterset_fields = (
-        'conversation',
-        'thread',
-    )
+    filterset_class = ConversationMessageFilter
     pagination_class = MessagePagination
 
     @property
@@ -148,10 +202,43 @@ class ConversationMessageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
             .annotate_replies_count() \
             .annotate_unread_replies_count_for(self.request.user)
 
+        if self.action == 'my_threads':
+            return qs
+
+        if self.action == 'list':
+            qs = qs.prefetch_related('reactions', 'participants')
+
         if self.request.query_params.get('thread', None):
             return qs.only_threads_and_replies()
-        else:
-            return qs.exclude_replies()
+
+        return qs.exclude_replies()
+
+    @action(
+        detail=False,
+        schema=ManualSchema(
+            description='Lists threads the user has participated in',
+            fields=[
+                coreapi.Field('group', location='query'),
+                coreapi.Field('conversation', location='query'),
+            ]
+        )
+    )
+    def my_threads(self, request):
+        queryset = self.get_queryset() \
+            .only_threads_with_user(request.user) \
+            .select_related('latest_message') \
+            .prefetch_related('participants')
+        queryset = self.filter_queryset(queryset)
+        paginator = ConversationPagination()
+
+        threads = list(paginator.paginate_queryset(queryset, request, view=self))
+        messages = [t.latest_message for t in threads if t.latest_message is not None]
+
+        prefetch_related_objects(threads + messages, 'reactions')
+
+        serializer = self.get_serializer(threads, many=True)
+        message_serializer = self.get_serializer(messages, many=True)
+        return paginator.get_paginated_response({'threads': serializer.data, 'messages': message_serializer.data})
 
     def partial_update(self, request, *args, **kwargs):
         """Update one of your messages"""
@@ -173,7 +260,6 @@ class ConversationMessageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
     @action(
         detail=True,
         methods=('POST', ),
-        filterset_fields=('name', ),
     )
     def reactions(self, request, pk):
         """route for POST /messages/{id}/reactions/ with body {"name":"emoji_name"}"""
@@ -214,7 +300,7 @@ class ConversationMessageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
 
     def perform_create(self, serializer):
         message = serializer.save()
-        if isinstance(message.conversation.target, Group):
+        if message.conversation.type() == 'group':
             group = message.conversation.target
             group.refresh_active_status()
 
@@ -224,7 +310,10 @@ class RetrieveConversationMixin(object):
 
     def retrieve_conversation(self, request, *args, **kwargs):
         target = self.get_object()
-        conversation = Conversation.objects.get_or_create_for_target(target)
+        conversation = Conversation.objects. \
+            prefetch_related('conversationparticipant_set'). \
+            select_related('target_type'). \
+            get_or_create_for_target(target)
         serializer = ConversationSerializer(conversation, data={}, context={'request': request})
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data)

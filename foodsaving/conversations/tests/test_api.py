@@ -7,11 +7,14 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from foodsaving.applications.factories import GroupApplicationFactory
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationParticipant, Conversation, ConversationMessage, \
     ConversationMessageReaction
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupStatus
+from foodsaving.pickups.factories import PickupDateFactory
+from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
 from foodsaving.webhooks.models import EmailEvent
 
@@ -31,6 +34,74 @@ class TestConversationsAPI(APITestCase):
         self.conversation2.sync_users([self.participant1])
         self.conversation2.messages.create(author=self.participant1, content='hello2')
         self.conversation3 = ConversationFactory()  # conversation noone is in
+
+    def test_conversations_list(self):
+        self.conversation1.messages.create(author=self.participant1, content='yay')
+        self.conversation1.messages.create(author=self.participant1, content='second!')
+        conversation2 = ConversationFactory(participants=[self.participant1, self.participant2])
+        conversation2.messages.create(author=self.participant1, content='yay')
+        self.client.force_login(user=self.participant1)
+
+        response = self.client.get('/api/conversations/', format='json')
+        response_conversations = response.data['results']['conversations']
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # is ordered by latest message first
+        self.assertEqual(
+            [conversation['id'] for conversation in response_conversations],
+            [conversation2.id, self.conversation1.id, self.conversation2.id],
+        )
+
+    def test_list_conversations_by_group(self):
+        user = UserFactory()
+        group1 = GroupFactory(members=[user])
+        conversation1 = Conversation.objects.get_or_create_for_target(group1)
+        conversation1.messages.create(author=user, content='bu')
+        group2 = GroupFactory(members=[user])
+        conversation2 = Conversation.objects.get_or_create_for_target(group2)
+        conversation2.messages.create(author=user, content='bu')
+
+        self.client.force_login(user=user)
+
+        response = self.client.get('/api/conversations/', {'group': group1.id}, format='json')
+        response_conversations = response.data['results']['conversations']
+        self.assertEqual(len(response_conversations), 1, response.data)
+        self.assertEqual(response_conversations[0]['id'], conversation1.id)
+
+        response = self.client.get('/api/conversations/', {'group': group2.id}, format='json')
+        response_conversations = response.data['results']['conversations']
+        self.assertEqual(len(response_conversations), 1, response.data)
+        self.assertEqual(response_conversations[0]['id'], conversation2.id)
+
+    def test_list_conversations_without_wall(self):
+        user = UserFactory()
+        group = GroupFactory(members=[user])
+        conversation = Conversation.objects.get_or_create_for_target(group)
+        conversation.messages.create(author=user, content='bu')
+        self.client.force_login(user=user)
+
+        response = self.client.get('/api/conversations/', {'exclude_wall': True}, format='json')
+        response_conversations = response.data['results']['conversations']
+        self.assertEqual(len(response_conversations), 0)
+
+    def test_list_conversations_with_related_data_efficiently(self):
+        user = UserFactory()
+        group = GroupFactory(members=[user])
+        store = StoreFactory(group=group)
+        pickup = PickupDateFactory(store=store)
+        application = GroupApplicationFactory(user=UserFactory(), group=group)
+
+        conversations = [Conversation.objects.get_or_create_for_target(t) for t in (group, pickup, application)]
+        [c.sync_users([user]) for c in conversations]
+        [c.messages.create(content='hey', author=user) for c in conversations]
+
+        self.client.force_login(user=user)
+        with self.assertNumQueries(10):
+            response = self.client.get('/api/conversations/', {'group': group.id}, format='json')
+        results = response.data['results']
+
+        self.assertEqual(len(results['conversations']), len(conversations))
+        self.assertEqual(results['pickups'][0]['id'], pickup.id)
+        self.assertEqual(results['applications'][0]['id'], application.id)
 
     def test_get_messages(self):
         self.client.force_login(user=self.participant1)
@@ -136,17 +207,29 @@ class TestConversationThreadsAPI(APITestCase):
         self.client.force_login(user=self.user)
         another_thread = self.conversation.messages.create(author=self.user, content='my own thread')
         n = 5
-        [
-            ConversationMessage.objects.create(
-                conversation=self.conversation,
-                author=self.user,
-                thread=another_thread,
-                content='default reply',
-            ) for _ in range(n)
-        ]
+        [self.create_reply(thread=another_thread) for _ in range(n)]
+
         response = self.client.get('/api/messages/?thread={}'.format(another_thread.id), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), n + 1)
+
+    def test_list_my_recently_active_threads(self):
+        self.client.force_login(user=self.user)
+        most_recent_thread = self.conversation.messages.create(author=self.user, content='my own thread')
+        self.create_reply(author=self.user2)
+        another_thread = self.conversation.messages.create(author=self.user, content='my own thread')
+        [self.create_reply(thread=another_thread) for _ in range(2)]
+        self.conversation.messages.create(author=self.user, content='no replies yet')
+        self.create_reply(thread=most_recent_thread)
+
+        with self.assertNumQueries(4):
+            response = self.client.get('/api/messages/my_threads/', format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        results = response.data['results']
+        self.assertEqual([thread['id'] for thread in results['threads']],
+                         [most_recent_thread.id, another_thread.id, self.thread.id])
+        self.assertEqual(len(results['threads']), len(results['messages']))
 
     def test_reply_adds_participant(self):
         self.client.force_login(user=self.user2)
@@ -298,6 +381,7 @@ class TestConversationsSeenUpToAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['seen_up_to'], None)
         self.assertEqual(response.data['unread_message_count'], 1)
+        self.assertEqual(response.data['type'], None)
 
         self.participant.seen_up_to = message
         self.participant.save()
@@ -316,7 +400,7 @@ class TestConversationsSeenUpToAPI(APITestCase):
 
         response = self.client.get('/api/conversations/'.format(self.conversation.id), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data[0]['seen_up_to'], message.id)
+        self.assertEqual(response.data['results']['conversations'][0]['seen_up_to'], message.id)
 
     def test_mark_seen_up_to(self):
         message = self.conversation.messages.create(author=self.user2, content='yay')
