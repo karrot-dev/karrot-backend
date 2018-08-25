@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-08-07 12:58+0000\n"
+"POT-Creation-Date: 2018-08-25 15:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: Arabic (https://www.transifex.com/yunity-1/teams/68631/ar/)\n"
 "MIME-Version: 1.0\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Language: ar\n"
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
-#: foodsaving/applications/api.py:16
+#: foodsaving/applications/api.py:15
 msgid "You need to have a verified email address"
 msgstr ""
 
@@ -42,7 +42,6 @@ msgid "Your application to join %(group_name)s was accepted"
 msgstr ""
 
 #: foodsaving/applications/templates/application_accepted.html.jinja2:119
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:130
 #: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:130
 #, python-format
 msgid "Visit %(group_name)s"
@@ -134,7 +133,11 @@ msgstr ""
 
 #: foodsaving/conversations/emails.py:195
 #, python-format
-msgid "New message in %(user_name)s's application"
+msgid "New message in application of %(user_name)s"
+msgstr ""
+
+#: foodsaving/conversations/emails.py:199
+msgid "New message in your application"
 msgstr ""
 
 #: foodsaving/conversations/serializers.py:232
@@ -300,37 +303,6 @@ msgid ""
 "All email notifications are disabled by default."
 msgstr ""
 
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:4
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:120
-#, python-format
-msgid "You became editor in %(group_name)s!"
-msgstr ""
-
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:123
-msgid ""
-"You've received enough trust from fellow group members to grant you "
-"<strong>editing permissions</strong>. For example, you can now modify your "
-"group, stores and pickup dates, or create new ones."
-msgstr ""
-
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:129
-msgid "Use your power wisely!"
-msgstr ""
-
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:131
-#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:131
-#, python-format
-msgid ""
-"You are receiving this because you are a member of "
-"<strong>%(group_name)s</strong>."
-msgstr ""
-
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:132
-#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:132
-#, python-format
-msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
-msgstr ""
-
 #: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:120
 msgid "Hey, we're missing you!"
 msgstr ""
@@ -347,6 +319,18 @@ msgstr ""
 msgid ""
 "We've marked you as inactive, but you can reactivate by simply visiting the group\n"
 "                                again."
+msgstr ""
+
+#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:131
+#, python-format
+msgid ""
+"You are receiving this because you are a member of "
+"<strong>%(group_name)s</strong>."
+msgstr ""
+
+#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:132
+#, python-format
+msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
 msgstr ""
 
 #: foodsaving/groups/templates/user_inactive_in_group.subject.jinja2:1
