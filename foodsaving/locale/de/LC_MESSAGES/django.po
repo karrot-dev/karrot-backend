@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-08-07 12:58+0000\n"
+"POT-Creation-Date: 2018-08-25 15:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Bodhi Neiser <Bodhin@gmx.net>, 2017\n"
 "Language-Team: German (https://www.transifex.com/yunity-1/teams/68631/de/)\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: foodsaving/applications/api.py:16
+#: foodsaving/applications/api.py:15
 msgid "You need to have a verified email address"
 msgstr "Du brauchst eine bestätigte E-Mail-Adresse."
 
@@ -43,7 +43,6 @@ msgid "Your application to join %(group_name)s was accepted"
 msgstr "Deine Bewerbung bei %(group_name)s wurde akzeptiert"
 
 #: foodsaving/applications/templates/application_accepted.html.jinja2:119
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:130
 #: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:130
 #, python-format
 msgid "Visit %(group_name)s"
@@ -145,8 +144,12 @@ msgstr "Abholung %(date)s"
 
 #: foodsaving/conversations/emails.py:195
 #, python-format
-msgid "New message in %(user_name)s's application"
-msgstr "Neue Nachricht in %(user_name)ss Bewerbung"
+msgid "New message in application of %(user_name)s"
+msgstr ""
+
+#: foodsaving/conversations/emails.py:199
+msgid "New message in your application"
+msgstr ""
 
 #: foodsaving/conversations/serializers.py:232
 msgid "You cannot change the thread of a message"
@@ -325,40 +328,6 @@ msgstr ""
 "\n"
 "Alle E-Mail-Benachrichtigungen sind standardmäßig abgestellt."
 
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:4
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:120
-#, python-format
-msgid "You became editor in %(group_name)s!"
-msgstr ""
-
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:123
-msgid ""
-"You've received enough trust from fellow group members to grant you "
-"<strong>editing permissions</strong>. For example, you can now modify your "
-"group, stores and pickup dates, or create new ones."
-msgstr ""
-
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:129
-msgid "Use your power wisely!"
-msgstr ""
-
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:131
-#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:131
-#, python-format
-msgid ""
-"You are receiving this because you are a member of "
-"<strong>%(group_name)s</strong>."
-msgstr ""
-"Du erhältst dies weil du Mitglied von <strong>%(group_name)s</strong> bist."
-
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:132
-#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:132
-#, python-format
-msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
-msgstr ""
-"Wenn du die Gruppe verlassen möchtest, kannst du dies auf der <a "
-"href=\"%(group_url)s\">Gruppen-Hauptseite</a> tun."
-
 #: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:120
 msgid "Hey, we're missing you!"
 msgstr "Hey, wir vermissen dich!"
@@ -380,6 +349,21 @@ msgid ""
 msgstr ""
 "Du bist daher als inaktiv markiert, aber du wirst sofort wieder als aktiv "
 "angezeigt, wenn du die Gruppe das nächste Mal besuchst."
+
+#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:131
+#, python-format
+msgid ""
+"You are receiving this because you are a member of "
+"<strong>%(group_name)s</strong>."
+msgstr ""
+"Du erhältst dies weil du Mitglied von <strong>%(group_name)s</strong> bist."
+
+#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:132
+#, python-format
+msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
+msgstr ""
+"Wenn du die Gruppe verlassen möchtest, kannst du dies auf der <a "
+"href=\"%(group_url)s\">Gruppen-Hauptseite</a> tun."
 
 #: foodsaving/groups/templates/user_inactive_in_group.subject.jinja2:1
 #, python-format
