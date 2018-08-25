@@ -32,5 +32,5 @@ gevent
 bleach
 bleach_whitelist
 pymdown-extensions
--e git+https://github.com/django/daphne@2f94210#egg=daphne
+daphne
 -e git+https://github.com/tiltec/channels@c013a6c#egg=channels
