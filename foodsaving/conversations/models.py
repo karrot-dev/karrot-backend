@@ -85,7 +85,7 @@ class Conversation(BaseModel, UpdatedAtMixin):
     def type(self):
         if self.is_private:
             return 'private'
-        if self.target_type is None:
+        if self.target_type_id is None:
             return None
 
         type = str(self.target_type)

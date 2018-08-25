@@ -88,7 +88,7 @@ class ConversationThreadSerializer(serializers.ModelSerializer):
         count = getattr(participant.thread, 'unread_replies_count', None)
         if count is None:
             messages = participant.thread.thread_messages.only_replies()
-            if participant.seen_up_to:
+            if participant.seen_up_to_id:
                 messages = messages.filter(id__gt=participant.seen_up_to_id)
             return messages.count()
         return count
@@ -223,7 +223,7 @@ class ConversationSerializer(serializers.ModelSerializer):
             return annotated
         participant = self._participant(conversation)
         messages = conversation.messages.exclude_replies()
-        if participant.seen_up_to:
+        if participant.seen_up_to_id:
             messages = messages.filter(id__gt=participant.seen_up_to_id)
         return messages.count()
 

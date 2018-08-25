@@ -309,7 +309,10 @@ class RetrieveConversationMixin(object):
 
     def retrieve_conversation(self, request, *args, **kwargs):
         target = self.get_object()
-        conversation = Conversation.objects.get_or_create_for_target(target)
+        conversation = Conversation.objects. \
+            prefetch_related('conversationparticipant_set'). \
+            select_related('target_type'). \
+            get_or_create_for_target(target)
         serializer = ConversationSerializer(conversation, data={}, context={'request': request})
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data)
