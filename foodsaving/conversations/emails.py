@@ -189,11 +189,14 @@ def prepare_group_application_message_notification(user, messages):
 
     with translation.override(language):
         reply_to_name = application.user.display_name
-        conversation_name = _('New message in application of %(user_name)s') % {
+        conversation_name = _('New message in application of %(user_name)s to %(group_name)s') % {
             'user_name': application.user.display_name,
+            'group_name': application.group.name,
         }
         if application.user == user:
-            conversation_name = _('New message in your application')
+            conversation_name = _('New message in your application to %(group_name)s') % {
+                'group_name': application.group.name
+            }
 
         from_text = author_names(messages)
 
