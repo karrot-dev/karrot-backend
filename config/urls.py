@@ -26,7 +26,7 @@ from foodsaving.template_previews import views as template_preview_views
 from foodsaving.userauth.api import AuthUserView, AuthView, LogoutView, \
     RequestResetPasswordView, ChangePasswordView, VerifyMailView, ResendMailVerificationCodeView, ResetPasswordView, \
     ChangeMailView, RequestDeleteUserView, FailedEmailDeliveryView
-from foodsaving.users.api import UserViewSet, UserInfoViewSet
+from foodsaving.users.api import UserViewSet
 from foodsaving.webhooks.api import IncomingEmailView, EmailEventView
 
 router = routers.DefaultRouter()
@@ -38,7 +38,6 @@ router.register('agreements', AgreementViewSet)
 
 # User endpoints
 router.register('users', UserViewSet)
-router.register('users-info', UserInfoViewSet)
 
 # pickup date endpoints
 router.register('pickup-date-series', PickupDateSeriesViewSet)

@@ -21,7 +21,6 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, RetrievePriv
     filter_backends = (filters.SearchFilter, )
     permission_classes = (IsAuthenticated, )
     search_fields = ('display_name', )
-    filterset_fields = ('conversation', 'groups')
 
     def retrieve(self, request, *args, **kwargs):
         """Get one user profile"""
@@ -43,26 +42,3 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, RetrievePriv
     def get_queryset(self):
         return self.queryset.filter(Q(groups__in=self.request.user.groups.all()) |
                                     Q(id=self.request.user.id)).distinct()
-
-
-class UserPagination(CursorPagination):
-    page_size = 20
-    ordering = 'id'
-
-
-class UserInfoViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
-    """
-    Public User Profiles (for now only users that share a conversation)
-    """
-    queryset = get_user_model().objects.active()
-    serializer_class = UserInfoSerializer
-    filter_backends = (filters.SearchFilter, DjangoFilterBackend)
-    permission_classes = (IsAuthenticated, )
-    search_fields = ('display_name', )
-    filterset_fields = ('conversation', 'groups')
-    pagination_class = UserPagination
-
-    def get_queryset(self):
-        return self.queryset.filter(
-            Q(conversation__in=self.request.user.conversation_set.all()) | Q(id=self.request.user.id)
-        ).distinct()

@@ -194,7 +194,6 @@ class ConversationSerializer(serializers.ModelSerializer):
             'unread_message_count',
             'email_notifications',
             'type',
-            'group',
             'target_id',
         ]
 

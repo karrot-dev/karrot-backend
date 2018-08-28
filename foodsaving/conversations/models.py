@@ -57,7 +57,6 @@ class Conversation(BaseModel, UpdatedAtMixin):
     target_id = models.PositiveIntegerField(null=True)
     target = GenericForeignKey('target_type', 'target_id')
 
-    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, null=True)
     latest_message = models.ForeignKey(
         'conversations.ConversationMessage',
         on_delete=models.SET_NULL,
@@ -95,16 +94,6 @@ class Conversation(BaseModel, UpdatedAtMixin):
             return 'application'
 
         return type
-
-    def save(self, **kwargs):
-        # keep group reference updated, even when target might change
-        # (but can't keep track if target changes group - should not happen, too)
-        if self.target_id is not None:
-            old = type(self).objects.get(pk=self.pk) if self.pk else None
-            if old is None or old.target_id != self.target_id or old.target_type_id != self.target_type_id:
-                self.group = self.target.group
-
-        super().save(**kwargs)
 
 
 class ConversationParticipant(BaseModel, UpdatedAtMixin):

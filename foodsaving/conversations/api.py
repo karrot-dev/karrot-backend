@@ -18,7 +18,6 @@ from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.applications.models import GroupApplication
 from foodsaving.applications.serializers import GroupApplicationSerializer
-from foodsaving.conversations.filters import ConversationsFilter, ConversationMessageFilter
 from foodsaving.conversations.models import (
     Conversation, ConversationMessage, ConversationMessageReaction, ConversationParticipant
 )
@@ -98,8 +97,6 @@ class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
     serializer_class = ConversationSerializer
     permission_classes = (IsAuthenticated, )
     pagination_class = ConversationPagination
-    filter_backends = (DjangoFilterBackend, )
-    filterset_class = ConversationsFilter
 
     def get_queryset(self):
         return self.queryset.filter(participants=self.request.user)
@@ -118,7 +115,6 @@ class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
                 'conversationparticipant_set',
              )
 
-        queryset = self.filter_queryset(queryset).distinct()
         conversations = self.paginate_queryset(queryset)
         messages = [c.latest_message for c in conversations if c.latest_message is not None]
 
@@ -199,7 +195,7 @@ class ConversationMessageViewSet(
         IsWithinUpdatePeriod,
     )
     filter_backends = (DjangoFilterBackend, )
-    filterset_class = ConversationMessageFilter
+    filterset_fields = ('conversation', 'thread')
     pagination_class = MessagePagination
 
     @property
