@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Q
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from rest_framework import mixins
 from rest_framework.decorators import action
@@ -42,3 +41,23 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, RetrievePriv
     def get_queryset(self):
         return self.queryset.filter(Q(groups__in=self.request.user.groups.all()) |
                                     Q(id=self.request.user.id)).distinct()
+
+
+class UserPagination(CursorPagination):
+    page_size = 20
+    ordering = 'id'
+
+
+class UserInfoViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
+    """
+    Public User Profiles (for now only users that share a conversation)
+    """
+    queryset = get_user_model().objects.active()
+    serializer_class = UserInfoSerializer
+    permission_classes = (IsAuthenticated, )
+    pagination_class = UserPagination
+
+    def get_queryset(self):
+        return self.queryset.filter(
+            Q(conversation__in=self.request.user.conversation_set.all()) | Q(id=self.request.user.id)
+        ).distinct()
