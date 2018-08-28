@@ -1,5 +1,6 @@
 import coreapi
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import prefetch_related_objects
 from django.utils.translation import ugettext_lazy as _
@@ -27,6 +28,7 @@ from foodsaving.conversations.serializers import (
 )
 from foodsaving.pickups.models import PickupDate
 from foodsaving.pickups.serializers import PickupDateSerializer
+from foodsaving.users.serializers import UserInfoSerializer
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 
@@ -116,34 +118,46 @@ class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
                 'conversationparticipant_set',
              )
 
-        queryset = self.filter_queryset(queryset)
+        queryset = self.filter_queryset(queryset).distinct()
         conversations = self.paginate_queryset(queryset)
+        messages = [c.latest_message for c in conversations if c.latest_message is not None]
 
         # Prefetch related objects per target type
         pickup_ct = ContentType.objects.get_for_model(PickupDate)
-        applications_ct = ContentType.objects.get_for_model(GroupApplication)
         pickup_conversations = [item for item in conversations if item.target_type == pickup_ct]
-        application_conversations = [item for item in conversations if item.target_type == applications_ct]
-
-        messages = [c.latest_message for c in conversations if c.latest_message is not None]
         pickups = PickupDate.objects. \
             filter(id__in=[c.target_id for c in pickup_conversations]). \
             prefetch_related('collectors')
+
+        applications_ct = ContentType.objects.get_for_model(GroupApplication)
+        application_conversations = [item for item in conversations if item.target_type == applications_ct]
         applications = GroupApplication.objects. \
             filter(id__in=[c.target_id for c in application_conversations]). \
             select_related('user')
+
+        my_applications = [a for a in applications if a.user == request.user]
+
+        def get_latest_message_author(application):
+            conversation = next(c for c in application_conversations if c.target_id == application.id)
+            return conversation.latest_message.author_id
+
+        users = get_user_model().objects. \
+            filter(id__in=[get_latest_message_author(a) for a in my_applications]). \
+            exclude(id=request.user.id)
 
         context = self.get_serializer_context()
         serializer = self.get_serializer(conversations, many=True)
         message_serializer = ConversationMessageSerializer(messages, many=True, context=context)
         pickups_serializer = PickupDateSerializer(pickups, many=True, context=context)
         application_serializer = GroupApplicationSerializer(applications, many=True, context=context)
+        user_serializer = UserInfoSerializer(users, many=True, context=context)
 
         return self.get_paginated_response({
             'conversations': serializer.data,
             'messages': message_serializer.data,
             'pickups': pickups_serializer.data,
             'applications': application_serializer.data,
+            'users': user_serializer.data,
         })
 
     @action(detail=True, methods=['POST'], serializer_class=ConversationMarkSerializer)
