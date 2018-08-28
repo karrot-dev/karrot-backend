@@ -131,14 +131,14 @@ class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
             filter(id__in=[c.target_id for c in application_conversations]). \
             select_related('user')
 
+        # Applicant does not have access to group member profiles, so we sideload reduced user profiles
         my_applications = [a for a in applications if a.user == request.user]
 
-        def get_latest_message_author(application):
-            conversation = next(c for c in application_conversations if c.target_id == application.id)
-            return conversation.latest_message.author_id
+        def get_conversation(application):
+            return next(c for c in application_conversations if c.target_id == application.id)
 
         users = get_user_model().objects. \
-            filter(id__in=[get_latest_message_author(a) for a in my_applications]). \
+            filter(conversationparticipant__conversation__in=[get_conversation(a) for a in my_applications]). \
             exclude(id=request.user.id)
 
         context = self.get_serializer_context()
@@ -153,7 +153,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
             'messages': message_serializer.data,
             'pickups': pickups_serializer.data,
             'applications': application_serializer.data,
-            'users': user_serializer.data,
+            'users_info': user_serializer.data,
         })
 
     @action(detail=True, methods=['POST'], serializer_class=ConversationMarkSerializer)
