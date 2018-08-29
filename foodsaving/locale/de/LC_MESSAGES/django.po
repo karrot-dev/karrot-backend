@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-08-07 12:58+0000\n"
+"POT-Creation-Date: 2018-08-26 10:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Bodhi Neiser <Bodhin@gmx.net>, 2017\n"
 "Language-Team: German (https://www.transifex.com/yunity-1/teams/68631/de/)\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: foodsaving/applications/api.py:16
+#: foodsaving/applications/api.py:15
 msgid "You need to have a verified email address"
 msgstr "Du brauchst eine bestätigte E-Mail-Adresse."
 
@@ -43,7 +43,6 @@ msgid "Your application to join %(group_name)s was accepted"
 msgstr "Deine Bewerbung bei %(group_name)s wurde akzeptiert"
 
 #: foodsaving/applications/templates/application_accepted.html.jinja2:119
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:130
 #: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:130
 #, python-format
 msgid "Visit %(group_name)s"
@@ -111,17 +110,17 @@ msgstr ""
 "besuchen</a> oder <a href=\"%(mute_url)s\">die Unterhaltung "
 "stummschalten</a>."
 
-#: foodsaving/conversations/api.py:42
-#: foodsaving/conversations/serializers.py:31
-#: foodsaving/conversations/serializers.py:224
+#: foodsaving/conversations/api.py:50
+#: foodsaving/conversations/serializers.py:154
+#: foodsaving/conversations/serializers.py:211
 msgid "You are not in this conversation"
 msgstr "Du bist nicht Teil dieser Unterhaltung"
 
-#: foodsaving/conversations/api.py:64
+#: foodsaving/conversations/api.py:72
 msgid "You are not the author of this message"
 msgstr "Du bist nicht Autor dieser Nachricht"
 
-#: foodsaving/conversations/api.py:73
+#: foodsaving/conversations/api.py:81
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
@@ -129,38 +128,43 @@ msgstr ""
 "Du kannst eine Nachricht nicht mehr als %(days_number)s Tage nach ihrer "
 "Erstellung bearbeiten."
 
-#: foodsaving/conversations/api.py:164
+#: foodsaving/conversations/api.py:251
 msgid "Must be first in thread"
 msgstr ""
 
-#: foodsaving/conversations/api.py:167
+#: foodsaving/conversations/api.py:254
 msgid "You are not a participant in this thread"
 msgstr "Du bist nicht Teil dieses Threads"
 
+#: foodsaving/conversations/emails.py:129
 #: foodsaving/conversations/emails.py:132
-#: foodsaving/conversations/emails.py:135
 #, python-format
 msgid "Pickup %(date)s"
 msgstr "Abholung %(date)s"
 
-#: foodsaving/conversations/emails.py:195
+#: foodsaving/conversations/emails.py:192
 #, python-format
-msgid "New message in %(user_name)s's application"
-msgstr "Neue Nachricht in %(user_name)ss Bewerbung"
+msgid "New message in application of %(user_name)s to %(group_name)s"
+msgstr ""
 
-#: foodsaving/conversations/serializers.py:232
+#: foodsaving/conversations/emails.py:197
+#, python-format
+msgid "New message in your application to %(group_name)s"
+msgstr ""
+
+#: foodsaving/conversations/serializers.py:162
 msgid "You cannot change the thread of a message"
 msgstr "Du kannst den Thread einer Nachricht nicht ändern"
 
-#: foodsaving/conversations/serializers.py:239
+#: foodsaving/conversations/serializers.py:169
 msgid "Thread is not in the same conversation"
 msgstr "Thread ist nicht in dieser Unterhaltung"
 
-#: foodsaving/conversations/serializers.py:243
+#: foodsaving/conversations/serializers.py:173
 msgid "You can only reply to Group messages"
 msgstr "Du kannst nur auf Gruppen-Nachrichten antworten"
 
-#: foodsaving/conversations/serializers.py:247
+#: foodsaving/conversations/serializers.py:177
 msgid "You cannot reply to replies"
 msgstr "Du kannst auf Antworten nicht nochmal antworten"
 
@@ -325,40 +329,6 @@ msgstr ""
 "\n"
 "Alle E-Mail-Benachrichtigungen sind standardmäßig abgestellt."
 
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:4
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:120
-#, python-format
-msgid "You became editor in %(group_name)s!"
-msgstr ""
-
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:123
-msgid ""
-"You've received enough trust from fellow group members to grant you "
-"<strong>editing permissions</strong>. For example, you can now modify your "
-"group, stores and pickup dates, or create new ones."
-msgstr ""
-
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:129
-msgid "Use your power wisely!"
-msgstr ""
-
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:131
-#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:131
-#, python-format
-msgid ""
-"You are receiving this because you are a member of "
-"<strong>%(group_name)s</strong>."
-msgstr ""
-"Du erhältst dies weil du Mitglied von <strong>%(group_name)s</strong> bist."
-
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:132
-#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:132
-#, python-format
-msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
-msgstr ""
-"Wenn du die Gruppe verlassen möchtest, kannst du dies auf der <a "
-"href=\"%(group_url)s\">Gruppen-Hauptseite</a> tun."
-
 #: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:120
 msgid "Hey, we're missing you!"
 msgstr "Hey, wir vermissen dich!"
@@ -380,6 +350,21 @@ msgid ""
 msgstr ""
 "Du bist daher als inaktiv markiert, aber du wirst sofort wieder als aktiv "
 "angezeigt, wenn du die Gruppe das nächste Mal besuchst."
+
+#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:131
+#, python-format
+msgid ""
+"You are receiving this because you are a member of "
+"<strong>%(group_name)s</strong>."
+msgstr ""
+"Du erhältst dies weil du Mitglied von <strong>%(group_name)s</strong> bist."
+
+#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:132
+#, python-format
+msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
+msgstr ""
+"Wenn du die Gruppe verlassen möchtest, kannst du dies auf der <a "
+"href=\"%(group_url)s\">Gruppen-Hauptseite</a> tun."
 
 #: foodsaving/groups/templates/user_inactive_in_group.subject.jinja2:1
 #, python-format

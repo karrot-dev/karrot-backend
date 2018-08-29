@@ -4,6 +4,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import ForeignKey, TextField, ManyToManyField, BooleanField, CharField, QuerySet, Count, F, Q
+from django.db.models.manager import BaseManager
 from django.utils import timezone
 
 from foodsaving.base.base_models import BaseModel, UpdatedAtMixin
@@ -34,6 +35,12 @@ class ConversationQuerySet(models.QuerySet):
             target_type=ContentType.objects.get_for_model(target),
         )
 
+    def annotate_unread_message_count_for(self, user):
+        unread_message_filter = Q(conversationparticipant__user=user) & (
+            Q(conversationparticipant__seen_up_to=None) | Q(messages__id__gt=F('conversationparticipant__seen_up_to'))
+        )
+        return self.annotate(unread_message_count=Count('messages', filter=unread_message_filter, distinct=True))
+
 
 class Conversation(BaseModel, UpdatedAtMixin):
     """A conversation between one or more users."""
@@ -49,6 +56,13 @@ class Conversation(BaseModel, UpdatedAtMixin):
     target_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
     target_id = models.PositiveIntegerField(null=True)
     target = GenericForeignKey('target_type', 'target_id')
+
+    latest_message = models.ForeignKey(
+        'conversations.ConversationMessage',
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='conversation_latest_message'
+    )
 
     def join(self, user, **kwargs):
         if not self.conversationparticipant_set.filter(user=user).exists():
@@ -66,6 +80,20 @@ class Conversation(BaseModel, UpdatedAtMixin):
         for user in existing_users:
             if user not in desired_users:
                 self.leave(user)
+
+    def type(self):
+        if self.is_private:
+            return 'private'
+        if self.target_type_id is None:
+            return None
+
+        type = str(self.target_type)
+        if type == 'pickup date':
+            return 'pickup'
+        if type == 'group application':
+            return 'application'
+
+        return type
 
 
 class ConversationParticipant(BaseModel, UpdatedAtMixin):
@@ -99,6 +127,9 @@ class ConversationMessageQuerySet(QuerySet):
     def exclude_replies(self):
         return self.filter(Q(thread_id=None) | Q(id=F('thread_id')))
 
+    def only_threads_with_user(self, user):
+        return self.filter(participants__user=user)
+
     def only_threads_and_replies(self):
         return self.exclude(thread_id=None)
 
@@ -106,7 +137,9 @@ class ConversationMessageQuerySet(QuerySet):
         return self.filter(~Q(thread_id=None) & ~Q(id=F('thread_id')))
 
     def annotate_replies_count(self):
-        return self.annotate(replies_count=Count('thread_messages', filter=~Q(id=F('thread_id')), distinct=True))
+        return self.annotate(
+            replies_count=Count('thread_messages', filter=~Q(thread_messages__id=F('thread_id')), distinct=True)
+        )
 
     def annotate_unread_replies_count_for(self, user):
         unread_replies_filter = Q(
@@ -118,10 +151,19 @@ class ConversationMessageQuerySet(QuerySet):
         )
 
 
+class ConversationMessageManager(BaseManager.from_queryset(ConversationMessageQuerySet)):
+    def create(self, **kwargs):
+        obj = super().create(**kwargs)
+        # clear cached value
+        if obj.thread and hasattr(obj.thread, '_replies_count'):
+            del obj.thread._replies_count
+        return obj
+
+
 class ConversationMessage(BaseModel, UpdatedAtMixin):
     """A message in the conversation by a particular user."""
 
-    objects = ConversationMessageQuerySet.as_manager()
+    objects = ConversationMessageManager()
 
     author = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     conversation = ForeignKey(Conversation, related_name='messages', on_delete=models.CASCADE)
@@ -129,6 +171,29 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 
     content = TextField()
     received_via = CharField(max_length=40, blank=True)
+
+    latest_message = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='thread_latest_message',
+    )
+
+    def save(self, **kwargs):
+        creating = self.pk is None
+        super().save(**kwargs)
+        if creating:
+            # keep latest_message reference up-to-date
+            if self.is_thread_reply():
+                # update thread
+                thread = self.thread
+                thread.latest_message = self
+                thread.save()
+            else:
+                # update conversation
+                conversation = self.conversation
+                conversation.latest_message = self
+                conversation.save()
 
     def content_rendered(self, **kwargs):
         return markdown.render(self.content, **kwargs)
@@ -144,14 +209,14 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 
     @property
     def replies_count(self):
-        if hasattr(self, '__replies_count'):
-            return self.__replies_count
+        if hasattr(self, '_replies_count'):
+            return self._replies_count
         else:
             return self.thread_messages.only_replies().count()
 
     @replies_count.setter
     def replies_count(self, value):
-        self.__replies_count = value
+        self._replies_count = value
 
 
 class ConversationThreadParticipant(BaseModel, UpdatedAtMixin):

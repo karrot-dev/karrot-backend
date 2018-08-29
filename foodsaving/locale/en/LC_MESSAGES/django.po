@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-08-08 15:06+0000\n"
+"POT-Creation-Date: 2018-08-29 11:56+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,11 +17,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.6.0\n"
 
-#: foodsaving/applications/api.py:15
+#: foodsaving/applications/api.py:20
 msgid "You need to have a verified email address"
 msgstr ""
 
-#: foodsaving/applications/api.py:24 foodsaving/groups/api.py:57
+#: foodsaving/applications/api.py:29 foodsaving/groups/api.py:57
 #: foodsaving/invitations/serializers.py:27
 #: foodsaving/pickups/permissions.py:67 foodsaving/pickups/serializers.py:38
 #: foodsaving/pickups/serializers.py:190 foodsaving/stores/api.py:18
@@ -29,7 +29,7 @@ msgstr ""
 msgid "You need to be a group editor"
 msgstr ""
 
-#: foodsaving/applications/api.py:32
+#: foodsaving/applications/api.py:37
 msgid "You need to be the applicant"
 msgstr ""
 
@@ -114,55 +114,60 @@ msgid ""
 "conversation</a>."
 msgstr ""
 
-#: foodsaving/conversations/api.py:42
-#: foodsaving/conversations/serializers.py:31
-#: foodsaving/conversations/serializers.py:224
+#: foodsaving/conversations/api.py:51
+#: foodsaving/conversations/serializers.py:154
+#: foodsaving/conversations/serializers.py:210
 msgid "You are not in this conversation"
 msgstr ""
 
-#: foodsaving/conversations/api.py:64
+#: foodsaving/conversations/api.py:73
 msgid "You are not the author of this message"
 msgstr ""
 
-#: foodsaving/conversations/api.py:73
+#: foodsaving/conversations/api.py:82
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its "
 "creation."
 msgstr ""
 
-#: foodsaving/conversations/api.py:164
+#: foodsaving/conversations/api.py:261
 msgid "Must be first in thread"
 msgstr ""
 
-#: foodsaving/conversations/api.py:167
+#: foodsaving/conversations/api.py:264
 msgid "You are not a participant in this thread"
 msgstr ""
 
+#: foodsaving/conversations/emails.py:129
 #: foodsaving/conversations/emails.py:132
-#: foodsaving/conversations/emails.py:135
 #, python-format
 msgid "Pickup %(date)s"
 msgstr ""
 
-#: foodsaving/conversations/emails.py:195
+#: foodsaving/conversations/emails.py:192
 #, python-format
-msgid "New message in %(user_name)s's application"
+msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr ""
 
-#: foodsaving/conversations/serializers.py:232
+#: foodsaving/conversations/emails.py:197
+#, python-format
+msgid "New message in your application to %(group_name)s"
+msgstr ""
+
+#: foodsaving/conversations/serializers.py:162
 msgid "You cannot change the thread of a message"
 msgstr ""
 
-#: foodsaving/conversations/serializers.py:239
+#: foodsaving/conversations/serializers.py:169
 msgid "Thread is not in the same conversation"
 msgstr ""
 
-#: foodsaving/conversations/serializers.py:243
+#: foodsaving/conversations/serializers.py:173
 msgid "You can only reply to Group messages"
 msgstr ""
 
-#: foodsaving/conversations/serializers.py:247
+#: foodsaving/conversations/serializers.py:177
 msgid "You cannot reply to replies"
 msgstr ""
 

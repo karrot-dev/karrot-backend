@@ -150,8 +150,9 @@ class TestGroupsAPI(APITestCase):
     def test_get_conversation(self):
         self.client.force_login(user=self.member)
         response = self.client.get('/api/groups/{}/conversation/'.format(self.group.id))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertIn(self.member.id, response.data['participants'])
+        self.assertEqual(response.data['type'], 'group')
 
     def test_join_group(self):
         self.client.force_login(user=self.user)

@@ -33,7 +33,6 @@ class FeedbackViewSet(
         mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
         PartialUpdateModelMixin,
-        mixins.ListModelMixin,
         GenericViewSet,
 ):
     """
@@ -55,6 +54,22 @@ class FeedbackViewSet(
 
     def get_queryset(self):
         return self.queryset.filter(about__store__group__members=self.request.user)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset()) \
+            .select_related('about') \
+            .prefetch_related('about__collectors')
+        feedback = self.paginate_queryset(queryset)
+
+        pickups = set(f.about for f in feedback)
+
+        serializer = self.get_serializer(feedback, many=True)
+        context = self.get_serializer_context()
+        pickups_serializer = PickupDateSerializer(pickups, many=True, context=context)
+        return self.get_paginated_response({
+            'feedback': serializer.data,
+            'pickups': pickups_serializer.data,
+        })
 
 
 class PickupDateSeriesViewSet(

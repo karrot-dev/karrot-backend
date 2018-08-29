@@ -1,21 +1,20 @@
 from influxdb_metrics.loader import write_points
 
-from foodsaving.groups.models import Group
 from foodsaving.groups.stats import group_tags
-from foodsaving.pickups.models import PickupDate
 
 
 def conversation_tags(conversation):
     tags = {}
     target = conversation.target
-    if isinstance(target, Group):
+    type = conversation.type()
+
+    if type == 'group':
         tags = group_tags(target)
-        tags['type'] = 'group'
-    elif isinstance(target, PickupDate):
+    elif type == 'pickup':
         tags = group_tags(target.store.group)
-        tags['type'] = 'pickup'
-    elif conversation.is_private:
-        tags['type'] = 'private'
+
+    if type is not None:
+        tags['type'] = type
     else:
         tags['type'] = 'unknown'
     return tags

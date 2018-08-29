@@ -5,10 +5,15 @@ from rest_framework import permissions, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.applications.models import GroupApplication
 from foodsaving.applications.serializers import GroupApplicationSerializer
+
+
+class ApplicationsPerDayThrottle(UserRateThrottle):
+    rate = '20/day'
 
 
 class HasVerifiedEmailAddress(permissions.BasePermission):
@@ -50,6 +55,11 @@ class GroupApplicationViewSet(
     )
     filter_backends = (DjangoFilterBackend, )
     filterset_fields = ('group', 'user', 'status')
+
+    def get_throttles(self):
+        if self.action == 'create':
+            self.throttle_classes = (ApplicationsPerDayThrottle, )
+        return super().get_throttles()
 
     def get_queryset(self):
         return self.queryset.filter(Q(group__members=self.request.user) | Q(user=self.request.user)).distinct()

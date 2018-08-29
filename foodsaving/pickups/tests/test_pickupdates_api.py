@@ -274,8 +274,9 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.member)
         self.pickup.collectors.add(self.member)
         response = self.client.get(self.conversation_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertIn(self.member.id, response.data['participants'], response.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn(self.member.id, response.data['participants'])
+        self.assertEqual(response.data['type'], 'pickup')
 
 
 class TestPickupDatesListAPI(APITestCase, ExtractPaginationMixin):

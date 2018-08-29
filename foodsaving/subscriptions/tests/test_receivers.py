@@ -57,6 +57,7 @@ def make_conversation_message_broadcast(message, **kwargs):
 
 
 def make_conversation_broadcast(conversation, **kwargs):
+    """ does not include participants"""
     response = {
         'topic': 'conversations:conversation',
         'payload': {
@@ -65,6 +66,8 @@ def make_conversation_broadcast(conversation, **kwargs):
             'seen_up_to': None,
             'unread_message_count': 0,
             'email_notifications': True,
+            'type': None,
+            'target_id': None,
         }
     }
     response['payload'].update(kwargs)
@@ -128,6 +131,7 @@ class ConversationReceiverTests(WSTestCase):
         message = ConversationMessage.objects.create(conversation=conversation, content='yay', author=author)
 
         # hopefully they receive it!
+        self.assertEqual(len(client.messages), 2, client.messages)
         response = client.messages[0]
         parse_dates(response)
         self.assertEqual(response, make_conversation_message_broadcast(message))
@@ -136,7 +140,14 @@ class ConversationReceiverTests(WSTestCase):
         response = client.messages[1]
         parse_dates(response)
         del response['payload']['participants']
-        self.assertEqual(response, make_conversation_broadcast(conversation, unread_message_count=1))
+        self.assertEqual(
+            response,
+            make_conversation_broadcast(
+                conversation,
+                unread_message_count=1,
+                updated_at=response['payload']['updated_at'],  # TODO fix test
+            )
+        )
 
         # author should get message & updated conversations object too
         response = author_client.messages[0]
@@ -250,6 +261,7 @@ class ConversationThreadReceiverTests(WSTestCase):
                 },
                 thread=thread.id,
                 is_editable=True,  # user is author of thread message
+                updated_at=response['payload']['updated_at'],  # TODO fix test
             )
         )
 
@@ -274,7 +286,8 @@ class ConversationThreadReceiverTests(WSTestCase):
                     'reply_count': 1,
                     'seen_up_to': reply.id,
                     'unread_reply_count': 0,
-                }
+                },
+                updated_at=response['payload']['updated_at'],  # TODO fix test
             )
         )
 

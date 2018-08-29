@@ -101,11 +101,3 @@ class TestPublicUserProfilesAPI(APITestCase, ExtractPaginationMixin):
     def test_access_forbidden_if_not_logged_in(self):
         response = self.get_results('/api/users-info/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_filter_by_conversation(self):
-        more_users = [UserFactory() for _ in range(3)] + [self.user]
-        another_conversation = ConversationFactory(participants=more_users)
-        self.client.force_login(user=self.user)
-        response = self.get_results('/api/users-info/?conversation={}'.format(another_conversation.id))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), len(more_users))

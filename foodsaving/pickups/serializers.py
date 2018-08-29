@@ -231,7 +231,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
         return feedback
 
     def get_is_editable(self, feedback):
-        return feedback.about.is_recent() and feedback.given_by == self.context['request'].user
+        return feedback.about.is_recent() and feedback.given_by_id == self.context['request'].user.id
 
     def validate_about(self, about):
         user = self.context['request'].user

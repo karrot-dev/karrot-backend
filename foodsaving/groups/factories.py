@@ -1,4 +1,4 @@
-from factory import DjangoModelFactory, post_generation, LazyAttribute
+from factory import DjangoModelFactory, post_generation, LazyAttribute, Sequence
 
 from foodsaving.groups import roles
 from foodsaving.groups.models import Group as GroupModel, GroupMembership, GroupStatus
@@ -21,7 +21,7 @@ class GroupFactory(DjangoModelFactory):
             for member in extracted:
                 GroupMembership.objects.create(group=self, user=member)
 
-    name = LazyAttribute(lambda x: 'Group ' + faker.name())
+    name = Sequence(lambda n: ' '.join(['Group', str(n), faker.name()]))
     description = LazyAttribute(lambda x: faker.sentence(nb_words=40))
     public_description = LazyAttribute(lambda x: faker.sentence(nb_words=20))
     application_questions = LazyAttribute(lambda x: faker.sentence(nb_words=20))

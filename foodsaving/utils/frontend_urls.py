@@ -1,16 +1,15 @@
 from furl import furl
 
 from config import settings
-from foodsaving.groups.models import Group
-from foodsaving.pickups.models import PickupDate
 
 
 def conversation_url(conversation, user):
-    if isinstance(conversation.target, Group):
+    type = conversation.type()
+    if type == 'group':
         return group_wall_url(conversation.target)
-    elif isinstance(conversation.target, PickupDate):
+    elif type == 'pickup':
         return pickup_detail_url(conversation.target)
-    elif conversation.is_private:
+    elif type == 'private':
         return user_detail_url(user)
     return None
 
@@ -46,8 +45,7 @@ def pickup_conversation_mute_url(pickup, conversation):
 
 
 def group_application_url(application):
-    # TODO check before merging
-    return '{hostname}/#/group/{group_id}/applications/{application_id}/'.format(
+    return '{hostname}/#/group/{group_id}/applications/{application_id}'.format(
         hostname=settings.HOSTNAME,
         group_id=application.group.id,
         application_id=application.id,

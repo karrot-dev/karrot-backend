@@ -97,7 +97,7 @@ def send_messages(sender, instance, created, **kwargs):
     ).distinct()
 
     message_title = message.author.display_name
-    if isinstance(conversation.target, Group):
+    if conversation.type() == 'group':
         message_title = '{} / {}'.format(conversation.target.name, message_title)
 
     click_action = None
