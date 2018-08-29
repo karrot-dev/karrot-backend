@@ -5,6 +5,7 @@ from asgiref.sync import async_to_sync
 from channels.exceptions import ChannelFull
 from channels.layers import get_channel_layer
 from django.conf import settings
+from django.contrib.auth import user_logged_out
 from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete, m2m_changed, post_delete
 from django.dispatch import receiver
@@ -206,7 +207,7 @@ def remove_participant(sender, instance, **kwargs):
 
     user = instance.user
     conversation = instance.conversation
-    for subscription in ChannelSubscription.objects.filter(user=user):
+    for subscription in ChannelSubscription.objects.recent().filter(user=user):
         send_in_channel(subscription.reply_channel, topic='conversations:leave', payload={'id': conversation.id})
 
 
@@ -356,6 +357,12 @@ def send_auth_user_updates(sender, instance, **kwargs):
     payload = AuthUserSerializer(user, context={'request': AbsoluteURIBuildingRequest()}).data
     for subscription in ChannelSubscription.objects.recent().filter(user=user):
         send_in_channel(subscription.reply_channel, topic='auth:user', payload=payload)
+
+
+@receiver(user_logged_out)
+def notify_logged_out_user(sender, user, **kwargs):
+    for subscription in ChannelSubscription.objects.recent().filter(user=user):
+        send_in_channel(subscription.reply_channel, topic='auth:logout', payload={})
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
