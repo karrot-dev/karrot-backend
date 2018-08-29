@@ -68,7 +68,7 @@ class Command(BaseCommand):
     def setup_relay_webhook(self, s):
         # create inbound domain with best effort, ignore failures
         response = s.post(
-            'https://api.sparkpost.com/api/v1/inbound_domains', json={'domain': settings.SPARKPOST_RELAY_DOMAIN}
+            'https://api.sparkpost.com/api/v1/inbound-domains', json={'domain': settings.SPARKPOST_RELAY_DOMAIN}
         )
         self.log_response(response)
 
