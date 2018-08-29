@@ -117,6 +117,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
             'conversation',
             'created_at',
             'updated_at',
+            'edited_at',
             'reactions',
             'received_via',
             'is_editable',

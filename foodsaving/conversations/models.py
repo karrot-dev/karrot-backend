@@ -3,7 +3,8 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import ForeignKey, TextField, ManyToManyField, BooleanField, CharField, QuerySet, Count, F, Q
+from django.db.models import ForeignKey, TextField, ManyToManyField, BooleanField, CharField, QuerySet, Count, F, Q, \
+    DateTimeField
 from django.db.models.manager import BaseManager
 from django.utils import timezone
 
@@ -171,6 +172,7 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 
     content = TextField()
     received_via = CharField(max_length=40, blank=True)
+    edited_at = DateTimeField(null=True)
 
     latest_message = models.ForeignKey(
         'self',
@@ -181,7 +183,12 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 
     def save(self, **kwargs):
         creating = self.pk is None
+        old = type(self).objects.get(pk=self.pk) if self.pk else None
+        if old is not None and old.content != self.content:
+            self.edited_at = timezone.now()
+
         super().save(**kwargs)
+
         if creating:
             # keep latest_message reference up-to-date
             if self.is_thread_reply():

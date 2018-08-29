@@ -730,11 +730,13 @@ class TestConversationsMessageEditAPI(APITestCase):
             created_at=(timezone.now() - timedelta(days=10)),
         )
 
-    def test_update_message(self):
+    def test_edit_message(self):
         self.client.force_login(user=self.user)
         data = {'content': 'hi'}
+        now = timezone.now()
         response = self.client.patch('/api/messages/{}/'.format(self.message.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertGreater(parse(response.data['edited_at']), now)
 
     def test_cannot_update_message_without_specifying_content(self):
         self.client.force_login(user=self.user)

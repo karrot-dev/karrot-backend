@@ -30,7 +30,7 @@ from foodsaving.utils.tests.fake import faker
 
 def parse_dates(data):
     payload = data['payload']
-    for k in ('created_at', 'updated_at'):
+    for k in ('created_at', 'updated_at', 'edited_at'):
         if payload.get(k):
             payload[k] = parse(payload[k])
 
@@ -45,6 +45,7 @@ def make_conversation_message_broadcast(message, **kwargs):
             'conversation': message.conversation.id,
             'created_at': message.created_at,
             'updated_at': message.updated_at,
+            'edited_at': message.edited_at,
             'received_via': '',
             'reactions': [],
             'is_editable': False,
