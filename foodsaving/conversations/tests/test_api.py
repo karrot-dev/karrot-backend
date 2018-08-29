@@ -51,38 +51,6 @@ class TestConversationsAPI(APITestCase):
             [conversation2.id, self.conversation1.id, self.conversation2.id],
         )
 
-    def test_list_conversations_by_group(self):
-        user = UserFactory()
-        group1 = GroupFactory(members=[user])
-        conversation1 = Conversation.objects.get_or_create_for_target(group1)
-        conversation1.messages.create(author=user, content='bu')
-        group2 = GroupFactory(members=[user])
-        conversation2 = Conversation.objects.get_or_create_for_target(group2)
-        conversation2.messages.create(author=user, content='bu')
-
-        self.client.force_login(user=user)
-
-        response = self.client.get('/api/conversations/', {'group': group1.id}, format='json')
-        response_conversations = response.data['results']['conversations']
-        self.assertEqual(len(response_conversations), 1, response.data)
-        self.assertEqual(response_conversations[0]['id'], conversation1.id)
-
-        response = self.client.get('/api/conversations/', {'group': group2.id}, format='json')
-        response_conversations = response.data['results']['conversations']
-        self.assertEqual(len(response_conversations), 1, response.data)
-        self.assertEqual(response_conversations[0]['id'], conversation2.id)
-
-    def test_list_conversations_without_wall(self):
-        user = UserFactory()
-        group = GroupFactory(members=[user])
-        conversation = Conversation.objects.get_or_create_for_target(group)
-        conversation.messages.create(author=user, content='bu')
-        self.client.force_login(user=user)
-
-        response = self.client.get('/api/conversations/', {'exclude_wall': True}, format='json')
-        response_conversations = response.data['results']['conversations']
-        self.assertEqual(len(response_conversations), 0)
-
     def test_list_conversations_with_related_data_efficiently(self):
         user = UserFactory()
         group = GroupFactory(members=[user])
@@ -95,7 +63,7 @@ class TestConversationsAPI(APITestCase):
         [c.messages.create(content='hey', author=user) for c in conversations]
 
         self.client.force_login(user=user)
-        with self.assertNumQueries(10):
+        with self.assertNumQueries(9):
             response = self.client.get('/api/conversations/', {'group': group.id}, format='json')
         results = response.data['results']
 

@@ -5,26 +5,8 @@ from django.db import migrations, models
 
 
 def set_conversation_group(apps, schema_editor):
-    Conversation = apps.get_model('conversations', 'Conversation')
-    for c in Conversation.objects.exclude(target_id=None):
-        target_type = c.target_type
-        TargetModel = apps.get_model(target_type.app_label, target_type.model)
-        target = TargetModel.objects.get(id=c.target_id)
-
-        type = target_type.model
-        group = None
-        if type == 'pickupdate':
-            group = target.store.group
-        elif type == 'groupapplication':
-            group = target.group
-        elif type == 'group':
-            group = target
-
-        if group is None:
-            print('did not find group for conversation', c)
-
-        c.group = group
-        c.save()
+    # conversation.group has been removed
+    pass
 
 
 class Migration(migrations.Migration):

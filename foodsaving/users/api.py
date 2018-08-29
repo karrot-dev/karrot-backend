@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Q
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from rest_framework import mixins
 from rest_framework.decorators import action
@@ -21,7 +20,6 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, RetrievePriv
     filter_backends = (filters.SearchFilter, )
     permission_classes = (IsAuthenticated, )
     search_fields = ('display_name', )
-    filterset_fields = ('conversation', 'groups')
 
     def retrieve(self, request, *args, **kwargs):
         """Get one user profile"""
@@ -56,10 +54,7 @@ class UserInfoViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericV
     """
     queryset = get_user_model().objects.active()
     serializer_class = UserInfoSerializer
-    filter_backends = (filters.SearchFilter, DjangoFilterBackend)
     permission_classes = (IsAuthenticated, )
-    search_fields = ('display_name', )
-    filterset_fields = ('conversation', 'groups')
     pagination_class = UserPagination
 
     def get_queryset(self):

@@ -169,17 +169,6 @@ class TestPickupConversations(TestCase):
 
         self.assertEqual(len(mail.outbox), 2)
 
-    def test_sets_group(self):
-        self.assertEqual(self.conversation.group, self.group)
-
-
-class TestGroupConversation(TestCase):
-    def test_sets_group(self):
-        user = VerifiedUserFactory()
-        group = GroupFactory(members=[user])
-        conversation = Conversation.objects.get_or_create_for_target(group)
-        self.assertEqual(conversation.group, group)
-
 
 class TestPrivateUserConversations(TestCase):
     def setUp(self):
@@ -217,10 +206,6 @@ class TestPrivateUserConversations(TestCase):
     def test_get_or_create_conversation_for_yourself_fails(self):
         with self.assertRaises(Exception):
             Conversation.objects.get_or_create_for_two_users(self.user, self.user)
-
-    def test_does_not_set_group(self):
-        conversation = Conversation.objects.get_or_create_for_two_users(self.user, self.user2)
-        self.assertIsNone(conversation.group)
 
 
 class ReactionModelTests(TestCase):
