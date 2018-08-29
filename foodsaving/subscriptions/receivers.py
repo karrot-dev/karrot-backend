@@ -206,7 +206,7 @@ def remove_participant(sender, instance, **kwargs):
 
     user = instance.user
     conversation = instance.conversation
-    for subscription in ChannelSubscription.objects.filter(user=user):
+    for subscription in ChannelSubscription.objects.recent().filter(user=user):
         send_in_channel(subscription.reply_channel, topic='conversations:leave', payload={'id': conversation.id})
 
 
