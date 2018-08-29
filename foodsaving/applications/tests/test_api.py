@@ -23,6 +23,10 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
         self.group = GroupFactory(members=[self.member])
         mail.outbox = []
 
+        # effectively disable throttling
+        from foodsaving.applications.api import ApplicationsPerDayThrottle
+        ApplicationsPerDayThrottle.rate = '1000/day'
+
     def test_apply_for_group(self):
         self.client.force_login(user=self.applicant)
         answers = faker.text()
