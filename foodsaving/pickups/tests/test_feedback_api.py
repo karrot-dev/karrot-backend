@@ -187,16 +187,23 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.user)
         response = self.get_results(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data), 0)
+        self.assertEqual(len(response.data['feedback']), 0)
 
     def test_list_feedback_works_as_group_member(self):
         """
-        Member is allowed to see list of feedback (DOUBLE CHECK!!)
+        Member is allowed to see list of feedback
         """
         self.client.force_login(user=self.member)
-        response = self.get_results(self.url)
+        with self.assertNumQueries(3):
+            response = self.get_results(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data), 3)
+        feedback = response.data['feedback']
+        self.assertEqual(len(feedback), 3)
+
+        # check related data
+        pickup_ids = set(f['about'] for f in feedback)
+        self.assertEqual(len(response.data['pickups']), len(pickup_ids))
+        self.assertEqual(set(p['id'] for p in response.data['pickups']), pickup_ids)
 
     def test_list_feedback_works_as_collector(self):
         """
@@ -205,7 +212,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.collector)
         response = self.get_results(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data), 3)
+        self.assertEqual(len(response.data['feedback']), 3)
 
     def test_retrieve_feedback_fails_as_non_user(self):
         """
