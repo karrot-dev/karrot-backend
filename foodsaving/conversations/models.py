@@ -37,10 +37,11 @@ class ConversationQuerySet(models.QuerySet):
         )
 
     def annotate_unread_message_count_for(self, user):
-        unread_message_filter = Q(conversationparticipant__user=user) & (
-            Q(conversationparticipant__seen_up_to=None) | Q(messages__id__gt=F('conversationparticipant__seen_up_to'))
-        )
-        return self.annotate(unread_message_count=Count('messages', filter=unread_message_filter, distinct=True))
+        exclude_replies = Q(messages__thread_id=None) | Q(messages__id=F('messages__thread_id'))
+        unread_messages = Q(conversationparticipant__seen_up_to=None) \
+                          | Q(messages__id__gt=F('conversationparticipant__seen_up_to'))
+        filter = Q(conversationparticipant__user=user) & unread_messages & exclude_replies
+        return self.annotate(unread_message_count=Count('messages', filter=filter, distinct=True))
 
 
 class Conversation(BaseModel, UpdatedAtMixin):
