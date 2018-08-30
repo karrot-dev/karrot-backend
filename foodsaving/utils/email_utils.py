@@ -1,4 +1,4 @@
-from email.utils import formataddr
+from email.utils import formataddr as real_formataddr
 
 import html2text
 from anymail.message import AnymailMessage
@@ -6,6 +6,7 @@ from babel.dates import format_date, format_time
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string, get_template
 from django.utils import translation
+from django.utils.text import Truncator
 from django.utils.timezone import get_current_timezone
 from django.utils.translation import to_locale, get_language
 from jinja2 import Environment
@@ -141,3 +142,11 @@ def prepare_email_content(template, context, language='en'):
         subject = render_to_string('{}.subject.jinja2'.format(template), context).replace('\n', '')
 
         return subject, text_content, html_content
+
+
+def formataddr(pair, *args, **kwargs):
+    # Sparkpost has problems if from_email name contains more than 78 characters, so let's truncate it...
+    name, email = pair
+    name = Truncator(name).chars(num=75)
+
+    return real_formataddr((name, email), *args, **kwargs)

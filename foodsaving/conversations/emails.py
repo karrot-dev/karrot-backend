@@ -1,12 +1,10 @@
-from email.utils import formataddr
-
 from babel.dates import format_date, format_time
 from django.utils import translation, timezone
 from django.utils.text import Truncator
 from django.utils.translation import ugettext as _
 
 from config import settings
-from foodsaving.utils.email_utils import prepare_email
+from foodsaving.utils.email_utils import prepare_email, formataddr
 from foodsaving.utils.frontend_urls import (
     group_wall_url, group_conversation_mute_url, pickup_detail_url, pickup_conversation_mute_url, user_detail_url,
     user_conversation_mute_url, group_application_url, group_application_mute_url, thread_url, thread_mute_url
