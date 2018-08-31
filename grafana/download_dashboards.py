@@ -19,7 +19,7 @@ path = os.path.dirname(os.path.realpath(__file__))
 
 try:
     shutil.rmtree(os.path.join(path, 'dashboards'))
-except:
+except FileNotFoundError:
     pass
 
 os.mkdir(os.path.join(path, 'dashboards'))
