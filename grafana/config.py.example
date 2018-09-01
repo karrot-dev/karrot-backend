@@ -1,0 +1,2 @@
+API_KEY = 'your key'
+GRAFANA_HOST = 'https://grafana.yunity.org'
