@@ -1,10 +1,9 @@
-from dateutil.relativedelta import relativedelta
 from django.test import TestCase
 from django.utils import timezone
 
-from foodsaving.users import stats
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership
+from foodsaving.users import stats
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
 from foodsaving.webhooks.models import EmailEvent
 
@@ -12,9 +11,6 @@ from foodsaving.webhooks.models import EmailEvent
 class TestUserStats(TestCase):
     def test_user_stats(self):
         self.maxDiff = None
-
-        def update_member_activity(user, **kwargs):
-            GroupMembership.objects.filter(user=user).update(lastseen_at=timezone.now() - relativedelta(**kwargs))
 
         # 9 verified users, 1 unverified user
         users = [VerifiedUserFactory() for _ in range(9)]
@@ -53,12 +49,11 @@ class TestUserStats(TestCase):
         photo_user.photo = 'photo.jpg'
         photo_user.save()
 
-        # 3 groups
+        # 2 groups where everybody is active, 1 where everybody is inactive
         GroupFactory(members=users[:9])
         GroupFactory(members=users[:9])
-        GroupFactory(members=users[:9])
-        for user in users:
-            update_member_activity(user, days=5)
+        group_all_inactive = GroupFactory(members=users[:9])
+        GroupMembership.objects.filter(group=group_all_inactive).update(inactive_at=timezone.now())
 
         points = stats.get_users_stats()
 
@@ -71,9 +66,8 @@ class TestUserStats(TestCase):
                 'active_with_mobile_number_count': 1,
                 'active_with_description_count': 4,
                 'active_with_photo_count': 1,
-                'active_with_groups_count_avg': 3.0,
-                'active_with_groups_count_stddev': 0.0,
-                'without_group_count': 1,
+                'active_memberships_per_active_user_avg': 2.0,
+                'no_membership_count': 1,
                 'deleted_count': 1,
             }
         )

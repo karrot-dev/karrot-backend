@@ -6,7 +6,7 @@ from foodsaving.users.stats import get_users_stats
 from foodsaving.utils import stats_utils
 
 
-@db_periodic_task(crontab(minute=0))  # every hour
+@db_periodic_task(crontab(hour='*/6', minute=5))  # every 6 hours
 def record_user_stats():
     stats_utils.periodic_task('users__record_user_stats')
 
