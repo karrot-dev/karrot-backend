@@ -3,7 +3,8 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import ForeignKey, TextField, ManyToManyField, BooleanField, CharField, QuerySet, Count, F, Q
+from django.db.models import ForeignKey, TextField, ManyToManyField, BooleanField, CharField, QuerySet, Count, F, Q, \
+    DateTimeField
 from django.db.models.manager import BaseManager
 from django.utils import timezone
 
@@ -36,10 +37,11 @@ class ConversationQuerySet(models.QuerySet):
         )
 
     def annotate_unread_message_count_for(self, user):
-        unread_message_filter = Q(conversationparticipant__user=user) & (
-            Q(conversationparticipant__seen_up_to=None) | Q(messages__id__gt=F('conversationparticipant__seen_up_to'))
-        )
-        return self.annotate(unread_message_count=Count('messages', filter=unread_message_filter, distinct=True))
+        exclude_replies = Q(messages__thread_id=None) | Q(messages__id=F('messages__thread_id'))
+        unread_messages = Q(conversationparticipant__seen_up_to=None) \
+            | Q(messages__id__gt=F('conversationparticipant__seen_up_to'))
+        filter = Q(conversationparticipant__user=user) & unread_messages & exclude_replies
+        return self.annotate(unread_message_count=Count('messages', filter=filter, distinct=True))
 
 
 class Conversation(BaseModel, UpdatedAtMixin):
@@ -171,6 +173,7 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 
     content = TextField()
     received_via = CharField(max_length=40, blank=True)
+    edited_at = DateTimeField(null=True)
 
     latest_message = models.ForeignKey(
         'self',
@@ -181,7 +184,12 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 
     def save(self, **kwargs):
         creating = self.pk is None
+        old = type(self).objects.get(pk=self.pk) if self.pk else None
+        if old is not None and old.content != self.content:
+            self.edited_at = timezone.now()
+
         super().save(**kwargs)
+
         if creating:
             # keep latest_message reference up-to-date
             if self.is_thread_reply():

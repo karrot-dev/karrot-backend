@@ -1,8 +1,6 @@
-from email.utils import formataddr
-
 from config import settings
 from foodsaving.conversations.models import Conversation
-from foodsaving.utils.email_utils import prepare_email
+from foodsaving.utils.email_utils import prepare_email, formataddr
 from foodsaving.utils.frontend_urls import group_wall_url, group_settings_url, group_application_url, \
     group_application_mute_url, group_applications_url, group_edit_url
 from foodsaving.webhooks.api import make_local_part

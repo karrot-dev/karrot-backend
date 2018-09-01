@@ -131,6 +131,16 @@ class ConversationThreadModelTests(TestCase):
 
         self.assertEqual(message.unread_replies_count, n - read_messages)
 
+    def test_unread_message_count_annotation_does_not_include_replies(self):
+        self.thread.participants.create(user=self.user2)
+        self.create_reply()
+
+        message = Conversation.objects \
+            .annotate_unread_message_count_for(self.user2) \
+            .get(pk=self.conversation.id)
+
+        self.assertEqual(message.unread_message_count, 1)
+
     def test_default_replies_count_property(self):
         self.assertEqual(self.thread.replies_count, 0)
         n = 5
