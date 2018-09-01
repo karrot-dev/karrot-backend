@@ -2,8 +2,6 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
-from foodsaving.groups.serializers import GroupMembershipInfoSerializer
-
 
 class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,7 +28,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserProfileSerializer(serializers.ModelSerializer):
     photo_urls = VersatileImageFieldSerializer(sizes='user_profile', source='photo')
-    memberships = serializers.SerializerMethodField()
 
     class Meta:
         model = get_user_model()
@@ -44,8 +41,5 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'longitude',
             'description',
             'photo_urls',
-            'memberships',
+            'groups',
         ]
-
-    def get_memberships(self, user):
-        return {m.group_id: GroupMembershipInfoSerializer(m).data for m in user.groupmembership_set.all()}

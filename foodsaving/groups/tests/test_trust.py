@@ -141,8 +141,3 @@ class TestTrustList(APITestCase):
         response = self.client.get('/api/groups/{}/'.format(self.group.id))
         self.assertEqual(response.data['memberships'][self.member1.id]['trusted_by'], [self.member2.id])
         self.assertEqual(response.data['memberships'][self.member2.id]['trusted_by'], [self.member1.id])
-
-    def test_list_trust_for_user(self):
-        self.client.force_login(user=self.member1)
-        response = self.client.get('/api/users/{}/profile/'.format(self.member2.id))
-        self.assertEqual(response.data['memberships'][self.group.id]['trusted_by'], [self.member1.id])
