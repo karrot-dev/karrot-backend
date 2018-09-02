@@ -29,6 +29,7 @@ class HistoryTypus(enum.Enum):
     PICKUP_LEAVE = 15
     PICKUP_MISSED = 16
     GROUP_APPLICATION_DECLINED = 17
+    MEMBER_BECAME_EDITOR = 18
 
 
 class HistoryQuerySet(models.QuerySet):

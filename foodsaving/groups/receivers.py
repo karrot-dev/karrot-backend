@@ -5,6 +5,7 @@ from foodsaving.conversations.models import Conversation
 from foodsaving.groups import roles, stats
 from foodsaving.groups.emails import prepare_user_became_editor_email
 from foodsaving.groups.models import Group, GroupMembership, Trust, GroupNotificationType
+from foodsaving.history.models import History, HistoryTypus
 
 
 @receiver(post_save, sender=Group)
@@ -85,6 +86,14 @@ def trust_given(sender, instance, created, **kwargs):
 
     if relevant_trust.count() >= trust_threshold:
         membership.add_roles([roles.GROUP_EDITOR])
+        History.objects.create(
+            typus=HistoryTypus.MEMBER_BECAME_EDITOR,
+            group=membership.group,
+            users=[membership.user],
+            payload={
+                'threshold': trust_threshold,
+            },
+        )
 
         # new editors should also get informed about new applications
         membership.add_notification_types([GroupNotificationType.NEW_APPLICATION])
