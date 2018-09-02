@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-08-29 11:56+0000\n"
+"POT-Creation-Date: 2018-09-02 12:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -115,8 +115,8 @@ msgid ""
 msgstr ""
 
 #: foodsaving/conversations/api.py:51
-#: foodsaving/conversations/serializers.py:154
-#: foodsaving/conversations/serializers.py:210
+#: foodsaving/conversations/serializers.py:155
+#: foodsaving/conversations/serializers.py:211
 msgid "You are not in this conversation"
 msgstr ""
 
@@ -139,35 +139,35 @@ msgstr ""
 msgid "You are not a participant in this thread"
 msgstr ""
 
-#: foodsaving/conversations/emails.py:129
-#: foodsaving/conversations/emails.py:132
+#: foodsaving/conversations/emails.py:127
+#: foodsaving/conversations/emails.py:130
 #, python-format
 msgid "Pickup %(date)s"
 msgstr ""
 
-#: foodsaving/conversations/emails.py:192
+#: foodsaving/conversations/emails.py:190
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr ""
 
-#: foodsaving/conversations/emails.py:197
+#: foodsaving/conversations/emails.py:195
 #, python-format
 msgid "New message in your application to %(group_name)s"
 msgstr ""
 
-#: foodsaving/conversations/serializers.py:162
+#: foodsaving/conversations/serializers.py:163
 msgid "You cannot change the thread of a message"
 msgstr ""
 
-#: foodsaving/conversations/serializers.py:169
+#: foodsaving/conversations/serializers.py:170
 msgid "Thread is not in the same conversation"
 msgstr ""
 
-#: foodsaving/conversations/serializers.py:173
+#: foodsaving/conversations/serializers.py:174
 msgid "You can only reply to Group messages"
 msgstr ""
 
-#: foodsaving/conversations/serializers.py:177
+#: foodsaving/conversations/serializers.py:178
 msgid "You cannot reply to replies"
 msgstr ""
 
@@ -330,7 +330,7 @@ msgstr ""
 #: foodsaving/groups/templates/user_became_editor.html.jinja2:120
 #: foodsaving/groups/templates/user_became_editor.subject.jinja2:1
 #, python-format
-msgid "You became editor in %(group_name)s!"
+msgid "You gained editing permissions in %(group_name)s!"
 msgstr ""
 
 #: foodsaving/groups/templates/user_became_editor.html.jinja2:123

@@ -1,7 +1,7 @@
 <mjml>
     <mj-head>
         <mj-include path="../../base/templates/_base-head.mjml"/>
-        <mj-title>{% trans %}You became editor in {{ group_name }}!{% endtrans %}</mj-title>
+        <mj-title>{% trans %}You gained editing permissions in {{ group_name }}!{% endtrans %}</mj-title>
     </mj-head>
     <mj-body>
         <mj-container>
@@ -10,7 +10,7 @@
                 <mj-column>
                     <mj-text>
                         <h1>
-                            {% trans %}You became editor in {{ group_name }}!{% endtrans %}
+                            {% trans %}You gained editing permissions in {{ group_name }}!{% endtrans %}
                         </h1>
                         <p>
                             {% trans trimmed %}
