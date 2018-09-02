@@ -28,7 +28,7 @@ class TestProcessInactiveUsers(TestCase):
     def setUp(self):
         self.active_user = UserFactory()
         self.inactive_user = UserFactory()
-        self.group = GroupFactory(editors=[self.active_user, self.inactive_user])
+        self.group = GroupFactory(members=[self.active_user, self.inactive_user])
 
         self.active_membership = GroupMembership.objects.get(group=self.group, user=self.active_user)
         self.inactive_membership = set_member_inactive(self.group, self.inactive_user)
@@ -54,8 +54,8 @@ class TestProcessInactiveUsers(TestCase):
 class TestProcessInactiveUsersNonActiveGroup(TestCase):
     def setUp(self):
         inactive_user = UserFactory()
-        playground_group = PlaygroundGroupFactory(editors=[inactive_user])
-        inactive_group = InactiveGroupFactory(editors=[inactive_user])
+        playground_group = PlaygroundGroupFactory(members=[inactive_user])
+        inactive_group = InactiveGroupFactory(members=[inactive_user])
 
         set_member_inactive(playground_group, inactive_user)
         set_member_inactive(inactive_group, inactive_user)
@@ -131,7 +131,7 @@ class TestSummaryEmailTask(TestCase):
 
     @patch('foodsaving.groups.stats.write_points')
     def test_no_summary_email_if_no_activity_in_group(self, write_points):
-        group = GroupFactory(editors=[VerifiedUserFactory()])
+        group = GroupFactory(members=[VerifiedUserFactory()])
 
         write_points.reset_mock()
         mail.outbox = []

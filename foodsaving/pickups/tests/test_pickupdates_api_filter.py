@@ -23,12 +23,12 @@ class TestPickupdatesAPIFilter(APITestCase, ExtractPaginationMixin):
 
         # pickup date for group with one member and one store
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[self.member])
+        self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(store=self.store)
 
         # and another store + group + pick-update
-        self.group2 = GroupFactory(editors=[self.member])
+        self.group2 = GroupFactory(members=[self.member])
         self.store2 = StoreFactory(group=self.group2)
         self.pickup2 = PickupDateFactory(store=self.store2)
 
@@ -96,11 +96,11 @@ class TestFeedbackPossibleFilter(APITestCase, ExtractPaginationMixin):
 
         self.member = UserFactory()
         self.member2 = UserFactory()
-        self.group = GroupFactory(editors=[self.member, self.member2])
+        self.group = GroupFactory(members=[self.member, self.member2])
         self.store = StoreFactory(group=self.group)
 
         # not member (anymore)
-        self.group2 = GroupFactory(editors=[])
+        self.group2 = GroupFactory(members=[])
         self.store2 = StoreFactory(group=self.group2)
 
         self.pickupFeedbackPossible = PickupDateFactory(

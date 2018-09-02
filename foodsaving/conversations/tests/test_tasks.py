@@ -18,7 +18,7 @@ class TestConversationNotificationTask(TestCase):
     def setUp(self):
         self.user = VerifiedUserFactory()
         self.author = VerifiedUserFactory()
-        self.group = GroupFactory(editors=[self.author, self.user])
+        self.group = GroupFactory(members=[self.author, self.user])
         mail.outbox = []
         with suppressed_notifications():
             self.message = self.group.conversation.messages.create(author=self.author, content='initial message')

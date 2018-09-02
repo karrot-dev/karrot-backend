@@ -34,7 +34,7 @@ class TestPickupDateSeriesCreationAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):
 
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[self.member])
+        self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
 
     def test_create_and_get_recurring_series(self):
@@ -143,7 +143,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.now = timezone.now()
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[self.member])
+        self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
         self.series = PickupDateSeriesFactory(max_collectors=3, store=self.store)
         self.series.update_pickup_dates(start=lambda: self.now)

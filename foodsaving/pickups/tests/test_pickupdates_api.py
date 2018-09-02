@@ -17,7 +17,7 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
 
         # pickup date for group with one member and one store
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[self.member])
+        self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(store=self.store)
         self.pickup_url = self.url + str(self.pickup.id) + '/'
@@ -285,7 +285,7 @@ class TestPickupDatesListAPI(APITestCase, ExtractPaginationMixin):
 
         # pickup date for group with one member and one store
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[self.member])
+        self.group = GroupFactory(members=[self.member])
         self.active_store = StoreFactory(group=self.group, status='active')
         self.inactive_store = StoreFactory(group=self.group, status='created')
 

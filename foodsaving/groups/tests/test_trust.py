@@ -14,7 +14,7 @@ from foodsaving.users.factories import UserFactory
 class TestTrustThreshold(TestCase):
     def create_group_with_members(self, member_count):
         self.members = [UserFactory() for _ in range(member_count)]
-        self.group = GroupFactory(editors=self.members)
+        self.group = GroupFactory(members=self.members)
         # trust threshold calculation ignores recently joined users, so we need to create users before that
         two_days_ago = timezone.now() - relativedelta(days=2)
         GroupMembership.objects.filter(group=self.group).update(created_at=two_days_ago)
@@ -53,7 +53,7 @@ class TestTrustReceiver(TestCase):
     def test_newcomer_becomes_editor(self):
         editor = UserFactory()
         newcomer = UserFactory()
-        group = GroupFactory(editors=[editor], newcomers=[newcomer])
+        group = GroupFactory(members=[editor], newcomers=[newcomer])
         two_days_ago = timezone.now() - relativedelta(days=2)
         GroupMembership.objects.filter(group=group).update(created_at=two_days_ago)
         mail.outbox = []
@@ -64,12 +64,12 @@ class TestTrustReceiver(TestCase):
         self.assertTrue(group.is_editor(newcomer))
         self.assertIn(GroupNotificationType.NEW_APPLICATION, membership.notification_types)
         self.assertEqual(len(mail.outbox), 1)
-        self.assertIn('You became editor', mail.outbox[0].subject)
+        self.assertIn('You gained editing permissions', mail.outbox[0].subject)
 
     def test_remove_trust_when_giver_leaves_group(self):
         editor = UserFactory()
         newcomer = UserFactory()
-        group = GroupFactory(editors=[editor], newcomers=[newcomer])
+        group = GroupFactory(members=[editor], newcomers=[newcomer])
         membership = GroupMembership.objects.get(user=newcomer, group=group)
         Trust.objects.create(membership=membership, given_by=editor)
 
@@ -82,7 +82,7 @@ class TestTrustAPI(APITestCase):
     def setUp(self):
         self.member1 = UserFactory()
         self.member2 = UserFactory()
-        self.group = GroupFactory(editors=[self.member1, self.member2])
+        self.group = GroupFactory(members=[self.member1, self.member2])
 
     def test_give_trust(self):
         self.client.force_login(user=self.member1)
@@ -129,7 +129,7 @@ class TestTrustList(APITestCase):
     def setUp(self):
         self.member1 = UserFactory()
         self.member2 = UserFactory()
-        self.group = GroupFactory(editors=[self.member1, self.member2])
+        self.group = GroupFactory(members=[self.member1, self.member2])
 
         membership = GroupMembership.objects.get(user=self.member2, group=self.group)
         Trust.objects.create(membership=membership, given_by=self.member1)

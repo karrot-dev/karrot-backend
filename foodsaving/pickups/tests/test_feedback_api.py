@@ -23,7 +23,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.collector3 = UserFactory()
         self.evil_collector = UserFactory()
         self.group = GroupFactory(
-            editors=[self.member, self.collector, self.evil_collector, self.collector2, self.collector3]
+            members=[self.member, self.collector, self.evil_collector, self.collector2, self.collector3]
         )
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(

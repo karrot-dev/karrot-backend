@@ -10,7 +10,7 @@ class GroupFactory(DjangoModelFactory):
         model = GroupModel
 
     @post_generation
-    def editors(self, created, extracted, **kwargs):
+    def members(self, created, extracted, **kwargs):
         if created and extracted:
             for member in extracted:
                 GroupMembership.objects.create(group=self, user=member, roles=[roles.GROUP_EDITOR])

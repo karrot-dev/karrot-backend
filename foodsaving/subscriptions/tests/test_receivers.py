@@ -352,7 +352,7 @@ class GroupReceiverTests(WSTestCase):
         super().setUp()
         self.member = UserFactory()
         self.user = UserFactory()
-        self.group = GroupFactory(editors=[self.member])
+        self.group = GroupFactory(members=[self.member])
 
     def test_receive_group_changes(self):
         self.client = self.connect_as(self.member)
@@ -393,7 +393,7 @@ class GroupApplicationReceiverTests(WSTestCase):
         super().setUp()
         self.member = UserFactory()
         self.user = UserFactory()
-        self.group = GroupFactory(editors=[self.member])
+        self.group = GroupFactory(members=[self.member])
 
     def test_member_receives_application_create(self):
         self.client = self.connect_as(self.member)
@@ -436,7 +436,7 @@ class InvitationReceiverTests(WSTestCase):
     def setUp(self):
         super().setUp()
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[self.member])
+        self.group = GroupFactory(members=[self.member])
 
     def test_receive_invitation_updates(self):
         self.client = self.connect_as(self.member)
@@ -466,7 +466,7 @@ class StoreReceiverTests(WSTestCase):
     def setUp(self):
         super().setUp()
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[self.member])
+        self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
 
     def test_receive_store_changes(self):
@@ -487,7 +487,7 @@ class PickupDateReceiverTests(WSTestCase):
     def setUp(self):
         super().setUp()
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[self.member])
+        self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(store=self.store)
 
@@ -543,7 +543,7 @@ class PickupDateSeriesReceiverTests(WSTestCase):
     def setUp(self):
         super().setUp()
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[self.member])
+        self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
 
         # Create far in the future to generate no pickup dates
@@ -580,7 +580,7 @@ class FeedbackReceiverTests(WSTestCase):
     def setUp(self):
         super().setUp()
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[self.member])
+        self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(store=self.store)
 
@@ -600,7 +600,7 @@ class FinishedPickupReceiverTest(WSTestCase):
     def setUp(self):
         super().setUp()
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[self.member])
+        self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(store=self.store, collectors=[self.member])
 
@@ -628,7 +628,7 @@ class UserReceiverTest(WSTestCase):
         self.member = UserFactory()
         self.other_member = UserFactory()
         self.unrelated_user = UserFactory()
-        self.group = GroupFactory(editors=[self.member, self.other_member])
+        self.group = GroupFactory(members=[self.member, self.other_member])
         pathlib.Path(settings.MEDIA_ROOT).mkdir(exist_ok=True)
         copyfile(
             os.path.join(os.path.dirname(__file__), './photo.jpg'), os.path.join(settings.MEDIA_ROOT, 'photo.jpg')
@@ -669,7 +669,7 @@ class UserReceiverTest(WSTestCase):
         self.assertEqual(len(self.client.messages), 1)
 
     def test_do_not_send_too_many_updates(self):
-        [GroupFactory(editors=[self.member, self.other_member]) for _ in range(3)]
+        [GroupFactory(members=[self.member, self.other_member]) for _ in range(3)]
 
         self.client = self.connect_as(self.member)
 

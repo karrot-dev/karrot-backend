@@ -13,7 +13,7 @@ from foodsaving.users.factories import UserFactory
 class TestConversationReceiver(TestCase):
     def setUp(self):
         self.invited_by = UserFactory()
-        self.group = GroupFactory(editors=[self.invited_by])
+        self.group = GroupFactory(members=[self.invited_by])
         self.user = UserFactory()
         self.invited_at = timezone.now()
 
@@ -38,7 +38,7 @@ class TestConversationReceiver(TestCase):
 
     def test_removes_participant(self):
         user = UserFactory()
-        group = GroupFactory(editors=[user])
+        group = GroupFactory(members=[user])
         GroupMembership.objects.filter(group=group, user=user).delete()
         conversation = self.get_conversation_for_group(group)
         self.assertNotIn(user, conversation.participants.all(), 'Conversation still had user in')
@@ -53,7 +53,7 @@ class TestSendStatistics(TestCase):
     def setUp(self):
         self.user = UserFactory()
         self.member = UserFactory()
-        self.group = GroupFactory(editors=[self.member])
+        self.group = GroupFactory(members=[self.member])
 
     @patch('foodsaving.groups.stats.write_points')
     def test_send_group_join_stats(self, write_mock):

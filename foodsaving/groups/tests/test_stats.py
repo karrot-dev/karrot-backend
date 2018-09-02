@@ -20,7 +20,7 @@ class TestGroupStats(TestCase):
             membership.save()
 
         members = [UserFactory() for _ in range(10)]
-        group = GroupFactory(editors=members)
+        group = GroupFactory(members=members)
 
         set_as_newcomer(members[0])
         update_member_activity(members[0], days=2)

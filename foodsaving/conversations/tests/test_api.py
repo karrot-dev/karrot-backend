@@ -53,7 +53,7 @@ class TestConversationsAPI(APITestCase):
 
     def test_list_conversations_with_related_data_efficiently(self):
         user = UserFactory()
-        group = GroupFactory(editors=[user])
+        group = GroupFactory(members=[user])
         store = StoreFactory(group=group)
         pickup = PickupDateFactory(store=store)
         application = GroupApplicationFactory(user=UserFactory(), group=group)
@@ -133,7 +133,7 @@ class TestConversationThreadsAPI(APITestCase):
     def setUp(self):
         self.user = VerifiedUserFactory()
         self.user2 = VerifiedUserFactory()
-        self.group = GroupFactory(editors=[self.user, self.user2])
+        self.group = GroupFactory(members=[self.user, self.user2])
         self.conversation = self.group.conversation
         self.thread = self.conversation.messages.create(author=self.user, content='yay')
 
@@ -412,7 +412,7 @@ class TestConversationsSeenUpToAPI(APITestCase):
 class TestConversationsEmailNotificationsAPI(APITestCase):
     def setUp(self):
         self.user = VerifiedUserFactory()
-        self.group = GroupFactory(editors=[self.user])
+        self.group = GroupFactory(members=[self.user])
         self.conversation = self.group.conversation
         self.participant = ConversationParticipant.objects.get(conversation=self.conversation, user=self.user)
 
@@ -501,7 +501,7 @@ class TestConversationsMessageReactionsPostAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.user2 = UserFactory()
-        self.group = GroupFactory(editors=[self.user, self.user2])
+        self.group = GroupFactory(members=[self.user, self.user2])
         self.conversation = Conversation.objects.get_or_create_for_target(self.group)
         self.conversation.join(self.user)
         self.conversation.join(self.user2)
@@ -509,7 +509,7 @@ class TestConversationsMessageReactionsPostAPI(APITestCase):
         self.message = self.conversation.messages.create(author=self.user, content='hello')
         self.reaction = self.message.reactions.create(user=self.user, name='thumbsdown')
 
-        self.group2 = GroupFactory(editors=[self.user])
+        self.group2 = GroupFactory(members=[self.user])
         self.conversation2 = Conversation.objects.get_or_create_for_target(self.group2)
         self.conversation2.join(self.user)
         self.message2 = self.conversation2.messages.create(author=self.user, content='hello2')
@@ -633,14 +633,14 @@ class TestConversationsMessageReactionsDeleteAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.user2 = UserFactory()
-        self.group = GroupFactory(editors=[self.user])
+        self.group = GroupFactory(members=[self.user])
         self.conversation = Conversation.objects.get_or_create_for_target(self.group)
         self.conversation.join(self.user)
         self.participant = ConversationParticipant.objects.get(conversation=self.conversation, user=self.user)
         self.message = self.conversation.messages.create(author=self.user, content='hello')
         self.reaction = self.message.reactions.create(user=self.user, name='thumbsup')
 
-        self.group2 = GroupFactory(editors=[self.user])
+        self.group2 = GroupFactory(members=[self.user])
         self.conversation2 = Conversation.objects.get_or_create_for_target(self.group2)
         self.conversation2.join(self.user)
         self.message2 = self.conversation2.messages.create(author=self.user, content='hello2')
@@ -713,13 +713,13 @@ class TestConversationsMessageEditAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.user2 = UserFactory()
-        self.group = GroupFactory(editors=[self.user])
+        self.group = GroupFactory(members=[self.user])
         self.conversation = Conversation.objects.get_or_create_for_target(self.group)
         self.conversation.join(self.user)
         self.participant = ConversationParticipant.objects.get(conversation=self.conversation, user=self.user)
         self.message = self.conversation.messages.create(author=self.user, content='hello')
 
-        self.group2 = GroupFactory(editors=[self.user, self.user2])
+        self.group2 = GroupFactory(members=[self.user, self.user2])
         self.conversation2 = Conversation.objects.get_or_create_for_target(self.group2)
         self.conversation2.join(self.user)
         self.conversation2.join(self.user2)
@@ -766,7 +766,7 @@ class TestConversationsMessageEditAPI(APITestCase):
 class TestWallMessagesUpdateStatus(APITestCase):
     def setUp(self):
         self.user = UserFactory()
-        self.group = GroupFactory(editors=[self.user])
+        self.group = GroupFactory(members=[self.user])
         self.conversation = Conversation.objects.get_or_create_for_target(self.group)
         self.conversation.join(self.user)
 

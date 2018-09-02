@@ -21,13 +21,13 @@ class TestGroupModel(TestCase):
 
     def test_roles_initialized(self):
         user = UserFactory()
-        group = GroupFactory(editors=[user])
+        group = GroupFactory(members=[user])
         membership = GroupMembership.objects.get(user=user, group=group)
         self.assertIn(roles.GROUP_MEMBERSHIP_MANAGER, membership.roles)
 
     def test_notifications_on_by_default(self):
         user = UserFactory()
-        group = GroupFactory(editors=[user])
+        group = GroupFactory(members=[user])
         membership = GroupMembership.objects.get(user=user, group=group)
         self.assertEqual(get_default_notification_types(), membership.notification_types)
         conversation = Conversation.objects.get_for_target(group)
@@ -36,7 +36,7 @@ class TestGroupModel(TestCase):
 
     def test_no_notifications_by_default_in_playground(self):
         user = UserFactory()
-        group = PlaygroundGroupFactory(editors=[user])
+        group = PlaygroundGroupFactory(members=[user])
         membership = GroupMembership.objects.get(user=user, group=group)
         self.assertEqual([], membership.notification_types)
         conversation = Conversation.objects.get_for_target(group)
