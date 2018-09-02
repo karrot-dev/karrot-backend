@@ -17,6 +17,7 @@ foodsaving/*/templates/*.html.jinja2
 *.pid
 *.mo
 mjml/node_modules
+grafana/config.py
 
 # IDE
 /.idea
