@@ -1,5 +1,6 @@
 from rest_framework import status
 from rest_framework.test import APITestCase
+
 from foodsaving.users.factories import UserFactory
 
 
@@ -13,6 +14,8 @@ class TestSwaggerAPI(APITestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.accepted_media_type, 'application/coreapi+json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('agreements', response.data)
+        self.assertIn('groups', response.data)
 
     def test_swagger_html(self):
         self.client.force_login(user=self.user)

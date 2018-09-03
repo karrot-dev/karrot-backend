@@ -3,7 +3,7 @@ django-cors-headers
 django-enumfield==1.3b2
 django-extensions
 django-redis
-django-rest-swagger
+-e git+https://github.com/tiltec/django-rest-swagger@1c92642#egg=django-rest-swagger
 django-jinja
 djangorestframework
 drf-nested-routers
