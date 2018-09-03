@@ -12,7 +12,7 @@ def record_user_stats():
 
     fields = get_users_stats()
 
-    write_points({
+    write_points([{
         'measurement': 'karrot.users',
         'fields': fields,
-    })
+    }])
