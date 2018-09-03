@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-08-26 10:30+0000\n"
+"POT-Creation-Date: 2018-09-02 12:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Stefan Simon <foodsharingtaiwan@gmail.com>, 2017\n"
 "Language-Team: Chinese (https://www.transifex.com/yunity-1/teams/68631/zh/)\n"
@@ -19,9 +19,21 @@ msgstr ""
 "Language: zh\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: foodsaving/applications/api.py:15
+#: foodsaving/applications/api.py:20
 msgid "You need to have a verified email address"
 msgstr "你需要一個經過驗證的電郵地址"
+
+#: foodsaving/applications/api.py:29 foodsaving/groups/api.py:57
+#: foodsaving/invitations/serializers.py:27
+#: foodsaving/pickups/permissions.py:67 foodsaving/pickups/serializers.py:38
+#: foodsaving/pickups/serializers.py:190 foodsaving/stores/api.py:18
+#: foodsaving/stores/serializers.py:82
+msgid "You need to be a group editor"
+msgstr ""
+
+#: foodsaving/applications/api.py:37
+msgid "You need to be the applicant"
+msgstr ""
 
 #: foodsaving/applications/serializers.py:42
 msgid "Application is already pending"
@@ -43,6 +55,7 @@ msgid "Your application to join %(group_name)s was accepted"
 msgstr "你加入%(group_name)s的申請已被批准"
 
 #: foodsaving/applications/templates/application_accepted.html.jinja2:119
+#: foodsaving/groups/templates/user_became_editor.html.jinja2:130
 #: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:130
 #, python-format
 msgid "Visit %(group_name)s"
@@ -104,59 +117,59 @@ msgstr ""
 "直接回覆這封郵件，<a href=\"%(conversation_url)s\">在%(site_name)s上檢視</a>, 或是<a "
 "href=\"%(mute_url)s\">將對話靜音</a>"
 
-#: foodsaving/conversations/api.py:50
-#: foodsaving/conversations/serializers.py:154
+#: foodsaving/conversations/api.py:51
+#: foodsaving/conversations/serializers.py:155
 #: foodsaving/conversations/serializers.py:211
 msgid "You are not in this conversation"
 msgstr "你並未加入對話"
 
-#: foodsaving/conversations/api.py:72
+#: foodsaving/conversations/api.py:73
 msgid "You are not the author of this message"
 msgstr "這則訊息不是你寫的"
 
-#: foodsaving/conversations/api.py:81
+#: foodsaving/conversations/api.py:82
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
 msgstr "在發出訊息%(days_number)s天後你就不能編輯了"
 
-#: foodsaving/conversations/api.py:251
+#: foodsaving/conversations/api.py:261
 msgid "Must be first in thread"
 msgstr "必須是討論串中的第一個"
 
-#: foodsaving/conversations/api.py:254
+#: foodsaving/conversations/api.py:264
 msgid "You are not a participant in this thread"
 msgstr "你並未加入此討論串"
 
-#: foodsaving/conversations/emails.py:129
-#: foodsaving/conversations/emails.py:132
+#: foodsaving/conversations/emails.py:127
+#: foodsaving/conversations/emails.py:130
 #, python-format
 msgid "Pickup %(date)s"
 msgstr "領取%(date)s"
 
-#: foodsaving/conversations/emails.py:192
+#: foodsaving/conversations/emails.py:190
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr "%(user_name)s申請%(group_name)s的新訊息"
 
-#: foodsaving/conversations/emails.py:197
+#: foodsaving/conversations/emails.py:195
 #, python-format
 msgid "New message in your application to %(group_name)s"
 msgstr "你的%(group_name)s申請的新訊息"
 
-#: foodsaving/conversations/serializers.py:162
+#: foodsaving/conversations/serializers.py:163
 msgid "You cannot change the thread of a message"
 msgstr "你不可以更改訊息的討論串中"
 
-#: foodsaving/conversations/serializers.py:169
+#: foodsaving/conversations/serializers.py:170
 msgid "Thread is not in the same conversation"
 msgstr "討論串中不在同一個對話"
 
-#: foodsaving/conversations/serializers.py:173
+#: foodsaving/conversations/serializers.py:174
 msgid "You can only reply to Group messages"
 msgstr "你只能回覆群組對話"
 
-#: foodsaving/conversations/serializers.py:177
+#: foodsaving/conversations/serializers.py:178
 msgid "You cannot reply to replies"
 msgstr "你無法回覆留言"
 
@@ -184,35 +197,43 @@ msgstr ""
 "直接回覆此信件，<a href=\"%(thread_url)s\">查看%(site_name)s上的回覆</a>，或<a "
 "href=\"%(mute_url)s\">停止新留言通知</a>"
 
-#: foodsaving/groups/api.py:27
+#: foodsaving/groups/api.py:28
 msgid "You are already a member."
 msgstr "你已經是成員了。"
 
-#: foodsaving/groups/api.py:34
+#: foodsaving/groups/api.py:35
 msgid "You can only join open groups."
 msgstr "你只能加入公開社團"
 
-#: foodsaving/groups/api.py:41
+#: foodsaving/groups/api.py:42
 msgid "You do not have permission to update memberships."
 msgstr "你沒有修改成員名單的權限"
 
-#: foodsaving/groups/serializers.py:23
+#: foodsaving/groups/api.py:50
+msgid "You cannot give trust to yourself"
+msgstr ""
+
+#: foodsaving/groups/api.py:198
+msgid "You already gave trust to this user"
+msgstr ""
+
+#: foodsaving/groups/serializers.py:24
 msgid "Unknown timezone"
 msgstr "未知的時區"
 
-#: foodsaving/groups/serializers.py:31
+#: foodsaving/groups/serializers.py:32
 msgid "Playground"
 msgstr "遊樂區"
 
-#: foodsaving/groups/serializers.py:97 foodsaving/groups/serializers.py:173
+#: foodsaving/groups/serializers.py:102 foodsaving/groups/serializers.py:181
 msgid "You cannot manage agreements"
 msgstr "你無法管理合約"
 
-#: foodsaving/groups/serializers.py:99
+#: foodsaving/groups/serializers.py:104
 msgid "Agreement is not for this group"
 msgstr "不是這個社團的合約"
 
-#: foodsaving/groups/serializers.py:171
+#: foodsaving/groups/serializers.py:179
 msgid "You are not in this group"
 msgstr "你並未在社團裡"
 
@@ -282,8 +303,8 @@ msgstr "領取任務回饋"
 
 #: foodsaving/groups/templates/group_summary.html.jinja2:171
 #, python-format
-msgid "%(weight)s kg from <a href=\"%(store_url)s\">%(store_name)s</a>\n"
-msgstr "%(weight)s公斤來自<a href=\"%(store_url)s\">%(store_name)s</a>的食物\n"
+msgid "%(weight)s kg from <a href=\"%(store_url)s\">%(store_name)s</a>"
+msgstr ""
 
 #: foodsaving/groups/templates/group_summary.html.jinja2:184
 msgid "Here's what was said last week"
@@ -314,6 +335,38 @@ msgstr ""
 "\n"
 "原則上不會發送電郵通知"
 
+#: foodsaving/groups/templates/user_became_editor.html.jinja2:4
+#: foodsaving/groups/templates/user_became_editor.html.jinja2:120
+#: foodsaving/groups/templates/user_became_editor.subject.jinja2:1
+#, python-format
+msgid "You gained editing permissions in %(group_name)s!"
+msgstr ""
+
+#: foodsaving/groups/templates/user_became_editor.html.jinja2:123
+msgid ""
+"You've received enough trust from fellow group members to grant you "
+"<strong>editing permissions</strong>. For example, you can now modify your "
+"group, stores and pickup dates, or create new ones."
+msgstr ""
+
+#: foodsaving/groups/templates/user_became_editor.html.jinja2:129
+msgid "Use your power wisely!"
+msgstr ""
+
+#: foodsaving/groups/templates/user_became_editor.html.jinja2:131
+#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:131
+#, python-format
+msgid ""
+"You are receiving this because you are a member of "
+"<strong>%(group_name)s</strong>."
+msgstr "收到此信代表你已成功加入<strong>%(group_name)s</strong>"
+
+#: foodsaving/groups/templates/user_became_editor.html.jinja2:132
+#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:132
+#, python-format
+msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
+msgstr "你可以從<a href=\"%(group_url)s\">社團頁面</a>離開社團"
+
 #: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:120
 msgid "Hey, we're missing you!"
 msgstr "Hey, 我們很想念你"
@@ -334,33 +387,21 @@ msgid ""
 "                                again."
 msgstr "你目前被標記為不活躍，但只要你再度造訪社團，就可以回復活躍狀態"
 
-#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:131
-#, python-format
-msgid ""
-"You are receiving this because you are a member of "
-"<strong>%(group_name)s</strong>."
-msgstr "收到此信代表你已成功加入<strong>%(group_name)s</strong>"
-
-#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:132
-#, python-format
-msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
-msgstr "你可以從<a href=\"%(group_url)s\">社團頁面</a>離開社團"
-
 #: foodsaving/groups/templates/user_inactive_in_group.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s is missing you!"
 msgstr "%(group_name)s 想念你 !"
 
-#: foodsaving/invitations/serializers.py:18
+#: foodsaving/invitations/serializers.py:19
 msgid "An invitation has already been sent to this e-mail address"
 msgstr "邀請信已寄送至下列電子郵件信箱："
 
-#: foodsaving/invitations/serializers.py:24
-#: foodsaving/stores/serializers.py:79
+#: foodsaving/invitations/serializers.py:25
+#: foodsaving/stores/serializers.py:80
 msgid "You are not a member of this group."
 msgstr "你並不是此社團的成員。"
 
-#: foodsaving/invitations/serializers.py:29
+#: foodsaving/invitations/serializers.py:32
 msgid "User is already member of group"
 msgstr "用戶已經是社團的成員了"
 
@@ -398,54 +439,54 @@ msgstr "開放領取食物的日期已過。"
 msgid "You can only delete empty pickup dates."
 msgstr "你只能刪除空白的開放領取食物日期。"
 
-#: foodsaving/pickups/permissions.py:25
+#: foodsaving/pickups/permissions.py:27
 msgid "You have not joined this pickup date."
 msgstr "你還沒有加入此開放領取食物之日期。"
 
-#: foodsaving/pickups/permissions.py:32
+#: foodsaving/pickups/permissions.py:34
 msgid "You have already joined this pickup date."
 msgstr "你已經加入此食物領取日期。"
 
-#: foodsaving/pickups/permissions.py:39
+#: foodsaving/pickups/permissions.py:41
 msgid "Pickup date is already full."
 msgstr "開放食物領取日期已滿。"
 
-#: foodsaving/pickups/permissions.py:46
+#: foodsaving/pickups/permissions.py:48
 msgid "This feedback is given by another user."
 msgstr "此反映來自其他用戶"
 
-#: foodsaving/pickups/permissions.py:53 foodsaving/pickups/serializers.py:242
+#: foodsaving/pickups/permissions.py:57 foodsaving/pickups/serializers.py:247
 #, python-format
 msgid ""
 "You can't give feedback for pickups more than %(days_number)s days ago."
 msgstr "你不能在早於%(days_number)s天前反映領取食物的事"
 
-#: foodsaving/pickups/serializers.py:35 foodsaving/pickups/serializers.py:187
-#: foodsaving/pickups/serializers.py:235
+#: foodsaving/pickups/serializers.py:36 foodsaving/pickups/serializers.py:192
+#: foodsaving/pickups/serializers.py:240
 msgid "You are not member of the store's group."
 msgstr "你不是此店面之志工社團成員。"
 
-#: foodsaving/pickups/serializers.py:90
+#: foodsaving/pickups/serializers.py:93
 msgid "The date should be in the future."
 msgstr "日期應該設定在未來。"
 
-#: foodsaving/pickups/serializers.py:198
+#: foodsaving/pickups/serializers.py:203
 msgid "Invalid recurrence rule."
 msgstr "無效的週期規則"
 
-#: foodsaving/pickups/serializers.py:200
+#: foodsaving/pickups/serializers.py:205
 msgid "Only single recurrence rules are allowed."
 msgstr "只允許一種週期規則"
 
-#: foodsaving/pickups/serializers.py:237
+#: foodsaving/pickups/serializers.py:242
 msgid "The pickup is not done yet"
 msgstr "食物領取任務未完成"
 
-#: foodsaving/pickups/serializers.py:239
+#: foodsaving/pickups/serializers.py:244
 msgid "You aren't assigned to the pickup."
 msgstr "你並未被分配到此領取任務"
 
-#: foodsaving/pickups/serializers.py:256
+#: foodsaving/pickups/serializers.py:261
 msgid "Both comment and weight cannot be blank."
 msgstr "意見回饋和重量兩欄都不能是空的"
 
@@ -458,10 +499,8 @@ msgstr "%(group_name)s的新領取任務 ! "
 
 #: foodsaving/pickups/templates/pickup_notification.html.jinja2:130
 #, python-format
-msgid ""
-"                                                    "
-"%(empty_collectors_count)s/%(max_collectors)s remaining\n"
-msgstr "剩下%(empty_collectors_count)s/%(max_collectors)s\n"
+msgid "%(empty_collectors_count)s/%(max_collectors)s remaining"
+msgstr ""
 
 #: foodsaving/pickups/templates/pickup_notification.html.jinja2:145
 msgid "Tonight"
@@ -496,7 +535,7 @@ msgid ""
 "                                <strong>Pickup notification</strong> emails for this group."
 msgstr "此信件為你成功訂閱此社團<strong>領取任務提醒</strong>郵件的通知"
 
-#: foodsaving/stores/serializers.py:84
+#: foodsaving/stores/serializers.py:87
 msgid "Set at least one week in advance"
 msgstr "至少要在一週前設立"
 
@@ -591,8 +630,8 @@ msgstr "請驗證你的電子信箱"
 #, python-format
 msgid ""
 "You requested to change your email address from %(old_email)s to "
-"%(new_email)s\n"
-msgstr "你要求將你的電子郵件地址從%(old_email)s改成%(new_email)s\n"
+"%(new_email)s"
+msgstr ""
 
 #: foodsaving/users/templates/changemail_request.html.jinja2:123
 #: foodsaving/users/templates/signup.html.jinja2:119
