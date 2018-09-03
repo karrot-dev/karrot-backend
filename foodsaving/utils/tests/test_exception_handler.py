@@ -3,7 +3,7 @@ from rest_framework.test import APITestCase
 
 
 class TestCustomExceptionHandlerAPI(APITestCase):
-    def test_use_token(self):
+    def test_reports_error_code(self):
         response = self.client.get(
             '/api/auth/user/', **{
                 'HTTP_AUTHORIZATION': 'Token {}'.format('invalidtoken'),
