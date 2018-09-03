@@ -1,6 +1,6 @@
 import pytz
 from django.test import TestCase
-from django.utils import timezone
+from django.utils import timezone, translation
 
 import foodsaving.invitations.emails
 import foodsaving.users.emails
@@ -97,7 +97,7 @@ class TestJinjaFilters(TestCase):
         )
         tz = pytz.timezone('Europe/Berlin')
         offset_hours = int(tz.utcoffset(datetime.utcnow()).seconds / 3600)
-        with timezone.override(tz):
+        with timezone.override(tz), translation.override('en'):
             val = time_filter(datetime)
             self.assertEqual(val, '{}:00 AM'.format(hour + offset_hours))
 
@@ -113,7 +113,7 @@ class TestJinjaFilters(TestCase):
             second=0,
             microsecond=0,
         )
-        with timezone.override(pytz.timezone('Europe/Berlin')):
+        with timezone.override(pytz.timezone('Europe/Berlin')), translation.override('en'):
             # ... is Monday in Berlin
             val = date_filter(datetime)
             self.assertIn('Monday', val)
