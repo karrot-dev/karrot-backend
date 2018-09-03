@@ -18,7 +18,9 @@ class IsEmptyPickupDate(permissions.BasePermission):
     message = _('You can only delete empty pickup dates.')
 
     def has_object_permission(self, request, view, obj):
-        return obj.is_empty()
+        if view.action == 'destroy':
+            return obj.is_empty()
+        return True
 
 
 class HasJoinedPickupDate(permissions.BasePermission):
@@ -46,7 +48,9 @@ class IsSameCollector(permissions.BasePermission):
     message = _('This feedback is given by another user.')
 
     def has_object_permission(self, request, view, obj):
-        return obj.given_by == request.user
+        if view.action == 'partial_update':
+            return obj.given_by == request.user
+        return True
 
 
 class IsRecentPickupDate(permissions.BasePermission):
@@ -54,4 +58,15 @@ class IsRecentPickupDate(permissions.BasePermission):
         {'days_number': settings.FEEDBACK_POSSIBLE_DAYS}
 
     def has_object_permission(self, request, view, obj):
-        return obj.about.is_recent()
+        if view.action == 'partial_update':
+            return obj.about.is_recent()
+        return True
+
+
+class IsGroupEditor(permissions.BasePermission):
+    message = _('You need to be a group editor')
+
+    def has_object_permission(self, request, view, obj):
+        if view.action in ('partial_update', 'destroy'):
+            return obj.store.group.is_editor(request.user)
+        return True

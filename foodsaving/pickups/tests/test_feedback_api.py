@@ -105,9 +105,20 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
 
     def test_create_feedback_works_as_collector(self):
         """
-        Member is allowed to give feedback when he is assigned to the Pickup.
+        Editor is allowed to give feedback when he is assigned to the Pickup.
         """
         self.client.force_login(user=self.collector3)
+        response = self.client.post(self.url, self.feedback_post, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+
+    def test_create_feedback_as_newcomer_collector(self):
+        """
+        Newcomer is allowed to give feedback when he is assigned to the Pickup.
+        """
+        newcomer = UserFactory()
+        self.group.groupmembership_set.create(user=newcomer)
+        self.past_pickup.collectors.add(newcomer)
+        self.client.force_login(user=newcomer)
         response = self.client.post(self.url, self.feedback_post, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 

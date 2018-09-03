@@ -23,16 +23,12 @@ class TestPickupdatesAPIFilter(APITestCase, ExtractPaginationMixin):
 
         # pickup date for group with one member and one store
         self.member = UserFactory()
-        self.group = GroupFactory(members=[
-            self.member,
-        ])
+        self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(store=self.store)
 
         # and another store + group + pick-update
-        self.group2 = GroupFactory(members=[
-            self.member,
-        ])
+        self.group2 = GroupFactory(members=[self.member])
         self.store2 = StoreFactory(group=self.group2)
         self.pickup2 = PickupDateFactory(store=self.store2)
 

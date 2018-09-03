@@ -1,3 +1,4 @@
+# yapf: disable
 """
 Django settings for karrot.
 
@@ -71,8 +72,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ),
-    'EXCEPTION_HANDLER':
-    'foodsaving.utils.misc.custom_exception_handler'
+    'EXCEPTION_HANDLER': 'foodsaving.utils.misc.custom_exception_handler',
 }
 
 MIDDLEWARE = (
@@ -199,6 +199,7 @@ DESCRIPTION_MAX_LENGTH = 100000
 NAME_MAX_LENGTH = 80
 FEEDBACK_POSSIBLE_DAYS = 30
 MESSAGE_EDIT_DAYS = 2
+GROUP_EDITOR_TRUST_MAX_THRESHOLD = 3
 
 CHANNEL_LAYERS = {
     "default": {

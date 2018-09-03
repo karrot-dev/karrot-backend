@@ -18,14 +18,8 @@ class TestFeedbackAPIFilter(APITestCase, ExtractPaginationMixin):
         # create a group with a user and two stores
         self.collector = UserFactory()
         self.collector2 = UserFactory()
-        self.group = GroupFactory(members=[
-            self.collector,
-            self.collector2,
-        ])
-        self.group2 = GroupFactory(members=[
-            self.collector,
-            self.collector2,
-        ])
+        self.group = GroupFactory(members=[self.collector, self.collector2])
+        self.group2 = GroupFactory(members=[self.collector, self.collector2])
         self.store = StoreFactory(group=self.group)
         self.store2 = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(store=self.store, date=timezone.now() - relativedelta(days=1))

@@ -25,6 +25,22 @@ class HasVerifiedEmailAddress(permissions.BasePermission):
         return request.user.mail_verified
 
 
+class IsGroupEditor(permissions.BasePermission):
+    message = _('You need to be a group editor')
+
+    def has_object_permission(self, request, view, obj):
+        application = obj
+        return application.group.is_editor(request.user)
+
+
+class IsApplicant(permissions.BasePermission):
+    message = _('You need to be the applicant')
+
+    def has_object_permission(self, request, view, obj):
+        application = obj
+        return application.user == request.user
+
+
 class GroupApplicationViewSet(
         mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
@@ -46,16 +62,12 @@ class GroupApplicationViewSet(
         return super().get_throttles()
 
     def get_queryset(self):
-        q = Q(group__members=self.request.user)
-        if self.action in ('list', 'retrieve'):
-            q |= Q(user=self.request.user)
-        if self.action == 'withdraw':
-            q = Q(user=self.request.user)
-        return self.queryset.filter(q).distinct()
+        return self.queryset.filter(Q(group__members=self.request.user) | Q(user=self.request.user)).distinct()
 
     @action(
         detail=True,
         methods=['POST'],
+        permission_classes=(IsAuthenticated, IsGroupEditor),
     )
     def accept(self, request, pk=None):
         self.check_permissions(request)
@@ -69,6 +81,7 @@ class GroupApplicationViewSet(
     @action(
         detail=True,
         methods=['POST'],
+        permission_classes=(IsAuthenticated, IsGroupEditor),
     )
     def decline(self, request, pk=None):
         self.check_permissions(request)
@@ -82,6 +95,7 @@ class GroupApplicationViewSet(
     @action(
         detail=True,
         methods=['POST'],
+        permission_classes=(IsAuthenticated, IsApplicant),
     )
     def withdraw(self, request, pk=None):
         self.check_permissions(request)

@@ -34,9 +34,7 @@ class TestPickupDateSeriesCreationAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):
 
         self.member = UserFactory()
-        self.group = GroupFactory(members=[
-            self.member,
-        ])
+        self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
 
     def test_create_and_get_recurring_series(self):
@@ -145,9 +143,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.now = timezone.now()
         self.member = UserFactory()
-        self.group = GroupFactory(members=[
-            self.member,
-        ])
+        self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
         self.series = PickupDateSeriesFactory(max_collectors=3, store=self.store)
         self.series.update_pickup_dates(start=lambda: self.now)
@@ -322,8 +318,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.member)
         url = '/api/pickup-date-series/{}/'.format(self.series.id)
         response = self.client.patch(url, {'store': unrelated_store.id})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        self.assertEqual(response.data, {'store': ["You are not member of the store's group."]})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_set_multiple_rules_fails(self):
         self.client.force_login(user=self.member)
@@ -450,22 +445,23 @@ class TestPickupDateSeriesAPIAuth(APITestCase):
         self.series = PickupDateSeriesFactory()
         self.series_url = '/api/pickup-date-series/{}/'.format(self.series.id)
         self.non_member = UserFactory()
+        self.series_data = {'store': self.series.store.id, 'rule': 'FREQ=WEEKLY', 'start_date': timezone.now()}
 
     def test_create_as_anonymous_fails(self):
-        response = self.client.post(self.url, {})
+        response = self.client.post(self.url, self.series_data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_create_as_nonmember_fails(self):
         self.client.force_login(self.non_member)
-        response = self.client.post(
-            self.url, {
-                'store': self.series.store.id,
-                'rule': 'FREQ=WEEKLY',
-                'start_date': timezone.now()
-            }
-        )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        self.assertEqual(response.data, {'store': ["You are not member of the store's group."]})
+        response = self.client.post(self.url, self.series_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+    def test_create_as_newcomer_fails(self):
+        newcomer = UserFactory()
+        self.series.store.group.groupmembership_set.create(user=newcomer)
+        self.client.force_login(user=newcomer)
+        response = self.client.post(self.url, self.series_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_list_as_anonymous_fails(self):
         response = self.client.get(self.url)
@@ -495,6 +491,13 @@ class TestPickupDateSeriesAPIAuth(APITestCase):
         response = self.client.patch(self.series_url, {})
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
+    def test_patch_as_newcomer_fails(self):
+        newcomer = UserFactory()
+        self.series.store.group.groupmembership_set.create(user=newcomer)
+        self.client.force_login(user=newcomer)
+        response = self.client.patch(self.series_url, {})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
     def test_delete_as_anonymous_fails(self):
         response = self.client.delete(self.series_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
@@ -503,3 +506,10 @@ class TestPickupDateSeriesAPIAuth(APITestCase):
         self.client.force_login(self.non_member)
         response = self.client.delete(self.series_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
+
+    def test_delete_as_newcomer_fails(self):
+        newcomer = UserFactory()
+        self.series.store.group.groupmembership_set.create(user=newcomer)
+        self.client.force_login(user=newcomer)
+        response = self.client.delete(self.series_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)

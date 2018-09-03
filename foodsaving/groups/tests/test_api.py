@@ -20,11 +20,7 @@ class TestGroupsInfoAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.member = UserFactory()
-        self.group = GroupFactory(
-            members=[
-                self.member,
-            ], application_questions=''
-        )
+        self.group = GroupFactory(members=[self.member], application_questions='')
         self.url = '/api/groups-info/'
 
     def test_list_groups_as_anon(self):
@@ -59,11 +55,7 @@ class TestGroupsAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.member = UserFactory()
-        self.group = GroupFactory(
-            members=[
-                self.member,
-            ], is_open=True
-        )
+        self.group = GroupFactory(members=[self.member], is_open=True)
         self.group_with_password = GroupFactory(password='abc', is_open=True)
         self.join_password_url = '/api/groups/{}/join/'.format(self.group_with_password.id)
         self.url = '/api/groups/'
@@ -133,6 +125,14 @@ class TestGroupsAPI(APITestCase):
         url = self.url + str(self.group.id) + '/'
         response = self.client.patch(url, self.group_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_patch_group_as_newcomer(self):
+        newcomer = UserFactory()
+        self.group.groupmembership_set.create(user=newcomer)
+        self.client.force_login(user=newcomer)
+        url = self.url + str(self.group.id) + '/'
+        response = self.client.patch(url, self.group_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_change_timezone_to_invalid_value_fails(self):
         self.client.force_login(user=self.member)
@@ -305,6 +305,26 @@ class TestGroupMembershipRolesAPI(APITestCase):
         self.membership.refresh_from_db()
         self.assertNotIn(role, self.membership.roles)
 
+    def test_cannot_add_editor_role(self):
+        self.client.force_login(user=self.admin)
+        role = roles.GROUP_EDITOR
+        self.membership.roles.remove(role)
+        self.membership.save()
+        response = self.client.put('/api/groups/{}/users/{}/roles/{}/'.format(self.group.id, self.member.id, role))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.membership.refresh_from_db()
+        self.assertNotIn(role, self.membership.roles)
+
+    def test_cannot_remove_editor_role(self):
+        self.client.force_login(user=self.admin)
+        role = roles.GROUP_EDITOR
+        self.membership.roles.append(role)
+        self.membership.save()
+        response = self.client.put('/api/groups/{}/users/{}/roles/{}/'.format(self.group.id, self.member.id, role))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.membership.refresh_from_db()
+        self.assertIn(role, self.membership.roles)
+
 
 class TestGroupMembershipsAPI(APITestCase):
     def setUp(self):
@@ -413,10 +433,7 @@ class TestAgreementsAPI(APITestCase):
     def setUp(self):
         self.normal_member = UserFactory()
         self.agreement_manager = UserFactory()
-        self.group = GroupFactory(members=[
-            self.normal_member,
-            self.agreement_manager,
-        ])
+        self.group = GroupFactory(members=[self.normal_member, self.agreement_manager])
         self.agreement = Agreement.objects.create(group=self.group, title=faker.text(), content=faker.text())
         membership = GroupMembership.objects.get(group=self.group, user=self.agreement_manager)
         membership.roles.append(roles.GROUP_AGREEMENT_MANAGER)

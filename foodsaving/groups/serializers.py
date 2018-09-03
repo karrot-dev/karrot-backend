@@ -7,6 +7,7 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 
 from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
     GroupNotificationType
+from foodsaving.groups.roles import GROUP_EDITOR
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.history.utils import get_changed_data
 from . import roles
@@ -42,6 +43,7 @@ class GroupMembershipInfoSerializer(serializers.ModelSerializer):
             'added_by',
             'roles',
             'active',
+            'trusted_by',
         )
         read_only_fields = ['created_at', 'roles', 'added_by']
 
@@ -56,6 +58,8 @@ class GroupDetailSerializer(GroupBaseSerializer):
     memberships = serializers.SerializerMethodField()
     notification_types = serializers.SerializerMethodField()
     application_questions_default = serializers.SerializerMethodField()
+    trust_threshold_for_newcomer = serializers.SerializerMethodField()
+
     timezone = TimezoneField()
 
     class Meta:
@@ -77,6 +81,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'status',
             'notification_types',
             'is_open',
+            'trust_threshold_for_newcomer',
         ]
         extra_kwargs = {
             'name': {
@@ -112,6 +117,9 @@ class GroupDetailSerializer(GroupBaseSerializer):
     def get_application_questions_default(self, group):
         return group.get_application_questions_default()
 
+    def get_trust_threshold_for_newcomer(self, group):
+        return group.get_trust_threshold_for_newcomer()
+
     def update(self, group, validated_data):
         if group.is_playground():
             # Prevent editing of public fields
@@ -135,7 +143,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
     def create(self, validated_data):
         user = self.context['request'].user
         group = GroupModel.objects.create(**validated_data)
-        GroupMembership.objects.create(group=group, user=user)
+        GroupMembership.objects.create(group=group, user=user, roles=[roles.GROUP_EDITOR])
         History.objects.create(
             typus=HistoryTypus.GROUP_CREATE, group=group, users=[
                 user,
@@ -266,6 +274,11 @@ class GroupMembershipAddRoleSerializer(serializers.Serializer):
         ), required=True, write_only=True
     )
 
+    def validate_role_name(self, role_name):
+        if role_name == GROUP_EDITOR:
+            raise serializers.ValidationError('You cannot change the editor role')
+        return role_name
+
     def update(self, instance, validated_data):
         role = validated_data['role_name']
         instance.add_roles([role])
@@ -275,6 +288,11 @@ class GroupMembershipAddRoleSerializer(serializers.Serializer):
 
 class GroupMembershipRemoveRoleSerializer(serializers.Serializer):
     role_name = serializers.CharField(required=True, write_only=True)
+
+    def validate_role_name(self, role_name):
+        if role_name == GROUP_EDITOR:
+            raise serializers.ValidationError('You cannot change the editor role')
+        return role_name
 
     def update(self, instance, validated_data):
         role = validated_data['role_name']

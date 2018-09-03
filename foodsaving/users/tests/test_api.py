@@ -25,9 +25,7 @@ class TestUsersAPI(APITestCase):
         self.group = GroupFactory(members=[self.user, self.user2])
         self.another_common_group = GroupFactory(members=[self.user, self.user2])
         self.user_in_another_group = UserFactory()
-        self.another_group = GroupFactory(members=[
-            self.user_in_another_group,
-        ])
+        self.another_group = GroupFactory(members=[self.user_in_another_group])
         mail.outbox = []
 
     def test_list_users_forbidden(self):
@@ -50,7 +48,16 @@ class TestUsersAPI(APITestCase):
         url = self.url + str(self.user.id) + '/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('photo_urls', response.data)
+        self.assertNotIn('description', response.data)
+
+    def test_retrieve_user_profile(self):
+        self.client.force_login(user=self.user2)
+        url = self.url + str(self.user.id) + '/profile/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['description'], self.user.description)
+        self.assertEqual(response.data['groups'], [self.group.id, self.another_common_group.id])
 
     def test_retrieve_user_in_another_group_fails(self):
         self.client.force_login(user=self.user2)

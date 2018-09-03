@@ -76,6 +76,7 @@ class GroupApplication(BaseModel):
             users=[declined_by],
             payload={
                 'applicant': self.user.id,
+                'applicant_name': self.user.display_name,
                 'application_date': self.created_at.isoformat()
             }
         )

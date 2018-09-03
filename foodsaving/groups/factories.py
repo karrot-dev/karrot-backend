@@ -1,5 +1,6 @@
 from factory import DjangoModelFactory, post_generation, LazyAttribute, Sequence
 
+from foodsaving.groups import roles
 from foodsaving.groups.models import Group as GroupModel, GroupMembership, GroupStatus
 from foodsaving.utils.tests.fake import faker
 
@@ -9,11 +10,15 @@ class GroupFactory(DjangoModelFactory):
         model = GroupModel
 
     @post_generation
-    def members(self, created, members, **kwargs):
-        if not created:
-            return
-        if members:
-            for member in members:
+    def members(self, created, extracted, **kwargs):
+        if created and extracted:
+            for member in extracted:
+                GroupMembership.objects.create(group=self, user=member, roles=[roles.GROUP_EDITOR])
+
+    @post_generation
+    def newcomers(self, created, extracted, **kwargs):
+        if created and extracted:
+            for member in extracted:
                 GroupMembership.objects.create(group=self, user=member)
 
     name = Sequence(lambda n: ' '.join(['Group', str(n), faker.name()]))

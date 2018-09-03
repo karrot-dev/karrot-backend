@@ -5,10 +5,11 @@ from rest_framework import mixins
 from rest_framework.decorators import action
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.conversations.api import RetrievePrivateConversationMixin
-from foodsaving.users.serializers import UserSerializer, UserInfoSerializer
+from foodsaving.users.serializers import UserSerializer, UserInfoSerializer, UserProfileSerializer
 
 
 class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, RetrievePrivateConversationMixin, GenericViewSet):
@@ -32,6 +33,12 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, RetrievePriv
         - `?search` - search in `display_name`
         """
         return super().list(request, *args, **kwargs)
+
+    @action(detail=True)
+    def profile(self, request, pk=None):
+        user = self.get_object()
+        serializer = UserProfileSerializer(user)
+        return Response(serializer.data)
 
     @action(detail=True)
     def conversation(self, request, pk=None):

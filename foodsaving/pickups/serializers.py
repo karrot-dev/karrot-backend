@@ -5,6 +5,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.validators import UniqueTogetherValidator
 
 from foodsaving.history.models import History, HistoryTypus
@@ -32,7 +33,9 @@ class PickupDateSerializer(serializers.ModelSerializer):
 
     def validate_store(self, store):
         if not self.context['request'].user.groups.filter(store=store).exists():
-            raise serializers.ValidationError(_('You are not member of the store\'s group.'))
+            raise PermissionDenied(_('You are not member of the store\'s group.'))
+        if not store.group.is_editor(self.context['request'].user):
+            raise PermissionDenied(_('You need to be a group editor'))
         return store
 
     def create(self, validated_data):
@@ -183,6 +186,8 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
         return series
 
     def validate_store(self, store):
+        if not store.group.is_editor(self.context['request'].user):
+            raise PermissionDenied(_('You need to be a group editor'))
         if not store.group.is_member(self.context['request'].user):
             raise serializers.ValidationError(_('You are not member of the store\'s group.'))
         return store

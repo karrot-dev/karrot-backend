@@ -10,7 +10,7 @@
                 <mj-column>
                     <mj-text>
                         <p>
-                        {% trans new_email=user.unverified_email, old_email=user.email -%}
+                        {% trans trimmed new_email=user.unverified_email, old_email=user.email %}
                             You requested to change your email address from {{ old_email }} to {{ new_email }}
                         {% endtrans %}
                         </p>

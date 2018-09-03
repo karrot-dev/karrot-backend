@@ -1,16 +1,18 @@
 from datetime import timedelta
 from enum import Enum
 
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import TextField, DateTimeField, QuerySet
 from django.template.loader import render_to_string
-from django.utils import timezone as tz
+from django.utils import timezone as tz, timezone
 from timezone_field import TimeZoneField
 
 from foodsaving.base.base_models import BaseModel, LocationModel
 from foodsaving.conversations.models import ConversationMixin
+from foodsaving.groups import roles
 from foodsaving.history.models import History, HistoryTypus
 
 
@@ -20,7 +22,17 @@ class GroupStatus(Enum):
     PLAYGROUND = 'playground'
 
 
+class GroupQuerySet(models.QuerySet):
+    def user_is_editor(self, user):
+        return self.filter(
+            groupmembership__roles__contains=[roles.GROUP_EDITOR],
+            groupmembership__user=user,
+        )
+
+
 class Group(BaseModel, LocationModel, ConversationMixin):
+    objects = GroupQuerySet.as_manager()
+
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH, unique=True)
     description = models.TextField(blank=True)
     members = models.ManyToManyField(
@@ -40,7 +52,10 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     sent_summary_up_to = DateTimeField(null=True)
     timezone = TimeZoneField(default='Europe/Berlin', null=True, blank=True)
     active_agreement = models.OneToOneField(
-        'groups.Agreement', related_name='active_group', null=True, on_delete=models.SET_NULL
+        'groups.Agreement',
+        related_name='active_group',
+        null=True,
+        on_delete=models.SET_NULL,
     )
     last_active_at = DateTimeField(default=tz.now)
     is_open = models.BooleanField(default=False)
@@ -53,11 +68,16 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         return 'Group {}'.format(self.name)
 
     def add_member(self, user, added_by=None, history_payload=None):
-        membership = GroupMembership.objects.create(group=self, user=user, added_by=added_by)
+        membership = GroupMembership.objects.create(
+            group=self,
+            user=user,
+            added_by=added_by,
+        )
         History.objects.create(
-            typus=HistoryTypus.GROUP_JOIN, group=self, users=[
-                user,
-            ], payload=history_payload
+            typus=HistoryTypus.GROUP_JOIN,
+            group=self,
+            users=[user],
+            payload=history_payload,
         )
         return membership
 
@@ -71,6 +91,9 @@ class Group(BaseModel, LocationModel, ConversationMixin):
 
     def is_member(self, user):
         return not user.is_anonymous and GroupMembership.objects.filter(group=self, user=user).exists()
+
+    def is_editor(self, user):
+        return self.is_member_with_role(user, roles.GROUP_EDITOR)
 
     def is_member_with_role(self, user, role_name):
         return not user.is_anonymous and GroupMembership.objects.filter(
@@ -106,6 +129,12 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     def get_application_questions_default(self):
         return render_to_string('default_application_questions.nopreview.jinja2')
 
+    def get_trust_threshold_for_newcomer(self):
+        one_day_ago = timezone.now() - relativedelta(days=1)
+        dynamic_threshold = max(1, self.groupmembership_set.active().filter(created_at__lte=one_day_ago).count() // 2)
+        trust_threshold = min(settings.GROUP_EDITOR_TRUST_MAX_THRESHOLD, dynamic_threshold)
+        return trust_threshold
+
 
 class Agreement(BaseModel):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
@@ -137,8 +166,24 @@ class GroupMembershipQuerySet(QuerySet):
     def with_notification_type(self, type):
         return self.filter(notification_types__contains=[type])
 
+    def with_role(self, role):
+        return self.filter(roles__contains=[role])
+
+    def without_role(self, role):
+        return self.exclude(roles__contains=[role])
+
     def active(self):
         return self.filter(inactive_at__isnull=True)
+
+    def active_within(self, **kwargs):
+        now = timezone.now()
+        return self.filter(lastseen_at__gte=now - relativedelta(**kwargs))
+
+    def editors(self):
+        return self.with_role(roles.GROUP_EDITOR)
+
+    def newcomers(self):
+        return self.without_role(roles.GROUP_EDITOR)
 
 
 class GroupMembership(BaseModel):
@@ -158,6 +203,7 @@ class GroupMembership(BaseModel):
         null=True,
         related_name='groupmembership_added',
     )
+    trusted_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='membership', through='Trust')
     roles = ArrayField(TextField(), default=list)
     lastseen_at = DateTimeField(default=tz.now)
     inactive_at = DateTimeField(null=True)
@@ -186,3 +232,11 @@ class GroupMembership(BaseModel):
         for notification_type in notification_types:
             while notification_type in self.notification_types:
                 self.notification_types.remove(notification_type)
+
+
+class Trust(BaseModel):
+    membership = models.ForeignKey('groups.GroupMembership', on_delete=models.CASCADE)
+    given_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='trust_given')
+
+    class Meta:
+        unique_together = (('membership', 'given_by'), )

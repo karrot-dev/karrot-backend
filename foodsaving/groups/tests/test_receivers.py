@@ -13,9 +13,7 @@ from foodsaving.users.factories import UserFactory
 class TestConversationReceiver(TestCase):
     def setUp(self):
         self.invited_by = UserFactory()
-        self.group = GroupFactory(members=[
-            self.invited_by,
-        ])
+        self.group = GroupFactory(members=[self.invited_by])
         self.user = UserFactory()
         self.invited_at = timezone.now()
 

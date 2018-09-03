@@ -3,22 +3,25 @@ from django.dispatch import receiver
 
 from foodsaving.conversations.models import Conversation
 from foodsaving.groups import roles, stats
-from foodsaving.groups.models import Group, GroupMembership
+from foodsaving.groups.emails import prepare_user_became_editor_email
+from foodsaving.groups.models import Group, GroupMembership, Trust, GroupNotificationType
+from foodsaving.history.models import History, HistoryTypus
 
 
 @receiver(post_save, sender=Group)
-def group_created(**kwargs):
+def group_created(sender, instance, created, **kwargs):
     """Ensure every group has a conversation."""
-    group = kwargs.get('instance')
-    # TODO: limit this to only run on creation
+    if not created:
+        return
+    group = instance
     conversation = Conversation.objects.get_or_create_for_target(group)
     conversation.sync_users(group.members.all())
 
 
 @receiver(pre_delete, sender=Group)
-def group_deleted(**kwargs):
+def group_deleted(sender, instance, **kwargs):
     """Delete the conversation when the group is deleted."""
-    group = kwargs.get('instance')
+    group = instance
     conversation = Conversation.objects.get_for_target(group)
     if conversation:
         conversation.delete()
@@ -26,18 +29,19 @@ def group_deleted(**kwargs):
 
 @receiver(post_save, sender=GroupMembership)
 def group_member_added(sender, instance, created, **kwargs):
-    if created:
-        group = instance.group
-        user = instance.user
-        membership = instance
-        if group.is_playground():
-            membership.notification_types = []
-            membership.save()
+    if not created:
+        return
+    group = instance.group
+    user = instance.user
+    membership = instance
+    if group.is_playground():
+        membership.notification_types = []
+        membership.save()
 
-        conversation = Conversation.objects.get_or_create_for_target(group)
-        conversation.join(user, email_notifications=not group.is_playground())
+    conversation = Conversation.objects.get_or_create_for_target(group)
+    conversation.join(user, email_notifications=not group.is_playground())
 
-        stats.group_joined(group)
+    stats.group_joined(group)
 
 
 @receiver(pre_delete, sender=GroupMembership)
@@ -69,3 +73,38 @@ def initialize_group(sender, instance, **kwargs):
         if oldest:
             oldest.roles.append(roles.GROUP_MEMBERSHIP_MANAGER)
             oldest.save()
+
+
+@receiver(post_save, sender=Trust)
+def trust_given(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    membership = instance.membership
+    relevant_trust = Trust.objects.filter(membership=membership)
+    trust_threshold = membership.group.get_trust_threshold_for_newcomer()
+
+    if relevant_trust.count() >= trust_threshold:
+        membership.add_roles([roles.GROUP_EDITOR])
+        History.objects.create(
+            typus=HistoryTypus.MEMBER_BECAME_EDITOR,
+            group=membership.group,
+            users=[membership.user],
+            payload={
+                'threshold': trust_threshold,
+            },
+        )
+
+        # new editors should also get informed about new applications
+        membership.add_notification_types([GroupNotificationType.NEW_APPLICATION])
+        membership.save()
+        prepare_user_became_editor_email(user=membership.user, group=membership.group).send()
+
+    stats.trust_given(membership.group)
+
+
+@receiver(pre_delete, sender=GroupMembership)
+def remove_trust(sender, instance, **kwargs):
+    membership = instance
+
+    Trust.objects.filter(given_by=membership.user).delete()

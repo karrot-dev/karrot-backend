@@ -5,6 +5,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, BasePermission
@@ -14,7 +15,7 @@ from rest_framework.viewsets import GenericViewSet
 from foodsaving.conversations.api import RetrieveConversationMixin
 from foodsaving.groups import roles, stats
 from foodsaving.groups.filters import GroupsFilter, GroupsInfoFilter
-from foodsaving.groups.models import Agreement, Group as GroupModel, GroupMembership
+from foodsaving.groups.models import Agreement, Group as GroupModel, GroupMembership, Trust
 from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer, GroupJoinSerializer, \
     GroupLeaveSerializer, TimezonesSerializer, EmptySerializer, \
     GroupMembershipAddRoleSerializer, GroupMembershipRemoveRoleSerializer, GroupMembershipInfoSerializer, \
@@ -45,6 +46,22 @@ class CanUpdateMemberships(BasePermission):
         return obj.group.is_member_with_role(request.user, roles.GROUP_MEMBERSHIP_MANAGER)
 
 
+class IsOtherUser(BasePermission):
+    message = _('You cannot give trust to yourself')
+
+    def has_object_permission(self, request, view, membership):
+        return membership.user != request.user
+
+
+class IsGroupEditor(BasePermission):
+    message = _('You need to be a group editor')
+
+    def has_object_permission(self, request, view, obj):
+        if view.action == 'partial_update':
+            return obj.is_editor(request.user)
+        return True
+
+
 class GroupInfoViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
     """
     Group Info - public information
@@ -71,7 +88,7 @@ class GroupViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUp
     filterset_class = GroupsFilter
     search_fields = ('name', 'public_description')
     serializer_class = GroupDetailSerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated, IsGroupEditor)
 
     def create(self, request, *args, **kwargs):
         """Create a new group"""
@@ -127,11 +144,12 @@ class GroupViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUp
     @action(detail=True, methods=['POST'])
     def mark_user_active(self, request, pk=None):
         """Mark that the logged-in user is active in the group"""
-        gm = get_object_or_404(GroupMembership.objects, group=pk, user=request.user)
-        gm.lastseen_at = timezone.now()
-        gm.inactive_at = None
-        gm.save()
-        stats.group_activity(gm.group)
+        self.check_permissions(request)
+        membership = get_object_or_404(GroupMembership.objects, group=pk, user=request.user)
+        membership.lastseen_at = timezone.now()
+        membership.inactive_at = None
+        membership.save()
+        stats.group_activity(membership.group)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
@@ -143,7 +161,8 @@ class GroupViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUp
         serializer_class=EmptySerializer  # for Swagger
     )
     def modify_user_roles(self, request, pk, user_id, role_name):
-        """add (POST) or remove (DELETE) a membership role"""
+        """add (PUT) or remove (DELETE) a membership role"""
+        self.check_permissions(request)
         instance = get_object_or_404(GroupMembership.objects, group=pk, user=user_id)
         self.check_object_permissions(request, instance)
         serializer_class = None
@@ -159,6 +178,29 @@ class GroupViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUp
 
     @action(
         detail=True,
+        methods=['POST'],
+        permission_classes=(IsAuthenticated, IsOtherUser),
+        url_name='trust-user',
+        url_path='users/(?P<user_id>[^/.]+)/trust',
+        serializer_class=EmptySerializer
+    )
+    def trust_user(self, request, pk, user_id):
+        """trust the user in a group"""
+        self.check_permissions(request)
+        membership = get_object_or_404(GroupMembership.objects, group=pk, user=user_id)
+        self.check_object_permissions(request, membership)
+
+        trust, created = Trust.objects.get_or_create(
+            membership=membership,
+            given_by=self.request.user,
+        )
+        if not created:
+            raise ValidationError(_('You already gave trust to this user'))
+
+        return Response(data={})
+
+    @action(
+        detail=True,
         methods=['PUT', 'DELETE'],
         permission_classes=(IsAuthenticated, ),
         url_name='notification_types',
@@ -167,6 +209,7 @@ class GroupViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUp
     )
     def modify_notification_types(self, request, pk, notification_type):
         """add (POST) or remove (DELETE) a notification type"""
+        self.check_permissions(request)
         membership = get_object_or_404(GroupMembership.objects, group=self.get_object(), user=request.user)
         self.check_object_permissions(request, membership)
         serializer_class = None
