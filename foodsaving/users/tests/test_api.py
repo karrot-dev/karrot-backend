@@ -57,7 +57,7 @@ class TestUsersAPI(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['description'], self.user.description)
-        self.assertEqual(response.data['groups'], [self.group.id, self.another_common_group.id])
+        self.assertEqual(set(response.data['groups']), set([self.group.id, self.another_common_group.id]))
 
     def test_retrieve_user_in_another_group_fails(self):
         self.client.force_login(user=self.user2)
