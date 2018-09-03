@@ -84,7 +84,7 @@ def trust_given(sender, instance, created, **kwargs):
     relevant_trust = Trust.objects.filter(membership=membership)
     trust_threshold = membership.group.get_trust_threshold_for_newcomer()
 
-    if relevant_trust.count() >= trust_threshold:
+    if relevant_trust.count() >= trust_threshold and roles.GROUP_EDITOR not in membership.roles:
         membership.add_roles([roles.GROUP_EDITOR])
         History.objects.create(
             typus=HistoryTypus.MEMBER_BECAME_EDITOR,

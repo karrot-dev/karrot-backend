@@ -8,6 +8,7 @@ from rest_framework.test import APITestCase
 
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership, Trust, GroupNotificationType
+from foodsaving.history.models import History, HistoryTypus
 from foodsaving.users.factories import UserFactory
 
 
@@ -65,6 +66,22 @@ class TestTrustReceiver(TestCase):
         self.assertIn(GroupNotificationType.NEW_APPLICATION, membership.notification_types)
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn('You gained editing permissions', mail.outbox[0].subject)
+
+        self.assertEqual(History.objects.filter(typus=HistoryTypus.MEMBER_BECAME_EDITOR).count(), 1)
+
+    def test_do_not_send_notification_again(self):
+        editor = UserFactory()
+        editor2 = UserFactory()
+        group = GroupFactory(members=[editor, editor2])
+        two_days_ago = timezone.now() - relativedelta(days=2)
+        GroupMembership.objects.filter(group=group).update(created_at=two_days_ago)
+        mail.outbox = []
+
+        membership = GroupMembership.objects.get(user=editor, group=group)
+        Trust.objects.create(membership=membership, given_by=editor2)
+
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(History.objects.filter(typus=HistoryTypus.MEMBER_BECAME_EDITOR).count(), 0)
 
     def test_remove_trust_when_giver_leaves_group(self):
         editor = UserFactory()

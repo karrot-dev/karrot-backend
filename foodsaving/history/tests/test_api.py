@@ -79,8 +79,8 @@ class TestHistoryAPIWithExistingGroup(APITestCase, ExtractPaginationMixin):
     def test_member_becomes_editor(self):
         user = UserFactory()
         GroupMembership.objects.create(group=self.group, user=user)
-        url = reverse('group-trust-user', args=(self.group.id, self.member.id))
-        self.client.force_login(user)
+        url = reverse('group-trust-user', args=(self.group.id, user.id))
+        self.client.force_login(self.member)
 
         self.client.post(url)
 
