@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from factory import DjangoModelFactory, CREATE_STRATEGY, LazyAttribute, PostGeneration
+from factory import DjangoModelFactory, CREATE_STRATEGY, LazyAttribute, PostGeneration, Sequence
 
 from foodsaving.utils.tests.fake import faker
 
@@ -12,7 +12,7 @@ class UserFactory(DjangoModelFactory):
     is_active = True
     is_staff = False
     display_name = LazyAttribute(lambda _: faker.name())
-    email = LazyAttribute(lambda _: faker.email())
+    email = Sequence(lambda n: str(n) + faker.email())
     description = LazyAttribute(lambda _: faker.text())
 
     # Use display_name as password, as it is readable
