@@ -11,13 +11,4 @@ class Migration(migrations.Migration):
         ('users', '0007_auto_20161224_1706'),
     ]
 
-    operations = [
-        migrations.RemoveField(
-            model_name='user',
-            name='wall',
-        ),
-        migrations.RemoveField(
-            model_name='user',
-            name='profile_visibility'
-        )
-    ]
+    operations = [migrations.RemoveField(model_name='user', name='profile_visibility')]

@@ -5,7 +5,7 @@ from foodsaving.utils.tests.fake import faker
 
 
 class TestUnverifiedMailDataMigration(TestMigrations):
-    migrate_from = [('walls', '0001_initial'), ('users', '0001_initial')]
+    migrate_from = [('users', '0001_initial')]
     migrate_to = [('users', '0015_auto_20170413_1731')]
 
     def tearDown(self):

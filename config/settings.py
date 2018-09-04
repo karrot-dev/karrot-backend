@@ -44,9 +44,6 @@ INSTALLED_APPS = (
     'foodsaving.template_previews',
     'foodsaving.webhooks',
 
-    # removed app, it's just here that the migration can run
-    'foodsaving.walls',
-
     # Django packages
     'django.contrib.admindocs',
     'django_extensions',
