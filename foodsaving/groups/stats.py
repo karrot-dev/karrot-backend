@@ -60,6 +60,16 @@ def trust_given(group):
     }])
 
 
+def member_became_editor(group):
+    write_points([{
+        'measurement': 'karrot.events',
+        'tags': group_tags(group),
+        'fields': {
+            'member_became_editor': 1
+        },
+    }])
+
+
 def get_group_members_stats(group):
 
     memberships = group.groupmembership_set

@@ -100,6 +100,8 @@ def trust_given(sender, instance, created, **kwargs):
         membership.save()
         prepare_user_became_editor_email(user=membership.user, group=membership.group).send()
 
+        stats.member_became_editor(membership.group)
+
     stats.trust_given(membership.group)
 
 
