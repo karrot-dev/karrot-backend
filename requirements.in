@@ -6,7 +6,6 @@ django-redis
 -e git+https://github.com/tiltec/django-rest-swagger@1c92642#egg=django-rest-swagger
 django-jinja
 djangorestframework
-drf-nested-routers
 factory-boy
 hiredis
 markdown

@@ -11,7 +11,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import path, re_path, include
 from django.views.static import serve
 from rest_framework.authtoken.views import obtain_auth_token
-from rest_framework_nested import routers
+from rest_framework.routers import DefaultRouter
 from rest_framework_swagger.views import get_swagger_view
 
 from foodsaving.conversations.api import ConversationMessageViewSet, ConversationViewSet
@@ -29,7 +29,7 @@ from foodsaving.userauth.api import AuthUserView, AuthView, LogoutView, \
 from foodsaving.users.api import UserViewSet, UserInfoViewSet
 from foodsaving.webhooks.api import IncomingEmailView, EmailEventView
 
-router = routers.DefaultRouter()
+router = DefaultRouter()
 
 router.register('groups', GroupViewSet)
 router.register('groups-info', GroupInfoViewSet, base_name='groupinfo')

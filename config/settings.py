@@ -50,7 +50,6 @@ INSTALLED_APPS = (
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_framework_nested',
     'rest_framework_swagger',
     'anymail',
     'influxdb_metrics',
