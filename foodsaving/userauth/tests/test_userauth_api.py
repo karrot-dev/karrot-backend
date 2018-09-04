@@ -2,7 +2,6 @@ import os
 from datetime import timedelta
 from unittest.mock import MagicMock
 
-import re
 from anymail.exceptions import AnymailAPIError
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
