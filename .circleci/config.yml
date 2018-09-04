@@ -21,9 +21,10 @@ jobs:
       - attach_workspace:
           at: ~/repo
       - restore_cache:
-          key: python-cache-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
-          key: python-cache-{{ checksum "requirements.txt" }}-
-          key: python-cache-
+          keys:
+            - python-cache-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+            - python-cache-{{ checksum "requirements.txt" }}-
+            - python-cache-
 
       - run:
           name: configure and run tests
