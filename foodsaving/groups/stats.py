@@ -53,9 +53,7 @@ def group_summary_email(group, **extra_fields):
 def trust_given(group):
     write_points([{
         'measurement': 'karrot.events',
-        'tags': {
-            'group': str(group.id)
-        },
+        'tags': group_tags(group),
         'fields': {
             'trust_given': 1
         },
