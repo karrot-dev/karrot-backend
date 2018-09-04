@@ -20,14 +20,14 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/repo
+
       - restore_cache:
           keys:
             - python-cache-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
             - python-cache-{{ checksum "requirements.txt" }}-
             - python-cache-
-
       - run:
-          name: configure and run tests
+          name: set up environment
           environment:
             LC_ALL: C.UTF-8
             LANG: C.UTF-8
@@ -37,6 +37,18 @@ jobs:
             pip install --upgrade pip
             pip install --upgrade pip-tools
             pip-sync requirements*.txt
+      - save_cache:
+          paths:
+            - env
+            - ~/.cache/pip
+          key: python-cache-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+
+      - run:
+          name: run tests
+          environment:
+            LC_ALL: C.UTF-8
+            LANG: C.UTF-8
+          command: |
             cp config/local_settings.py.ci config/local_settings.py
             (cd mjml && yarn)
             mjml/convert
@@ -48,11 +60,6 @@ jobs:
           path: test-reports
       - store_artifacts:
           path: test-reports
-      - save_cache:
-          paths:
-            - env
-            - ~/.cache/pip
-          key: python-cache-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
 
   deploy-dev:
     <<: *defaults
