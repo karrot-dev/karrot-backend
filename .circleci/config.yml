@@ -33,10 +33,9 @@ jobs:
             LANG: C.UTF-8
           command: |
             test -d env/bin || virtualenv -p python3 env
-            source env/bin/activate
-            pip install --upgrade pip
-            pip install --upgrade pip-tools
-            pip-sync requirements*.txt
+            env/bin/pip install --upgrade pip
+            env/bin/pip install --upgrade pip-tools
+            env/bin/pip-sync requirements*.txt
       - save_cache:
           paths:
             - env
@@ -53,9 +52,10 @@ jobs:
             (cd mjml && yarn)
             mjml/convert
             mkdir -p test-reports
-            pytest -n 4 --cov=foodsaving --cov-report xml --junitxml=test-reports/junit.xml
-            flake8 ./
-            pip install codecov && codecov
+            env/bin/pytest -n 4 --cov=foodsaving --cov-report xml --junitxml=test-reports/junit.xml
+            env/bin/flake8 ./
+            env/bin/pip install codecov
+            env/bin/codecov
       - store_test_results:
           path: test-reports
       - store_artifacts:
