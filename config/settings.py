@@ -19,8 +19,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Application definition
 
 INSTALLED_APPS = (
+    # Should be loaded first
+    'channels',
+    'raven.contrib.django.raven_compat',
+
     # core Django
     'django.contrib.admin',
+    'django.contrib.admindocs',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -45,7 +50,6 @@ INSTALLED_APPS = (
     'foodsaving.webhooks',
 
     # Django packages
-    'django.contrib.admindocs',
     'django_extensions',
     'corsheaders',
     'rest_framework',
@@ -55,8 +59,6 @@ INSTALLED_APPS = (
     'influxdb_metrics',
     'timezone_field',
     'django_jinja',
-    'channels',
-    'raven.contrib.django.raven_compat',
     'versatileimagefield',
     'huey.contrib.djhuey',
 )
