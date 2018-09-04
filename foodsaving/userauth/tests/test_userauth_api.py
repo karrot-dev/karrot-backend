@@ -2,6 +2,7 @@ import os
 from datetime import timedelta
 from unittest.mock import MagicMock
 
+import re
 from anymail.exceptions import AnymailAPIError
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -443,7 +444,8 @@ class TestChangeEMail(APITestCase):
 
     def test_change_to_similar_mail_succeeds(self):
         self.client.force_login(user=self.verified_user)
-        similar_mail = self.verified_user.email[0].swapcase() + self.verified_user.email[1:]
+        local_part, domain_part = self.verified_user.email.split('@')
+        similar_mail = '@'.join([local_part.swapcase(), domain_part])
         response = self.client.put(self.url, {'password': self.password, 'new_email': similar_mail})
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(mail.outbox), 2)
