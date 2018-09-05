@@ -32,4 +32,4 @@ bleach
 bleach_whitelist
 pymdown-extensions
 daphne
--e git+https://github.com/tiltec/channels@c013a6c#egg=channels
+-e git+https://github.com/tiltec/channels@555613#egg=channels
