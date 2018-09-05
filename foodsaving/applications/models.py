@@ -86,4 +86,6 @@ class GroupApplication(BaseModel):
     @transaction.atomic
     def withdraw(self):
         self.status = GroupApplicationStatus.WITHDRAWN.value
+        self.decided_by = self.user
+        self.decided_at = timezone.now()
         self.save()
