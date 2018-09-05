@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
--e git+https://github.com/tiltec/channels@555613#egg=channels
+-e git+https://github.com/tiltec/channels@bb9d5b7#egg=channels
 -e git+https://github.com/tiltec/django-rest-swagger@1c92642#egg=django-rest-swagger
 aioredis==1.1.0           # via channels-redis
 argon2-cffi==18.3.0       # via django
