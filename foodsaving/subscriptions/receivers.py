@@ -13,6 +13,8 @@ from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from foodsaving.applications.models import GroupApplication
 from foodsaving.applications.serializers import GroupApplicationSerializer
+from foodsaving.bells.models import Bell
+from foodsaving.bells.serializers import BellSerializer
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction, \
     ConversationThreadParticipant
 from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer
@@ -383,3 +385,20 @@ def send_history_updates(sender, instance, **kwargs):
     payload = HistorySerializer(history).data
     for subscription in ChannelSubscription.objects.recent().filter(user__in=history.group.members.all()).distinct():
         send_in_channel(subscription.reply_channel, topic='history:history', payload=payload)
+
+
+# Bell
+@receiver(post_save, sender=Bell)
+def bell_created(sender, instance, **kwargs):
+    bell = instance
+    payload = BellSerializer(bell).data
+    for subscription in ChannelSubscription.objects.recent().filter(user=bell.user):
+        send_in_channel(subscription.reply_channel, topic='bells:bell', payload=payload)
+
+
+@receiver(pre_delete, sender=Bell)
+def bell_deleted(sender, instance, **kwargs):
+    bell = instance
+    payload = BellSerializer(bell).data
+    for subscription in ChannelSubscription.objects.recent().filter(user=bell.user):
+        send_in_channel(subscription.reply_channel, topic='bells:bell_deleted', payload=payload)

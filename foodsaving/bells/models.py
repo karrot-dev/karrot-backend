@@ -13,10 +13,12 @@ class BellType(Enum):
     APPLICATION_DECLINED = 'application_declined'
     USER_BECAME_EDITOR = 'user_became_editor'
     FEEDBACK_POSSIBLE = 'feedback_possible'
+    NEW_STORE = 'new_store'
     """
     - pickup gets created/modified/deleted
     - pickup series get created/modified/deleted
-    - new store
+    - store changed
+    - new feedback
     - pickup_upcoming (maybe better from state)
     """
 

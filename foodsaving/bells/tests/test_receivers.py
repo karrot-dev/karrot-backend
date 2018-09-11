@@ -69,3 +69,11 @@ class TestBellReceivers(TestCase):
         bell = Bell.objects.filter(user=member, type=BellType.FEEDBACK_POSSIBLE.value)
         self.assertTrue(bell.exists())
         self.assertLessEqual(bell[0].expires_at, pickup.date + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS))
+
+    def test_creates_new_store_bell(self):
+        member = UserFactory()
+        group = GroupFactory(members=[member])
+        store = StoreFactory(group=group)
+
+        bell = Bell.objects.get(user=member, type=BellType.NEW_STORE.value)
+        self.assertEqual(bell.payload['store'], store.id)

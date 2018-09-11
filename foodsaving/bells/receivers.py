@@ -8,6 +8,7 @@ from foodsaving.bells.models import Bell, BellType
 from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
 from foodsaving.pickups.models import PickupDate
+from foodsaving.stores.models import Store
 
 
 @receiver(pre_save, sender=GroupMembership)
@@ -17,6 +18,7 @@ def user_became_editor(sender, instance, **kwargs):
         return
 
     if membership.id:
+        # skip if role was not changed
         old = GroupMembership.objects.get(id=membership.id)
         if GROUP_EDITOR in old.roles:
             return
@@ -24,6 +26,9 @@ def user_became_editor(sender, instance, **kwargs):
     Bell.objects.create(
         type=BellType.USER_BECAME_EDITOR.value,
         user=membership.user,
+        payload={
+            'group': membership.group.id,
+        },
     )
 
 
@@ -35,6 +40,9 @@ def new_applicant(sender, instance, **kwargs):
         Bell.objects.create(
             type=BellType.NEW_APPLICANT.value,
             user=member,
+            payload={
+                'application': application.id,
+            },
         )
 
 
@@ -47,12 +55,15 @@ def application_decided(sender, instance, **kwargs):
         return
 
     if application.id:
+        # skip if status was not changed
         old = GroupApplication.objects.get(id=application.id)
         if old.status == application.status:
             return
 
     bell_data = {
         'payload': {
+            'application': application.id,
+            # TODO either remove decided_by or send full application object
             'decided_by': application.decided_by_id,
         },
     }
@@ -75,6 +86,7 @@ def feedback_possible(sender, instance, **kwargs):
         return
 
     if pickup.id:
+        # skip if pickup was already processed
         old = PickupDate.objects.get(id=pickup.id)
         if old.done_and_processed == pickup.done_and_processed:
             return
@@ -91,4 +103,23 @@ def feedback_possible(sender, instance, **kwargs):
                 'pickup': pickup.id,
             },
             expires_at=expiry_date,
+        )
+
+
+@receiver(post_save, sender=Store)
+def new_store(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    store = instance
+
+    for member in store.group.members.all():
+        Bell.objects.create(
+            user=member,
+            type=BellType.NEW_STORE.value,
+            payload={
+                'store': store.id,
+                # TODO needs more data about who created the store
+                # 'created_by':
+            },
         )
