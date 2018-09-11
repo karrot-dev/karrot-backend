@@ -1,3 +1,5 @@
+from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.test import TestCase
 
 from foodsaving.applications.factories import GroupApplicationFactory
@@ -64,4 +66,6 @@ class TestBellReceivers(TestCase):
         pickup.done_and_processed = True
         pickup.save()
 
-        self.assertTrue(Bell.objects.filter(user=member, type=BellType.FEEDBACK_POSSIBLE.value).exists())
+        bell = Bell.objects.filter(user=member, type=BellType.FEEDBACK_POSSIBLE.value)
+        self.assertTrue(bell.exists())
+        self.assertLessEqual(bell[0].expires_at, pickup.date + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS))

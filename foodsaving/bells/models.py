@@ -34,3 +34,4 @@ class Bell(BaseModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     type = models.CharField(max_length=255)
     payload = JSONField(null=True)
+    expires_at = models.DateTimeField(null=True)

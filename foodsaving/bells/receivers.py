@@ -1,40 +1,13 @@
-from collections import namedtuple
-
-import json
-from asgiref.sync import async_to_sync
-from channels.exceptions import ChannelFull
-from channels.layers import get_channel_layer
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.contrib.auth import user_logged_out
-from django.db.models import Q
-from django.db.models.signals import post_save, pre_delete, m2m_changed, post_delete, pre_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
-from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from foodsaving.applications.models import GroupApplication, GroupApplicationStatus
-from foodsaving.applications.serializers import GroupApplicationSerializer
 from foodsaving.bells.models import Bell, BellType
-from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction, \
-    ConversationThreadParticipant
-from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer
-from foodsaving.groups.models import Group, Trust, GroupMembership
+from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
-from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer
-from foodsaving.history.models import history_created
-from foodsaving.history.serializers import HistorySerializer
-from foodsaving.invitations.models import Invitation
-from foodsaving.invitations.serializers import InvitationSerializer
-from foodsaving.pickups.models import PickupDate, PickupDateSeries, Feedback, pickup_done
-from foodsaving.pickups.serializers import PickupDateSerializer, PickupDateSeriesSerializer, FeedbackSerializer
-from foodsaving.stores.models import Store
-from foodsaving.stores.serializers import StoreSerializer
-from foodsaving.subscriptions import stats
-from foodsaving.subscriptions.fcm import notify_subscribers
-from foodsaving.subscriptions.models import ChannelSubscription, PushSubscription
-from foodsaving.userauth.serializers import AuthUserSerializer
-from foodsaving.users.serializers import UserSerializer
-from foodsaving.utils import frontend_urls
-from foodsaving.utils.frontend_urls import logo_url
+from foodsaving.pickups.models import PickupDate
 
 
 @receiver(pre_save, sender=GroupMembership)
@@ -106,9 +79,16 @@ def feedback_possible(sender, instance, **kwargs):
         if old.done_and_processed == pickup.done_and_processed:
             return
 
+    # TODO take into account that settings can change
+    # better save feedback possible expiry in pickup too
+    expiry_date = pickup.date + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
+
     for collector in pickup.collectors.all():
         Bell.objects.create(
-            user=collector, type=BellType.FEEDBACK_POSSIBLE.value, payload={
+            user=collector,
+            type=BellType.FEEDBACK_POSSIBLE.value,
+            payload={
                 'pickup': pickup.id,
-            }
+            },
+            expires_at=expiry_date,
         )
