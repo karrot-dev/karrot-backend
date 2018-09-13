@@ -15,6 +15,8 @@ class BellType(Enum):
     FEEDBACK_POSSIBLE = 'feedback_possible'
     NEW_STORE = 'new_store'
     """
+    - became inactive in group
+    - new trust
     - pickup gets created/modified/deleted
     - pickup series get created/modified/deleted
     - store changed
