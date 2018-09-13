@@ -23,6 +23,7 @@ def user_became_editor(sender, instance, **kwargs):
         if GROUP_EDITOR in old.roles:
             return
 
+    # TODO maybe also add bell for all group members?
     Bell.objects.create(
         type=BellType.USER_BECAME_EDITOR.value,
         user=membership.user,
