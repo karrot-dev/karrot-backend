@@ -25,8 +25,7 @@ class TestBellReceivers(TestCase):
         membership.save()
 
         self.assertEqual(bells.count(), 2)
-        self.assertEqual(bells[0].user, user)
-        self.assertEqual(bells[1].user, user1)
+        self.assertEqual(set(bell.user for bell in bells), {user, user1})
 
     def test_creates_new_applicant_bell(self):
         member = UserFactory()
@@ -59,7 +58,6 @@ class TestBellReceivers(TestCase):
         application.accept(member)
 
         self.assertEqual(Bell.objects.filter(user=user, type=BellType.APPLICATION_ACCEPTED.value).count(), 1)
-        self.assertEqual(Bell.objects.filter(user=member, type=BellType.APPLICATION_ACCEPTED.value).count(), 1)
         self.assertEqual(Bell.objects.filter(type=BellType.NEW_APPLICANT.value).count(), 0)
 
     def test_creates_application_declined_bell(self):
@@ -71,7 +69,6 @@ class TestBellReceivers(TestCase):
         application.decline(member)
 
         self.assertEqual(Bell.objects.filter(user=user, type=BellType.APPLICATION_DECLINED.value).count(), 1)
-        self.assertEqual(Bell.objects.filter(user=member, type=BellType.APPLICATION_DECLINED.value).count(), 1)
         self.assertEqual(Bell.objects.filter(type=BellType.NEW_APPLICANT.value).count(), 0)
 
     def test_creates_feedback_possible_bell(self):

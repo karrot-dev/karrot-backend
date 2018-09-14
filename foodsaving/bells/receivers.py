@@ -91,9 +91,6 @@ def application_decided(sender, instance, **kwargs):
 
     Bell.objects.create(user=application.user, **bell_data)
 
-    for member in application.group.members.all():
-        Bell.objects.create(user=member, **bell_data)
-
 
 @receiver(pre_save, sender=PickupDate)
 def feedback_possible(sender, instance, **kwargs):
