@@ -15,14 +15,18 @@ from foodsaving.users.factories import UserFactory
 class TestBellReceivers(TestCase):
     def test_creates_user_became_editor(self):
         user = UserFactory()
-        group = GroupFactory(newcomers=[user])
+        user1 = UserFactory()
+        group = GroupFactory(newcomers=[user, user1])
         membership = GroupMembership.objects.get(user=user, group=group)
-        self.assertEqual(Bell.objects.filter(user=user, type=BellType.USER_BECAME_EDITOR.value).count(), 0)
+        bells = Bell.objects.filter(type=BellType.USER_BECAME_EDITOR.value)
+        self.assertEqual(bells.count(), 0)
 
         membership.roles.append(GROUP_EDITOR)
         membership.save()
 
-        self.assertEqual(Bell.objects.filter(user=user, type=BellType.USER_BECAME_EDITOR.value).count(), 1)
+        self.assertEqual(bells.count(), 2)
+        self.assertEqual(bells[0].user, user)
+        self.assertEqual(bells[1].user, user1)
 
     def test_creates_new_applicant_bell(self):
         member = UserFactory()
