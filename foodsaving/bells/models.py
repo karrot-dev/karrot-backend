@@ -3,6 +3,7 @@ from enum import Enum
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.db import models
+from django.db.models.manager import BaseManager
 
 from foodsaving.base.base_models import BaseModel
 
@@ -29,8 +30,12 @@ class BellQuerySet(models.QuerySet):
     pass
 
 
+class BellManager(BaseManager.from_queryset(BellQuerySet)):
+    pass
+
+
 class Bell(BaseModel):
-    objects = BellQuerySet.as_manager()
+    objects = BellManager()
 
     class Meta:
         ordering = ['-created_at']
