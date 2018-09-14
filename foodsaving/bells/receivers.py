@@ -29,7 +29,7 @@ def user_became_editor(sender, instance, **kwargs):
         Bell.objects.create(
             type=BellType.USER_BECAME_EDITOR.value,
             user=member,
-            payload={
+            context={
                 'group': membership.group.id,
                 'user': membership.user.id,
             },
@@ -47,7 +47,7 @@ def new_applicant(sender, instance, created, **kwargs):
         Bell.objects.create(
             type=BellType.NEW_APPLICANT.value,
             user=member,
-            payload={
+            context={
                 'application': application.id,
             },
         )
@@ -73,7 +73,7 @@ def application_decided(sender, instance, **kwargs):
     # clean up new_application bells for this application
     Bell.objects.filter(
         type=BellType.NEW_APPLICANT.value,
-        payload__application=application.id,
+        context__application=application.id,
     ).delete()
 
     # do not create more bells if application was withdrawn
@@ -81,7 +81,7 @@ def application_decided(sender, instance, **kwargs):
         return
 
     bell_data = {
-        'payload': {
+        'context': {
             'application': application.id,
         },
     }
@@ -114,7 +114,7 @@ def feedback_possible(sender, instance, **kwargs):
         Bell.objects.create(
             user=collector,
             type=BellType.FEEDBACK_POSSIBLE.value,
-            payload={
+            context={
                 'pickup': pickup.id,
             },
             expires_at=expiry_date,
@@ -132,7 +132,7 @@ def new_store(sender, instance, created, **kwargs):
         Bell.objects.create(
             user=member,
             type=BellType.NEW_STORE.value,
-            payload={
+            context={
                 'store': store.id,
                 'user': store.created_by_id,
             },
@@ -150,7 +150,7 @@ def new_member(sender, instance, created, **kwargs):
         Bell.objects.create(
             user=member,
             type=BellType.NEW_MEMBER.value,
-            payload={
+            context={
                 'group': membership.group.id,
                 'user': membership.added_by_id,
             },
@@ -171,7 +171,7 @@ def invitation_accepted(sender, instance, **kwargs):
     Bell.objects.create(
         user=invitation.invited_by,
         type=BellType.INVITATION_ACCEPTED.value,
-        payload={
+        context={
             'group': invitation.group.id,
             'user': user.id
         }

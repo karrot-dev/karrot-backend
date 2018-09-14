@@ -95,8 +95,8 @@ class TestBellReceivers(TestCase):
         bells = Bell.objects.filter(type=BellType.NEW_STORE.value)
         self.assertEqual(bells.count(), 1)
         self.assertEqual(bells[0].user, member)
-        self.assertEqual(bells[0].payload['store'], store.id)
-        self.assertEqual(bells[0].payload['user'], creator.id)
+        self.assertEqual(bells[0].context['store'], store.id)
+        self.assertEqual(bells[0].context['user'], creator.id)
 
     def test_creates_new_member_bell(self):
         member1 = UserFactory()
@@ -126,6 +126,6 @@ class TestBellReceivers(TestCase):
         # only member1 gets a bell, as they invited the user
         self.assertEqual(bells.count(), 1)
         self.assertEqual(bells[0].user, member1)
-        payload = bells[0].payload
-        self.assertEqual(payload['group'], group.id)
-        self.assertEqual(payload['user'], user.id)
+        context = bells[0].context
+        self.assertEqual(context['group'], group.id)
+        self.assertEqual(context['user'], user.id)

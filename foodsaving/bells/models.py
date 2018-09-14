@@ -18,12 +18,14 @@ class BellType(Enum):
     NEW_MEMBER = 'new_member'
     INVITATION_ACCEPTED = 'invitation_accepted'
     """
-    - new trust
+    - new trust (stackable!)
+    - pickup_upcoming (maybe better from state)
+    
+    needs store subscription
     - pickup gets created/modified/deleted
     - pickup series get created/modified/deleted
     - store changed
     - new feedback
-    - pickup_upcoming (maybe better from state)
     """
 
 
@@ -43,5 +45,5 @@ class Bell(BaseModel):
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     type = models.CharField(max_length=255)
-    payload = JSONField(null=True)
+    context = JSONField(null=True)
     expires_at = models.DateTimeField(null=True)
