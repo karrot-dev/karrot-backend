@@ -15,8 +15,9 @@ class BellType(Enum):
     USER_BECAME_EDITOR = 'user_became_editor'
     FEEDBACK_POSSIBLE = 'feedback_possible'
     NEW_STORE = 'new_store'
+    NEW_MEMBER = 'new_member'
+    INVITATION_ACCEPTED = 'invitation_accepted'
     """
-    - user joined group
     - new trust
     - pickup gets created/modified/deleted
     - pickup series get created/modified/deleted

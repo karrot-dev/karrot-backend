@@ -7,6 +7,7 @@ from foodsaving.bells.models import Bell, BellType
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
+from foodsaving.invitations.models import Invitation
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory
@@ -96,3 +97,35 @@ class TestBellReceivers(TestCase):
         self.assertEqual(bells[0].user, member)
         self.assertEqual(bells[0].payload['store'], store.id)
         self.assertEqual(bells[0].payload['user'], creator.id)
+
+    def test_creates_new_member_bell(self):
+        member1 = UserFactory()
+        member2 = UserFactory()
+        group = GroupFactory(members=[member1, member2])
+        Bell.objects.all().delete()
+
+        user = UserFactory()
+        group.add_member(user, added_by=member1)
+
+        bells = Bell.objects.filter(type=BellType.NEW_MEMBER.value)
+        # member1 doesn't get a bell, as they added the user
+        self.assertEqual(bells.count(), 1, bells)
+        self.assertEqual(bells[0].user, member2)
+
+    def test_creates_new_invitation_accepted_bell(self):
+        member1 = UserFactory()
+        member2 = UserFactory()
+        group = GroupFactory(members=[member1, member2])
+        invitation = Invitation.objects.create(email='bla@bla.com', group=group, invited_by=member1)
+        Bell.objects.all().delete()
+
+        user = UserFactory()
+        invitation.accept(user)
+
+        bells = Bell.objects.filter(type=BellType.INVITATION_ACCEPTED.value)
+        # only member1 gets a bell, as they invited the user
+        self.assertEqual(bells.count(), 1)
+        self.assertEqual(bells[0].user, member1)
+        payload = bells[0].payload
+        self.assertEqual(payload['group'], group.id)
+        self.assertEqual(payload['user'], user.id)

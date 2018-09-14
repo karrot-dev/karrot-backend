@@ -1,12 +1,14 @@
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_save, pre_delete
 from django.dispatch import receiver
+from django.utils import timezone
 
 from foodsaving.applications.models import GroupApplication, GroupApplicationStatus
 from foodsaving.bells.models import Bell, BellType
 from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
+from foodsaving.invitations.models import Invitation
 from foodsaving.pickups.models import PickupDate
 from foodsaving.stores.models import Store
 
@@ -135,3 +137,42 @@ def new_store(sender, instance, created, **kwargs):
                 'user': store.created_by_id,
             },
         )
+
+
+@receiver(post_save, sender=GroupMembership)
+def new_member(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    membership = instance
+
+    for member in membership.group.members.exclude(id__in=(membership.user_id, membership.added_by_id)):
+        Bell.objects.create(
+            user=member,
+            type=BellType.NEW_MEMBER.value,
+            payload={
+                'group': membership.group.id,
+                'user': membership.added_by_id,
+            },
+        )
+
+
+@receiver(pre_delete, sender=Invitation)
+def invitation_accepted(sender, instance, **kwargs):
+    invitation = instance
+
+    # skip expired invitations
+    if invitation.expires_at < timezone.now():
+        return
+
+    # search for the user who accepted the invitation, as we don't have access to the request object
+    user = invitation.group.groupmembership_set.filter(added_by=invitation.invited_by).latest('created_at').user
+
+    Bell.objects.create(
+        user=invitation.invited_by,
+        type=BellType.INVITATION_ACCEPTED.value,
+        payload={
+            'group': invitation.group.id,
+            'user': user.id
+        }
+    )
