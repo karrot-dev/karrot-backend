@@ -128,13 +128,12 @@ def new_store(sender, instance, created, **kwargs):
 
     store = instance
 
-    for member in store.group.members.all():
+    for member in store.group.members.exclude(id=store.created_by_id):
         Bell.objects.create(
             user=member,
             type=BellType.NEW_STORE.value,
             payload={
                 'store': store.id,
-                # TODO needs more data about who created the store
-                # 'created_by':
+                'user': store.created_by_id,
             },
         )

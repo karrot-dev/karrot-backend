@@ -86,8 +86,12 @@ class TestBellReceivers(TestCase):
 
     def test_creates_new_store_bell(self):
         member = UserFactory()
-        group = GroupFactory(members=[member])
-        store = StoreFactory(group=group)
+        creator = UserFactory()
+        group = GroupFactory(members=[member, creator])
+        store = StoreFactory(group=group, created_by=creator)
 
-        bell = Bell.objects.get(user=member, type=BellType.NEW_STORE.value)
-        self.assertEqual(bell.payload['store'], store.id)
+        bells = Bell.objects.filter(type=BellType.NEW_STORE.value)
+        self.assertEqual(bells.count(), 1)
+        self.assertEqual(bells[0].user, member)
+        self.assertEqual(bells[0].payload['store'], store.id)
+        self.assertEqual(bells[0].payload['user'], creator.id)

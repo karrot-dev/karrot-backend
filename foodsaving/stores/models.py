@@ -25,6 +25,7 @@ class Store(BaseModel, LocationModel):
     description = models.TextField(blank=True)
     weeks_in_advance = models.PositiveIntegerField(default=4)
     status = models.CharField(max_length=20, default=DEFAULT_STATUS)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
 
     deleted = models.BooleanField(default=False)
 
