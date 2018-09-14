@@ -34,7 +34,10 @@ def user_became_editor(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=GroupApplication)
-def new_applicant(sender, instance, **kwargs):
+def new_applicant(sender, instance, created, **kwargs):
+    if not created:
+        return
+
     application = instance
 
     for member in application.group.members.all():
@@ -51,8 +54,11 @@ def new_applicant(sender, instance, **kwargs):
 def application_decided(sender, instance, **kwargs):
     application = instance
 
-    if (application.status != GroupApplicationStatus.ACCEPTED.value
-            and application.status != GroupApplicationStatus.DECLINED.value):
+    if application.status not in (
+            GroupApplicationStatus.ACCEPTED.value,
+            GroupApplicationStatus.DECLINED.value,
+            GroupApplicationStatus.WITHDRAWN.value,
+    ):
         return
 
     if application.id:
@@ -61,11 +67,19 @@ def application_decided(sender, instance, **kwargs):
         if old.status == application.status:
             return
 
+    # clean up new_application bells for this application
+    Bell.objects.filter(
+        type=BellType.NEW_APPLICANT.value,
+        payload__application=application.id,
+    ).delete()
+
+    # do not create more bells if application was withdrawn
+    if application.status == GroupApplicationStatus.WITHDRAWN.value:
+        return
+
     bell_data = {
         'payload': {
             'application': application.id,
-            # TODO either remove decided_by or send full application object
-            'decided_by': application.decided_by_id,
         },
     }
 
