@@ -58,6 +58,6 @@ class NotificationViewSet(GenericViewSet):
     def mark_seen(self, request):
         """Mark all notifications as seen"""
         self.check_permissions(request)
-        meta = NotificationMeta.objects.update_or_create({'marked_at': timezone.now()}, user=request.user)
+        meta, _ = NotificationMeta.objects.update_or_create({'marked_at': timezone.now()}, user=request.user)
         serializer = NotificationMetaSerializer(meta)
         return Response(serializer.data)

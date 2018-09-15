@@ -54,5 +54,5 @@ class Notification(BaseModel):
 
 
 class NotificationMeta(NicelyFormattedModel):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     marked_at = models.DateTimeField(null=True)
