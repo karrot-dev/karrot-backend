@@ -16,10 +16,7 @@ class NotificationPagination(CursorPagination):
     ordering = '-created_at'
 
 
-class NotificationViewSet(
-        mixins.DestroyModelMixin,
-        GenericViewSet,
-):
+class NotificationViewSet(GenericViewSet):
     """
     On-site notifications (Bell)
     """
