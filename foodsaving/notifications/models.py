@@ -5,7 +5,7 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models.manager import BaseManager
 
-from foodsaving.base.base_models import BaseModel
+from foodsaving.base.base_models import BaseModel, NicelyFormattedModel
 
 
 class NotificationType(Enum):
@@ -47,3 +47,12 @@ class Notification(BaseModel):
     type = models.CharField(max_length=255)
     context = JSONField(null=True)
     expires_at = models.DateTimeField(null=True)
+    clicked_at = models.DateTimeField(null=True)
+
+    def clicked(self):
+        return self.clicked_at is not None
+
+
+class NotificationMeta(NicelyFormattedModel):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    marked_at = models.DateTimeField(null=True)

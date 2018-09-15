@@ -13,8 +13,8 @@ from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from foodsaving.applications.models import GroupApplication
 from foodsaving.applications.serializers import GroupApplicationSerializer
-from foodsaving.notifications.models import Notification
-from foodsaving.notifications.serializers import NotificationSerializer
+from foodsaving.notifications.models import Notification, NotificationMeta
+from foodsaving.notifications.serializers import NotificationSerializer, NotificationMetaSerializer
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction, \
     ConversationThreadParticipant
 from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer
@@ -389,7 +389,7 @@ def send_history_updates(sender, instance, **kwargs):
 
 # Notification
 @receiver(post_save, sender=Notification)
-def notification_created(sender, instance, **kwargs):
+def notification_saved(sender, instance, **kwargs):
     notification = instance
     payload = NotificationSerializer(notification).data
     for subscription in ChannelSubscription.objects.recent().filter(user=notification.user):
@@ -402,3 +402,11 @@ def notification_deleted(sender, instance, **kwargs):
     payload = NotificationSerializer(notification).data
     for subscription in ChannelSubscription.objects.recent().filter(user=notification.user):
         send_in_channel(subscription.reply_channel, topic='notifications:notification_deleted', payload=payload)
+
+
+@receiver(post_save, sender=NotificationMeta)
+def notification_meta_saved(sender, instance, **kwargs):
+    meta = instance
+    payload = NotificationMetaSerializer(meta).data
+    for subscription in ChannelSubscription.objects.recent().filter(user=meta.user):
+        send_in_channel(subscription.reply_channel, topic='notifications:meta', payload=payload)

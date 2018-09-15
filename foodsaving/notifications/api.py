@@ -1,10 +1,13 @@
+from django.utils import timezone
 from rest_framework import mixins
+from rest_framework.decorators import action
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from foodsaving.notifications.models import Notification
-from foodsaving.notifications.serializers import NotificationSerializer
+from foodsaving.notifications.models import Notification, NotificationMeta
+from foodsaving.notifications.serializers import NotificationSerializer, NotificationMetaSerializer
 
 
 class NotificationPagination(CursorPagination):
@@ -14,13 +17,11 @@ class NotificationPagination(CursorPagination):
 
 
 class NotificationViewSet(
-        mixins.RetrieveModelMixin,
         mixins.DestroyModelMixin,
-        mixins.ListModelMixin,
         GenericViewSet,
 ):
     """
-    Notification-type notifications
+    On-site notifications (Bell)
     """
     serializer_class = NotificationSerializer
     queryset = Notification.objects
@@ -29,3 +30,37 @@ class NotificationViewSet(
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True)
+
+        meta = NotificationMeta.objects.get_or_create(user=request.user)
+        meta_serializer = NotificationMetaSerializer(meta)
+
+        return self.get_paginated_response({
+            'notifications': serializer.data,
+            'meta': meta_serializer.data,
+        })
+
+    @action(detail=True, methods=['POST'])
+    def mark_clicked(self, request, pk=None):
+        """Mark notification as clicked"""
+        self.check_permissions(request)
+        notification = self.get_object()
+
+        notification.clicked = timezone.now()
+        notification.save()
+
+        serializer = self.get_serializer(notification)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['POST'])
+    def mark_seen(self, request):
+        """Mark all notifications as seen"""
+        self.check_permissions(request)
+        meta = NotificationMeta.objects.update_or_create({'marked_at': timezone.now()}, user=request.user)
+        serializer = NotificationMetaSerializer(meta)
+        return Response(serializer.data)
