@@ -3,29 +3,29 @@ from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
-from foodsaving.bells.models import Bell
-from foodsaving.bells.serializers import BellSerializer
+from foodsaving.notifications.models import Notification
+from foodsaving.notifications.serializers import NotificationSerializer
 
 
-class BellPagination(CursorPagination):
+class NotificationPagination(CursorPagination):
     # TODO: create an index on 'created_at' for increased speed
     page_size = 20
     ordering = '-created_at'
 
 
-class BellViewSet(
+class NotificationViewSet(
         mixins.RetrieveModelMixin,
         mixins.DestroyModelMixin,
         mixins.ListModelMixin,
         GenericViewSet,
 ):
     """
-    Bell-type notifications
+    Notification-type notifications
     """
-    serializer_class = BellSerializer
-    queryset = Bell.objects
+    serializer_class = NotificationSerializer
+    queryset = Notification.objects
     permission_classes = (IsAuthenticated, )
-    pagination_class = BellPagination
+    pagination_class = NotificationPagination
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)

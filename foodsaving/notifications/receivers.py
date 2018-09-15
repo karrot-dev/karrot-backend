@@ -5,7 +5,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 from foodsaving.applications.models import GroupApplication, GroupApplicationStatus
-from foodsaving.bells.models import Bell, BellType
+from foodsaving.notifications.models import Notification, NotificationType
 from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
 from foodsaving.invitations.models import Invitation
@@ -26,8 +26,8 @@ def user_became_editor(sender, instance, **kwargs):
             return
 
     for member in membership.group.members.all():
-        Bell.objects.create(
-            type=BellType.USER_BECAME_EDITOR.value,
+        Notification.objects.create(
+            type=NotificationType.USER_BECAME_EDITOR.value,
             user=member,
             context={
                 'group': membership.group.id,
@@ -44,8 +44,8 @@ def new_applicant(sender, instance, created, **kwargs):
     application = instance
 
     for member in application.group.members.all():
-        Bell.objects.create(
-            type=BellType.NEW_APPLICANT.value,
+        Notification.objects.create(
+            type=NotificationType.NEW_APPLICANT.value,
             user=member,
             context={
                 'application': application.id,
@@ -70,28 +70,28 @@ def application_decided(sender, instance, **kwargs):
         if old.status == application.status:
             return
 
-    # clean up new_application bells for this application
-    Bell.objects.filter(
-        type=BellType.NEW_APPLICANT.value,
+    # clean up new_application notifications for this application
+    Notification.objects.filter(
+        type=NotificationType.NEW_APPLICANT.value,
         context__application=application.id,
     ).delete()
 
-    # do not create more bells if application was withdrawn
+    # do not create more notifications if application was withdrawn
     if application.status == GroupApplicationStatus.WITHDRAWN.value:
         return
 
-    bell_data = {
+    notification_data = {
         'context': {
             'application': application.id,
         },
     }
 
     if application.status == GroupApplicationStatus.ACCEPTED.value:
-        bell_data['type'] = BellType.APPLICATION_ACCEPTED.value
+        notification_data['type'] = NotificationType.APPLICATION_ACCEPTED.value
     elif application.status == GroupApplicationStatus.DECLINED.value:
-        bell_data['type'] = BellType.APPLICATION_DECLINED.value
+        notification_data['type'] = NotificationType.APPLICATION_DECLINED.value
 
-    Bell.objects.create(user=application.user, **bell_data)
+    Notification.objects.create(user=application.user, **notification_data)
 
 
 @receiver(pre_save, sender=PickupDate)
@@ -111,9 +111,9 @@ def feedback_possible(sender, instance, **kwargs):
     expiry_date = pickup.date + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
     for collector in pickup.collectors.all():
-        Bell.objects.create(
+        Notification.objects.create(
             user=collector,
-            type=BellType.FEEDBACK_POSSIBLE.value,
+            type=NotificationType.FEEDBACK_POSSIBLE.value,
             context={
                 'pickup': pickup.id,
             },
@@ -129,9 +129,9 @@ def new_store(sender, instance, created, **kwargs):
     store = instance
 
     for member in store.group.members.exclude(id=store.created_by_id):
-        Bell.objects.create(
+        Notification.objects.create(
             user=member,
-            type=BellType.NEW_STORE.value,
+            type=NotificationType.NEW_STORE.value,
             context={
                 'store': store.id,
                 'user': store.created_by_id,
@@ -147,9 +147,9 @@ def new_member(sender, instance, created, **kwargs):
     membership = instance
 
     for member in membership.group.members.exclude(id__in=(membership.user_id, membership.added_by_id)):
-        Bell.objects.create(
+        Notification.objects.create(
             user=member,
-            type=BellType.NEW_MEMBER.value,
+            type=NotificationType.NEW_MEMBER.value,
             context={
                 'group': membership.group.id,
                 'user': membership.added_by_id,
@@ -168,9 +168,9 @@ def invitation_accepted(sender, instance, **kwargs):
     # search for the user who accepted the invitation, as we don't have access to the request object
     user = invitation.group.groupmembership_set.filter(added_by=invitation.invited_by).latest('created_at').user
 
-    Bell.objects.create(
+    Notification.objects.create(
         user=invitation.invited_by,
-        type=BellType.INVITATION_ACCEPTED.value,
+        type=NotificationType.INVITATION_ACCEPTED.value,
         context={
             'group': invitation.group.id,
             'user': user.id

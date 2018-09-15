@@ -8,7 +8,7 @@ from django.db.models.manager import BaseManager
 from foodsaving.base.base_models import BaseModel
 
 
-class BellType(Enum):
+class NotificationType(Enum):
     NEW_APPLICANT = 'new_applicant'
     APPLICATION_ACCEPTED = 'application_accepted'
     APPLICATION_DECLINED = 'application_declined'
@@ -29,16 +29,16 @@ class BellType(Enum):
     """
 
 
-class BellQuerySet(models.QuerySet):
+class NotificationQuerySet(models.QuerySet):
     pass
 
 
-class BellManager(BaseManager.from_queryset(BellQuerySet)):
+class NotificationManager(BaseManager.from_queryset(NotificationQuerySet)):
     pass
 
 
-class Bell(BaseModel):
-    objects = BellManager()
+class Notification(BaseModel):
+    objects = NotificationManager()
 
     class Meta:
         ordering = ['-created_at']

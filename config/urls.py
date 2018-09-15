@@ -13,7 +13,7 @@ from django.views.static import serve
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 
-from foodsaving.bells.api import BellViewSet
+from foodsaving.notifications.api import NotificationViewSet
 from rest_framework_swagger.views import get_swagger_view
 
 from foodsaving.conversations.api import ConversationMessageViewSet, ConversationViewSet
@@ -50,8 +50,8 @@ router.register('pickup-dates', PickupDateViewSet)
 router.register('conversations', ConversationViewSet)
 router.register('messages', ConversationMessageViewSet)
 
-# Bell endpoints
-router.register('bells', BellViewSet)
+# Notification endpoints
+router.register('notifications', NotificationViewSet)
 
 # Subscription endpoints
 router.register('subscriptions/push', PushSubscriptionViewSet)

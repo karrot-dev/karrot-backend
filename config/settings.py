@@ -48,7 +48,7 @@ INSTALLED_APPS = (
     'foodsaving.invitations.InvitationsConfig',
     'foodsaving.template_previews',
     'foodsaving.webhooks',
-    'foodsaving.bells.BellsConfig',
+    'foodsaving.notifications.NotificationsConfig',
 
     # Django packages
     'django_extensions',

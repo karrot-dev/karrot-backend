@@ -13,8 +13,8 @@ from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from foodsaving.applications.models import GroupApplication
 from foodsaving.applications.serializers import GroupApplicationSerializer
-from foodsaving.bells.models import Bell
-from foodsaving.bells.serializers import BellSerializer
+from foodsaving.notifications.models import Notification
+from foodsaving.notifications.serializers import NotificationSerializer
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction, \
     ConversationThreadParticipant
 from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer
@@ -387,18 +387,18 @@ def send_history_updates(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='history:history', payload=payload)
 
 
-# Bell
-@receiver(post_save, sender=Bell)
-def bell_created(sender, instance, **kwargs):
-    bell = instance
-    payload = BellSerializer(bell).data
-    for subscription in ChannelSubscription.objects.recent().filter(user=bell.user):
-        send_in_channel(subscription.reply_channel, topic='bells:bell', payload=payload)
+# Notification
+@receiver(post_save, sender=Notification)
+def notification_created(sender, instance, **kwargs):
+    notification = instance
+    payload = NotificationSerializer(notification).data
+    for subscription in ChannelSubscription.objects.recent().filter(user=notification.user):
+        send_in_channel(subscription.reply_channel, topic='notifications:notification', payload=payload)
 
 
-@receiver(pre_delete, sender=Bell)
-def bell_deleted(sender, instance, **kwargs):
-    bell = instance
-    payload = BellSerializer(bell).data
-    for subscription in ChannelSubscription.objects.recent().filter(user=bell.user):
-        send_in_channel(subscription.reply_channel, topic='bells:bell_deleted', payload=payload)
+@receiver(pre_delete, sender=Notification)
+def notification_deleted(sender, instance, **kwargs):
+    notification = instance
+    payload = NotificationSerializer(notification).data
+    for subscription in ChannelSubscription.objects.recent().filter(user=notification.user):
+        send_in_channel(subscription.reply_channel, topic='notifications:notification_deleted', payload=payload)

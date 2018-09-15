@@ -1,8 +1,8 @@
 from django.apps import AppConfig
 
 
-class BellsConfig(AppConfig):
-    name = 'foodsaving.bells'
+class NotificationsConfig(AppConfig):
+    name = 'foodsaving.notifications'
 
     def ready(self):
         from . import receivers  # noqa: F401
