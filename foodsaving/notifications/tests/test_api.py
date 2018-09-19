@@ -15,7 +15,7 @@ class TestNotificationsAPI(APITestCase, ExtractPaginationMixin):
         self.member = UserFactory()
 
     def test_list_with_meta(self):
-        # create any notification
+        # any notification
         Notification.objects.create(user=self.member, type=NotificationType.USER_BECAME_EDITOR)
 
         self.client.force_login(self.member)
@@ -25,6 +25,18 @@ class TestNotificationsAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.data['meta'], {
             'marked_at': None,
         })
+
+    def test_list_with_already_marked(self):
+        # any notification
+        Notification.objects.create(user=self.member, type=NotificationType.USER_BECAME_EDITOR)
+
+        self.client.force_login(self.member)
+
+        now = timezone.now()
+        self.client.post(notification_url + 'mark_seen/')
+
+        response = self.get_results(notification_url)
+        self.assertGreaterEqual(parse(response.data['meta']['marked_at']), now)
 
     def test_mark_seen(self):
         self.client.force_login(self.member)
@@ -40,7 +52,7 @@ class TestNotificationsAPI(APITestCase, ExtractPaginationMixin):
         self.assertLess(time1, time2)
 
     def test_mark_clicked(self):
-        # create any notification
+        # any notification
         notification = Notification.objects.create(user=self.member, type=NotificationType.USER_BECAME_EDITOR)
 
         self.client.force_login(self.member)

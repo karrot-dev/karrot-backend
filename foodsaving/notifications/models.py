@@ -13,6 +13,7 @@ class NotificationType(Enum):
     APPLICATION_ACCEPTED = 'application_accepted'
     APPLICATION_DECLINED = 'application_declined'
     USER_BECAME_EDITOR = 'user_became_editor'
+    YOU_BECAME_EDITOR = 'you_became_editor'
     FEEDBACK_POSSIBLE = 'feedback_possible'
     NEW_STORE = 'new_store'
     NEW_MEMBER = 'new_member'
@@ -53,6 +54,6 @@ class Notification(BaseModel):
         return self.clicked_at is not None
 
 
-class NotificationMeta(NicelyFormattedModel):
+class NotificationMeta(BaseModel):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     marked_at = models.DateTimeField(null=True)
