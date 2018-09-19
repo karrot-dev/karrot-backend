@@ -6,6 +6,7 @@ from django.db import models
 from django.db.models.manager import BaseManager
 
 from foodsaving.base.base_models import BaseModel, NicelyFormattedModel
+from foodsaving.notifications import stats
 
 
 class NotificationType(Enum):
@@ -48,10 +49,15 @@ class Notification(BaseModel):
     type = models.CharField(max_length=255)
     context = JSONField(null=True)
     expires_at = models.DateTimeField(null=True)
-    clicked_at = models.DateTimeField(null=True)
+    clicked = models.BooleanField(default=False)
 
-    def clicked(self):
-        return self.clicked_at is not None
+    def save(self, **kwargs):
+        old = type(self).objects.get(pk=self.pk) if self.pk else None
+        super().save(**kwargs)
+        if old is None:
+            stats.notification_created(self)
+        elif self.clicked and not old.clicked:
+            stats.notification_clicked(self)
 
 
 class NotificationMeta(BaseModel):

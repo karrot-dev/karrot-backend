@@ -12,13 +12,13 @@ notification_url = '/api/notifications/'
 
 class TestNotificationsAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):
-        self.member = UserFactory()
+        self.user = UserFactory()
 
     def test_list_with_meta(self):
         # any notification
-        Notification.objects.create(user=self.member, type=NotificationType.USER_BECAME_EDITOR)
+        Notification.objects.create(user=self.user, type=NotificationType.USER_BECAME_EDITOR.value)
 
-        self.client.force_login(self.member)
+        self.client.force_login(self.user)
         response = self.get_results(notification_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['notifications']), 1)
@@ -28,9 +28,9 @@ class TestNotificationsAPI(APITestCase, ExtractPaginationMixin):
 
     def test_list_with_already_marked(self):
         # any notification
-        Notification.objects.create(user=self.member, type=NotificationType.USER_BECAME_EDITOR)
+        Notification.objects.create(user=self.user, type=NotificationType.USER_BECAME_EDITOR.value)
 
-        self.client.force_login(self.member)
+        self.client.force_login(self.user)
 
         now = timezone.now()
         self.client.post(notification_url + 'mark_seen/')
@@ -39,7 +39,7 @@ class TestNotificationsAPI(APITestCase, ExtractPaginationMixin):
         self.assertGreaterEqual(parse(response.data['meta']['marked_at']), now)
 
     def test_mark_seen(self):
-        self.client.force_login(self.member)
+        self.client.force_login(self.user)
 
         response = self.client.post(notification_url + 'mark_seen/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -53,12 +53,15 @@ class TestNotificationsAPI(APITestCase, ExtractPaginationMixin):
 
     def test_mark_clicked(self):
         # any notification
-        notification = Notification.objects.create(user=self.member, type=NotificationType.USER_BECAME_EDITOR)
+        notification = Notification.objects.create(user=self.user, type=NotificationType.USER_BECAME_EDITOR.value)
 
-        self.client.force_login(self.member)
+        self.client.force_login(self.user)
         response = self.get_results(notification_url)
         self.assertFalse(response.data['notifications'][0]['clicked'])
 
         response = self.client.post(notification_url + str(notification.id) + '/mark_clicked/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.data['clicked'])
+
+        response = self.get_results(notification_url)
+        self.assertTrue(response.data['notifications'][0]['clicked'])

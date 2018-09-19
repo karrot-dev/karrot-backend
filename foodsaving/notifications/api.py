@@ -1,5 +1,4 @@
 from django.utils import timezone
-from rest_framework import mixins
 from rest_framework.decorators import action
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
@@ -48,8 +47,9 @@ class NotificationViewSet(GenericViewSet):
         self.check_permissions(request)
         notification = self.get_object()
 
-        notification.clicked = timezone.now()
-        notification.save()
+        if not notification.clicked:
+            notification.clicked = True
+            notification.save()
 
         serializer = self.get_serializer(notification)
         return Response(serializer.data)
