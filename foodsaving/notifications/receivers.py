@@ -25,7 +25,15 @@ def user_became_editor(sender, instance, **kwargs):
         if GROUP_EDITOR in old.roles:
             return
 
-    for member in membership.group.members.all():
+    Notification.objects.create(
+        type=NotificationType.YOU_BECAME_EDITOR.value,
+        user=membership.user,
+        context={
+            'group': membership.group.id,
+        },
+    )
+
+    for member in membership.group.members.exclude(id=membership.user_id):
         Notification.objects.create(
             type=NotificationType.USER_BECAME_EDITOR.value,
             user=member,
@@ -48,6 +56,8 @@ def new_applicant(sender, instance, created, **kwargs):
             type=NotificationType.NEW_APPLICANT.value,
             user=member,
             context={
+                'group': application.group.id,
+                'user': application.user.id,
                 'application': application.id,
             },
         )
@@ -82,6 +92,7 @@ def application_decided(sender, instance, **kwargs):
 
     notification_data = {
         'context': {
+            'group': application.group.id,
             'application': application.id,
         },
     }
@@ -115,6 +126,7 @@ def feedback_possible(sender, instance, **kwargs):
             user=collector,
             type=NotificationType.FEEDBACK_POSSIBLE.value,
             context={
+                'group': pickup.store.group.id,
                 'pickup': pickup.id,
             },
             expires_at=expiry_date,
@@ -133,6 +145,7 @@ def new_store(sender, instance, created, **kwargs):
             user=member,
             type=NotificationType.NEW_STORE.value,
             context={
+                'group': store.group.id,
                 'store': store.id,
                 'user': store.created_by_id,
             },

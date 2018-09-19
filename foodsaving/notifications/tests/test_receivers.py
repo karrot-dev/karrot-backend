@@ -103,6 +103,7 @@ class TestNotificationReceivers(TestCase):
         store = StoreFactory(group=group, created_by=creator)
 
         notifications = Notification.objects.filter(type=NotificationType.NEW_STORE.value)
+        # creator does not get a notification
         self.assertEqual(notifications.count(), 1)
         self.assertEqual(notifications[0].user, member)
         self.assertEqual(notifications[0].context['store'], store.id)
