@@ -5,7 +5,7 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models.manager import BaseManager
 
-from foodsaving.base.base_models import BaseModel, NicelyFormattedModel
+from foodsaving.base.base_models import BaseModel
 from foodsaving.notifications import stats
 
 
@@ -22,7 +22,7 @@ class NotificationType(Enum):
     PICKUP_UPCOMING = 'pickup_upcoming'
     """
     - new trust (stackable!)
-    
+
     needs store subscription
     - pickup gets created/modified/deleted
     - pickup series get created/modified/deleted
