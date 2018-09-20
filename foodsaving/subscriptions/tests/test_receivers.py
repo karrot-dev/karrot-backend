@@ -504,7 +504,7 @@ class PickupDateReceiverTests(WSTestCase):
         self.assertEqual(parse(response['payload']['date']), date)
 
         # join
-        self.pickup.collectors.add(self.member)
+        self.pickup.add_collector(self.member)
 
         response = self.client.messages[1]
         self.assertEqual(response['topic'], 'pickups:pickupdate')
@@ -515,7 +515,7 @@ class PickupDateReceiverTests(WSTestCase):
         self.assertEqual(response['payload']['participants'], [self.member.id])
 
         # leave
-        self.pickup.collectors.remove(self.member)
+        self.pickup.remove_collector(self.member)
 
         response = self.client.messages[3]
         self.assertEqual(response['topic'], 'pickups:pickupdate')

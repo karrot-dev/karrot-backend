@@ -204,7 +204,7 @@ class TestHistoryAPIWithExistingPickups(APITestCase, ExtractPaginationMixin):
 
     def test_leave_pickup(self):
         self.client.force_login(self.member)
-        self.pickup.collectors.add(self.member)
+        self.pickup.add_collector(self.member)
         self.client.post(self.pickup_url + 'remove/')
         response = self.get_results(history_url)
         self.assertEqual(response.data[0]['typus'], 'PICKUP_LEAVE')
@@ -217,7 +217,7 @@ class TestHistoryAPIWithDonePickup(APITestCase, ExtractPaginationMixin):
         self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(store=self.store, date=timezone.now() - relativedelta(days=1))
-        self.pickup.collectors.add(self.member)
+        self.pickup.add_collector(self.member)
         PickupDate.objects.process_finished_pickup_dates()
 
     def test_pickup_done(self):
@@ -263,7 +263,7 @@ class TestHistoryAPIPickupForInactiveStore(APITestCase, ExtractPaginationMixin):
         self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group, status='archived')
         self.pickup = PickupDateFactory(store=self.store, date=timezone.now() - relativedelta(days=1))
-        self.pickup.collectors.add(self.member)
+        self.pickup.add_collector(self.member)
 
         PickupDateFactory(store=self.store, date=timezone.now() - relativedelta(days=1))
         PickupDate.objects.process_finished_pickup_dates()

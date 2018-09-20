@@ -167,7 +167,7 @@ class TestPickupConversations(TestCase):
 
     def test_send_email_notifications(self):
         users = [VerifiedUserFactory() for _ in range(2)]
-        [self.pickup.collectors.add(u) for u in users]
+        [self.pickup.add_collector(u) for u in users]
 
         mail.outbox = []
         ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')

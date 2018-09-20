@@ -180,11 +180,24 @@ class PickupDate(BaseModel, ConversationMixin):
     class Meta:
         ordering = ['date']
 
-    series = models.ForeignKey('PickupDateSeries', related_name='pickup_dates', on_delete=models.SET_NULL, null=True)
-    store = models.ForeignKey('stores.Store', related_name='pickup_dates', on_delete=models.CASCADE)
+    series = models.ForeignKey(
+        'PickupDateSeries',
+        related_name='pickup_dates',
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+    store = models.ForeignKey(
+        'stores.Store',
+        related_name='pickup_dates',
+        on_delete=models.CASCADE,
+    )
+    collectors = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='pickup_dates',
+        through='PickupDateCollector',
+        through_fields=('pickupdate', 'user')
+    )
     date = models.DateTimeField()
-
-    collectors = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='pickup_dates')
     description = models.TextField(blank=True)
     max_collectors = models.PositiveIntegerField(null=True)
     deleted = models.BooleanField(default=False)
@@ -225,6 +238,34 @@ class PickupDate(BaseModel, ConversationMixin):
 
     def empty_collectors_count(self):
         return max(0, self.max_collectors - self.collectors.count())
+
+    def add_collector(self, user):
+        collector, _ = PickupDateCollector.objects.get_or_create(
+            pickupdate=self,
+            user=user,
+        )
+        return collector
+
+    def remove_collector(self, user):
+        PickupDateCollector.objects.filter(
+            pickupdate=self,
+            user=user,
+        ).delete()
+
+
+class PickupDateCollector(BaseModel):
+    pickupdate = models.ForeignKey(
+        PickupDate,
+        on_delete=models.CASCADE,
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        db_table = 'pickups_pickupdate_collectors'
+        unique_together = (('pickupdate', 'user'), )
 
 
 class Feedback(BaseModel):

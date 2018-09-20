@@ -86,7 +86,7 @@ class TestNotificationReceivers(TestCase):
         store = StoreFactory(group=group)
         pickup = PickupDateFactory(store=store)
 
-        pickup.collectors.add(member)
+        pickup.add_collector(member)
         pickup.done_and_processed = True
         pickup.save()
 

@@ -1,20 +1,18 @@
+import json
 from collections import namedtuple
 
-import json
 from asgiref.sync import async_to_sync
 from channels.exceptions import ChannelFull
 from channels.layers import get_channel_layer
 from django.conf import settings
 from django.contrib.auth import user_logged_out
 from django.db.models import Q
-from django.db.models.signals import post_save, pre_delete, m2m_changed, post_delete
+from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
 from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from foodsaving.applications.models import GroupApplication
 from foodsaving.applications.serializers import GroupApplicationSerializer
-from foodsaving.notifications.models import Notification, NotificationMeta
-from foodsaving.notifications.serializers import NotificationSerializer, NotificationMetaSerializer
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction, \
     ConversationThreadParticipant
 from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer
@@ -24,7 +22,9 @@ from foodsaving.history.models import history_created
 from foodsaving.history.serializers import HistorySerializer
 from foodsaving.invitations.models import Invitation
 from foodsaving.invitations.serializers import InvitationSerializer
-from foodsaving.pickups.models import PickupDate, PickupDateSeries, Feedback, pickup_done
+from foodsaving.notifications.models import Notification, NotificationMeta
+from foodsaving.notifications.serializers import NotificationSerializer, NotificationMetaSerializer
+from foodsaving.pickups.models import PickupDate, PickupDateSeries, Feedback, pickup_done, PickupDateCollector
 from foodsaving.pickups.serializers import PickupDateSerializer, PickupDateSeriesSerializer, FeedbackSerializer
 from foodsaving.stores.models import Store
 from foodsaving.stores.serializers import StoreSerializer
@@ -303,15 +303,14 @@ def send_pickup_updates(sender, instance, **kwargs):
             send_in_channel(subscription.reply_channel, topic='pickups:pickupdate_deleted', payload=payload)
 
 
-@receiver(m2m_changed, sender=PickupDate.collectors.through)
+@receiver(post_save, sender=PickupDateCollector)
+@receiver(post_delete, sender=PickupDateCollector)
 def send_pickup_collector_updates(sender, instance, **kwargs):
-    action = kwargs.get('action')
-    if action and (action == 'post_add' or action == 'post_remove'):
-        pickup = instance
-        payload = PickupDateSerializer(pickup).data
-        for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.store.group.members.all()
-                                                                        ).distinct():
-            send_in_channel(subscription.reply_channel, topic='pickups:pickupdate', payload=payload)
+    pickup = instance.pickupdate
+    payload = PickupDateSerializer(pickup).data
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.store.group.members.all()
+                                                                    ).distinct():
+        send_in_channel(subscription.reply_channel, topic='pickups:pickupdate', payload=payload)
 
 
 # Pickup Date Series

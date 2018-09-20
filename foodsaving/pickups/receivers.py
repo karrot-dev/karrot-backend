@@ -1,11 +1,11 @@
-from django.db.models.signals import pre_delete, post_save, m2m_changed
+from django.db.models.signals import pre_delete, post_save, post_delete
 from django.dispatch import receiver
 from django.utils import timezone
 
 from foodsaving.conversations.models import Conversation
 from foodsaving.groups.models import GroupMembership
 from foodsaving.pickups import stats
-from foodsaving.pickups.models import PickupDate, Feedback
+from foodsaving.pickups.models import PickupDate, Feedback, PickupDateCollector
 
 
 @receiver(pre_delete, sender=GroupMembership)
@@ -16,7 +16,7 @@ def leave_group_handler(sender, instance, **kwargs):
             filter(date__gte=timezone.now()). \
             filter(collectors__in=[user, ]). \
             filter(store__group=group):
-        _.collectors.remove(user)
+        _.remove_collector(user)
 
 
 @receiver(post_save, sender=Feedback)
@@ -44,11 +44,10 @@ def pickup_deleted(**kwargs):
         conversation.delete()
 
 
-@receiver(m2m_changed, sender=PickupDate.collectors.through)
+@receiver(post_save, sender=PickupDateCollector)
+@receiver(post_delete, sender=PickupDateCollector)
 def sync_pickup_collectors_conversation(sender, instance, **kwargs):
     """Update conversation participants when collectors are added or removed."""
-    action = kwargs.get('action')
-    if action and (action == 'post_add' or action == 'post_remove'):
-        pickup = instance
-        conversation = Conversation.objects.get_or_create_for_target(pickup)
-        conversation.sync_users(pickup.collectors.all())
+    pickup = instance.pickupdate
+    conversation = Conversation.objects.get_or_create_for_target(pickup)
+    conversation.sync_users(pickup.collectors.all())

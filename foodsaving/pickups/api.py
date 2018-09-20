@@ -132,15 +132,19 @@ class PickupDateViewSet(
     """
     serializer_class = PickupDateSerializer
     queryset = PickupDateModel.objects \
-        .filter(deleted=False) \
-        .prefetch_related('collectors')  # because we have collector_ids field in the serializer
+        .filter(deleted=False)
     filter_backends = (DjangoFilterBackend, )
     filterset_class = PickupDatesFilter
     permission_classes = (IsAuthenticated, IsUpcoming, IsGroupEditor, IsEmptyPickupDate)
     pagination_class = PickupDatePagination
 
     def get_queryset(self):
-        return self.queryset.filter(store__group__members=self.request.user, store__status='active')
+        qs = self.queryset.filter(store__group__members=self.request.user, store__status='active')
+        if self.action == 'list':
+            # because we have collector_ids field in the serializer
+            # only prefetch on read_only actions, otherwise there are caching problems when collectors get added
+            qs = qs.prefetch_related('collectors')
+        return qs
 
     def perform_destroy(self, pickup):
         # set deleted flag to make the pickup date invisible

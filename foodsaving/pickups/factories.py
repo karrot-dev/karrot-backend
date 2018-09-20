@@ -27,8 +27,8 @@ class PickupDateFactory(DjangoModelFactory):
         if not created:
             return
         if collectors:
-            for _ in collectors:
-                self.collectors.add(_)
+            for user in collectors:
+                self.add_collector(user)
 
     store = SubFactory(StoreFactory)
     date = LazyFunction(in_one_day)

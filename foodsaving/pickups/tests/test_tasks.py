@@ -65,7 +65,7 @@ class TestPickupNotificationTask(APITestCase):
             date=timezone.localtime() + delta,
             max_collectors=2,
         )
-        pickup.collectors.add(self.other_user)
+        pickup.add_collector(self.other_user)
         pickup.save()
         return pickup
 
@@ -77,7 +77,7 @@ class TestPickupNotificationTask(APITestCase):
             date=timezone.localtime() + delta,
             **kwargs,
         )
-        pickup.collectors.add(self.user)
+        pickup.add_collector(self.user)
         pickup.save()
         return pickup
 
