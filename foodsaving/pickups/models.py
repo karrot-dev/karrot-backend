@@ -127,11 +127,15 @@ class PickupDateQuerySet(models.QuerySet):
     def in_group(self, group):
         return self.filter(store__group=group)
 
+    def due_soon(self):
+        in_some_hours = timezone.now() + relativedelta(hours=settings.PICKUPDATE_DUE_SOON_HOURS)
+        return self.exclude_deleted().filter(date__gt=timezone.now(), date__lt=in_some_hours)
+
     def missed(self):
-        return self.exclude_deleted().annotate_num_collectors().filter(date__lt=timezone.now(), num_collectors=0)
+        return self.exclude_deleted().filter(date__lt=timezone.now(), collectors=None)
 
     def done(self):
-        return self.exclude_deleted().annotate_num_collectors().filter(date__lt=timezone.now(), num_collectors__gt=0)
+        return self.exclude_deleted().filter(date__lt=timezone.now()).exclude(collectors=None)
 
     @transaction.atomic
     def process_finished_pickup_dates(self):

@@ -19,14 +19,16 @@ class TestNotificationReceivers(TestCase):
         user1 = UserFactory()
         group = GroupFactory(newcomers=[user, user1])
         membership = GroupMembership.objects.get(user=user, group=group)
-        notifications = Notification.objects.filter(type=NotificationType.USER_BECAME_EDITOR.value)
-        self.assertEqual(notifications.count(), 0)
+        Notification.objects.all().delete()
 
         membership.roles.append(GROUP_EDITOR)
         membership.save()
 
-        self.assertEqual(notifications.count(), 2)
-        self.assertEqual(set(notification.user for notification in notifications), {user, user1})
+        self.assertEqual(Notification.objects.count(), 2)
+        you_became_editor = Notification.objects.get(type=NotificationType.YOU_BECAME_EDITOR.value)
+        self.assertEqual(you_became_editor.user, user)
+        user_became_editor = Notification.objects.get(type=NotificationType.USER_BECAME_EDITOR.value)
+        self.assertEqual(user_became_editor.user, user1)
 
     def test_creates_new_applicant_notification(self):
         member = UserFactory()

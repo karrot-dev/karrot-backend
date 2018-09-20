@@ -3,6 +3,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from foodsaving.groups.factories import GroupFactory
 from foodsaving.notifications.models import Notification, NotificationType
 from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.users.factories import UserFactory
@@ -13,12 +14,17 @@ notification_url = '/api/notifications/'
 class TestNotificationsAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.user = UserFactory()
+        self.group = GroupFactory()
+
+    def create_any_notification(self):
+        return Notification.objects.create(
+            user=self.user, type=NotificationType.USER_BECAME_EDITOR.value, context={'group': self.group.id}
+        )
 
     def test_list_with_meta(self):
-        # any notification
-        Notification.objects.create(user=self.user, type=NotificationType.USER_BECAME_EDITOR.value)
-
+        self.create_any_notification()
         self.client.force_login(self.user)
+
         response = self.get_results(notification_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['notifications']), 1)
@@ -27,9 +33,7 @@ class TestNotificationsAPI(APITestCase, ExtractPaginationMixin):
         })
 
     def test_list_with_already_marked(self):
-        # any notification
-        Notification.objects.create(user=self.user, type=NotificationType.USER_BECAME_EDITOR.value)
-
+        self.create_any_notification()
         self.client.force_login(self.user)
 
         now = timezone.now()
@@ -52,9 +56,7 @@ class TestNotificationsAPI(APITestCase, ExtractPaginationMixin):
         self.assertLess(time1, time2)
 
     def test_mark_clicked(self):
-        # any notification
-        notification = Notification.objects.create(user=self.user, type=NotificationType.USER_BECAME_EDITOR.value)
-
+        notification = self.create_any_notification()
         self.client.force_login(self.user)
         response = self.get_results(notification_url)
         self.assertFalse(response.data['notifications'][0]['clicked'])

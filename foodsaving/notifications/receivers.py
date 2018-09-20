@@ -116,6 +116,9 @@ def feedback_possible(sender, instance, **kwargs):
         old = PickupDate.objects.get(id=pickup.id)
         if old.done_and_processed == pickup.done_and_processed:
             return
+    else:
+        # Pickup is not saved yet and can't have any collectors
+        return
 
     # TODO take into account that settings can change
     # better save feedback possible expiry in pickup too

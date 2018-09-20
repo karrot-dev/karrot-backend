@@ -19,9 +19,9 @@ class NotificationType(Enum):
     NEW_STORE = 'new_store'
     NEW_MEMBER = 'new_member'
     INVITATION_ACCEPTED = 'invitation_accepted'
+    PICKUP_UPCOMING = 'pickup_upcoming'
     """
     - new trust (stackable!)
-    - pickup_upcoming (maybe better from state)
     
     needs store subscription
     - pickup gets created/modified/deleted
