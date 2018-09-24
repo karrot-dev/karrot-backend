@@ -20,28 +20,9 @@ class NotificationType(Enum):
     NEW_MEMBER = 'new_member'
     INVITATION_ACCEPTED = 'invitation_accepted'
     PICKUP_UPCOMING = 'pickup_upcoming'
-    """
-    - new trust (stackable!)
-
-    needs store subscription
-    - pickup gets created/modified/deleted
-    - pickup series get created/modified/deleted
-    - store changed
-    - new feedback
-    """
-
-
-class NotificationQuerySet(models.QuerySet):
-    pass
-
-
-class NotificationManager(BaseManager.from_queryset(NotificationQuerySet)):
-    pass
 
 
 class Notification(BaseModel):
-    objects = NotificationManager()
-
     class Meta:
         ordering = ['-created_at']
 
