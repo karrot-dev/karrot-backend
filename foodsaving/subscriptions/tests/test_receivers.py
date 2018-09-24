@@ -395,15 +395,18 @@ class GroupApplicationReceiverTests(WSTestCase):
         self.user = UserFactory()
         self.group = GroupFactory(members=[self.member])
 
+    def application_update_messages(self):
+        return [r for r in self.client.messages if r['topic'] == 'applications:update']
+
     def test_member_receives_application_create(self):
         self.client = self.connect_as(self.member)
 
         application = GroupApplicationFactory(user=self.user, group=self.group)
 
-        response = next(r for r in self.client.messages if r['topic'] == 'applications:update')
+        messages = self.application_update_messages()
+        self.assertEqual(len(messages), 1)
+        response = messages[0]
         self.assertEqual(response['payload']['id'], application.id)
-
-        self.assertEqual(len(self.client.messages), 2)
 
     def test_member_receives_application_update(self):
         application = GroupApplicationFactory(user=self.user, group=self.group)
@@ -413,10 +416,10 @@ class GroupApplicationReceiverTests(WSTestCase):
         application.status = 'accepted'
         application.save()
 
-        response = self.client.messages[0]
+        messages = self.application_update_messages()
+        self.assertEqual(len(messages), 1)
+        response = messages[0]
         self.assertEqual(response['payload']['id'], application.id)
-
-        self.assertEqual(len(self.client.messages), 1)
 
     def test_applicant_receives_application_update(self):
         application = GroupApplicationFactory(user=self.user, group=self.group)
@@ -426,10 +429,10 @@ class GroupApplicationReceiverTests(WSTestCase):
         application.status = 'accepted'
         application.save()
 
-        response = self.client.messages[0]
+        messages = self.application_update_messages()
+        self.assertEqual(len(messages), 1)
+        response = messages[0]
         self.assertEqual(response['payload']['id'], application.id)
-
-        self.assertEqual(len(self.client.messages), 1)
 
 
 class InvitationReceiverTests(WSTestCase):
@@ -504,7 +507,7 @@ class PickupDateReceiverTests(WSTestCase):
         self.assertEqual(parse(response['payload']['date']), date)
 
         # join
-        self.pickup.collectors.add(self.member)
+        self.pickup.add_collector(self.member)
 
         response = self.client.messages[1]
         self.assertEqual(response['topic'], 'pickups:pickupdate')
@@ -515,7 +518,7 @@ class PickupDateReceiverTests(WSTestCase):
         self.assertEqual(response['payload']['participants'], [self.member.id])
 
         # leave
-        self.pickup.collectors.remove(self.member)
+        self.pickup.remove_collector(self.member)
 
         response = self.client.messages[3]
         self.assertEqual(response['topic'], 'pickups:pickupdate')
@@ -611,15 +614,11 @@ class FinishedPickupReceiverTest(WSTestCase):
         self.client = self.connect_as(self.member)
         PickupDate.objects.process_finished_pickup_dates()
 
-        response = self.client.messages[0]
-        self.assertEqual(response['topic'], 'history:history')
-        self.assertEqual(response['payload']['typus'], 'PICKUP_DONE')
+        history_response = next(m for m in self.client.messages if m['topic'] == 'history:history')
+        self.assertEqual(history_response['payload']['typus'], 'PICKUP_DONE')
 
-        response = self.client.messages[1]
-        self.assertEqual(response['topic'], 'pickups:feedback_possible')
-        self.assertEqual(response['payload']['id'], self.pickup.id)
-
-        self.assertEqual(len(self.client.messages), 2)
+        pickup_response = next(m for m in self.client.messages if m['topic'] == 'pickups:feedback_possible')
+        self.assertEqual(pickup_response['payload']['id'], self.pickup.id)
 
 
 class UserReceiverTest(WSTestCase):

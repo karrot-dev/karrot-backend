@@ -270,7 +270,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
 
     def test_set_end_date_with_users_have_joined_pickup(self):
         self.client.force_login(user=self.member)
-        self.series.pickup_dates.last().collectors.add(self.member)
+        self.series.pickup_dates.last().add_collector(self.member)
         # change rule
         url = '/api/pickup-date-series/{}/'.format(self.series.id)
         rule = rrulestr(self.series.rule, dtstart=self.now) \
@@ -289,7 +289,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         "the series should get removed, as well as all upcoming pickups if they don't have collectors"
         self.client.force_login(user=self.member)
         joined_pickup = self.series.pickup_dates.last()
-        joined_pickup.collectors.add(self.member)
+        joined_pickup.add_collector(self.member)
 
         url = '/api/pickup-date-series/{}/'.format(self.series.id)
         response = self.client.delete(url)

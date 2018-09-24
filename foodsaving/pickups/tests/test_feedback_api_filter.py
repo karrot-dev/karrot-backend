@@ -34,8 +34,9 @@ class TestFeedbackAPIFilter(APITestCase, ExtractPaginationMixin):
         self.feedback2 = Feedback.objects.create(**self.feedback_get2)
 
         # transforms the user into a collector
-        self.pickup.collectors.add(self.collector, )
-        self.pickup2.collectors.add(self.collector, self.collector2)
+        self.pickup.add_collector(self.collector)
+        self.pickup2.add_collector(self.collector)
+        self.pickup2.add_collector(self.collector2)
 
     def test_filter_by_about(self):
         """

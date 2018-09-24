@@ -101,7 +101,7 @@ class PickupDateJoinSerializer(serializers.ModelSerializer):
 
     def update(self, pickupdate, validated_data):
         user = self.context['request'].user
-        pickupdate.collectors.add(user)
+        pickupdate.add_collector(user)
 
         stats.pickup_joined(pickupdate)
 
@@ -125,7 +125,7 @@ class PickupDateLeaveSerializer(serializers.ModelSerializer):
 
     def update(self, pickupdate, validated_data):
         user = self.context['request'].user
-        pickupdate.collectors.remove(user)
+        pickupdate.remove_collector(user)
 
         stats.pickup_left(pickupdate)
 

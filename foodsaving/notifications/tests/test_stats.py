@@ -1,0 +1,64 @@
+from unittest.mock import patch
+
+from dateutil.relativedelta import relativedelta
+from django.test import TestCase
+from django.utils import timezone
+
+from foodsaving.groups.factories import GroupFactory
+from foodsaving.notifications.models import Notification, NotificationType
+from foodsaving.users.factories import UserFactory
+
+
+class TestStats(TestCase):
+    @patch('foodsaving.notifications.stats.write_points')
+    def test_created(self, write_points):
+        user = UserFactory()
+        group = GroupFactory(members=[user])
+        write_points.reset_mock()
+
+        Notification.objects.create(
+            user=user,
+            type=NotificationType.USER_BECAME_EDITOR.value,
+            context={'group': group.id},
+        )
+
+        write_points.assert_called_with([{
+            'measurement': 'karrot.events',
+            'tags': {
+                'group': str(group.id),
+                'group_status': group.status,
+                'notification_type': NotificationType.USER_BECAME_EDITOR.value,
+            },
+            'fields': {
+                'notification_created': 1,
+            },
+        }])
+
+    @patch('foodsaving.notifications.stats.write_points')
+    def test_clicked(self, write_points):
+        user = UserFactory()
+        group = GroupFactory(members=[user])
+        two_hours_ago = timezone.now() - relativedelta(hours=2)
+        notification = Notification.objects.create(
+            created_at=two_hours_ago,
+            user=user,
+            type=NotificationType.USER_BECAME_EDITOR.value,
+            context={'group': group.id},
+        )
+        write_points.reset_mock()
+
+        notification.clicked = True
+        notification.save()
+
+        write_points.assert_called_with([{
+            'measurement': 'karrot.events',
+            'tags': {
+                'group': str(group.id),
+                'group_status': group.status,
+                'notification_type': NotificationType.USER_BECAME_EDITOR.value,
+            },
+            'fields': {
+                'notification_clicked': 1,
+                'notification_clicked_seconds': 60 * 60 * 2,
+            },
+        }])

@@ -13,16 +13,6 @@ from foodsaving.users.models import User
 from foodsaving.utils import stats_utils
 
 
-def fetch_user_pickups(group, user, start_date, end_date):
-    return PickupDate.objects.filter(
-        store__status=StoreStatus.ACTIVE.value,
-        store__group=group,
-        date__gte=start_date,
-        date__lt=end_date,
-        collectors__in=[user],
-    ).order_by('date')
-
-
 @db_periodic_task(crontab(minute='*'))  # every minute
 def process_finished_pickup_dates():
     PickupDate.objects.process_finished_pickup_dates()

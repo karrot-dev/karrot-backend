@@ -39,7 +39,10 @@ class StoreSerializer(serializers.ModelSerializer):
     )
 
     def create(self, validated_data):
+        validated_data['created_by'] = self.context['request'].user
         store = super().create(validated_data)
+
+        # TODO move into receiver
         History.objects.create(
             typus=HistoryTypus.STORE_CREATE,
             group=store.group,

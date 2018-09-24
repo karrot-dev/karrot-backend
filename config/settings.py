@@ -48,6 +48,7 @@ INSTALLED_APPS = (
     'foodsaving.invitations.InvitationsConfig',
     'foodsaving.template_previews',
     'foodsaving.webhooks',
+    'foodsaving.notifications.NotificationsConfig',
 
     # Django packages
     'django_extensions',
@@ -198,6 +199,7 @@ NAME_MAX_LENGTH = 80
 FEEDBACK_POSSIBLE_DAYS = 30
 MESSAGE_EDIT_DAYS = 2
 GROUP_EDITOR_TRUST_MAX_THRESHOLD = 3
+PICKUPDATE_DUE_SOON_HOURS = 6
 
 CHANNEL_LAYERS = {
     "default": {

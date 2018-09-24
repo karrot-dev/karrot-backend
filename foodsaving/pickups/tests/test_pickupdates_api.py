@@ -189,6 +189,10 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.post(self.join_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
+        # should have access to chat
+        response = self.client.get(self.conversation_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
     def test_join_pickup_as_newcomer(self):
         newcomer = UserFactory()
         self.group.groupmembership_set.create(user=newcomer)
@@ -216,7 +220,7 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         self.pickup.save()
         u2 = UserFactory()
         GroupMembership.objects.create(group=self.group, user=u2)
-        self.pickup.collectors.add(u2)
+        self.pickup.add_collector(u2)
         response = self.client.post(self.join_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
         self.assertEqual(response.data['detail'], 'Pickup date is already full.')
@@ -237,21 +241,25 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
 
     def test_leave_pickup_as_member(self):
         self.client.force_login(user=self.member)
-        self.pickup.collectors.add(self.member)
+        self.pickup.add_collector(self.member)
         response = self.client.post(self.leave_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+        # should be removed from chat
+        response = self.client.get(self.conversation_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_leave_pickup_as_newcomer(self):
         newcomer = UserFactory()
         self.group.groupmembership_set.create(user=newcomer)
-        self.pickup.collectors.add(newcomer)
+        self.pickup.add_collector(newcomer)
         self.client.force_login(user=newcomer)
         response = self.client.post(self.leave_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_leave_pickup_activates_group(self):
         self.client.force_login(user=self.member)
-        self.pickup.collectors.add(self.member)
+        self.pickup.add_collector(self.member)
         self.group.status = GroupStatus.INACTIVE.value
         self.group.save()
         self.client.post(self.leave_url)
@@ -260,7 +268,7 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
 
     def test_leave_past_pickup_fails(self):
         self.client.force_login(user=self.member)
-        self.past_pickup.collectors.add(self.member)
+        self.past_pickup.add_collector(self.member)
         response = self.client.post(self.past_leave_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
@@ -272,7 +280,7 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
 
     def test_get_conversation_as_collector(self):
         self.client.force_login(user=self.member)
-        self.pickup.collectors.add(self.member)
+        self.pickup.add_collector(self.member)
         response = self.client.get(self.conversation_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(self.member.id, response.data['participants'])

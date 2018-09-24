@@ -239,7 +239,7 @@ class Command(BaseCommand):
                 store_id=store,
                 max_collectors=10,
             )
-            pickup.collectors.add(User.objects.get(pk=user_id))
+            pickup.add_collector(User.objects.get(pk=user_id))
             print('created pickup: ', pickup)
             return pickup
 

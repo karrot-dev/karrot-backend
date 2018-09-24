@@ -117,7 +117,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         """
         newcomer = UserFactory()
         self.group.groupmembership_set.create(user=newcomer)
-        self.past_pickup.collectors.add(newcomer)
+        self.past_pickup.add_collector(newcomer)
         self.client.force_login(user=newcomer)
         response = self.client.post(self.url, self.feedback_post, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
