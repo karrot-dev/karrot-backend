@@ -10,7 +10,7 @@ aioredis==1.1.0           # via channels-redis
 argon2-cffi==18.3.0       # via django
 asgiref==2.3.2            # via channels-redis
 async-timeout==3.0.0      # via aioredis, asgiref
-attrs==18.1.0             # via automat, twisted
+attrs==18.2.0             # via automat, twisted
 autobahn==18.8.1          # via daphne
 automat==0.7.0            # via twisted
 babel==2.6.0
