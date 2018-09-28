@@ -1,7 +1,8 @@
 import asyncio
 import json
-import pytest
 from base64 import b64encode
+
+import pytest
 from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 from channels.testing import WebsocketCommunicator
@@ -11,6 +12,7 @@ from rest_framework.authtoken.models import Token
 
 from foodsaving.subscriptions.consumers import WebsocketConsumer, TokenAuthMiddleware, get_auth_token_from_subprotocols
 from foodsaving.subscriptions.models import ChannelSubscription
+from foodsaving.subscriptions.routing import AllowedHostsAndFileOriginValidator
 from foodsaving.users.factories import UserFactory
 
 AsyncUserFactory = database_sync_to_async(UserFactory)
@@ -158,6 +160,17 @@ class TestTokenAuth:
         async with TokenCommunicator() as (communicator, user):
             await communicator.connect()
             assert communicator.scope['user'] == user
+
+
+@pytest.mark.asyncio
+@pytest.mark.django_db
+class TestAllowedOriginValidator:
+    async def test_can_connect_with_file_origin(self):
+        application = AllowedHostsAndFileOriginValidator(WebsocketConsumer)
+        communicator = WebsocketCommunicator(application, '/', headers=[(b'origin', b'file:///')])
+        connected, _ = await communicator.connect()
+        assert connected
+        await communicator.disconnect()
 
 
 class TestTokenUtil:
