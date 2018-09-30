@@ -21,7 +21,7 @@ msgstr ""
 
 #: foodsaving/applications/api.py:20
 msgid "You need to have a verified email address"
-msgstr ""
+msgstr "Musisz posiadać zweryfikowany adres e-mail"
 
 #: foodsaving/applications/api.py:29 foodsaving/groups/api.py:57
 #: foodsaving/invitations/serializers.py:27
@@ -29,30 +29,30 @@ msgstr ""
 #: foodsaving/pickups/serializers.py:190 foodsaving/stores/api.py:18
 #: foodsaving/stores/serializers.py:82
 msgid "You need to be a group editor"
-msgstr ""
+msgstr "Musisz posiadać uprawnienia do edycji"
 
 #: foodsaving/applications/api.py:37
 msgid "You need to be the applicant"
-msgstr ""
+msgstr "Musisz być kandydatem"
 
 #: foodsaving/applications/serializers.py:42
 msgid "Application is already pending"
-msgstr ""
+msgstr "Zgłoszenie jest w trakcie rozpatrywania"
 
 #: foodsaving/applications/serializers.py:47
 msgid "You are already member of the group"
-msgstr ""
+msgstr "Już jesteś członkiem tej grupy."
 
 #: foodsaving/applications/serializers.py:49
 msgid "You cannot apply to open groups"
-msgstr ""
+msgstr "Nie możesz aplikować do otwartych grup"
 
 #: foodsaving/applications/templates/application_accepted.html.jinja2:4
 #: foodsaving/applications/templates/application_accepted.html.jinja2:119
 #: foodsaving/applications/templates/application_accepted.subject.jinja2:1
 #, python-format
 msgid "Your application to join %(group_name)s was accepted"
-msgstr ""
+msgstr "Twoje zgłoszenie do %(group_name)s zostało zaakceptowane"
 
 #: foodsaving/applications/templates/application_accepted.html.jinja2:119
 #: foodsaving/groups/templates/user_became_editor.html.jinja2:130
@@ -66,18 +66,18 @@ msgstr "Odwiedź %(group_name)s"
 #: foodsaving/applications/templates/application_declined.subject.jinja2:1
 #, python-format
 msgid "Your application to join %(group_name)s was declined"
-msgstr ""
+msgstr "Twoje zgłoszenie do %(group_name)s zostało odrzucone"
 
 #: foodsaving/applications/templates/new_application.html.jinja2:4
 #: foodsaving/applications/templates/new_application.html.jinja2:119
 #: foodsaving/applications/templates/new_application.subject.jinja2:1
 #, python-format
 msgid "%(user_name)s wants to join %(group_name)s"
-msgstr ""
+msgstr "%(user_name)s chce dołączyć do %(group_name)s"
 
 #: foodsaving/applications/templates/new_application.html.jinja2:121
 msgid "Questions asked by your group"
-msgstr ""
+msgstr "Pytania zadane przez Twoją grupę"
 
 #: foodsaving/applications/templates/new_application.html.jinja2:126
 #, python-format
@@ -85,21 +85,25 @@ msgid ""
 "You can edit the questions for new applications on the <a "
 "href=\"%(group_edit_url)s\">group edit page</a>."
 msgstr ""
+"Możesz edytować pytania dla kandydatów na <a "
+"href=\"%(group_edit_url)s\">stronie edycji grupy</a>."
 
 #: foodsaving/applications/templates/new_application.html.jinja2:128
 #, python-format
 msgid "Answers from %(user_name)s"
-msgstr ""
+msgstr "Odpowiedzi od %(user_name)s"
 
 #: foodsaving/applications/templates/new_application.html.jinja2:132
 msgid "View applications"
-msgstr ""
+msgstr "Zobacz zgłoszenia"
 
 #: foodsaving/applications/templates/new_application.html.jinja2:133
 msgid ""
 "You are receiving this because you are subscribed to <strong>User "
 "application</strong> emails for this group."
 msgstr ""
+"Otrzymałaś/-eś tę wiadomość, ponieważ subskrybujesz <strong>zgłoszenia "
+"nowych użytkowników</strong> dla tej grupy."
 
 #: foodsaving/applications/templates/new_application.html.jinja2:134
 #: foodsaving/groups/templates/group_summary.html.jinja2:193
@@ -141,7 +145,7 @@ msgstr ""
 
 #: foodsaving/conversations/api.py:264
 msgid "You are not a participant in this thread"
-msgstr ""
+msgstr "Nie uczestniczysz w tym wątku"
 
 #: foodsaving/conversations/emails.py:127
 #: foodsaving/conversations/emails.py:130
@@ -152,28 +156,28 @@ msgstr "Odbiór %(date)s"
 #: foodsaving/conversations/emails.py:190
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
-msgstr ""
+msgstr "Nowa wiadomość w zgłoszeniu %(user_name)s do %(group_name)s"
 
 #: foodsaving/conversations/emails.py:195
 #, python-format
 msgid "New message in your application to %(group_name)s"
-msgstr ""
+msgstr "Nowa wiadomość w Twoim zgłoszeniu do %(group_name)s"
 
 #: foodsaving/conversations/serializers.py:163
 msgid "You cannot change the thread of a message"
-msgstr ""
+msgstr "Nie możesz zmienić wątku wiadomości"
 
 #: foodsaving/conversations/serializers.py:170
 msgid "Thread is not in the same conversation"
-msgstr ""
+msgstr "Wątek nie jest w tej samej rozmowie"
 
 #: foodsaving/conversations/serializers.py:174
 msgid "You can only reply to Group messages"
-msgstr ""
+msgstr "Możesz odpowiadać na wiadomości grupowe"
 
 #: foodsaving/conversations/serializers.py:178
 msgid "You cannot reply to replies"
-msgstr ""
+msgstr "Nie możesz odpowiadać na odpowiedzi"
 
 #: foodsaving/conversations/templates/conversation_message_notification.html.jinja2:103
 msgid ""
@@ -182,13 +186,15 @@ msgstr "Otrzymałaś/-eś tę wiadomość, ponieważ subskrybujesz tę konwersac
 
 #: foodsaving/conversations/templates/thread_message_notification.html.jinja2:102
 msgid "In reply to:"
-msgstr ""
+msgstr "W odpowiedzi na:"
 
 #: foodsaving/conversations/templates/thread_message_notification.html.jinja2:107
 msgid ""
 "You are receiving this because you are subscribed to replies in this "
 "conversation."
 msgstr ""
+"Otrzymałaś/-eś tę wiadomość, ponieważ subskrybujesz odpowiedzi w tej "
+"konwersacji."
 
 #: foodsaving/conversations/templates/thread_message_notification.html.jinja2:108
 #, python-format
@@ -196,6 +202,9 @@ msgid ""
 "Reply to this email directly, <a href=\"%(thread_url)s\">view replies on "
 "%(site_name)s</a>, or <a href=\"%(mute_url)s\">mute further replies</a>."
 msgstr ""
+"Odpowiedz bezpośrednio na tą wiadomość, <a href=\"%(thread_url)s\">zobacz "
+"odpowiedzi na %(site_name)s</a> lub <a href=\"%(mute_url)s\">wycisz przyszłe"
+" odpowiedzi</a>."
 
 #: foodsaving/groups/api.py:28
 msgid "You are already a member."
@@ -203,7 +212,7 @@ msgstr "Już jesteś członkiem tej grupy."
 
 #: foodsaving/groups/api.py:35
 msgid "You can only join open groups."
-msgstr ""
+msgstr "Możesz dołączyć jedynie do otwartych grup."
 
 #: foodsaving/groups/api.py:42
 msgid "You do not have permission to update memberships."
@@ -211,11 +220,11 @@ msgstr "Nie możesz zmieniać uprawnień członków grupy."
 
 #: foodsaving/groups/api.py:50
 msgid "You cannot give trust to yourself"
-msgstr ""
+msgstr "Nie możesz udzielić sobie zaufania"
 
 #: foodsaving/groups/api.py:198
 msgid "You already gave trust to this user"
-msgstr ""
+msgstr "Już zaufałaś/-eś temu użytkownikowi"
 
 #: foodsaving/groups/serializers.py:24
 msgid "Unknown timezone"
@@ -243,6 +252,9 @@ msgid ""
 "and your motivation. Please tell us how you got to know about us and what "
 "you wish to do here!"
 msgstr ""
+"Cześć! Zanim dołączysz do naszej grupy, chcielibyśmy dowiedzieć się czegoś o"
+" Tobie i o Twojej motywacji. Napisz o tym, skąd się o nas dowiedziałaś/-eś i"
+" co Cię do nas sprowadza!"
 
 #: foodsaving/groups/templates/group_summary.html.jinja2:4
 #: foodsaving/groups/templates/group_summary.html.jinja2:119
@@ -304,7 +316,7 @@ msgstr "Komentarz do odbioru"
 #: foodsaving/groups/templates/group_summary.html.jinja2:171
 #, python-format
 msgid "%(weight)s kg from <a href=\"%(store_url)s\">%(store_name)s</a>"
-msgstr ""
+msgstr "%(weight)s kg z <a href=\"%(store_url)s\">%(store_name)s</a>"
 
 #: foodsaving/groups/templates/group_summary.html.jinja2:184
 msgid "Here's what was said last week"
@@ -342,7 +354,7 @@ msgstr ""
 #: foodsaving/groups/templates/user_became_editor.subject.jinja2:1
 #, python-format
 msgid "You gained editing permissions in %(group_name)s!"
-msgstr ""
+msgstr "Otrzymałaś/-eś uprawnienia do edycji w %(group_name)s!"
 
 #: foodsaving/groups/templates/user_became_editor.html.jinja2:123
 msgid ""
@@ -350,10 +362,13 @@ msgid ""
 "<strong>editing permissions</strong>. For example, you can now modify your "
 "group, stores and pickup dates, or create new ones."
 msgstr ""
+"Otrzymałaś/-eś wystarczające zaufanie od innych członków grupy, aby przyznać"
+" Ci <strong>uprawnienia do edycji</strong>. Możesz teraz na przykład "
+"edytować istniejące punkty odbioru lub tworzyć nowe."
 
 #: foodsaving/groups/templates/user_became_editor.html.jinja2:129
 msgid "Use your power wisely!"
-msgstr ""
+msgstr "Korzystaj ze swoich uprawnień z rozsądkiem!"
 
 #: foodsaving/groups/templates/user_became_editor.html.jinja2:131
 #: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:131
@@ -512,7 +527,7 @@ msgstr "Nadchodzące odbiory w %(group_name)s"
 #: foodsaving/pickups/templates/pickup_notification.html.jinja2:130
 #, python-format
 msgid "%(empty_collectors_count)s/%(max_collectors)s remaining"
-msgstr ""
+msgstr "Pozostało %(empty_collectors_count)s/%(max_collectors)s"
 
 #: foodsaving/pickups/templates/pickup_notification.html.jinja2:145
 msgid "Tonight"
@@ -650,6 +665,7 @@ msgid ""
 "You requested to change your email address from %(old_email)s to "
 "%(new_email)s"
 msgstr ""
+"Poprosiłaś/-eś o zmianę adresu e-mail z %(old_email)s na %(new_email)s"
 
 #: foodsaving/users/templates/changemail_request.html.jinja2:123
 #: foodsaving/users/templates/signup.html.jinja2:119
