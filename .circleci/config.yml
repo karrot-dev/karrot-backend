@@ -127,19 +127,38 @@ jobs:
             git add foodsaving/locale
             git commit -m "[CI] update locales" || exit 0
             git push origin circleci-update-locales
-            hub pull-request -m "[CI] Update locales"
+            hub pull-request -m "[CI] Update locales" || exit 0
 
 workflows:
   version: 2
   all-the-things:
     jobs:
-      - update-locales
-  update-locales:
+      - test
+      - deploy-dev:
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - test
+      - deploy-karrot-world:
+          filters:
+            branches:
+              only:
+                - production
+          requires:
+            - test
+      - deploy-foodsharing-taiwan:
+          filters:
+            branches:
+              only:
+                - production
+  update-locales-cronjob:
     triggers:
       - schedule:
           cron: "0 6 * * *"
           filters:
             branches:
-              only: try-update-locales
+              only: master
     jobs:
       - update-locales
