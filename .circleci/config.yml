@@ -112,6 +112,8 @@ jobs:
             wget https://github.com/github/hub/releases/download/v2.5.1/hub-linux-amd64-2.5.1.tgz
             tar -xf hub-linux-amd64-2.5.1.tgz
             ./hub-linux-amd64-2.5.1/install
+            rm hub-linux-amd64-2.5.1.tgz
+            rm -r hub-linux-amd64-2.5.1
       - run:
           name: update locales
           environment:
