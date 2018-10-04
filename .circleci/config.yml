@@ -132,7 +132,6 @@ jobs:
                 hub push origin
                 hub pull-request -F - <<END
                 [CI] Update locales
-
                 There are updated locales available and you just need to click to merge them :)
                 END
             )
