@@ -1,7 +1,33 @@
 defaults: &defaults
-    working_directory: ~/repo
-    docker:
-      - image: karrot/python:1.7
+  working_directory: ~/repo
+  docker:
+    - image: karrot/python:1.7
+
+aliases:
+  - &restore-env-cache
+    restore_cache:
+      keys:
+        - python-cache-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+        - python-cache-{{ checksum "requirements.txt" }}-
+        - python-cache-
+
+  - &save-env-cache
+    save_cache:
+      paths:
+        - env
+      key: python-cache-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+
+  - &setup-env
+    run:
+      name: set up environment
+      environment:
+        LC_ALL: C.UTF-8
+        LANG: C.UTF-8
+      command: |
+        test -d env/bin || virtualenv -p python3 env
+        env/bin/pip install --upgrade pip
+        env/bin/pip install --upgrade pip-tools
+        env/bin/pip-sync requirements*.txt
 
 version: 2
 jobs:
@@ -18,30 +44,10 @@ jobs:
       - image: redis:3.2.11
     steps:
       - checkout
-      - attach_workspace:
-          at: ~/repo
 
-      - restore_cache:
-          keys:
-            - python-cache-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
-            - python-cache-{{ checksum "requirements.txt" }}-
-            - python-cache-
-      - run:
-          name: set up environment
-          environment:
-            LC_ALL: C.UTF-8
-            LANG: C.UTF-8
-          command: |
-            test -d env/bin || virtualenv -p python3 env
-            env/bin/pip install --upgrade pip
-            env/bin/pip install --upgrade pip-tools
-            env/bin/pip-sync requirements*.txt
-      - save_cache:
-          paths:
-            - env
-            - ~/.cache/pip
-          key: python-cache-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
-
+      - *restore-env-cache
+      - *setup-env
+      - *save-env-cache
       - run:
           name: run tests
           environment:
@@ -60,6 +66,18 @@ jobs:
           path: test-reports
       - store_artifacts:
           path: test-reports
+
+  push-locale-messages:
+    <<: *defaults
+    steps:
+      - checkout
+      - *restore-env-cache
+      - run:
+          name: push source messages to transifex
+          command: |
+            set -xe
+            env/bin/python manage.py makemessages
+            env/bin/tx push -s --no-interactive
 
   deploy-dev:
     <<: *defaults
@@ -83,26 +101,9 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - python-cache-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
-            - python-cache-{{ checksum "requirements.txt" }}-
-            - python-cache-
-      - run:
-          name: set up environment
-          environment:
-            LC_ALL: C.UTF-8
-            LANG: C.UTF-8
-          command: |
-            test -d env/bin || virtualenv -p python3 env
-            env/bin/pip install --upgrade pip
-            env/bin/pip install --upgrade pip-tools
-            env/bin/pip-sync requirements*.txt
-      - save_cache:
-          paths:
-            - env
-            - ~/.cache/pip
-          key: python-cache-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+      - *restore-env-cache
+      - *setup-env
+      - *save-env-cache
       - run:
           name: install hub
           command: |
@@ -136,6 +137,13 @@ workflows:
   all-the-things:
     jobs:
       - test
+      - push-locale-messages:
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - test
       - deploy-dev:
           filters:
             branches:
