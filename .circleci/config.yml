@@ -115,11 +115,12 @@ jobs:
             rm hub-linux-amd64-2.5.1.tgz
             rm -r hub-linux-amd64-2.5.1
       - run:
-          name: update locales
+          name: update locales and make pull request
           environment:
             LC_ALL: C.UTF-8
             LANG: C.UTF-8
           command: |
+            set -xe
             git config credential.helper 'cache --timeout=120'
             git config user.email "ci@foodsaving.world"
             git config user.name "CircleCI"
@@ -129,7 +130,7 @@ jobs:
             git add foodsaving/locale
             git commit -m "[CI] update locales" || exit 0
             # git push -q https://${GITHUB_TOKEN}@github.com/yunity/karrot-backend.git master
-            hub push origin
+            hub push origin circleci-update-locales
             hub pull-request -m "[CI] Update locales\nThere are updated locales available and you just need to click to merge them :)"
 
 workflows:
