@@ -167,8 +167,9 @@ def new_member(sender, instance, created, **kwargs):
             user=member,
             type=NotificationType.NEW_MEMBER.value,
             context={
-                'group': membership.group.id,
-                'user': membership.added_by_id,
+                'group': membership.group_id,
+                'user': membership.user_id,
+                'added_by': membership.added_by_id,
             },
         )
 

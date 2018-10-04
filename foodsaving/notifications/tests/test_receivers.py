@@ -124,6 +124,7 @@ class TestNotificationReceivers(TestCase):
         # member1 doesn't get a notification, as they added the user
         self.assertEqual(notifications.count(), 1, notifications)
         self.assertEqual(notifications[0].user, member2)
+        self.assertEqual(notifications[0].context['user'], user.id)
 
     def test_creates_new_invitation_accepted_notification(self):
         member1 = UserFactory()
