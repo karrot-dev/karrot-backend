@@ -139,28 +139,7 @@ workflows:
   version: 2
   all-the-things:
     jobs:
-      - test
-      - deploy-dev:
-          filters:
-            branches:
-              only:
-                - master
-          requires:
-            - test
-      - deploy-karrot-world:
-          filters:
-            branches:
-              only:
-                - production
-          requires:
-            - test
-      - deploy-foodsharing-taiwan:
-          filters:
-            branches:
-              only:
-                - production
-          requires:
-            - test
+      - update-locales
   update-locales:
     triggers:
       - schedule:
