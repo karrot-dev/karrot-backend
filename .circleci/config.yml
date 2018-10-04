@@ -123,11 +123,11 @@ jobs:
             git config user.name "CircleCI"
             git checkout circleci-update-locales || git checkout -b circleci-update-locales
             env/bin/tx pull -a --force --no-interactive
-            rm foodsaving/locale/de/LC_MESSAGES/django.po
+            rm foodsaving/locale/pl/LC_MESSAGES/django.po
             git add foodsaving/locale
             git commit -m "[CI] update locales" || exit 0
             git push origin circleci-update-locales
-            hub pull-request -m "[CI] Update locales\nThere are updated locales available and you just need to click to merge them :)"
+            hub pull-request -m "[CI] Update locales"
 
 workflows:
   version: 2
