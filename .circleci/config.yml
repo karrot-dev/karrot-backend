@@ -125,8 +125,8 @@ jobs:
             git config user.name "CircleCI"
             git checkout circleci-update-locales || git checkout -b circleci-update-locales
             env/bin/tx pull -a --force --no-interactive
-            git add foodsaving/locale
             rm foodsaving/locale/de/LC_MESSAGES/django.po
+            git add foodsaving/locale
             git commit -m "[CI] update locales" || exit 0
             # git push -q https://${GITHUB_TOKEN}@github.com/yunity/karrot-backend.git master
             hub push origin
