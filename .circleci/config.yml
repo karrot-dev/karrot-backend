@@ -76,6 +76,7 @@ jobs:
           name: push source messages to transifex
           command: |
             set -xe
+            cp config/local_settings.py.ci config/local_settings.py
             env/bin/python manage.py makemessages
             env/bin/tx push -s --no-interactive
 
