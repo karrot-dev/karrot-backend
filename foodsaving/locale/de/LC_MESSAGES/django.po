@@ -29,11 +29,11 @@ msgstr "Du brauchst eine bestätigte E-Mail-Adresse."
 #: foodsaving/pickups/serializers.py:190 foodsaving/stores/api.py:18
 #: foodsaving/stores/serializers.py:82
 msgid "You need to be a group editor"
-msgstr ""
+msgstr "Du brauchst Bearbeitungsrechte für diese Gruppe."
 
 #: foodsaving/applications/api.py:37
 msgid "You need to be the applicant"
-msgstr ""
+msgstr "Du kannst dies nur als Bewerber tun."
 
 #: foodsaving/applications/serializers.py:42
 msgid "Application is already pending"
