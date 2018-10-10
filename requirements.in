@@ -32,4 +32,4 @@ bleach_whitelist
 pymdown-extensions
 daphne
 -e git+https://github.com/tiltec/channels@bb9d5b7#egg=channels
--e git+https://github.com/tiltec/django-influxdb-metrics@a6a183f#egg=django-influxdb-metrics
+-e git+https://github.com/tiltec/django-influxdb-metrics@07f5701#egg=django-influxdb-metrics
