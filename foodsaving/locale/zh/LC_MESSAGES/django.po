@@ -29,11 +29,11 @@ msgstr "你需要一個經過驗證的電郵地址"
 #: foodsaving/pickups/serializers.py:190 foodsaving/stores/api.py:18
 #: foodsaving/stores/serializers.py:82
 msgid "You need to be a group editor"
-msgstr ""
+msgstr "你必須擁有社團編輯權"
 
 #: foodsaving/applications/api.py:37
 msgid "You need to be the applicant"
-msgstr ""
+msgstr "你必須是申請者"
 
 #: foodsaving/applications/serializers.py:42
 msgid "Application is already pending"
@@ -211,11 +211,11 @@ msgstr "你沒有修改成員名單的權限"
 
 #: foodsaving/groups/api.py:50
 msgid "You cannot give trust to yourself"
-msgstr ""
+msgstr "你不能「信任」你自己"
 
 #: foodsaving/groups/api.py:198
 msgid "You already gave trust to this user"
-msgstr ""
+msgstr "你已經給予此名使用者「信任」"
 
 #: foodsaving/groups/serializers.py:24
 msgid "Unknown timezone"
@@ -304,7 +304,7 @@ msgstr "領取任務回饋"
 #: foodsaving/groups/templates/group_summary.html.jinja2:171
 #, python-format
 msgid "%(weight)s kg from <a href=\"%(store_url)s\">%(store_name)s</a>"
-msgstr ""
+msgstr "從<a href=\"%(store_url)s\">%(store_name)s</a>領取的%(weight)s公斤食物"
 
 #: foodsaving/groups/templates/group_summary.html.jinja2:184
 msgid "Here's what was said last week"
@@ -340,18 +340,18 @@ msgstr ""
 #: foodsaving/groups/templates/user_became_editor.subject.jinja2:1
 #, python-format
 msgid "You gained editing permissions in %(group_name)s!"
-msgstr ""
+msgstr "你已取得%(group_name)s的編輯權"
 
 #: foodsaving/groups/templates/user_became_editor.html.jinja2:123
 msgid ""
 "You've received enough trust from fellow group members to grant you "
 "<strong>editing permissions</strong>. For example, you can now modify your "
 "group, stores and pickup dates, or create new ones."
-msgstr ""
+msgstr "你已得到社團成員足夠的「信任」使你取得編輯權限。舉例來說，你現在可以編輯社團、合作商店及食物領取日期，你也可以建立新的店家及食物領取日期。"
 
 #: foodsaving/groups/templates/user_became_editor.html.jinja2:129
 msgid "Use your power wisely!"
-msgstr ""
+msgstr "善用你的權力!"
 
 #: foodsaving/groups/templates/user_became_editor.html.jinja2:131
 #: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:131
@@ -500,7 +500,7 @@ msgstr "%(group_name)s的新領取任務 ! "
 #: foodsaving/pickups/templates/pickup_notification.html.jinja2:130
 #, python-format
 msgid "%(empty_collectors_count)s/%(max_collectors)s remaining"
-msgstr ""
+msgstr "還有 %(empty_collectors_count)s/%(max_collectors)s 個空缺"
 
 #: foodsaving/pickups/templates/pickup_notification.html.jinja2:145
 msgid "Tonight"
@@ -631,7 +631,7 @@ msgstr "請驗證你的電子信箱"
 msgid ""
 "You requested to change your email address from %(old_email)s to "
 "%(new_email)s"
-msgstr ""
+msgstr "你已要求將你的電郵地址從%(old_email)s改成%(new_email)s"
 
 #: foodsaving/users/templates/changemail_request.html.jinja2:123
 #: foodsaving/users/templates/signup.html.jinja2:119
