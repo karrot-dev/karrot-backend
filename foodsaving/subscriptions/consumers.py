@@ -70,6 +70,8 @@ class WebsocketConsumer(JsonWebsocketConsumer):
                     update_attrs['away_at'] = timezone.now()
                 elif message_type == 'back':
                     update_attrs['away_at'] = None
+                elif message_type == 'ping':
+                    self.send_json({'type': 'pong'})
                 subscriptions.update(**update_attrs)
 
     def disconnect(self, close_code):
