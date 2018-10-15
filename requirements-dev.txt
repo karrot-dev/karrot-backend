@@ -10,7 +10,7 @@ attrs==18.2.0             # via pytest
 autoflake==1.2
 autopep8==1.4
 backcall==0.1.0           # via ipython
-certifi==2018.8.24        # via requests
+certifi==2018.10.15       # via requests
 chardet==3.0.4            # via requests
 click==7.0                # via pip-tools
 coverage==4.5.1           # via pytest-cov
@@ -19,7 +19,7 @@ django-silk==3.0.1
 django==2.1.2             # via django-silk
 execnet==1.5.0            # via pytest-xdist
 flake8==3.5.0
-freezegun==0.3.10
+freezegun==0.3.11
 gprof2dot==2016.10.13     # via django-silk
 idna==2.7                 # via requests
 ipython-genutils==0.2.0   # via traitlets
