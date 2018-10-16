@@ -27,7 +27,7 @@ aliases:
         test -d env/bin || virtualenv -p python3 env
         env/bin/pip install --upgrade pip
         env/bin/pip install --upgrade pip-tools
-        env/bin/pip-sync requirements*.txt
+        PIP_EXISTS_ACTION=w env/bin/pip-sync requirements*.txt
 
 version: 2
 jobs:
