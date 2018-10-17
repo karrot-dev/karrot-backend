@@ -56,6 +56,7 @@ class FCMTests(TestCase):
         with override_fcm_key('something'):
             valid = PushSubscriptionFactory()
             invalid = PushSubscriptionFactory()
+            invalid2 = PushSubscriptionFactory()
             m.post(
                 'https://fcm.googleapis.com/fcm/send',
                 json={
@@ -65,15 +66,18 @@ class FCMTests(TestCase):
                         },
                         {
                             'error': 'InvalidRegistration'
+                        },
+                        {
+                            'error': 'NotRegistered'
                         }
                     ]
                 }
             )
 
-            result = fcm.notify_subscribers([valid, invalid], fcm_options={})
-            self.assertIsNotNone(result)
+            fcm.notify_subscribers([valid, invalid, invalid2], fcm_options={})
             self.assertEqual(PushSubscription.objects.filter(token=valid.token).count(), 1)
             self.assertEqual(PushSubscription.objects.filter(token=invalid.token).count(), 0)
+            self.assertEqual(PushSubscription.objects.filter(token=invalid2.token).count(), 0)
 
     def test_continues_if_config_not_present(self, m):
         with logger_warning_mock() as warning_mock:
@@ -94,6 +98,7 @@ class FCMNotifySubscribersTests(TestCase):
         subscriptions = web_subscriptions + android_subscriptions
 
         write_points.reset_mock()
+        _notify_multiple_devices.return_value = ([1, 2, 3, 4, 5, 6], [0, 7])
 
         fcm.notify_subscribers(
             subscriptions,
@@ -114,7 +119,8 @@ class FCMNotifySubscribersTests(TestCase):
                     'platform': 'android',
                 },
                 'fields': {
-                    'subscription_push': len(android_subscriptions),
+                    'subscription_push': len(android_subscriptions) - 1,
+                    'subscription_push_error': 1,
                 },
             },
             {
@@ -123,7 +129,8 @@ class FCMNotifySubscribersTests(TestCase):
                     'platform': 'web',
                 },
                 'fields': {
-                    'subscription_push': len(web_subscriptions),
+                    'subscription_push': len(web_subscriptions) - 1,
+                    'subscription_push_error': 1
                 },
             },
         ])

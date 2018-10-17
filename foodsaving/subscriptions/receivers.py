@@ -28,13 +28,10 @@ from foodsaving.pickups.models import PickupDate, PickupDateSeries, Feedback, pi
 from foodsaving.pickups.serializers import PickupDateSerializer, PickupDateSeriesSerializer, FeedbackSerializer
 from foodsaving.stores.models import Store
 from foodsaving.stores.serializers import StoreSerializer
-from foodsaving.subscriptions import stats
-from foodsaving.subscriptions.fcm import notify_subscribers
-from foodsaving.subscriptions.models import ChannelSubscription, PushSubscription
+from foodsaving.subscriptions import stats, tasks
+from foodsaving.subscriptions.models import ChannelSubscription
 from foodsaving.userauth.serializers import AuthUserSerializer
 from foodsaving.users.serializers import UserSerializer
-from foodsaving.utils import frontend_urls
-from foodsaving.utils.frontend_urls import logo_url
 
 MockRequest = namedtuple('Request', ['user'])
 
@@ -95,32 +92,7 @@ def send_messages(sender, instance, created, **kwargs):
     if not created:
         return
 
-    subscriptions = PushSubscription.objects.filter(
-        Q(user__in=conversation.participants.all()) & ~Q(user__in=push_exclude_users) & ~Q(user=message.author)
-    ).distinct()
-
-    message_title = message.author.display_name
-    if conversation.type() == 'group':
-        message_title = '{} / {}'.format(conversation.target.name, message_title)
-
-    click_action = None
-    if message.is_thread_reply():
-        click_action = frontend_urls.thread_url(message.thread)
-    else:
-        click_action = frontend_urls.conversation_url(conversation, message.author)
-
-    notify_subscribers(
-        subscriptions=subscriptions,
-        fcm_options={
-            'message_title': message_title,
-            'message_body': message.content,
-            'click_action': click_action,
-            'message_icon': logo_url(),
-            # this causes each notification for a given conversation to replace previous notifications
-            # fancier would be to make the new notifications show a summary not just the latest message
-            'tag': 'conversation:{}'.format(conversation.id)
-        }
-    )
+    tasks.notify_message_push_subscribers(message, push_exclude_users)
 
     # Send conversations object to participants after sending a message
     # (important for unread_message_count)

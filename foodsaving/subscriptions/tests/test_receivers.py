@@ -1,16 +1,14 @@
-import json
 import os
 import pathlib
-import requests_mock
+from shutil import copyfile
+from unittest.mock import patch
+
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 from django.utils.crypto import get_random_string
-from pyfcm.baseapi import BaseAPI as FCMApi
-from shutil import copyfile
-from unittest.mock import patch
 
 from foodsaving.applications.factories import GroupApplicationFactory
 from foodsaving.conversations.factories import ConversationFactory
@@ -689,7 +687,7 @@ class UserReceiverTest(WSTestCase):
         self.assertEqual(len(self.client.messages), 0)
 
 
-@requests_mock.Mocker()
+@patch('foodsaving.subscriptions.tasks.notify_subscribers')
 class ReceiverPushTests(TestCase):
     def setUp(self):
         self.user = UserFactory()
@@ -702,50 +700,46 @@ class ReceiverPushTests(TestCase):
         self.conversation = ConversationFactory(participants=[self.user, self.author])
 
         # add a push subscriber
-        PushSubscription.objects.create(
+        self.subscription = PushSubscription.objects.create(
             user=self.user,
             token=self.token,
             platform=PushSubscriptionPlatform.ANDROID.value,
         )
 
-    def test_sends_to_push_subscribers(self, m):
-        def check_json_data(request):
-            data = json.loads(request.body.decode('utf-8'))
-            self.assertEqual(data['notification']['title'], self.author.display_name)
-            self.assertEqual(data['notification']['body'], self.content)
-            self.assertEqual(data['to'], self.token)
-            return True
-
-        m.post(FCMApi.FCM_END_POINT, json={}, additional_matcher=check_json_data)
-
+    def test_sends_to_push_subscribers(self, notify_subscribers):
         # add a message to the conversation
         ConversationMessage.objects.create(conversation=self.conversation, content=self.content, author=self.author)
 
-    def test_does_not_send_push_notification_if_active_channel_subscription(self, m):
+        self.assertEqual(notify_subscribers.call_count, 1)
+        kwargs = notify_subscribers.call_args[1]
+        self.assertEqual(list(kwargs['subscriptions']), [self.subscription])
+        self.assertEqual(kwargs['fcm_options']['message_title'], self.author.display_name)
+        self.assertEqual(kwargs['fcm_options']['message_body'], self.content)
+
+    def test_does_not_send_push_notification_if_active_channel_subscription(self, notify_subscribers):
         # add a channel subscription to prevent the push being sent
         ChannelSubscription.objects.create(user=self.user, reply_channel='foo')
         # add a message to the conversation
         ConversationMessage.objects.create(conversation=self.conversation, content=self.content, author=self.author)
-        # if it sent a push message, the requests mock would complain there is no matching request...
 
-    def test_send_push_notification_if_channel_subscription_is_away(self, m):
-        def check_json_data(request):
-            data = json.loads(request.body.decode('utf-8'))
-            self.assertEqual(data['notification']['title'], self.author.display_name)
-            self.assertEqual(data['notification']['body'], self.content)
-            self.assertEqual(data['to'], self.token)
-            return True
+        kwargs = notify_subscribers.call_args[1]
+        self.assertEqual(len(kwargs['subscriptions']), 0)
 
-        m.post(FCMApi.FCM_END_POINT, json={}, additional_matcher=check_json_data)
-
+    def test_send_push_notification_if_channel_subscription_is_away(self, notify_subscribers):
         # add a channel subscription to prevent the push being sent
         ChannelSubscription.objects.create(user=self.user, reply_channel='foo', away_at=timezone.now())
 
         # add a message to the conversation
         ConversationMessage.objects.create(conversation=self.conversation, content=self.content, author=self.author)
 
+        self.assertEqual(notify_subscribers.call_count, 1)
+        kwargs = notify_subscribers.call_args[1]
+        self.assertEqual(list(kwargs['subscriptions']), [self.subscription])
+        self.assertEqual(kwargs['fcm_options']['message_title'], self.author.display_name)
+        self.assertEqual(kwargs['fcm_options']['message_body'], self.content)
 
-@requests_mock.Mocker()
+
+@patch('foodsaving.subscriptions.tasks.notify_subscribers')
 class GroupConversationReceiverPushTests(TestCase):
     def setUp(self):
         self.group = GroupFactory()
@@ -760,21 +754,18 @@ class GroupConversationReceiverPushTests(TestCase):
         self.conversation = self.group.conversation
 
         # add a push subscriber
-        PushSubscription.objects.create(
+        self.subscription = PushSubscription.objects.create(
             user=self.user,
             token=self.token,
             platform=PushSubscriptionPlatform.ANDROID.value,
         )
 
-    def test_sends_to_push_subscribers(self, m):
-        def check_json_data(request):
-            data = json.loads(request.body.decode('utf-8'))
-            self.assertEqual(data['notification']['title'], self.group.name + ' / ' + self.author.display_name)
-            self.assertEqual(data['notification']['body'], self.content)
-            self.assertEqual(data['to'], self.token)
-            return True
-
-        m.post(FCMApi.FCM_END_POINT, json={}, additional_matcher=check_json_data)
-
+    def test_sends_to_push_subscribers(self, notify_subscribers):
         # add a message to the conversation
         ConversationMessage.objects.create(conversation=self.conversation, content=self.content, author=self.author)
+
+        self.assertEqual(notify_subscribers.call_count, 1)
+        kwargs = notify_subscribers.call_args[1]
+        self.assertEqual(list(kwargs['subscriptions']), [self.subscription])
+        self.assertEqual(kwargs['fcm_options']['message_title'], self.group.name + ' / ' + self.author.display_name)
+        self.assertEqual(kwargs['fcm_options']['message_body'], self.content)
