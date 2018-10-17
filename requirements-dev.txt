@@ -35,7 +35,7 @@ pathlib2==2.3.2
 pexpect==4.6.0            # via ipython
 pickleshare==0.7.5        # via ipython
 pip-tools==3.1.0
-pluggy==0.7.1             # via pytest
+pluggy==0.8.0             # via pytest
 prompt-toolkit==2.0.6     # via ipython
 ptyprocess==0.6.0         # via pexpect
 py==1.7.0                 # via pytest
@@ -47,7 +47,7 @@ pytest-cov==2.6.0
 pytest-django==3.4.3
 pytest-forked==0.2        # via pytest-xdist
 pytest-xdist==1.23.2
-pytest==3.8.2             # via pytest-asyncio, pytest-cov, pytest-django, pytest-forked, pytest-xdist
+pytest==3.9.1             # via pytest-asyncio, pytest-cov, pytest-django, pytest-forked, pytest-xdist
 python-dateutil==2.7.3    # via django-silk, freezegun
 python-slugify==1.2.6     # via transifex-client
 pytz==2018.5              # via django, django-silk
