@@ -18,9 +18,9 @@ else:
 
 
 def notify_subscribers(subscriptions, fcm_options):
+    if len(subscriptions) < 1:
+        return
     tokens = [item.token for item in subscriptions]
-    if len(tokens) < 1:
-        return None
 
     success_indices, failure_indices = _notify_multiple_devices(
         registration_ids=tokens,

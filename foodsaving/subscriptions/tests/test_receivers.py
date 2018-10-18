@@ -710,8 +710,8 @@ class ReceiverPushTests(TestCase):
         # add a message to the conversation
         ConversationMessage.objects.create(conversation=self.conversation, content=self.content, author=self.author)
 
-        self.assertEqual(notify_subscribers.call_count, 1)
-        kwargs = notify_subscribers.call_args[1]
+        self.assertEqual(notify_subscribers.call_count, 2)
+        kwargs = notify_subscribers.call_args_list[0][1]
         self.assertEqual(list(kwargs['subscriptions']), [self.subscription])
         self.assertEqual(kwargs['fcm_options']['message_title'], self.author.display_name)
         self.assertEqual(kwargs['fcm_options']['message_body'], self.content)
@@ -732,8 +732,8 @@ class ReceiverPushTests(TestCase):
         # add a message to the conversation
         ConversationMessage.objects.create(conversation=self.conversation, content=self.content, author=self.author)
 
-        self.assertEqual(notify_subscribers.call_count, 1)
-        kwargs = notify_subscribers.call_args[1]
+        self.assertEqual(notify_subscribers.call_count, 2)
+        kwargs = notify_subscribers.call_args_list[0][1]
         self.assertEqual(list(kwargs['subscriptions']), [self.subscription])
         self.assertEqual(kwargs['fcm_options']['message_title'], self.author.display_name)
         self.assertEqual(kwargs['fcm_options']['message_body'], self.content)
@@ -764,8 +764,8 @@ class GroupConversationReceiverPushTests(TestCase):
         # add a message to the conversation
         ConversationMessage.objects.create(conversation=self.conversation, content=self.content, author=self.author)
 
-        self.assertEqual(notify_subscribers.call_count, 1)
-        kwargs = notify_subscribers.call_args[1]
+        self.assertEqual(notify_subscribers.call_count, 2)
+        kwargs = notify_subscribers.call_args_list[0][1]
         self.assertEqual(list(kwargs['subscriptions']), [self.subscription])
         self.assertEqual(kwargs['fcm_options']['message_title'], self.group.name + ' / ' + self.author.display_name)
         self.assertEqual(kwargs['fcm_options']['message_body'], self.content)
