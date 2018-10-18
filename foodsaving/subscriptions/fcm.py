@@ -62,6 +62,6 @@ def _notify_multiple_devices(**kwargs):
 
     # raise exception if there's other errors
     if len(cleanup_tokens) != len(failure_indices):
-        sentry_client.captureMessage('FCM error while sending', data=response)
+        sentry_client.captureMessage('FCM error while sending', extra=response)
 
     return success_indices, failure_indices
