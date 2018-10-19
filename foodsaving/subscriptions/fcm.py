@@ -42,16 +42,16 @@ def _notify_multiple_devices(**kwargs):
     """
 
     if fcm is None:
-        return None
+        return 0, 0
 
     response = fcm.notify_multiple_devices(**kwargs)
     tokens = kwargs.get('registration_ids', [])
 
     # check for invalid tokens and remove any corresponding push subscriptions
-    indexed_results = enumerate(response['results'])
+    indexed_results = list(enumerate(response['results']))
     cleanup_tokens = [
         tokens[i] for (i, result) in indexed_results
-        if 'error' in result and result['error'] in ('InvalidRegistration', 'NotRegistered')
+        if result.get('error') in ('InvalidRegistration', 'NotRegistered')
     ]
 
     if len(cleanup_tokens) > 0:

@@ -86,7 +86,7 @@ class FCMTests(TestCase):
                     'Please configure FCM_SERVER_KEY in your settings to use push messaging'
                 )
                 result = _notify_multiple_devices(registration_ids=['mytoken'])
-                self.assertIsNone(result)
+                self.assertEqual(result, (0, 0))
 
 
 class FCMNotifySubscribersTests(TestCase):
