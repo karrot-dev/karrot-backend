@@ -1,4 +1,5 @@
 from django.db.models import Q
+from furl import furl
 from huey.contrib.djhuey import db_task
 
 from foodsaving.subscriptions.fcm import notify_subscribers
@@ -26,7 +27,6 @@ def notify_message_push_subscribers(message, exclude_users):
     fcm_options = {
         'message_title': message_title,
         'message_body': message.content,
-        'click_action': click_action,
         # this causes each notification for a given conversation to replace previous notifications
         # fancier would be to make the new notifications show a summary not just the latest message
         'tag': 'conversation:{}'.format(conversation.id)
@@ -36,15 +36,24 @@ def notify_message_push_subscribers(message, exclude_users):
     web_subscriptions = subscriptions.filter(platform=PushSubscriptionPlatform.WEB.value)
 
     notify_subscribers(
-        subscriptions=android_subscriptions, fcm_options={
+        subscriptions=android_subscriptions,
+        fcm_options={
             **fcm_options,
             'message_icon': 'icon_push',
+            # according to https://github.com/fechanique/cordova-plugin-fcm#send-notification-payload-example-rest-api
+            'click_action': 'FCM_PLUGIN_ACTIVITY',
+            'data_message': {
+                # we send the route as data - the frontend takes care of the actual routing
+                'karrot_route': str(furl(click_action).fragment),
+            },
         }
     )
 
     notify_subscribers(
-        subscriptions=web_subscriptions, fcm_options={
+        subscriptions=web_subscriptions,
+        fcm_options={
             **fcm_options,
             'message_icon': frontend_urls.logo_url(),
+            'click_action': click_action,
         }
     )

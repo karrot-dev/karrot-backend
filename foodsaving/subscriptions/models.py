@@ -12,7 +12,7 @@ class ChannelSubscriptionQuerySet(models.QuerySet):
         return self.filter(lastseen_at__lt=timezone.now() - relativedelta(minutes=5))
 
     def recent(self):
-        return self.filter(lastseen_at__gt=timezone.now() - relativedelta(minutes=5))
+        return self.filter(lastseen_at__gt=timezone.now() - relativedelta(seconds=20))
 
 
 class ChannelSubscription(BaseModel):
