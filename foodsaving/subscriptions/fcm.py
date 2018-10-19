@@ -50,8 +50,8 @@ def _notify_multiple_devices(**kwargs):
     # check for invalid tokens and remove any corresponding push subscriptions
     indexed_results = list(enumerate(response['results']))
     cleanup_tokens = [
-        tokens[i] for (i, result) in indexed_results
-        if result.get('error') in ('InvalidRegistration', 'NotRegistered')
+        tokens[i] for (i, result) in indexed_results if result.get('error') in
+        ('InvalidRegistration', 'NotRegistered', 'MismatchSenderId', 'InvalidApnsCredential')
     ]
 
     if len(cleanup_tokens) > 0:
@@ -60,8 +60,13 @@ def _notify_multiple_devices(**kwargs):
     success_indices = [i for (i, result) in indexed_results if 'error' not in result]
     failure_indices = [i for (i, result) in indexed_results if 'error' in result]
 
-    # raise exception if there's other errors
-    if len(cleanup_tokens) != len(failure_indices):
+    # tell Sentry if there were errors
+    if len(failure_indices) > 0:
         sentry_client.captureMessage('FCM error while sending', extra=response)
+        logger.warning(
+            'FCM error while sending: {} tokens successful, {} failed, {} removed from database'.format(
+                len(success_indices), len(failure_indices), len(cleanup_tokens)
+            )
+        )
 
     return success_indices, failure_indices
