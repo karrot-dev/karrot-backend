@@ -11,7 +11,7 @@ from foodsaving.pickups.models import PickupDate, PickupDateCollector
 
 @db_periodic_task(crontab(minute='*'))  # every minute
 def delete_expired_notifications():
-    Notification.objects.filter(expires_at__gte=timezone.now()).delete()
+    Notification.objects.filter(expires_at__lte=timezone.now()).delete()
 
 
 @db_periodic_task(crontab(minute='*'))  # every minute

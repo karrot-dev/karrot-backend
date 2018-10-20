@@ -3,12 +3,47 @@ from django.test import TestCase
 from django.utils import timezone
 
 from foodsaving.groups.factories import GroupFactory
+from foodsaving.notifications import tasks
 from foodsaving.notifications.models import Notification, NotificationType
 from foodsaving.notifications.tasks import create_pickup_upcoming_notifications
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.pickups.models import PickupDateCollector
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory
+
+
+class TestDeleteExpiredTask(TestCase):
+    def test_deletes_expired_notification(self):
+        one_hour_ago = timezone.now() - relativedelta(hours=1)
+        group = GroupFactory()
+        Notification.objects.create(
+            type=NotificationType.PICKUP_UPCOMING.value,
+            user=UserFactory(),
+            expires_at=one_hour_ago,
+            context={
+                'group': group.id,
+            }
+        )
+
+        tasks.delete_expired_notifications.call_local()
+
+        self.assertEqual(Notification.objects.count(), 0)
+
+    def test_does_not_delete_active_notifications(self):
+        in_one_hour = timezone.now() + relativedelta(hours=1)
+        group = GroupFactory()
+        Notification.objects.create(
+            type=NotificationType.PICKUP_UPCOMING.value,
+            user=UserFactory(),
+            expires_at=in_one_hour,
+            context={
+                'group': group.id,
+            }
+        )
+
+        tasks.delete_expired_notifications.call_local()
+
+        self.assertEqual(Notification.objects.count(), 1)
 
 
 class TestPickupUpcomingTask(TestCase):
