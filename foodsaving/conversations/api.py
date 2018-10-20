@@ -324,7 +324,7 @@ class RetrieveConversationMixin(object):
             prefetch_related('conversationparticipant_set'). \
             select_related('target_type'). \
             get_or_create_for_target(target)
-        serializer = ConversationSerializer(conversation, data={}, context={'request': request})
+        serializer = ConversationSerializer(conversation, data={}, context=self.get_serializer_context())
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data)
 
@@ -338,6 +338,6 @@ class RetrievePrivateConversationMixin(object):
             conversation = Conversation.objects.get_or_create_for_two_users(request.user, user2)
         except Exception:
             return Response(status=status.HTTP_404_NOT_FOUND, data={})
-        serializer = ConversationSerializer(conversation, data={}, context={'request': request})
+        serializer = ConversationSerializer(conversation, data={}, context=self.get_serializer_context())
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data)
