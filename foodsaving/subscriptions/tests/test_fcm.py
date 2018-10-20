@@ -53,7 +53,7 @@ class FCMTests(TestCase):
         _notify_multiple_devices(registration_ids=['mytoken'])
 
     def test_removes_invalid_subscriptions(self, m):
-        with override_fcm_key('something'):
+        with logger_warning_mock() as warning_mock, override_fcm_key('something'):
             valid = PushSubscriptionFactory()
             invalid = PushSubscriptionFactory()
             invalid2 = PushSubscriptionFactory()
@@ -78,15 +78,15 @@ class FCMTests(TestCase):
             self.assertEqual(PushSubscription.objects.filter(token=valid.token).count(), 1)
             self.assertEqual(PushSubscription.objects.filter(token=invalid.token).count(), 0)
             self.assertEqual(PushSubscription.objects.filter(token=invalid2.token).count(), 0)
+            warning_mock.assert_called_with(
+                'FCM error while sending: 1 tokens successful, 2 failed, 2 removed from database'
+            )
 
     def test_continues_if_config_not_present(self, m):
-        with logger_warning_mock() as warning_mock:
-            with override_fcm_key():
-                warning_mock.assert_called_with(
-                    'Please configure FCM_SERVER_KEY in your settings to use push messaging'
-                )
-                result = _notify_multiple_devices(registration_ids=['mytoken'])
-                self.assertEqual(result, (0, 0))
+        with logger_warning_mock() as warning_mock, override_fcm_key():
+            warning_mock.assert_called_with('Please configure FCM_SERVER_KEY in your settings to use push messaging')
+            result = _notify_multiple_devices(registration_ids=['mytoken'])
+            self.assertEqual(result, (0, 0))
 
 
 class FCMNotifySubscribersTests(TestCase):
