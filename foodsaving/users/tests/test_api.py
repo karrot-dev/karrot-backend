@@ -12,6 +12,8 @@ from foodsaving.utils.tests.fake import faker
 class TestUsersAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
+        self.user.photo = 'photo.jpg'
+        self.user.save()
         self.user2 = UserFactory()
         self.url = '/api/users/'
         self.user_data = {
@@ -58,6 +60,7 @@ class TestUsersAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['description'], self.user.description)
         self.assertEqual(set(response.data['groups']), set([self.group.id, self.another_common_group.id]))
+        self.assertTrue(response.data['photo_urls']['full_size'].startswith('http'))
 
     def test_retrieve_user_in_another_group_fails(self):
         self.client.force_login(user=self.user2)

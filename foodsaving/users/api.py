@@ -34,10 +34,10 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, RetrievePriv
         """
         return super().list(request, *args, **kwargs)
 
-    @action(detail=True)
+    @action(detail=True, serializer_class=UserProfileSerializer)
     def profile(self, request, pk=None):
         user = self.get_object()
-        serializer = UserProfileSerializer(user)
+        serializer = self.get_serializer(user)
         return Response(serializer.data)
 
     @action(detail=True)
