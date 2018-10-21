@@ -9,7 +9,6 @@ from .consumers import WebsocketConsumer, TokenAuthMiddleware
 class OriginValidatorThatAllowsFileUrls(websocket.OriginValidator):
     # We need to allow file urls in the origin header for our cordova app
     def valid_origin(self, parsed_origin):
-        print(parsed_origin)
         if parsed_origin is not None and parsed_origin.scheme == 'file':
             return True
         return super().valid_origin(parsed_origin)
