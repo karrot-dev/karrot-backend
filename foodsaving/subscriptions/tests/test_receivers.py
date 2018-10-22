@@ -723,7 +723,7 @@ class UserReceiverTest(WSTestCase):
         self.other_member.save()
 
         self.assertEqual(len(self.client.messages), 1)
-        response = self.client.messages_by_topic.get('users:user')[0]
+        self.assertIn('users:user', self.client.messages_by_topic.keys())
 
     def test_unrelated_user_receives_no_changes(self):
         self.client = self.connect_as(self.unrelated_user)
