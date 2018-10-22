@@ -8,7 +8,7 @@ from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationMessage
 from foodsaving.users.factories import UserFactory
 from foodsaving.webhooks.api import make_local_part
-from foodsaving.webhooks.models import EmailEvent
+from foodsaving.webhooks.models import EmailEvent, IncomingEmail
 
 
 class TestEmailReplyAPI(APITestCase):
@@ -20,16 +20,17 @@ class TestEmailReplyAPI(APITestCase):
     @override_settings(SPARKPOST_RELAY_SECRET='test_key')
     def test_receive_incoming_email(self):
         reply_token = make_local_part(self.conversation, self.user)
+        relay_message = {
+            'rcpt_to': '{}@example.com'.format(reply_token),
+            'content': {
+                'text': 'message body'
+            },
+        }
         response = self.client.post(
             '/api/webhooks/incoming_email/',
             data=[{
                 'msys': {
-                    'relay_message': {
-                        'rcpt_to': '{}@example.com'.format(reply_token),
-                        'content': {
-                            'text': 'message body'
-                        }
-                    }
+                    'relay_message': relay_message
                 }
             }],
             HTTP_X_MESSAGESYSTEMS_WEBHOOK_TOKEN='test_key',
@@ -39,6 +40,11 @@ class TestEmailReplyAPI(APITestCase):
         self.assertEqual(self.conversation.messages.count(), 1)
         message = ConversationMessage.objects.first()
         self.assertEqual(message.received_via, 'email')
+
+        incoming_email = IncomingEmail.objects.first()
+        self.assertEqual(incoming_email.user, self.user)
+        self.assertEqual(incoming_email.payload, relay_message)
+        self.assertEqual(incoming_email.message, message)
 
 
 class TestEmailEventAPI(APITestCase):

@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from talon import quotations
 
 from foodsaving.conversations.models import Conversation, ConversationMessage
-from foodsaving.webhooks.models import EmailEvent
+from foodsaving.webhooks.models import EmailEvent, IncomingEmail
 
 
 def parse_local_part(part):
@@ -38,6 +38,7 @@ class IncomingEmailView(views.APIView):
     def post(self, request):
         """
         Receive conversation replies via e-mail
+        Request payload spec: https://developers.sparkpost.com/api/relay-webhooks/#header-relay-webhook-payload
         """
 
         auth_key = request.META.get('HTTP_X_MESSAGESYSTEMS_WEBHOOK_TOKEN')
@@ -48,10 +49,10 @@ class IncomingEmailView(views.APIView):
             )
 
         for messages in [e['msys'].values() for e in request.data]:
-            for message in messages:
+            for incoming_message in messages:
                 # 1. get email content and reply-to
-                reply_to = parseaddr(message['rcpt_to'])[1]
-                content = message['content']
+                reply_to = parseaddr(incoming_message['rcpt_to'])[1]
+                content = incoming_message['content']
 
                 # 2. check local part of reply-to and extract conversation and user (fail if they don't exist)
                 local_part = reply_to.split('@')[0]
@@ -72,12 +73,18 @@ class IncomingEmailView(views.APIView):
                 text_content = content['text']
                 reply_plain = quotations.extract_from_plain(text_content)
 
-                ConversationMessage.objects.create(
+                created_message = ConversationMessage.objects.create(
                     author=user,
                     conversation=conversation,
                     thread=thread,
                     content=reply_plain,
                     received_via='email',
+                )
+
+                IncomingEmail.objects.create(
+                    user=user,
+                    message=created_message,
+                    payload=incoming_message,
                 )
 
         return Response(status=status.HTTP_200_OK, data={})

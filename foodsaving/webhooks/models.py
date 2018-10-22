@@ -28,3 +28,10 @@ class EmailEvent(BaseModel):
     address = models.TextField()
     event = models.CharField(max_length=255)
     payload = JSONField()
+
+
+class IncomingEmail(BaseModel):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    message = models.ForeignKey('conversations.ConversationMessage', on_delete=models.CASCADE)
+
+    payload = JSONField()
