@@ -369,13 +369,11 @@ class GroupReceiverTests(WSTestCase):
         self.group.name = name
         self.group.save()
 
-        response = self.client.messages[0]
-        self.assertEqual(response['topic'], 'groups:group_detail')
+        response = self.client.messages_by_topic.get('groups:group_detail')[0]
         self.assertEqual(response['payload']['name'], name)
         self.assertTrue('description' in response['payload'])
 
-        response = self.client.messages[1]
-        self.assertEqual(response['topic'], 'groups:group_preview')
+        response = self.client.messages_by_topic.get('groups:group_preview')[0]
         self.assertEqual(response['payload']['name'], name)
         self.assertTrue('description' not in response['payload'])
 
@@ -388,8 +386,7 @@ class GroupReceiverTests(WSTestCase):
         self.group.name = name
         self.group.save()
 
-        response = self.client.messages[0]
-        self.assertEqual(response['topic'], 'groups:group_preview')
+        response = self.client.messages_by_topic.get('groups:group_preview')[0]
         self.assertEqual(response['payload']['name'], name)
         self.assertTrue('description' not in response['payload'])
 
@@ -508,8 +505,7 @@ class InvitationReceiverTests(WSTestCase):
 
         invitation = Invitation.objects.create(email='bla@bla.com', group=self.group, invited_by=self.member)
 
-        response = self.client.messages[0]
-        self.assertEqual(response['topic'], 'invitations:invitation')
+        response = self.client.messages_by_topic.get('invitations:invitation')[0]
         self.assertEqual(response['payload']['email'], invitation.email)
 
         self.assertEqual(len(self.client.messages), 1)
@@ -541,8 +537,7 @@ class StoreReceiverTests(WSTestCase):
         self.store.name = name
         self.store.save()
 
-        response = self.client.messages[0]
-        self.assertEqual(response['topic'], 'stores:store')
+        response = self.client.messages_by_topic.get('stores:store')[0]
         self.assertEqual(response['payload']['name'], name)
 
         self.assertEqual(len(self.client.messages), 1)
@@ -564,32 +559,27 @@ class PickupDateReceiverTests(WSTestCase):
         self.pickup.date = date
         self.pickup.save()
 
-        response = self.client.messages[0]
-        self.assertEqual(response['topic'], 'pickups:pickupdate')
+        response = self.client.messages_by_topic.get('pickups:pickupdate')[0]
         self.assertEqual(parse(response['payload']['date']), date)
 
         # join
+        self.client = self.connect_as(self.member)
         self.pickup.add_collector(self.member)
 
-        response = self.client.messages[1]
-        self.assertEqual(response['topic'], 'pickups:pickupdate')
+        response = self.client.messages_by_topic.get('pickups:pickupdate')[0]
         self.assertEqual(response['payload']['collector_ids'], [self.member.id])
 
-        response = self.client.messages[2]
-        self.assertEqual(response['topic'], 'conversations:conversation')
+        response = self.client.messages_by_topic.get('conversations:conversation')[0]
         self.assertEqual(response['payload']['participants'], [self.member.id])
 
         # leave
+        self.client = self.connect_as(self.member)
         self.pickup.remove_collector(self.member)
 
-        response = self.client.messages[3]
-        self.assertEqual(response['topic'], 'pickups:pickupdate')
+        response = self.client.messages_by_topic.get('pickups:pickupdate')[0]
         self.assertEqual(response['payload']['collector_ids'], [])
 
-        response = self.client.messages[4]
-        self.assertEqual(response['topic'], 'conversations:leave')
-
-        self.assertEqual(len(self.client.messages), 5)
+        self.assertIn('conversations:leave', self.client.messages_by_topic.keys())
 
     def test_receive_pickup_delete(self):
         self.client = self.connect_as(self.member)
@@ -597,8 +587,7 @@ class PickupDateReceiverTests(WSTestCase):
         self.pickup.deleted = True
         self.pickup.save()
 
-        response = self.client.messages[0]
-        self.assertEqual(response['topic'], 'pickups:pickupdate_deleted')
+        response = self.client.messages_by_topic.get('pickups:pickupdate_deleted')[0]
         self.assertEqual(response['payload']['id'], self.pickup.id)
 
         self.assertEqual(len(self.client.messages), 1)
@@ -622,8 +611,7 @@ class PickupDateSeriesReceiverTests(WSTestCase):
         self.series.start_date = date
         self.series.save()
 
-        response = self.client.messages[0]
-        self.assertEqual(response['topic'], 'pickups:series')
+        response = self.client.messages_by_topic.get('pickups:series')[0]
         self.assertEqual(parse(response['payload']['start_date']), date)
 
         self.assertEqual(len(self.client.messages), 1)
@@ -634,8 +622,7 @@ class PickupDateSeriesReceiverTests(WSTestCase):
         id = self.series.id
         self.series.delete()
 
-        response = self.client.messages[0]
-        self.assertEqual(response['topic'], 'pickups:series_deleted')
+        response = self.client.messages_by_topic.get('pickups:series_deleted')[0]
         self.assertEqual(response['payload']['id'], id)
 
         self.assertEqual(len(self.client.messages), 1)
@@ -654,8 +641,7 @@ class FeedbackReceiverTests(WSTestCase):
 
         feedback = FeedbackFactory(given_by=self.member, about=self.pickup)
 
-        response = self.client.messages[0]
-        self.assertEqual(response['topic'], 'feedback:feedback')
+        response = self.client.messages_by_topic.get('feedback:feedback')[0]
         self.assertEqual(response['payload']['weight'], feedback.weight)
 
         self.assertEqual(len(self.client.messages), 1)
@@ -706,8 +692,7 @@ class UserReceiverTest(WSTestCase):
         self.member.display_name = name
         self.member.save()
 
-        response = self.client.messages[0]
-        self.assertEqual(response['topic'], 'auth:user')
+        response = self.client.messages_by_topic.get('auth:user')[0]
         self.assertEqual(response['payload']['display_name'], name)
         self.assertTrue('current_group' in response['payload'])
         self.assertTrue(response['payload']['photo_urls']['full_size'].startswith(settings.HOSTNAME))
@@ -721,8 +706,7 @@ class UserReceiverTest(WSTestCase):
         self.other_member.display_name = name
         self.other_member.save()
 
-        response = self.client.messages[0]
-        self.assertEqual(response['topic'], 'users:user')
+        response = self.client.messages_by_topic.get('users:user')[0]
         self.assertEqual(response['payload']['display_name'], name)
         self.assertTrue('current_group' not in response['payload'])
         self.assertTrue(response['payload']['photo_urls']['full_size'].startswith(settings.HOSTNAME))
@@ -739,8 +723,7 @@ class UserReceiverTest(WSTestCase):
         self.other_member.save()
 
         self.assertEqual(len(self.client.messages), 1)
-        response = self.client.messages[0]
-        self.assertEqual(response['topic'], 'users:user')
+        response = self.client.messages_by_topic.get('users:user')[0]
 
     def test_unrelated_user_receives_no_changes(self):
         self.client = self.connect_as(self.unrelated_user)
