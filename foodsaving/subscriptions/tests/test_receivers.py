@@ -1,5 +1,7 @@
+import itertools
 import os
 import pathlib
+from operator import itemgetter
 from shutil import copyfile
 from unittest.mock import patch
 
@@ -98,6 +100,14 @@ class WSClient:
             'topic': topic,
             'payload': payload,
         } for channel, topic, payload in self.call_args() if channel == self.reply_channel]
+
+    @property
+    def messages_by_topic(self):
+        topic = itemgetter('topic')
+        return {
+            topic: list(group)
+            for (topic, group) in itertools.groupby(sorted(self.messages, key=topic), key=topic)
+        }
 
 
 class WSTestCase(TestCase):
@@ -384,6 +394,60 @@ class GroupReceiverTests(WSTestCase):
         self.assertTrue('description' not in response['payload'])
 
         self.assertEqual(len(self.client.messages), 1)
+
+
+class GroupMembershipReceiverTests(WSTestCase):
+    def setUp(self):
+        super().setUp()
+        self.member = UserFactory()
+        self.user = UserFactory()
+        self.group = GroupFactory(members=[self.member])
+
+    def test_receive_group_join_as_member(self):
+        self.client = self.connect_as(self.member)
+
+        self.group.add_member(self.user)
+
+        response = self.client.messages_by_topic.get('groups:group_detail')[0]
+        self.assertIn(self.user.id, response['payload']['members'])
+        self.assertIn(self.user.id, response['payload']['memberships'].keys())
+
+        response = self.client.messages_by_topic.get('groups:group_preview')[0]
+        self.assertIn(self.user.id, response['payload']['members'])
+        self.assertNotIn('memberships', response['payload'])
+
+    def test_receive_group_join_as_joining_user(self):
+        self.client = self.connect_as(self.user)
+
+        self.group.add_member(self.user)
+
+        response = self.client.messages_by_topic.get('groups:group_detail')[0]
+        self.assertIn(self.user.id, response['payload']['members'])
+        self.assertIn(self.user.id, response['payload']['memberships'].keys())
+
+        response = self.client.messages_by_topic.get('groups:group_preview')[0]
+        self.assertIn(self.user.id, response['payload']['members'])
+        self.assertNotIn('memberships', response['payload'])
+
+    def test_receive_group_join_as_nonmember(self):
+        self.client = self.connect_as(self.user)
+
+        join_user = UserFactory()
+        self.group.add_member(join_user)
+
+        self.assertNotIn('groups:group_detail', self.client.messages_by_topic.keys())
+        response = self.client.messages_by_topic.get('groups:group_preview')[0]
+        self.assertIn(join_user.id, response['payload']['members'])
+        self.assertNotIn('memberships', response['payload'])
+
+    def test_receive_group_leave_as_leaving_user(self):
+        self.client = self.connect_as(self.member)
+
+        self.group.remove_member(self.member)
+
+        response = self.client.messages_by_topic.get('groups:group_preview')[0]
+        self.assertNotIn(self.user.id, response['payload']['members'])
+        self.assertNotIn('memberships', response['payload'])
 
 
 class GroupApplicationReceiverTests(WSTestCase):

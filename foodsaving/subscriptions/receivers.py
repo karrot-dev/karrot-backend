@@ -16,7 +16,7 @@ from foodsaving.applications.serializers import GroupApplicationSerializer
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction, \
     ConversationThreadParticipant
 from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer
-from foodsaving.groups.models import Group, Trust
+from foodsaving.groups.models import Group, Trust, GroupMembership
 from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer
 from foodsaving.history.models import history_created
 from foodsaving.history.serializers import HistorySerializer
@@ -213,6 +213,21 @@ def send_group_updates(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='groups:group_preview', payload=preview_payload)
 
 
+# GroupMembership
+@receiver(post_save, sender=GroupMembership)
+def send_group_membership_updates(sender, instance, created, **kwargs):
+    group = instance.group
+    if not created:
+        return
+    send_group_updates(sender, group)
+
+
+@receiver(post_delete, sender=GroupMembership)
+def send_group_member_left(sender, instance, **kwargs):
+    group = instance.group
+    send_group_updates(sender, group)
+
+
 # Applications
 @receiver(post_save, sender=GroupApplication)
 def send_group_application_updates(sender, instance, **kwargs):
@@ -228,7 +243,7 @@ def send_group_application_updates(sender, instance, **kwargs):
 @receiver(post_save, sender=Trust)
 def send_trust_updates(sender, instance, **kwargs):
     send_group_updates(sender, instance.membership.group)
-    send_user_updates(sender, instance.membership.user)
+    send_user_updates(sender, instance.membership.user)  # TODO check if needed
 
 
 # Invitations

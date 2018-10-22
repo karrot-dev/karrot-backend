@@ -38,6 +38,7 @@ class HistoryQuerySet(models.QuerySet):
         if kwargs.get('users') is not None:
             a.users.add(*kwargs['users'])
 
+        # TODO remove and just use post_save signal
         history_created.send(sender=History.__class__, instance=a)
 
 
