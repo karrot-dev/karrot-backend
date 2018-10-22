@@ -8,11 +8,11 @@ from foodsaving.utils import frontend_urls
 
 
 @db_task()
-def notify_message_push_subscribers(message, exclude_users):
+def notify_message_push_subscribers(message):
     conversation = message.conversation
 
     subscriptions = PushSubscription.objects.filter(
-        Q(user__in=conversation.participants.all()) & ~Q(user__in=exclude_users) & ~Q(user=message.author)
+        Q(user__in=conversation.participants.all()) & ~Q(user=message.author)
     ).distinct()
 
     message_title = message.author.display_name

@@ -70,13 +70,8 @@ def send_messages(sender, instance, created, **kwargs):
 
     topic = 'conversations:message'
 
-    push_exclude_users = []
-
     for subscription in ChannelSubscription.objects.recent().filter(user__in=conversation.participants.all()
                                                                     ).distinct():
-        # TODO deduplicate user objects, maybe use a set
-        if not subscription.away_at:
-            push_exclude_users.append(subscription.user)
 
         payload = ConversationMessageSerializer(message, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic, payload)
@@ -93,7 +88,7 @@ def send_messages(sender, instance, created, **kwargs):
     if not created:
         return
 
-    tasks.notify_message_push_subscribers(message, push_exclude_users)
+    tasks.notify_message_push_subscribers(message)
 
     # Send conversations object to participants after sending a message
     # (important for unread_message_count)
