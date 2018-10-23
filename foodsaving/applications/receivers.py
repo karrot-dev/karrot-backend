@@ -4,7 +4,8 @@ from django.dispatch import receiver
 from foodsaving.applications.tasks import notify_members_about_new_application
 from foodsaving.conversations.models import Conversation
 from foodsaving.groups.models import GroupMembership, GroupNotificationType
-from foodsaving.applications.models import GroupApplication
+from foodsaving.applications.models import GroupApplication, GroupApplicationStatus
+from foodsaving.users.models import post_erase_user
 
 
 @receiver(post_save, sender=GroupApplication)
@@ -51,3 +52,10 @@ def group_member_removed(sender, instance, **kwargs):
         conversation = Conversation.objects.get_for_target(application)
         if conversation:
             conversation.leave(user)
+
+
+@receiver(post_erase_user)
+def user_erased(sender, instance, **kwargs):
+    user = instance
+    for application in user.groupapplication_set.filter(status=GroupApplicationStatus.PENDING.value):
+        application.withdraw()

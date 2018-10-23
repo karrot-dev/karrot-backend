@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import transaction, models
 from django.db.models import EmailField, BooleanField, TextField, CharField, DateTimeField, ForeignKey, Q
+from django.dispatch import Signal
 from django.utils import timezone
 from versatileimagefield.fields import VersatileImageField
 
@@ -15,6 +16,8 @@ from foodsaving.users.emails import prepare_accountdelete_request_email, prepare
 from foodsaving.webhooks.models import EmailEvent
 
 MAX_DISPLAY_NAME_LENGTH = 80
+
+post_erase_user = Signal()
 
 
 class UserQuerySet(models.QuerySet):
@@ -178,11 +181,10 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
 
         To keep historic pickup infos, keep the user account but clear personal data.
         """
-        # Emits pre_delete and post_delete signals, they are used to remove the user from pick-ups
-        for _ in Group.objects.filter(members__in=[
-                self,
-        ]):
-            GroupMembership.objects.filter(group=_, user=self).delete()
+        # Removing group memberships emits pre_delete and post_delete signals,
+        # they are used to remove the user from pick-ups
+        for group in Group.objects.filter(members__in=[self]):
+            GroupMembership.objects.filter(group=group, user=self).delete()
 
         success_email = prepare_accountdelete_success_email(self)
 
@@ -207,6 +209,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         self.save()
 
         VerificationCode.objects.filter(user=self, type=VerificationCode.ACCOUNT_DELETE).delete()
+        post_erase_user.send(sender=User.__class__, instance=self)
         success_email.send()
 
     def has_perm(self, perm, obj=None):

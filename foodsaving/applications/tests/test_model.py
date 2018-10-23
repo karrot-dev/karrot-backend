@@ -4,7 +4,7 @@ from foodsaving.conversations.models import Conversation
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.applications.factories import GroupApplicationFactory
 from foodsaving.groups.models import GroupMembership
-from foodsaving.applications.models import GroupApplication
+from foodsaving.applications.models import GroupApplication, GroupApplicationStatus
 from foodsaving.users.factories import VerifiedUserFactory
 
 
@@ -22,6 +22,13 @@ class TestApplicationConversationModel(APITestCase):
             self.member,
             self.conversation.participants.all(),
         )
+
+    def test_user_erased(self):
+        self.applicant.refresh_from_db()  # otherwise user.photo.name is None
+        self.applicant.erase()
+
+        self.application.refresh_from_db()
+        self.assertEqual(self.application.status, GroupApplicationStatus.WITHDRAWN.value)
 
     def test_deleting_application_deletes_conversation(self):
         GroupApplication.objects.filter(user=self.applicant, group=self.group).delete()
