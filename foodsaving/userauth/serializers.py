@@ -19,8 +19,7 @@ class AuthLoginSerializer(serializers.Serializer):
         if user:
             login(self.context['request'], user)
         else:
-            msg = 'Unable to login with provided credentials.'
-            raise serializers.ValidationError(msg)
+            raise serializers.ValidationError(_('Unable to log in with provided credentials.'))
 
         return user
 
