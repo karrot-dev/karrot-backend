@@ -91,6 +91,7 @@ class PickupDateSeriesViewSet(
         return self.queryset.filter(store__group__members=self.request.user)
 
     def perform_destroy(self, series):
+        data = self.get_serializer(series).data
         History.objects.create(
             typus=HistoryTypus.SERIES_DELETE,
             group=series.store.group,
@@ -98,6 +99,7 @@ class PickupDateSeriesViewSet(
             users=[
                 self.request.user,
             ],
+            payload=data,
         )
         super().perform_destroy(series)
 

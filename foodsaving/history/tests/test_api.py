@@ -125,7 +125,8 @@ class TestHistoryAPIWithExistingStore(APITestCase, ExtractPaginationMixin):
     def test_create_pickup(self):
         self.client.force_login(self.member)
         self.client.post(
-            '/api/pickup-dates/', {
+            '/api/pickup-dates/',
+            {
                 'date': timezone.now() + relativedelta(days=1),
                 'store': self.store.id
             }
@@ -194,6 +195,7 @@ class TestHistoryAPIWithExistingPickups(APITestCase, ExtractPaginationMixin):
         self.client.delete(self.series_url)
         response = self.get_results(history_url)
         self.assertEqual(response.data[0]['typus'], 'SERIES_DELETE')
+        self.assertEqual(response.data[0]['payload']['rule'], self.series.rule)
 
     def test_join_pickup(self):
         self.client.force_login(self.member)
