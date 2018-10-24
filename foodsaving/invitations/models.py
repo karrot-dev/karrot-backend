@@ -13,9 +13,6 @@ from foodsaving.base.base_models import BaseModel
 class InvitationQuerySet(models.QuerySet):
     @transaction.atomic
     def create_and_send(self, **kwargs):
-        # TODO: make this into a periodic task
-        self.delete_expired_invitations()
-
         invitation = self.create(**kwargs)
         invitation.send_mail()
         return invitation

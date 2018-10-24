@@ -79,7 +79,7 @@ class TestInviteCreate(APITestCase):
         response = self.client.post(base_url, {'email': 'please@join.com', 'group': self.group.id})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_invite_same_email_twice_when_expired(self):
+    def test_invite_again_when_expired(self):
         self.client.force_login(self.member)
         response = self.client.post(base_url, {'email': 'please@join.com', 'group': self.group.id})
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -88,6 +88,9 @@ class TestInviteCreate(APITestCase):
         i = Invitation.objects.get(id=response.data['id'])
         i.expires_at = timezone.now() - relativedelta(days=1)
         i.save()
+
+        # delete expired invitations
+        Invitation.objects.delete_expired_invitations()
 
         response = self.client.post(base_url, {'email': 'please@join.com', 'group': self.group.id})
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
