@@ -10,6 +10,7 @@ from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agree
 from foodsaving.groups.roles import GROUP_EDITOR
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.history.utils import get_changed_data
+from foodsaving.utils.validators import prevent_reserved_names
 from . import roles
 
 
@@ -85,7 +86,8 @@ class GroupDetailSerializer(GroupBaseSerializer):
         ]
         extra_kwargs = {
             'name': {
-                'min_length': 5
+                'min_length': 5,
+                'validators': [prevent_reserved_names],
             },
             'description': {
                 'trim_whitespace': False,

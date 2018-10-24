@@ -6,6 +6,7 @@ from rest_framework import serializers
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from foodsaving.userauth.models import VerificationCode
+from foodsaving.utils.validators import prevent_reserved_names
 from foodsaving.webhooks.models import EmailEvent
 
 
@@ -31,20 +32,37 @@ class AuthUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = [
-            'id', 'display_name', 'email', 'unverified_email', 'password', 'mobile_number', 'address', 'latitude',
-            'longitude', 'description', 'mail_verified', 'current_group', 'language', 'photo', 'photo_urls'
+            'id',
+            'display_name',
+            'email',
+            'unverified_email',
+            'password',
+            'mobile_number',
+            'address',
+            'latitude',
+            'longitude',
+            'description',
+            'mail_verified',
+            'current_group',
+            'language',
+            'photo',
+            'photo_urls',
         ]
         read_only_fields = ('unverified_email', 'mail_verified')
         extra_kwargs = {
+            'display_name': {
+                'min_length': 3,
+                'validators': [prevent_reserved_names],
+            },
             'password': {
-                'write_only': True
+                'write_only': True,
             },
             'description': {
                 'trim_whitespace': False,
-                'max_length': settings.DESCRIPTION_MAX_LENGTH
+                'max_length': settings.DESCRIPTION_MAX_LENGTH,
             },
             'mail_verified': {
-                'default': False
+                'default': False,
             },
         }
 
