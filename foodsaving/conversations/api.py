@@ -88,6 +88,19 @@ class IsWithinUpdatePeriod(BasePermission):
         return message.is_recent()
 
 
+class ConversationFilter(filters.FilterSet):
+    exclude_read = filters.BooleanFilter(field_name='unread_message_count', method='filter_exclude_read')
+
+    def filter_exclude_read(self, qs, name, value):
+        if value is True:
+            return qs.exclude(unread_message_count=0)
+        return qs
+
+    class Meta:
+        model = Conversation
+        fields = ['exclude_read']
+
+
 class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
     """
     Conversations
@@ -97,6 +110,8 @@ class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
     serializer_class = ConversationSerializer
     permission_classes = (IsAuthenticated, )
     pagination_class = ConversationPagination
+    filterset_class = ConversationFilter
+    filter_backends = (filters.DjangoFilterBackend, )
 
     def get_queryset(self):
         return self.queryset.filter(participants=self.request.user)
@@ -114,6 +129,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
                 'participants',
                 'conversationparticipant_set',
              )
+        queryset = self.filter_queryset(queryset)
 
         conversations = self.paginate_queryset(queryset)
         messages = [c.latest_message for c in conversations if c.latest_message is not None]
@@ -175,6 +191,19 @@ class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
         return Response(serializer.data)
 
 
+class ConversationMessageFilter(filters.FilterSet):
+    exclude_read = filters.BooleanFilter(field_name='unread_replies_count', method='filter_exclude_read')
+
+    def filter_exclude_read(self, qs, name, value):
+        if value is True:
+            return qs.exclude(unread_replies_count=0)
+        return qs
+
+    class Meta:
+        model = ConversationMessage
+        fields = ('conversation', 'thread', 'exclude_read')
+
+
 class ConversationMessageViewSet(
         mixins.CreateModelMixin,
         mixins.ListModelMixin,
@@ -195,7 +224,7 @@ class ConversationMessageViewSet(
         IsWithinUpdatePeriod,
     )
     filter_backends = (filters.DjangoFilterBackend, )
-    filterset_fields = ('conversation', 'thread')
+    filterset_class = ConversationMessageFilter
     pagination_class = MessagePagination
 
     @property
@@ -230,6 +259,7 @@ class ConversationMessageViewSet(
             fields=[
                 coreapi.Field('group', location='query'),
                 coreapi.Field('conversation', location='query'),
+                coreapi.Field('exclude_read', location='query'),
             ]
         )
     )
