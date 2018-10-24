@@ -1,4 +1,4 @@
-from django_filters.rest_framework import FilterSet, BooleanFilter
+from django_filters import rest_framework as filters
 
 from foodsaving.groups.models import Group
 
@@ -9,15 +9,15 @@ def include_empty(qs, name, value):
     return qs.exclude(members=None)
 
 
-class GroupsInfoFilter(FilterSet):
-    include_empty = BooleanFilter(field_name='members', method=include_empty)
+class GroupsInfoFilter(filters.FilterSet):
+    include_empty = filters.BooleanFilter(field_name='members', method=include_empty)
 
     class Meta:
         model = Group
         fields = ['members', 'include_empty', 'name']
 
 
-class GroupsFilter(FilterSet):
+class GroupsFilter(filters.FilterSet):
     class Meta:
         model = Group
         fields = ['members', 'name']

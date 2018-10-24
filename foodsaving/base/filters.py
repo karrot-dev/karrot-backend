@@ -1,8 +1,8 @@
 from django import forms
 from django.utils.dateparse import parse_datetime
 from django.utils.encoding import force_str
+from django_filters import rest_framework as filters
 from django_filters.fields import RangeField
-from django_filters.rest_framework import RangeFilter
 
 
 class ISODateTimeField(forms.DateTimeField):
@@ -19,5 +19,5 @@ class DateTimeRangeField(RangeField):
         super(DateTimeRangeField, self).__init__(fields, *args, **kwargs)
 
 
-class ISODateTimeFromToRangeFilter(RangeFilter):
+class ISODateTimeFromToRangeFilter(filters.RangeFilter):
     field_class = DateTimeRangeField

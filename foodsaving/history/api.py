@@ -1,4 +1,4 @@
-from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import rest_framework as filters
 from rest_framework import viewsets
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
@@ -20,7 +20,7 @@ class HistoryViewSet(viewsets.ReadOnlyModelViewSet):
     """
     serializer_class = HistorySerializer
     queryset = History.objects
-    filter_backends = (DjangoFilterBackend, )
+    filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = HistoryFilter
     permission_classes = (IsAuthenticated, )
     pagination_class = HistoryPagination

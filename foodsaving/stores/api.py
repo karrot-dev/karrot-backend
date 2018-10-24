@@ -1,5 +1,5 @@
 from django.db.models import Avg, Count, Q, Sum
-from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import rest_framework as filters
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import mixins, permissions
 from rest_framework.decorators import action
@@ -40,7 +40,7 @@ class StoreViewSet(
     serializer_class = StoreSerializer
     queryset = StoreModel.objects.filter(deleted=False)
     filterset_fields = ('group', 'name')
-    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filter_backends = (SearchFilter, filters.DjangoFilterBackend)
     search_fields = ('name', 'description')
     permission_classes = (IsAuthenticated, IsGroupEditor)
 

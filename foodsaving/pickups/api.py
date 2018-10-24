@@ -1,4 +1,4 @@
-from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import rest_framework as filters
 from rest_framework import mixins
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -47,7 +47,7 @@ class FeedbackViewSet(
     """
     serializer_class = FeedbackSerializer
     queryset = FeedbackModel.objects.all()
-    filter_backends = (DjangoFilterBackend, )
+    filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = FeedbackFilter
     permission_classes = (IsAuthenticated, IsSameCollector, IsRecentPickupDate)
     pagination_class = FeedbackPagination
@@ -83,7 +83,7 @@ class PickupDateSeriesViewSet(
 
     serializer_class = PickupDateSeriesSerializer
     queryset = PickupDateSeriesModel.objects
-    filter_backends = (DjangoFilterBackend, )
+    filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = PickupDateSeriesFilter
     permission_classes = (IsAuthenticated, IsGroupEditor)
 
@@ -135,7 +135,7 @@ class PickupDateViewSet(
     serializer_class = PickupDateSerializer
     queryset = PickupDateModel.objects \
         .filter(deleted=False)
-    filter_backends = (DjangoFilterBackend, )
+    filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = PickupDatesFilter
     permission_classes = (IsAuthenticated, IsUpcoming, IsGroupEditor, IsEmptyPickupDate)
     pagination_class = PickupDatePagination

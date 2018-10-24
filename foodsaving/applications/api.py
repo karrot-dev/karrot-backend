@@ -1,6 +1,6 @@
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
-from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import rest_framework as filters
 from rest_framework import permissions, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -53,7 +53,7 @@ class GroupApplicationViewSet(
         IsAuthenticated,
         HasVerifiedEmailAddress,
     )
-    filter_backends = (DjangoFilterBackend, )
+    filter_backends = (filters.DjangoFilterBackend, )
     filterset_fields = ('group', 'user', 'status')
 
     def get_throttles(self):

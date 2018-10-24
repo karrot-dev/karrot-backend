@@ -1,7 +1,7 @@
 import pytz
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import rest_framework as filters
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework.decorators import action
@@ -72,7 +72,7 @@ class GroupInfoViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, Generic
     - `?include_empty` - set to False to exclude empty groups without members
     """
     queryset = GroupModel.objects.prefetch_related('members')
-    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filter_backends = (SearchFilter, filters.DjangoFilterBackend)
     filterset_class = GroupsInfoFilter
     search_fields = ('name', 'public_description')
     serializer_class = GroupPreviewSerializer
@@ -84,7 +84,7 @@ class GroupViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUp
     Your groups: list, create, update
     """
     queryset = GroupModel.objects
-    filter_backends = (SearchFilter, DjangoFilterBackend)
+    filter_backends = (SearchFilter, filters.DjangoFilterBackend)
     filterset_class = GroupsFilter
     search_fields = ('name', 'public_description')
     serializer_class = GroupDetailSerializer
