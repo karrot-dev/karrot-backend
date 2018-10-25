@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-10-23 16:17+0000\n"
+"POT-Creation-Date: 2018-10-24 09:50+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: Arabic (https://www.transifex.com/yunity-1/teams/68631/ar/)\n"
 "MIME-Version: 1.0\n"
@@ -212,23 +212,23 @@ msgstr ""
 msgid "You already gave trust to this user"
 msgstr ""
 
-#: foodsaving/groups/serializers.py:24
+#: foodsaving/groups/serializers.py:25
 msgid "Unknown timezone"
 msgstr ""
 
-#: foodsaving/groups/serializers.py:32
+#: foodsaving/groups/serializers.py:33
 msgid "Playground"
 msgstr ""
 
-#: foodsaving/groups/serializers.py:102 foodsaving/groups/serializers.py:181
+#: foodsaving/groups/serializers.py:104 foodsaving/groups/serializers.py:183
 msgid "You cannot manage agreements"
 msgstr ""
 
-#: foodsaving/groups/serializers.py:104
+#: foodsaving/groups/serializers.py:106
 msgid "Agreement is not for this group"
 msgstr ""
 
-#: foodsaving/groups/serializers.py:179
+#: foodsaving/groups/serializers.py:181
 msgid "You are not in this group"
 msgstr ""
 
@@ -527,11 +527,11 @@ msgstr ""
 msgid "Set at least one week in advance"
 msgstr ""
 
-#: foodsaving/userauth/api.py:92 foodsaving/userauth/serializers.py:70
-#: foodsaving/userauth/serializers.py:115
-#: foodsaving/userauth/serializers.py:136
-#: foodsaving/userauth/serializers.py:165
-#: foodsaving/userauth/serializers.py:186
+#: foodsaving/userauth/api.py:92 foodsaving/userauth/serializers.py:88
+#: foodsaving/userauth/serializers.py:133
+#: foodsaving/userauth/serializers.py:154
+#: foodsaving/userauth/serializers.py:183
+#: foodsaving/userauth/serializers.py:204
 msgid "We could not send you an e-mail."
 msgstr ""
 
@@ -539,29 +539,29 @@ msgstr ""
 msgid "Mail is already verified."
 msgstr ""
 
-#: foodsaving/userauth/serializers.py:22
+#: foodsaving/userauth/serializers.py:23
 msgid "Unable to log in with provided credentials."
 msgstr ""
 
-#: foodsaving/userauth/serializers.py:57
-#: foodsaving/userauth/serializers.py:152
+#: foodsaving/userauth/serializers.py:75
+#: foodsaving/userauth/serializers.py:170
 msgid "Similar e-mail exists: "
 msgstr ""
 
-#: foodsaving/userauth/serializers.py:93
+#: foodsaving/userauth/serializers.py:111
 msgid "Verification code is invalid"
 msgstr ""
 
-#: foodsaving/userauth/serializers.py:96
+#: foodsaving/userauth/serializers.py:114
 msgid "Verification code has expired"
 msgstr ""
 
-#: foodsaving/userauth/serializers.py:129
-#: foodsaving/userauth/serializers.py:146
+#: foodsaving/userauth/serializers.py:147
+#: foodsaving/userauth/serializers.py:164
 msgid "Wrong password"
 msgstr ""
 
-#: foodsaving/userauth/serializers.py:178
+#: foodsaving/userauth/serializers.py:196
 msgid "Unknown e-mail address"
 msgstr ""
 
@@ -709,4 +709,9 @@ msgstr ""
 msgid ""
 "You can safely ignore this message if it wasn't you who signed up at our "
 "service using this email address."
+msgstr ""
+
+#: foodsaving/utils/validators.py:8
+#, python-format
+msgid "%(value)s is a reserved name"
 msgstr ""

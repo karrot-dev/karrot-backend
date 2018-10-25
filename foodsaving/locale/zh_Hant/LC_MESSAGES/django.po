@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-10-23 16:17+0000\n"
+"POT-Creation-Date: 2018-10-24 09:50+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Tilmann Becker <tilmann.becker+github@gmail.com>, 2018\n"
 "Language-Team: Chinese (Taiwan) (https://www.transifex.com/yunity-1/teams/68631/zh_TW/)\n"
@@ -217,23 +217,23 @@ msgstr "你不能「信任」你自己"
 msgid "You already gave trust to this user"
 msgstr "你已經給予此名使用者「信任」"
 
-#: foodsaving/groups/serializers.py:24
+#: foodsaving/groups/serializers.py:25
 msgid "Unknown timezone"
 msgstr "未知的時區"
 
-#: foodsaving/groups/serializers.py:32
+#: foodsaving/groups/serializers.py:33
 msgid "Playground"
 msgstr "遊樂區"
 
-#: foodsaving/groups/serializers.py:102 foodsaving/groups/serializers.py:181
+#: foodsaving/groups/serializers.py:104 foodsaving/groups/serializers.py:183
 msgid "You cannot manage agreements"
 msgstr "你無法管理合約"
 
-#: foodsaving/groups/serializers.py:104
+#: foodsaving/groups/serializers.py:106
 msgid "Agreement is not for this group"
 msgstr "不是這個社團的合約"
 
-#: foodsaving/groups/serializers.py:179
+#: foodsaving/groups/serializers.py:181
 msgid "You are not in this group"
 msgstr "你並未在社團裡"
 
@@ -539,11 +539,11 @@ msgstr "此信件為你成功訂閱此社團<strong>領取任務提醒</strong>�
 msgid "Set at least one week in advance"
 msgstr "至少要在一週前設立"
 
-#: foodsaving/userauth/api.py:92 foodsaving/userauth/serializers.py:70
-#: foodsaving/userauth/serializers.py:115
-#: foodsaving/userauth/serializers.py:136
-#: foodsaving/userauth/serializers.py:165
-#: foodsaving/userauth/serializers.py:186
+#: foodsaving/userauth/api.py:92 foodsaving/userauth/serializers.py:88
+#: foodsaving/userauth/serializers.py:133
+#: foodsaving/userauth/serializers.py:154
+#: foodsaving/userauth/serializers.py:183
+#: foodsaving/userauth/serializers.py:204
 msgid "We could not send you an e-mail."
 msgstr "無法寄電郵給你"
 
@@ -551,29 +551,29 @@ msgstr "無法寄電郵給你"
 msgid "Mail is already verified."
 msgstr "郵箱已經認證。"
 
-#: foodsaving/userauth/serializers.py:22
+#: foodsaving/userauth/serializers.py:23
 msgid "Unable to log in with provided credentials."
 msgstr ""
 
-#: foodsaving/userauth/serializers.py:57
-#: foodsaving/userauth/serializers.py:152
+#: foodsaving/userauth/serializers.py:75
+#: foodsaving/userauth/serializers.py:170
 msgid "Similar e-mail exists: "
 msgstr "已經有同樣的信箱註冊了"
 
-#: foodsaving/userauth/serializers.py:93
+#: foodsaving/userauth/serializers.py:111
 msgid "Verification code is invalid"
 msgstr "驗證碼無效"
 
-#: foodsaving/userauth/serializers.py:96
+#: foodsaving/userauth/serializers.py:114
 msgid "Verification code has expired"
 msgstr "驗證碼已過期"
 
-#: foodsaving/userauth/serializers.py:129
-#: foodsaving/userauth/serializers.py:146
+#: foodsaving/userauth/serializers.py:147
+#: foodsaving/userauth/serializers.py:164
 msgid "Wrong password"
 msgstr "密碼錯誤"
 
-#: foodsaving/userauth/serializers.py:178
+#: foodsaving/userauth/serializers.py:196
 msgid "Unknown e-mail address"
 msgstr "未知的電子郵件地址"
 
@@ -722,3 +722,8 @@ msgid ""
 "You can safely ignore this message if it wasn't you who signed up at our "
 "service using this email address."
 msgstr "如果你並未使用此電子郵件地址註冊我們的服務，你可以忽略這封信"
+
+#: foodsaving/utils/validators.py:8
+#, python-format
+msgid "%(value)s is a reserved name"
+msgstr ""
