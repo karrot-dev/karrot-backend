@@ -1,4 +1,4 @@
--e git+https://github.com/django/channels@9c59938#egg=channels
+
 -e git+https://github.com/tiltec/django-influxdb-metrics@07f5701#egg=django-influxdb-metrics
 -e git+https://github.com/tiltec/django-rest-swagger@1c92642#egg=django-rest-swagger
 django[argon2]
@@ -32,4 +32,5 @@ bleach
 bleach_whitelist
 pymdown-extensions
 daphne
+channels
 channels_redis
