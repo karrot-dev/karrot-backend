@@ -3,17 +3,21 @@
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
 # 
+# Translators:
+# Tilmann Becker <tilmann.becker+github@gmail.com>, 2018
+# Stefan Simon <foodsharingtaiwan@gmail.com>, 2018
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2018-10-24 09:50+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Tilmann Becker <tilmann.becker+github@gmail.com>, 2018\n"
+"PO-Revision-Date: 2017-02-24 04:04+0000\n"
+"Last-Translator: Stefan Simon <foodsharingtaiwan@gmail.com>, 2018\n"
 "Language-Team: Chinese (Taiwan) (https://www.transifex.com/yunity-1/teams/68631/zh_TW/)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.6.0\n"
 "Language: zh_TW\n"
@@ -159,11 +163,11 @@ msgstr "你的%(group_name)s申請的新訊息"
 
 #: foodsaving/conversations/serializers.py:163
 msgid "You cannot change the thread of a message"
-msgstr "你不可以更改訊息的討論串中"
+msgstr "你不可以更改留言討論串"
 
 #: foodsaving/conversations/serializers.py:170
 msgid "Thread is not in the same conversation"
-msgstr "討論串中不在同一個對話"
+msgstr "討論串並不在同一個主題"
 
 #: foodsaving/conversations/serializers.py:174
 msgid "You can only reply to Group messages"
@@ -553,7 +557,7 @@ msgstr "郵箱已經認證。"
 
 #: foodsaving/userauth/serializers.py:23
 msgid "Unable to log in with provided credentials."
-msgstr ""
+msgstr "無法以提供的驗證資訊登入"
 
 #: foodsaving/userauth/serializers.py:75
 #: foodsaving/userauth/serializers.py:170
@@ -726,4 +730,4 @@ msgstr "如果你並未使用此電子郵件地址註冊我們的服務，你可
 #: foodsaving/utils/validators.py:8
 #, python-format
 msgid "%(value)s is a reserved name"
-msgstr ""
+msgstr "%(value)s是個已儲存的名稱"
