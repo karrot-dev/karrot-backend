@@ -1,7 +1,14 @@
+from itertools import groupby
+
+from babel.dates import format_date, format_time
 from django.db.models import Q
+from django.utils import timezone, translation
+from django.utils.text import Truncator
+from django.utils.translation import ugettext as _
 from furl import furl
 from huey.contrib.djhuey import db_task
 
+from foodsaving.applications.models import GroupApplicationStatus
 from foodsaving.subscriptions.fcm import notify_subscribers
 from foodsaving.subscriptions.models import PushSubscription, PushSubscriptionPlatform
 from foodsaving.utils import frontend_urls
@@ -13,11 +20,77 @@ def notify_message_push_subscribers(message):
 
     subscriptions = PushSubscription.objects.filter(
         Q(user__in=conversation.participants.all()) & ~Q(user=message.author)
-    ).distinct()
+    ).select_related('user').order_by('user__language').distinct()
 
-    message_title = message.author.display_name
-    if conversation.type() == 'group':
-        message_title = '{} / {}'.format(conversation.target.name, message_title)
+    for (language, subscriptions) in groupby(subscriptions, key=lambda subscription: subscription.user.language):
+        subscriptions = list(subscriptions)
+        notify_message_push_subscribers_with_language(message, subscriptions, language)
+
+
+def get_message_title(message, language):
+    conversation = message.conversation
+    author_name = message.author.display_name
+    type = conversation.type()
+
+    if message.is_thread_reply():
+        thread_start = Truncator(message.thread.content).chars(num=15)
+        return '{} / {}'.format(thread_start, author_name)
+
+    if type == 'group':
+        return '{} / {}'.format(conversation.target.name, author_name)
+
+    if type == 'pickup':
+        pickup = conversation.target
+        group_tz = pickup.store.group.timezone
+        with timezone.override(group_tz):
+            weekday = format_date(
+                pickup.date.astimezone(timezone.get_current_timezone()),
+                'EEEE',
+                locale=translation.to_locale(language),
+            )
+            time = format_time(
+                pickup.date,
+                format='short',
+                locale=translation.to_locale(language),
+                tzinfo=timezone.get_current_timezone(),
+            )
+        short_date = '{} {}'.format(weekday, time)
+        short_name = _('Pickup %(date)s') % {
+            'date': short_date,
+        }
+        return '{} / {}'.format(short_name, author_name)
+
+    if type == 'application':
+        application = conversation.target
+        applicant_name = application.user.display_name
+        if applicant_name == '':
+            applicant_name = '(?)'
+
+        emoji = '❓'
+        if application.status == GroupApplicationStatus.ACCEPTED.value:
+            emoji = '✅'
+        elif application.status == GroupApplicationStatus.DECLINED.value:
+            emoji = '❌'
+        elif application.status == GroupApplicationStatus.WITHDRAWN.value:
+            emoji = '🗑️'
+        application_title = '{} {}'.format(emoji, applicant_name)
+
+        if message.author == application.user:
+            return application_title
+        else:
+            return '{} / {}'.format(application_title, author_name)
+
+    return author_name
+
+
+def notify_message_push_subscribers_with_language(message, subscriptions, language):
+    conversation = message.conversation
+
+    if not translation.check_for_language(language):
+        language = 'en'
+
+    with translation.override(language):
+        message_title = get_message_title(message, language)
 
     if message.is_thread_reply():
         click_action = frontend_urls.thread_url(message.thread)
@@ -32,8 +105,8 @@ def notify_message_push_subscribers(message):
         'tag': 'conversation:{}'.format(conversation.id)
     }
 
-    android_subscriptions = subscriptions.filter(platform=PushSubscriptionPlatform.ANDROID.value)
-    web_subscriptions = subscriptions.filter(platform=PushSubscriptionPlatform.WEB.value)
+    android_subscriptions = [s for s in subscriptions if s.platform == PushSubscriptionPlatform.ANDROID.value]
+    web_subscriptions = [s for s in subscriptions if s.platform == PushSubscriptionPlatform.WEB.value]
 
     notify_subscribers(
         subscriptions=android_subscriptions,

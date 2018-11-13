@@ -11,6 +11,8 @@ def conversation_url(conversation, user):
         return pickup_detail_url(conversation.target)
     elif type == 'private':
         return user_detail_url(user)
+    elif type == 'application':
+        return group_application_url(conversation.target)
     return None
 
 
