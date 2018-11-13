@@ -1,7 +1,6 @@
 from itertools import groupby
 
 from babel.dates import format_date, format_time
-from django.db.models import Q
 from django.utils import timezone, translation
 from django.utils.text import Truncator
 from django.utils.translation import ugettext as _
@@ -16,11 +15,21 @@ from foodsaving.utils import frontend_urls
 
 @db_task()
 def notify_message_push_subscribers(message):
-    conversation = message.conversation
+    if message.is_thread_reply():
+        subscriptions = PushSubscription.objects.filter(
+            user__conversationthreadparticipant__thread=message.thread,
+            user__conversationthreadparticipant__muted=False,
+        )
+    else:
+        subscriptions = PushSubscription.objects.filter(
+            user__conversationparticipant__conversation=message.conversation,
+            user__conversationparticipant__email_notifications=True,
+        )
 
-    subscriptions = PushSubscription.objects.filter(
-        Q(user__in=conversation.participants.all()) & ~Q(user=message.author)
-    ).select_related('user').order_by('user__language').distinct()
+    subscriptions = subscriptions.exclude(user=message.author).\
+        select_related('user').\
+        order_by('user__language').\
+        distinct()
 
     for (language, subscriptions) in groupby(subscriptions, key=lambda subscription: subscription.user.language):
         subscriptions = list(subscriptions)

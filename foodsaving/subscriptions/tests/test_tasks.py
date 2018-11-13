@@ -1,18 +1,111 @@
-from datetime import datetime
+from unittest.mock import patch, call
 
 from dateutil.parser import parse
 from django.test import TestCase
 
 from foodsaving.applications.factories import GroupApplicationFactory
-from foodsaving.conversations.models import Conversation, ConversationMessage
+from foodsaving.conversations.models import Conversation, ConversationMessage, ConversationThreadParticipant, \
+    ConversationParticipant
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.stores.factories import StoreFactory
-from foodsaving.subscriptions.tasks import get_message_title
+from foodsaving.subscriptions.models import PushSubscription, PushSubscriptionPlatform
+from foodsaving.subscriptions.tasks import get_message_title, notify_message_push_subscribers
 from foodsaving.users.factories import UserFactory
 
 
+@patch('foodsaving.subscriptions.tasks.notify_message_push_subscribers_with_language')
 class TestMessagePushNotifications(TestCase):
+    def test_message_notification(self, notify):
+        author = UserFactory()
+        user = UserFactory()
+        group = GroupFactory(members=[author, user])
+        conversation = Conversation.objects.get_or_create_for_target(group)
+        message = conversation.messages.create(author=author, content='bla')
+
+        subscriptions = [
+            PushSubscription.objects.create(user=user, token='', platform=PushSubscriptionPlatform.ANDROID.value)
+        ]
+
+        notify.reset_mock()
+        notify_message_push_subscribers(message)
+        notify.assert_called_once_with(message, subscriptions, 'en')
+
+    def test_reply_notification(self, notify):
+        author = UserFactory()
+        reply_author = UserFactory()
+        group = GroupFactory(members=[author, reply_author])
+        conversation = Conversation.objects.get_or_create_for_target(group)
+        message = conversation.messages.create(author=author, content='bla')
+        reply = ConversationMessage.objects.create(
+            author=reply_author, conversation=conversation, thread=message, content='reply'
+        )
+        subscriptions = [
+            PushSubscription.objects.create(user=author, token='', platform=PushSubscriptionPlatform.ANDROID.value)
+        ]
+
+        notify.reset_mock()
+        notify_message_push_subscribers(reply)
+        notify.assert_called_once_with(reply, subscriptions, 'en')
+
+    def test_groups_by_language(self, notify):
+        author = UserFactory()
+        users = [UserFactory(language=l) for l in ('de', 'de', 'en', 'fr')]
+        group = GroupFactory(members=[author, *users])
+        conversation = Conversation.objects.get_or_create_for_target(group)
+        message = conversation.messages.create(author=author, content='bla')
+
+        subscriptions = [
+            PushSubscription.objects.create(user=u, token='', platform=PushSubscriptionPlatform.ANDROID.value)
+            for u in users
+        ]
+
+        notify.reset_mock()
+        notify_message_push_subscribers(message)
+        notify.assert_has_calls([
+            call(message, subscriptions[:2], 'de'),
+            call(message, subscriptions[2:3], 'en'),
+            call(message, subscriptions[3:4], 'fr'),
+        ])
+        self.assertEqual(len(notify.call_args_list), 3)
+
+    def test_no_message_notification_if_muted(self, notify):
+        author = UserFactory()
+        user = UserFactory()
+        group = GroupFactory(members=[author, user])
+        conversation = Conversation.objects.get_or_create_for_target(group)
+        message = conversation.messages.create(author=author, content='bla')
+
+        participant = ConversationParticipant.objects.get(user=user, conversation=conversation)
+        participant.email_notifications = False
+        participant.save()
+        PushSubscription.objects.create(user=user, token='', platform=PushSubscriptionPlatform.ANDROID.value)
+
+        notify.reset_mock()
+        notify_message_push_subscribers(message)
+        notify.assert_not_called()
+
+    def test_no_reply_notification_if_muted(self, notify):
+        author = UserFactory()
+        reply_author = UserFactory()
+        group = GroupFactory(members=[author, reply_author])
+        conversation = Conversation.objects.get_or_create_for_target(group)
+        message = conversation.messages.create(author=author, content='bla')
+        reply = ConversationMessage.objects.create(
+            author=reply_author, conversation=conversation, thread=message, content='reply'
+        )
+
+        participant = ConversationThreadParticipant.objects.get(user=author, thread=reply.thread)
+        participant.muted = True
+        participant.save()
+        PushSubscription.objects.create(user=author, token='', platform=PushSubscriptionPlatform.ANDROID.value)
+
+        notify.reset_mock()
+        notify_message_push_subscribers(reply)
+        notify.assert_not_called()
+
+
+class TestMessagePushNotificationTitles(TestCase):
     def test_private_message_title(self):
         author = UserFactory()
         user = UserFactory()
