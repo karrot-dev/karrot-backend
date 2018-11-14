@@ -54,6 +54,14 @@ class GroupMembershipInfoSerializer(serializers.ModelSerializer):
         return membership.inactive_at is None
 
 
+class GroupHistorySerializer(GroupBaseSerializer):
+    timezone = TimezoneField()
+
+    class Meta:
+        model = GroupModel
+        fields = '__all__'
+
+
 class GroupDetailSerializer(GroupBaseSerializer):
     "use this also for creating and updating a group"
     memberships = serializers.SerializerMethodField()
@@ -131,14 +139,21 @@ class GroupDetailSerializer(GroupBaseSerializer):
                     del validated_data[field]
 
         changed_data = get_changed_data(group, validated_data)
+        before_data = GroupHistorySerializer(group).data
         group = super().update(group, validated_data)
+        after_data = GroupHistorySerializer(group).data
 
-        if changed_data:
+        if before_data != after_data:
             user = self.context['request'].user
             History.objects.create(
-                typus=HistoryTypus.GROUP_MODIFY, group=group, users=[
+                typus=HistoryTypus.GROUP_MODIFY,
+                group=group,
+                users=[
                     user,
-                ], payload=changed_data
+                ],
+                payload=changed_data,
+                before=before_data,
+                after=after_data,
             )
         return group
 
@@ -147,9 +162,13 @@ class GroupDetailSerializer(GroupBaseSerializer):
         group = GroupModel.objects.create(**validated_data)
         GroupMembership.objects.create(group=group, user=user, roles=[roles.GROUP_EDITOR])
         History.objects.create(
-            typus=HistoryTypus.GROUP_CREATE, group=group, users=[
+            typus=HistoryTypus.GROUP_CREATE,
+            group=group,
+            users=[
                 user,
-            ], payload=self.initial_data
+            ],
+            payload=self.initial_data,
+            after=GroupHistorySerializer(group).data
         )
         return group
 
