@@ -18,7 +18,7 @@ from foodsaving.pickups.permissions import (
 )
 from foodsaving.pickups.serializers import (
     PickupDateSerializer, PickupDateSeriesSerializer, PickupDateJoinSerializer, PickupDateLeaveSerializer,
-    FeedbackSerializer
+    FeedbackSerializer, PickupDateSeriesHistorySerializer, PickupDateHistorySerializer
 )
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
@@ -100,6 +100,7 @@ class PickupDateSeriesViewSet(
                 self.request.user,
             ],
             payload=data,
+            before=PickupDateSeriesHistorySerializer(series).data,
         )
         super().perform_destroy(series)
 
@@ -158,7 +159,8 @@ class PickupDateViewSet(
             store=pickup.store,
             users=[
                 self.request.user,
-            ]
+            ],
+            before=PickupDateHistorySerializer(pickup).data,
         )
         pickup.save()
 

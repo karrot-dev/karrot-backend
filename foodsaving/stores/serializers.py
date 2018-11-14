@@ -9,6 +9,12 @@ from foodsaving.history.utils import get_changed_data
 from foodsaving.stores.models import Store as StoreModel, StoreStatus
 
 
+class StoreHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StoreModel
+        fields = '__all__'
+
+
 class StoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = StoreModel
@@ -40,6 +46,7 @@ class StoreSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data['created_by'] = self.context['request'].user
+
         store = super().create(validated_data)
 
         # TODO move into receiver
@@ -51,13 +58,16 @@ class StoreSerializer(serializers.ModelSerializer):
                 self.context['request'].user,
             ],
             payload=self.initial_data,
+            after=StoreHistorySerializer(store).data,
         )
         store.group.refresh_active_status()
         return store
 
     def update(self, store, validated_data):
         changed_data = get_changed_data(store, validated_data)
+        before_data = StoreHistorySerializer(store).data
         store = super().update(store, validated_data)
+        after_data = StoreHistorySerializer(store).data
 
         if 'weeks_in_advance' in changed_data or \
                 ('status' in changed_data and store.status == StoreStatus.ACTIVE.value):
@@ -65,7 +75,7 @@ class StoreSerializer(serializers.ModelSerializer):
                 for series in store.series.all():
                     series.update_pickup_dates()
 
-        if changed_data:
+        if before_data != after_data:
             History.objects.create(
                 typus=HistoryTypus.STORE_MODIFY,
                 group=store.group,
@@ -74,6 +84,8 @@ class StoreSerializer(serializers.ModelSerializer):
                     self.context['request'].user,
                 ],
                 payload=changed_data,
+                before=before_data,
+                after=after_data,
             )
         store.group.refresh_active_status()
         return store

@@ -18,6 +18,12 @@ from foodsaving.pickups.models import (
 )
 
 
+class PickupDateHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PickupDateModel
+        fields = '__all__'
+
+
 class PickupDateSerializer(serializers.ModelSerializer):
     class Meta:
         model = PickupDateModel
@@ -48,6 +54,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
                 self.context['request'].user,
             ],
             payload=self.initial_data,
+            after=PickupDateHistorySerializer(pickupdate).data,
         )
         pickupdate.store.group.refresh_active_status()
         return pickupdate
@@ -73,9 +80,11 @@ class PickupDateSerializer(serializers.ModelSerializer):
                 if not pickupdate.is_description_changed:
                     changed_data['is_description_changed'] = True
 
+        before_data = PickupDateHistorySerializer(pickupdate).data
         super().update(pickupdate, selected_validated_data)
+        after_data = PickupDateHistorySerializer(pickupdate).data
 
-        if changed_data:
+        if before_data != after_data:
             History.objects.create(
                 typus=HistoryTypus.PICKUP_MODIFY,
                 group=pickupdate.store.group,
@@ -84,6 +93,8 @@ class PickupDateSerializer(serializers.ModelSerializer):
                     self.context['request'].user,
                 ],
                 payload=changed_data,
+                before=before_data,
+                after=after_data,
             )
         pickupdate.store.group.refresh_active_status()
         return pickupdate
@@ -142,6 +153,12 @@ class PickupDateLeaveSerializer(serializers.ModelSerializer):
         return pickupdate
 
 
+class PickupDateSeriesHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PickupDateSeriesModel
+        fields = '__all__'
+
+
 class PickupDateSeriesSerializer(serializers.ModelSerializer):
     class Meta:
         model = PickupDateSeriesModel
@@ -159,6 +176,7 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
                 self.context['request'].user,
             ],
             payload=self.initial_data,
+            after=PickupDateSeriesHistorySerializer(series).data,
         )
         series.store.group.refresh_active_status()
         return series
@@ -170,9 +188,11 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
                 selected_validated_data[attr] = validated_data[attr]
 
         changed_data = get_changed_data(series, selected_validated_data)
+        before_data = PickupDateSeriesHistorySerializer(series).data
         super().update(series, selected_validated_data)
+        after_data = PickupDateSeriesHistorySerializer(series).data
 
-        if changed_data:
+        if before_data != after_data:
             History.objects.create(
                 typus=HistoryTypus.SERIES_MODIFY,
                 group=series.store.group,
@@ -181,6 +201,8 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
                     self.context['request'].user,
                 ],
                 payload=changed_data,
+                before=before_data,
+                after=after_data,
             )
         series.store.group.refresh_active_status()
         return series
