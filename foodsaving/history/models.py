@@ -59,3 +59,16 @@ class History(NicelyFormattedModel):
 
     def __str__(self):
         return 'History {} - {} ({})'.format(self.date, HistoryTypus.name(self.typus), self.group)
+
+    def changed(self):
+        before = self.before or {}
+        after = self.after or {}
+        keys = set(after.keys()).union(before.keys())
+        changed_keys = [k for k in keys if before.get(k) != after.get(k)]
+
+        return {
+            'before': {k: before.get(k)
+                       for k in changed_keys if k in before},
+            'after': {k: after.get(k)
+                      for k in changed_keys if k in after},
+        }
