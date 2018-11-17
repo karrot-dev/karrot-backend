@@ -1,5 +1,3 @@
-from itertools import zip_longest
-
 import dateutil.rrule
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -14,6 +12,7 @@ from foodsaving.base.base_models import BaseModel
 from foodsaving.conversations.models import ConversationMixin
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.pickups import stats
+from foodsaving.pickups.utils import match_pickups_with_dates, rrule_between_dates_in_local_time
 from foodsaving.stores.models import StoreStatus
 
 pickup_done = Signal()
@@ -45,35 +44,31 @@ class PickupDateSeries(BaseModel):
             pickup.save()
         return super().delete(*args, **kwargs)
 
-    def get_dates_for_rule(self, start_date):
-        # using local time zone to avoid daylight saving time errors
-        tz = self.store.group.timezone
-        period_start = start_date.astimezone(tz).replace(tzinfo=None)
-        start_date = self.start_date.astimezone(tz).replace(tzinfo=None)
-        dates = dateutil.rrule.rrulestr(
-            self.rule,
-        ).replace(
-            dtstart=start_date,
-        ).between(
-            period_start,
-            period_start + relativedelta(weeks=self.store.weeks_in_advance),
+    def get_dates_for_rule(self, period_start):
+        return rrule_between_dates_in_local_time(
+            rule=self.rule,
+            dtstart=self.start_date,
+            tz=self.store.group.timezone,
+            period_start=period_start,
+            period_duration=relativedelta(weeks=self.store.weeks_in_advance)
         )
-        return [tz.localize(d) for d in dates]
 
     def update_pickup_dates(self, start=timezone.now):
         """
-        synchronizes the pickup dates with the series
+        synchronizes pickup dates with series
 
-        changes to the series fields are also made to the pickup dates, except for
+        changes to series fields are also made to pickup dates, except
         - the field on the pickup date has been modified
         - users have joined the pickup date
         """
 
         # shift start time slightly into future to avoid pickup dates which are only valid for very short time
-        start_date = start() + relativedelta(minutes=5)
+        period_start = start() + relativedelta(minutes=5)
 
-        for pickup, new_date in zip_longest(self.pickup_dates.filter(date__gte=start_date),
-                                            self.get_dates_for_rule(start_date=start_date)):
+        for pickup, new_date in match_pickups_with_dates(
+                pickups=self.pickup_dates.order_by('date').filter(date__gte=period_start),
+                new_dates=self.get_dates_for_rule(period_start=period_start),
+        ):
             if not pickup:
                 # does not yet exist
                 PickupDate.objects.create(

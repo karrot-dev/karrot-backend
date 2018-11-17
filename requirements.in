@@ -34,3 +34,4 @@ pymdown-extensions
 daphne
 channels
 channels_redis
+more-itertools
