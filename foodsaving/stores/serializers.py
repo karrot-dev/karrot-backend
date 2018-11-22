@@ -72,6 +72,7 @@ class StoreSerializer(serializers.ModelSerializer):
         if 'weeks_in_advance' in changed_data or \
                 ('status' in changed_data and store.status == StoreStatus.ACTIVE.value):
             with transaction.atomic():
+                # move this into pickups/receivers.py
                 for series in store.series.all():
                     series.update_pickup_dates()
 

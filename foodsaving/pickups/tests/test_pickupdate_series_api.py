@@ -4,8 +4,10 @@ from dateutil import rrule
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrulestr
+from dateutil.tz import tzlocal
 from django.utils import timezone
 from django.utils.datetime_safe import datetime
+from more_itertools import interleave
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -23,7 +25,7 @@ def shift_date_in_local_time(old_date, delta, tz):
     # e.g. 20:00 + 1 day is always 20:00 on the next day, even if UTC offset changes
     old_date = old_date.astimezone(tz).replace(tzinfo=None)
     new_date = old_date + delta
-    return tz.localize(new_date)
+    return tz.localize(new_date).astimezone(tzlocal())
 
 
 class TestPickupDateSeriesCreationAPI(APITestCase, ExtractPaginationMixin):
@@ -435,6 +437,145 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.member)
         response = self.client.patch(url, {'rule': 'FREQ=WEEKLY;BYDAY='})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
+    def test_keeps_moved_pickup(self):
+        # move pickup via API
+        pickup = self.series.pickup_dates.first()
+        pickup_url = '/api/pickup-dates/{}/'.format(pickup.id)
+        self.client.force_login(user=self.member)
+        response = self.client.patch(pickup_url, {
+            'date': pickup.date + relativedelta(days=8),
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # run update
+        self.series.update_pickup_dates(start=lambda: self.now)
+
+        response = self.client.get('/api/pickup-dates/?series={}'.format(self.series.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual([parse(p['date']) for p in response.data['results']], [
+            shift_date_in_local_time(self.series.start_date, delta, self.group.timezone) for delta in (
+                relativedelta(days=7),
+                relativedelta(days=8),
+                relativedelta(days=14),
+                relativedelta(days=21),
+            )
+        ])
+
+    def test_cancels_moved_pickup_on_series_change(self):
+        # move pickup
+        pickup = self.series.pickup_dates.first()
+        pickup_url = '/api/pickup-dates/{}/'.format(pickup.id)
+        self.client.force_login(user=self.member)
+        response = self.client.patch(pickup_url, {
+            'date': pickup.date + relativedelta(days=8),
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # change series rule
+        series_url = '/api/pickup-date-series/{}/'.format(self.series.id)
+        response = self.client.patch(series_url, {
+            'start_date': self.series.start_date + relativedelta(hours=2),
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.series.refresh_from_db()
+
+        response = self.client.get('/api/pickup-dates/?series={}'.format(self.series.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual([parse(p['date']) for p in response.data['results']], [
+            shift_date_in_local_time(self.series.start_date, delta, self.group.timezone) for delta in (
+                relativedelta(days=0),
+                relativedelta(days=7),
+                relativedelta(days=14),
+                relativedelta(days=21),
+            )
+        ])
+
+    def test_cancels_nonmatching_joined_pickups(self):
+        # join pickups
+        [p.add_collector(self.member) for p in self.series.pickup_dates.all()]
+
+        # change series rule
+        series_url = '/api/pickup-date-series/{}/'.format(self.series.id)
+        self.client.force_login(user=self.member)
+        response = self.client.patch(series_url, {
+            'start_date': self.series.start_date + relativedelta(days=1),
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.series.refresh_from_db()
+
+        response = self.client.get('/api/pickup-dates/?series={}'.format(self.series.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual([parse(p['date']) for p in response.data['results']], [
+            shift_date_in_local_time(self.series.start_date, delta, self.group.timezone) for delta in (
+                relativedelta(days=0),
+                relativedelta(days=7),
+                relativedelta(days=14),
+                relativedelta(days=21),
+            )
+        ])
+        self.assertEqual([p['collector_ids'] for p in response.data['results']], [[] for _ in range(4)])
+
+    def test_keeps_matching_joined_pickups(self):
+        # join pickups
+        [p.add_collector(self.member) for p in self.series.pickup_dates.all()]
+
+        # change series rule to add another day
+        recurrence = rrule.rrule(
+            freq=rrule.WEEKLY,
+            byweekday=[
+                self.now.weekday(),
+                (self.now + relativedelta(days=1)).weekday(),
+            ],
+        )
+        series_url = '/api/pickup-date-series/{}/'.format(self.series.id)
+        self.client.force_login(user=self.member)
+        response = self.client.patch(series_url, {
+            'rule': str(recurrence),
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.series.refresh_from_db()
+
+        response = self.client.get('/api/pickup-dates/?series={}'.format(self.series.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual([parse(p['date']) for p in response.data['results']], [
+            shift_date_in_local_time(self.series.start_date, delta, self.group.timezone) for delta in (
+                relativedelta(days=0),
+                relativedelta(days=1),
+                relativedelta(days=7),
+                relativedelta(days=8),
+                relativedelta(days=14),
+                relativedelta(days=15),
+                relativedelta(days=21),
+                relativedelta(days=22),
+            )
+        ])
+        self.assertEqual(
+            [p['collector_ids'] for p in response.data['results']],
+            list(interleave(
+                [[self.member.id] for _ in range(4)],
+                [[] for _ in range(4)],
+            )),
+        )
+
+    def test_cancels_leftover_pickups(self):
+        # join pickups
+        [p.add_collector(self.member) for p in self.series.pickup_dates.all()]
+
+        # change weeks_in_advance
+        store_url = '/api/stores/{}/'.format(self.store.id)
+        self.client.force_login(user=self.member)
+        self.client.patch(store_url, {
+            'weeks_in_advance': 1,
+        })
+
+        response = self.client.get('/api/pickup-dates/?series={}'.format(self.series.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual([parse(p['date']) for p in response.data['results']], [
+            shift_date_in_local_time(self.series.start_date, delta, self.group.timezone)
+            for delta in (relativedelta(days=0), )
+        ])
+        self.assertEqual(response.data['results'][0]['collector_ids'][0], self.member.id)
 
 
 class TestPickupDateSeriesAPIAuth(APITestCase):
