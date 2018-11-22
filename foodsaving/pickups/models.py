@@ -206,6 +206,14 @@ class PickupDate(BaseModel, ConversationMixin):
     max_collectors = models.PositiveIntegerField(null=True)
     deleted = models.BooleanField(default=False)
 
+    cancelled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        related_name='pickups_cancelled',
+        on_delete=models.SET_NULL,
+    )
+    cancelled_at = models.DateTimeField(null=True)
+
     # internal values for change detection
     # used when the respective value in the series gets updated
     is_date_changed = models.BooleanField(default=False)
@@ -255,6 +263,11 @@ class PickupDate(BaseModel, ConversationMixin):
             pickupdate=self,
             user=user,
         ).delete()
+
+    def cancel(self, user):
+        self.cancelled_at = timezone.now()
+        self.cancelled_by = user
+        self.save()
 
 
 class PickupDateCollector(BaseModel):
