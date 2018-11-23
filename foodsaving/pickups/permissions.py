@@ -67,6 +67,6 @@ class IsGroupEditor(permissions.BasePermission):
     message = _('You need to be a group editor')
 
     def has_object_permission(self, request, view, obj):
-        if view.action in ('partial_update', 'destroy'):
+        if view.action in ('partial_update', 'cancel', 'destroy'):
             return obj.store.group.is_editor(request.user)
         return True

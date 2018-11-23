@@ -4,6 +4,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.conversations.api import RetrieveConversationMixin
@@ -18,7 +19,7 @@ from foodsaving.pickups.permissions import (
 )
 from foodsaving.pickups.serializers import (
     PickupDateSerializer, PickupDateSeriesSerializer, PickupDateJoinSerializer, PickupDateLeaveSerializer,
-    FeedbackSerializer, PickupDateSeriesHistorySerializer, PickupDateHistorySerializer
+    FeedbackSerializer, PickupDateHistorySerializer, PickupDateSeriesDeleteSerializer
 )
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
@@ -77,7 +78,6 @@ class PickupDateSeriesViewSet(
         mixins.RetrieveModelMixin,
         PartialUpdateModelMixin,
         mixins.ListModelMixin,
-        mixins.DestroyModelMixin,
         viewsets.GenericViewSet,
 ):
 
@@ -90,19 +90,18 @@ class PickupDateSeriesViewSet(
     def get_queryset(self):
         return self.queryset.filter(store__group__members=self.request.user)
 
-    def perform_destroy(self, series):
-        data = self.get_serializer(series).data
-        History.objects.create(
-            typus=HistoryTypus.SERIES_DELETE,
-            group=series.store.group,
-            store=series.store,
-            users=[
-                self.request.user,
-            ],
-            payload=data,
-            before=PickupDateSeriesHistorySerializer(series).data,
-        )
-        super().perform_destroy(series)
+    @action(
+        detail=True,
+        methods=['POST'],
+        serializer_class=PickupDateSeriesDeleteSerializer,
+    )
+    def cancel(self, request, *args, **kwargs):
+        series = self.get_object()
+        serializer = self.get_serializer(series, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
 
 
 class PickupDatePagination(CursorPagination):

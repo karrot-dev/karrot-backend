@@ -19,8 +19,8 @@ def process_finished_pickup_dates():
 
 
 @db_periodic_task(crontab(minute=0))  # every hour
-def update_pickup_dates():
-    PickupDateSeries.objects.create_all_pickup_dates()
+def add_new_pickups():
+    PickupDateSeries.objects.add_new_pickups()
 
 
 @db_periodic_task(crontab(minute=0))  # we check every hour

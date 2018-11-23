@@ -2,6 +2,7 @@ from datetime import timedelta
 
 import dateutil.rrule
 from django.conf import settings
+from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
@@ -27,14 +28,29 @@ class PickupDateHistorySerializer(serializers.ModelSerializer):
 class PickupDateSerializer(serializers.ModelSerializer):
     class Meta:
         model = PickupDateModel
-        fields = ['id', 'date', 'series', 'store', 'max_collectors', 'collector_ids', 'description']
-        update_fields = ['date', 'max_collectors', 'description']
-        extra_kwargs = {
-            'series': {
-                'read_only': True
-            },
-        }
+        fields = [
+            'id',
+            'date',
+            'series',
+            'store',
+            'max_collectors',
+            'collector_ids',
+            'description',
+            'cancelled_at',
+            'last_changed_by',
+            'last_changed_message',
+        ]
+        update_fields = [
+            'date',
+            'max_collectors',
+            'description',
+            'last_changed_message',
+        ]
+        read_only_fields = [
+            'series',
+        ]
 
+    # TODO change to collectors to make it uniform with other endpoints
     collector_ids = serializers.PrimaryKeyRelatedField(source='collectors', many=True, read_only=True)
 
     def validate_store(self, store):
@@ -60,25 +76,11 @@ class PickupDateSerializer(serializers.ModelSerializer):
         return pickupdate
 
     def update(self, pickupdate, validated_data):
-        selected_validated_data = {}
-        for attr in self.Meta.update_fields:
-            if attr in validated_data:
-                selected_validated_data[attr] = validated_data[attr]
+        selected_validated_data = {
+            attr: validated_data[attr]
+            for attr in self.Meta.update_fields if attr in validated_data
+        }
         changed_data = get_changed_data(pickupdate, selected_validated_data)
-
-        if pickupdate.series:
-            if 'max_collectors' in changed_data:
-                selected_validated_data['is_max_collectors_changed'] = True
-                if not pickupdate.is_max_collectors_changed:
-                    changed_data['is_max_collectors_changed'] = True
-            if 'date' in changed_data:
-                selected_validated_data['is_date_changed'] = True
-                if not pickupdate.is_date_changed:
-                    changed_data['is_date_changed'] = True
-            if 'description' in changed_data:
-                selected_validated_data['is_description_changed'] = True
-                if not pickupdate.is_description_changed:
-                    changed_data['is_description_changed'] = True
 
         before_data = PickupDateHistorySerializer(pickupdate).data
         super().update(pickupdate, selected_validated_data)
@@ -162,9 +164,29 @@ class PickupDateSeriesHistorySerializer(serializers.ModelSerializer):
 class PickupDateSeriesSerializer(serializers.ModelSerializer):
     class Meta:
         model = PickupDateSeriesModel
-        fields = ['id', 'max_collectors', 'store', 'rule', 'start_date', 'description']
-        update_fields = ('max_collectors', 'start_date', 'rule', 'description')
+        fields = [
+            'id',
+            'max_collectors',
+            'store',
+            'rule',
+            'start_date',
+            'description',
+            'last_changed_message',
+            'last_changed_by',
+        ]
+        update_fields = [
+            'max_collectors',
+            'start_date',
+            'rule',
+            'description',
+            'last_changed_message',
+            'last_changed_by',
+        ]
+        read_only_fields = [
+            'last_changed_by',
+        ]
 
+    @transaction.atomic()
     def create(self, validated_data):
         series = super().create(validated_data)
 
@@ -181,11 +203,12 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
         series.store.group.refresh_active_status()
         return series
 
+    @transaction.atomic()
     def update(self, series, validated_data):
-        selected_validated_data = {}
-        for attr in self.Meta.update_fields:
-            if attr in validated_data:
-                selected_validated_data[attr] = validated_data[attr]
+        selected_validated_data = {
+            attr: validated_data[attr]
+            for attr in self.Meta.update_fields if attr in validated_data
+        }
 
         changed_data = get_changed_data(series, selected_validated_data)
         before_data = PickupDateSeriesHistorySerializer(series).data
@@ -226,6 +249,45 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
         if not isinstance(rrule, dateutil.rrule.rrule):
             raise serializers.ValidationError(_('Only single recurrence rules are allowed.'))
         return rule_string
+
+    def validate(self, data):
+        data['last_changed_by'] = self.context['request'].user
+        return data
+
+
+class PickupDateSeriesDeleteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PickupDateSeriesModel
+        fields = [
+            'id',
+            'last_changed_message',
+        ]
+        extra_kwargs = {'last_changed_message': {'required': True}}
+
+    @transaction.atomic()
+    def update(self, series, validated_data):
+        # set last_changed_by and last_changed_message
+        super().update(series, validated_data)
+
+        # now delete series, this cancels associated pickups and sends a message to collectors
+        series.delete()
+
+        History.objects.create(
+            typus=HistoryTypus.SERIES_DELETE,
+            group=series.store.group,
+            store=series.store,
+            users=[
+                self.context['request'].user,
+            ],
+            payload=PickupDateSeriesSerializer(series).data,
+            before=PickupDateSeriesHistorySerializer(series).data,
+        )
+        series.store.group.refresh_active_status()
+        return series
+
+    def validate(self, data):
+        data['last_changed_by'] = self.context['request'].user
+        return data
 
 
 class FeedbackSerializer(serializers.ModelSerializer):

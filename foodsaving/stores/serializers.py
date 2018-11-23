@@ -28,6 +28,8 @@ class StoreSerializer(serializers.ModelSerializer):
             'longitude',
             'weeks_in_advance',
             'status',
+            'last_changed_message',
+            'last_changed_by',
         ]
 
         extra_kwargs = {
@@ -37,7 +39,10 @@ class StoreSerializer(serializers.ModelSerializer):
             'description': {
                 'trim_whitespace': False,
                 'max_length': settings.DESCRIPTION_MAX_LENGTH,
-            }
+            },
+            'last_changed_by': {
+                'read_only': True,
+            },
         }
 
     status = serializers.ChoiceField(
@@ -63,6 +68,7 @@ class StoreSerializer(serializers.ModelSerializer):
         store.group.refresh_active_status()
         return store
 
+    @transaction.atomic()
     def update(self, store, validated_data):
         changed_data = get_changed_data(store, validated_data)
         before_data = StoreHistorySerializer(store).data
@@ -71,10 +77,12 @@ class StoreSerializer(serializers.ModelSerializer):
 
         if 'weeks_in_advance' in changed_data or \
                 ('status' in changed_data and store.status == StoreStatus.ACTIVE.value):
-            with transaction.atomic():
-                # move this into pickups/receivers.py
-                for series in store.series.all():
-                    series.update_pickup_dates()
+            # TODO: move this into pickups/receivers.py
+            for series in store.series.all():
+                series.last_changed_by = store.last_changed_by
+                series.last_changed_message = store.last_changed_message
+                series.save()
+                series.override_pickups()
 
         if before_data != after_data:
             History.objects.create(
@@ -102,3 +110,7 @@ class StoreSerializer(serializers.ModelSerializer):
         if w < 1:
             raise serializers.ValidationError(_('Set at least one week in advance'))
         return w
+
+    def validate(self, data):
+        data['last_changed_by'] = self.context['request'].user
+        return data

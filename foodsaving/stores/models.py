@@ -25,7 +25,17 @@ class Store(BaseModel, LocationModel):
     description = models.TextField(blank=True)
     weeks_in_advance = models.PositiveIntegerField(default=4)
     status = models.CharField(max_length=20, default=DEFAULT_STATUS)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
+    )  # TODO replace with last_changed_by
+
+    last_changed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name='changed_stores',
+        null=True,
+    )
+    last_changed_message = models.TextField(null=True)
 
     deleted = models.BooleanField(default=False)
 
