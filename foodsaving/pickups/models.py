@@ -89,11 +89,7 @@ class PickupDateSeries(BaseModel):
             self.pickups_created_until = dates[-1]
             self.save()
 
-    def override_pickups(self):
-        """
-        create new pickups, cancel/delete all pickups that don't match series
-        """
-
+    def preview_override_pickups(self):
         # shift start time slightly into future to avoid pickup dates which are only valid for very short time
         period_start = timezone.now() + relativedelta(minutes=5)
         dates = rrule_between_dates_in_local_time(
@@ -104,20 +100,29 @@ class PickupDateSeries(BaseModel):
             period_duration=relativedelta(weeks=self.store.weeks_in_advance)
         )
 
-        for pickup, new_date in match_pickups_with_dates(
-                pickups=self.pickup_dates.order_by('date').filter(date__gt=period_start),
-                new_dates=dates,
-        ):
+        return match_pickups_with_dates(
+            pickups=self.pickup_dates.order_by('date').filter(date__gt=period_start),
+            new_dates=dates,
+        )
+
+    def override_pickups(self):
+        """
+        create new pickups and cancel/delete all pickups that don't match series
+        """
+
+        date = None
+
+        for pickup, date in self.preview_override_pickups():
             if not pickup:
-                self.create_pickup(new_date)
-            elif not new_date:
+                self.create_pickup(date)
+            elif not date:
                 if pickup.collectors.count() > 0:
                     pickup.cancel(user=self.last_changed_by, message=self.last_changed_message)
                 else:
                     pickup.delete()
 
-        if len(dates) > 0:
-            self.pickups_created_until = dates[-1]
+        if date:
+            self.pickups_created_until = date
             self.save()
 
     def __str__(self):

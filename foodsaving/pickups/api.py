@@ -102,12 +102,34 @@ class PickupDateSeriesViewSet(
         serializer_class=PickupDateSeriesDeleteSerializer,
     )
     def cancel(self, request, *args, **kwargs):
+        """Cancel upcoming pickups and delete this series"""
         series = self.get_object()
         serializer = self.get_serializer(series, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
         return Response(serializer.data)
+
+    @action(
+        detail=True,
+        methods=['POST'],
+        serializer_class=PickupDateSeriesUpdateSerializer,
+    )
+    def get_pickup_preview(self, request, *args, **kwargs):
+        """Returns an overview which pickups will get created or cancelled when modifying the series"""
+        series = self.get_object()
+        serializer = self.get_serializer(series, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        for (key, value) in serializer.validated_data.items():
+            setattr(series, key, value)
+
+        preview = series.preview_override_pickups()
+
+        return Response([{
+            'existing_pickup': PickupDateSerializer(pickup).data if pickup else None,
+            'new_date': date
+        } for (pickup, date) in preview])
 
 
 class PickupDatePagination(CursorPagination):
