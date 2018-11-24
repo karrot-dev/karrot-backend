@@ -34,12 +34,13 @@ class HistoryTypus(enum.Enum):
 
 class HistoryQuerySet(models.QuerySet):
     def create(self, typus, group, **kwargs):
-        a = super().create(typus=typus, group=group, **without_keys(kwargs, {'users'}))
+        entry = super().create(typus=typus, group=group, **without_keys(kwargs, {'users'}))
         if kwargs.get('users') is not None:
-            a.users.add(*kwargs['users'])
+            entry.users.add(*kwargs['users'])
 
         # TODO remove and just use post_save signal
-        history_created.send(sender=History.__class__, instance=a)
+        history_created.send(sender=History.__class__, instance=entry)
+        return entry
 
 
 class History(NicelyFormattedModel):

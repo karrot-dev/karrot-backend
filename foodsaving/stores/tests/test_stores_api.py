@@ -189,7 +189,6 @@ class TestStoreChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
         self.store = StoreFactory(group=self.group)
         self.store_url = self.url + str(self.store.id) + '/'
         self.series = PickupDateSeriesFactory(max_collectors=3, store=self.store)
-        self.series.update_pickup_dates(start=lambda: self.now)
 
     def test_reduce_weeks_in_advance(self):
         self.client.force_login(user=self.member)

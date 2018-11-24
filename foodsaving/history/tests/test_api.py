@@ -112,9 +112,9 @@ class TestHistoryAPIWithExistingStore(APITestCase, ExtractPaginationMixin):
         )
         response = self.get_results(history_url)
         self.assertEqual(len(response.data), 1, response.data)
-        self.assertEqual(response.data[0]['typus'], 'STORE_MODIFY')
-        self.assertEqual(response.data[0]['payload']['name'], 'newnew')
-        self.assertEqual(len(response.data[0]['payload']), 1)
+        history = response.data[0]
+        self.assertEqual(history['typus'], 'STORE_MODIFY')
+        self.assertEqual(history['payload']['name'], 'newnew')
 
     def test_dont_modify_store(self):
         self.client.force_login(self.member)
@@ -169,7 +169,7 @@ class TestHistoryAPIWithExistingPickups(APITestCase, ExtractPaginationMixin):
         self.client.force_login(self.member)
         self.client.patch(self.pickup_url, {'date': self.pickup.date})
         response = self.get_results(history_url)
-        self.assertEqual(len(response.data), 0)
+        self.assertEqual(len(response.data), 0, response.data)
 
     def test_delete_pickup(self):
         self.client.force_login(self.member)
@@ -188,11 +188,11 @@ class TestHistoryAPIWithExistingPickups(APITestCase, ExtractPaginationMixin):
         self.client.force_login(self.member)
         self.client.patch(self.series_url, {'rule': self.series.rule})
         response = self.get_results(history_url)
-        self.assertEqual(len(response.data), 0)
+        self.assertEqual(len(response.data), 0, response.data)
 
     def test_delete_series(self):
         self.client.force_login(self.member)
-        self.client.delete(self.series_url)
+        self.client.post(self.series_url + 'cancel/')
         response = self.get_results(history_url)
         self.assertEqual(response.data[0]['typus'], 'SERIES_DELETE')
         self.assertEqual(response.data[0]['payload']['rule'], self.series.rule)

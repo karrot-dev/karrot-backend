@@ -6,6 +6,7 @@ from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from django.db import DataError, IntegrityError
 from django.utils import timezone
+from freezegun import freeze_time
 
 from foodsaving.history.models import History
 from foodsaving.pickups.factories import PickupDateFactory, \
@@ -47,9 +48,7 @@ class TestFeedbackModel(TestCase):
 
 class TestPickupDateSeriesModel(TestCase):
     def setUp(self):
-
         self.store = StoreFactory()
-        self.recurrence = rrule.rrule(freq=rrule.WEEKLY, )
 
     def test_create_all_pickup_dates_inactive_stores(self):
         self.store.status = StoreStatus.ARCHIVED.value
@@ -57,8 +56,8 @@ class TestPickupDateSeriesModel(TestCase):
 
         start_date = self.store.group.timezone.localize(datetime.now().replace(2017, 3, 18, 15, 0, 0, 0))
 
-        series = PickupDateSeries(store=self.store, rule=str(self.recurrence), start_date=start_date)
-        series.save()
+        PickupDateSeriesFactory(store=self.store, start_date=start_date)
+
         PickupDate.objects.all().delete()
         PickupDateSeries.objects.add_new_pickups()
         self.assertEqual(PickupDate.objects.count(), 0)
@@ -66,9 +65,10 @@ class TestPickupDateSeriesModel(TestCase):
     def test_daylight_saving_time_to_summer(self):
         start_date = self.store.group.timezone.localize(datetime.now().replace(2017, 3, 18, 15, 0, 0, 0))
 
-        series = PickupDateSeries(store=self.store, rule=str(self.recurrence), start_date=start_date)
-        series.save()
-        series.override_pickups(start=lambda: timezone.now().replace(2017, 3, 18, 4, 40, 13))
+        before_dst_switch = timezone.now().replace(2017, 3, 18, 4, 40, 13)
+        with freeze_time(before_dst_switch, tick=True):
+            series = PickupDateSeriesFactory(store=self.store, start_date=start_date)
+
         expected_dates = []
         for month, day in [(3, 18), (3, 25), (4, 1), (4, 8)]:
             expected_dates.append(self.store.group.timezone.localize(datetime(2017, month, day, 15, 0)))
@@ -78,9 +78,10 @@ class TestPickupDateSeriesModel(TestCase):
     def test_daylight_saving_time_to_winter(self):
         start_date = self.store.group.timezone.localize(datetime.now().replace(2016, 10, 22, 15, 0, 0, 0))
 
-        series = PickupDateSeries(store=self.store, rule=str(self.recurrence), start_date=start_date)
-        series.save()
-        series.override_pickups(start=lambda: timezone.now().replace(2016, 10, 22, 4, 40, 13))
+        before_dst_switch = timezone.now().replace(2016, 10, 22, 4, 40, 13)
+        with freeze_time(before_dst_switch, tick=True):
+            series = PickupDateSeriesFactory(store=self.store, start_date=start_date)
+
         expected_dates = []
         for month, day in [(10, 22), (10, 29), (11, 5), (11, 12)]:
             expected_dates.append(self.store.group.timezone.localize(datetime(2016, month, day, 15, 0)))
@@ -90,9 +91,9 @@ class TestPickupDateSeriesModel(TestCase):
     def test_delete(self):
         now = timezone.now()
         two_weeks_ago = now - relativedelta(weeks=2)
-        series = PickupDateSeries(store=self.store, rule=str(self.recurrence), start_date=two_weeks_ago)
-        series.save()
-        series.override_pickups(start=lambda: two_weeks_ago)
+        with freeze_time(two_weeks_ago, tick=True):
+            series = PickupDateSeriesFactory(store=self.store, start_date=two_weeks_ago)
+
         pickup_dates = series.pickup_dates.all()
         past_date_count = pickup_dates.filter(date__lt=now).count()
         self.assertGreater(pickup_dates.count(), 2)

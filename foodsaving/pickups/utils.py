@@ -31,7 +31,7 @@ def match_pickups_with_dates(pickups, new_dates):
             continue
 
         diff = get_diff(pickup, date)
-        diff_is_small = diff < timedelta(seconds=30)
+        diff_is_small = diff < timedelta(seconds=31)
         next_pickup = pickups.peek(None)
         next_date = new_dates.peek(None)
 

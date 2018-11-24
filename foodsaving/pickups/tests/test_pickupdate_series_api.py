@@ -14,7 +14,6 @@ from rest_framework.test import APITestCase
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupStatus
 from foodsaving.pickups.factories import PickupDateSeriesFactory
-from foodsaving.pickups.models import PickupDate
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.users.factories import UserFactory
@@ -66,7 +65,7 @@ class TestPickupDateSeriesCreationAPI(APITestCase, ExtractPaginationMixin):
             'store': self.store.id,
             'rule': str(recurrence),
             'description': '',
-            'last_changed_message': None,
+            'last_changed_message': '',
             'last_changed_by': self.member.id,
         }
         self.assertEqual(response.data, expected_series_data)
@@ -117,7 +116,7 @@ class TestPickupDateSeriesCreationAPI(APITestCase, ExtractPaginationMixin):
                 'store': self.store.id,
                 'description': '',
                 'last_changed_by': self.member.id,
-                'last_changed_message': None,
+                'last_changed_message': '',
                 'cancelled_at': None,
             })
         self.assertEqual(response.data, created_pickup_dates)
@@ -325,12 +324,16 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_set_invalid_store_fails(self):
+        original_store = self.series.store
         unrelated_store = StoreFactory()
 
         self.client.force_login(user=self.member)
         url = '/api/pickup-date-series/{}/'.format(self.series.id)
         response = self.client.patch(url, {'store': unrelated_store.id})
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data['store'], original_store.id)
+        self.series.refresh_from_db()
+        self.assertEqual(self.series.store.id, original_store.id)
 
     def test_set_multiple_rules_fails(self):
         self.client.force_login(user=self.member)
@@ -414,7 +417,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # run update
-        self.series.add_new_pickups(start=lambda: self.now)
+        self.series.add_new_pickups()
 
         response = self.client.get('/api/pickup-dates/?series={}'.format(self.series.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -463,7 +466,6 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         # change series rule
         series_url = '/api/pickup-date-series/{}/'.format(self.series.id)
         self.client.force_login(user=self.member)
-        print('patch')
         response = self.client.patch(
             series_url, {
                 'start_date': self.series.start_date + relativedelta(days=1),
@@ -486,6 +488,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual([p['collector_ids'] for p in response.data['results']], [[] for _ in range(4)])
 
     def test_keeps_matching_joined_pickups(self):
+        self.maxDiff = None
         # join pickups
         [p.add_collector(self.member) for p in self.series.pickup_dates.all()]
 

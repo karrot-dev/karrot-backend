@@ -19,7 +19,8 @@ from foodsaving.pickups.permissions import (
 )
 from foodsaving.pickups.serializers import (
     PickupDateSerializer, PickupDateSeriesSerializer, PickupDateJoinSerializer, PickupDateLeaveSerializer,
-    FeedbackSerializer, PickupDateHistorySerializer, PickupDateSeriesDeleteSerializer
+    FeedbackSerializer, PickupDateHistorySerializer, PickupDateSeriesDeleteSerializer, PickupDateUpdateSerializer,
+    PickupDateSeriesUpdateSerializer
 )
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
@@ -90,6 +91,11 @@ class PickupDateSeriesViewSet(
     def get_queryset(self):
         return self.queryset.filter(store__group__members=self.request.user)
 
+    def get_serializer_class(self):
+        if self.action == 'partial_update':
+            return PickupDateSeriesUpdateSerializer
+        return self.serializer_class
+
     @action(
         detail=True,
         methods=['POST'],
@@ -147,6 +153,11 @@ class PickupDateViewSet(
             # only prefetch on read_only actions, otherwise there are caching problems when collectors get added
             qs = qs.prefetch_related('collectors')
         return qs
+
+    def get_serializer_class(self):
+        if self.action == 'partial_update':
+            return PickupDateUpdateSerializer
+        return self.serializer_class
 
     def perform_destroy(self, pickup):
         # set deleted flag to make the pickup date invisible

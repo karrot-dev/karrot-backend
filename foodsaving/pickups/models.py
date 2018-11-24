@@ -41,13 +41,13 @@ class PickupDateSeries(BaseModel):
         related_name='changed_series',
         null=True,
     )
-    last_changed_message = models.TextField(null=True)
+    last_changed_message = models.TextField(blank=True)
 
     pickups_created_until = models.DateTimeField(null=True)
 
     def delete(self, *args, **kwargs):
-        # cancel or delete associated pickups
-        self.rule = str(rrule.rrulestr(self.rule, dtstart=self.start_date).replace(until=timezone.now()))
+        # cancel/delete associated pickups
+        self.rule = str(rrule.rrulestr(self.rule).replace(dtstart=self.start_date, until=timezone.now()))
         self.save()
 
         # now delete the series
@@ -64,11 +64,11 @@ class PickupDateSeries(BaseModel):
             last_changed_message=self.last_changed_message,
         )
 
-    def add_new_pickups(self, start=timezone.now):
+    def add_new_pickups(self):
         """create new pickups, don't change the ones modified by users"""
 
         # shift start time slightly into future to avoid pickup dates which are only valid for very short time
-        period_start = start() + relativedelta(minutes=5)
+        period_start = timezone.now() + relativedelta(minutes=5)
         after_date = max(period_start, self.pickups_created_until) if self.pickups_created_until else period_start
         dates = rrule_between_dates_in_local_time(
             rule=self.rule,
@@ -89,13 +89,13 @@ class PickupDateSeries(BaseModel):
             self.pickups_created_until = dates[-1]
             self.save()
 
-    def override_pickups(self, start=timezone.now):
+    def override_pickups(self):
         """
         create new pickups, cancel/delete all pickups that don't match series
         """
 
         # shift start time slightly into future to avoid pickup dates which are only valid for very short time
-        period_start = start() + relativedelta(minutes=5)
+        period_start = timezone.now() + relativedelta(minutes=5)
         dates = rrule_between_dates_in_local_time(
             rule=self.rule,
             dtstart=self.start_date,
@@ -249,7 +249,7 @@ class PickupDate(BaseModel, ConversationMixin):
     max_collectors = models.PositiveIntegerField(null=True)
     deleted = models.BooleanField(default=False)
     cancelled_at = models.DateTimeField(null=True)
-    last_changed_message = models.TextField(null=True)
+    last_changed_message = models.TextField(blank=True)
     last_changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
@@ -302,7 +302,7 @@ class PickupDate(BaseModel, ConversationMixin):
         ).delete()
 
     def cancel(self, user, message):
-        if not message:
+        if message == '':
             raise ValidationError('You need to provide a message to cancel pickups')
         self.cancelled_at = timezone.now()
         self.last_changed_by = user

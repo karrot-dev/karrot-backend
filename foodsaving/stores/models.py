@@ -35,7 +35,7 @@ class Store(BaseModel, LocationModel):
         related_name='changed_stores',
         null=True,
     )
-    last_changed_message = models.TextField(null=True)
+    last_changed_message = models.TextField(blank=True)
 
     deleted = models.BooleanField(default=False)
 

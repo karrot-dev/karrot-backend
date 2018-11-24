@@ -9,7 +9,7 @@ from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agree
     GroupNotificationType
 from foodsaving.groups.roles import GROUP_EDITOR
 from foodsaving.history.models import History, HistoryTypus
-from foodsaving.history.utils import get_changed_data
+from foodsaving.utils.misc import find_changed
 from foodsaving.utils.validators import prevent_reserved_names
 from . import roles
 
@@ -104,7 +104,13 @@ class GroupDetailSerializer(GroupBaseSerializer):
                 'max_length': settings.DESCRIPTION_MAX_LENGTH
             },
         }
-        read_only_fields = ['active', 'members', 'memberships', 'notification_types', 'is_open']
+        read_only_fields = [
+            'active',
+            'members',
+            'memberships',
+            'notification_types',
+            'is_open',
+        ]
 
     def validate_active_agreement(self, active_agreement):
         user = self.context['request'].user
@@ -143,7 +149,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
                 if field in validated_data:
                     del validated_data[field]
 
-        changed_data = get_changed_data(group, validated_data)
+        changed_data = find_changed(group, validated_data)
         before_data = GroupHistorySerializer(group).data
         group = super().update(group, validated_data)
         after_data = GroupHistorySerializer(group).data
@@ -156,7 +162,8 @@ class GroupDetailSerializer(GroupBaseSerializer):
                 users=[
                     user,
                 ],
-                payload=changed_data,
+                payload={k: self.initial_data.get(k)
+                         for k in changed_data.keys()},
                 before=before_data,
                 after=after_data,
             )
