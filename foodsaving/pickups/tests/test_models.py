@@ -1,10 +1,8 @@
 from datetime import datetime
-from django.test import TestCase
-
-from dateutil import rrule
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from django.db import DataError, IntegrityError
+from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
 

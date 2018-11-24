@@ -109,7 +109,7 @@ class StoreUpdateSerializer(StoreSerializer):
         after_data = StoreHistorySerializer(store).data
 
         if 'weeks_in_advance' in validated_data or \
-            ('status' in validated_data and store.status == StoreStatus.ACTIVE.value):
+                ('status' in validated_data and store.status == StoreStatus.ACTIVE.value):
             # TODO: move this into pickups/receivers.py
             for series in store.series.all():
                 series.last_changed_by = store.last_changed_by
