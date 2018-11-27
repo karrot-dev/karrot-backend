@@ -19,7 +19,7 @@ from foodsaving.pickups.permissions import (
 )
 from foodsaving.pickups.serializers import (
     PickupDateSerializer, PickupDateSeriesSerializer, PickupDateJoinSerializer, PickupDateLeaveSerializer,
-    FeedbackSerializer, PickupDateHistorySerializer, PickupDateSeriesDeleteSerializer, PickupDateUpdateSerializer,
+    FeedbackSerializer, PickupDateHistorySerializer, PickupDateSeriesCancelSerializer, PickupDateUpdateSerializer,
     PickupDateSeriesUpdateSerializer
 )
 from foodsaving.utils.mixins import PartialUpdateModelMixin
@@ -99,12 +99,12 @@ class PickupDateSeriesViewSet(
     @action(
         detail=True,
         methods=['POST'],
-        serializer_class=PickupDateSeriesDeleteSerializer,
+        serializer_class=PickupDateSeriesCancelSerializer,
     )
     def cancel(self, request, *args, **kwargs):
         """Cancel upcoming pickups and delete this series"""
         series = self.get_object()
-        serializer = self.get_serializer(series, data=request.data, partial=True)
+        serializer = self.get_serializer(series, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
@@ -121,14 +121,13 @@ class PickupDateSeriesViewSet(
         serializer = self.get_serializer(series, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
-        for (key, value) in serializer.validated_data.items():
-            setattr(series, key, value)
-
-        preview = series.preview_override_pickups()
+        preview = series.preview_override_pickups(
+            rule=serializer.validated_data.get('rule'), start_date=serializer.validated_data.get('start_date')
+        )
 
         return Response([{
             'existing_pickup': PickupDateSerializer(pickup).data if pickup else None,
-            'new_date': date
+            'new_date': date.isoformat() if date else None,
         } for (pickup, date) in preview])
 
 

@@ -271,15 +271,34 @@ class PickupDateSeriesUpdateSerializer(PickupDateSeriesSerializer):
         series.store.group.refresh_active_status()
         return series
 
+    def validate(self, attrs):
+        series = self.instance
+        last_changed_message = attrs.get('last_changed_message', '')
+        rule = attrs.get('rule')
+        start_date = attrs.get('start_date')
+        values_changed = rule != series.rule or start_date != series.start_date
+        if values_changed and last_changed_message == '':
+            preview = series.preview_override_pickups(rule=rule, start_date=start_date)
+            if any(pickup is not None and date is None and pickup.collectors.count() > 0
+                   for (pickup, date) in preview):
+                raise serializers.ValidationError(code='required', detail={
+                    'last_changed_message':
+                    _('You need to provide a message to cancel pickups')
+                },)
+        return super().validate(attrs)
 
-class PickupDateSeriesDeleteSerializer(serializers.ModelSerializer):
+
+class PickupDateSeriesCancelSerializer(serializers.ModelSerializer):
     class Meta:
         model = PickupDateSeriesModel
         fields = [
             'id',
             'last_changed_message',
         ]
-        extra_kwargs = {'last_changed_message': {'required': True}}
+        extra_kwargs = {'last_changed_message': {'allow_blank': False, 'required': True}}
+
+    def save(self, **kwargs):
+        return super().save(last_changed_by=self.context['request'].user, **kwargs)
 
     @transaction.atomic()
     def update(self, series, validated_data):
@@ -303,10 +322,6 @@ class PickupDateSeriesDeleteSerializer(serializers.ModelSerializer):
         )
         series.store.group.refresh_active_status()
         return series
-
-    def validate(self, data):
-        data['last_changed_by'] = self.context['request'].user
-        return data
 
 
 class FeedbackSerializer(serializers.ModelSerializer):

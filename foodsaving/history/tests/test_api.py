@@ -190,9 +190,9 @@ class TestHistoryAPIWithExistingPickups(APITestCase, ExtractPaginationMixin):
         response = self.get_results(history_url)
         self.assertEqual(len(response.data), 0, response.data)
 
-    def test_delete_series(self):
+    def test_cancel_series(self):
         self.client.force_login(self.member)
-        self.client.post(self.series_url + 'cancel/')
+        self.client.post(self.series_url + 'cancel/', {'last_changed_message': 'alles löschen!'})
         response = self.get_results(history_url)
         self.assertEqual(response.data[0]['typus'], 'SERIES_DELETE')
         self.assertEqual(response.data[0]['payload']['rule'], self.series.rule)

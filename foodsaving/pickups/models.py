@@ -7,7 +7,6 @@ from django.db import transaction
 from django.db.models import Count, Q
 from django.dispatch import Signal
 from django.utils import timezone
-from rest_framework.exceptions import ValidationError
 
 from foodsaving.base.base_models import BaseModel
 from foodsaving.conversations.models import ConversationMixin
@@ -70,34 +69,36 @@ class PickupDateSeries(BaseModel):
         # shift start time slightly into future to avoid pickup dates which are only valid for very short time
         period_start = timezone.now() + relativedelta(minutes=5)
         after_date = max(period_start, self.pickups_created_until) if self.pickups_created_until else period_start
-        dates = rrule_between_dates_in_local_time(
-            rule=self.rule,
-            dtstart=self.start_date,
-            tz=self.store.group.timezone,
-            period_start=period_start,
-            period_duration=relativedelta(weeks=self.store.weeks_in_advance),
-            after=after_date,
-        )
-        for pickup, new_date in match_pickups_with_dates(
+
+        date = None
+
+        for pickup, date in match_pickups_with_dates(
                 pickups=self.pickup_dates.order_by('date').filter(date__gt=after_date),
-                new_dates=dates,
+                new_dates=rrule_between_dates_in_local_time(
+                    rule=self.rule,
+                    dtstart=self.start_date,
+                    tz=self.store.group.timezone,
+                    period_start=period_start,
+                    period_duration=relativedelta(weeks=self.store.weeks_in_advance),
+                    after=after_date,
+                ),
         ):
             if not pickup:
-                self.create_pickup(new_date)
+                self.create_pickup(date)
 
-        if len(dates) > 0:
-            self.pickups_created_until = dates[-1]
+        if date:
+            self.pickups_created_until = date
             self.save()
 
-    def preview_override_pickups(self):
+    def preview_override_pickups(self, rule=None, start_date=None, weeks_in_advance=None, tz=None):
         # shift start time slightly into future to avoid pickup dates which are only valid for very short time
         period_start = timezone.now() + relativedelta(minutes=5)
         dates = rrule_between_dates_in_local_time(
-            rule=self.rule,
-            dtstart=self.start_date,
-            tz=self.store.group.timezone,
+            rule=rule or self.rule,
+            dtstart=start_date or self.start_date,
+            tz=tz or self.store.group.timezone,
             period_start=period_start,
-            period_duration=relativedelta(weeks=self.store.weeks_in_advance)
+            period_duration=relativedelta(weeks=weeks_in_advance or self.store.weeks_in_advance)
         )
 
         return match_pickups_with_dates(
@@ -308,7 +309,7 @@ class PickupDate(BaseModel, ConversationMixin):
 
     def cancel(self, user, message):
         if message == '':
-            raise ValidationError('You need to provide a message to cancel pickups')
+            raise ValueError('Message should not be empty')
         self.cancelled_at = timezone.now()
         self.last_changed_by = user
         self.last_changed_message = message
