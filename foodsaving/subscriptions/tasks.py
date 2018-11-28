@@ -121,7 +121,6 @@ def notify_message_push_subscribers_with_language(message, subscriptions, langua
         subscriptions=android_subscriptions,
         fcm_options={
             **fcm_options,
-            'message_icon': 'icon_push',
             # according to https://github.com/fechanique/cordova-plugin-fcm#send-notification-payload-example-rest-api
             'click_action': 'FCM_PLUGIN_ACTIVITY',
             'data_message': {
