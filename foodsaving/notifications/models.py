@@ -1,3 +1,4 @@
+from django.utils import timezone
 from enum import Enum
 
 from django.conf import settings
@@ -21,7 +22,17 @@ class NotificationType(Enum):
     PICKUP_UPCOMING = 'pickup_upcoming'
 
 
+class NotificationQuerySet(models.QuerySet):
+    def expired(self):
+        return self.filter(expires_at__lte=timezone.now())
+
+    def not_expired(self):
+        return self.exclude(expires_at__lte=timezone.now())
+
+
 class Notification(BaseModel):
+    objects = NotificationQuerySet.as_manager()
+
     class Meta:
         ordering = ['-created_at']
 

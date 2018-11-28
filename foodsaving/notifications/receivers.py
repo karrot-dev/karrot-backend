@@ -9,7 +9,7 @@ from foodsaving.notifications.models import Notification, NotificationType
 from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
 from foodsaving.invitations.models import Invitation
-from foodsaving.pickups.models import PickupDate
+from foodsaving.pickups.models import PickupDate, PickupDateCollector
 from foodsaving.stores.models import Store
 
 
@@ -193,3 +193,14 @@ def invitation_accepted(sender, instance, **kwargs):
             'user': user.id
         }
     )
+
+
+@receiver(pre_delete, sender=PickupDateCollector)
+def pickup_collector_removed(sender, instance, **kwargs):
+    collector = instance
+
+    Notification.objects.not_expired().filter(
+        type=NotificationType.PICKUP_UPCOMING.value,
+        user=collector.user,
+        context__pickup_collector=collector.id,
+    ).delete()

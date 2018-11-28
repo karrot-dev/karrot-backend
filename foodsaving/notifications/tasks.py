@@ -1,7 +1,6 @@
 from django.contrib.postgres.fields.jsonb import KeyTextTransform
 from django.db.models import IntegerField
 from django.db.models.functions import Cast
-from django.utils import timezone
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task
 
@@ -11,7 +10,7 @@ from foodsaving.pickups.models import PickupDate, PickupDateCollector
 
 @db_periodic_task(crontab(minute='*'))  # every minute
 def delete_expired_notifications():
-    Notification.objects.filter(expires_at__lte=timezone.now()).delete()
+    Notification.objects.expired().delete()
 
 
 @db_periodic_task(crontab(minute='*'))  # every minute

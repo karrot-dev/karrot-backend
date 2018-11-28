@@ -1,9 +1,11 @@
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.test import TestCase
+from django.utils import timezone
 
 from foodsaving.applications.factories import GroupApplicationFactory
 from foodsaving.notifications.models import Notification, NotificationType
+from foodsaving.notifications.tasks import create_pickup_upcoming_notifications
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
@@ -144,3 +146,18 @@ class TestNotificationReceivers(TestCase):
         context = notifications[0].context
         self.assertEqual(context['group'], group.id)
         self.assertEqual(context['user'], user.id)
+
+    def test_deletes_pickup_upcoming_notification(self):
+        user = UserFactory()
+        group = GroupFactory(members=[user])
+        store = StoreFactory(group=group)
+        in_one_hour = timezone.now() + relativedelta(hours=1)
+        pickup = PickupDateFactory(store=store, date=in_one_hour, collectors=[user])
+        Notification.objects.all().delete()
+
+        create_pickup_upcoming_notifications.call_local()
+        pickup.remove_collector(user)
+
+        notifications = Notification.objects.filter(type=NotificationType.PICKUP_UPCOMING.value)
+        self.assertEqual(notifications.count(), 0)
+
