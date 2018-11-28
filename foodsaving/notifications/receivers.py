@@ -1,5 +1,8 @@
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
+from django.contrib.postgres.fields.jsonb import KeyTextTransform
+from django.db.models import IntegerField
+from django.db.models.functions import Cast
 from django.db.models.signals import post_save, pre_save, pre_delete
 from django.dispatch import receiver
 from django.utils import timezone
@@ -196,11 +199,25 @@ def invitation_accepted(sender, instance, **kwargs):
 
 
 @receiver(pre_delete, sender=PickupDateCollector)
-def pickup_collector_removed(sender, instance, **kwargs):
+def delete_pickup_upcoming_when_collector_leaves(sender, instance, **kwargs):
     collector = instance
 
-    Notification.objects.not_expired().filter(
+    Notification.objects.order_by().not_expired().filter(
         type=NotificationType.PICKUP_UPCOMING.value,
         user=collector.user,
         context__pickup_collector=collector.id,
     ).delete()
+
+
+@receiver(post_save, sender=PickupDate)
+def pickup_cancelled(sender, instance, **kwargs):
+    pickup = instance
+
+    if not pickup.is_cancelled():
+        return
+
+    Notification.objects.order_by().not_expired()\
+        .filter(type=NotificationType.PICKUP_UPCOMING.value)\
+        .annotate(collector_id=Cast(KeyTextTransform('pickup_collector', 'context'), IntegerField()))\
+        .filter(collector_id__in=pickup.pickupdatecollector_set.values_list('id', flat=True))\
+        .delete()

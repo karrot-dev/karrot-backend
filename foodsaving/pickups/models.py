@@ -291,6 +291,9 @@ class PickupDate(BaseModel, ConversationMixin):
     def is_recent(self):
         return self.date >= timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
+    def is_cancelled(self):
+        return self.cancelled_at is not None
+
     def empty_collectors_count(self):
         return max(0, self.max_collectors - self.collectors.count())
 

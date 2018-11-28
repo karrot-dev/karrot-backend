@@ -161,3 +161,17 @@ class TestNotificationReceivers(TestCase):
         notifications = Notification.objects.filter(type=NotificationType.PICKUP_UPCOMING.value)
         self.assertEqual(notifications.count(), 0)
 
+    def test_deletes_pickup_upcoming_notification_when_cancelling_pickup(self):
+        user1, user2 = UserFactory(), UserFactory()
+        group = GroupFactory(members=[user1, user2])
+        store = StoreFactory(group=group)
+        in_one_hour = timezone.now() + relativedelta(hours=1)
+        pickup = PickupDateFactory(store=store, date=in_one_hour, collectors=[user1])
+        Notification.objects.all().delete()
+
+        create_pickup_upcoming_notifications.call_local()
+        pickup.cancel(user=user2, message='asdf')
+
+        notifications = Notification.objects.filter(type=NotificationType.PICKUP_UPCOMING.value)
+        self.assertEqual(notifications.count(), 0)
+
