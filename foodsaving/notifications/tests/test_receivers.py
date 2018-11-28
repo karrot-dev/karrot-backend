@@ -104,7 +104,7 @@ class TestNotificationReceivers(TestCase):
         member = UserFactory()
         creator = UserFactory()
         group = GroupFactory(members=[member, creator])
-        store = StoreFactory(group=group, created_by=creator)
+        store = StoreFactory(group=group, last_changed_by=creator)
 
         notifications = Notification.objects.filter(type=NotificationType.NEW_STORE.value)
         # creator does not get a notification

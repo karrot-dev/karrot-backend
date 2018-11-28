@@ -56,9 +56,6 @@ class StoreSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
-        #  TODO replace with last_changed_by
-        validated_data['created_by'] = self.context['request'].user
-
         store = super().create(validated_data)
 
         # TODO move into receiver

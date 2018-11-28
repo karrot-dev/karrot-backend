@@ -146,14 +146,14 @@ def new_store(sender, instance, created, **kwargs):
 
     store = instance
 
-    for member in store.group.members.exclude(id=store.created_by_id):
+    for member in store.group.members.exclude(id=store.last_changed_by_id):
         Notification.objects.create(
             user=member,
             type=NotificationType.NEW_STORE.value,
             context={
                 'group': store.group.id,
                 'store': store.id,
-                'user': store.created_by_id,
+                'user': store.last_changed_by_id,
             },
         )
 
