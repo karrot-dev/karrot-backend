@@ -68,6 +68,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
     notification_types = serializers.SerializerMethodField()
     application_questions_default = serializers.SerializerMethodField()
     trust_threshold_for_newcomer = serializers.SerializerMethodField()
+    member_inactive_after_days = serializers.SerializerMethodField()
 
     timezone = TimezoneField()
 
@@ -91,6 +92,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'notification_types',
             'is_open',
             'trust_threshold_for_newcomer',
+            'member_inactive_after_days',
         ]
         extra_kwargs = {
             'name': {
@@ -129,6 +131,9 @@ class GroupDetailSerializer(GroupBaseSerializer):
 
     def get_trust_threshold_for_newcomer(self, group):
         return group.get_trust_threshold_for_newcomer()
+
+    def get_member_inactive_after_days(self, group):
+        return settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP
 
     def update(self, group, validated_data):
         if group.is_playground():
