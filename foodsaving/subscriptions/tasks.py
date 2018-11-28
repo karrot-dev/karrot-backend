@@ -1,6 +1,7 @@
 from itertools import groupby
 
 from babel.dates import format_date, format_time
+from django.conf import settings
 from django.utils import timezone, translation
 from django.utils.text import Truncator
 from django.utils.translation import ugettext as _
@@ -11,6 +12,12 @@ from foodsaving.applications.models import GroupApplicationStatus
 from foodsaving.subscriptions.fcm import notify_subscribers
 from foodsaving.subscriptions.models import PushSubscription, PushSubscriptionPlatform
 from foodsaving.utils import frontend_urls
+from foodsaving.users.serializers import UserSerializer
+
+
+class AbsoluteURIBuildingRequest:
+    def build_absolute_uri(self, path):
+        return settings.HOSTNAME + path
 
 
 @db_task()
@@ -100,32 +107,62 @@ def notify_message_push_subscribers_with_language(message, subscriptions, langua
 
     with translation.override(language):
         message_title = get_message_title(message, language)
+        summary_text = _('%n% unread messages')
 
     if message.is_thread_reply():
         click_action = frontend_urls.thread_url(message.thread)
+        tag = 'thread:{}'.format(message.thread.id)
     else:
         click_action = frontend_urls.conversation_url(conversation, message.author)
+        tag = 'conversation:{}'.format(conversation.id)
 
     fcm_options = {
         'message_title': message_title,
         'message_body': message.content,
         # this causes each notification for a given conversation to replace previous notifications
         # fancier would be to make the new notifications show a summary not just the latest message
-        'tag': 'conversation:{}'.format(conversation.id)
+        'tag': tag,
     }
 
     android_subscriptions = [s for s in subscriptions if s.platform == PushSubscriptionPlatform.ANDROID.value]
     web_subscriptions = [s for s in subscriptions if s.platform == PushSubscriptionPlatform.WEB.value]
 
+    author_data = UserSerializer(message.author, context={'request': AbsoluteURIBuildingRequest()}).data
+    author_thumbnail = author_data['photo_urls'].get('thumbnail')
+
     notify_subscribers(
         subscriptions=android_subscriptions,
         fcm_options={
-            **fcm_options,
-            # according to https://github.com/fechanique/cordova-plugin-fcm#send-notification-payload-example-rest-api
-            'click_action': 'FCM_PLUGIN_ACTIVITY',
             'data_message': {
-                # we send the route as data - the frontend takes care of the actual routing
-                'karrot_route': str(furl(click_action).fragment),
+                'title': message_title,
+                'message': message.content,
+                # 'count': 3,
+                'notId': conversation.id,
+                'content-available': 1,
+                'image': author_thumbnail,
+                'image-type': 'circular',
+                'summaryText': summary_text,
+                'style': 'inbox',
+                'force-start': 1,
+                'actions': [
+                    {
+                        'title': 'Mark as read',
+                        'callback': 'mark',
+                        'foreground': False,
+                    },
+                    {
+                        'title': 'Mute',
+                        'callback': 'mute',
+                        'foreground': False,
+                    },
+                ],
+                'karrot': {
+                    # we send the path as data - the frontend takes care of the actual routing
+                    'path': str(furl(click_action).fragment),
+                    'conversationId': message.conversation.id,
+                    'messageId': message.id,
+                    'threadId': message.thread.id if message.is_thread_reply() else None,
+                },
             },
         }
     )
