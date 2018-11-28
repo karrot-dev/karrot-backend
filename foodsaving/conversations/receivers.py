@@ -26,12 +26,14 @@ def create_thread_participant(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=ConversationMessage)
-def mark_as_read(sender, instance, **kwargs):
+def mark_as_read(sender, instance, created, **kwargs):
     """Mark sent messages as read for the author"""
-
     message = instance
 
-    if message.thread:
+    if not created:
+        return
+
+    if message.is_thread_reply():
         participant = ConversationThreadParticipant.objects.get(
             user=message.author,
             thread=message.thread,
@@ -39,15 +41,7 @@ def mark_as_read(sender, instance, **kwargs):
     else:
         participant = ConversationParticipant.objects.get(user=message.author, conversation=message.conversation)
 
-    # When a message is updated, the participants seen_up_to
-    # member variable gets set to that updated message. Perform the below
-    # check to ensure this does not occur.
-    if participant.seen_up_to_id:
-        if participant.seen_up_to_id < message.id:
-            participant.seen_up_to = message
-    else:
-        participant.seen_up_to = message
-
+    participant.seen_up_to = message
     participant.save()
 
 
