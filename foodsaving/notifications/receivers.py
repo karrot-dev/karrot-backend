@@ -127,9 +127,9 @@ def feedback_possible(sender, instance, **kwargs):
     # better save feedback possible expiry in pickup too
     expiry_date = pickup.date + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
-    for collector in pickup.collectors.all():
+    for user in pickup.collectors.all():
         Notification.objects.create(
-            user=collector,
+            user=user,
             type=NotificationType.FEEDBACK_POSSIBLE.value,
             context={
                 'group': pickup.store.group.id,
@@ -146,9 +146,9 @@ def new_store(sender, instance, created, **kwargs):
 
     store = instance
 
-    for member in store.group.members.exclude(id=store.last_changed_by_id):
+    for user in store.group.members.exclude(id=store.last_changed_by_id):
         Notification.objects.create(
-            user=member,
+            user=user,
             type=NotificationType.NEW_STORE.value,
             context={
                 'group': store.group.id,
@@ -165,9 +165,9 @@ def new_member(sender, instance, created, **kwargs):
 
     membership = instance
 
-    for member in membership.group.members.exclude(id__in=(membership.user_id, membership.added_by_id)):
+    for user in membership.group.members.exclude(id__in=(membership.user_id, membership.added_by_id)):
         Notification.objects.create(
-            user=member,
+            user=user,
             type=NotificationType.NEW_MEMBER.value,
             context={
                 'group': membership.group_id,
@@ -209,15 +209,38 @@ def delete_pickup_upcoming_when_collector_leaves(sender, instance, **kwargs):
     ).delete()
 
 
-@receiver(post_save, sender=PickupDate)
+@receiver(pre_save, sender=PickupDate)
 def pickup_cancelled(sender, instance, **kwargs):
     pickup = instance
 
-    if not pickup.is_cancelled():
+    # abort pickup was just created or not cancelled
+    if not pickup.id or not pickup.is_cancelled():
         return
 
+    # abort if pickup was already cancelled
+    old = PickupDate.objects.get(id=pickup.id)
+    if old.is_cancelled():
+        return
+
+    collectors = pickup.pickupdatecollector_set
+
+    # delete pickup_upcoming notifications
     Notification.objects.order_by().not_expired()\
         .filter(type=NotificationType.PICKUP_UPCOMING.value)\
         .annotate(collector_id=Cast(KeyTextTransform('pickup_collector', 'context'), IntegerField()))\
-        .filter(collector_id__in=pickup.pickupdatecollector_set.values_list('id', flat=True))\
+        .filter(collector_id__in=collectors.values_list('id', flat=True))\
         .delete()
+
+    # create pickup_cancelled notifications
+    for collector in collectors.exclude(user=pickup.last_changed_by):
+        Notification.objects.create(
+            user=collector.user,
+            type=NotificationType.PICKUP_CANCELLED.value,
+            context={
+                'group': pickup.group.id,
+                'user': pickup.last_changed_by.id,
+                'store': pickup.store.id,
+                'pickup': pickup.id,
+                'pickup_collector': collector.id,
+            }
+        )

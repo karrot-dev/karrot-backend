@@ -20,6 +20,7 @@ class NotificationType(Enum):
     NEW_MEMBER = 'new_member'
     INVITATION_ACCEPTED = 'invitation_accepted'
     PICKUP_UPCOMING = 'pickup_upcoming'
+    PICKUP_CANCELLED = 'pickup_cancelled'
 
 
 class NotificationQuerySet(models.QuerySet):
