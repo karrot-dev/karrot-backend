@@ -111,13 +111,13 @@ def application_decided(sender, instance, **kwargs):
 @receiver(pre_save, sender=PickupDate)
 def feedback_possible(sender, instance, **kwargs):
     pickup = instance
-    if not pickup.done_and_processed:
+    if not pickup.feedback_possible:
         return
 
     if pickup.id:
         # skip if pickup was already processed
         old = PickupDate.objects.get(id=pickup.id)
-        if old.done_and_processed == pickup.done_and_processed:
+        if old.feedback_possible == pickup.feedback_possible:
             return
     else:
         # Pickup is not saved yet and can't have any collectors

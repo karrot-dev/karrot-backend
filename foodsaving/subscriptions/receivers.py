@@ -273,7 +273,7 @@ def send_store_updates(sender, instance, **kwargs):
 @receiver(post_save, sender=PickupDate)
 def send_pickup_updates(sender, instance, **kwargs):
     pickup = instance
-    if pickup.done_and_processed:
+    if pickup.feedback_possible:
         # doesn't change serialized data
         return
 

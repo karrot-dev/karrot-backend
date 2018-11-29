@@ -153,7 +153,7 @@ class PickupDateSeries(BaseModel):
 
 class PickupDateQuerySet(models.QuerySet):
     def _feedback_possible_q(self, user):
-        return Q(done_and_processed=True) \
+        return Q(feedback_possible=True) \
                & Q(date__gte=timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)) \
                & Q(collectors=user) \
                & ~Q(feedback__given_by=user)
@@ -167,33 +167,34 @@ class PickupDateQuerySet(models.QuerySet):
     def annotate_num_collectors(self):
         return self.annotate(num_collectors=Count('collectors'))
 
-    def exclude_deleted(self):
-        return self.filter(deleted=False)
+    def exclude_deleted_and_cancelled(self):
+        return self.filter(deleted=False, cancelled_at=None)
 
     def in_group(self, group):
         return self.filter(store__group=group)
 
     def due_soon(self):
         in_some_hours = timezone.now() + relativedelta(hours=settings.PICKUPDATE_DUE_SOON_HOURS)
-        return self.exclude_deleted().filter(date__gt=timezone.now(), date__lt=in_some_hours)
+        return self.exclude_deleted_and_cancelled().filter(date__gt=timezone.now(), date__lt=in_some_hours)
 
     def missed(self):
-        return self.exclude_deleted().filter(date__lt=timezone.now(), collectors=None)
+        return self.exclude_deleted_and_cancelled().filter(date__lt=timezone.now(), collectors=None)
 
     def done(self):
-        return self.exclude_deleted().filter(date__lt=timezone.now()).exclude(collectors=None)
+        return self.exclude_deleted_and_cancelled().filter(date__lt=timezone.now()).exclude(collectors=None)
 
     def upcoming(self):
         return self.filter(date__gt=timezone.now())
 
     @transaction.atomic
     def process_finished_pickup_dates(self):
-        """find all pickup dates that are in the past and didn't get processed yet and add them to history
         """
-        for pickup in self.filter(
-                done_and_processed=False,
+        find all pickup dates that are in the past and didn't get processed yet and add them to history
+        """
+        for pickup in self.exclude_deleted_and_cancelled().filter(
+                feedback_possible=False,
                 date__lt=timezone.now(),
-        ).exclude_deleted():
+        ):
             if pickup.store.is_active():
                 payload = {}
                 payload['pickup_date'] = pickup.id
@@ -221,7 +222,7 @@ class PickupDateQuerySet(models.QuerySet):
                         payload=payload,
                     )
 
-            pickup.done_and_processed = True
+            pickup.feedback_possible = True
             pickup.save()
 
             pickup_done.send(sender=PickupDate.__class__, instance=pickup)
@@ -263,9 +264,8 @@ class PickupDate(BaseModel, ConversationMixin):
         on_delete=models.SET_NULL,
     )
 
-    # internal value to find out if this has been processed
-    # e.g. logged to history as PICKUP_DONE or PICKUP_MISSED
-    done_and_processed = models.BooleanField(default=False)
+    # Is set to true when the pickup is done
+    feedback_possible = models.BooleanField(default=False)
 
     @property
     def group(self):
@@ -318,6 +318,7 @@ class PickupDate(BaseModel, ConversationMixin):
         self.last_changed_message = message
         self.series = None
         self.save()
+        stats.pickup_cancelled(self)
 
 
 class PickupDateCollector(BaseModel):

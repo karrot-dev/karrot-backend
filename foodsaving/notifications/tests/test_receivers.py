@@ -91,7 +91,7 @@ class TestNotificationReceivers(TestCase):
         pickup = PickupDateFactory(store=store)
 
         pickup.add_collector(member)
-        pickup.done_and_processed = True
+        pickup.feedback_possible = True
         pickup.save()
 
         notification = Notification.objects.filter(user=member, type=NotificationType.FEEDBACK_POSSIBLE.value)

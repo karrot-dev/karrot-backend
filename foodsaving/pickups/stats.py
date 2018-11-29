@@ -51,6 +51,16 @@ def pickup_missed(pickup):
     }])
 
 
+def pickup_cancelled(pickup):
+    write_points([{
+        'measurement': 'karrot.events',
+        'tags': pickup_tags(pickup),
+        'fields': {
+            'pickup_cancelled': 1
+        },
+    }])
+
+
 def feedback_given(feedback):
     write_points([{
         'measurement': 'karrot.events',

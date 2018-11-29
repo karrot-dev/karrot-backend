@@ -90,7 +90,7 @@ def send_message_on_cancelled_pickup(sender, instance, **kwargs):
         return
 
     old = PickupDate.objects.get(id=pickup.id)
-    if not pickup.cancelled_at or old.cancelled_at:
+    if not pickup.is_cancelled() or old.is_cancelled():
         return
 
     conversation = Conversation.objects.get_for_target(pickup)

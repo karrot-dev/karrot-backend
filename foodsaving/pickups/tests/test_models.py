@@ -109,6 +109,22 @@ class TestProcessFinishedPickupDates(TestCase):
         self.assertEqual(PickupDate.objects.count(), 1)
         self.assertEqual(History.objects.count(), 1)
 
+    def test_do_no_process_deleted_pickups(self):
+        self.pickup.deleted = True
+        self.pickup.save()
+        PickupDate.objects.process_finished_pickup_dates()
+
+        self.assertFalse(self.pickup.feedback_possible)
+        self.assertEqual(History.objects.count(), 0)
+
+    def test_do_no_process_cancelled_pickups(self):
+        self.pickup.cancelled_at = timezone.now()
+        self.pickup.save()
+        PickupDate.objects.process_finished_pickup_dates()
+
+        self.assertFalse(self.pickup.feedback_possible)
+        self.assertEqual(History.objects.count(), 0)
+
 
 class TestAddPickupsCommand(TestCase):
     def setUp(self):

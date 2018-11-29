@@ -53,9 +53,7 @@ def fetch_pickup_notification_data_for_group(group):
     empty = {'num_collectors': 0}
     not_full = {'num_collectors__gt': 0, 'num_collectors__lt': F('max_collectors')}
 
-    pickups = PickupDate.objects.annotate_num_collectors().filter(
-        cancelled_at=None,
-        deleted=False,
+    pickups = PickupDate.objects.exclude_deleted_and_cancelled().annotate_num_collectors().filter(
         store__status=StoreStatus.ACTIVE.value,
         store__group=group,
     ).order_by('date')

@@ -264,7 +264,7 @@ class TestStoreStatisticsAPI(APITestCase):
                 store=store,
                 date=one_day_ago,
                 collectors=users,
-                done_and_processed=True,
+                feedback_possible=True,
             ) for _ in range(3)
         ]
         feedback = [FeedbackFactory(about=choice(pickups), given_by=u) for u in users]
