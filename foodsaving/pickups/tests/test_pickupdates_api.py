@@ -149,6 +149,16 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.patch(self.pickup_url, {'max_collectors': 1}, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
+    def test_patch_cancelled_pickup_fails(self):
+        pickup = PickupDateFactory(
+            store=self.store,
+            cancelled_at=timezone.now(),
+        )
+        self.client.force_login(user=self.member)
+
+        response = self.client.patch('/api/pickup-dates/{}/'.format(pickup.id), self.pickup_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
     def test_delete_pickup(self):
         response = self.client.delete(self.pickup_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)

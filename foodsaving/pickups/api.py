@@ -15,8 +15,7 @@ from foodsaving.pickups.models import (
 )
 from foodsaving.pickups.permissions import (
     IsUpcoming, HasNotJoinedPickupDate, HasJoinedPickupDate, IsEmptyPickupDate, IsNotFull, IsSameCollector,
-    IsRecentPickupDate, IsGroupEditor
-)
+    IsRecentPickupDate, IsGroupEditor, IsNotCancelledWhenEditing)
 from foodsaving.pickups.serializers import (
     PickupDateSerializer, PickupDateSeriesSerializer, PickupDateJoinSerializer, PickupDateLeaveSerializer,
     FeedbackSerializer, PickupDateHistorySerializer, PickupDateSeriesCancelSerializer, PickupDateUpdateSerializer,
@@ -164,7 +163,7 @@ class PickupDateViewSet(
         .filter(deleted=False)
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = PickupDatesFilter
-    permission_classes = (IsAuthenticated, IsUpcoming, IsGroupEditor, IsEmptyPickupDate)
+    permission_classes = (IsAuthenticated, IsUpcoming, IsGroupEditor, IsEmptyPickupDate, IsNotCancelledWhenEditing)
     pagination_class = PickupDatePagination
 
     def get_queryset(self):
