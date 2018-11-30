@@ -87,7 +87,7 @@ def calculate_group_summary_dates(group):
         midnight = tz.localize(timezone.now().replace(tzinfo=None, hour=0, minute=0, second=0, microsecond=0))
 
         # last sunday
-        from_date = midnight - relativedelta(weekday=SU(-1))
+        from_date = midnight - relativedelta(weekday=SU(-1), hours=-1)
 
         # a week after from date
         to_date = from_date + relativedelta(weekday=SU(+1))
