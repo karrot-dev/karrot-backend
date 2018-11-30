@@ -1,7 +1,7 @@
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields.jsonb import KeyTextTransform
-from django.db.models import IntegerField
+from django.db.models import IntegerField, Q
 from django.db.models.functions import Cast
 from django.db.models.signals import post_save, pre_save, pre_delete
 from django.dispatch import receiver
@@ -199,14 +199,13 @@ def invitation_accepted(sender, instance, **kwargs):
 
 
 @receiver(pre_delete, sender=PickupDateCollector)
-def delete_pickup_upcoming_when_collector_leaves(sender, instance, **kwargs):
+def delete_pickup_notifications_when_collector_leaves(sender, instance, **kwargs):
     collector = instance
 
-    Notification.objects.order_by().not_expired().filter(
-        type=NotificationType.PICKUP_UPCOMING.value,
-        user=collector.user,
-        context__pickup_collector=collector.id,
-    ).delete()
+    Notification.objects.order_by().not_expired()\
+        .filter(Q(type=NotificationType.PICKUP_UPCOMING.value) | Q(type=NotificationType.PICKUP_CANCELLED.value))\
+        .filter(user=collector.user, context__pickup_collector=collector.id)\
+        .delete()
 
 
 @receiver(pre_save, sender=PickupDate)
@@ -238,7 +237,6 @@ def pickup_cancelled(sender, instance, **kwargs):
             type=NotificationType.PICKUP_CANCELLED.value,
             context={
                 'group': pickup.group.id,
-                'user': pickup.last_changed_by.id,
                 'store': pickup.store.id,
                 'pickup': pickup.id,
                 'pickup_collector': collector.id,
