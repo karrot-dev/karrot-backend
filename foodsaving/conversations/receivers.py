@@ -82,7 +82,7 @@ def set_conversation_updated_at_on_delete(sender, instance, **kwargs):
     participant.conversation.save()
 
 
-@receiver(pre_save, sender=PickupDate)
+# @receiver(pre_save, sender=PickupDate)
 def send_message_on_cancelled_pickup(sender, instance, **kwargs):
     pickup = instance
 

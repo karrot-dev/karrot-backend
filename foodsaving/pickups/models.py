@@ -311,8 +311,6 @@ class PickupDate(BaseModel, ConversationMixin):
         ).delete()
 
     def cancel(self, user, message):
-        if message == '':
-            raise ValueError('Message should not be empty')
         self.cancelled_at = timezone.now()
         self.last_changed_by = user
         self.last_changed_message = message
