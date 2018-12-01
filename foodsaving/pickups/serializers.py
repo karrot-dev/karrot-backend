@@ -39,6 +39,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
             'cancelled_at',
             'last_changed_by',
             'last_changed_message',
+            'deleted',
         ]
         read_only_fields = [
             'id',
@@ -281,10 +282,11 @@ class PickupDateSeriesUpdateSerializer(PickupDateSeriesSerializer):
             preview = series.preview_override_pickups(rule=rule, start_date=start_date)
             if any(pickup is not None and date is None and pickup.collectors.count() > 0
                    for (pickup, date) in preview):
-                raise serializers.ValidationError(code='required', detail={
-                    'last_changed_message':
-                    _('You need to provide a message to cancel pickups')
-                },)
+                pass
+                # raise serializers.ValidationError(code='required', detail={
+                #     'last_changed_message':
+                #     _('You need to provide a message to cancel pickups')
+                # },)
         return super().validate(attrs)
 
 
