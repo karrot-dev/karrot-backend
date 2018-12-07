@@ -139,7 +139,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
         pickup_conversations = [item for item in conversations if item.target_type == pickup_ct]
         pickups = PickupDate.objects. \
             filter(id__in=[c.target_id for c in pickup_conversations]). \
-            prefetch_related('collectors')
+            prefetch_related('collectors', 'feedback_given_by')
 
         applications_ct = ContentType.objects.get_for_model(GroupApplication)
         application_conversations = [item for item in conversations if item.target_type == applications_ct]

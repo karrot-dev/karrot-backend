@@ -34,7 +34,7 @@ class TestPickupDateSeriesCreationAPI(APITestCase, ExtractPaginationMixin):
     """
 
     def setUp(self):
-
+        self.maxDiff = None
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
@@ -109,6 +109,7 @@ class TestPickupDateSeriesCreationAPI(APITestCase, ExtractPaginationMixin):
         for _ in response.data:
             del _['id']
             del _['date']
+            del _['feedback_due']
         for _ in dates_list:
             created_pickup_dates.append({
                 'max_collectors': 5,
@@ -116,11 +117,12 @@ class TestPickupDateSeriesCreationAPI(APITestCase, ExtractPaginationMixin):
                 'collector_ids': [],
                 'store': self.store.id,
                 'description': '',
+                'feedback_given_by': [],
                 'last_changed_by': self.member.id,
                 'last_changed_message': '',
                 'cancelled_at': None,
             })
-        self.assertEqual(response.data, created_pickup_dates)
+        self.assertEqual(response.data, created_pickup_dates, response.data)
 
     def test_pickup_series_create_activates_group(self):
         url = '/api/pickup-date-series/'

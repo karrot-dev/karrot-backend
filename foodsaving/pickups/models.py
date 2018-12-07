@@ -251,6 +251,12 @@ class PickupDate(BaseModel, ConversationMixin):
         through='PickupDateCollector',
         through_fields=('pickupdate', 'user')
     )
+    feedback_given_by = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='feedback_about_pickups',
+        through='Feedback',
+        through_fields=('about', 'given_by')
+    )
     date = models.DateTimeField()
     description = models.TextField(blank=True)
     max_collectors = models.PositiveIntegerField(null=True)
@@ -273,6 +279,9 @@ class PickupDate(BaseModel, ConversationMixin):
 
     def __str__(self):
         return 'PickupDate {} - {}'.format(self.date, self.store)
+
+    def feedback_due(self):
+        return self.date + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
     def is_upcoming(self):
         return self.date > timezone.now()

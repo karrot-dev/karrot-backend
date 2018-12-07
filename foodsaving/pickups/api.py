@@ -59,7 +59,7 @@ class FeedbackViewSet(
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset()) \
             .select_related('about') \
-            .prefetch_related('about__collectors')
+            .prefetch_related('about__collectors', 'about__feedback_given_by')
         feedback = self.paginate_queryset(queryset)
 
         pickups = set(f.about for f in feedback)
@@ -171,7 +171,7 @@ class PickupDateViewSet(
         if self.action == 'list':
             # because we have collector_ids field in the serializer
             # only prefetch on read_only actions, otherwise there are caching problems when collectors get added
-            qs = qs.prefetch_related('collectors')
+            qs = qs.prefetch_related('collectors', 'feedback_given_by')
         return qs
 
     def get_serializer_class(self):

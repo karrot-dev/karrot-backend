@@ -36,6 +36,8 @@ class PickupDateSerializer(serializers.ModelSerializer):
             'max_collectors',
             'collector_ids',
             'description',
+            'feedback_due',
+            'feedback_given_by',
             'cancelled_at',
             'last_changed_by',
             'last_changed_message',
@@ -51,6 +53,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
 
     # TODO change to collectors to make it uniform with other endpoints
     collector_ids = serializers.PrimaryKeyRelatedField(source='collectors', many=True, read_only=True)
+    feedback_due = serializers.DateTimeField(read_only=True)
 
     def save(self, **kwargs):
         return super().save(
