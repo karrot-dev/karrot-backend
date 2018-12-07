@@ -80,21 +80,3 @@ def set_conversation_updated_at_on_create(sender, instance, created, **kwargs):
 def set_conversation_updated_at_on_delete(sender, instance, **kwargs):
     participant = instance
     participant.conversation.save()
-
-
-# @receiver(pre_save, sender=PickupDate)
-def send_message_on_cancelled_pickup(sender, instance, **kwargs):
-    pickup = instance
-
-    if not pickup.id:
-        return
-
-    old = PickupDate.objects.get(id=pickup.id)
-    if not pickup.is_cancelled() or old.is_cancelled():
-        return
-
-    conversation = Conversation.objects.get_for_target(pickup)
-    conversation.messages.create(
-        author=pickup.last_changed_by,
-        content=pickup.last_changed_message,
-    )

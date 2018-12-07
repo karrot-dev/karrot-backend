@@ -305,7 +305,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         joined_pickup.add_collector(self.member)
 
         url = '/api/pickup-date-series/{}/'.format(self.series.id)
-        response = self.client.post(url + 'cancel/', {'last_changed_message': 'hi'})
+        response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
         url = '/api/pickup-dates/'
@@ -472,7 +472,6 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.patch(
             series_url, {
                 'start_date': self.series.start_date + relativedelta(days=1),
-                'last_changed_message': 'hi',
             }
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -542,7 +541,6 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.member)
         response = self.client.patch(store_url, {
             'weeks_in_advance': 1,
-            'last_changed_message': 'hi',
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -553,43 +551,6 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
             for delta in (relativedelta(days=0), )
         ])
         self.assertEqual(response.data['results'][0]['collector_ids'][0], self.member.id)
-
-    def test_change_rule_without_change_message_fails(self):
-        self.client.force_login(user=self.member)
-        with freeze_time(datetime(2018, 11, 25, tzinfo=self.group.timezone), tick=True):
-            series = PickupDateSeriesFactory(store=self.store, rule='FREQ=WEEKLY;BYDAY=MO')
-            series.pickup_dates.last().add_collector(self.member)
-            response = self.client.patch(
-                '/api/pickup-date-series/{}/'.format(series.id), {'rule': 'FREQ=WEEKLY;BYDAY=TU'}
-            )
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['last_changed_message'][0].code, 'required', response.data)
-
-    def test_change_start_date_without_change_message_fails(self):
-        self.client.force_login(user=self.member)
-        with freeze_time(datetime(2018, 11, 25, 12, tzinfo=self.group.timezone), tick=True):
-            series = PickupDateSeriesFactory(store=self.store)
-            series.pickup_dates.last().add_collector(self.member)
-            response = self.client.patch(
-                '/api/pickup-date-series/{}/'.format(series.id),
-                {'start_date': series.start_date.replace(hour=23).isoformat()}
-            )
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['last_changed_message'][0].code, 'required', response.data)
-
-    def test_cancel_without_message_fails_and_does_not_delete_pickups(self):
-        self.series.pickup_dates.last().add_collector(self.member)
-        pickup_count = self.series.pickup_dates.count()
-
-        self.client.force_login(user=self.member)
-        response = self.client.post('/api/pickup-date-series/{}/cancel/'.format(self.series.id))
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['last_changed_message'][0].code, 'required', response.data)
-
-        self.series.refresh_from_db()
-        self.assertEqual(self.series.pickup_dates.count(), pickup_count)
 
     def test_preview(self):
         self.client.force_login(user=self.member)

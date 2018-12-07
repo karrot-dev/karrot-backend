@@ -31,7 +31,6 @@ class Store(BaseModel, LocationModel):
         on_delete=models.SET_NULL,
         null=True,
     )
-    last_changed_message = models.TextField(blank=True)
 
     deleted = models.BooleanField(default=False)
 

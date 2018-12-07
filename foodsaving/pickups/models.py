@@ -40,7 +40,6 @@ class PickupDateSeries(BaseModel):
         related_name='changed_series',
         null=True,
     )
-    last_changed_message = models.TextField(blank=True)
 
     pickups_created_until = models.DateTimeField(null=True)
 
@@ -60,7 +59,6 @@ class PickupDateSeries(BaseModel):
             store=self.store,
             description=self.description,
             last_changed_by=self.last_changed_by,
-            last_changed_message=self.last_changed_message,
         )
 
     def add_new_pickups(self):
@@ -108,7 +106,7 @@ class PickupDateSeries(BaseModel):
 
     def override_pickups(self):
         """
-        create new pickups and cancel/delete all pickups that don't match series
+        create new pickups and delete empty pickups that don't match series
         """
 
         date = None
@@ -117,9 +115,7 @@ class PickupDateSeries(BaseModel):
             if not pickup:
                 self.create_pickup(date)
             elif not date:
-                if pickup.collectors.count() > 0:
-                    pickup.cancel(user=self.last_changed_by, message=self.last_changed_message)
-                else:
+                if pickup.collectors.count() < 1:
                     pickup.delete()
 
         if date:
@@ -262,7 +258,6 @@ class PickupDate(BaseModel, ConversationMixin):
     max_collectors = models.PositiveIntegerField(null=True)
     deleted = models.BooleanField(default=False)
     cancelled_at = models.DateTimeField(null=True)
-    last_changed_message = models.TextField(blank=True)
     last_changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
@@ -322,7 +317,6 @@ class PickupDate(BaseModel, ConversationMixin):
     def cancel(self, user, message):
         self.cancelled_at = timezone.now()
         self.last_changed_by = user
-        self.last_changed_message = message
         self.series = None
         self.save()
         stats.pickup_cancelled(self)

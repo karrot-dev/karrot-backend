@@ -4,7 +4,6 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.conversations.api import RetrieveConversationMixin
@@ -18,9 +17,9 @@ from foodsaving.pickups.permissions import (
     IsRecentPickupDate, IsGroupEditor, IsNotCancelledWhenEditing)
 from foodsaving.pickups.serializers import (
     PickupDateSerializer, PickupDateSeriesSerializer, PickupDateJoinSerializer, PickupDateLeaveSerializer,
-    FeedbackSerializer, PickupDateHistorySerializer, PickupDateSeriesCancelSerializer, PickupDateUpdateSerializer,
-    PickupDateSeriesUpdateSerializer
-)
+    FeedbackSerializer, PickupDateHistorySerializer, PickupDateUpdateSerializer,
+    PickupDateSeriesUpdateSerializer,
+    PickupDateSeriesHistorySerializer)
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 
@@ -78,6 +77,7 @@ class PickupDateSeriesViewSet(
         mixins.RetrieveModelMixin,
         PartialUpdateModelMixin,
         mixins.ListModelMixin,
+        mixins.DestroyModelMixin,
         viewsets.GenericViewSet,
 ):
 
@@ -95,39 +95,20 @@ class PickupDateSeriesViewSet(
             return PickupDateSeriesUpdateSerializer
         return self.serializer_class
 
-    @action(
-        detail=True,
-        methods=['POST'],
-        serializer_class=PickupDateSeriesCancelSerializer,
-    )
-    def cancel(self, request, *args, **kwargs):
-        """Cancel upcoming pickups and delete this series"""
-        series = self.get_object()
-        serializer = self.get_serializer(series, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(serializer.data)
-
-    @action(
-        detail=True,
-        methods=['POST'],
-        serializer_class=PickupDateSeriesUpdateSerializer,
-    )
-    def get_pickup_preview(self, request, *args, **kwargs):
-        """Returns an overview which pickups will get created or cancelled when modifying the series"""
-        series = self.get_object()
-        serializer = self.get_serializer(series, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-
-        preview = series.preview_override_pickups(
-            rule=serializer.validated_data.get('rule'), start_date=serializer.validated_data.get('start_date')
+    def perform_destroy(self, series):
+        data = self.get_serializer(series).data
+        History.objects.create(
+            typus=HistoryTypus.SERIES_DELETE,
+            group=series.store.group,
+            store=series.store,
+            users=[
+                self.request.user,
+            ],
+            payload=data,
+            before=PickupDateSeriesHistorySerializer(series).data,
         )
-
-        return Response([{
-            'existing_pickup': PickupDateSerializer(pickup).data if pickup else None,
-            'new_date': date.isoformat() if date else None,
-        } for (pickup, date) in preview])
+        super().perform_destroy(series)
+        series.store.group.refresh_active_status()
 
 
 class PickupDatePagination(CursorPagination):

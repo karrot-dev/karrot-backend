@@ -28,7 +28,6 @@ class StoreSerializer(serializers.ModelSerializer):
             'longitude',
             'weeks_in_advance',
             'status',
-            'last_changed_message',
             'last_changed_by',
         ]
         extra_kwargs = {
@@ -52,7 +51,6 @@ class StoreSerializer(serializers.ModelSerializer):
     def save(self, **kwargs):
         return super().save(
             last_changed_by=self.context['request'].user,
-            last_changed_message=self.validated_data.get('last_changed_message', ''),
         )
 
     def create(self, validated_data):
@@ -94,7 +92,7 @@ class StoreUpdateSerializer(StoreSerializer):
 
     def save(self, **kwargs):
         self._validated_data = find_changed(self.instance, self.validated_data)
-        skip_update = len(set(self.validated_data.keys()).difference(['last_changed_message'])) == 0
+        skip_update = len(self.validated_data.keys()) == 0
         if skip_update:
             return self.instance
         return super().save(**kwargs)
@@ -110,7 +108,6 @@ class StoreUpdateSerializer(StoreSerializer):
             # TODO: move this into pickups/receivers.py
             for series in store.series.all():
                 series.last_changed_by = store.last_changed_by
-                series.last_changed_message = store.last_changed_message
                 series.save()
                 series.override_pickups()
 
