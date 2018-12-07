@@ -1,6 +1,5 @@
-from datetime import timedelta
-
 import dateutil.rrule
+from datetime import timedelta
 from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import ugettext as _
@@ -27,7 +26,17 @@ class PickupDateHistorySerializer(serializers.ModelSerializer):
 class PickupDateSerializer(serializers.ModelSerializer):
     class Meta:
         model = PickupDateModel
-        fields = ['id', 'date', 'series', 'store', 'max_collectors', 'collector_ids', 'description']
+        fields = [
+            'id',
+            'date',
+            'series',
+            'store',
+            'max_collectors',
+            'collector_ids',
+            'description',
+            'feedback_due',
+            'feedback_given_by',
+        ]
         update_fields = ['date', 'max_collectors', 'description']
         extra_kwargs = {
             'series': {
@@ -36,6 +45,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
         }
 
     collector_ids = serializers.PrimaryKeyRelatedField(source='collectors', many=True, read_only=True)
+    feedback_due = serializers.DateTimeField(read_only=True)
 
     def validate_store(self, store):
         if not self.context['request'].user.groups.filter(store=store).exists():

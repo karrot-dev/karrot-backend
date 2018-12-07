@@ -151,8 +151,9 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.assertEqual(
             response.data, {
                 'about': [
-                    'You can\'t give feedback for pickups more than {} days ago.'
-                    .format(settings.FEEDBACK_POSSIBLE_DAYS)
+                    'You can\'t give feedback for pickups more than {} days ago.'.format(
+                        settings.FEEDBACK_POSSIBLE_DAYS
+                    )
                 ]
             }
         )
@@ -205,7 +206,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         Member is allowed to see list of feedback
         """
         self.client.force_login(user=self.member)
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(4):
             response = self.get_results(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         feedback = response.data['feedback']
@@ -326,8 +327,8 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         response = self.client.patch(self.old_feedback_url, {'weight': 499}, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
         self.assertEqual(
-            response.data['detail'], 'You can\'t give feedback for pickups more than {} days ago.'
-            .format(settings.FEEDBACK_POSSIBLE_DAYS)
+            response.data['detail'],
+            'You can\'t give feedback for pickups more than {} days ago.'.format(settings.FEEDBACK_POSSIBLE_DAYS)
         )
 
     def test_patch_feedback_to_remove_weight(self):

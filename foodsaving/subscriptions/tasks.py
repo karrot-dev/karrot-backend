@@ -122,7 +122,8 @@ def notify_message_push_subscribers_with_language(message, subscriptions, langua
         fcm_options={
             **fcm_options,
             # according to https://github.com/fechanique/cordova-plugin-fcm#send-notification-payload-example-rest-api
-            'click_action': 'FCM_PLUGIN_ACTIVITY',
+            'click_action':
+            'FCM_PLUGIN_ACTIVITY',
             'data_message': {
                 # we send the route as data - the frontend takes care of the actual routing
                 'karrot_route': str(furl(click_action).fragment),
