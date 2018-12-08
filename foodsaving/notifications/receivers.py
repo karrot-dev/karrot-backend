@@ -209,36 +209,43 @@ def delete_pickup_notifications_when_collector_leaves(sender, instance, **kwargs
 
 
 @receiver(pre_save, sender=PickupDate)
-def pickup_cancelled(sender, instance, **kwargs):
+def pickup_cancelled_or_uncancelled(sender, instance, **kwargs):
     pickup = instance
 
-    # abort pickup was just created or not cancelled
-    if not pickup.id or not pickup.is_cancelled():
+    # abort pickup was just created
+    if not pickup.id:
         return
 
-    # abort if pickup was already cancelled
+    # abort if pickup cancel status didn't change
     old = PickupDate.objects.get(id=pickup.id)
-    if old.is_cancelled():
+    if old.is_cancelled == pickup.is_cancelled:
         return
 
     collectors = pickup.pickupdatecollector_set
 
-    # delete pickup_upcoming notifications
-    Notification.objects.order_by().not_expired()\
-        .filter(type=NotificationType.PICKUP_UPCOMING.value)\
-        .annotate(collector_id=Cast(KeyTextTransform('pickup_collector', 'context'), IntegerField()))\
-        .filter(collector_id__in=collectors.values_list('id', flat=True))\
-        .delete()
+    def delete_notifications_by_type_and_collectors(type, collectors):
+        Notification.objects.order_by().not_expired() \
+            .filter(type=type) \
+            .annotate(collector_id=Cast(KeyTextTransform('pickup_collector', 'context'), IntegerField())) \
+            .filter(collector_id__in=collectors.values_list('id', flat=True)) \
+            .delete()
 
-    # create pickup_cancelled notifications
-    for collector in collectors.exclude(user=pickup.last_changed_by):
-        Notification.objects.create(
-            user=collector.user,
-            type=NotificationType.PICKUP_CANCELLED.value,
-            context={
-                'group': pickup.group.id,
-                'store': pickup.store.id,
-                'pickup': pickup.id,
-                'pickup_collector': collector.id,
-            }
-        )
+    if pickup.is_cancelled:
+        delete_notifications_by_type_and_collectors(type=NotificationType.PICKUP_UPCOMING.value, collectors=collectors)
+
+        # create pickup_cancelled notifications
+        for collector in collectors.exclude(user=pickup.last_changed_by):
+            Notification.objects.create(
+                user=collector.user,
+                type=NotificationType.PICKUP_CANCELLED.value,
+                context={
+                    'group': pickup.group.id,
+                    'store': pickup.store.id,
+                    'pickup': pickup.id,
+                    'pickup_collector': collector.id,
+                }
+            )
+    else:
+        # pickup is uncancelled
+        delete_notifications_by_type_and_collectors(type=NotificationType.PICKUP_CANCELLED.value, collectors=collectors)
+        # pickup_upcoming notifications will automatically get created by cronjob

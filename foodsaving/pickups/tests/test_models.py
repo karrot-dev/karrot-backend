@@ -96,7 +96,7 @@ class TestPickupDateSeriesModel(TestCase):
         past_date_count = pickup_dates.filter(date__lt=now).count()
         self.assertGreater(pickup_dates.count(), 2)
         series.delete()
-        self.assertEqual(PickupDate.objects.filter(date__gte=now, deleted=False).count(), 0)
+        self.assertEqual(PickupDate.objects.filter(date__gte=now, is_cancelled=False).count(), 0)
         self.assertEqual(PickupDate.objects.filter(date__lt=now).count(), past_date_count)
 
 
@@ -118,7 +118,7 @@ class TestProcessFinishedPickupDates(TestCase):
         self.assertEqual(History.objects.count(), 0)
 
     def test_do_no_process_cancelled_pickups(self):
-        self.pickup.cancelled_at = timezone.now()
+        self.pickup.is_cancelled = True
         self.pickup.save()
         PickupDate.objects.process_finished_pickup_dates()
 

@@ -70,12 +70,3 @@ class IsGroupEditor(permissions.BasePermission):
         if view.action in ('partial_update', 'cancel', 'destroy'):
             return obj.store.group.is_editor(request.user)
         return True
-
-
-class IsNotCancelledWhenEditing(permissions.BasePermission):
-    message = _('Pickup is cancelled')
-
-    def has_object_permission(self, request, view, obj):
-        if view.action in ('partial_update', ):
-            return not obj.is_cancelled()
-        return True

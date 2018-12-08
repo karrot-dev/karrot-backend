@@ -120,7 +120,7 @@ class TestPickupDateSeriesCreationAPI(APITestCase, ExtractPaginationMixin):
                 'feedback_given_by': [],
                 'last_changed_by': self.member.id,
                 'last_changed_message': '',
-                'cancelled_at': None,
+                'is_cancelled': False,
             })
         self.assertEqual(response.data, created_pickup_dates, response.data)
 
@@ -318,7 +318,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.data['collector_ids'], [
             self.member.id,
         ])
-        self.assertIsNotNone(response.data['cancelled_at'])
+        self.assertFalse(response.data['is_cancelled'])
 
     def test_change_max_collectors_to_invalid_number_fails(self):
         self.client.force_login(user=self.member)

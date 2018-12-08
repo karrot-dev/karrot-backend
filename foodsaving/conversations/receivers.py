@@ -3,10 +3,8 @@ from django.dispatch import receiver
 
 from foodsaving.conversations import tasks, stats
 from foodsaving.conversations.models import (
-    ConversationParticipant, ConversationMessage, ConversationMessageReaction, ConversationThreadParticipant,
-    Conversation
+    ConversationParticipant, ConversationMessage, ConversationMessageReaction, ConversationThreadParticipant
 )
-from foodsaving.pickups.models import PickupDate
 
 
 @receiver(pre_save, sender=ConversationMessage)

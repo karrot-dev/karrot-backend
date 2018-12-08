@@ -152,7 +152,7 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
     def test_patch_cancelled_pickup_fails(self):
         pickup = PickupDateFactory(
             store=self.store,
-            cancelled_at=timezone.now(),
+            is_cancelled=True,
         )
         self.client.force_login(user=self.member)
 

@@ -32,8 +32,6 @@ class Store(BaseModel, LocationModel):
         null=True,
     )
 
-    deleted = models.BooleanField(default=False)
-
     def __str__(self):
         return 'Store {} ({})'.format(self.name, self.group)
 

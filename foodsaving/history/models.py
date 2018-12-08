@@ -30,6 +30,8 @@ class HistoryTypus(enum.Enum):
     PICKUP_MISSED = 16
     GROUP_APPLICATION_DECLINED = 17
     MEMBER_BECAME_EDITOR = 18
+    PICKUP_CANCEL = 19
+    PICKUP_UNCANCEL = 20
 
 
 class HistoryQuerySet(models.QuerySet):
@@ -53,6 +55,8 @@ class History(NicelyFormattedModel):
     typus = enum.EnumField(HistoryTypus)
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE)
     store = models.ForeignKey('stores.Store', null=True, on_delete=models.CASCADE)
+    pickup = models.ForeignKey('pickups.PickupDate', null=True, on_delete=models.SET_NULL)
+    series = models.ForeignKey('pickups.PickupDateSeries', null=True, on_delete=models.SET_NULL)
     users = models.ManyToManyField('users.User')
     payload = JSONField(null=True)
     before = JSONField(null=True)

@@ -1,4 +1,3 @@
-from dateutil import rrule
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -42,14 +41,6 @@ class PickupDateSeries(BaseModel):
     )
 
     pickups_created_until = models.DateTimeField(null=True)
-
-    def delete(self, *args, **kwargs):
-        # cancel/delete associated pickups
-        self.rule = str(rrule.rrulestr(self.rule).replace(dtstart=self.start_date, until=timezone.now()))
-        self.save()
-
-        # now delete the series
-        return super().delete(*args, **kwargs)
 
     def create_pickup(self, date):
         return self.pickup_dates.create(
@@ -163,21 +154,21 @@ class PickupDateQuerySet(models.QuerySet):
     def annotate_num_collectors(self):
         return self.annotate(num_collectors=Count('collectors'))
 
-    def exclude_deleted_and_cancelled(self):
-        return self.filter(deleted=False, cancelled_at=None)
+    def exclude_cancelled(self):
+        return self.filter(is_cancelled=False)
 
     def in_group(self, group):
         return self.filter(store__group=group)
 
     def due_soon(self):
         in_some_hours = timezone.now() + relativedelta(hours=settings.PICKUPDATE_DUE_SOON_HOURS)
-        return self.exclude_deleted_and_cancelled().filter(date__gt=timezone.now(), date__lt=in_some_hours)
+        return self.exclude_cancelled().filter(date__gt=timezone.now(), date__lt=in_some_hours)
 
     def missed(self):
-        return self.exclude_deleted_and_cancelled().filter(date__lt=timezone.now(), collectors=None)
+        return self.exclude_cancelled().filter(date__lt=timezone.now(), collectors=None)
 
     def done(self):
-        return self.exclude_deleted_and_cancelled().filter(date__lt=timezone.now()).exclude(collectors=None)
+        return self.exclude_cancelled().filter(date__lt=timezone.now()).exclude(collectors=None)
 
     def upcoming(self):
         return self.filter(date__gt=timezone.now())
@@ -187,7 +178,7 @@ class PickupDateQuerySet(models.QuerySet):
         """
         find all pickup dates that are in the past and didn't get processed yet and add them to history
         """
-        for pickup in self.exclude_deleted_and_cancelled().filter(
+        for pickup in self.exclude_cancelled().filter(
                 feedback_possible=False,
                 date__lt=timezone.now(),
         ):
@@ -256,8 +247,7 @@ class PickupDate(BaseModel, ConversationMixin):
     date = models.DateTimeField()
     description = models.TextField(blank=True)
     max_collectors = models.PositiveIntegerField(null=True)
-    deleted = models.BooleanField(default=False)
-    cancelled_at = models.DateTimeField(null=True)
+    is_cancelled = models.BooleanField(default=False)
     last_changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
@@ -295,9 +285,6 @@ class PickupDate(BaseModel, ConversationMixin):
     def is_recent(self):
         return self.date >= timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
-    def is_cancelled(self):
-        return self.cancelled_at is not None
-
     def empty_collectors_count(self):
         return max(0, self.max_collectors - self.collectors.count())
 
@@ -313,13 +300,6 @@ class PickupDate(BaseModel, ConversationMixin):
             pickupdate=self,
             user=user,
         ).delete()
-
-    def cancel(self, user, message):
-        self.cancelled_at = timezone.now()
-        self.last_changed_by = user
-        self.series = None
-        self.save()
-        stats.pickup_cancelled(self)
 
 
 class PickupDateCollector(BaseModel):

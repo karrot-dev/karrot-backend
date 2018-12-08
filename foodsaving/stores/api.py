@@ -38,7 +38,7 @@ class StoreViewSet(
     - `?search` - search in name and description
     """
     serializer_class = StoreSerializer
-    queryset = StoreModel.objects.filter(deleted=False)
+    queryset = StoreModel.objects
     filterset_fields = ('group', 'name')
     filter_backends = (SearchFilter, filters.DjangoFilterBackend)
     search_fields = ('name', 'description')

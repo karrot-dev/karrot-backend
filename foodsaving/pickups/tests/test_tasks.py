@@ -98,7 +98,7 @@ class TestPickupNotificationTask(APITestCase):
             store=store,
             date=timezone.localtime() + delta,
             max_collectors=1,
-            cancelled_at=timezone.now(),
+            is_cancelled=True,
         )
 
     def test_user_pickups(self):

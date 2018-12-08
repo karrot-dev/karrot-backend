@@ -14,10 +14,10 @@ from foodsaving.pickups.models import (
 )
 from foodsaving.pickups.permissions import (
     IsUpcoming, HasNotJoinedPickupDate, HasJoinedPickupDate, IsEmptyPickupDate, IsNotFull, IsSameCollector,
-    IsRecentPickupDate, IsGroupEditor, IsNotCancelledWhenEditing)
+    IsRecentPickupDate, IsGroupEditor)
 from foodsaving.pickups.serializers import (
     PickupDateSerializer, PickupDateSeriesSerializer, PickupDateJoinSerializer, PickupDateLeaveSerializer,
-    FeedbackSerializer, PickupDateHistorySerializer, PickupDateUpdateSerializer,
+    FeedbackSerializer, PickupDateUpdateSerializer,
     PickupDateSeriesUpdateSerializer,
     PickupDateSeriesHistorySerializer)
 from foodsaving.utils.mixins import PartialUpdateModelMixin
@@ -124,7 +124,6 @@ class PickupDateViewSet(
         mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
         PartialUpdateModelMixin,
-        mixins.DestroyModelMixin,
         mixins.ListModelMixin,
         GenericViewSet,
         RetrieveConversationMixin,
@@ -140,11 +139,10 @@ class PickupDateViewSet(
     - `?date_min=<from_date>`&`date_max=<to_date>` - filter by date, can also either give either date_min or date_max
     """
     serializer_class = PickupDateSerializer
-    queryset = PickupDateModel.objects \
-        .filter(deleted=False)
+    queryset = PickupDateModel.objects
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = PickupDatesFilter
-    permission_classes = (IsAuthenticated, IsUpcoming, IsGroupEditor, IsEmptyPickupDate, IsNotCancelledWhenEditing)
+    permission_classes = (IsAuthenticated, IsUpcoming, IsGroupEditor, IsEmptyPickupDate)
     pagination_class = PickupDatePagination
 
     def get_queryset(self):
@@ -159,21 +157,6 @@ class PickupDateViewSet(
         if self.action == 'partial_update':
             return PickupDateUpdateSerializer
         return self.serializer_class
-
-    def perform_destroy(self, pickup):
-        # set deleted flag to make the pickup date invisible
-        pickup.deleted = True
-
-        History.objects.create(
-            typus=HistoryTypus.PICKUP_DELETE,
-            group=pickup.store.group,
-            store=pickup.store,
-            users=[
-                self.request.user,
-            ],
-            before=PickupDateHistorySerializer(pickup).data,
-        )
-        pickup.save()
 
     @action(
         detail=True,

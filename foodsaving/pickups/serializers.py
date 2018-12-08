@@ -37,14 +37,13 @@ class PickupDateSerializer(serializers.ModelSerializer):
             'description',
             'feedback_due',
             'feedback_given_by',
-            'cancelled_at',
+            'is_cancelled',
             'last_changed_by',
         ]
         read_only_fields = [
             'id',
             'series',
             'collector_ids',
-            'cancelled_at',
             'last_changed_by',
         ]
 
@@ -63,6 +62,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
             typus=HistoryTypus.PICKUP_CREATE,
             group=pickupdate.store.group,
             store=pickupdate.store,
+            pickup=pickupdate,
             users=[
                 self.context['request'].user,
             ],
@@ -104,18 +104,30 @@ class PickupDateUpdateSerializer(PickupDateSerializer):
         after_data = PickupDateHistorySerializer(pickupdate).data
 
         if before_data != after_data:
-            History.objects.create(
-                typus=HistoryTypus.PICKUP_MODIFY,
-                group=pickupdate.store.group,
-                store=pickupdate.store,
-                users=[
-                    self.context['request'].user,
-                ],
-                payload={k: self.initial_data.get(k)
-                         for k in validated_data.keys()},
-                before=before_data,
-                after=after_data,
-            )
+            typus_list = []
+            if 'is_cancelled' in validated_data:
+                if validated_data['is_cancelled']:
+                    typus_list.append(HistoryTypus.PICKUP_CANCEL)
+                else:
+                    typus_list.append(HistoryTypus.PICKUP_UNCANCEL)
+
+            if len(set(validated_data.keys()).difference(['is_cancelled'])) > 0:
+                typus_list.append(HistoryTypus.PICKUP_MODIFY)
+
+            for typus in typus_list:
+                History.objects.create(
+                    typus=typus,
+                    group=pickupdate.store.group,
+                    store=pickupdate.store,
+                    pickup=pickupdate,
+                    users=[
+                        self.context['request'].user,
+                    ],
+                    payload={k: self.initial_data.get(k)
+                             for k in validated_data.keys()},
+                    before=before_data,
+                    after=after_data,
+                )
         pickupdate.store.group.refresh_active_status()
         return pickupdate
 
@@ -204,6 +216,7 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
             typus=HistoryTypus.SERIES_CREATE,
             group=series.store.group,
             store=series.store,
+            series=series,
             users=[
                 self.context['request'].user,
             ],
@@ -258,6 +271,7 @@ class PickupDateSeriesUpdateSerializer(PickupDateSeriesSerializer):
                 typus=HistoryTypus.SERIES_MODIFY,
                 group=series.store.group,
                 store=series.store,
+                series=series,
                 users=[
                     self.context['request'].user,
                 ],
