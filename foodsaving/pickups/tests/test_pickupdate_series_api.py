@@ -469,11 +469,9 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         # change series rule
         series_url = '/api/pickup-date-series/{}/'.format(self.series.id)
         self.client.force_login(user=self.member)
-        response = self.client.patch(
-            series_url, {
-                'start_date': self.series.start_date + relativedelta(days=1),
-            }
-        )
+        response = self.client.patch(series_url, {
+            'start_date': self.series.start_date + relativedelta(days=1),
+        })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.series.refresh_from_db()
 

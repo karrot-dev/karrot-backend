@@ -14,12 +14,12 @@ from foodsaving.pickups.models import (
 )
 from foodsaving.pickups.permissions import (
     IsUpcoming, HasNotJoinedPickupDate, HasJoinedPickupDate, IsEmptyPickupDate, IsNotFull, IsSameCollector,
-    IsRecentPickupDate, IsGroupEditor)
+    IsRecentPickupDate, IsGroupEditor
+)
 from foodsaving.pickups.serializers import (
     PickupDateSerializer, PickupDateSeriesSerializer, PickupDateJoinSerializer, PickupDateLeaveSerializer,
-    FeedbackSerializer, PickupDateUpdateSerializer,
-    PickupDateSeriesUpdateSerializer,
-    PickupDateSeriesHistorySerializer)
+    FeedbackSerializer, PickupDateUpdateSerializer, PickupDateSeriesUpdateSerializer, PickupDateSeriesHistorySerializer
+)
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 

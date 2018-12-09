@@ -49,9 +49,7 @@ class StoreSerializer(serializers.ModelSerializer):
     )
 
     def save(self, **kwargs):
-        return super().save(
-            last_changed_by=self.context['request'].user,
-        )
+        return super().save(last_changed_by=self.context['request'].user)
 
     def create(self, validated_data):
         store = super().create(validated_data)

@@ -1,5 +1,6 @@
 import dateutil.rrule
 from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
@@ -15,6 +16,7 @@ from foodsaving.pickups.models import (
     Feedback as FeedbackModel,
     PickupDateSeries as PickupDateSeriesModel,
 )
+from foodsaving.pickups.utils import rrule_between_dates_in_local_time
 from foodsaving.utils.misc import find_changed
 
 
@@ -52,9 +54,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
     feedback_due = serializers.DateTimeField(read_only=True)
 
     def save(self, **kwargs):
-        return super().save(
-            last_changed_by=self.context['request'].user
-        )
+        return super().save(last_changed_by=self.context['request'].user)
 
     def create(self, validated_data):
         pickupdate = super().create(validated_data)
@@ -197,16 +197,32 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
             'start_date',
             'description',
             'last_changed_by',
+            'dates_preview',
         ]
         read_only_fields = [
             'id',
             'last_changed_by',
         ]
 
-    def save(self, **kwargs):
-        return super().save(
-            last_changed_by=self.context['request'].user
+    dates_preview = serializers.ListField(
+        child=serializers.DateTimeField(),
+        read_only=True,
+        source='dates',
+    )
+
+    def get_dates_preview(self, series):
+        period_start = timezone.now() + relativedelta(minutes=5)
+        dates = rrule_between_dates_in_local_time(
+            rule=series.rule,
+            dtstart=series.start_date,
+            tz=series.store.group.timezone,
+            period_start=period_start,
+            period_duration=relativedelta(weeks=series.store.weeks_in_advance)
         )
+        return dates
+
+    def save(self, **kwargs):
+        return super().save(last_changed_by=self.context['request'].user)
 
     @transaction.atomic()
     def create(self, validated_data):

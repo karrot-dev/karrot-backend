@@ -55,8 +55,7 @@ class PickupDateSeries(BaseModel):
     def add_new_pickups(self):
         """create new pickups, don't change the ones modified by users"""
 
-        # shift start time slightly into future to avoid pickup dates which are only valid for very short time
-        period_start = timezone.now() + relativedelta(minutes=5)
+        period_start = self.period_start()
         after_date = max(period_start, self.pickups_created_until) if self.pickups_created_until else period_start
 
         date = None
@@ -79,20 +78,23 @@ class PickupDateSeries(BaseModel):
             self.pickups_created_until = date
             self.save()
 
-    def preview_override_pickups(self, rule=None, start_date=None, weeks_in_advance=None, tz=None):
+    def period_start(self):
         # shift start time slightly into future to avoid pickup dates which are only valid for very short time
-        period_start = timezone.now() + relativedelta(minutes=5)
-        dates = rrule_between_dates_in_local_time(
-            rule=rule or self.rule,
-            dtstart=start_date or self.start_date,
-            tz=tz or self.store.group.timezone,
-            period_start=period_start,
-            period_duration=relativedelta(weeks=weeks_in_advance or self.store.weeks_in_advance)
+        return timezone.now() + relativedelta(minutes=5)
+
+    def dates(self):
+        return rrule_between_dates_in_local_time(
+            rule=self.rule,
+            dtstart=self.start_date,
+            tz=self.store.group.timezone,
+            period_start=self.period_start(),
+            period_duration=relativedelta(weeks=self.store.weeks_in_advance)
         )
 
+    def preview_override_pickups(self):
         return match_pickups_with_dates(
-            pickups=self.pickup_dates.order_by('date').filter(date__gt=period_start),
-            new_dates=dates,
+            pickups=self.pickup_dates.order_by('date').filter(date__gt=self.period_start()),
+            new_dates=self.dates(),
         )
 
     def override_pickups(self):

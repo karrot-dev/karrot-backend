@@ -247,5 +247,7 @@ def pickup_cancelled_or_uncancelled(sender, instance, **kwargs):
             )
     else:
         # pickup is uncancelled
-        delete_notifications_by_type_and_collectors(type=NotificationType.PICKUP_CANCELLED.value, collectors=collectors)
+        delete_notifications_by_type_and_collectors(
+            type=NotificationType.PICKUP_CANCELLED.value, collectors=collectors
+        )
         # pickup_upcoming notifications will automatically get created by cronjob
