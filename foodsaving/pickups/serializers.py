@@ -108,8 +108,10 @@ class PickupDateUpdateSerializer(PickupDateSerializer):
             if 'is_cancelled' in validated_data:
                 if validated_data['is_cancelled']:
                     typus_list.append(HistoryTypus.PICKUP_CANCEL)
+                    stats.pickup_cancelled(pickupdate)
                 else:
                     typus_list.append(HistoryTypus.PICKUP_UNCANCEL)
+                    stats.pickup_uncancelled(pickupdate)
 
             if len(set(validated_data.keys()).difference(['is_cancelled'])) > 0:
                 typus_list.append(HistoryTypus.PICKUP_MODIFY)
