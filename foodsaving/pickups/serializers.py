@@ -39,7 +39,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
             'description',
             'feedback_due',
             'feedback_given_by',
-            'is_cancelled',
+            'is_disabled',
             'last_changed_by',
         ]
         read_only_fields = [
@@ -105,15 +105,15 @@ class PickupDateUpdateSerializer(PickupDateSerializer):
 
         if before_data != after_data:
             typus_list = []
-            if 'is_cancelled' in validated_data:
-                if validated_data['is_cancelled']:
-                    typus_list.append(HistoryTypus.PICKUP_CANCEL)
-                    stats.pickup_cancelled(pickupdate)
+            if 'is_disabled' in validated_data:
+                if validated_data['is_disabled']:
+                    typus_list.append(HistoryTypus.PICKUP_DISABLE)
+                    stats.pickup_disabled(pickupdate)
                 else:
-                    typus_list.append(HistoryTypus.PICKUP_UNCANCEL)
-                    stats.pickup_uncancelled(pickupdate)
+                    typus_list.append(HistoryTypus.PICKUP_ENABLE)
+                    stats.pickup_enabled(pickupdate)
 
-            if len(set(validated_data.keys()).difference(['is_cancelled'])) > 0:
+            if len(set(validated_data.keys()).difference(['is_disabled'])) > 0:
                 typus_list.append(HistoryTypus.PICKUP_MODIFY)
 
             for typus in typus_list:
@@ -132,6 +132,11 @@ class PickupDateUpdateSerializer(PickupDateSerializer):
                 )
         pickupdate.store.group.refresh_active_status()
         return pickupdate
+
+    def validate_date(self, date):
+        if self.instance.series is not None and abs((self.instance.date - date).seconds) > 1:
+            raise serializers.ValidationError(_('You can\'t move pickups that are part of a series.'))
+        return super().validate_date(date)
 
 
 class PickupDateJoinSerializer(serializers.ModelSerializer):

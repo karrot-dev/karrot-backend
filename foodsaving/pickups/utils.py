@@ -49,18 +49,17 @@ def match_pickups_with_dates(pickups, new_dates):
             date = next(new_dates, None)
 
 
-def rrule_between_dates_in_local_time(rule, dtstart, tz, period_start, period_duration, after=None):
+def rrule_between_dates_in_local_time(rule, dtstart, tz, period_start, period_duration):
     # using local time zone to avoid daylight saving time errors
     period_start_local = period_start.astimezone(tz).replace(tzinfo=None)
     dtstart_local = dtstart.astimezone(tz).replace(tzinfo=None)
-    after_local = after.astimezone(tz).replace(tzinfo=None) if after else None
 
     dates = dateutil.rrule.rrulestr(
         rule,
     ).replace(
         dtstart=dtstart_local,
     ).between(
-        after_local or period_start_local,
+        period_start_local,
         period_start_local + period_duration,
     )
     return [tz.localize(d) for d in dates]

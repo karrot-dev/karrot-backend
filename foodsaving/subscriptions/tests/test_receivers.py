@@ -584,8 +584,7 @@ class PickupDateReceiverTests(WSTestCase):
     def test_receive_pickup_delete(self):
         self.client = self.connect_as(self.member)
 
-        self.pickup.deleted = True
-        self.pickup.save()
+        self.pickup.delete()
 
         response = self.client.messages_by_topic.get('pickups:pickupdate_deleted')[0]
         self.assertEqual(response['payload']['id'], self.pickup.id)

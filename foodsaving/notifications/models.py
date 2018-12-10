@@ -1,3 +1,4 @@
+from django.db.models.manager import BaseManager
 from django.utils import timezone
 from enum import Enum
 
@@ -20,7 +21,9 @@ class NotificationType(Enum):
     NEW_MEMBER = 'new_member'
     INVITATION_ACCEPTED = 'invitation_accepted'
     PICKUP_UPCOMING = 'pickup_upcoming'
-    PICKUP_CANCELLED = 'pickup_cancelled'
+    PICKUP_DISABLED = 'pickup_disabled'
+    PICKUP_ENABLED = 'pickup_enabled'
+    PICKUP_MOVED = 'pickup_moved'
 
 
 class NotificationQuerySet(models.QuerySet):
@@ -31,8 +34,24 @@ class NotificationQuerySet(models.QuerySet):
         return self.exclude(expires_at__lte=timezone.now())
 
 
+class NotificationManager(BaseManager.from_queryset(NotificationQuerySet)):
+    def create_for_pickup_collectors(self, collectors, type):
+        for collector in collectors:
+            pickup = collector.pickupdate
+            super().create(
+                user=collector.user,
+                type=type,
+                context={
+                    'group': pickup.group.id,
+                    'store': pickup.store.id,
+                    'pickup': pickup.id,
+                    'pickup_collector': collector.id,
+                }
+            )
+
+
 class Notification(BaseModel):
-    objects = NotificationQuerySet.as_manager()
+    objects = NotificationManager()
 
     class Meta:
         ordering = ['-created_at']

@@ -203,51 +203,57 @@ def delete_pickup_notifications_when_collector_leaves(sender, instance, **kwargs
     collector = instance
 
     Notification.objects.order_by().not_expired()\
-        .filter(Q(type=NotificationType.PICKUP_UPCOMING.value) | Q(type=NotificationType.PICKUP_CANCELLED.value))\
+        .filter(Q(type=NotificationType.PICKUP_UPCOMING.value) | Q(type=NotificationType.PICKUP_DISABLED.value))\
         .filter(user=collector.user, context__pickup_collector=collector.id)\
         .delete()
 
 
 @receiver(pre_save, sender=PickupDate)
-def pickup_cancelled_or_uncancelled(sender, instance, **kwargs):
+def pickup_modified(sender, instance, **kwargs):
     pickup = instance
 
-    # abort pickup was just created
+    # abort if pickup was just created
     if not pickup.id:
         return
 
-    # abort if pickup cancel status didn't change
     old = PickupDate.objects.get(id=pickup.id)
-    if old.is_cancelled == pickup.is_cancelled:
-        return
 
     collectors = pickup.pickupdatecollector_set
 
-    def delete_notifications_by_type_and_collectors(type, collectors):
+    def delete_notifications_for_collectors(collectors, type):
         Notification.objects.order_by().not_expired() \
             .filter(type=type) \
             .annotate(collector_id=Cast(KeyTextTransform('pickup_collector', 'context'), IntegerField())) \
             .filter(collector_id__in=collectors.values_list('id', flat=True)) \
             .delete()
 
-    if pickup.is_cancelled:
-        delete_notifications_by_type_and_collectors(type=NotificationType.PICKUP_UPCOMING.value, collectors=collectors)
-
-        # create pickup_cancelled notifications
-        for collector in collectors.exclude(user=pickup.last_changed_by):
-            Notification.objects.create(
-                user=collector.user,
-                type=NotificationType.PICKUP_CANCELLED.value,
-                context={
-                    'group': pickup.group.id,
-                    'store': pickup.store.id,
-                    'pickup': pickup.id,
-                    'pickup_collector': collector.id,
-                }
+    if old.is_disabled != pickup.is_disabled:
+        if pickup.is_disabled:
+            delete_notifications_for_collectors(
+                collectors=collectors,
+                type=NotificationType.PICKUP_UPCOMING.value,
             )
-    else:
-        # pickup is uncancelled
-        delete_notifications_by_type_and_collectors(
-            type=NotificationType.PICKUP_CANCELLED.value, collectors=collectors
+
+            Notification.objects.create_for_pickup_collectors(
+                collectors=collectors.exclude(user=pickup.last_changed_by),
+                type=NotificationType.PICKUP_DISABLED.value,
+            )
+        else:
+            # pickup is enabled
+            delete_notifications_for_collectors(
+                collectors=collectors,
+                type=NotificationType.PICKUP_DISABLED.value,
+            )
+
+            Notification.objects.create_for_pickup_collectors(
+                collectors=collectors.exclude(user=pickup.last_changed_by),
+                type=NotificationType.PICKUP_ENABLED.value,
+            )
+
+            # pickup_upcoming notifications will automatically get created by cronjob
+
+    if abs((old.date - pickup.date).seconds) > 60:
+        Notification.objects.create_for_pickup_collectors(
+            collectors=collectors.exclude(user=pickup.last_changed_by),
+            type=NotificationType.PICKUP_MOVED.value,
         )
-        # pickup_upcoming notifications will automatically get created by cronjob

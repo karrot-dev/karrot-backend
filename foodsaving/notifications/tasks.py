@@ -15,8 +15,8 @@ def delete_expired_notifications():
 
 @db_periodic_task(crontab(minute='*'))  # every minute
 def create_pickup_upcoming_notifications():
-    # Oh oh, this is a bit complex. As notification.context is a JSONField, the subquery would return a jsonb object
-    # by default (which can't be compared to integer).
+    # Oh oh, this is a bit complex. As notification.context is a JSONField, the collectors_already_notified subquery
+    # would return a jsonb object by default (which can't be compared to integer).
     # We can work around this by transforming the property value to text ("->>" lookup) and then casting to integer
     collectors_already_notified = Notification.objects.\
         order_by().\

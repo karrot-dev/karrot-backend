@@ -161,7 +161,7 @@ class TestNotificationReceivers(TestCase):
         notifications = Notification.objects.filter(type=NotificationType.PICKUP_UPCOMING.value)
         self.assertEqual(notifications.count(), 0)
 
-    def test_creates_pickup_cancelled_notification_and_deletes_pickup_upcoming_notification(self):
+    def test_creates_pickup_disabled_notification_and_deletes_pickup_upcoming_notification(self):
         user1, user2 = UserFactory(), UserFactory()
         group = GroupFactory(members=[user1, user2])
         store = StoreFactory(group=group)
@@ -175,10 +175,10 @@ class TestNotificationReceivers(TestCase):
         pickup_upcoming_notifications = Notification.objects.filter(type=NotificationType.PICKUP_UPCOMING.value)
         self.assertEqual(pickup_upcoming_notifications.count(), 0)
 
-        pickup_cancelled_notifications = Notification.objects.filter(type=NotificationType.PICKUP_CANCELLED.value)
-        self.assertEqual(pickup_cancelled_notifications.count(), 1)
-        self.assertEqual(pickup_cancelled_notifications[0].user, user1)
-        context = pickup_cancelled_notifications[0].context
+        pickup_disabled_notifications = Notification.objects.filter(type=NotificationType.PICKUP_DISABLED.value)
+        self.assertEqual(pickup_disabled_notifications.count(), 1)
+        self.assertEqual(pickup_disabled_notifications[0].user, user1)
+        context = pickup_disabled_notifications[0].context
         self.assertEqual(context['group'], group.id)
         self.assertEqual(context['user'], user2.id)
         self.assertEqual(context['pickup'], pickup.id)

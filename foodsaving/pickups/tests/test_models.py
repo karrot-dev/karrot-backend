@@ -57,7 +57,7 @@ class TestPickupDateSeriesModel(TestCase):
         PickupDateSeriesFactory(store=self.store, start_date=start_date)
 
         PickupDate.objects.all().delete()
-        PickupDateSeries.objects.add_new_pickups()
+        PickupDateSeries.objects.update_pickups()
         self.assertEqual(PickupDate.objects.count(), 0)
 
     def test_daylight_saving_time_to_summer(self):
@@ -96,7 +96,7 @@ class TestPickupDateSeriesModel(TestCase):
         past_date_count = pickup_dates.filter(date__lt=now).count()
         self.assertGreater(pickup_dates.count(), 2)
         series.delete()
-        self.assertEqual(PickupDate.objects.filter(date__gte=now, is_cancelled=False).count(), 0)
+        self.assertEqual(PickupDate.objects.filter(date__gte=now, is_disabled=False).count(), 0)
         self.assertEqual(PickupDate.objects.filter(date__lt=now).count(), past_date_count)
 
 
@@ -109,16 +109,8 @@ class TestProcessFinishedPickupDates(TestCase):
         self.assertEqual(PickupDate.objects.count(), 1)
         self.assertEqual(History.objects.count(), 1)
 
-    def test_do_no_process_deleted_pickups(self):
-        self.pickup.deleted = True
-        self.pickup.save()
-        PickupDate.objects.process_finished_pickup_dates()
-
-        self.assertFalse(self.pickup.feedback_possible)
-        self.assertEqual(History.objects.count(), 0)
-
-    def test_do_no_process_cancelled_pickups(self):
-        self.pickup.is_cancelled = True
+    def test_do_no_process_disabled_pickups(self):
+        self.pickup.is_disabled = True
         self.pickup.save()
         PickupDate.objects.process_finished_pickup_dates()
 
@@ -130,6 +122,6 @@ class TestAddPickupsCommand(TestCase):
     def setUp(self):
         self.series = PickupDateSeriesFactory()
 
-    def test_add_new_pickups(self):
-        PickupDateSeries.objects.add_new_pickups()
+    def test_update_pickups(self):
+        PickupDateSeries.objects.update_pickups()
         self.assertGreater(PickupDate.objects.count(), 0)

@@ -19,9 +19,9 @@ pickup_done = Signal()
 
 class PickupDateSeriesQuerySet(models.QuerySet):
     @transaction.atomic
-    def add_new_pickups(self):
+    def update_pickups(self):
         for series in self.filter(store__status=StoreStatus.ACTIVE.value):
-            series.add_new_pickups()
+            series.update_pickups()
 
 
 class PickupDateSeries(BaseModel):
@@ -40,8 +40,6 @@ class PickupDateSeries(BaseModel):
         null=True,
     )
 
-    pickups_created_until = models.DateTimeField(null=True)
-
     def create_pickup(self, date):
         return self.pickup_dates.create(
             date=date,
@@ -51,32 +49,6 @@ class PickupDateSeries(BaseModel):
             description=self.description,
             last_changed_by=self.last_changed_by,
         )
-
-    def add_new_pickups(self):
-        """create new pickups, don't change the ones modified by users"""
-
-        period_start = self.period_start()
-        after_date = max(period_start, self.pickups_created_until) if self.pickups_created_until else period_start
-
-        date = None
-
-        for pickup, date in match_pickups_with_dates(
-                pickups=self.pickup_dates.order_by('date').filter(date__gt=after_date),
-                new_dates=rrule_between_dates_in_local_time(
-                    rule=self.rule,
-                    dtstart=self.start_date,
-                    tz=self.store.group.timezone,
-                    period_start=period_start,
-                    period_duration=relativedelta(weeks=self.store.weeks_in_advance),
-                    after=after_date,
-                ),
-        ):
-            if not pickup:
-                self.create_pickup(date)
-
-        if date:
-            self.pickups_created_until = date
-            self.save()
 
     def period_start(self):
         # shift start time slightly into future to avoid pickup dates which are only valid for very short time
@@ -91,29 +63,23 @@ class PickupDateSeries(BaseModel):
             period_duration=relativedelta(weeks=self.store.weeks_in_advance)
         )
 
-    def preview_override_pickups(self):
+    def get_matched_pickups(self):
         return match_pickups_with_dates(
             pickups=self.pickup_dates.order_by('date').filter(date__gt=self.period_start()),
             new_dates=self.dates(),
         )
 
-    def override_pickups(self):
+    def update_pickups(self):
         """
         create new pickups and delete empty pickups that don't match series
         """
 
-        date = None
-
-        for pickup, date in self.preview_override_pickups():
+        for pickup, date in self.get_matched_pickups():
             if not pickup:
                 self.create_pickup(date)
             elif not date:
                 if pickup.collectors.count() < 1:
                     pickup.delete()
-
-        if date:
-            self.pickups_created_until = date
-            self.save()
 
     def __str__(self):
         return 'PickupDateSeries {} - {}'.format(self.rule, self.store)
@@ -123,12 +89,10 @@ class PickupDateSeries(BaseModel):
 
         super().save(*args, **kwargs)
 
-        if not old:
-            self.add_new_pickups()
-        else:
-            if old.start_date != self.start_date or old.rule != self.rule:
-                self.override_pickups()
+        if not old or old.start_date != self.start_date or old.rule != self.rule:
+            self.update_pickups()
 
+        if old:
             description_changed = old.description != self.description
             max_collectors_changed = old.max_collectors != self.max_collectors
             if description_changed or max_collectors_changed:
@@ -156,21 +120,21 @@ class PickupDateQuerySet(models.QuerySet):
     def annotate_num_collectors(self):
         return self.annotate(num_collectors=Count('collectors'))
 
-    def exclude_cancelled(self):
-        return self.filter(is_cancelled=False)
+    def exclude_disabled(self):
+        return self.filter(is_disabled=False)
 
     def in_group(self, group):
         return self.filter(store__group=group)
 
     def due_soon(self):
         in_some_hours = timezone.now() + relativedelta(hours=settings.PICKUPDATE_DUE_SOON_HOURS)
-        return self.exclude_cancelled().filter(date__gt=timezone.now(), date__lt=in_some_hours)
+        return self.exclude_disabled().filter(date__gt=timezone.now(), date__lt=in_some_hours)
 
     def missed(self):
-        return self.exclude_cancelled().filter(date__lt=timezone.now(), collectors=None)
+        return self.exclude_disabled().filter(date__lt=timezone.now(), collectors=None)
 
     def done(self):
-        return self.exclude_cancelled().filter(date__lt=timezone.now()).exclude(collectors=None)
+        return self.exclude_disabled().filter(date__lt=timezone.now()).exclude(collectors=None)
 
     def upcoming(self):
         return self.filter(date__gt=timezone.now())
@@ -178,9 +142,10 @@ class PickupDateQuerySet(models.QuerySet):
     @transaction.atomic
     def process_finished_pickup_dates(self):
         """
-        find all pickup dates that are in the past and didn't get processed yet and add them to history
+        find all pickup dates that are in the past and didn't get processed yet
+        add them to history and mark as processed
         """
-        for pickup in self.exclude_cancelled().filter(
+        for pickup in self.exclude_disabled().filter(
                 feedback_possible=False,
                 date__lt=timezone.now(),
         ):
@@ -249,11 +214,11 @@ class PickupDate(BaseModel, ConversationMixin):
     date = models.DateTimeField()
     description = models.TextField(blank=True)
     max_collectors = models.PositiveIntegerField(null=True)
-    is_cancelled = models.BooleanField(default=False)
+    is_disabled = models.BooleanField(default=False)
     last_changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
-        related_name='pickups_cancelled',
+        related_name='pickups_changed',
         on_delete=models.SET_NULL,
     )
 

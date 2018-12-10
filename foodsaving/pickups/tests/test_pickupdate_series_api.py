@@ -66,7 +66,6 @@ class TestPickupDateSeriesCreationAPI(APITestCase, ExtractPaginationMixin):
             'store': self.store.id,
             'rule': str(recurrence),
             'description': '',
-            'last_changed_message': '',
             'last_changed_by': self.member.id,
         }
         self.assertEqual(response.data, expected_series_data)
@@ -119,8 +118,7 @@ class TestPickupDateSeriesCreationAPI(APITestCase, ExtractPaginationMixin):
                 'description': '',
                 'feedback_given_by': [],
                 'last_changed_by': self.member.id,
-                'last_changed_message': '',
-                'is_cancelled': False,
+                'is_disabled': False,
             })
         self.assertEqual(response.data, created_pickup_dates, response.data)
 
@@ -287,7 +285,6 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
     #         .replace(until=self.now)
     #     response = self.client.patch(url, {
     #         'rule': str(rule),
-    #         'last_changed_message': 'hi',
     #     })
     #     self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
     #     self.assertEqual(response.data['rule'], str(rule))
@@ -298,7 +295,8 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
     #     self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
     #     self.assertEqual(len(response.data), 1, response.data)
 
-    def test_cancel_pickup_series(self):
+    def test_disable_pickup_series(self):
+        # TODO rewrite
         "the series should get removed, all upcoming pickups cancelled"
         self.client.force_login(user=self.member)
         joined_pickup = self.series.pickup_dates.last()
@@ -318,7 +316,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.data['collector_ids'], [
             self.member.id,
         ])
-        self.assertFalse(response.data['is_cancelled'])
+        self.assertFalse(response.data['is_disabled'])
 
     def test_change_max_collectors_to_invalid_number_fails(self):
         self.client.force_login(user=self.member)
@@ -356,7 +354,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.data['max_collectors'], 666)
 
         # run regular update command of series
-        self.series.add_new_pickups()
+        self.series.update_pickups()
 
         # check if changes persist
         url = '/api/pickup-dates/{}/'.format(pickup_under_test.id)
@@ -376,7 +374,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(parse(response.data['date']), target_date)
 
         # run regular update command of series
-        self.series.add_new_pickups()
+        self.series.update_pickups()
 
         # check if changes persist
         url = '/api/pickup-dates/{}/'.format(pickup_under_test.id)
@@ -395,7 +393,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.data['description'], 'asdf')
 
         # run regular update command of series
-        self.series.add_new_pickups()
+        self.series.update_pickups()
 
         # check if changes persist
         url = '/api/pickup-dates/{}/'.format(pickup_under_test.id)
@@ -420,7 +418,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # run update
-        self.series.add_new_pickups()
+        self.series.update_pickups()
 
         response = self.client.get('/api/pickup-dates/?series={}'.format(self.series.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -433,7 +431,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
             )
         ])
 
-    def test_cancels_moved_pickup_on_series_change(self):
+    def test_disables_moved_pickup_on_series_change(self):
         # move pickup
         pickup = self.series.pickup_dates.first()
         pickup_url = '/api/pickup-dates/{}/'.format(pickup.id)
@@ -462,7 +460,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
             )
         ])
 
-    def test_cancels_nonmatching_joined_pickups(self):
+    def test_disables_nonmatching_joined_pickups(self):
         # join pickups
         [p.add_collector(self.member) for p in self.series.pickup_dates.all()]
 
@@ -530,7 +528,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
             )),
         )
 
-    def test_cancels_leftover_pickups_when_reducing_weeks_in_advance(self):
+    def test_disables_leftover_pickups_when_reducing_weeks_in_advance(self):
         # join pickups
         [p.add_collector(self.member) for p in self.series.pickup_dates.all()]
 

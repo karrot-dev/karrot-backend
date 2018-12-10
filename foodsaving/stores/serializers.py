@@ -107,7 +107,7 @@ class StoreUpdateSerializer(StoreSerializer):
             for series in store.series.all():
                 series.last_changed_by = store.last_changed_by
                 series.save()
-                series.override_pickups()
+                series.update_pickups()
 
         if before_data != after_data:
             History.objects.create(

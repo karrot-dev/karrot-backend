@@ -280,10 +280,16 @@ def send_pickup_updates(sender, instance, **kwargs):
     payload = PickupDateSerializer(pickup).data
     for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.store.group.members.all()
                                                                     ).distinct():
-        if not pickup.deleted:
-            send_in_channel(subscription.reply_channel, topic='pickups:pickupdate', payload=payload)
-        else:
-            send_in_channel(subscription.reply_channel, topic='pickups:pickupdate_deleted', payload=payload)
+        send_in_channel(subscription.reply_channel, topic='pickups:pickupdate', payload=payload)
+
+
+@receiver(pre_delete, sender=PickupDate)
+def send_pickup_deleted(sender, instance, **kwargs):
+    pickup = instance
+    payload = PickupDateSerializer(pickup).data
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.store.group.members.all()
+                                                                    ).distinct():
+        send_in_channel(subscription.reply_channel, topic='pickups:pickupdate_deleted', payload=payload)
 
 
 @receiver(post_save, sender=PickupDateCollector)
