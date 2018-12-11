@@ -1,3 +1,4 @@
+import dateutil
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -102,6 +103,11 @@ class PickupDateSeries(BaseModel):
                     if max_collectors_changed:
                         pickup.max_collectors = self.max_collectors
                     pickup.save()
+
+    def delete(self, **kwargs):
+        self.rule = str(dateutil.rrule.rrulestr(self.rule).replace(dtstart=self.start_date, until=timezone.now()))
+        self.update_pickups()
+        return super().delete()
 
 
 class PickupDateQuerySet(models.QuerySet):

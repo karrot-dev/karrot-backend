@@ -170,7 +170,9 @@ class TestNotificationReceivers(TestCase):
         Notification.objects.all().delete()
 
         create_pickup_upcoming_notifications.call_local()
-        pickup.cancel(user=user2, message='asdf')
+        pickup.last_changed_by = user2
+        pickup.is_disabled = True
+        pickup.save()
 
         pickup_upcoming_notifications = Notification.objects.filter(type=NotificationType.PICKUP_UPCOMING.value)
         self.assertEqual(pickup_upcoming_notifications.count(), 0)
@@ -180,6 +182,5 @@ class TestNotificationReceivers(TestCase):
         self.assertEqual(pickup_disabled_notifications[0].user, user1)
         context = pickup_disabled_notifications[0].context
         self.assertEqual(context['group'], group.id)
-        self.assertEqual(context['user'], user2.id)
         self.assertEqual(context['pickup'], pickup.id)
         self.assertEqual(context['store'], store.id)

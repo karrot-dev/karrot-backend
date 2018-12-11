@@ -584,10 +584,11 @@ class PickupDateReceiverTests(WSTestCase):
     def test_receive_pickup_delete(self):
         self.client = self.connect_as(self.member)
 
+        pickup_id = self.pickup.id
         self.pickup.delete()
 
         response = self.client.messages_by_topic.get('pickups:pickupdate_deleted')[0]
-        self.assertEqual(response['payload']['id'], self.pickup.id)
+        self.assertEqual(response['payload']['id'], pickup_id)
 
         self.assertEqual(len(self.client.messages), 1)
 
@@ -624,8 +625,7 @@ class PickupDateSeriesReceiverTests(WSTestCase):
         response = self.client.messages_by_topic.get('pickups:series_deleted')[0]
         self.assertEqual(response['payload']['id'], id)
 
-        # there's a spurious pickups:series message that could get removed at some point
-        self.assertEqual(len(self.client.messages), 2)
+        self.assertEqual(len(self.client.messages), 1)
 
 
 class FeedbackReceiverTests(WSTestCase):

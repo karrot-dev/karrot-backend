@@ -171,12 +171,6 @@ class TestHistoryAPIWithExistingPickups(APITestCase, ExtractPaginationMixin):
         response = self.get_results(history_url)
         self.assertEqual(len(response.data), 0, response.data)
 
-    def test_delete_pickup(self):
-        self.client.force_login(self.member)
-        self.client.delete(self.pickup_url)
-        response = self.get_results(history_url)
-        self.assertEqual(response.data[0]['typus'], 'PICKUP_DELETE')
-
     def test_modify_series(self):
         self.client.force_login(self.member)
         self.client.patch(self.series_url, {'max_collectors': '11'})
@@ -281,7 +275,7 @@ class TestHistoryAPIPickupForInactiveStore(APITestCase, ExtractPaginationMixin):
         self.assertEqual(len(response.data), 0)
 
 
-class TestHistoryAPIWithDeletedPickup(APITestCase, ExtractPaginationMixin):
+class TestHistoryAPIWithDisabledPickup(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
@@ -289,11 +283,11 @@ class TestHistoryAPIWithDeletedPickup(APITestCase, ExtractPaginationMixin):
         self.pickup = PickupDateFactory(
             store=self.store,
             date=timezone.now() - relativedelta(days=1),
-            deleted=True,
+            is_disabled=True,
         )
         PickupDate.objects.process_finished_pickup_dates()
 
-    def test_no_history_for_deleted_pickup(self):
+    def test_no_history_for_disabled_pickup(self):
         self.client.force_login(self.member)
         response = self.get_results(history_url)
         self.assertEqual(len(response.data), 0)

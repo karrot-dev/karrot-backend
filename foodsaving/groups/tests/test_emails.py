@@ -114,7 +114,7 @@ class TestGroupSummaryEmails(APITestCase):
 
         with freeze_time(a_few_days_ago, tick=True):
             # fulfilled, but deleted
-            PickupDateFactory(store=store, max_collectors=1, collectors=[user], deleted=True)
+            PickupDateFactory(store=store, max_collectors=1, collectors=[user], is_disabled=True)
 
         from_date, to_date = foodsaving.groups.emails.calculate_group_summary_dates(self.group)
         data = foodsaving.groups.emails.prepare_group_summary_data(self.group, from_date, to_date)

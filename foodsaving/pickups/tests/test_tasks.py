@@ -157,12 +157,6 @@ class TestPickupNotificationTask(APITestCase):
             daily_pickup_notifications()
             self.assertEqual(len(mail.outbox), 0)
 
-    def test_ignores_deleted_pickups(self):
-        with group_timezone_at(self.group, hour=20):
-            self.create_deleted_pickup(delta=relativedelta(minutes=10))
-            daily_pickup_notifications()
-            self.assertEqual(len(mail.outbox), 0)
-
     def test_ignores_disabled_pickups(self):
         with group_timezone_at(self.group, hour=20):
             self.create_disabled_pickup(delta=relativedelta(minutes=10))
