@@ -7,7 +7,6 @@ from dateutil.rrule import rrulestr
 from dateutil.tz import tzlocal
 from django.utils import timezone
 from django.utils.datetime_safe import datetime
-from freezegun import freeze_time
 from more_itertools import interleave
 from rest_framework import status
 from rest_framework.test import APITestCase
