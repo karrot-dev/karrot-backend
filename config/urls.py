@@ -34,8 +34,8 @@ from foodsaving.webhooks.api import IncomingEmailView, EmailEventView
 router = DefaultRouter()
 
 router.register('groups', GroupViewSet)
-router.register('groups-info', GroupInfoViewSet, base_name='groupinfo')
-router.register('group-applications', GroupApplicationViewSet, base_name='groupapplication')
+router.register('groups-info', GroupInfoViewSet, basename='groupinfo')
+router.register('group-applications', GroupApplicationViewSet, basename='groupapplication')
 router.register('agreements', AgreementViewSet)
 
 # User endpoints

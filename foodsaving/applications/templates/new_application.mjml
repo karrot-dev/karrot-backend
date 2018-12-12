@@ -4,42 +4,40 @@
         <mj-title>{% trans user_name=applicant.display_name, group_name=group.name %}{{ user_name }} wants to join {{ group_name }}{% endtrans %}</mj-title>
     </mj-head>
     <mj-body>
-        <mj-container>
-            <mj-include path="../../base/templates/_header.mjml"/>
-            <mj-section background-color="#ffffff" padding="40px 0 40px 0">
-                <mj-column>
-                    <mj-text>
-                        <h1>{% trans user_name=applicant.display_name, group_name=group.name %}{{ user_name }} wants to join {{ group_name }}{% endtrans %}</h1>
-                        <div class="message">
-                            <h2>{% trans %}Questions asked by your group{% endtrans %}</h2>
-                            <div class="message-content">
-                                {{ questions | safe }}
-                            </div>
-                            <p class="light-text">
-                                {% trans %}You can edit the questions for new applications on the <a href="{{ group_edit_url }}">group edit page</a>.{% endtrans %}
-                            </p>
-                            <h2>{% trans user_name=applicant.display_name %}Answers from {{ user_name }}{% endtrans %}</h2>
-                            <div class="message-content">
-                                {{ answers | safe }}
-                            </div>
+        <mj-include path="../../base/templates/_header.mjml"/>
+        <mj-section background-color="#ffffff" padding="40px 0 40px 0">
+            <mj-column>
+                <mj-text>
+                    <h1>{% trans user_name=applicant.display_name, group_name=group.name %}{{ user_name }} wants to join {{ group_name }}{% endtrans %}</h1>
+                    <div class="message">
+                        <h2>{% trans %}Questions asked by your group{% endtrans %}</h2>
+                        <div class="message-content">
+                            {{ questions | safe }}
                         </div>
-                    </mj-text>
-                    <mj-button href="{{ group_applications_url }}">
-                        {% trans %}View applications{% endtrans %}
-                    </mj-button>
-                    <mj-divider/>
-                    <mj-text font-size="13px" line-height="18px" color="#777">
-                        <p>
-                            {% trans %}You are receiving this because you are subscribed to <strong>User application</strong> emails for this group.{% endtrans %}
-                            <a href="{{ settings_url }}">{% trans %}Click here to unsubscribe{% endtrans %}</a>.
+                        <p class="light-text">
+                            {% trans %}You can edit the questions for new applications on the <a href="{{ group_edit_url }}">group edit page</a>.{% endtrans %}
                         </p>
-                        <p>
-                            {% trans %}Reply to this email directly, <a href="{{ conversation_url }}">view it on {{ site_name }}</a>, or <a href="{{ mute_url }}">mute the conversation</a>.{% endtrans %}
-                        </p>
-                    </mj-text>
-                </mj-column>
-            </mj-section>
-            <mj-include path="../../base/templates/_footer.mjml"/>
-        </mj-container>
+                        <h2>{% trans user_name=applicant.display_name %}Answers from {{ user_name }}{% endtrans %}</h2>
+                        <div class="message-content">
+                            {{ answers | safe }}
+                        </div>
+                    </div>
+                </mj-text>
+                <mj-button href="{{ group_applications_url }}">
+                    {% trans %}View applications{% endtrans %}
+                </mj-button>
+                <mj-divider/>
+                <mj-text font-size="13px" line-height="18px" color="#777">
+                    <p>
+                        {% trans %}You are receiving this because you are subscribed to <strong>User application</strong> emails for this group.{% endtrans %}
+                        <a href="{{ settings_url }}">{% trans %}Click here to unsubscribe{% endtrans %}</a>.
+                    </p>
+                    <p>
+                        {% trans %}Reply to this email directly, <a href="{{ conversation_url }}">view it on {{ site_name }}</a>, or <a href="{{ mute_url }}">mute the conversation</a>.{% endtrans %}
+                    </p>
+                </mj-text>
+            </mj-column>
+        </mj-section>
+        <mj-include path="../../base/templates/_footer.mjml"/>
     </mj-body>
 </mjml>

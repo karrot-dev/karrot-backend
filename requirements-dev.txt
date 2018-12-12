@@ -8,58 +8,57 @@ apipkg==1.5               # via execnet
 atomicwrites==1.2.1       # via pytest
 attrs==18.2.0             # via pytest
 autoflake==1.2
-autopep8==1.4.2
+autopep8==1.4.3
 backcall==0.1.0           # via ipython
-certifi==2018.10.15       # via requests
+certifi==2018.11.29       # via requests
 chardet==3.0.4            # via requests
 click==7.0                # via pip-tools
-coverage==4.5.1           # via pytest-cov
+coverage==4.5.2           # via pytest-cov
 decorator==4.3.0          # via ipython, traitlets
 django-silk==3.0.1
-django==2.1.2             # via django-silk
+django==2.1.4             # via django-silk
 execnet==1.5.0            # via pytest-xdist
 flake8==3.6.0
 freezegun==0.3.11
 gprof2dot==2016.10.13     # via django-silk
-idna==2.7                 # via requests
+idna==2.8                 # via requests
 ipython-genutils==0.2.0   # via traitlets
-ipython==7.0.1
+ipython==7.2.0
 jedi==0.13.1              # via ipython
 jinja2==2.10              # via django-silk
 logging-tree==1.8
-markupsafe==1.0           # via jinja2
+markupsafe==1.1.0         # via jinja2
 mccabe==0.6.1             # via flake8
 more-itertools==4.3.0     # via pytest
 parso==0.3.1              # via jedi
-pathlib2==2.3.2
+pathlib2==2.3.3
 pexpect==4.6.0            # via ipython
 pickleshare==0.7.5        # via ipython
 pip-tools==3.1.0
 pluggy==0.8.0             # via pytest
-prompt-toolkit==2.0.6     # via ipython
+prompt-toolkit==2.0.7     # via ipython
 ptyprocess==0.6.0         # via pexpect
 py==1.7.0                 # via pytest
 pycodestyle==2.4.0        # via autopep8, flake8
 pyflakes==2.0.0           # via autoflake, flake8
-pygments==2.2.0           # via django-silk, ipython
+pygments==2.3.0           # via django-silk, ipython
 pytest-asyncio==0.9.0
 pytest-cov==2.6.0
-pytest-django==3.4.3
+pytest-django==3.4.4
 pytest-forked==0.2        # via pytest-xdist
-pytest-xdist==1.23.2
-pytest==3.9.2             # via pytest-asyncio, pytest-cov, pytest-django, pytest-forked, pytest-xdist
-python-dateutil==2.7.4    # via django-silk, freezegun
+pytest-xdist==1.24.1
+pytest==4.0.1             # via pytest-asyncio, pytest-cov, pytest-django, pytest-forked, pytest-xdist
+python-dateutil==2.7.5    # via django-silk, freezegun
 python-slugify==1.2.6     # via transifex-client
-pytz==2018.6              # via django, django-silk
+pytz==2018.7              # via django, django-silk
 requests-mock==1.5.2
-requests==2.20.0          # via django-silk, requests-mock, transifex-client
-simplegeneric==0.8.1      # via ipython
+requests==2.21.0          # via django-silk, requests-mock, transifex-client
 six==1.11.0               # via freezegun, more-itertools, pathlib2, pip-tools, prompt-toolkit, pytest, pytest-xdist, python-dateutil, requests-mock, traitlets, transifex-client
 sqlparse==0.2.4           # via django-silk
 tblib==1.3.2
 traitlets==4.3.2          # via ipython
 transifex-client==0.13.5
-unidecode==1.0.22         # via python-slugify
+unidecode==1.0.23         # via python-slugify
 urllib3==1.23             # via requests, transifex-client
 wcwidth==0.1.7            # via prompt-toolkit
-yapf==0.24.0
+yapf==0.25.0

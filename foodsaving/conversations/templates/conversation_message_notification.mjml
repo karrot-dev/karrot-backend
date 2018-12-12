@@ -4,27 +4,25 @@
         <mj-title>{{ conversation_name }}</mj-title>
     </mj-head>
     <mj-body>
-        <mj-container>
-            <mj-section>
-                <mj-column>
-                    <mj-text>
-                        {% for message in messages %}
-                            <div class="message">
-                                <a class="message-author" href="{{ user_url(message.author) }}">{{ message.author.display_name }}</a><br>
-                                <span class="message-content">{{ message.content_rendered() | safe }}</span>
-                            </div>
-                        {% endfor %}
-                    </mj-text>
-                    <mj-divider/>
-                    <mj-text font-size="13px" line-height="18px" color="#777">
-                        <p>
-                            {% trans %}You are receiving this because you are subscribed to this conversation.{% endtrans %}<br/>
-                            {% trans %}Reply to this email directly, <a href="{{ conversation_url }}">view it on {{ site_name }}</a>, or <a href="{{ mute_url }}">mute the conversation</a>.{% endtrans %}
-                        </p>
-                    </mj-text>
-                </mj-column>
-            </mj-section>
-            <mj-include path="../../base/templates/_footer.mjml"/>
-        </mj-container>
+        <mj-section>
+            <mj-column>
+                <mj-text>
+                    {% for message in messages %}
+                        <div class="message">
+                            <a class="message-author" href="{{ user_url(message.author) }}">{{ message.author.display_name }}</a><br>
+                            <span class="message-content">{{ message.content_rendered() | safe }}</span>
+                        </div>
+                    {% endfor %}
+                </mj-text>
+                <mj-divider/>
+                <mj-text font-size="13px" line-height="18px" color="#777">
+                    <p>
+                        {% trans %}You are receiving this because you are subscribed to this conversation.{% endtrans %}<br/>
+                        {% trans %}Reply to this email directly, <a href="{{ conversation_url }}">view it on {{ site_name }}</a>, or <a href="{{ mute_url }}">mute the conversation</a>.{% endtrans %}
+                    </p>
+                </mj-text>
+            </mj-column>
+        </mj-section>
+        <mj-include path="../../base/templates/_footer.mjml"/>
     </mj-body>
 </mjml>

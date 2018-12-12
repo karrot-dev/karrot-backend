@@ -4,19 +4,17 @@
         <mj-title>{% trans group_name=group.name %}Your application to join {{ group_name }} was accepted{% endtrans %}</mj-title>
     </mj-head>
     <mj-body>
-        <mj-container>
-            <mj-include path="../../base/templates/_header.mjml"/>
-            <mj-section background-color="#ffffff" padding="40px 0 40px 0">
-                <mj-column>
-                    <mj-text>
-                        <h1>{% trans group_name=group.name %}Your application to join {{ group_name }} was accepted{% endtrans %}</h1>
-                    </mj-text>
-                    <mj-button href="{{ group_url }}">
-                        {% trans group_name=group.name %}Visit {{ group_name }}{% endtrans %}
-                    </mj-button>
-                </mj-column>
-            </mj-section>
-            <mj-include path="../../base/templates/_footer.mjml"/>
-        </mj-container>
+        <mj-include path="../../base/templates/_header.mjml"/>
+        <mj-section background-color="#ffffff" padding="40px 0 40px 0">
+            <mj-column>
+                <mj-text>
+                    <h1>{% trans group_name=group.name %}Your application to join {{ group_name }} was accepted{% endtrans %}</h1>
+                </mj-text>
+                <mj-button href="{{ group_url }}">
+                    {% trans group_name=group.name %}Visit {{ group_name }}{% endtrans %}
+                </mj-button>
+            </mj-column>
+        </mj-section>
+        <mj-include path="../../base/templates/_footer.mjml"/>
     </mj-body>
 </mjml>

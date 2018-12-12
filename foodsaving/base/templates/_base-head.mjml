@@ -4,7 +4,7 @@
     <mj-text font-weight="400" font-size="20px" color="#616161" line-height="28px" />
     <mj-button font-weight="700" font-size="20px" line-height="28px" background-color="#fccb3f" color="white"/>
     <mj-section background-color="#ffffff" padding="40px 0 40px 0" />
-    <mj-container background-color="#f5f5f5" />
+    <mj-body background-color="#f5f5f5" />
     <mj-column width="90%" />
     <mj-divider border-width="1px" border-style="dashed" border-color="lightgrey"/>
 </mj-attributes>
