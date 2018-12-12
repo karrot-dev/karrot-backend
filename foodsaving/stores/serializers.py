@@ -76,6 +76,10 @@ class StoreSerializer(serializers.ModelSerializer):
     def validate_weeks_in_advance(self, w):
         if w < 1:
             raise serializers.ValidationError(_('Set at least one week in advance'))
+        if w > settings.STORE_MAX_WEEKS_IN_ADVANCE:
+            raise serializers.ValidationError(
+                _('Do not set more than %(count)s weeks in advance') % {'count': settings.STORE_MAX_WEEKS_IN_ADVANCE}
+            )
         return w
 
 
@@ -99,22 +103,12 @@ class StoreUpdateSerializer(StoreSerializer):
         store = super().update(store, validated_data)
         after_data = StoreHistorySerializer(store).data
 
-        if 'weeks_in_advance' in validated_data or \
-                ('status' in validated_data and store.status == StoreStatus.ACTIVE.value):
-            # TODO: move this into pickups/receivers.py
-            for series in store.series.all():
-                series.last_changed_by = store.last_changed_by
-                series.save()
-                series.update_pickups()
-
         if before_data != after_data:
             History.objects.create(
                 typus=HistoryTypus.STORE_MODIFY,
                 group=store.group,
                 store=store,
-                users=[
-                    self.context['request'].user,
-                ],
+                users=[self.context['request'].user],
                 payload={k: self.initial_data.get(k)
                          for k in validated_data.keys()},
                 before=before_data,
