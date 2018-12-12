@@ -40,13 +40,11 @@ class PickupDateSerializer(serializers.ModelSerializer):
             'feedback_due',
             'feedback_given_by',
             'is_disabled',
-            'last_changed_by',
         ]
         read_only_fields = [
             'id',
             'series',
             'collector_ids',
-            'last_changed_by',
         ]
 
     # TODO change to collectors to make it uniform with other endpoints
@@ -203,12 +201,10 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
             'rule',
             'start_date',
             'description',
-            'last_changed_by',
             'dates_preview',
         ]
         read_only_fields = [
             'id',
-            'last_changed_by',
         ]
 
     dates_preview = serializers.ListField(

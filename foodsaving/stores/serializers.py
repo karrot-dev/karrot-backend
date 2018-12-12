@@ -28,7 +28,6 @@ class StoreSerializer(serializers.ModelSerializer):
             'longitude',
             'weeks_in_advance',
             'status',
-            'last_changed_by',
         ]
         extra_kwargs = {
             'name': {
@@ -41,7 +40,6 @@ class StoreSerializer(serializers.ModelSerializer):
         }
         read_only_fields = [
             'id',
-            'last_changed_by',
         ]
 
     status = serializers.ChoiceField(
