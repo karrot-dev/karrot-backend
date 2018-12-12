@@ -1,4 +1,4 @@
-from django.db.models.signals import pre_delete, post_save, post_delete
+from django.db.models.signals import pre_delete, post_save, post_delete, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
@@ -6,6 +6,7 @@ from foodsaving.conversations.models import Conversation
 from foodsaving.groups.models import GroupMembership
 from foodsaving.pickups import stats
 from foodsaving.pickups.models import PickupDate, Feedback, PickupDateCollector
+from foodsaving.stores.models import Store, StoreStatus
 
 
 @receiver(pre_delete, sender=GroupMembership)
@@ -51,3 +52,18 @@ def sync_pickup_collectors_conversation(sender, instance, **kwargs):
     pickup = instance.pickupdate
     conversation = Conversation.objects.get_or_create_for_target(pickup)
     conversation.sync_users(pickup.collectors.all())
+
+
+@receiver(pre_save, sender=Store)
+def update_pickup_series_when_store_changes(sender, instance, **kwargs):
+    store = instance
+
+    if not store.id:
+        return
+
+    old = Store.objects.get(id=store.id)
+    store_became_active = old.status != store.status and store.status == StoreStatus.ACTIVE.value
+    weeks_in_advance_changed = old.weeks_in_advance != store.weeks_in_advance
+    if store_became_active or weeks_in_advance_changed:
+        for series in store.series.all():
+            series.update_pickups()
