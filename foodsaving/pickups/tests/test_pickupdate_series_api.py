@@ -275,25 +275,24 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 2, response.data)
 
-    # TODO: allow similar functionality through "cancel" endpoint
-    # def test_set_end_date_with_users_have_joined_pickup(self):
-    #     self.client.force_login(user=self.member)
-    #     self.series.pickup_dates.last().add_collector(self.member)
-    #     # change rule
-    #     url = '/api/pickup-date-series/{}/'.format(self.series.id)
-    #     rule = rrulestr(self.series.rule, dtstart=self.now) \
-    #         .replace(until=self.now)
-    #     response = self.client.patch(url, {
-    #         'rule': str(rule),
-    #     })
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-    #     self.assertEqual(response.data['rule'], str(rule))
-    #
-    #     # compare resulting pickups
-    #     url = '/api/pickup-dates/'
-    #     response = self.get_results(url, {'series': self.series.id, 'date_min': self.now})
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-    #     self.assertEqual(len(response.data), 1, response.data)
+    def test_set_end_date_with_users_have_joined_pickup(self):
+        self.client.force_login(user=self.member)
+        self.series.pickup_dates.last().add_collector(self.member)
+        # change rule
+        url = '/api/pickup-date-series/{}/'.format(self.series.id)
+        rule = rrulestr(self.series.rule, dtstart=self.now) \
+            .replace(until=self.now)
+        response = self.client.patch(url, {
+            'rule': str(rule),
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data['rule'], str(rule))
+
+        # compare resulting pickups
+        url = '/api/pickup-dates/'
+        response = self.get_results(url, {'series': self.series.id, 'date_min': self.now})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data), 1, response.data)
 
     def test_disable_pickup_series(self):
         "the series should get removed, empty upcoming pickups disabled, non-empty pickups kept"
