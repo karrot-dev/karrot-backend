@@ -184,3 +184,48 @@ class TestNotificationReceivers(TestCase):
         self.assertEqual(context['group'], group.id)
         self.assertEqual(context['pickup'], pickup.id)
         self.assertEqual(context['store'], store.id)
+
+    def test_creates_pickup_enabled_notification_and_deletes_pickup_disabled_notification(self):
+        user1, user2 = UserFactory(), UserFactory()
+        group = GroupFactory(members=[user1, user2])
+        store = StoreFactory(group=group)
+        pickup = PickupDateFactory(store=store, collectors=[user1, user2])
+        Notification.objects.all().delete()
+
+        pickup.last_changed_by = user2
+        pickup.is_disabled = True
+        pickup.save()
+
+        pickup.is_disabled = False
+        pickup.save()
+
+        pickup_disabled_notifications = Notification.objects.filter(type=NotificationType.PICKUP_DISABLED.value)
+        self.assertEqual(pickup_disabled_notifications.count(), 0)
+
+        pickup_enabled_notifications = Notification.objects.filter(type=NotificationType.PICKUP_ENABLED.value)
+        self.assertEqual(pickup_enabled_notifications.count(), 1)
+        self.assertEqual(pickup_enabled_notifications[0].user, user1)
+        context = pickup_enabled_notifications[0].context
+        self.assertEqual(context['group'], group.id)
+        self.assertEqual(context['pickup'], pickup.id)
+        self.assertEqual(context['store'], store.id)
+
+    def test_creates_pickup_moved_notification(self):
+        user1, user2 = UserFactory(), UserFactory()
+        group = GroupFactory(members=[user1, user2])
+        store = StoreFactory(group=group)
+        pickup = PickupDateFactory(store=store, collectors=[user1, user2])
+        Notification.objects.all().delete()
+
+        pickup.last_changed_by = user2
+        pickup.date = pickup.date + relativedelta(days=2)
+        pickup.save()
+
+        notifications = Notification.objects.all()
+        self.assertEqual(notifications.count(), 1)
+        self.assertEqual(notifications[0].type, NotificationType.PICKUP_MOVED.value)
+        self.assertEqual(notifications[0].user, user1)
+        context = notifications[0].context
+        self.assertEqual(context['group'], group.id)
+        self.assertEqual(context['pickup'], pickup.id)
+        self.assertEqual(context['store'], store.id)

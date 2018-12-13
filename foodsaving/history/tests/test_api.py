@@ -4,6 +4,8 @@ from rest_framework.test import APITestCase
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
+
+from foodsaving.history.models import History
 from foodsaving.tests.utils import ExtractPaginationMixin
 
 from foodsaving.groups.factories import GroupFactory
@@ -205,6 +207,28 @@ class TestHistoryAPIWithExistingPickups(APITestCase, ExtractPaginationMixin):
         response = self.get_results(history_url)
         self.assertEqual(response.data[0]['typus'], 'PICKUP_LEAVE')
         self.assertEqual(parse(response.data[0]['payload']['date']), self.pickup.date)
+
+    def test_disable_pickup(self):
+        self.client.force_login(self.member)
+        History.objects.all().delete()
+
+        self.client.patch(self.pickup_url, {'is_disabled': True})
+
+        response = self.get_results(history_url)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['typus'], 'PICKUP_DISABLE')
+
+    def test_enable_pickup(self):
+        self.pickup.is_disabled = True
+        self.pickup.save()
+        self.client.force_login(self.member)
+        History.objects.all().delete()
+
+        self.client.patch(self.pickup_url, {'is_disabled': False})
+
+        response = self.get_results(history_url)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['typus'], 'PICKUP_ENABLE')
 
 
 class TestHistoryAPIWithDonePickup(APITestCase, ExtractPaginationMixin):

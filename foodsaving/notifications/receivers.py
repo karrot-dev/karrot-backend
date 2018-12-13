@@ -244,15 +244,13 @@ def pickup_modified(sender, instance, **kwargs):
                 collectors=collectors,
                 type=NotificationType.PICKUP_DISABLED.value,
             )
-
             Notification.objects.create_for_pickup_collectors(
                 collectors=collectors.exclude(user=pickup.last_changed_by),
                 type=NotificationType.PICKUP_ENABLED.value,
             )
-
             # pickup_upcoming notifications will automatically get created by cronjob
 
-    if abs((old.date - pickup.date).seconds) > 60:
+    if abs((old.date - pickup.date).total_seconds()) > 60:
         Notification.objects.create_for_pickup_collectors(
             collectors=collectors.exclude(user=pickup.last_changed_by),
             type=NotificationType.PICKUP_MOVED.value,

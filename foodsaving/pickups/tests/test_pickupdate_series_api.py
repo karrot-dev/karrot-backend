@@ -468,6 +468,17 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.data[0]['id'], joined_pickup.id)
         self.assertEqual(response.data[0]['collector_ids'], [self.member.id])
 
+    def test_cannot_move_pickups_in_a_series(self):
+        self.client.force_login(user=self.member)
+        pickup = self.series.pickup_dates.last()
+
+        response = self.client.patch(
+            '/api/pickup-dates/{}/'.format(pickup.id), {'date': pickup.date + relativedelta(weeks=7)}
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('You can\'t move pickups', response.data['date'][0])
+
 
 class TestPickupDateSeriesAPIAuth(APITestCase):
     """ Testing actions that are forbidden """

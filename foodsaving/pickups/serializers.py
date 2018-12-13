@@ -90,28 +90,28 @@ class PickupDateUpdateSerializer(PickupDateSerializer):
         read_only_fields = PickupDateSerializer.Meta.read_only_fields + ['store']
 
     def save(self, **kwargs):
-        self._validated_data = find_changed(self.instance, self.validated_data)
+        pickupdate = self.instance
+        changed_data = find_changed(pickupdate, self.validated_data)
+        self._validated_data = changed_data
         skip_update = len(self.validated_data.keys()) == 0
         if skip_update:
             return self.instance
-        return super().save(**kwargs)
 
-    def update(self, pickupdate, validated_data):
         before_data = PickupDateHistorySerializer(pickupdate).data
-        super().update(pickupdate, validated_data)
+        pickupdate = super().save(**kwargs)
         after_data = PickupDateHistorySerializer(pickupdate).data
 
         if before_data != after_data:
             typus_list = []
-            if 'is_disabled' in validated_data:
-                if validated_data['is_disabled']:
+            if 'is_disabled' in changed_data:
+                if changed_data['is_disabled']:
                     typus_list.append(HistoryTypus.PICKUP_DISABLE)
                     stats.pickup_disabled(pickupdate)
                 else:
                     typus_list.append(HistoryTypus.PICKUP_ENABLE)
                     stats.pickup_enabled(pickupdate)
 
-            if len(set(validated_data.keys()).difference(['is_disabled'])) > 0:
+            if len(set(changed_data.keys()).difference(['is_disabled'])) > 0:
                 typus_list.append(HistoryTypus.PICKUP_MODIFY)
 
             for typus in typus_list:
@@ -124,15 +124,16 @@ class PickupDateUpdateSerializer(PickupDateSerializer):
                         self.context['request'].user,
                     ],
                     payload={k: self.initial_data.get(k)
-                             for k in validated_data.keys()},
+                             for k in changed_data.keys()},
                     before=before_data,
                     after=after_data,
                 )
         pickupdate.store.group.refresh_active_status()
+
         return pickupdate
 
     def validate_date(self, date):
-        if self.instance.series is not None and abs((self.instance.date - date).seconds) > 1:
+        if self.instance.series is not None and abs((self.instance.date - date).total_seconds()) > 1:
             raise serializers.ValidationError(_('You can\'t move pickups that are part of a series.'))
         return super().validate_date(date)
 
