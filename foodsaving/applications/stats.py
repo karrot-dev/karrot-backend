@@ -12,7 +12,7 @@ def application_status_update(application):
     }
 
     if application.status != 'pending':
-        seconds = (timezone.now() - application.created_at).seconds
+        seconds = round((timezone.now() - application.created_at).total_seconds())
         fields['application_alive_seconds'] = seconds
         fields['application_{}_alive_seconds'.format(application.status)] = seconds
         tags['application_status'] = application.status
