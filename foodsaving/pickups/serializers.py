@@ -1,6 +1,5 @@
 import dateutil.rrule
 from datetime import timedelta
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
@@ -16,7 +15,6 @@ from foodsaving.pickups.models import (
     Feedback as FeedbackModel,
     PickupDateSeries as PickupDateSeriesModel,
 )
-from foodsaving.pickups.utils import rrule_between_dates_in_local_time
 from foodsaving.utils.misc import find_changed
 
 
