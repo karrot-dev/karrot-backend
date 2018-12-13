@@ -360,6 +360,17 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data['max_collectors'], 666)
 
+        # modify series max_collectors
+        series_url = '/api/pickup-date-series/{}/'.format(self.series.id)
+        response = self.client.patch(series_url, {'max_collectors': 20})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+        # check if changes persist
+        url = '/api/pickup-dates/{}/'.format(pickup_under_test.id)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data['max_collectors'], 666)
+
     def test_keep_changes_to_description(self):
         self.client.force_login(user=self.member)
         pickup_under_test = self.series.pickup_dates.first()
@@ -372,6 +383,17 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
 
         # run regular update command of series
         self.series.update_pickups()
+
+        # check if changes persist
+        url = '/api/pickup-dates/{}/'.format(pickup_under_test.id)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data['description'], 'asdf')
+
+        # modify series description
+        series_url = '/api/pickup-date-series/{}/'.format(self.series.id)
+        response = self.client.patch(series_url, {'description': 'new series description'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
         # check if changes persist
         url = '/api/pickup-dates/{}/'.format(pickup_under_test.id)

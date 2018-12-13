@@ -98,9 +98,9 @@ class PickupDateSeries(BaseModel):
             max_collectors_changed = old.max_collectors != self.max_collectors
             if description_changed or max_collectors_changed:
                 for pickup in self.pickup_dates.upcoming():
-                    if description_changed:
+                    if description_changed and old.description == pickup.description:
                         pickup.description = self.description
-                    if max_collectors_changed:
+                    if max_collectors_changed and old.max_collectors == pickup.max_collectors:
                         pickup.max_collectors = self.max_collectors
                     pickup.save()
 
