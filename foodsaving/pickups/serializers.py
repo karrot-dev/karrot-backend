@@ -214,17 +214,6 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
         source='dates',
     )
 
-    def get_dates_preview(self, series):
-        period_start = timezone.now() + relativedelta(minutes=5)
-        dates = rrule_between_dates_in_local_time(
-            rule=series.rule,
-            dtstart=series.start_date,
-            tz=series.store.group.timezone,
-            period_start=period_start,
-            period_duration=relativedelta(weeks=series.store.weeks_in_advance)
-        )
-        return dates
-
     def save(self, **kwargs):
         return super().save(last_changed_by=self.context['request'].user)
 
