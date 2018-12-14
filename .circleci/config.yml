@@ -164,6 +164,8 @@ workflows:
             branches:
               only:
                 - production
+          requires:
+            - test
   update-locales-cronjob:
     triggers:
       - schedule:
