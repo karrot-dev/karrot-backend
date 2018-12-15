@@ -110,12 +110,29 @@ class TestProcessFinishedPickupDates(TestCase):
         self.assertEqual(PickupDate.objects.count(), 1)
         self.assertEqual(History.objects.count(), 1)
 
-    def test_do_no_process_disabled_pickups(self):
+    def test_do_not_process_disabled_pickups(self):
         self.pickup.is_disabled = True
         self.pickup.save()
         PickupDate.objects.process_finished_pickup_dates()
 
         self.assertFalse(self.pickup.feedback_possible)
+        self.assertEqual(History.objects.count(), 0)
+
+    def test_disables_past_pickups_of_inactive_stores(self):
+        store = self.pickup.store
+        store.status = StoreStatus.ARCHIVED.value
+        store.save()
+        PickupDate.objects.process_finished_pickup_dates()
+
+        self.assertEqual(History.objects.count(), 0)
+        self.assertEqual(PickupDate.objects.count(), 1)
+        self.assertTrue(PickupDate.objects.first().is_disabled)
+
+        # do not process pickup again if stores gets active
+        store.status = StoreStatus.ACTIVE.value
+        store.save()
+        PickupDate.objects.process_finished_pickup_dates()
+
         self.assertEqual(History.objects.count(), 0)
 
 

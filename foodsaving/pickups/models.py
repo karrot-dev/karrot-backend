@@ -15,8 +15,6 @@ from foodsaving.pickups import stats
 from foodsaving.pickups.utils import match_pickups_with_dates, rrule_between_dates_in_local_time
 from foodsaving.stores.models import StoreStatus
 
-pickup_done = Signal()
-
 
 class PickupDateSeriesQuerySet(models.QuerySet):
     @transaction.atomic
@@ -155,37 +153,40 @@ class PickupDateQuerySet(models.QuerySet):
                 feedback_possible=False,
                 date__lt=timezone.now(),
         ):
-            if pickup.store.is_active():
-                payload = {}
-                payload['pickup_date'] = pickup.id
-                if pickup.series:
-                    payload['series'] = pickup.series.id
-                if pickup.max_collectors:
-                    payload['max_collectors'] = pickup.max_collectors
-                if pickup.collectors.count() == 0:
-                    stats.pickup_missed(pickup)
-                    History.objects.create(
-                        typus=HistoryTypus.PICKUP_MISSED,
-                        group=pickup.store.group,
-                        store=pickup.store,
-                        date=pickup.date,
-                        payload=payload,
-                    )
-                else:
-                    stats.pickup_done(pickup)
-                    History.objects.create(
-                        typus=HistoryTypus.PICKUP_DONE,
-                        group=pickup.store.group,
-                        store=pickup.store,
-                        users=pickup.collectors.all(),
-                        date=pickup.date,
-                        payload=payload,
-                    )
+            if not pickup.store.is_active():
+                # Make sure we don't process this pickup again, even if the store gets active in future
+                pickup.is_disabled = True
+                pickup.save()
+                continue
+
+            payload = {}
+            payload['pickup_date'] = pickup.id
+            if pickup.series:
+                payload['series'] = pickup.series.id
+            if pickup.max_collectors:
+                payload['max_collectors'] = pickup.max_collectors
+            if pickup.collectors.count() == 0:
+                stats.pickup_missed(pickup)
+                History.objects.create(
+                    typus=HistoryTypus.PICKUP_MISSED,
+                    group=pickup.store.group,
+                    store=pickup.store,
+                    date=pickup.date,
+                    payload=payload,
+                )
+            else:
+                stats.pickup_done(pickup)
+                History.objects.create(
+                    typus=HistoryTypus.PICKUP_DONE,
+                    group=pickup.store.group,
+                    store=pickup.store,
+                    users=pickup.collectors.all(),
+                    date=pickup.date,
+                    payload=payload,
+                )
 
             pickup.feedback_possible = True
             pickup.save()
-
-            pickup_done.send(sender=PickupDate.__class__, instance=pickup)
 
 
 class PickupDate(BaseModel, ConversationMixin):
