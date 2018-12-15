@@ -655,7 +655,7 @@ class FinishedPickupReceiverTest(WSTestCase):
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(store=self.store, collectors=[self.member])
 
-    def test_receive_feedback_possible_and_history(self):
+    def test_receive_history_and_notification(self):
         self.pickup.date = timezone.now() - relativedelta(days=1)
         self.pickup.save()
 
@@ -665,8 +665,10 @@ class FinishedPickupReceiverTest(WSTestCase):
         history_response = next(m for m in self.client.messages if m['topic'] == 'history:history')
         self.assertEqual(history_response['payload']['typus'], 'PICKUP_DONE')
 
-        pickup_response = next(m for m in self.client.messages if m['topic'] == 'pickups:feedback_possible')
-        self.assertEqual(pickup_response['payload']['id'], self.pickup.id)
+        history_response = next(m for m in self.client.messages if m['topic'] == 'notifications:notification')
+        self.assertEqual(history_response['payload']['type'], 'feedback_possible')
+
+        self.assertEqual(len(self.client.messages), 2, self.client.messages)
 
 
 class UserReceiverTest(WSTestCase):
