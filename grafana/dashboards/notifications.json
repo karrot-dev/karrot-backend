@@ -16,10 +16,242 @@
     "editable": true,
     "gnetId": null,
     "graphTooltip": 0,
-    "id": 25,
-    "iteration": 1543436279869,
+    "id": 26,
+    "iteration": 1543438269825,
     "links": [],
     "panels": [
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 0,
+          "y": 0
+        },
+        "id": 2,
+        "interval": null,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "0"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.events",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "notification_created"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
+          }
+        ],
+        "thresholds": "",
+        "title": "Notifications created",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "N/A",
+            "value": "null"
+          }
+        ],
+        "valueName": "total"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 3,
+          "y": 0
+        },
+        "id": 3,
+        "interval": null,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "0"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.events",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "notification_clicked"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
+          }
+        ],
+        "thresholds": "",
+        "title": "Notifications clicked",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "N/A",
+            "value": "null"
+          }
+        ],
+        "valueName": "total"
+      },
       {
         "cacheTimeout": null,
         "colorBackground": false,
@@ -40,8 +272,8 @@
         },
         "gridPos": {
           "h": 3,
-          "w": 5,
-          "x": 0,
+          "w": 3,
+          "x": 6,
           "y": 0
         },
         "id": 4,
@@ -76,7 +308,7 @@
           "fillColor": "rgba(31, 118, 189, 0.18)",
           "full": false,
           "lineColor": "rgb(31, 120, 193)",
-          "show": false
+          "show": true
         },
         "tableColumn": "",
         "targets": [
@@ -91,7 +323,7 @@
               [
                 {
                   "params": [
-                    "application_accepted_alive_seconds"
+                    "notification_clicked_seconds"
                   ],
                   "type": "field"
                 },
@@ -101,11 +333,17 @@
                 }
               ]
             ],
-            "tags": []
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
           }
         ],
         "thresholds": "",
-        "title": "Accepted within (avg)",
+        "title": "Clicked within",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -127,7 +365,8 @@
           "#d44a3a"
         ],
         "datasource": "$site",
-        "format": "dtdurations",
+        "decimals": 2,
+        "format": "percentunit",
         "gauge": {
           "maxValue": 100,
           "minValue": 0,
@@ -137,11 +376,11 @@
         },
         "gridPos": {
           "h": 3,
-          "w": 5,
-          "x": 5,
+          "w": 3,
+          "x": 9,
           "y": 0
         },
-        "id": 5,
+        "id": 8,
         "interval": null,
         "links": [],
         "mappingType": 1,
@@ -178,17 +417,32 @@
         "tableColumn": "",
         "targets": [
           {
-            "groupBy": [],
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "0"
+                ],
+                "type": "fill"
+              }
+            ],
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
+            "query": "SELECT sum(\"notification_clicked\") / sum(\"notification_created\") FROM \"karrot.events\" WHERE (\"group_status\" = 'active') AND $timeFilter",
+            "rawQuery": true,
             "refId": "A",
             "resultFormat": "time_series",
             "select": [
               [
                 {
                   "params": [
-                    "application_declined_alive_seconds"
+                    "notification_clicked_seconds"
                   ],
                   "type": "field"
                 },
@@ -202,104 +456,7 @@
           }
         ],
         "thresholds": "",
-        "title": "Declined within (avg)",
-        "type": "singlestat",
-        "valueFontSize": "80%",
-        "valueMaps": [
-          {
-            "op": "=",
-            "text": "N/A",
-            "value": "null"
-          }
-        ],
-        "valueName": "current"
-      },
-      {
-        "cacheTimeout": null,
-        "colorBackground": false,
-        "colorValue": false,
-        "colors": [
-          "#299c46",
-          "rgba(237, 129, 40, 0.89)",
-          "#d44a3a"
-        ],
-        "datasource": "$site",
-        "format": "dtdurations",
-        "gauge": {
-          "maxValue": 100,
-          "minValue": 0,
-          "show": false,
-          "thresholdLabels": false,
-          "thresholdMarkers": true
-        },
-        "gridPos": {
-          "h": 3,
-          "w": 5,
-          "x": 10,
-          "y": 0
-        },
-        "id": 6,
-        "interval": null,
-        "links": [],
-        "mappingType": 1,
-        "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
-        ],
-        "maxDataPoints": 100,
-        "nullPointMode": "connected",
-        "nullText": null,
-        "postfix": "",
-        "postfixFontSize": "50%",
-        "prefix": "",
-        "prefixFontSize": "50%",
-        "rangeMaps": [
-          {
-            "from": "null",
-            "text": "N/A",
-            "to": "null"
-          }
-        ],
-        "sparkline": {
-          "fillColor": "rgba(31, 118, 189, 0.18)",
-          "full": false,
-          "lineColor": "rgb(31, 120, 193)",
-          "show": false
-        },
-        "tableColumn": "",
-        "targets": [
-          {
-            "groupBy": [],
-            "measurement": "karrot.events",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "A",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "application_withdrawn_alive_seconds"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "mean"
-                }
-              ]
-            ],
-            "tags": []
-          }
-        ],
-        "thresholds": "",
-        "title": "Withdrawn within (avg)",
+        "title": "% clicked",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -316,18 +473,18 @@
         "datasource": "$site",
         "fontSize": "100%",
         "gridPos": {
-          "h": 14,
-          "w": 10,
+          "h": 17,
+          "w": 8,
           "x": 0,
           "y": 3
         },
-        "id": 2,
+        "id": 6,
         "links": [],
         "pageSize": null,
         "scroll": true,
         "showHeader": true,
         "sort": {
-          "col": 6,
+          "col": 5,
           "desc": true
         },
         "styles": [
@@ -348,7 +505,23 @@
             "dateFormat": "YYYY-MM-DD HH:mm:ss",
             "decimals": 2,
             "mappingType": 1,
-            "pattern": "% decided",
+            "pattern": "clicked within",
+            "thresholds": [],
+            "type": "number",
+            "unit": "s"
+          },
+          {
+            "alias": "",
+            "colorMode": null,
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "mappingType": 1,
+            "pattern": "% clicked",
             "thresholds": [],
             "type": "number",
             "unit": "percentunit"
@@ -361,16 +534,18 @@
               "rgba(237, 129, 40, 0.89)",
               "rgba(50, 172, 45, 0.97)"
             ],
-            "decimals": 0,
+            "decimals": null,
+            "link": false,
+            "mappingType": 1,
             "pattern": "/.*/",
             "thresholds": [],
             "type": "number",
-            "unit": "short"
+            "unit": "none",
+            "valueMaps": []
           }
         ],
         "targets": [
           {
-            "dsType": "influxdb",
             "groupBy": [
               {
                 "params": [
@@ -382,7 +557,7 @@
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT \"group\", \"new\", \"accepted\", \"declined\", \"withdrawn\", \"decided\" / \"new\" AS \"% decided\" FROM (\nSELECT \nsum(\"application_pending\") AS \"new\", \nsum(\"application_accepted\") AS \"accepted\", \nsum(\"application_declined\") AS \"declined\", \nsum(\"application_withdrawn\") AS \"withdrawn\",  \nsum(\"application_accepted\") + sum(\"application_declined\") + sum(\"application_withdrawn\") AS \"decided\"\nFROM \"karrot.events\" WHERE $timeFilter GROUP BY \"group\" fill(0)\n) fill(0)",
+            "query": "SELECT sum(\"notification_created\") AS \"created\", sum(\"notification_clicked\") AS \"clicked\", mean(\"notification_clicked_seconds\") AS \"clicked within\", sum(\"notification_clicked\") / sum(\"notification_created\")  AS \"% clicked\" FROM \"karrot.events\" WHERE (\"group_status\" = 'active') AND $timeFilter GROUP BY \"group\" fill(0)",
             "rawQuery": true,
             "refId": "A",
             "resultFormat": "table",
@@ -390,7 +565,7 @@
               [
                 {
                   "params": [
-                    "application_accepted"
+                    "notification_created"
                   ],
                   "type": "field"
                 },
@@ -400,7 +575,7 @@
                 },
                 {
                   "params": [
-                    "accepted"
+                    "created"
                   ],
                   "type": "alias"
                 }
@@ -408,7 +583,7 @@
               [
                 {
                   "params": [
-                    "application_declined"
+                    "notification_clicked"
                   ],
                   "type": "field"
                 },
@@ -418,7 +593,7 @@
                 },
                 {
                   "params": [
-                    "declined"
+                    "clicked"
                   ],
                   "type": "alias"
                 }
@@ -426,17 +601,17 @@
               [
                 {
                   "params": [
-                    "application_pending"
+                    "notification_clicked_seconds"
                   ],
                   "type": "field"
                 },
                 {
                   "params": [],
-                  "type": "sum"
+                  "type": "mean"
                 },
                 {
                   "params": [
-                    "new"
+                    "clicked within"
                   ],
                   "type": "alias"
                 }
@@ -444,17 +619,17 @@
               [
                 {
                   "params": [
-                    "application_withdrawn"
+                    "notification_clicked_seconds"
                   ],
                   "type": "field"
                 },
                 {
                   "params": [],
-                  "type": "sum"
+                  "type": "mean"
                 },
                 {
                   "params": [
-                    "withdrawn"
+                    "% clicked"
                   ],
                   "type": "alias"
                 }
@@ -463,7 +638,160 @@
             "tags": []
           }
         ],
-        "title": "Group Application Stats",
+        "title": "By Group",
+        "transform": "table",
+        "type": "table"
+      },
+      {
+        "columns": [],
+        "datasource": "$site",
+        "fontSize": "100%",
+        "gridPos": {
+          "h": 17,
+          "w": 8,
+          "x": 8,
+          "y": 3
+        },
+        "id": 7,
+        "links": [],
+        "pageSize": null,
+        "scroll": true,
+        "showHeader": true,
+        "sort": {
+          "col": 5,
+          "desc": true
+        },
+        "styles": [
+          {
+            "alias": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "pattern": "Time",
+            "type": "hidden"
+          },
+          {
+            "alias": "",
+            "colorMode": null,
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "mappingType": 1,
+            "pattern": "clicked within",
+            "thresholds": [],
+            "type": "number",
+            "unit": "s"
+          },
+          {
+            "alias": "",
+            "colorMode": null,
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "mappingType": 1,
+            "pattern": "% clicked",
+            "thresholds": [],
+            "type": "number",
+            "unit": "percentunit"
+          },
+          {
+            "alias": "",
+            "colorMode": null,
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "decimals": null,
+            "pattern": "/.*/",
+            "thresholds": [],
+            "type": "number",
+            "unit": "none"
+          }
+        ],
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "notification_type"
+                ],
+                "type": "tag"
+              }
+            ],
+            "measurement": "karrot.events",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT sum(\"notification_created\") AS \"created\", sum(\"notification_clicked\") AS \"clicked\", mean(\"notification_clicked_seconds\") AS \"clicked within\", sum(\"notification_clicked\") / sum(\"notification_created\")  AS \"% clicked\"  FROM \"karrot.events\" WHERE (\"group_status\" = 'active') AND $timeFilter GROUP BY \"notification_type\" fill(0)",
+            "rawQuery": true,
+            "refId": "A",
+            "resultFormat": "table",
+            "select": [
+              [
+                {
+                  "params": [
+                    "notification_created"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                },
+                {
+                  "params": [
+                    "created"
+                  ],
+                  "type": "alias"
+                }
+              ],
+              [
+                {
+                  "params": [
+                    "notification_clicked"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                },
+                {
+                  "params": [
+                    "clicked"
+                  ],
+                  "type": "alias"
+                }
+              ],
+              [
+                {
+                  "params": [
+                    "notification_clicked_seconds"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "mean"
+                },
+                {
+                  "params": [
+                    "clicked within"
+                  ],
+                  "type": "alias"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "title": "By Type",
         "transform": "table",
         "type": "table"
       }
@@ -475,7 +803,6 @@
       "list": [
         {
           "current": {
-            "tags": [],
             "text": "karrot-prod",
             "value": "karrot-prod"
           },
@@ -485,7 +812,7 @@
           "options": [],
           "query": "influxdb",
           "refresh": 1,
-          "regex": "",
+          "regex": "karrot.*",
           "skipUrlSync": false,
           "type": "datasource"
         }
@@ -521,16 +848,16 @@
       ]
     },
     "timezone": "",
-    "title": "Group Applications",
-    "uid": "ydNQAo5ika",
-    "version": 5
+    "title": "Notifications",
+    "uid": "fUG6B0Ymz",
+    "version": 6
   },
   "meta": {
     "canAdmin": false,
     "canEdit": false,
     "canSave": false,
     "canStar": true,
-    "created": "2018-09-26T18:26:20+02:00",
+    "created": "2018-11-28T20:28:38+01:00",
     "createdBy": "tiltec",
     "expires": "0001-01-01T00:00:00Z",
     "folderId": 0,
@@ -539,11 +866,11 @@
     "hasAcl": false,
     "isFolder": false,
     "provisioned": false,
-    "slug": "group-applications",
+    "slug": "notifications",
     "type": "db",
-    "updated": "2018-11-28T21:32:46+01:00",
+    "updated": "2018-11-28T21:57:04+01:00",
     "updatedBy": "tiltec",
-    "url": "/d/ydNQAo5ika/group-applications",
-    "version": 5
+    "url": "/d/fUG6B0Ymz/notifications",
+    "version": 6
   }
 }

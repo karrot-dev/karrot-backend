@@ -16,8 +16,8 @@
     "editable": true,
     "gnetId": null,
     "graphTooltip": 0,
-    "id": 25,
-    "iteration": 1543436279869,
+    "id": 20,
+    "iteration": 1544525541278,
     "links": [],
     "panels": [
       {
@@ -30,7 +30,7 @@
           "#d44a3a"
         ],
         "datasource": "$site",
-        "format": "dtdurations",
+        "format": "none",
         "gauge": {
           "maxValue": 100,
           "minValue": 0,
@@ -40,7 +40,7 @@
         },
         "gridPos": {
           "h": 3,
-          "w": 5,
+          "w": 3,
           "x": 0,
           "y": 0
         },
@@ -76,12 +76,25 @@
           "fillColor": "rgba(31, 118, 189, 0.18)",
           "full": false,
           "lineColor": "rgb(31, 120, 193)",
-          "show": false
+          "show": true
         },
         "tableColumn": "",
         "targets": [
           {
-            "groupBy": [],
+            "groupBy": [
+              {
+                "params": [
+                  "$interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "0"
+                ],
+                "type": "fill"
+              }
+            ],
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
@@ -91,13 +104,13 @@
               [
                 {
                   "params": [
-                    "application_accepted_alive_seconds"
+                    "trust_given"
                   ],
                   "type": "field"
                 },
                 {
                   "params": [],
-                  "type": "mean"
+                  "type": "sum"
                 }
               ]
             ],
@@ -105,7 +118,7 @@
           }
         ],
         "thresholds": "",
-        "title": "Accepted within (avg)",
+        "title": "Trust given",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -115,7 +128,7 @@
             "value": "null"
           }
         ],
-        "valueName": "current"
+        "valueName": "total"
       },
       {
         "cacheTimeout": null,
@@ -127,7 +140,7 @@
           "#d44a3a"
         ],
         "datasource": "$site",
-        "format": "dtdurations",
+        "format": "none",
         "gauge": {
           "maxValue": 100,
           "minValue": 0,
@@ -137,11 +150,11 @@
         },
         "gridPos": {
           "h": 3,
-          "w": 5,
-          "x": 5,
+          "w": 3,
+          "x": 3,
           "y": 0
         },
-        "id": 5,
+        "id": 9,
         "interval": null,
         "links": [],
         "mappingType": 1,
@@ -173,12 +186,25 @@
           "fillColor": "rgba(31, 118, 189, 0.18)",
           "full": false,
           "lineColor": "rgb(31, 120, 193)",
-          "show": false
+          "show": true
         },
         "tableColumn": "",
         "targets": [
           {
-            "groupBy": [],
+            "groupBy": [
+              {
+                "params": [
+                  "$interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "null"
+                ],
+                "type": "fill"
+              }
+            ],
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
@@ -188,13 +214,13 @@
               [
                 {
                   "params": [
-                    "application_declined_alive_seconds"
+                    "member_became_editor"
                   ],
                   "type": "field"
                 },
                 {
                   "params": [],
-                  "type": "mean"
+                  "type": "sum"
                 }
               ]
             ],
@@ -202,133 +228,36 @@
           }
         ],
         "thresholds": "",
-        "title": "Declined within (avg)",
+        "title": "New editors",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
           {
             "op": "=",
-            "text": "N/A",
+            "text": "0",
             "value": "null"
           }
         ],
-        "valueName": "current"
-      },
-      {
-        "cacheTimeout": null,
-        "colorBackground": false,
-        "colorValue": false,
-        "colors": [
-          "#299c46",
-          "rgba(237, 129, 40, 0.89)",
-          "#d44a3a"
-        ],
-        "datasource": "$site",
-        "format": "dtdurations",
-        "gauge": {
-          "maxValue": 100,
-          "minValue": 0,
-          "show": false,
-          "thresholdLabels": false,
-          "thresholdMarkers": true
-        },
-        "gridPos": {
-          "h": 3,
-          "w": 5,
-          "x": 10,
-          "y": 0
-        },
-        "id": 6,
-        "interval": null,
-        "links": [],
-        "mappingType": 1,
-        "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
-        ],
-        "maxDataPoints": 100,
-        "nullPointMode": "connected",
-        "nullText": null,
-        "postfix": "",
-        "postfixFontSize": "50%",
-        "prefix": "",
-        "prefixFontSize": "50%",
-        "rangeMaps": [
-          {
-            "from": "null",
-            "text": "N/A",
-            "to": "null"
-          }
-        ],
-        "sparkline": {
-          "fillColor": "rgba(31, 118, 189, 0.18)",
-          "full": false,
-          "lineColor": "rgb(31, 120, 193)",
-          "show": false
-        },
-        "tableColumn": "",
-        "targets": [
-          {
-            "groupBy": [],
-            "measurement": "karrot.events",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "A",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "application_withdrawn_alive_seconds"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "mean"
-                }
-              ]
-            ],
-            "tags": []
-          }
-        ],
-        "thresholds": "",
-        "title": "Withdrawn within (avg)",
-        "type": "singlestat",
-        "valueFontSize": "80%",
-        "valueMaps": [
-          {
-            "op": "=",
-            "text": "N/A",
-            "value": "null"
-          }
-        ],
-        "valueName": "current"
+        "valueName": "total"
       },
       {
         "columns": [],
         "datasource": "$site",
         "fontSize": "100%",
         "gridPos": {
-          "h": 14,
-          "w": 10,
+          "h": 6,
+          "w": 24,
           "x": 0,
           "y": 3
         },
-        "id": 2,
+        "id": 8,
         "links": [],
         "pageSize": null,
         "scroll": true,
         "showHeader": true,
         "sort": {
-          "col": 6,
-          "desc": true
+          "col": 5,
+          "desc": false
         },
         "styles": [
           {
@@ -336,22 +265,6 @@
             "dateFormat": "YYYY-MM-DD HH:mm:ss",
             "pattern": "Time",
             "type": "hidden"
-          },
-          {
-            "alias": "",
-            "colorMode": null,
-            "colors": [
-              "rgba(245, 54, 54, 0.9)",
-              "rgba(237, 129, 40, 0.89)",
-              "rgba(50, 172, 45, 0.97)"
-            ],
-            "dateFormat": "YYYY-MM-DD HH:mm:ss",
-            "decimals": 2,
-            "mappingType": 1,
-            "pattern": "% decided",
-            "thresholds": [],
-            "type": "number",
-            "unit": "percentunit"
           },
           {
             "alias": "",
@@ -379,28 +292,28 @@
                 "type": "tag"
               }
             ],
-            "measurement": "karrot.events",
+            "measurement": "karrot.group.members",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT \"group\", \"new\", \"accepted\", \"declined\", \"withdrawn\", \"decided\" / \"new\" AS \"% decided\" FROM (\nSELECT \nsum(\"application_pending\") AS \"new\", \nsum(\"application_accepted\") AS \"accepted\", \nsum(\"application_declined\") AS \"declined\", \nsum(\"application_withdrawn\") AS \"withdrawn\",  \nsum(\"application_accepted\") + sum(\"application_declined\") + sum(\"application_withdrawn\") AS \"decided\"\nFROM \"karrot.events\" WHERE $timeFilter GROUP BY \"group\" fill(0)\n) fill(0)",
-            "rawQuery": true,
+            "query": "SELECT sum(\"group_activity\") AS \"page impressions\", sum(\"pickup_joined\") AS \"pickups joined\", sum(\"pickup_done\") AS \"pickups done\", sum(\"pickup_missed\") AS \"pickups missed\", sum(\"feedback\") AS \"feedbacks given\", sum(\"message\") AS \"messages written\", sum(\"message_reaction\") AS \"message reactions\", sum(\"group_joined\") AS \"new members\" FROM \"karrot.events\" WHERE $timeFilter GROUP BY \"group\"",
+            "rawQuery": false,
             "refId": "A",
             "resultFormat": "table",
             "select": [
               [
                 {
                   "params": [
-                    "application_accepted"
+                    "count_active_30d"
                   ],
                   "type": "field"
                 },
                 {
                   "params": [],
-                  "type": "sum"
+                  "type": "last"
                 },
                 {
                   "params": [
-                    "accepted"
+                    "members"
                   ],
                   "type": "alias"
                 }
@@ -408,17 +321,17 @@
               [
                 {
                   "params": [
-                    "application_declined"
+                    "count_active_editors_30d"
                   ],
                   "type": "field"
                 },
                 {
                   "params": [],
-                  "type": "sum"
+                  "type": "last"
                 },
                 {
                   "params": [
-                    "declined"
+                    "editors"
                   ],
                   "type": "alias"
                 }
@@ -426,25 +339,43 @@
               [
                 {
                   "params": [
-                    "application_pending"
+                    "count_active_newcomers_30d"
                   ],
                   "type": "field"
                 },
                 {
                   "params": [],
-                  "type": "sum"
+                  "type": "last"
                 },
                 {
                   "params": [
-                    "new"
+                    "newcomers"
                   ],
                   "type": "alias"
                 }
-              ],
+              ]
+            ],
+            "tags": []
+          },
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "group"
+                ],
+                "type": "tag"
+              }
+            ],
+            "measurement": "karrot.events",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "B",
+            "resultFormat": "table",
+            "select": [
               [
                 {
                   "params": [
-                    "application_withdrawn"
+                    "member_became_editor"
                   ],
                   "type": "field"
                 },
@@ -454,7 +385,7 @@
                 },
                 {
                   "params": [
-                    "withdrawn"
+                    "new editors"
                   ],
                   "type": "alias"
                 }
@@ -463,9 +394,133 @@
             "tags": []
           }
         ],
-        "title": "Group Application Stats",
+        "title": "Active memberships in groups",
         "transform": "table",
         "type": "table"
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "$site",
+        "fill": 1,
+        "gridPos": {
+          "h": 7,
+          "w": 24,
+          "x": 0,
+          "y": 9
+        },
+        "id": 11,
+        "interval": "1h",
+        "legend": {
+          "avg": false,
+          "current": false,
+          "hideZero": true,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "connected",
+        "percentage": false,
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "alias": "group $tag_group",
+            "dsType": "influxdb",
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "group"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "previous"
+                ],
+                "type": "fill"
+              }
+            ],
+            "hide": false,
+            "measurement": "karrot.group.members",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_active_newcomers_7d"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "last"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Active newcomers last week",
+        "tooltip": {
+          "shared": true,
+          "sort": 2,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
       }
     ],
     "schemaVersion": 16,
@@ -521,16 +576,16 @@
       ]
     },
     "timezone": "",
-    "title": "Group Applications",
-    "uid": "ydNQAo5ika",
-    "version": 5
+    "title": "User level and trust stats",
+    "uid": "ydNQAo5ik",
+    "version": 30
   },
   "meta": {
     "canAdmin": false,
     "canEdit": false,
     "canSave": false,
     "canStar": true,
-    "created": "2018-09-26T18:26:20+02:00",
+    "created": "2018-08-08T14:35:00+02:00",
     "createdBy": "tiltec",
     "expires": "0001-01-01T00:00:00Z",
     "folderId": 0,
@@ -539,11 +594,11 @@
     "hasAcl": false,
     "isFolder": false,
     "provisioned": false,
-    "slug": "group-applications",
+    "slug": "user-level-and-trust-stats",
     "type": "db",
-    "updated": "2018-11-28T21:32:46+01:00",
+    "updated": "2018-12-11T11:53:54+01:00",
     "updatedBy": "tiltec",
-    "url": "/d/ydNQAo5ika/group-applications",
-    "version": 5
+    "url": "/d/ydNQAo5ik/user-level-and-trust-stats",
+    "version": 30
   }
 }

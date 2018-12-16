@@ -16,820 +16,803 @@
     "editable": true,
     "gnetId": null,
     "graphTooltip": 0,
-    "hideControls": false,
     "id": 3,
+    "iteration": 1544525895060,
     "links": [],
-    "refresh": false,
-    "rows": [
+    "panels": [
       {
-        "collapse": false,
-        "height": "250px",
-        "panels": [
+        "aliasColors": {},
+        "bars": true,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "$site",
+        "fill": 1,
+        "gridPos": {
+          "h": 7,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "id": 1,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": false,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "percentage": false,
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
           {
-            "aliasColors": {},
-            "bars": true,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": null,
-            "fill": 1,
-            "id": 1,
-            "legend": {
-              "avg": false,
-              "current": false,
-              "max": false,
-              "min": false,
-              "show": true,
-              "total": false,
-              "values": false
-            },
-            "lines": false,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null",
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "span": 12,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
+            "dsType": "influxdb",
+            "groupBy": [
               {
-                "dsType": "influxdb",
-                "groupBy": [
-                  {
-                    "params": [
-                      "1h"
-                    ],
-                    "type": "time"
-                  }
+                "params": [
+                  "$__interval"
                 ],
-                "measurement": "django_request",
-                "policy": "default",
-                "refId": "A",
-                "resultFormat": "time_series",
-                "select": [
-                  [
-                    {
-                      "params": [
-                        "value"
-                      ],
-                      "type": "field"
-                    },
-                    {
-                      "params": [],
-                      "type": "count"
-                    }
-                  ]
-                ],
-                "tags": []
+                "type": "time"
               }
             ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeShift": null,
-            "title": "Number of requests",
-            "tooltip": {
-              "shared": true,
-              "sort": 0,
-              "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-              "buckets": null,
-              "mode": "time",
-              "name": null,
-              "show": true,
-              "values": []
-            },
-            "yaxes": [
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              },
-              {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
-              }
-            ]
+            "measurement": "django_request",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "count"
+                }
+              ]
+            ],
+            "tags": []
           }
         ],
-        "repeat": null,
-        "repeatIteration": null,
-        "repeatRowId": null,
-        "showTitle": false,
-        "title": "Dashboard Row",
-        "titleSize": "h6"
+        "thresholds": [],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Number of requests",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
       },
       {
-        "collapse": false,
-        "height": 250,
-        "panels": [
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "$site",
+        "fill": 1,
+        "gridPos": {
+          "h": 7,
+          "w": 8,
+          "x": 0,
+          "y": 7
+        },
+        "id": 2,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "percentage": false,
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
           {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": null,
-            "fill": 1,
-            "id": 2,
-            "legend": {
-              "avg": false,
-              "current": false,
-              "max": false,
-              "min": false,
-              "show": true,
-              "total": false,
-              "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null",
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "span": 4,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
+            "dsType": "influxdb",
+            "groupBy": [
               {
-                "dsType": "influxdb",
-                "groupBy": [
-                  {
-                    "params": [
-                      "1h"
-                    ],
-                    "type": "time"
-                  },
-                  {
-                    "params": [
-                      "0"
-                    ],
-                    "type": "fill"
-                  }
+                "params": [
+                  "$__interval"
                 ],
-                "measurement": "django_request",
-                "policy": "default",
-                "refId": "A",
-                "resultFormat": "time_series",
-                "select": [
-                  [
-                    {
-                      "params": [
-                        "value"
-                      ],
-                      "type": "field"
-                    },
-                    {
-                      "params": [
-                        "99"
-                      ],
-                      "type": "percentile"
-                    }
-                  ]
-                ],
-                "tags": []
-              }
-            ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeShift": null,
-            "title": "Request Duration (all)",
-            "tooltip": {
-              "shared": true,
-              "sort": 0,
-              "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-              "buckets": null,
-              "mode": "time",
-              "name": null,
-              "show": true,
-              "values": []
-            },
-            "yaxes": [
-              {
-                "format": "ms",
-                "label": "",
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
+                "type": "time"
               },
               {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
+                "params": [
+                  "0"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "django_request",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [
+                    "95"
+                  ],
+                  "type": "percentile"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Request Duration (all)",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "format": "ms",
+            "label": "",
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "$site",
+        "fill": 1,
+        "gridPos": {
+          "h": 7,
+          "w": 8,
+          "x": 8,
+          "y": 7
+        },
+        "id": 4,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "percentage": false,
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "dsType": "influxdb",
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "0"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "django_request",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "mean"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "method",
+                "operator": "=",
+                "value": "GET"
               }
             ]
           },
           {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": null,
-            "fill": 1,
-            "id": 4,
-            "legend": {
-              "avg": false,
-              "current": false,
-              "max": false,
-              "min": false,
-              "show": true,
-              "total": false,
-              "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null",
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "span": 4,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
+            "dsType": "influxdb",
+            "groupBy": [
               {
-                "dsType": "influxdb",
-                "groupBy": [
-                  {
-                    "params": [
-                      "1h"
-                    ],
-                    "type": "time"
-                  },
-                  {
-                    "params": [
-                      "0"
-                    ],
-                    "type": "fill"
-                  }
+                "params": [
+                  "$__interval"
                 ],
-                "measurement": "django_request",
-                "orderByTime": "ASC",
-                "policy": "default",
-                "refId": "A",
-                "resultFormat": "time_series",
-                "select": [
-                  [
-                    {
-                      "params": [
-                        "value"
-                      ],
-                      "type": "field"
-                    },
-                    {
-                      "params": [],
-                      "type": "mean"
-                    }
-                  ]
-                ],
-                "tags": [
-                  {
-                    "key": "method",
-                    "operator": "=",
-                    "value": "GET"
-                  }
-                ]
+                "type": "time"
               },
               {
-                "dsType": "influxdb",
-                "groupBy": [
-                  {
-                    "params": [
-                      "1h"
-                    ],
-                    "type": "time"
-                  },
-                  {
-                    "params": [
-                      "0"
-                    ],
-                    "type": "fill"
-                  }
+                "params": [
+                  "0"
                 ],
-                "measurement": "django_request",
-                "orderByTime": "ASC",
-                "policy": "default",
-                "refId": "B",
-                "resultFormat": "time_series",
-                "select": [
-                  [
-                    {
-                      "params": [
-                        "value"
-                      ],
-                      "type": "field"
-                    },
-                    {
-                      "params": [],
-                      "type": "max"
-                    }
-                  ]
-                ],
-                "tags": [
-                  {
-                    "key": "method",
-                    "operator": "=",
-                    "value": "GET"
-                  }
-                ]
+                "type": "fill"
               }
             ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeShift": null,
-            "title": "Request Duration (Read)",
-            "tooltip": {
-              "shared": true,
-              "sort": 0,
-              "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-              "buckets": null,
-              "mode": "time",
-              "name": null,
-              "show": true,
-              "values": []
-            },
-            "yaxes": [
+            "measurement": "django_request",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "B",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [
+                    95
+                  ],
+                  "type": "percentile"
+                }
+              ]
+            ],
+            "tags": [
               {
-                "format": "ms",
-                "label": "",
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
+                "key": "method",
+                "operator": "=",
+                "value": "GET"
+              }
+            ]
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Request Duration (Read)",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "format": "ms",
+            "label": "",
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "$site",
+        "fill": 1,
+        "gridPos": {
+          "h": 7,
+          "w": 8,
+          "x": 16,
+          "y": 7
+        },
+        "id": 5,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "percentage": false,
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "dsType": "influxdb",
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
               },
               {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
+                "params": [
+                  "0"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "django_request",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "mean"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "method",
+                "operator": "=",
+                "value": "POST"
+              },
+              {
+                "condition": "OR",
+                "key": "method",
+                "operator": "=",
+                "value": "PATCH"
               }
             ]
           },
           {
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
-            "datasource": null,
-            "fill": 1,
-            "id": 5,
-            "legend": {
-              "avg": false,
-              "current": false,
-              "max": false,
-              "min": false,
-              "show": true,
-              "total": false,
-              "values": false
-            },
-            "lines": true,
-            "linewidth": 1,
-            "links": [],
-            "nullPointMode": "null",
-            "percentage": false,
-            "pointradius": 5,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "span": 4,
-            "stack": false,
-            "steppedLine": false,
-            "targets": [
+            "dsType": "influxdb",
+            "groupBy": [
               {
-                "dsType": "influxdb",
-                "groupBy": [
-                  {
-                    "params": [
-                      "1h"
-                    ],
-                    "type": "time"
-                  },
-                  {
-                    "params": [
-                      "0"
-                    ],
-                    "type": "fill"
-                  }
+                "params": [
+                  "$__interval"
                 ],
-                "measurement": "django_request",
-                "policy": "default",
-                "refId": "A",
-                "resultFormat": "time_series",
-                "select": [
-                  [
-                    {
-                      "params": [
-                        "value"
-                      ],
-                      "type": "field"
-                    },
-                    {
-                      "params": [],
-                      "type": "mean"
-                    }
-                  ]
-                ],
-                "tags": [
-                  {
-                    "key": "method",
-                    "operator": "=",
-                    "value": "POST"
-                  },
-                  {
-                    "condition": "OR",
-                    "key": "method",
-                    "operator": "=",
-                    "value": "PATCH"
-                  }
-                ]
+                "type": "time"
               },
               {
-                "dsType": "influxdb",
-                "groupBy": [
-                  {
-                    "params": [
-                      "1h"
-                    ],
-                    "type": "time"
-                  },
-                  {
-                    "params": [
-                      "0"
-                    ],
-                    "type": "fill"
-                  }
+                "params": [
+                  "0"
                 ],
-                "measurement": "django_request",
-                "policy": "default",
-                "refId": "B",
-                "resultFormat": "time_series",
-                "select": [
-                  [
-                    {
-                      "params": [
-                        "value"
-                      ],
-                      "type": "field"
-                    },
-                    {
-                      "params": [],
-                      "type": "max"
-                    }
-                  ]
-                ],
-                "tags": [
-                  {
-                    "key": "method",
-                    "operator": "=",
-                    "value": "PATCH"
-                  },
-                  {
-                    "condition": "OR",
-                    "key": "method",
-                    "operator": "=",
-                    "value": "POST"
-                  }
-                ]
+                "type": "fill"
               }
             ],
-            "thresholds": [],
-            "timeFrom": null,
-            "timeShift": null,
-            "title": "Request Duration (Write)",
-            "tooltip": {
-              "shared": true,
-              "sort": 0,
-              "value_type": "individual"
-            },
-            "type": "graph",
-            "xaxis": {
-              "buckets": null,
-              "mode": "time",
-              "name": null,
-              "show": true,
-              "values": []
-            },
-            "yaxes": [
+            "measurement": "django_request",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "B",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [
+                    95
+                  ],
+                  "type": "percentile"
+                }
+              ]
+            ],
+            "tags": [
               {
-                "format": "ms",
-                "label": "",
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
+                "key": "method",
+                "operator": "=",
+                "value": "PATCH"
               },
               {
-                "format": "short",
-                "label": null,
-                "logBase": 1,
-                "max": null,
-                "min": null,
-                "show": true
+                "condition": "OR",
+                "key": "method",
+                "operator": "=",
+                "value": "POST"
               }
             ]
           }
         ],
-        "repeat": null,
-        "repeatIteration": null,
-        "repeatRowId": null,
-        "showTitle": false,
-        "title": "Dashboard Row",
-        "titleSize": "h6"
-      },
-      {
-        "collapse": false,
-        "height": 230,
-        "panels": [
+        "thresholds": [],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Request Duration (Write)",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
           {
-            "columns": [],
-            "datasource": null,
-            "fontSize": "100%",
-            "id": 3,
-            "links": [],
-            "pageSize": null,
-            "scroll": true,
-            "showHeader": true,
-            "sort": {
-              "col": 0,
-              "desc": true
-            },
-            "span": 12,
-            "styles": [
-              {
-                "dateFormat": "YYYY-MM-DD HH:mm:ss",
-                "pattern": "Time",
-                "type": "date"
-              },
-              {
-                "colorMode": null,
-                "colors": [
-                  "rgba(245, 54, 54, 0.9)",
-                  "rgba(237, 129, 40, 0.89)",
-                  "rgba(50, 172, 45, 0.97)"
-                ],
-                "decimals": 2,
-                "pattern": "count",
-                "thresholds": [],
-                "type": "number",
-                "unit": "short"
-              },
-              {
-                "colorMode": null,
-                "colors": [
-                  "rgba(245, 54, 54, 0.9)",
-                  "rgba(237, 129, 40, 0.89)",
-                  "rgba(50, 172, 45, 0.97)"
-                ],
-                "dateFormat": "YYYY-MM-DD HH:mm:ss",
-                "decimals": 2,
-                "pattern": "max",
-                "thresholds": [],
-                "type": "number",
-                "unit": "ms"
-              },
-              {
-                "colorMode": null,
-                "colors": [
-                  "rgba(245, 54, 54, 0.9)",
-                  "rgba(237, 129, 40, 0.89)",
-                  "rgba(50, 172, 45, 0.97)"
-                ],
-                "dateFormat": "YYYY-MM-DD HH:mm:ss",
-                "decimals": 2,
-                "pattern": "90th percentile",
-                "thresholds": [],
-                "type": "number",
-                "unit": "ms"
-              }
-            ],
-            "targets": [
-              {
-                "dsType": "influxdb",
-                "groupBy": [
-                  {
-                    "params": [
-                      "24h"
-                    ],
-                    "type": "time"
-                  }
-                ],
-                "measurement": "django_request",
-                "policy": "default",
-                "refId": "A",
-                "resultFormat": "table",
-                "select": [
-                  [
-                    {
-                      "params": [
-                        "value"
-                      ],
-                      "type": "field"
-                    },
-                    {
-                      "params": [],
-                      "type": "max"
-                    }
-                  ],
-                  [
-                    {
-                      "params": [
-                        "value"
-                      ],
-                      "type": "field"
-                    },
-                    {
-                      "params": [
-                        "90"
-                      ],
-                      "type": "percentile"
-                    },
-                    {
-                      "params": [
-                        "90th percentile"
-                      ],
-                      "type": "alias"
-                    }
-                  ],
-                  [
-                    {
-                      "params": [
-                        "value"
-                      ],
-                      "type": "field"
-                    },
-                    {
-                      "params": [],
-                      "type": "count"
-                    }
-                  ]
-                ],
-                "tags": []
-              }
-            ],
-            "title": "Panel Title",
-            "transform": "table",
-            "type": "table"
+            "format": "ms",
+            "label": "",
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
           }
         ],
-        "repeat": null,
-        "repeatIteration": null,
-        "repeatRowId": null,
-        "showTitle": false,
-        "title": "Dashboard Row",
-        "titleSize": "h6"
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
       },
       {
-        "collapse": false,
-        "height": 447,
-        "panels": [
+        "columns": [],
+        "datasource": null,
+        "fontSize": "100%",
+        "gridPos": {
+          "h": 9,
+          "w": 12,
+          "x": 0,
+          "y": 14
+        },
+        "id": 10,
+        "links": [],
+        "pageSize": null,
+        "repeat": null,
+        "repeatDirection": "h",
+        "scroll": true,
+        "showHeader": true,
+        "sort": {
+          "col": 2,
+          "desc": true
+        },
+        "styles": [
           {
-            "columns": [],
-            "datasource": null,
-            "fontSize": "80%",
-            "id": 6,
-            "links": [],
-            "pageSize": 15,
-            "scroll": false,
-            "showHeader": true,
-            "sort": {
-              "col": 0,
-              "desc": true
-            },
-            "span": 12,
-            "styles": [
-              {
-                "dateFormat": "YYYY-MM-DD HH:mm:ss",
-                "pattern": "Time",
-                "type": "date"
-              },
-              {
-                "colorMode": null,
-                "colors": [
-                  "rgba(245, 54, 54, 0.9)",
-                  "rgba(237, 129, 40, 0.89)",
-                  "rgba(50, 172, 45, 0.97)"
-                ],
-                "dateFormat": "YYYY-MM-DD HH:mm:ss",
-                "decimals": 2,
-                "pattern": "response time",
-                "thresholds": [],
-                "type": "number",
-                "unit": "ms"
-              },
-              {
-                "colorMode": null,
-                "colors": [
-                  "rgba(245, 54, 54, 0.9)",
-                  "rgba(237, 129, 40, 0.89)",
-                  "rgba(50, 172, 45, 0.97)"
-                ],
-                "dateFormat": "YYYY-MM-DD HH:mm:ss",
-                "decimals": 2,
-                "pattern": "/.*/",
-                "thresholds": [],
-                "type": "number",
-                "unit": "short"
-              }
+            "alias": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "pattern": "Time",
+            "type": "hidden"
+          },
+          {
+            "alias": "",
+            "colorMode": null,
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(50, 172, 45, 0.97)"
             ],
-            "targets": [
-              {
-                "dsType": "influxdb",
-                "groupBy": [
-                  {
-                    "params": [
-                      "full_path"
-                    ],
-                    "type": "tag"
-                  },
-                  {
-                    "params": [
-                      "method"
-                    ],
-                    "type": "tag"
-                  },
-                  {
-                    "params": [
-                      "referer"
-                    ],
-                    "type": "tag"
-                  }
-                ],
-                "hide": false,
-                "measurement": "django_request",
-                "orderByTime": "ASC",
-                "policy": "default",
-                "query": "SELECT \"value\" as \"response time\", \"full_path\", \"method\", \"referer\" FROM \"django_request\" WHERE $timeFilter ORDER BY time asc",
-                "rawQuery": true,
-                "refId": "A",
-                "resultFormat": "table",
-                "select": [
-                  [
-                    {
-                      "params": [
-                        "value"
-                      ],
-                      "type": "field"
-                    }
-                  ]
-                ],
-                "tags": []
-              }
-            ],
-            "title": "Individual requests",
-            "transform": "table",
-            "transparent": false,
-            "type": "table"
+            "decimals": 2,
+            "pattern": "/.*/",
+            "thresholds": [],
+            "type": "number",
+            "unit": "dtdurationms"
           }
         ],
-        "repeat": null,
-        "repeatIteration": null,
-        "repeatRowId": null,
-        "showTitle": false,
-        "title": "Dashboard Row",
-        "titleSize": "h6"
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "view"
+                ],
+                "type": "tag"
+              }
+            ],
+            "measurement": "django_request",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "table",
+            "select": [
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                }
+              ],
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "mean"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "method",
+                "operator": "=",
+                "value": "GET"
+              }
+            ]
+          }
+        ],
+        "title": "Read request time per view",
+        "transform": "table",
+        "transparent": false,
+        "type": "table"
+      },
+      {
+        "columns": [],
+        "datasource": "$site",
+        "fontSize": "80%",
+        "gridPos": {
+          "h": 12,
+          "w": 24,
+          "x": 0,
+          "y": 23
+        },
+        "id": 6,
+        "links": [],
+        "pageSize": 15,
+        "scroll": false,
+        "showHeader": true,
+        "sort": {
+          "col": 0,
+          "desc": true
+        },
+        "styles": [
+          {
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "pattern": "Time",
+            "type": "date"
+          },
+          {
+            "colorMode": null,
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "pattern": "response time",
+            "thresholds": [],
+            "type": "number",
+            "unit": "ms"
+          },
+          {
+            "colorMode": null,
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "pattern": "/.*/",
+            "thresholds": [],
+            "type": "number",
+            "unit": "short"
+          }
+        ],
+        "targets": [
+          {
+            "dsType": "influxdb",
+            "groupBy": [
+              {
+                "params": [
+                  "full_path"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "method"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "referer"
+                ],
+                "type": "tag"
+              }
+            ],
+            "hide": false,
+            "measurement": "django_request",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT \"value\" as \"response time\", \"full_path\", \"method\", \"referer\" FROM \"django_request\" WHERE $timeFilter ORDER BY time asc",
+            "rawQuery": true,
+            "refId": "A",
+            "resultFormat": "table",
+            "select": [
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "field"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "title": "Individual requests",
+        "transform": "table",
+        "transparent": false,
+        "type": "table"
       }
     ],
-    "schemaVersion": 14,
+    "refresh": false,
+    "schemaVersion": 16,
     "style": "dark",
-    "tags": [
-      "prod"
-    ],
+    "tags": [],
     "templating": {
-      "list": []
+      "list": [
+        {
+          "current": {
+            "text": "karrot-prod",
+            "value": "karrot-prod"
+          },
+          "hide": 0,
+          "label": null,
+          "name": "site",
+          "options": [],
+          "query": "influxdb",
+          "refresh": 1,
+          "regex": "karrot.*",
+          "skipUrlSync": false,
+          "type": "datasource"
+        }
+      ]
     },
     "time": {
-      "from": "now-2d",
+      "from": "now-7d",
       "to": "now"
     },
     "timepicker": {
@@ -860,7 +843,7 @@
     "timezone": "utc",
     "title": "Requests",
     "uid": "000000003",
-    "version": 11
+    "version": 18
   },
   "meta": {
     "canAdmin": false,
@@ -878,9 +861,9 @@
     "provisioned": false,
     "slug": "requests",
     "type": "db",
-    "updated": "2018-03-11T23:57:33+01:00",
-    "updatedBy": "nicksellen",
+    "updated": "2018-12-11T11:58:22+01:00",
+    "updatedBy": "tiltec",
     "url": "/d/000000003/requests",
-    "version": 11
+    "version": 18
   }
 }
