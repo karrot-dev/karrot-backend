@@ -18,7 +18,7 @@
     "gnetId": null,
     "graphTooltip": 0,
     "id": 21,
-    "iteration": 1533737282931,
+    "iteration": 1543437297608,
     "links": [],
     "panels": [
       {
@@ -457,8 +457,9 @@
       "list": [
         {
           "current": {
-            "text": "karrot-dev",
-            "value": "karrot-dev"
+            "tags": [],
+            "text": "karrot-prod",
+            "value": "karrot-prod"
           },
           "hide": 0,
           "label": null,
@@ -467,6 +468,7 @@
           "query": "influxdb",
           "refresh": 1,
           "regex": "karrot.*",
+          "skipUrlSync": false,
           "type": "datasource"
         }
       ]
@@ -503,7 +505,7 @@
     "timezone": "",
     "title": "Push messages",
     "uid": "xyTxbocmz",
-    "version": 4
+    "version": 6
   },
   "meta": {
     "canAdmin": false,
@@ -521,9 +523,9 @@
     "provisioned": false,
     "slug": "push-messages",
     "type": "db",
-    "updated": "2018-08-08T16:15:20+02:00",
+    "updated": "2018-11-28T21:35:58+01:00",
     "updatedBy": "tiltec",
     "url": "/d/xyTxbocmz/push-messages",
-    "version": 4
+    "version": 6
   }
 }

@@ -1,3 +1,4 @@
+#!/bin/env python
 """
 Downloads all Grafana dashboards from an organization for backup purposes, until we have generated dashboards
 

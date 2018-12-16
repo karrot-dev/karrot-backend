@@ -213,6 +213,12 @@
                 "key": "process_name",
                 "operator": "=",
                 "value": "python"
+              },
+              {
+                "condition": "AND",
+                "key": "user",
+                "operator": "=",
+                "value": "karrot-world"
               }
             ]
           },
@@ -261,6 +267,12 @@
                 "key": "process_name",
                 "operator": "=",
                 "value": "daphne"
+              },
+              {
+                "condition": "AND",
+                "key": "user",
+                "operator": "=",
+                "value": "karrot-world"
               }
             ]
           }
@@ -1022,7 +1034,7 @@
     "timezone": "",
     "title": "yuca",
     "uid": "W-jrGNhmz",
-    "version": 2
+    "version": 3
   },
   "meta": {
     "canAdmin": false,
@@ -1040,9 +1052,9 @@
     "provisioned": false,
     "slug": "yuca",
     "type": "db",
-    "updated": "2018-08-30T14:50:31+02:00",
+    "updated": "2018-12-11T11:57:07+01:00",
     "updatedBy": "tiltec",
     "url": "/d/W-jrGNhmz/yuca",
-    "version": 2
+    "version": 3
   }
 }

@@ -17,7 +17,7 @@
     "gnetId": null,
     "graphTooltip": 1,
     "id": 19,
-    "iteration": 1535703679322,
+    "iteration": 1544525873945,
     "links": [],
     "panels": [
       {
@@ -104,7 +104,7 @@
               },
               {
                 "params": [
-                  "0"
+                  "previous"
                 ],
                 "type": "fill"
               }
@@ -126,11 +126,17 @@
                 },
                 {
                   "params": [],
-                  "type": "max"
+                  "type": "last"
                 }
               ]
             ],
-            "tags": []
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
           }
         ],
         "thresholds": "",
@@ -245,9 +251,9 @@
             ],
             "tags": [
               {
-                "key": "group",
-                "operator": "!=",
-                "value": "16"
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
               }
             ]
           }
@@ -362,7 +368,13 @@
                 }
               ]
             ],
-            "tags": []
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
           }
         ],
         "thresholds": "",
@@ -477,9 +489,9 @@
             ],
             "tags": [
               {
-                "key": "group",
-                "operator": "!=",
-                "value": "16"
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
               }
             ]
           }
@@ -618,6 +630,12 @@
                 "key": "is_reply",
                 "operator": "!=",
                 "value": "True"
+              },
+              {
+                "condition": "AND",
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
               }
             ]
           }
@@ -737,6 +755,12 @@
                 "key": "is_reply",
                 "operator": "=",
                 "value": "True"
+              },
+              {
+                "condition": "AND",
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
               }
             ]
           }
@@ -856,6 +880,12 @@
                 "key": "type",
                 "operator": "=",
                 "value": "pickup"
+              },
+              {
+                "condition": "AND",
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
               }
             ]
           }
@@ -1208,7 +1238,19 @@
                 }
               ]
             ],
-            "tags": []
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "!=",
+                "value": "inactive"
+              },
+              {
+                "condition": "AND",
+                "key": "group_status",
+                "operator": "!=",
+                "value": "playground"
+              }
+            ]
           }
         ],
         "thresholds": "",
@@ -1314,7 +1356,7 @@
               },
               {
                 "params": [
-                  "0"
+                  "previous"
                 ],
                 "type": "fill"
               }
@@ -1338,7 +1380,13 @@
                 }
               ]
             ],
-            "tags": []
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
           }
         ],
         "thresholds": "",
@@ -1715,7 +1763,7 @@
           "#d44a3a"
         ],
         "datasource": "$site",
-        "format": "h",
+        "format": "dtdurations",
         "gauge": {
           "maxValue": 100,
           "minValue": 0,
@@ -1768,25 +1816,12 @@
           "fillColor": "rgba(31, 118, 189, 0.18)",
           "full": false,
           "lineColor": "rgb(31, 120, 193)",
-          "show": true
+          "show": false
         },
         "tableColumn": "",
         "targets": [
           {
-            "groupBy": [
-              {
-                "params": [
-                  "$interval"
-                ],
-                "type": "time"
-              },
-              {
-                "params": [
-                  "previous"
-                ],
-                "type": "fill"
-              }
-            ],
+            "groupBy": [],
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
@@ -1802,13 +1837,7 @@
                 },
                 {
                   "params": [],
-                  "type": "max"
-                },
-                {
-                  "params": [
-                    " / 3600"
-                  ],
-                  "type": "math"
+                  "type": "mean"
                 }
               ]
             ],
@@ -1826,7 +1855,7 @@
             "value": "null"
           }
         ],
-        "valueName": "avg"
+        "valueName": "current"
       },
       {
         "collapsed": false,
@@ -2289,6 +2318,240 @@
         "valueName": "total"
       },
       {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 14,
+          "y": 13
+        },
+        "id": 56,
+        "interval": null,
+        "links": [
+          {
+            "dashUri": "db/user-level-and-trust-stats",
+            "dashboard": "User level and trust stats",
+            "title": "User level and trust stats",
+            "type": "dashboard"
+          }
+        ],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "0"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.events",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "trust_given"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": "",
+        "title": "Trust given",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "total"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 17,
+          "y": 13
+        },
+        "id": 57,
+        "interval": null,
+        "links": [
+          {
+            "dashUri": "db/user-profile-stats",
+            "dashboard": "User profile stats",
+            "title": "User profile stats",
+            "type": "dashboard"
+          }
+        ],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "previous"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.users",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "active_count"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "max"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": "",
+        "title": "Active users",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
         "collapsed": false,
         "gridPos": {
           "h": 1,
@@ -2667,15 +2930,15 @@
       {
         "cacheTimeout": null,
         "colorBackground": false,
-        "colorValue": false,
+        "colorPrefix": false,
+        "colorValue": true,
         "colors": [
           "#299c46",
           "rgba(237, 129, 40, 0.89)",
           "#d44a3a"
         ],
         "datasource": "$site",
-        "decimals": 0,
-        "format": "short",
+        "format": "none",
         "gauge": {
           "maxValue": 100,
           "minValue": 0,
@@ -2685,17 +2948,17 @@
         },
         "gridPos": {
           "h": 3,
-          "w": 3,
+          "w": 4,
           "x": 12,
           "y": 17
         },
-        "id": 46,
+        "id": 58,
         "interval": null,
         "links": [
           {
-            "dashUri": "db/requests",
-            "dashboard": "Requests",
-            "title": "Requests",
+            "dashUri": "db/push-messages",
+            "dashboard": "Push messages",
+            "title": "Push messages",
             "type": "dashboard"
           }
         ],
@@ -2747,7 +3010,7 @@
                 "type": "fill"
               }
             ],
-            "measurement": "django_request",
+            "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
             "refId": "A",
@@ -2756,7 +3019,7 @@
               [
                 {
                   "params": [
-                    "value"
+                    "subscription_push_error"
                   ],
                   "type": "field"
                 },
@@ -2769,138 +3032,18 @@
             "tags": []
           }
         ],
-        "thresholds": "",
-        "title": "API requests",
+        "thresholds": "0,1",
+        "title": "FCM push errors",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
           {
             "op": "=",
-            "text": "N/A",
+            "text": "0",
             "value": "null"
           }
         ],
         "valueName": "total"
-      },
-      {
-        "cacheTimeout": null,
-        "colorBackground": false,
-        "colorValue": false,
-        "colors": [
-          "#299c46",
-          "rgba(237, 129, 40, 0.89)",
-          "#d44a3a"
-        ],
-        "datasource": "$site",
-        "decimals": null,
-        "description": "1% of slowest read requests, averaged",
-        "format": "ms",
-        "gauge": {
-          "maxValue": 100,
-          "minValue": 0,
-          "show": false,
-          "thresholdLabels": false,
-          "thresholdMarkers": true
-        },
-        "gridPos": {
-          "h": 3,
-          "w": 5,
-          "x": 15,
-          "y": 17
-        },
-        "id": 49,
-        "interval": null,
-        "links": [],
-        "mappingType": 1,
-        "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
-        ],
-        "maxDataPoints": 100,
-        "nullPointMode": "connected",
-        "nullText": null,
-        "postfix": "",
-        "postfixFontSize": "50%",
-        "prefix": "",
-        "prefixFontSize": "50%",
-        "rangeMaps": [
-          {
-            "from": "null",
-            "text": "N/A",
-            "to": "null"
-          }
-        ],
-        "sparkline": {
-          "fillColor": "rgba(31, 118, 189, 0.18)",
-          "full": false,
-          "lineColor": "rgb(31, 120, 193)",
-          "show": true
-        },
-        "tableColumn": "",
-        "targets": [
-          {
-            "groupBy": [
-              {
-                "params": [
-                  "$interval"
-                ],
-                "type": "time"
-              },
-              {
-                "params": [
-                  "0"
-                ],
-                "type": "fill"
-              }
-            ],
-            "measurement": "django_request",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "A",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "value"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [
-                    "99"
-                  ],
-                  "type": "percentile"
-                }
-              ]
-            ],
-            "tags": [
-              {
-                "key": "method",
-                "operator": "=",
-                "value": "GET"
-              }
-            ]
-          }
-        ],
-        "thresholds": "",
-        "title": "API read reponse time (slow)",
-        "type": "singlestat",
-        "valueFontSize": "80%",
-        "valueMaps": [
-          {
-            "op": "=",
-            "text": "N/A",
-            "value": "null"
-          }
-        ],
-        "valueName": "avg"
       },
       {
         "cacheTimeout": null,
@@ -3110,7 +3253,7 @@
           }
         ],
         "thresholds": "-1,0",
-        "title": "Emails errors",
+        "title": "Email errors",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -3244,8 +3387,126 @@
           "#d44a3a"
         ],
         "datasource": "$site",
+        "decimals": 0,
+        "format": "short",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 0,
+          "y": 23
+        },
+        "id": 46,
+        "interval": null,
+        "links": [
+          {
+            "dashUri": "db/requests",
+            "dashboard": "Requests",
+            "title": "Requests",
+            "type": "dashboard"
+          }
+        ],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "0"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "django_request",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": "",
+        "title": "API requests",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "N/A",
+            "value": "null"
+          }
+        ],
+        "valueName": "total"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
         "decimals": null,
-        "description": "1% of slowest requests, averaged",
+        "description": "",
         "format": "ms",
         "gauge": {
           "maxValue": 100,
@@ -3257,8 +3518,8 @@
         "gridPos": {
           "h": 3,
           "w": 5,
-          "x": 15,
-          "y": 20
+          "x": 3,
+          "y": 23
         },
         "id": 50,
         "interval": null,
@@ -3326,7 +3587,7 @@
                 },
                 {
                   "params": [
-                    "99"
+                    "95"
                   ],
                   "type": "percentile"
                 }
@@ -3360,7 +3621,127 @@
           }
         ],
         "thresholds": "",
-        "title": "API write reponse time (slow)",
+        "title": "API write reponse time (95th percentile)",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "N/A",
+            "value": "null"
+          }
+        ],
+        "valueName": "avg"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "decimals": null,
+        "description": "",
+        "format": "ms",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 5,
+          "x": 8,
+          "y": 23
+        },
+        "id": 49,
+        "interval": null,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "0"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "django_request",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [
+                    "95"
+                  ],
+                  "type": "percentile"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "method",
+                "operator": "=",
+                "value": "GET"
+              }
+            ]
+          }
+        ],
+        "thresholds": "",
+        "title": "API read reponse time (95th percentile)",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -3377,10 +3758,10 @@
         "datasource": "$site",
         "fontSize": "100%",
         "gridPos": {
-          "h": 14,
+          "h": 8,
           "w": 24,
           "x": 0,
-          "y": 23
+          "y": 26
         },
         "id": 10,
         "links": [],
@@ -3388,8 +3769,8 @@
         "scroll": true,
         "showHeader": true,
         "sort": {
-          "col": 3,
-          "desc": false
+          "col": 2,
+          "desc": true
         },
         "styles": [
           {
@@ -3422,6 +3803,12 @@
                   "group"
                 ],
                 "type": "tag"
+              },
+              {
+                "params": [
+                  "0"
+                ],
+                "type": "fill"
               }
             ],
             "measurement": "karrot.events",
@@ -3595,7 +3982,7 @@
           "h": 7,
           "w": 24,
           "x": 0,
-          "y": 37
+          "y": 34
         },
         "id": 2,
         "interval": "1h",
@@ -3722,7 +4109,7 @@
           "h": 17,
           "w": 12,
           "x": 0,
-          "y": 44
+          "y": 41
         },
         "id": 7,
         "links": [],
@@ -3760,6 +4147,7 @@
             "alias": "",
             "dsType": "influxdb",
             "format": "table",
+            "group": [],
             "groupBy": [
               {
                 "params": [
@@ -3774,8 +4162,10 @@
                 "type": "fill"
               }
             ],
+            "metricColumn": "none",
             "orderByTime": "ASC",
             "policy": "default",
+            "rawQuery": true,
             "rawSql": "SELECT id, name FROM group_names",
             "refId": "A",
             "resultFormat": "time_series",
@@ -3793,7 +4183,15 @@
                 }
               ]
             ],
-            "tags": []
+            "tags": [],
+            "timeColumn": "time",
+            "where": [
+              {
+                "name": "$__timeFilter",
+                "params": [],
+                "type": "macro"
+              }
+            ]
           }
         ],
         "title": "Group Names",
@@ -3808,7 +4206,7 @@
           "h": 17,
           "w": 12,
           "x": 12,
-          "y": 44
+          "y": 41
         },
         "id": 3,
         "links": [],
@@ -3996,7 +4394,7 @@
           "h": 7,
           "w": 8,
           "x": 0,
-          "y": 61
+          "y": 58
         },
         "id": 1,
         "interval": "4h",
@@ -4179,7 +4577,7 @@
           "h": 7,
           "w": 8,
           "x": 8,
-          "y": 61
+          "y": 58
         },
         "id": 9,
         "interval": "1d",
@@ -4345,7 +4743,7 @@
           "h": 7,
           "w": 8,
           "x": 16,
-          "y": 61
+          "y": 58
         },
         "id": 12,
         "links": [],
@@ -4460,7 +4858,7 @@
           "h": 7,
           "w": 24,
           "x": 0,
-          "y": 68
+          "y": 65
         },
         "id": 4,
         "interval": "",
@@ -4576,7 +4974,7 @@
           "h": 7,
           "w": 24,
           "x": 0,
-          "y": 75
+          "y": 72
         },
         "id": 5,
         "interval": "1h",
@@ -4798,7 +5196,7 @@
           "h": 7,
           "w": 24,
           "x": 0,
-          "y": 82
+          "y": 79
         },
         "id": 8,
         "interval": "1h",
@@ -5036,7 +5434,7 @@
           "h": 7,
           "w": 24,
           "x": 0,
-          "y": 89
+          "y": 86
         },
         "id": 6,
         "interval": "4h",
@@ -5152,15 +5550,11 @@
     "refresh": false,
     "schemaVersion": 16,
     "style": "dark",
-    "tags": [
-      "prod",
-      "dev"
-    ],
+    "tags": [],
     "templating": {
       "list": [
         {
           "current": {
-            "tags": [],
             "text": "karrot-prod",
             "value": "karrot-prod"
           },
@@ -5171,6 +5565,7 @@
           "query": "influxdb",
           "refresh": 1,
           "regex": "/karrot/",
+          "skipUrlSync": false,
           "type": "datasource"
         }
       ]
@@ -5207,7 +5602,7 @@
     "timezone": "",
     "title": "Activity",
     "uid": "000000019",
-    "version": 47
+    "version": 61
   },
   "meta": {
     "canAdmin": false,
@@ -5225,9 +5620,9 @@
     "provisioned": false,
     "slug": "activity",
     "type": "db",
-    "updated": "2018-08-31T10:21:58+02:00",
+    "updated": "2018-12-11T11:58:09+01:00",
     "updatedBy": "tiltec",
     "url": "/d/000000019/activity",
-    "version": 47
+    "version": 61
   }
 }
