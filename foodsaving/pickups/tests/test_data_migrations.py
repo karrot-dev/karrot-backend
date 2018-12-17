@@ -53,3 +53,60 @@ class TestExtractPickupsFromStoresApp(TestMigrations):
         self.assertEqual(pickup_date_series.start_date, self.now)
         self.assertTrue(pickup_date in pickup_date_series.pickup_dates.all())
         self.assertEqual(feedback.about, pickup_date)
+
+
+class TestMovedPickupMigration(TestMigrations):
+    migrate_from = [
+        ('pickups', '0005_pickupdate_feedback_given_by'),
+        ('stores', '0031_auto_20181216_2133'),
+        ('groups', '0034_auto_20180806_1428'),
+        ('history', '0005_auto_20181114_1126'),
+    ]
+    migrate_to = [
+        ('pickups', '0006_auto_20181216_2130'),
+    ]
+
+    def setUpBeforeMigration(self, apps):
+        Group = apps.get_model('groups', 'Group')
+        Store = apps.get_model('stores', 'Store')
+        PickupDateSeries = apps.get_model('pickups', 'PickupDateSeries')
+        PickupDate = apps.get_model('pickups', 'PickupDate')
+        History = apps.get_model('history', 'History')
+
+        now = datetime.datetime.now(tz=pytz.utc)
+        # pickup is moved to a later date
+        date1 = faker.date_time_between(start_date='now', end_date='+24h', tzinfo=pytz.utc)
+        date2 = faker.date_time_between(start_date='+24h', end_date='+48h', tzinfo=pytz.utc)
+
+        group = Group.objects.create(name=faker.name())
+        store = Store.objects.create(name=faker.name(), group=group)
+        pickup_date_series = PickupDateSeries.objects.create(store=store, start_date=now)
+        pickup_date = PickupDate.objects.create(
+            series=pickup_date_series, store=store, date=date2, is_date_changed=True
+        )
+        # PICKUP_MODIFY history entry
+        History.objects.create(
+            typus=8,
+            group=group,
+            before={
+                'id': pickup_date.id,
+                'is_date_changed': False,
+                'date': date1.isoformat()
+            },
+            after={'is_date_changed': True}
+        )
+
+    def test_removes_moved_pickup_from_series(self):
+        PickupDate = self.apps.get_model('pickups', 'PickupDate')
+        pickups = PickupDate.objects.all()
+        self.assertEqual(pickups.count(), 2)
+
+        # a deleted pickup should have been created at the original time
+        self.assertLess(pickups[0].date, pickups[1].date)
+        self.assertTrue(pickups[0].deleted)
+        self.assertIsNotNone(pickups[0].series)
+        self.assertIn('Message from Karrot', pickups[0].description)
+
+        # the moved pickup should not be part of the series anymore
+        self.assertIsNone(pickups[1].series)
+        self.assertFalse(pickups[1].deleted)
