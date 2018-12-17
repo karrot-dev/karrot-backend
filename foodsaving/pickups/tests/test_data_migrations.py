@@ -1,5 +1,7 @@
 import datetime
 import pytz
+from dateutil.relativedelta import relativedelta
+from django.utils import timezone
 
 from foodsaving.tests.utils import TestMigrations
 from foodsaving.utils.tests.fake import faker
@@ -73,14 +75,13 @@ class TestMovedPickupMigration(TestMigrations):
         PickupDate = apps.get_model('pickups', 'PickupDate')
         History = apps.get_model('history', 'History')
 
-        now = datetime.datetime.now(tz=pytz.utc)
-        # pickup is moved to a later date
-        date1 = faker.date_time_between(start_date='now', end_date='+24h', tzinfo=pytz.utc)
+        # upcoming pickup is moved to a later date
+        date1 = faker.date_time_between(start_date='+1h', end_date='+24h', tzinfo=pytz.utc)
         date2 = faker.date_time_between(start_date='+24h', end_date='+48h', tzinfo=pytz.utc)
 
         group = Group.objects.create(name=faker.name())
         store = Store.objects.create(name=faker.name(), group=group)
-        pickup_date_series = PickupDateSeries.objects.create(store=store, start_date=now)
+        pickup_date_series = PickupDateSeries.objects.create(store=store, start_date=timezone.now())
         pickup_date = PickupDate.objects.create(
             series=pickup_date_series, store=store, date=date2, is_date_changed=True
         )
@@ -96,9 +97,14 @@ class TestMovedPickupMigration(TestMigrations):
             after={'is_date_changed': True}
         )
 
-    def test_removes_moved_pickup_from_series(self):
+        # past moved pickup
+        PickupDate.objects.create(
+            series=pickup_date_series, store=store, date=timezone.now() - relativedelta(days=1), is_date_changed=True
+        )
+
+    def test_removes_upcoming_moved_pickup_from_series(self):
         PickupDate = self.apps.get_model('pickups', 'PickupDate')
-        pickups = PickupDate.objects.all()
+        pickups = PickupDate.objects.filter(date__gte=timezone.now())
         self.assertEqual(pickups.count(), 2)
 
         # a deleted pickup should have been created at the original time
@@ -110,3 +116,11 @@ class TestMovedPickupMigration(TestMigrations):
         # the moved pickup should not be part of the series anymore
         self.assertIsNone(pickups[1].series)
         self.assertFalse(pickups[1].deleted)
+
+    def test_does_not_remove_past_moved_pickups(self):
+        PickupDate = self.apps.get_model('pickups', 'PickupDate')
+        pickups = PickupDate.objects.filter(date__lt=timezone.now())
+        self.assertEqual(pickups.count(), 1)
+        self.assertIsNotNone(pickups[0].series)
+        self.assertFalse(pickups[0].deleted)
+
