@@ -56,8 +56,6 @@ class Command(BaseCommand):
             if not status.is_success(response.status_code):
                 self.errors.append('Failed to create new event webhook')
         else:
-            # TODO fix updating, if fails quite often
-            return
             response = s.put(
                 'https://api.sparkpost.com/api/v1/webhooks/' + existing_event_webhook['id'], json=event_webhook_data
             )
@@ -109,6 +107,10 @@ class Command(BaseCommand):
             )
             self.log_response(response)
             if not status.is_success(response.status_code):
+                if response.status_code == 409:
+                    print('409: Failed to update existing relay webhook')
+                    print('Ignoring - Sparkpost gets confused when updating for existing domain.')
+                    return
                 self.errors.append('Failed to update existing relay webhook')
 
     def handle(self, *args, **options):
