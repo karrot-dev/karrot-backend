@@ -3,7 +3,10 @@ from django.dispatch import receiver
 
 from foodsaving.conversations import tasks, stats
 from foodsaving.conversations.models import (
-    ConversationParticipant, ConversationMessage, ConversationMessageReaction, ConversationThreadParticipant
+    ConversationParticipant,
+    ConversationMessage,
+    ConversationMessageReaction,
+    ConversationThreadParticipant,
 )
 
 
