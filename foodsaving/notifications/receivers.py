@@ -240,10 +240,6 @@ def pickup_modified(sender, instance, **kwargs):
             )
         else:
             # pickup is enabled
-            delete_notifications_for_collectors(
-                collectors=collectors,
-                type=NotificationType.PICKUP_DISABLED.value,
-            )
             Notification.objects.create_for_pickup_collectors(
                 collectors=collectors.exclude(user=pickup.last_changed_by),
                 type=NotificationType.PICKUP_ENABLED.value,
