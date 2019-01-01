@@ -91,6 +91,16 @@ class TestPickupNotificationTask(APITestCase):
             deleted=True,
         )
 
+    def create_disabled_pickup(self, delta, store=None):
+        if store is None:
+            store = self.store
+        return PickupDate.objects.create(
+            store=store,
+            date=timezone.localtime() + delta,
+            max_collectors=1,
+            is_disabled=True,
+        )
+
     def test_user_pickups(self):
         with group_timezone_at(self.group, hour=20):
             user_pickup_tonight = self.create_user_pickup(relativedelta(minutes=50), max_collectors=1)
@@ -147,9 +157,9 @@ class TestPickupNotificationTask(APITestCase):
             daily_pickup_notifications()
             self.assertEqual(len(mail.outbox), 0)
 
-    def test_ignores_deleted_pickups(self):
+    def test_ignores_disabled_pickups(self):
         with group_timezone_at(self.group, hour=20):
-            self.create_deleted_pickup(delta=relativedelta(minutes=10))
+            self.create_disabled_pickup(delta=relativedelta(minutes=10))
             daily_pickup_notifications()
             self.assertEqual(len(mail.outbox), 0)
 

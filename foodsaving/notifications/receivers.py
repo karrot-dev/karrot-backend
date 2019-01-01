@@ -1,5 +1,8 @@
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
+from django.contrib.postgres.fields.jsonb import KeyTextTransform
+from django.db.models import IntegerField, Q
+from django.db.models.functions import Cast
 from django.db.models.signals import post_save, pre_save, pre_delete
 from django.dispatch import receiver
 from django.utils import timezone
@@ -9,7 +12,7 @@ from foodsaving.notifications.models import Notification, NotificationType
 from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
 from foodsaving.invitations.models import Invitation
-from foodsaving.pickups.models import PickupDate
+from foodsaving.pickups.models import PickupDate, PickupDateCollector
 from foodsaving.stores.models import Store
 
 
@@ -108,13 +111,13 @@ def application_decided(sender, instance, **kwargs):
 @receiver(pre_save, sender=PickupDate)
 def feedback_possible(sender, instance, **kwargs):
     pickup = instance
-    if not pickup.done_and_processed:
+    if not pickup.feedback_possible:
         return
 
     if pickup.id:
         # skip if pickup was already processed
         old = PickupDate.objects.get(id=pickup.id)
-        if old.done_and_processed == pickup.done_and_processed:
+        if old.feedback_possible == pickup.feedback_possible:
             return
     else:
         # Pickup is not saved yet and can't have any collectors
@@ -124,9 +127,9 @@ def feedback_possible(sender, instance, **kwargs):
     # better save feedback possible expiry in pickup too
     expiry_date = pickup.date + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
-    for collector in pickup.collectors.all():
+    for user in pickup.collectors.all():
         Notification.objects.create(
-            user=collector,
+            user=user,
             type=NotificationType.FEEDBACK_POSSIBLE.value,
             context={
                 'group': pickup.store.group.id,
@@ -143,14 +146,14 @@ def new_store(sender, instance, created, **kwargs):
 
     store = instance
 
-    for member in store.group.members.exclude(id=store.created_by_id):
+    for user in store.group.members.exclude(id=store.last_changed_by_id):
         Notification.objects.create(
-            user=member,
+            user=user,
             type=NotificationType.NEW_STORE.value,
             context={
                 'group': store.group.id,
                 'store': store.id,
-                'user': store.created_by_id,
+                'user': store.last_changed_by_id,
             },
         )
 
@@ -162,9 +165,9 @@ def new_member(sender, instance, created, **kwargs):
 
     membership = instance
 
-    for member in membership.group.members.exclude(id__in=(membership.user_id, membership.added_by_id)):
+    for user in membership.group.members.exclude(id__in=(membership.user_id, membership.added_by_id)):
         Notification.objects.create(
-            user=member,
+            user=user,
             type=NotificationType.NEW_MEMBER.value,
             context={
                 'group': membership.group_id,
@@ -193,3 +196,58 @@ def invitation_accepted(sender, instance, **kwargs):
             'user': user.id
         }
     )
+
+
+@receiver(pre_delete, sender=PickupDateCollector)
+def delete_pickup_notifications_when_collector_leaves(sender, instance, **kwargs):
+    collector = instance
+
+    Notification.objects.order_by().not_expired()\
+        .filter(Q(type=NotificationType.PICKUP_UPCOMING.value) | Q(type=NotificationType.PICKUP_DISABLED.value))\
+        .filter(user=collector.user, context__pickup_collector=collector.id)\
+        .delete()
+
+
+@receiver(pre_save, sender=PickupDate)
+def pickup_modified(sender, instance, **kwargs):
+    pickup = instance
+
+    # abort if pickup was just created
+    if not pickup.id:
+        return
+
+    old = PickupDate.objects.get(id=pickup.id)
+
+    collectors = pickup.pickupdatecollector_set
+
+    def delete_notifications_for_collectors(collectors, type):
+        Notification.objects.order_by().not_expired() \
+            .filter(type=type) \
+            .annotate(collector_id=Cast(KeyTextTransform('pickup_collector', 'context'), IntegerField())) \
+            .filter(collector_id__in=collectors.values_list('id', flat=True)) \
+            .delete()
+
+    if old.is_disabled != pickup.is_disabled:
+        if pickup.is_disabled:
+            delete_notifications_for_collectors(
+                collectors=collectors,
+                type=NotificationType.PICKUP_UPCOMING.value,
+            )
+
+            Notification.objects.create_for_pickup_collectors(
+                collectors=collectors.exclude(user=pickup.last_changed_by),
+                type=NotificationType.PICKUP_DISABLED.value,
+            )
+        else:
+            # pickup is enabled
+            Notification.objects.create_for_pickup_collectors(
+                collectors=collectors.exclude(user=pickup.last_changed_by),
+                type=NotificationType.PICKUP_ENABLED.value,
+            )
+            # pickup_upcoming notifications will automatically get created by cronjob
+
+    if abs((old.date - pickup.date).total_seconds()) > 60:
+        Notification.objects.create_for_pickup_collectors(
+            collectors=collectors.exclude(user=pickup.last_changed_by),
+            type=NotificationType.PICKUP_MOVED.value,
+        )

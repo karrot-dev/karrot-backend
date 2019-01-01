@@ -189,7 +189,6 @@ class TestStoreChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
         self.store = StoreFactory(group=self.group)
         self.store_url = self.url + str(self.store.id) + '/'
         self.series = PickupDateSeriesFactory(max_collectors=3, store=self.store)
-        self.series.update_pickup_dates(start=lambda: self.now)
 
     def test_reduce_weeks_in_advance(self):
         self.client.force_login(user=self.member)
@@ -227,10 +226,16 @@ class TestStoreChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
         for return_date in response.data:
             self.assertLessEqual(parse(return_date['date']), self.now + relativedelta(weeks=10))
 
-    def test_set_weeks_to_invalid_value(self):
+    def test_set_weeks_to_invalid_low_value(self):
         self.client.force_login(user=self.member)
         response = self.client.patch(self.store_url, {'weeks_in_advance': 0})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
+    def test_set_weeks_to_invalid_high_value(self):
+        self.client.force_login(user=self.member)
+        response = self.client.patch(self.store_url, {'weeks_in_advance': 99})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertIn('Do not set more than', response.data['weeks_in_advance'][0])
 
     def test_set_store_active_status_updates_pickup_dates(self):
         self.store.status = StoreStatus.ARCHIVED.value
@@ -265,7 +270,7 @@ class TestStoreStatisticsAPI(APITestCase):
                 store=store,
                 date=one_day_ago,
                 collectors=users,
-                done_and_processed=True,
+                feedback_possible=True,
             ) for _ in range(3)
         ]
         feedback = [FeedbackFactory(about=choice(pickups), given_by=u) for u in users]

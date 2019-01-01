@@ -1,9 +1,11 @@
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.test import TestCase
+from django.utils import timezone
 
 from foodsaving.applications.factories import GroupApplicationFactory
 from foodsaving.notifications.models import Notification, NotificationType
+from foodsaving.notifications.tasks import create_pickup_upcoming_notifications
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
@@ -89,7 +91,7 @@ class TestNotificationReceivers(TestCase):
         pickup = PickupDateFactory(store=store)
 
         pickup.add_collector(member)
-        pickup.done_and_processed = True
+        pickup.feedback_possible = True
         pickup.save()
 
         notification = Notification.objects.filter(user=member, type=NotificationType.FEEDBACK_POSSIBLE.value)
@@ -102,7 +104,7 @@ class TestNotificationReceivers(TestCase):
         member = UserFactory()
         creator = UserFactory()
         group = GroupFactory(members=[member, creator])
-        store = StoreFactory(group=group, created_by=creator)
+        store = StoreFactory(group=group, last_changed_by=creator)
 
         notifications = Notification.objects.filter(type=NotificationType.NEW_STORE.value)
         # creator does not get a notification
@@ -144,3 +146,83 @@ class TestNotificationReceivers(TestCase):
         context = notifications[0].context
         self.assertEqual(context['group'], group.id)
         self.assertEqual(context['user'], user.id)
+
+    def test_deletes_pickup_upcoming_notification(self):
+        user = UserFactory()
+        group = GroupFactory(members=[user])
+        store = StoreFactory(group=group)
+        in_one_hour = timezone.now() + relativedelta(hours=1)
+        pickup = PickupDateFactory(store=store, date=in_one_hour, collectors=[user])
+        Notification.objects.all().delete()
+
+        create_pickup_upcoming_notifications.call_local()
+        pickup.remove_collector(user)
+
+        notifications = Notification.objects.filter(type=NotificationType.PICKUP_UPCOMING.value)
+        self.assertEqual(notifications.count(), 0)
+
+    def test_creates_pickup_disabled_notification_and_deletes_pickup_upcoming_notification(self):
+        user1, user2 = UserFactory(), UserFactory()
+        group = GroupFactory(members=[user1, user2])
+        store = StoreFactory(group=group)
+        in_one_hour = timezone.now() + relativedelta(hours=1)
+        pickup = PickupDateFactory(store=store, date=in_one_hour, collectors=[user1, user2])
+        Notification.objects.all().delete()
+
+        create_pickup_upcoming_notifications.call_local()
+        pickup.last_changed_by = user2
+        pickup.is_disabled = True
+        pickup.save()
+
+        pickup_upcoming_notifications = Notification.objects.filter(type=NotificationType.PICKUP_UPCOMING.value)
+        self.assertEqual(pickup_upcoming_notifications.count(), 0)
+
+        pickup_disabled_notifications = Notification.objects.filter(type=NotificationType.PICKUP_DISABLED.value)
+        self.assertEqual(pickup_disabled_notifications.count(), 1)
+        self.assertEqual(pickup_disabled_notifications[0].user, user1)
+        context = pickup_disabled_notifications[0].context
+        self.assertEqual(context['group'], group.id)
+        self.assertEqual(context['pickup'], pickup.id)
+        self.assertEqual(context['store'], store.id)
+
+    def test_creates_pickup_enabled_notification(self):
+        user1, user2 = UserFactory(), UserFactory()
+        group = GroupFactory(members=[user1, user2])
+        store = StoreFactory(group=group)
+        pickup = PickupDateFactory(store=store, collectors=[user1, user2])
+        Notification.objects.all().delete()
+
+        pickup.last_changed_by = user2
+        pickup.is_disabled = True
+        pickup.save()
+
+        pickup.is_disabled = False
+        pickup.save()
+
+        pickup_enabled_notifications = Notification.objects.filter(type=NotificationType.PICKUP_ENABLED.value)
+        self.assertEqual(pickup_enabled_notifications.count(), 1)
+        self.assertEqual(pickup_enabled_notifications[0].user, user1)
+        context = pickup_enabled_notifications[0].context
+        self.assertEqual(context['group'], group.id)
+        self.assertEqual(context['pickup'], pickup.id)
+        self.assertEqual(context['store'], store.id)
+
+    def test_creates_pickup_moved_notification(self):
+        user1, user2 = UserFactory(), UserFactory()
+        group = GroupFactory(members=[user1, user2])
+        store = StoreFactory(group=group)
+        pickup = PickupDateFactory(store=store, collectors=[user1, user2])
+        Notification.objects.all().delete()
+
+        pickup.last_changed_by = user2
+        pickup.date = pickup.date + relativedelta(days=2)
+        pickup.save()
+
+        notifications = Notification.objects.all()
+        self.assertEqual(notifications.count(), 1)
+        self.assertEqual(notifications[0].type, NotificationType.PICKUP_MOVED.value)
+        self.assertEqual(notifications[0].user, user1)
+        context = notifications[0].context
+        self.assertEqual(context['group'], group.id)
+        self.assertEqual(context['pickup'], pickup.id)
+        self.assertEqual(context['store'], store.id)

@@ -34,11 +34,9 @@ class TestPickupdatesAPIFilter(APITestCase, ExtractPaginationMixin):
 
         # a pickup date series
         self.series = PickupDateSeriesFactory(store=self.store)
-        self.series.update_pickup_dates()
 
         # another pickup date series
         self.series2 = PickupDateSeriesFactory(store=self.store)
-        self.series2.update_pickup_dates()
 
     def test_filter_by_store(self):
         self.client.force_login(user=self.member)

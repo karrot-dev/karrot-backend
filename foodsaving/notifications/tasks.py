@@ -1,7 +1,6 @@
 from django.contrib.postgres.fields.jsonb import KeyTextTransform
 from django.db.models import IntegerField
 from django.db.models.functions import Cast
-from django.utils import timezone
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task
 
@@ -11,13 +10,13 @@ from foodsaving.pickups.models import PickupDate, PickupDateCollector
 
 @db_periodic_task(crontab(minute='*'))  # every minute
 def delete_expired_notifications():
-    Notification.objects.filter(expires_at__lte=timezone.now()).delete()
+    Notification.objects.expired().delete()
 
 
 @db_periodic_task(crontab(minute='*'))  # every minute
 def create_pickup_upcoming_notifications():
-    # Oh oh, this is a bit complex. As notification.context is a JSONField, the subquery would return a jsonb object
-    # by default (which can't be compared to integer).
+    # Oh oh, this is a bit complex. As notification.context is a JSONField, the collectors_already_notified subquery
+    # would return a jsonb object by default (which can't be compared to integer).
     # We can work around this by transforming the property value to text ("->>" lookup) and then casting to integer
     collectors_already_notified = Notification.objects.\
         order_by().\

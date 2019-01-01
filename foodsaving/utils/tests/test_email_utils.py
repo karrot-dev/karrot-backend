@@ -96,7 +96,7 @@ class TestJinjaFilters(TestCase):
             microsecond=0,
         )
         tz = pytz.timezone('Europe/Berlin')
-        offset_hours = int(tz.utcoffset(datetime.utcnow()).seconds / 3600)
+        offset_hours = int(tz.utcoffset(datetime.utcnow()).total_seconds() / 3600)
         with timezone.override(tz), translation.override('en'):
             val = time_filter(datetime)
             self.assertEqual(val, '{}:00 AM'.format(hour + offset_hours))

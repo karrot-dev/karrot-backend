@@ -30,16 +30,19 @@ class HistoryTypus(enum.Enum):
     PICKUP_MISSED = 16
     GROUP_APPLICATION_DECLINED = 17
     MEMBER_BECAME_EDITOR = 18
+    PICKUP_DISABLE = 19
+    PICKUP_ENABLE = 20
 
 
 class HistoryQuerySet(models.QuerySet):
     def create(self, typus, group, **kwargs):
-        a = super().create(typus=typus, group=group, **without_keys(kwargs, {'users'}))
+        entry = super().create(typus=typus, group=group, **without_keys(kwargs, {'users'}))
         if kwargs.get('users') is not None:
-            a.users.add(*kwargs['users'])
+            entry.users.add(*kwargs['users'])
 
         # TODO remove and just use post_save signal
-        history_created.send(sender=History.__class__, instance=a)
+        history_created.send(sender=History.__class__, instance=entry)
+        return entry
 
 
 class History(NicelyFormattedModel):
@@ -52,6 +55,8 @@ class History(NicelyFormattedModel):
     typus = enum.EnumField(HistoryTypus)
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE)
     store = models.ForeignKey('stores.Store', null=True, on_delete=models.CASCADE)
+    pickup = models.ForeignKey('pickups.PickupDate', null=True, on_delete=models.SET_NULL)
+    series = models.ForeignKey('pickups.PickupDateSeries', null=True, on_delete=models.SET_NULL)
     users = models.ManyToManyField('users.User')
     payload = JSONField(null=True)
     before = JSONField(null=True)

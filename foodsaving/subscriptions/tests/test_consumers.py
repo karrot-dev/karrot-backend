@@ -124,7 +124,7 @@ class TestConsumer:
 
             subscription = ChannelSubscription.objects.filter(user=user).first()
             difference = subscription.lastseen_at - the_past
-            assert difference.seconds > 1000
+            assert difference.total_seconds() > 1000
 
     async def test_updates_away(self):
         async with Communicator() as communicator:

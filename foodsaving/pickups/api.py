@@ -18,7 +18,7 @@ from foodsaving.pickups.permissions import (
 )
 from foodsaving.pickups.serializers import (
     PickupDateSerializer, PickupDateSeriesSerializer, PickupDateJoinSerializer, PickupDateLeaveSerializer,
-    FeedbackSerializer, PickupDateSeriesHistorySerializer, PickupDateHistorySerializer
+    FeedbackSerializer, PickupDateUpdateSerializer, PickupDateSeriesUpdateSerializer, PickupDateSeriesHistorySerializer
 )
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
@@ -90,6 +90,11 @@ class PickupDateSeriesViewSet(
     def get_queryset(self):
         return self.queryset.filter(store__group__members=self.request.user)
 
+    def get_serializer_class(self):
+        if self.action == 'partial_update':
+            return PickupDateSeriesUpdateSerializer
+        return self.serializer_class
+
     def perform_destroy(self, series):
         data = self.get_serializer(series).data
         History.objects.create(
@@ -103,6 +108,7 @@ class PickupDateSeriesViewSet(
             before=PickupDateSeriesHistorySerializer(series).data,
         )
         super().perform_destroy(series)
+        series.store.group.refresh_active_status()
 
 
 class PickupDatePagination(CursorPagination):
@@ -118,7 +124,6 @@ class PickupDateViewSet(
         mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
         PartialUpdateModelMixin,
-        mixins.DestroyModelMixin,
         mixins.ListModelMixin,
         GenericViewSet,
         RetrieveConversationMixin,
@@ -134,8 +139,7 @@ class PickupDateViewSet(
     - `?date_min=<from_date>`&`date_max=<to_date>` - filter by date, can also either give either date_min or date_max
     """
     serializer_class = PickupDateSerializer
-    queryset = PickupDateModel.objects \
-        .filter(deleted=False)
+    queryset = PickupDateModel.objects
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = PickupDatesFilter
     permission_classes = (IsAuthenticated, IsUpcoming, IsGroupEditor, IsEmptyPickupDate)
@@ -149,20 +153,10 @@ class PickupDateViewSet(
             qs = qs.prefetch_related('collectors', 'feedback_given_by')
         return qs
 
-    def perform_destroy(self, pickup):
-        # set deleted flag to make the pickup date invisible
-        pickup.deleted = True
-
-        History.objects.create(
-            typus=HistoryTypus.PICKUP_DELETE,
-            group=pickup.store.group,
-            store=pickup.store,
-            users=[
-                self.request.user,
-            ],
-            before=PickupDateHistorySerializer(pickup).data,
-        )
-        pickup.save()
+    def get_serializer_class(self):
+        if self.action == 'partial_update':
+            return PickupDateUpdateSerializer
+        return self.serializer_class
 
     @action(
         detail=True,

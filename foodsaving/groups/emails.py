@@ -20,7 +20,7 @@ def prepare_group_summary_data(group, from_date, to_date):
         groupmembership__created_at__lt=to_date,
     ).all()
 
-    pickup_dates = PickupDate.objects.in_group(group).exclude_deleted().filter(
+    pickup_dates = PickupDate.objects.in_group(group).exclude_disabled().filter(
         date__gte=from_date, date__lt=to_date
     ).annotate_num_collectors()
 

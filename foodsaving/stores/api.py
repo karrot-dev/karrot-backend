@@ -10,7 +10,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.pickups.models import PickupDate
 from foodsaving.stores.models import Store as StoreModel
-from foodsaving.stores.serializers import StoreSerializer
+from foodsaving.stores.serializers import StoreSerializer, StoreUpdateSerializer
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 
@@ -38,7 +38,7 @@ class StoreViewSet(
     - `?search` - search in name and description
     """
     serializer_class = StoreSerializer
-    queryset = StoreModel.objects.filter(deleted=False)
+    queryset = StoreModel.objects
     filterset_fields = ('group', 'name')
     filter_backends = (SearchFilter, filters.DjangoFilterBackend)
     search_fields = ('name', 'description')
@@ -55,6 +55,11 @@ class StoreViewSet(
             )
         else:
             return qs
+
+    def get_serializer_class(self):
+        if self.action == 'partial_update':
+            return StoreUpdateSerializer
+        return self.serializer_class
 
     @action(detail=True)
     def statistics(self, request, pk=None):

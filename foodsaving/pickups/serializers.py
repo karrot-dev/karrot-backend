@@ -1,6 +1,7 @@
 import dateutil.rrule
 from datetime import timedelta
 from django.conf import settings
+from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
@@ -8,13 +9,13 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.validators import UniqueTogetherValidator
 
 from foodsaving.history.models import History, HistoryTypus
-from foodsaving.history.utils import get_changed_data
 from foodsaving.pickups import stats
 from foodsaving.pickups.models import (
     PickupDate as PickupDateModel,
     Feedback as FeedbackModel,
     PickupDateSeries as PickupDateSeriesModel,
 )
+from foodsaving.utils.misc import find_changed
 
 
 class PickupDateHistorySerializer(serializers.ModelSerializer):
@@ -36,23 +37,20 @@ class PickupDateSerializer(serializers.ModelSerializer):
             'description',
             'feedback_due',
             'feedback_given_by',
+            'is_disabled',
         ]
-        update_fields = ['date', 'max_collectors', 'description']
-        extra_kwargs = {
-            'series': {
-                'read_only': True
-            },
-        }
+        read_only_fields = [
+            'id',
+            'series',
+            'collector_ids',
+        ]
 
+    # TODO change to collectors to make it uniform with other endpoints
     collector_ids = serializers.PrimaryKeyRelatedField(source='collectors', many=True, read_only=True)
     feedback_due = serializers.DateTimeField(read_only=True)
 
-    def validate_store(self, store):
-        if not self.context['request'].user.groups.filter(store=store).exists():
-            raise PermissionDenied(_('You are not member of the store\'s group.'))
-        if not store.group.is_editor(self.context['request'].user):
-            raise PermissionDenied(_('You need to be a group editor'))
-        return store
+    def save(self, **kwargs):
+        return super().save(last_changed_by=self.context['request'].user)
 
     def create(self, validated_data):
         pickupdate = super().create(validated_data)
@@ -60,6 +58,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
             typus=HistoryTypus.PICKUP_CREATE,
             group=pickupdate.store.group,
             store=pickupdate.store,
+            pickup=pickupdate,
             users=[
                 self.context['request'].user,
             ],
@@ -69,50 +68,72 @@ class PickupDateSerializer(serializers.ModelSerializer):
         pickupdate.store.group.refresh_active_status()
         return pickupdate
 
-    def update(self, pickupdate, validated_data):
-        selected_validated_data = {}
-        for attr in self.Meta.update_fields:
-            if attr in validated_data:
-                selected_validated_data[attr] = validated_data[attr]
-        changed_data = get_changed_data(pickupdate, selected_validated_data)
-
-        if pickupdate.series:
-            if 'max_collectors' in changed_data:
-                selected_validated_data['is_max_collectors_changed'] = True
-                if not pickupdate.is_max_collectors_changed:
-                    changed_data['is_max_collectors_changed'] = True
-            if 'date' in changed_data:
-                selected_validated_data['is_date_changed'] = True
-                if not pickupdate.is_date_changed:
-                    changed_data['is_date_changed'] = True
-            if 'description' in changed_data:
-                selected_validated_data['is_description_changed'] = True
-                if not pickupdate.is_description_changed:
-                    changed_data['is_description_changed'] = True
-
-        before_data = PickupDateHistorySerializer(pickupdate).data
-        super().update(pickupdate, selected_validated_data)
-        after_data = PickupDateHistorySerializer(pickupdate).data
-
-        if before_data != after_data:
-            History.objects.create(
-                typus=HistoryTypus.PICKUP_MODIFY,
-                group=pickupdate.store.group,
-                store=pickupdate.store,
-                users=[
-                    self.context['request'].user,
-                ],
-                payload=changed_data,
-                before=before_data,
-                after=after_data,
-            )
-        pickupdate.store.group.refresh_active_status()
-        return pickupdate
+    def validate_store(self, store):
+        if not self.context['request'].user.groups.filter(store=store).exists():
+            raise PermissionDenied(_('You are not member of the store\'s group.'))
+        if not store.group.is_editor(self.context['request'].user):
+            raise PermissionDenied(_('You need to be a group editor'))
+        return store
 
     def validate_date(self, date):
         if not date > timezone.now() + timedelta(minutes=10):
             raise serializers.ValidationError(_('The date should be in the future.'))
         return date
+
+
+class PickupDateUpdateSerializer(PickupDateSerializer):
+    class Meta:
+        model = PickupDateModel
+        fields = PickupDateSerializer.Meta.fields
+        read_only_fields = PickupDateSerializer.Meta.read_only_fields + ['store']
+
+    def save(self, **kwargs):
+        pickupdate = self.instance
+        changed_data = find_changed(pickupdate, self.validated_data)
+        self._validated_data = changed_data
+        skip_update = len(self.validated_data.keys()) == 0
+        if skip_update:
+            return self.instance
+
+        before_data = PickupDateHistorySerializer(pickupdate).data
+        pickupdate = super().save(**kwargs)
+        after_data = PickupDateHistorySerializer(pickupdate).data
+
+        if before_data != after_data:
+            typus_list = []
+            if 'is_disabled' in changed_data:
+                if changed_data['is_disabled']:
+                    typus_list.append(HistoryTypus.PICKUP_DISABLE)
+                    stats.pickup_disabled(pickupdate)
+                else:
+                    typus_list.append(HistoryTypus.PICKUP_ENABLE)
+                    stats.pickup_enabled(pickupdate)
+
+            if len(set(changed_data.keys()).difference(['is_disabled'])) > 0:
+                typus_list.append(HistoryTypus.PICKUP_MODIFY)
+
+            for typus in typus_list:
+                History.objects.create(
+                    typus=typus,
+                    group=pickupdate.store.group,
+                    store=pickupdate.store,
+                    pickup=pickupdate,
+                    users=[
+                        self.context['request'].user,
+                    ],
+                    payload={k: self.initial_data.get(k)
+                             for k in changed_data.keys()},
+                    before=before_data,
+                    after=after_data,
+                )
+        pickupdate.store.group.refresh_active_status()
+
+        return pickupdate
+
+    def validate_date(self, date):
+        if self.instance.series is not None and abs((self.instance.date - date).total_seconds()) > 1:
+            raise serializers.ValidationError(_('You can\'t move pickups that are part of a series.'))
+        return super().validate_date(date)
 
 
 class PickupDateJoinSerializer(serializers.ModelSerializer):
@@ -172,9 +193,29 @@ class PickupDateSeriesHistorySerializer(serializers.ModelSerializer):
 class PickupDateSeriesSerializer(serializers.ModelSerializer):
     class Meta:
         model = PickupDateSeriesModel
-        fields = ['id', 'max_collectors', 'store', 'rule', 'start_date', 'description']
-        update_fields = ('max_collectors', 'start_date', 'rule', 'description')
+        fields = [
+            'id',
+            'max_collectors',
+            'store',
+            'rule',
+            'start_date',
+            'description',
+            'dates_preview',
+        ]
+        read_only_fields = [
+            'id',
+        ]
 
+    dates_preview = serializers.ListField(
+        child=serializers.DateTimeField(),
+        read_only=True,
+        source='dates',
+    )
+
+    def save(self, **kwargs):
+        return super().save(last_changed_by=self.context['request'].user)
+
+    @transaction.atomic()
     def create(self, validated_data):
         series = super().create(validated_data)
 
@@ -182,38 +223,13 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
             typus=HistoryTypus.SERIES_CREATE,
             group=series.store.group,
             store=series.store,
+            series=series,
             users=[
                 self.context['request'].user,
             ],
             payload=self.initial_data,
             after=PickupDateSeriesHistorySerializer(series).data,
         )
-        series.store.group.refresh_active_status()
-        return series
-
-    def update(self, series, validated_data):
-        selected_validated_data = {}
-        for attr in self.Meta.update_fields:
-            if attr in validated_data:
-                selected_validated_data[attr] = validated_data[attr]
-
-        changed_data = get_changed_data(series, selected_validated_data)
-        before_data = PickupDateSeriesHistorySerializer(series).data
-        super().update(series, selected_validated_data)
-        after_data = PickupDateSeriesHistorySerializer(series).data
-
-        if before_data != after_data:
-            History.objects.create(
-                typus=HistoryTypus.SERIES_MODIFY,
-                group=series.store.group,
-                store=series.store,
-                users=[
-                    self.context['request'].user,
-                ],
-                payload=changed_data,
-                before=before_data,
-                after=after_data,
-            )
         series.store.group.refresh_active_status()
         return series
 
@@ -236,6 +252,43 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
         if not isinstance(rrule, dateutil.rrule.rrule):
             raise serializers.ValidationError(_('Only single recurrence rules are allowed.'))
         return rule_string
+
+
+class PickupDateSeriesUpdateSerializer(PickupDateSeriesSerializer):
+    class Meta:
+        model = PickupDateSeriesModel
+        fields = PickupDateSeriesSerializer.Meta.fields
+        read_only_fields = PickupDateSeriesSerializer.Meta.read_only_fields + ['store']
+
+    def save(self, **kwargs):
+        self._validated_data = find_changed(self.instance, self.validated_data)
+        skip_update = len(self.validated_data.keys()) == 0
+        if skip_update:
+            return self.instance
+        return super().save(**kwargs)
+
+    @transaction.atomic()
+    def update(self, series, validated_data):
+        before_data = PickupDateSeriesHistorySerializer(series).data
+        super().update(series, validated_data)
+        after_data = PickupDateSeriesHistorySerializer(series).data
+
+        if before_data != after_data:
+            History.objects.create(
+                typus=HistoryTypus.SERIES_MODIFY,
+                group=series.store.group,
+                store=series.store,
+                series=series,
+                users=[
+                    self.context['request'].user,
+                ],
+                payload={k: self.initial_data.get(k)
+                         for k in validated_data.keys()},
+                before=before_data,
+                after=after_data,
+            )
+        series.store.group.refresh_active_status()
+        return series
 
 
 class FeedbackSerializer(serializers.ModelSerializer):

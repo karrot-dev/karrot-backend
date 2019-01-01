@@ -19,8 +19,8 @@ def process_finished_pickup_dates():
 
 
 @db_periodic_task(crontab(minute=0))  # every hour
-def update_pickup_dates():
-    PickupDateSeries.objects.create_all_pickup_dates()
+def update_pickups():
+    PickupDateSeries.objects.update_pickups()
 
 
 @db_periodic_task(crontab(minute=0))  # we check every hour
@@ -53,8 +53,7 @@ def fetch_pickup_notification_data_for_group(group):
     empty = {'num_collectors': 0}
     not_full = {'num_collectors__gt': 0, 'num_collectors__lt': F('max_collectors')}
 
-    pickups = PickupDate.objects.annotate_num_collectors().filter(
-        deleted=False,
+    pickups = PickupDate.objects.exclude_disabled().annotate_num_collectors().filter(
         store__status=StoreStatus.ACTIVE.value,
         store__group=group,
     ).order_by('date')

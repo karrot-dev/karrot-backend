@@ -20,7 +20,7 @@ def notification_clicked(notification):
         'tags': notification_tags(notification),
         'fields': {
             'notification_clicked': 1,
-            'notification_clicked_seconds': (timezone.now() - notification.created_at).seconds
+            'notification_clicked_seconds': round((timezone.now() - notification.created_at).total_seconds())
         },
     }])
 

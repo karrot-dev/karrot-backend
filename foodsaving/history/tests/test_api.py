@@ -4,6 +4,8 @@ from rest_framework.test import APITestCase
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
+
+from foodsaving.history.models import History
 from foodsaving.tests.utils import ExtractPaginationMixin
 
 from foodsaving.groups.factories import GroupFactory
@@ -112,9 +114,9 @@ class TestHistoryAPIWithExistingStore(APITestCase, ExtractPaginationMixin):
         )
         response = self.get_results(history_url)
         self.assertEqual(len(response.data), 1, response.data)
-        self.assertEqual(response.data[0]['typus'], 'STORE_MODIFY')
-        self.assertEqual(response.data[0]['payload']['name'], 'newnew')
-        self.assertEqual(len(response.data[0]['payload']), 1)
+        history = response.data[0]
+        self.assertEqual(history['typus'], 'STORE_MODIFY')
+        self.assertEqual(history['payload']['name'], 'newnew')
 
     def test_dont_modify_store(self):
         self.client.force_login(self.member)
@@ -169,13 +171,7 @@ class TestHistoryAPIWithExistingPickups(APITestCase, ExtractPaginationMixin):
         self.client.force_login(self.member)
         self.client.patch(self.pickup_url, {'date': self.pickup.date})
         response = self.get_results(history_url)
-        self.assertEqual(len(response.data), 0)
-
-    def test_delete_pickup(self):
-        self.client.force_login(self.member)
-        self.client.delete(self.pickup_url)
-        response = self.get_results(history_url)
-        self.assertEqual(response.data[0]['typus'], 'PICKUP_DELETE')
+        self.assertEqual(len(response.data), 0, response.data)
 
     def test_modify_series(self):
         self.client.force_login(self.member)
@@ -188,7 +184,7 @@ class TestHistoryAPIWithExistingPickups(APITestCase, ExtractPaginationMixin):
         self.client.force_login(self.member)
         self.client.patch(self.series_url, {'rule': self.series.rule})
         response = self.get_results(history_url)
-        self.assertEqual(len(response.data), 0)
+        self.assertEqual(len(response.data), 0, response.data)
 
     def test_delete_series(self):
         self.client.force_login(self.member)
@@ -211,6 +207,28 @@ class TestHistoryAPIWithExistingPickups(APITestCase, ExtractPaginationMixin):
         response = self.get_results(history_url)
         self.assertEqual(response.data[0]['typus'], 'PICKUP_LEAVE')
         self.assertEqual(parse(response.data[0]['payload']['date']), self.pickup.date)
+
+    def test_disable_pickup(self):
+        self.client.force_login(self.member)
+        History.objects.all().delete()
+
+        self.client.patch(self.pickup_url, {'is_disabled': True})
+
+        response = self.get_results(history_url)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['typus'], 'PICKUP_DISABLE')
+
+    def test_enable_pickup(self):
+        self.pickup.is_disabled = True
+        self.pickup.save()
+        self.client.force_login(self.member)
+        History.objects.all().delete()
+
+        self.client.patch(self.pickup_url, {'is_disabled': False})
+
+        response = self.get_results(history_url)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['typus'], 'PICKUP_ENABLE')
 
 
 class TestHistoryAPIWithDonePickup(APITestCase, ExtractPaginationMixin):
@@ -281,7 +299,7 @@ class TestHistoryAPIPickupForInactiveStore(APITestCase, ExtractPaginationMixin):
         self.assertEqual(len(response.data), 0)
 
 
-class TestHistoryAPIWithDeletedPickup(APITestCase, ExtractPaginationMixin):
+class TestHistoryAPIWithDisabledPickup(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
@@ -289,11 +307,11 @@ class TestHistoryAPIWithDeletedPickup(APITestCase, ExtractPaginationMixin):
         self.pickup = PickupDateFactory(
             store=self.store,
             date=timezone.now() - relativedelta(days=1),
-            deleted=True,
+            is_disabled=True,
         )
         PickupDate.objects.process_finished_pickup_dates()
 
-    def test_no_history_for_deleted_pickup(self):
+    def test_no_history_for_disabled_pickup(self):
         self.client.force_login(self.member)
         response = self.get_results(history_url)
         self.assertEqual(len(response.data), 0)

@@ -200,6 +200,7 @@ FEEDBACK_POSSIBLE_DAYS = 30
 MESSAGE_EDIT_DAYS = 2
 GROUP_EDITOR_TRUST_MAX_THRESHOLD = 3
 PICKUPDATE_DUE_SOON_HOURS = 6
+STORE_MAX_WEEKS_IN_ADVANCE = 52
 
 # Names that shouldn't be used used by groups or users because they are either confusing or unspecific
 # Values are case-insensitive
