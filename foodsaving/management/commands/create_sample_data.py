@@ -333,6 +333,7 @@ class Command(BaseCommand):
         leave_group(o.id)
 
         print_success('Done! You can login with any of those mail addresses and password {}'.format(password))
-        print_success('Consider using the --more argument next time for more users.')
+        if not options['more_data']:
+            print_success('Consider using the --more argument next time for more users.')
 
         teardown_environment()
