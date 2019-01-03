@@ -5,13 +5,53 @@ from django.test import TestCase
 from django.utils import timezone
 
 from foodsaving.conversations import tasks
-from foodsaving.conversations.models import ConversationParticipant, ConversationThreadParticipant
+from foodsaving.conversations.models import ConversationParticipant, ConversationThreadParticipant, Conversation
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.users.factories import VerifiedUserFactory, UserFactory
 
 
 def suppressed_notifications():
     return patch('foodsaving.conversations.receivers.tasks.notify_participants')
+
+
+class TestBatchedConversationNotificationTask(TestCase):
+    def setUp(self):
+        self.user = VerifiedUserFactory()
+        self.author = VerifiedUserFactory()
+        self.conversation = Conversation.objects.get_or_create_for_two_users(self.author, self.user)
+        with suppressed_notifications():
+            self.message = self.conversation.messages.create(author=self.author, content='initial message')
+        mail.outbox = []
+
+    def test_skip_task_if_more_recent_message_exists(self):
+        with suppressed_notifications():
+            self.conversation.messages.create(author=self.author, content='foo')
+
+        tasks.notify_participants(self.message)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_does_notification_batching(self):
+        recent_message = self.conversation.messages.create(author=self.author, content='first reply')
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn(recent_message.content, mail.outbox[0].body)
+
+        # and another three messages, to check if notified_up_to is updated
+        mail.outbox = []
+        with suppressed_notifications():
+            two = self.conversation.messages.create(author=self.author, content='two')
+            self.conversation.messages.create(author=self.author, content='three')
+        self.conversation.conversationparticipant_set.filter(user=self.user).update(seen_up_to=two)
+        recent_message = self.conversation.messages.create(author=self.author, content='four')
+
+        self.assertEqual(len(mail.outbox), 1)
+        user1_email = next(email for email in mail.outbox if email.to[0] == self.user.email)
+        self.assertNotIn('two', user1_email.body)
+        self.assertIn('three', user1_email.body)
+        self.assertIn('four', user1_email.body)
+        self.assertIn(self.author.display_name, mail.outbox[0].from_email)
+        participant = ConversationParticipant.objects.get(conversation=self.conversation, user=self.user)
+        self.assertEqual(participant.notified_up_to.id, recent_message.id)
 
 
 class TestConversationNotificationTask(TestCase):
@@ -50,43 +90,6 @@ class TestConversationNotificationTask(TestCase):
 
         tasks.notify_participants(another_message)
         self.assertEqual(len(mail.outbox), 0)
-
-    def test_skip_task_if_more_recent_message_exists(self):
-        with suppressed_notifications():
-            self.group.conversation.messages.create(author=self.author, content='foo')
-
-        tasks.notify_participants(self.message)
-        self.assertEqual(len(mail.outbox), 0)
-
-    def test_does_notification_batching(self):
-        recent_message = self.group.conversation.messages.create(author=self.author, content='first reply')
-
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertIn(recent_message.content, mail.outbox[0].body)
-        self.assertIn(self.message.content, mail.outbox[0].body)
-
-        # and another three messages, to check if notified_up_to is updated
-        user2 = VerifiedUserFactory()
-        self.group.add_member(user2)
-        mail.outbox = []
-        with suppressed_notifications():
-            two = self.group.conversation.messages.create(author=self.author, content='two')
-            self.group.conversation.messages.create(author=self.author, content='three')
-        self.group.conversation.conversationparticipant_set.filter(user=self.user).update(seen_up_to=two)
-        recent_message = self.group.conversation.messages.create(author=self.author, content='four')
-
-        self.assertEqual(len(mail.outbox), 2)
-        user1_email = next(email for email in mail.outbox if email.to[0] == self.user.email)
-        user2_email = next(email for email in mail.outbox if email.to[0] == user2.email)
-        self.assertNotIn('two', user1_email.body)
-        self.assertIn('three', user1_email.body)
-        self.assertIn('four', user1_email.body)
-        self.assertIn('two', user2_email.body)
-        self.assertIn('three', user2_email.body)
-        self.assertIn('four', user2_email.body)
-        self.assertIn(self.author.display_name, mail.outbox[0].from_email)
-        participant = ConversationParticipant.objects.get(conversation=self.group.conversation, user=self.user)
-        self.assertEqual(participant.notified_up_to.id, recent_message.id)
 
     def test_exclude_thread_replies_from_conversation_notification(self):
         with suppressed_notifications():
