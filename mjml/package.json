@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "dependencies": {
     "find": "^0.2.9",
-    "mjml": "^4.2.1",
+    "mjml": "^4.3.0",
     "ws": "^6.1.2"
   },
   "devDependencies": {
