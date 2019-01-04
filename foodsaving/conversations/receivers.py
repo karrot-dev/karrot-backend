@@ -46,6 +46,21 @@ def mark_as_read(sender, instance, created, **kwargs):
     participant.save()
 
 
+@receiver(post_save, sender=ConversationParticipant)
+def mark_as_read_on_join(sender, instance, created, **kwargs):
+    """When a user joins a conversation, we mark the latest message as the last seen.
+
+    This makes joining new conversations less overwhelming for users since they are
+    not presented with a potentially large backlog of unread messages.
+    """
+
+    if not created:
+        return
+
+    instance.seen_up_to = instance.conversation.latest_message
+    instance.save()
+
+
 @receiver(post_save, sender=ConversationMessage)
 def notify_participants(sender, instance, created, **kwargs):
     message = instance
