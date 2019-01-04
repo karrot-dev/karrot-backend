@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.utils import timezone
 
-from foodsaving.conversations.models import Conversation
+from foodsaving.conversations.models import Conversation, ConversationParticipant
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership
 from foodsaving.users.factories import UserFactory
@@ -35,6 +35,19 @@ class TestConversationReceiver(TestCase):
         GroupMembership.objects.create(group=group, user=user)
         conversation = self.get_conversation_for_group(group)
         self.assertIn(user, conversation.participants.all(), 'Conversation did not have user in')
+
+    def test_adds_participant_marks_existing_messages_as_read(self):
+        existing_member = UserFactory()
+        group = GroupFactory(members=[existing_member])
+
+        group.conversation.messages.create(author=existing_member, content='foo')
+        second_message = group.conversation.messages.create(author=existing_member, content='bar')
+
+        new_member = UserFactory()
+        GroupMembership.objects.create(group=group, user=new_member)
+
+        new_participant = ConversationParticipant.objects.get(user=new_member, conversation=group.conversation)
+        self.assertTrue(new_participant.seen_up_to == second_message)
 
     def test_removes_participant(self):
         user = UserFactory()
