@@ -7,15 +7,14 @@ aliases:
   - &restore-env-cache
     restore_cache:
       keys:
-        - python-cache-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
-        - python-cache-{{ checksum "requirements.txt" }}-
+        - python-cache-{{ checksum "requirements.txt" }}
         - python-cache-
 
   - &save-env-cache
     save_cache:
       paths:
         - env
-      key: python-cache-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}
+      key: python-cache-{{ checksum "requirements.txt" }}
 
   - &setup-env
     run:

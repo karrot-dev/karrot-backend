@@ -8,8 +8,7 @@ RUN echo 'fsync = off' >> /etc/postgresql/9.5/main/postgresql.conf; service post
 
 # Python virtualenv setup
 COPY requirements.txt /
-COPY requirements-dev.txt /
-RUN rm -rf /env; virtualenv -p /usr/bin/python3 /env; bash -c 'source /env/bin/activate; pip install -r /requirements.txt; pip install -r /requirements-dev.txt'
+RUN rm -rf /env; virtualenv -p /usr/bin/python3 /env; bash -c 'source /env/bin/activate; pip install -r /requirements.txt'
 
 # Django setup
 COPY . /karrot-backend
