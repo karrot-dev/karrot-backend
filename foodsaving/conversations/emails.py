@@ -20,10 +20,8 @@ def prepare_conversation_message_notification(user, messages):
     first_message = messages[0]
     type = first_message.conversation.type()
 
-    if type == 'group':
-        if first_message.is_thread_reply():
-            return prepare_group_thread_message_notification(user, messages)
-        return prepare_group_conversation_message_notification(user, messages)
+    if type == 'group' and first_message.is_thread_reply():
+        return prepare_group_thread_message_notification(user, messages)
     if type == 'pickup':
         return prepare_pickup_conversation_message_notification(user, messages)
     if type == 'application':
@@ -64,16 +62,15 @@ def prepare_group_thread_message_notification(user, messages):
     )
 
 
-def prepare_group_conversation_message_notification(user, messages):
-    first_message = messages[0]
-    conversation = first_message.conversation
+def prepare_group_conversation_message_notification(user, message):
+    conversation = message.conversation
     group = conversation.target
 
-    from_text = author_names(messages)
+    from_text = message.author.display_name
     reply_to_name = group.name
     conversation_name = group.name
 
-    local_part = make_local_part(conversation, user)
+    local_part = make_local_part(conversation, user, message)
     reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
     from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
@@ -83,7 +80,7 @@ def prepare_group_conversation_message_notification(user, messages):
         user=user,
         reply_to=[reply_to],
         context={
-            'messages': messages,
+            'messages': [message],
             'conversation_name': conversation_name,
             'conversation_url': group_wall_url(group),
             'mute_url': group_conversation_mute_url(group, conversation),
