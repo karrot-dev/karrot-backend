@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from foodsaving.conversations.models import Conversation, ConversationParticipant
-from foodsaving.groups.factories import GroupFactory
+from foodsaving.groups.factories import GroupFactory, PlaygroundGroupFactory
 from foodsaving.groups.models import GroupMembership
 from foodsaving.users.factories import UserFactory
 
@@ -79,3 +79,13 @@ class TestSendStatistics(TestCase):
         membership.inactive_at = None
         membership.save()
         self.assertFalse(write_mock.called)
+
+
+class TestGroupPlaygroundReceivers(TestCase):
+    def setUp(self):
+        self.group = PlaygroundGroupFactory()
+
+    def test_playground_members_are_always_editors(self):
+        new_member = UserFactory()
+        self.group.add_member(new_member)
+        self.assertTrue(self.group.is_editor(new_member))

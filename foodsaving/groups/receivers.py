@@ -34,8 +34,10 @@ def group_member_added(sender, instance, created, **kwargs):
     group = instance.group
     user = instance.user
     membership = instance
+
     if group.is_playground():
         membership.notification_types = []
+        membership.roles.append(roles.GROUP_EDITOR)
         membership.save()
 
     conversation = Conversation.objects.get_or_create_for_target(group)
