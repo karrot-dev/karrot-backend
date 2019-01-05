@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from foodsaving.groups.factories import GroupFactory
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.users.factories import UserFactory
 from foodsaving.pickups.models import Feedback
@@ -15,15 +15,15 @@ class TestFeedbackAPIFilter(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.url = '/api/feedback/'
 
-        # create a group with a user and two stores
+        # create a group with a user and two places
         self.collector = UserFactory()
         self.collector2 = UserFactory()
         self.group = GroupFactory(members=[self.collector, self.collector2])
         self.group2 = GroupFactory(members=[self.collector, self.collector2])
-        self.store = StoreFactory(group=self.group)
-        self.store2 = StoreFactory(group=self.group)
-        self.pickup = PickupDateFactory(store=self.store, date=timezone.now() - relativedelta(days=1))
-        self.pickup2 = PickupDateFactory(store=self.store2, date=timezone.now() - relativedelta(days=1))
+        self.place = PlaceFactory(group=self.group)
+        self.place2 = PlaceFactory(group=self.group)
+        self.pickup = PickupDateFactory(place=self.place, date=timezone.now() - relativedelta(days=1))
+        self.pickup2 = PickupDateFactory(place=self.place2, date=timezone.now() - relativedelta(days=1))
 
         # create a feedback data
         self.feedback_get = {'given_by': self.collector, 'about': self.pickup, 'weight': 1, 'comment': 'asfjk'}
@@ -58,22 +58,22 @@ class TestFeedbackAPIFilter(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.data['feedback'][0]['given_by'], self.collector.id)
         self.assertEqual(len(response.data['feedback']), 1)
 
-    def test_filter_by_store(self):
+    def test_filter_by_place(self):
         """
-        Filter the two feedbacks and return the one that is about the pickup at 'store'
+        Filter the two feedbacks and return the one that is about the pickup at 'place'
         """
         self.client.force_login(user=self.collector)
-        response = self.get_results(self.url, {'store': self.store.id})
+        response = self.get_results(self.url, {'place': self.place.id})
         self.assertEqual(response.data['feedback'][0]['id'], self.feedback.id)
         self.assertEqual(response.data['feedback'][0]['about'], self.pickup.id)
         self.assertEqual(len(response.data['feedback']), 1)
 
-    def test_filter_by_store_2(self):
+    def test_filter_by_place_2(self):
         """
-        Filter the two feedbacks and return the one that is about the pickup at 'store2'
+        Filter the two feedbacks and return the one that is about the pickup at 'place2'
         """
         self.client.force_login(user=self.collector)
-        response = self.get_results(self.url, {'store': self.store2.id})
+        response = self.get_results(self.url, {'place': self.place2.id})
         self.assertEqual(response.data['feedback'][0]['id'], self.feedback2.id)
         self.assertEqual(response.data['feedback'][0]['about'], self.pickup2.id)
         self.assertEqual(len(response.data['feedback']), 1)
@@ -81,7 +81,7 @@ class TestFeedbackAPIFilter(APITestCase, ExtractPaginationMixin):
 
     def test_filter_by_group(self):
         """
-        Filter the two feedbacks by the stores' group
+        Filter the two feedbacks by the places' group
         """
         self.client.force_login(user=self.collector)
         response = self.get_results(self.url, {'group': self.group.id})

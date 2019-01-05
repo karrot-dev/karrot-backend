@@ -11,7 +11,7 @@ def conversation_tags(conversation):
     if type == 'group':
         tags = group_tags(target)
     elif type == 'pickup':
-        tags = group_tags(target.store.group)
+        tags = group_tags(target.place.group)
 
     if type is not None:
         tags['type'] = type

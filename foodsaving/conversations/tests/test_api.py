@@ -14,7 +14,7 @@ from foodsaving.conversations.models import ConversationParticipant, Conversatio
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupStatus
 from foodsaving.pickups.factories import PickupDateFactory
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
 from foodsaving.webhooks.models import EmailEvent
 
@@ -54,8 +54,8 @@ class TestConversationsAPI(APITestCase):
     def test_list_conversations_with_related_data_efficiently(self):
         user = UserFactory()
         group = GroupFactory(members=[user])
-        store = StoreFactory(group=group)
-        pickup = PickupDateFactory(store=store)
+        place = PlaceFactory(group=group)
+        pickup = PickupDateFactory(place=place)
         application = GroupApplicationFactory(user=UserFactory(), group=group)
 
         conversations = [Conversation.objects.get_or_create_for_target(t) for t in (group, pickup, application)]

@@ -12,7 +12,7 @@ from rest_framework.test import APIClient
 from foodsaving.groups.models import Group, GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
 from foodsaving.pickups.models import PickupDate, PickupDateSeries
-from foodsaving.stores.models import Store
+from foodsaving.places.models import Place
 from foodsaving.users.models import User
 from foodsaving.utils.tests.fake import faker
 
@@ -132,10 +132,10 @@ class Command(BaseCommand):
             }).data
             return data
 
-        def make_store(group):
+        def make_place(group):
             data = c.post(
-                '/api/stores/', {
-                    'name': 'Store ' + faker.name(),
+                '/api/places/', {
+                    'name': 'Place ' + faker.name(),
                     'description': faker.text(),
                     'group': group,
                     'address': faker.street_address(),
@@ -144,32 +144,32 @@ class Command(BaseCommand):
                     'status': 'active'
                 }
             ).data
-            print('created store: ', data['id'], data['name'])
+            print('created place: ', data['id'], data['name'])
             return data
 
-        def modify_store(store):
+        def modify_place(place):
             data = c.patch(
-                '/api/stores/{}/'.format(store), {
-                    'name': 'Store (edited) ' + faker.name(),
+                '/api/places/{}/'.format(place), {
+                    'name': 'Place (edited) ' + faker.name(),
                     'description': faker.text(),
                 }
             ).data
-            print('modified store: ', store)
+            print('modified place: ', place)
             return data
 
-        def delete_store(store):
-            data = c.delete('/api/stores/{}/'.format(store)).data
-            print('deleted store: ', store)
+        def delete_place(place):
+            data = c.delete('/api/places/{}/'.format(place)).data
+            print('deleted place: ', place)
             return data
 
-        def make_series(store):
+        def make_series(place):
             data = c.post(
                 '/api/pickup-date-series/',
                 {
                     'start_date': faker.date_time_between(start_date='now', end_date='+24h', tzinfo=pytz.utc),
                     'rule': 'FREQ=WEEKLY;BYDAY=MO,TU,SA',
                     'max_collectors': 10,
-                    'store': store
+                    'place': place
                 }
             ).data
             print('created series: ', data)
@@ -190,11 +190,11 @@ class Command(BaseCommand):
             print('deleted series: ', series)
             return data
 
-        def make_pickup(store):
+        def make_pickup(place):
             data = c.post(
                 '/api/pickup-dates/', {
                     'date': faker.date_time_between(start_date='+2d', end_date='+7d', tzinfo=pytz.utc),
-                    'store': store,
+                    'place': place,
                     'max_collectors': 10
                 }
             ).data
@@ -233,10 +233,10 @@ class Command(BaseCommand):
             print('created feedback: ', data)
             return data
 
-        def create_done_pickup(store, user_id):
+        def create_done_pickup(place, user_id):
             pickup = PickupDate.objects.create(
                 date=faker.date_time_between(start_date='-9d', end_date='-1d', tzinfo=pytz.utc),
-                store_id=store,
+                place_id=place,
                 max_collectors=10,
             )
             pickup.add_collector(User.objects.get(pk=user_id))
@@ -258,12 +258,12 @@ class Command(BaseCommand):
             group = make_group()
             groups.append(group)
             for _ in range(5):
-                store = make_store(group['id'])
-                make_series(store['id'])
-                pickup = make_pickup(store['id'])
+                place = make_place(group['id'])
+                make_series(place['id'])
+                pickup = make_pickup(place['id'])
                 join_pickup(pickup['id'])
                 make_message(group['id'])
-                done_pickup = create_done_pickup(store['id'], user['id'])
+                done_pickup = create_done_pickup(place['id'], user['id'])
                 join_pickup(done_pickup.id)
                 make_feedback(done_pickup.id, user['id'])
 
@@ -277,7 +277,7 @@ class Command(BaseCommand):
                 users.append(user)
                 login_user(user['id'])
                 join_group(g['id'])
-                for p in PickupDate.objects.filter(store__group_id=g['id']).order_by('?')[:n_pickups]:
+                for p in PickupDate.objects.filter(place__group_id=g['id']).order_by('?')[:n_pickups]:
                     join_pickup(p.id)
 
         # modify
@@ -286,15 +286,15 @@ class Command(BaseCommand):
         modify_group(o.id)
 
         u = login_user()
-        o = Store.objects.filter(group__members=u).first()
-        modify_store(o.id)
+        o = Place.objects.filter(group__members=u).first()
+        modify_place(o.id)
 
         u = login_user()
-        o = PickupDateSeries.objects.filter(store__group__members=u).first()
+        o = PickupDateSeries.objects.filter(place__group__members=u).first()
         modify_series(o.id)
 
         u = login_user()
-        o = PickupDate.objects.filter(store__group__members=u).first()
+        o = PickupDate.objects.filter(place__group__members=u).first()
         modify_pickup(o.id)
 
         # leave
@@ -308,7 +308,7 @@ class Command(BaseCommand):
         for _ in range(n_done):
             # login not necessary, but gives us a user object
             u = login_user()
-            p = PickupDate.objects.filter(store__group__members=u).first()
+            p = PickupDate.objects.filter(place__group__members=u).first()
             join_pickup(p.id)
             p.date = p.date - relativedelta(weeks=4)
             p.save()
@@ -317,16 +317,16 @@ class Command(BaseCommand):
 
         # delete
         u = login_user()
-        o = PickupDate.objects.filter(store__group__members=u).first()
+        o = PickupDate.objects.filter(place__group__members=u).first()
         delete_pickup(o.id)
 
         u = login_user()
-        o = PickupDateSeries.objects.filter(store__group__members=u).first()
+        o = PickupDateSeries.objects.filter(place__group__members=u).first()
         delete_series(o.id)
 
         u = login_user()
-        o = Store.objects.filter(group__members=u).first()
-        delete_store(o.id)
+        o = Place.objects.filter(group__members=u).first()
+        delete_place(o.id)
 
         u = login_user()
         o = Group.objects.filter(members=u).first()

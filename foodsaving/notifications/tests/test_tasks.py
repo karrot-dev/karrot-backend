@@ -8,7 +8,7 @@ from foodsaving.notifications.models import Notification, NotificationType
 from foodsaving.notifications.tasks import create_pickup_upcoming_notifications
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.pickups.models import PickupDateCollector
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 from foodsaving.users.factories import UserFactory
 
 
@@ -50,11 +50,11 @@ class TestPickupUpcomingTask(TestCase):
     def test_create_pickup_upcoming_notifications(self):
         users = [UserFactory() for _ in range(3)]
         group = GroupFactory(members=users)
-        store = StoreFactory(group=group)
+        place = PlaceFactory(group=group)
         in_one_hour = timezone.now() + relativedelta(hours=1)
-        pickup1 = PickupDateFactory(store=store, date=in_one_hour, collectors=users)
+        pickup1 = PickupDateFactory(place=place, date=in_one_hour, collectors=users)
         in_two_hours = timezone.now() + relativedelta(hours=1)
-        PickupDateFactory(store=store, date=in_two_hours, collectors=users)
+        PickupDateFactory(place=place, date=in_two_hours, collectors=users)
         Notification.objects.all().delete()
 
         create_pickup_upcoming_notifications.call_local()
@@ -68,7 +68,7 @@ class TestPickupUpcomingTask(TestCase):
         self.assertEqual(
             pickup1_user1_notification.context, {
                 'group': group.id,
-                'store': store.id,
+                'place': place.id,
                 'pickup': pickup1.id,
                 'pickup_collector': pickup1_user1_collector.id,
             }
@@ -78,9 +78,9 @@ class TestPickupUpcomingTask(TestCase):
     def test_creates_only_one_pickup_upcoming_notification(self):
         user = UserFactory()
         group = GroupFactory(members=[user])
-        store = StoreFactory(group=group)
+        place = PlaceFactory(group=group)
         in_one_hour = timezone.now() + relativedelta(hours=1)
-        PickupDateFactory(store=store, date=in_one_hour, collectors=[user])
+        PickupDateFactory(place=place, date=in_one_hour, collectors=[user])
         Notification.objects.all().delete()
 
         create_pickup_upcoming_notifications.call_local()
@@ -92,9 +92,9 @@ class TestPickupUpcomingTask(TestCase):
     def test_creates_no_pickup_upcoming_notification_when_too_far_in_future(self):
         user = UserFactory()
         group = GroupFactory(members=[user])
-        store = StoreFactory(group=group)
+        place = PlaceFactory(group=group)
         in_one_day = timezone.now() + relativedelta(days=1)
-        PickupDateFactory(store=store, date=in_one_day, collectors=[user])
+        PickupDateFactory(place=place, date=in_one_day, collectors=[user])
         Notification.objects.all().delete()
 
         create_pickup_upcoming_notifications.call_local()
@@ -104,9 +104,9 @@ class TestPickupUpcomingTask(TestCase):
     def test_creates_no_pickup_upcoming_notification_when_in_past(self):
         user = UserFactory()
         group = GroupFactory(members=[user])
-        store = StoreFactory(group=group)
+        place = PlaceFactory(group=group)
         one_hour_ago = timezone.now() - relativedelta(hours=1)
-        PickupDateFactory(store=store, date=one_hour_ago, collectors=[user])
+        PickupDateFactory(place=place, date=one_hour_ago, collectors=[user])
         Notification.objects.all().delete()
 
         create_pickup_upcoming_notifications.call_local()

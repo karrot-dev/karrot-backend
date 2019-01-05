@@ -6,7 +6,7 @@ from foodsaving.groups.models import GroupMembership
 from foodsaving.users.factories import UserFactory
 
 
-class TestStoresAPIFilter(APITestCase):
+class TestPlacesAPIFilter(APITestCase):
     def setUp(self):
         self.url = '/api/users/'
 

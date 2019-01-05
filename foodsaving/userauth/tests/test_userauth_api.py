@@ -14,7 +14,7 @@ from rest_framework.test import APITestCase
 
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.pickups.factories import PickupDateFactory
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.userauth.models import VerificationCode
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
@@ -111,14 +111,14 @@ class TestUserDeleteAPI(APITestCase):
         self.user = UserFactory()
         self.user2 = UserFactory()
         self.group = GroupFactory(members=[self.user, self.user2])
-        self.store = StoreFactory(group=self.group)
+        self.place = PlaceFactory(group=self.group)
         self.pickupdate = PickupDateFactory(
-            store=self.store,
+            place=self.place,
             date=timezone.now() + relativedelta(days=1),
             collectors=[self.user],
         )
         self.past_pickupdate = PickupDateFactory(
-            store=self.store,
+            place=self.place,
             date=timezone.now() - relativedelta(days=1),
             collectors=[self.user],
         )

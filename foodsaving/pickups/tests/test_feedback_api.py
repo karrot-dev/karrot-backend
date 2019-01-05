@@ -6,7 +6,7 @@ from rest_framework.test import APITestCase
 
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupStatus
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 from foodsaving.pickups.models import Feedback
 from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.users.factories import UserFactory
@@ -25,9 +25,9 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.group = GroupFactory(
             members=[self.member, self.collector, self.evil_collector, self.collector2, self.collector3]
         )
-        self.store = StoreFactory(group=self.group)
+        self.place = PlaceFactory(group=self.group)
         self.pickup = PickupDateFactory(
-            store=self.store,
+            place=self.place,
             date=timezone.now() + relativedelta(days=1),
             collectors=[self.collector, self.collector2, self.collector3],
         )
@@ -37,14 +37,14 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
 
         # past pickup date
         self.past_pickup = PickupDateFactory(
-            store=self.store,
+            place=self.place,
             date=timezone.now() - relativedelta(days=1),
             collectors=[self.collector, self.evil_collector, self.collector2, self.collector3],
         )
 
         # old pickup date with feedback
         self.old_pickup = PickupDateFactory(
-            store=self.store,
+            place=self.place,
             date=timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS + 2),
             collectors=[
                 self.collector3,
@@ -87,12 +87,12 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
 
     def test_create_feedback_fails_as_non_group_member(self):
         """
-        User is not allowed to give feedback when not a member of the store's group.
+        User is not allowed to give feedback when not a member of the place's group.
         """
         self.client.force_login(user=self.user)
         response = self.client.post(self.url, self.feedback_post, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        self.assertEqual(response.data, {'about': ['You are not member of the store\'s group.']})
+        self.assertEqual(response.data, {'about': ['You are not member of the place\'s group.']})
 
     def test_create_feedback_fails_as_non_collector(self):
         """

@@ -7,7 +7,7 @@ from foodsaving.conversations.models import Conversation, ConversationMessage, C
     ConversationThreadParticipant
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.pickups.factories import PickupDateFactory
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
 
 
@@ -161,8 +161,8 @@ class TestPickupConversations(TestCase):
     def setUp(self):
         self.user = VerifiedUserFactory()
         self.group = GroupFactory(members=[self.user])
-        self.store = StoreFactory(group=self.group)
-        self.pickup = PickupDateFactory(store=self.store, collectors=[self.user])
+        self.place = PlaceFactory(group=self.group)
+        self.pickup = PickupDateFactory(place=self.place, collectors=[self.user])
         self.conversation = self.pickup.conversation
 
     def test_send_email_notifications(self):

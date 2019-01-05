@@ -8,19 +8,19 @@ class PickupDateSeriesFilter(filters.FilterSet):
     class Meta:
         model = PickupDateSeries
         fields = [
-            'store',
+            'place',
         ]
 
 
 class PickupDatesFilter(filters.FilterSet):
-    store = filters.NumberFilter(field_name='store')
-    group = filters.NumberFilter(field_name='store__group__id')
+    place = filters.NumberFilter(field_name='place')
+    group = filters.NumberFilter(field_name='place__group__id')
     date = ISODateTimeFromToRangeFilter(field_name='date')
     feedback_possible = filters.BooleanFilter(method='filter_feedback_possible')
 
     class Meta:
         model = PickupDate
-        fields = ['store', 'group', 'date', 'series', 'feedback_possible']
+        fields = ['place', 'group', 'date', 'series', 'feedback_possible']
 
     def filter_feedback_possible(self, qs, name, value):
         if value is True:
@@ -29,12 +29,12 @@ class PickupDatesFilter(filters.FilterSet):
 
 
 class FeedbackFilter(filters.FilterSet):
-    group = filters.NumberFilter(field_name='about__store__group__id')
-    store = filters.NumberFilter(field_name='about__store__id')
+    group = filters.NumberFilter(field_name='about__place__group__id')
+    place = filters.NumberFilter(field_name='about__place__id')
     about = filters.NumberFilter(field_name='about')
     given_by = filters.NumberFilter(field_name='given_by')
     created_at = ISODateTimeFromToRangeFilter(field_name='created_at')
 
     class Meta:
         model = Feedback
-        fields = ['group', 'store', 'about', 'given_by', 'created_at']
+        fields = ['group', 'place', 'about', 'given_by', 'created_at']

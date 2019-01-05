@@ -22,7 +22,7 @@ The pickup still exists and has been converted into a one-time pickup."""
             date=original_date,
             max_collectors=series.max_collectors,
             series=series,
-            store=series.store,
+            place=series.place,
             description=message,
             deleted=True,
         )

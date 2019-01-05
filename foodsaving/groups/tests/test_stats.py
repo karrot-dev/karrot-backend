@@ -5,7 +5,7 @@ from django.utils import timezone
 from foodsaving.groups import stats, roles
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 from foodsaving.users.factories import UserFactory
 
 
@@ -61,18 +61,18 @@ class TestGroupStats(TestCase):
             }]
         )
 
-    def test_group_stores_stats(self):
+    def test_group_places_stats(self):
         group = GroupFactory()
 
-        [StoreFactory(group=group, status='active') for _ in range(3)]
-        [StoreFactory(group=group, status='negotiating') for _ in range(7)]
-        [StoreFactory(group=group, status='archived') for _ in range(10)]
+        [PlaceFactory(group=group, status='active') for _ in range(3)]
+        [PlaceFactory(group=group, status='negotiating') for _ in range(7)]
+        [PlaceFactory(group=group, status='archived') for _ in range(10)]
 
-        points = stats.get_group_stores_stats(group)
+        points = stats.get_group_places_stats(group)
 
         self.assertEqual(
             points, [{
-                'measurement': 'karrot.group.stores',
+                'measurement': 'karrot.group.places',
                 'tags': {
                     'group': str(group.id),
                     'group_status': 'active',

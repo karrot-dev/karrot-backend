@@ -11,7 +11,7 @@ import foodsaving.groups.emails as group_emails
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupNotificationType, GroupMembership
 from foodsaving.pickups.factories import PickupDateFactory
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 from foodsaving.users.factories import VerifiedUserFactory, UserFactory
 
 
@@ -108,13 +108,13 @@ class TestGroupSummaryEmails(APITestCase):
     def test_ignores_deleted_pickups(self):
         a_few_days_ago = timezone.now() - relativedelta(days=4)
 
-        store = StoreFactory(group=self.group)
+        place = PlaceFactory(group=self.group)
         user = VerifiedUserFactory(mail_verified=True)
         self.group.add_member(user)
 
         with freeze_time(a_few_days_ago, tick=True):
             # fulfilled, but deleted
-            PickupDateFactory(store=store, max_collectors=1, collectors=[user], is_disabled=True)
+            PickupDateFactory(place=place, max_collectors=1, collectors=[user], is_disabled=True)
 
         from_date, to_date = foodsaving.groups.emails.calculate_group_summary_dates(self.group)
         data = foodsaving.groups.emails.prepare_group_summary_data(self.group, from_date, to_date)
@@ -126,7 +126,7 @@ class TestGroupSummaryEmails(APITestCase):
         a_couple_of_weeks_ago = timezone.now() - relativedelta(weeks=3)
         a_few_days_ago = timezone.now() - relativedelta(days=4)
 
-        store = StoreFactory(group=self.group)
+        place = PlaceFactory(group=self.group)
         old_user = VerifiedUserFactory(mail_verified=True)
         user = VerifiedUserFactory(mail_verified=True)
 
@@ -134,8 +134,8 @@ class TestGroupSummaryEmails(APITestCase):
         with freeze_time(a_couple_of_weeks_ago, tick=True):
             self.group.add_member(old_user)
             self.group.conversation.messages.create(author=old_user, content='old message')
-            PickupDateFactory(store=store)
-            PickupDateFactory(store=store, max_collectors=1, collectors=[old_user])
+            PickupDateFactory(place=place)
+            PickupDateFactory(place=place, max_collectors=1, collectors=[old_user])
 
         # should be included in summary email
         with freeze_time(a_few_days_ago, tick=True):
@@ -146,10 +146,10 @@ class TestGroupSummaryEmails(APITestCase):
             self.group.conversation.messages.create(author=user, content='whats up')
 
             # a missed pickup
-            PickupDateFactory(store=store)
+            PickupDateFactory(place=place)
 
             # a fulfilled pickup
-            PickupDateFactory(store=store, max_collectors=1, collectors=[user])
+            PickupDateFactory(place=place, max_collectors=1, collectors=[user])
 
         from_date, to_date = foodsaving.groups.emails.calculate_group_summary_dates(self.group)
         data = foodsaving.groups.emails.prepare_group_summary_data(self.group, from_date, to_date)

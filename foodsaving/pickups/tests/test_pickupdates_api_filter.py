@@ -13,7 +13,7 @@ from foodsaving.pickups.factories import PickupDateFactory, PickupDateSeriesFact
 from foodsaving.pickups.models import PickupDate as PickupDateModel
 from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.users.factories import UserFactory
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 
 
 class TestPickupdatesAPIFilter(APITestCase, ExtractPaginationMixin):
@@ -21,39 +21,39 @@ class TestPickupdatesAPIFilter(APITestCase, ExtractPaginationMixin):
 
         self.url = '/api/pickup-dates/'
 
-        # pickup date for group with one member and one store
+        # pickup date for group with one member and one place
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
-        self.store = StoreFactory(group=self.group)
-        self.pickup = PickupDateFactory(store=self.store)
+        self.place = PlaceFactory(group=self.group)
+        self.pickup = PickupDateFactory(place=self.place)
 
-        # and another store + group + pick-update
+        # and another place + group + pick-update
         self.group2 = GroupFactory(members=[self.member])
-        self.store2 = StoreFactory(group=self.group2)
-        self.pickup2 = PickupDateFactory(store=self.store2)
+        self.place2 = PlaceFactory(group=self.group2)
+        self.pickup2 = PickupDateFactory(place=self.place2)
 
         # a pickup date series
-        self.series = PickupDateSeriesFactory(store=self.store)
+        self.series = PickupDateSeriesFactory(place=self.place)
 
         # another pickup date series
-        self.series2 = PickupDateSeriesFactory(store=self.store)
+        self.series2 = PickupDateSeriesFactory(place=self.place)
 
-    def test_filter_by_store(self):
+    def test_filter_by_place(self):
         self.client.force_login(user=self.member)
-        response = self.get_results(self.url, {'store': self.store.id})
+        response = self.get_results(self.url, {'place': self.place.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         for _ in response.data:
-            self.assertEqual(_['store'], self.store.id)
-        self.assertEqual(len(response.data), self.store.pickup_dates.count())
+            self.assertEqual(_['place'], self.place.id)
+        self.assertEqual(len(response.data), self.place.pickup_dates.count())
 
     def test_filter_by_group(self):
         self.client.force_login(user=self.member)
         response = self.get_results(self.url, {'group': self.group.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        store_ids = [_.id for _ in self.group.store.all()]
+        place_ids = [_.id for _ in self.group.place.all()]
         for _ in response.data:
-            self.assertTrue(_['store'] in store_ids)
-        self.assertEqual(len(response.data), sum([store.pickup_dates.count() for store in self.group.store.all()]))
+            self.assertTrue(_['place'] in place_ids)
+        self.assertEqual(len(response.data), sum([place.pickup_dates.count() for place in self.group.place.all()]))
 
     def test_filter_by_series(self):
         self.client.force_login(user=self.member)
@@ -70,7 +70,7 @@ class TestPickupdatesAPIFilter(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         for _ in response.data:
             self.assertGreater(parse(_['date']), query_date)
-        selected_pickups = PickupDateModel.objects.filter(store__group__members=self.member) \
+        selected_pickups = PickupDateModel.objects.filter(place__group__members=self.member) \
             .filter(date__gte=query_date)
         self.assertEqual(len(response.data), selected_pickups.count())
 
@@ -81,7 +81,7 @@ class TestPickupdatesAPIFilter(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         for _ in response.data:
             self.assertLess(parse(_['date']), query_date)
-        selected_pickups = PickupDateModel.objects.filter(store__group__members=self.member) \
+        selected_pickups = PickupDateModel.objects.filter(place__group__members=self.member) \
             .filter(date__lte=query_date)
         self.assertEqual(len(response.data), selected_pickups.count())
 
@@ -95,41 +95,41 @@ class TestFeedbackPossibleFilter(APITestCase, ExtractPaginationMixin):
         self.member = UserFactory()
         self.member2 = UserFactory()
         self.group = GroupFactory(members=[self.member, self.member2])
-        self.store = StoreFactory(group=self.group)
+        self.place = PlaceFactory(group=self.group)
 
         # not member (anymore)
         self.group2 = GroupFactory(members=[])
-        self.store2 = StoreFactory(group=self.group2)
+        self.place2 = PlaceFactory(group=self.group2)
 
         self.pickupFeedbackPossible = PickupDateFactory(
-            store=self.store, collectors=[
+            place=self.place, collectors=[
                 self.member,
             ], date=self.oneWeekAgo
         )
 
         # now the cases where no feedback can be given
         self.pickupUpcoming = PickupDateFactory(
-            store=self.store, collectors=[
+            place=self.place, collectors=[
                 self.member,
             ]
         )
-        self.pickupNotCollector = PickupDateFactory(store=self.store, date=self.oneWeekAgo)
-        self.pickupTooLongAgo = PickupDateFactory(store=self.store, date=self.tooLongAgo)
+        self.pickupNotCollector = PickupDateFactory(place=self.place, date=self.oneWeekAgo)
+        self.pickupTooLongAgo = PickupDateFactory(place=self.place, date=self.tooLongAgo)
 
         self.pickupFeedbackAlreadyGiven = PickupDateFactory(
-            store=self.store, collectors=[
+            place=self.place, collectors=[
                 self.member,
             ], date=self.oneWeekAgo
         )
         self.feedback = FeedbackFactory(about=self.pickupFeedbackAlreadyGiven, given_by=self.member)
 
         self.pickupCollectorLeftGroup = PickupDateFactory(
-            store=self.store2, collectors=[
+            place=self.place2, collectors=[
                 self.member,
             ], date=self.oneWeekAgo
         )
         self.pickupDoneByAnotherUser = PickupDateFactory(
-            store=self.store, collectors=[
+            place=self.place, collectors=[
                 self.member2,
             ], date=self.oneWeekAgo
         )

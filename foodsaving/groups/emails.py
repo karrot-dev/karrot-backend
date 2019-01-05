@@ -31,7 +31,7 @@ def prepare_group_summary_data(group, from_date, to_date):
     feedbacks = Feedback.objects.filter(
         created_at__gte=from_date,
         created_at__lt=to_date,
-        about__store__group=group,
+        about__place__group=group,
     )
 
     messages = ConversationMessage.objects.exclude_replies().filter(

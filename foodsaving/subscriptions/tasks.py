@@ -50,7 +50,7 @@ def get_message_title(message, language):
 
     if type == 'pickup':
         pickup = conversation.target
-        group_tz = pickup.store.group.timezone
+        group_tz = pickup.place.group.timezone
         with timezone.override(group_tz):
             weekday = format_date(
                 pickup.date.astimezone(timezone.get_current_timezone()),

@@ -92,7 +92,7 @@ def prepare_pickup_conversation_message_notification(user, messages):
     first_message = messages[0]
     conversation = first_message.conversation
     pickup = conversation.target
-    group_tz = pickup.store.group.timezone
+    group_tz = pickup.place.group.timezone
 
     language = user.language
 
