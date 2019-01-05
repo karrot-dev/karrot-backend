@@ -288,6 +288,7 @@ class PickupDateCollector(BaseModel):
     class Meta:
         db_table = 'pickups_pickupdate_collectors'
         unique_together = (('pickupdate', 'user'), )
+        ordering = ['-created_at']
 
 
 class Feedback(BaseModel):

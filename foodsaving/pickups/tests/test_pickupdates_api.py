@@ -17,7 +17,8 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
 
         # pickup date for group with one member and one store
         self.member = UserFactory()
-        self.group = GroupFactory(members=[self.member])
+        self.second_member = UserFactory()
+        self.group = GroupFactory(members=[self.member, self.second_member])
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(store=self.store)
         self.pickup_url = self.url + str(self.pickup.id) + '/'
@@ -166,6 +167,17 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         # should have access to chat
         response = self.client.get(self.conversation_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_join_pickup_order_by_sign_up(self):
+        self.client.force_login(user=self.second_member)
+        response = self.client.post(self.join_url)
+
+        self.client.force_login(user=self.member)
+        response = self.client.post(self.join_url)
+
+        response = self.client.get(self.pickup_url)
+        self.assertTrue(response.data['collector_ids'][0] == self.second_member.id)
+        self.assertTrue(response.data['collector_ids'][1] == self.member.id)
 
     def test_join_pickup_as_newcomer(self):
         newcomer = UserFactory()
