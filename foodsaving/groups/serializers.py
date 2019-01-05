@@ -7,7 +7,6 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 
 from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
     GroupNotificationType
-from foodsaving.groups.roles import GROUP_EDITOR
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.utils.misc import find_changed
 from foodsaving.utils.validators import prevent_reserved_names
@@ -297,41 +296,6 @@ class TimezonesSerializer(serializers.Serializer):
 
 class EmptySerializer(serializers.Serializer):
     pass
-
-
-class GroupMembershipAddRoleSerializer(serializers.Serializer):
-    role_name = serializers.ChoiceField(
-        choices=(
-            roles.GROUP_MEMBERSHIP_MANAGER,
-            roles.GROUP_AGREEMENT_MANAGER,
-        ), required=True, write_only=True
-    )
-
-    def validate_role_name(self, role_name):
-        if role_name == GROUP_EDITOR:
-            raise serializers.ValidationError('You cannot change the editor role')
-        return role_name
-
-    def update(self, instance, validated_data):
-        role = validated_data['role_name']
-        instance.add_roles([role])
-        instance.save()
-        return instance
-
-
-class GroupMembershipRemoveRoleSerializer(serializers.Serializer):
-    role_name = serializers.CharField(required=True, write_only=True)
-
-    def validate_role_name(self, role_name):
-        if role_name == GROUP_EDITOR:
-            raise serializers.ValidationError('You cannot change the editor role')
-        return role_name
-
-    def update(self, instance, validated_data):
-        role = validated_data['role_name']
-        instance.remove_roles([role])
-        instance.save()
-        return instance
 
 
 class GroupMembershipAddNotificationTypeSerializer(serializers.Serializer):

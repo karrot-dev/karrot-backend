@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save, pre_delete, post_delete
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 from foodsaving.conversations.models import Conversation
@@ -54,25 +54,6 @@ def group_member_removed(sender, instance, **kwargs):
         conversation.leave(user)
 
     stats.group_left(group)
-
-
-@receiver(post_save, sender=GroupMembership)
-@receiver(post_delete, sender=GroupMembership)
-def initialize_group(sender, instance, **kwargs):
-    """
-    Configure membership roles for the group.
-
-    This implements a default model of group roles so that there is always someone who can manage the
-    roles and edit the agreement.
-    """
-    group = instance.group
-
-    memberships = GroupMembership.objects.filter(group=group)
-    if not memberships.filter(roles__contains=[roles.GROUP_MEMBERSHIP_MANAGER]).exists():
-        oldest = memberships.order_by('created_at', 'id').first()
-        if oldest:
-            oldest.roles.append(roles.GROUP_MEMBERSHIP_MANAGER)
-            oldest.save()
 
 
 @receiver(post_save, sender=Trust)
