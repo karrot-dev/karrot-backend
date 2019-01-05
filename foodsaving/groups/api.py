@@ -13,12 +13,12 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.conversations.api import RetrieveConversationMixin
-from foodsaving.groups import roles, stats
+from foodsaving.groups import stats
 from foodsaving.groups.filters import GroupsFilter, GroupsInfoFilter
 from foodsaving.groups.models import Agreement, Group as GroupModel, GroupMembership, Trust
 from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer, GroupJoinSerializer, \
     GroupLeaveSerializer, TimezonesSerializer, EmptySerializer, \
-    GroupMembershipAddRoleSerializer, GroupMembershipRemoveRoleSerializer, GroupMembershipInfoSerializer, \
+    GroupMembershipInfoSerializer, \
     AgreementSerializer, AgreementAgreeSerializer, GroupMembershipAddNotificationTypeSerializer, \
     GroupMembershipRemoveNotificationTypeSerializer
 from foodsaving.utils.mixins import PartialUpdateModelMixin
@@ -36,14 +36,6 @@ class IsOpenGroup(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return obj.is_open
-
-
-class CanUpdateMemberships(BasePermission):
-    message = _('You do not have permission to update memberships.')
-
-    def has_object_permission(self, request, view, obj):
-        # we get a membership object
-        return obj.group.is_member_with_role(request.user, roles.GROUP_MEMBERSHIP_MANAGER)
 
 
 class IsOtherUser(BasePermission):
@@ -151,30 +143,6 @@ class GroupViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUp
         membership.save()
         stats.group_activity(membership.group)
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(
-        detail=True,
-        methods=['PUT', 'DELETE'],
-        permission_classes=(IsAuthenticated, CanUpdateMemberships),
-        url_name='user-roles',
-        url_path='users/(?P<user_id>[^/.]+)/roles/(?P<role_name>[^/.]+)',
-        serializer_class=EmptySerializer  # for Swagger
-    )
-    def modify_user_roles(self, request, pk, user_id, role_name):
-        """add (PUT) or remove (DELETE) a membership role"""
-        self.check_permissions(request)
-        instance = get_object_or_404(GroupMembership.objects, group=pk, user=user_id)
-        self.check_object_permissions(request, instance)
-        serializer_class = None
-        if request.method == 'PUT':
-            serializer_class = GroupMembershipAddRoleSerializer
-        elif request.method == 'DELETE':
-            serializer_class = GroupMembershipRemoveRoleSerializer
-        serializer = serializer_class(instance, data={'role_name': role_name}, partial=True)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
-        return Response(GroupMembershipInfoSerializer(instance).data)
 
     @action(
         detail=True,

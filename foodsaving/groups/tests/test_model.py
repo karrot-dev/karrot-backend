@@ -3,7 +3,6 @@ from django.db import IntegrityError
 from django.test import TestCase
 
 from foodsaving.conversations.models import Conversation, ConversationParticipant
-from foodsaving.groups import roles
 from foodsaving.groups.factories import GroupFactory, PlaygroundGroupFactory
 from foodsaving.groups.models import Group, GroupMembership, get_default_notification_types
 from foodsaving.users.factories import UserFactory
@@ -18,12 +17,6 @@ class TestGroupModel(TestCase):
         Group.objects.create(name='abcdef')
         with self.assertRaises(IntegrityError):
             Group.objects.create(name='abcdef')
-
-    def test_roles_initialized(self):
-        user = UserFactory()
-        group = GroupFactory(members=[user])
-        membership = GroupMembership.objects.get(user=user, group=group)
-        self.assertIn(roles.GROUP_MEMBERSHIP_MANAGER, membership.roles)
 
     def test_notifications_on_by_default(self):
         user = UserFactory()
