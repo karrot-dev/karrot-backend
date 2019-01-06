@@ -1,4 +1,3 @@
-from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
@@ -14,7 +13,7 @@ def get_users_stats():
     active_membership_count = GroupMembership.objects.active().count()
     active_users_count = active_users.count()
 
-    done_pickup_filter = {'pickup_dates__in':PickupDate.objects.exclude_disabled().filter(date__lt=timezone.now())}
+    done_pickup_filter = {'pickup_dates__in': PickupDate.objects.exclude_disabled().filter(date__lt=timezone.now())}
     pickup_active_users = active_users.filter(**done_pickup_filter)
     pickup_users = User.objects.filter(**done_pickup_filter)
 
