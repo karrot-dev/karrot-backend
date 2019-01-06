@@ -46,8 +46,18 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, RetrievePriv
         return self.retrieve_private_conversation(request, pk)
 
     def get_queryset(self):
-        return self.queryset.filter(Q(groups__in=self.request.user.groups.all()) |
-                                    Q(id=self.request.user.id)).distinct()
+        is_member_of_group = Q(groups__in=self.request.user.groups.all())
+
+        is_self = Q(id=self.request.user.id)
+
+        groups = self.request.user.groups.all()
+        is_applicant_of_group = Q(groupapplication__group__in=groups)
+
+        return self.queryset.filter(
+            is_member_of_group |
+            is_applicant_of_group |
+            is_self
+        ).distinct()
 
 
 class UserPagination(CursorPagination):

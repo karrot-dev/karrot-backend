@@ -363,3 +363,32 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.member)
         response = self.client.post('/api/group-applications/{}/withdraw/'.format(self.application.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class TestApplicationUserProfileAccess(APITestCase, ExtractPaginationMixin):
+    def setUp(self):
+        self.applicant = VerifiedUserFactory()
+        self.member = VerifiedUserFactory()
+        self.group = GroupFactory(members=[self.member])
+        self.application = GroupApplicationFactory(group=self.group, user=self.applicant)
+
+    def test_applicant_cannot_view_group_members_profile_information(self):
+        self.client.force_login(user=self.applicant)
+
+        member_profile_url = '/api/users/{}/profile/'.format(self.member.id)
+        response = self.client.get(member_profile_url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_group_member_can_view_applicant_profile_information(self):
+        self.client.force_login(user=self.member)
+
+        applicant_profile_url = '/api/users/{}/profile/'.format(self.applicant.id)
+        response = self.client.get(applicant_profile_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['description'], self.applicant.description)
+        self.assertEqual(response.data['email'], self.applicant.email)
+
+        applicant_info_url = '/api/users-info/{}/'.format(self.applicant.id)
+        response = self.client.get(applicant_info_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['display_name'], self.applicant.display_name)
