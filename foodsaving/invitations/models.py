@@ -8,12 +8,14 @@ from django.utils import timezone
 
 import foodsaving.invitations.emails
 from foodsaving.base.base_models import BaseModel
+from foodsaving.invitations import stats
 
 
 class InvitationQuerySet(models.QuerySet):
     @transaction.atomic
     def create_and_send(self, **kwargs):
         invitation = self.create(**kwargs)
+        stats.invitation_created(invitation)
         invitation.send_mail()
         return invitation
 
@@ -54,6 +56,8 @@ class Invitation(BaseModel):
         # select joined group as default
         user.current_group = self.group
         user.save()
+
+        stats.invitation_accepted(self)
 
         self.delete()
 
