@@ -7,6 +7,7 @@ from foodsaving.webhooks.models import EmailEvent
 def get_users_stats():
     User = get_user_model()
 
+    # These "active" users use the database inactive_at field (which means 30 days)
     active_users = User.objects.filter(groupmembership__in=GroupMembership.objects.active(), deleted=False).distinct()
     active_membership_count = GroupMembership.objects.active().count()
     active_users_count = active_users.count()
@@ -23,5 +24,19 @@ def get_users_stats():
         'no_membership_count': User.objects.filter(groupmembership=None, deleted=False).count(),
         'deleted_count': User.objects.filter(deleted=True).count(),
     }
+
+    for n in (1, 7, 30, 60, 90):
+        active_users = User.objects.filter(
+            groupmembership__in=GroupMembership.objects.exclude_playgrounds().active_within(days=n),
+            deleted=False,
+        ).distinct()
+        pickup_active_users = User.objects.filter(
+            groupmembership__in=GroupMembership.objects.exclude_playgrounds().pickup_active_within(days=n),
+            deleted=False,
+        ).distinct()
+        fields.update({
+            'count_active_{}d'.format(n): active_users.count(),
+            'count_pickup_active_{}d'.format(n): pickup_active_users.count(),
+        })
 
     return fields

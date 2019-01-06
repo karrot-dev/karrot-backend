@@ -82,10 +82,14 @@ def get_group_members_stats(group):
 
     for n in (1, 7, 30, 60, 90):
         active_memberships = memberships.active_within(days=n)
+        pickup_active_memberships = memberships.pickup_active_within(days=n)
         fields.update({
             'count_active_{}d'.format(n): active_memberships.count(),
             'count_active_newcomers_{}d'.format(n): active_memberships.newcomers().count(),
             'count_active_editors_{}d'.format(n): active_memberships.editors().count(),
+            'count_pickup_active_{}d'.format(n): pickup_active_memberships.count(),
+            'count_pickup_active_newcomers_{}d'.format(n): pickup_active_memberships.newcomers().count(),
+            'count_pickup_active_editors_{}d'.format(n): pickup_active_memberships.editors().count(),
         })
 
     return [{

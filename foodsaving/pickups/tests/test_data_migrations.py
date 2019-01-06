@@ -123,4 +123,3 @@ class TestMovedPickupMigration(TestMigrations):
         self.assertEqual(pickups.count(), 1)
         self.assertIsNotNone(pickups[0].series)
         self.assertFalse(pickups[0].deleted)
-

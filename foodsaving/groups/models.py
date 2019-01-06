@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import TextField, DateTimeField, QuerySet
+from django.db.models import TextField, DateTimeField, QuerySet, Subquery, OuterRef
 from django.template.loader import render_to_string
 from django.utils import timezone as tz, timezone
 from timezone_field import TimeZoneField
@@ -14,6 +14,7 @@ from foodsaving.base.base_models import BaseModel, LocationModel
 from foodsaving.conversations.models import ConversationMixin
 from foodsaving.groups import roles
 from foodsaving.history.models import History, HistoryTypus
+from foodsaving.pickups.models import PickupDate
 
 
 class GroupStatus(Enum):
@@ -179,11 +180,21 @@ class GroupMembershipQuerySet(QuerySet):
         now = timezone.now()
         return self.filter(lastseen_at__gte=now - relativedelta(**kwargs))
 
+    def pickup_active_within(self, **kwargs):
+        now = timezone.now()
+        pickups = PickupDate.objects.exclude_disabled().filter(
+            store__group=OuterRef('group'), date__lt=now, date__gte=now - relativedelta(**kwargs)
+        )
+        return self.filter(user__pickup_dates__in=Subquery(pickups.only('pk')))
+
     def editors(self):
         return self.with_role(roles.GROUP_EDITOR)
 
     def newcomers(self):
         return self.without_role(roles.GROUP_EDITOR)
+
+    def exclude_playgrounds(self):
+        return self.exclude(group__status=GroupStatus.PLAYGROUND)
 
 
 class GroupMembership(BaseModel):
