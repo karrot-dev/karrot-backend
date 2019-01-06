@@ -32,12 +32,22 @@ def pickup_left(pickup):
 
 
 def pickup_done(pickup):
+    collectors_count = pickup.collectors.count()
+    fields = {
+        'pickup_done': 1,
+        'pickup_done_slots_joined': collectors_count,
+    }
+
+    if pickup.max_collectors is not None:
+        fields.update({
+            'pickup_done_slots_total': pickup.max_collectors,
+            'pickup_done_slots_percentage': collectors_count / pickup.max_collectors,
+        })
+
     write_points([{
         'measurement': 'karrot.events',
         'tags': pickup_tags(pickup),
-        'fields': {
-            'pickup_done': 1
-        },
+        'fields': fields,
     }])
 
 
