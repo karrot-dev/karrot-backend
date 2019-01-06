@@ -193,6 +193,9 @@ class GroupMembershipQuerySet(QuerySet):
     def newcomers(self):
         return self.without_role(roles.GROUP_EDITOR)
 
+    def exclude_playgrounds(self):
+        return self.exclude(group__status=GroupStatus.PLAYGROUND)
+
 
 class GroupMembership(BaseModel):
     objects = GroupMembershipQuerySet.as_manager()

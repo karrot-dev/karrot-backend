@@ -15,6 +15,9 @@ class TestUserStats(TestCase):
     def test_user_stats(self):
         self.maxDiff = None
 
+        def update_member_activity(user, **kwargs):
+            GroupMembership.objects.filter(user=user).update(lastseen_at=timezone.now() - relativedelta(**kwargs))
+
         def do_pickup(store, user, **kwargs):
             pickup = PickupDateFactory(store=store, date=timezone.now() - relativedelta(**kwargs))
             pickup.add_collector(user)
@@ -23,10 +26,15 @@ class TestUserStats(TestCase):
         users = [VerifiedUserFactory() for _ in range(9)]
         users.insert(0, UserFactory())
 
-        # 5 fully inactive users (only in one group and marked as inactive in that group)
+        # 5 some users of varying levels of inactivity
         inactive_users = [VerifiedUserFactory() for _ in range(5)]
         inactive_group = GroupFactory(members=inactive_users)
         GroupMembership.objects.filter(group=inactive_group).update(inactive_at=timezone.now())
+        update_member_activity(inactive_users[0], days=2)
+        update_member_activity(inactive_users[1], days=8)
+        update_member_activity(inactive_users[2], days=31)
+        update_member_activity(inactive_users[3], days=61)
+        update_member_activity(inactive_users[4], days=91)
 
         # 1 deleted user
         deleted_user = UserFactory()
@@ -67,14 +75,13 @@ class TestUserStats(TestCase):
         group_all_inactive = GroupFactory(members=users[:9])
         GroupMembership.objects.filter(group=group_all_inactive).update(inactive_at=timezone.now())
 
-        # 1 active user that did a pickup
+        # do some pickups!
         store = StoreFactory(group=group)
-        do_pickup(store, users[0], days=10)
-
-        # 2 inactive user that did a pickup long ago
-        inactive_store = StoreFactory(group=inactive_group)
-        do_pickup(inactive_store, inactive_users[0], days=60)
-        do_pickup(inactive_store, inactive_users[1], days=90)
+        do_pickup(store, users[0], days=2)
+        do_pickup(store, users[1], days=8)
+        do_pickup(store, users[2], days=31)
+        do_pickup(store, users[3], days=61)
+        do_pickup(store, users[4], days=91)
 
         points = stats.get_users_stats()
 
@@ -90,7 +97,15 @@ class TestUserStats(TestCase):
                 'active_memberships_per_active_user_avg': 2.0,
                 'no_membership_count': 1,
                 'deleted_count': 1,
-                'pickup_active_count': 1,
-                'pickup_count': 3,
+                'count_active_1d': 9,
+                'count_active_7d': 10,
+                'count_active_30d': 11,
+                'count_active_60d': 12,
+                'count_active_90d': 13,
+                'count_pickup_active_1d': 0,
+                'count_pickup_active_7d': 1,
+                'count_pickup_active_30d': 2,
+                'count_pickup_active_60d': 3,
+                'count_pickup_active_90d': 4,
             }
         )
