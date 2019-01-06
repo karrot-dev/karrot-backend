@@ -11,9 +11,7 @@ from rest_framework.validators import UniqueTogetherValidator
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.pickups import stats
 from foodsaving.pickups.models import (
-    PickupDate as PickupDateModel,
-    Feedback as FeedbackModel,
-    PickupDateSeries as PickupDateSeriesModel,
+    PickupDate as PickupDateModel, Feedback as FeedbackModel, PickupDateSeries as PickupDateSeriesModel
 )
 from foodsaving.utils.misc import find_changed
 
@@ -46,8 +44,11 @@ class PickupDateSerializer(serializers.ModelSerializer):
         ]
 
     # TODO change to collectors to make it uniform with other endpoints
-    collector_ids = serializers.PrimaryKeyRelatedField(source='collectors', many=True, read_only=True)
+    collector_ids = serializers.SerializerMethodField()
     feedback_due = serializers.DateTimeField(read_only=True)
+
+    def get_collector_ids(self, pickup):
+        return [c.user_id for c in pickup.pickupdatecollector_set.all()]
 
     def save(self, **kwargs):
         return super().save(last_changed_by=self.context['request'].user)

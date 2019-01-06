@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from django.db import DataError, IntegrityError
@@ -9,8 +9,7 @@ from freezegun import freeze_time
 from foodsaving.history.models import History
 from foodsaving.pickups.factories import PickupDateFactory, \
     PickupDateSeriesFactory
-from foodsaving.pickups.models import Feedback, PickupDate, PickupDateCollector, PickupDateSeries
-from foodsaving.groups.factories import GroupFactory
+from foodsaving.pickups.models import Feedback, PickupDate, PickupDateSeries
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.stores.models import StoreStatus
 from foodsaving.users.factories import UserFactory
@@ -144,25 +143,3 @@ class TestAddPickupsCommand(TestCase):
     def test_update_pickups(self):
         PickupDateSeries.objects.update_pickups()
         self.assertGreater(PickupDate.objects.count(), 0)
-
-
-class TestPickUpCollectors(TestCase):
-    def setUp(self):
-        self.first_member = UserFactory()
-        self.second_member = UserFactory()
-        self.group = GroupFactory(members=[self.first_member, self.second_member])
-        self.store = StoreFactory(group=self.group)
-        self.pickup = PickupDateFactory(store=self.store)
-
-    def test_pickup_collectors_reverse_created_at_order(self):
-        first_pickup_join_time = timezone.now()
-        with freeze_time(first_pickup_join_time):
-            first_pickup_join = PickupDateCollector.objects.create(user=self.first_member, pickupdate=self.pickup)
-        self.assertTrue(first_pickup_join.created_at == first_pickup_join_time)
-
-        second_pickup_join_time = first_pickup_join_time + timedelta(hours=1)
-        with freeze_time(second_pickup_join_time):
-            second_pickup_join = PickupDateCollector.objects.create(user=self.second_member, pickupdate=self.pickup)
-        self.assertTrue(second_pickup_join.created_at == second_pickup_join_time)
-
-        self.assertTrue(PickupDateCollector.objects.first() == second_pickup_join)
