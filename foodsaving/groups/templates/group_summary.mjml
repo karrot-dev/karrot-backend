@@ -73,6 +73,7 @@
 
                     {% if messages|length > 0 %}
                         <div class="divider"></div>
+                        <br>
                         <h3>{% trans %}Here's what was said last week{% endtrans %}</h3>
                         {% for message in messages %}
                             <div class="message">
