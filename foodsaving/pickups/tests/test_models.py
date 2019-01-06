@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from django.db import DataError, IntegrityError
@@ -9,8 +9,7 @@ from freezegun import freeze_time
 from foodsaving.history.models import History
 from foodsaving.pickups.factories import PickupDateFactory, \
     PickupDateSeriesFactory
-from foodsaving.pickups.models import Feedback, PickupDate, PickupDateCollector, PickupDateSeries
-from foodsaving.groups.factories import GroupFactory
+from foodsaving.pickups.models import Feedback, PickupDate, PickupDateSeries
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.stores.models import StoreStatus
 from foodsaving.users.factories import UserFactory

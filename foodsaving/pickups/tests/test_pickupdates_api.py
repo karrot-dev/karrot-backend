@@ -177,27 +177,30 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.post(self.join_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        collector_order = [self.second_member.id, self.member.id]
         response = self.client.get(self.pickup_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['collector_ids'], [self.second_member.id, self.member.id])
+        self.assertEqual(response.data['collector_ids'], collector_order)
 
         response = self.get_results(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         pickup = next(p for p in response.data if p['id'] == self.pickup.id)
-        self.assertEqual(pickup['collector_ids'], [self.second_member.id, self.member.id])
+        self.assertEqual(pickup['collector_ids'], collector_order)
 
+        # reverse order
         collector = self.pickup.pickupdatecollector_set.earliest('created_at')
         collector.created_at = timezone.now()
         collector.save()
+        collector_order = [self.member.id, self.second_member.id]
 
         response = self.client.get(self.pickup_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['collector_ids'], [self.member.id, self.second_member.id])
+        self.assertEqual(response.data['collector_ids'], collector_order)
 
         response = self.get_results(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         pickup = next(p for p in response.data if p['id'] == self.pickup.id)
-        self.assertEqual(pickup['collector_ids'], [self.member.id, self.second_member.id])
+        self.assertEqual(pickup['collector_ids'], collector_order)
 
     def test_join_pickup_as_newcomer(self):
         newcomer = UserFactory()
