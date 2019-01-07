@@ -114,7 +114,7 @@ class ConversationParticipant(BaseModel, UpdatedAtMixin):
         on_delete=models.SET_NULL,
         related_name='conversationparticipants_notified_up_to',
     )
-    email_notifications = BooleanField(default=True)
+    muted = BooleanField(default=False)
 
     def unseen_and_unnotified_messages(self):
         messages = self.conversation.messages.exclude_replies()
