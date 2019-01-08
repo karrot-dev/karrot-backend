@@ -108,7 +108,7 @@ pytest==4.0.2             # via pytest-asyncio, pytest-cov, pytest-django, pytes
 python-dateutil==2.7.5    # via django-silk, faker, freezegun, influxdb
 python-server-metrics==0.2.1
 python-slugify==1.2.6     # via transifex-client
-pytz==2018.7
+pytz==2018.9
 raven==6.10.0
 redis==3.0.1
 regex==2018.11.22         # via talon
