@@ -25,7 +25,7 @@ class TestGroupModel(TestCase):
         self.assertEqual(get_default_notification_types(), membership.notification_types)
         conversation = Conversation.objects.get_for_target(group)
         conversation_participant = ConversationParticipant.objects.get(conversation=conversation, user=user)
-        self.assertTrue(conversation_participant.email_notifications)
+        self.assertFalse(conversation_participant.muted)
 
     def test_no_notifications_by_default_in_playground(self):
         user = UserFactory()
@@ -34,7 +34,7 @@ class TestGroupModel(TestCase):
         self.assertEqual([], membership.notification_types)
         conversation = Conversation.objects.get_for_target(group)
         conversation_participant = ConversationParticipant.objects.get(conversation=conversation, user=user)
-        self.assertFalse(conversation_participant.email_notifications)
+        self.assertTrue(conversation_participant.muted)
 
     def test_uses_default_application_questions_if_not_specified(self):
         group = GroupFactory(application_questions='')

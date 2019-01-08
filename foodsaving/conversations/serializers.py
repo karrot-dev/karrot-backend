@@ -5,7 +5,6 @@ from rest_framework.fields import DateTimeField
 
 from foodsaving.conversations.helpers import normalize_emoji_name
 from foodsaving.conversations.models import (
-    Conversation,
     ConversationMessage,
     ConversationParticipant,
     ConversationMessageReaction,
@@ -186,68 +185,41 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
 
 class ConversationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Conversation
+        model = ConversationParticipant
         fields = [
             'id',
             'participants',
             'updated_at',
             'seen_up_to',
             'unread_message_count',
-            'email_notifications',
+            'muted',
             'type',
             'target_id',
         ]
 
-    seen_up_to = serializers.SerializerMethodField()
+    id = serializers.IntegerField(source='conversation.id', read_only=True)
+    participants = serializers.PrimaryKeyRelatedField(source='conversation.participants', many=True, read_only=True)
+    type = serializers.CharField(source='conversation.type', read_only=True)
+    target_id = serializers.IntegerField(source='conversation.target_id', read_only=True)
+
     unread_message_count = serializers.SerializerMethodField()
     updated_at = serializers.SerializerMethodField()
-    email_notifications = serializers.SerializerMethodField()
-    type = serializers.CharField(read_only=True)
 
-    def validate(self, data):
-        """Check the user is a participant"""
-        conversation = self.instance
-        if not self._participant(conversation):
-            raise PermissionDenied(_('You are not in this conversation'))
-        return data
-
-    def get_seen_up_to(self, conversation):
-        participant = self._participant(conversation)
-        if participant.seen_up_to_id is None:
-            return None
-        return participant.seen_up_to_id
-
-    def get_unread_message_count(self, conversation):
-        annotated = getattr(conversation, 'unread_message_count', None)
+    def get_unread_message_count(self, participant):
+        annotated = getattr(participant, 'unread_message_count', None)
         if annotated is not None:
             return annotated
-        participant = self._participant(conversation)
-        messages = conversation.messages.exclude_replies()
+        messages = participant.conversation.messages.exclude_replies()
         if participant.seen_up_to_id:
             messages = messages.filter(id__gt=participant.seen_up_to_id)
         return messages.count()
 
-    def get_updated_at(self, conversation):
-        participant = self._participant(conversation)
-        if participant.updated_at > conversation.updated_at:
+    def get_updated_at(self, participant):
+        if participant.updated_at > participant.conversation.updated_at:
             date = participant.updated_at
         else:
-            date = conversation.updated_at
+            date = participant.conversation.updated_at
         return DateTimeField().to_representation(date)
-
-    def get_email_notifications(self, conversation):
-        return self._participant(conversation).email_notifications
-
-    def _participant(self, conversation):
-        user = self.context['request'].user
-        participant = next((p for p in conversation.conversationparticipant_set.all() if p.user_id == user.id), None)
-        return participant
-
-
-class ConversationMarkSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ConversationParticipant
-        fields = ('seen_up_to', )
 
     def validate_seen_up_to(self, message):
         if not self.instance.conversation.messages.filter(id=message.id).exists():
@@ -255,12 +227,9 @@ class ConversationMarkSerializer(serializers.ModelSerializer):
         return message
 
     def update(self, participant, validated_data):
-        participant.seen_up_to = validated_data['seen_up_to']
+        if 'seen_up_to' in validated_data:
+            participant.seen_up_to = validated_data['seen_up_to']
+        if 'muted' in validated_data:
+            participant.muted = validated_data['muted']
         participant.save()
         return participant
-
-
-class ConversationEmailNotificationsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ConversationParticipant
-        fields = ('email_notifications', )

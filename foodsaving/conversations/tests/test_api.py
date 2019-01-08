@@ -63,7 +63,7 @@ class TestConversationsAPI(APITestCase):
         [c.messages.create(content='hey', author=user) for c in conversations]
 
         self.client.force_login(user=user)
-        with self.assertNumQueries(10):
+        with self.assertNumQueries(9):
             response = self.client.get('/api/conversations/', {'group': group.id}, format='json')
         results = response.data['results']
 
@@ -400,7 +400,7 @@ class TestConversationsSeenUpToAPI(APITestCase):
         self.assertEqual(response.data['seen_up_to'], None)
 
         data = {'seen_up_to': message.id}
-        response = self.client.post('/api/conversations/{}/mark/'.format(self.conversation.id), data, format='json')
+        response = self.client.patch('/api/conversations/{}/'.format(self.conversation.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['seen_up_to'], message.id)
 
@@ -410,22 +410,20 @@ class TestConversationsSeenUpToAPI(APITestCase):
     def test_mark_seen_up_to_fails_for_invalid_id(self):
         self.client.force_login(user=self.user)
         data = {'seen_up_to': 9817298172}
-        response = self.client.post('/api/conversations/{}/mark/'.format(self.conversation.id), data, format='json')
+        response = self.client.patch('/api/conversations/{}/'.format(self.conversation.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.data['seen_up_to'][0], 'Invalid pk "{}" - object does not exist.'.format(data['seen_up_to'])
         )
 
     def test_mark_seen_up_to_fails_for_message_in_other_conversation(self):
-        conversation = ConversationFactory(participants=[
-            self.user,
-        ])
+        conversation = ConversationFactory(participants=[self.user])
 
         message = conversation.messages.create(author=self.user, content='yay')
         self.client.force_login(user=self.user)
 
         data = {'seen_up_to': message.id}
-        response = self.client.post('/api/conversations/{}/mark/'.format(self.conversation.id), data, format='json')
+        response = self.client.patch('/api/conversations/{}/'.format(self.conversation.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['seen_up_to'][0], 'Must refer to a message in the conversation')
 
@@ -437,39 +435,35 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
         self.conversation = self.group.conversation
         self.participant = ConversationParticipant.objects.get(conversation=self.conversation, user=self.user)
 
-    def test_disable_email_notifications(self):
+    def test_mute(self):
         participant = ConversationParticipant.objects.get(conversation=self.conversation, user=self.user)
-        self.assertTrue(participant.email_notifications)
+        self.assertFalse(participant.muted)
 
         self.client.force_login(user=self.user)
 
-        data = {'email_notifications': False}
-        response = self.client.post(
-            '/api/conversations/{}/email_notifications/'.format(self.conversation.id), data, format='json'
-        )
+        data = {'muted': True}
+        response = self.client.patch('/api/conversations/{}/'.format(self.conversation.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['email_notifications'], False)
+        self.assertEqual(response.data['muted'], True)
 
         participant.refresh_from_db()
-        self.assertFalse(participant.email_notifications)
+        self.assertTrue(participant.muted)
 
-    def test_enable_email_notifications(self):
+    def test_unmute(self):
         participant = ConversationParticipant.objects.get(conversation=self.conversation, user=self.user)
-        participant.email_notifications = False
+        participant.muted = True
         participant.save()
-        self.assertFalse(participant.email_notifications)
+        self.assertTrue(participant.muted)
 
         self.client.force_login(user=self.user)
 
-        data = {'email_notifications': True}
-        response = self.client.post(
-            '/api/conversations/{}/email_notifications/'.format(self.conversation.id), data, format='json'
-        )
+        data = {'muted': False}
+        response = self.client.patch('/api/conversations/{}/'.format(self.conversation.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['email_notifications'], True)
+        self.assertEqual(response.data['muted'], False)
 
         participant.refresh_from_db()
-        self.assertTrue(participant.email_notifications)
+        self.assertFalse(participant.muted)
 
     def test_send_email_notifications(self):
         users = [VerifiedUserFactory() for _ in range(3)]

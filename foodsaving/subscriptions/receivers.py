@@ -103,7 +103,8 @@ def send_messages(sender, instance, created, **kwargs):
     for subscription in ChannelSubscription.objects.recent()\
             .filter(user__in=conversation.participants.all())\
             .exclude(user=message.author).distinct():
-        payload = ConversationSerializer(conversation, context={'request': MockRequest(user=subscription.user)}).data
+        participant = conversation.conversationparticipant_set.get(user=subscription.user)
+        payload = ConversationSerializer(participant, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
 
@@ -111,10 +112,10 @@ def send_messages(sender, instance, created, **kwargs):
 def send_conversation_update(sender, instance, **kwargs):
     # Update conversations object for user after updating their participation
     # (important for seen_up_to and unread_message_count)
-    conversation = instance.conversation
+    participant = instance
 
     topic = 'conversations:conversation'
-    payload = ConversationSerializer(conversation, context={'request': MockRequest(user=instance.user)}).data
+    payload = ConversationSerializer(participant, context={'request': MockRequest(user=participant.user)}).data
 
     for subscription in ChannelSubscription.objects.recent().filter(user=instance.user):
         send_in_channel(subscription.reply_channel, topic, payload)
@@ -167,7 +168,8 @@ def send_participant_joined(sender, instance, created, **kwargs):
     for subscription in ChannelSubscription.objects.recent() \
             .filter(user__in=conversation.participants.all()) \
             .exclude(user=instance.user).distinct():
-        payload = ConversationSerializer(conversation, context={'request': MockRequest(user=subscription.user)}).data
+        participant = conversation.conversationparticipant_set.get(user=subscription.user)
+        payload = ConversationSerializer(participant, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
 
@@ -191,7 +193,8 @@ def send_participant_left(sender, instance, **kwargs):
     for subscription in ChannelSubscription.objects.recent() \
             .filter(user__in=conversation.participants.all()) \
             .exclude(user=instance.user).distinct():
-        payload = ConversationSerializer(conversation, context={'request': MockRequest(user=subscription.user)}).data
+        participant = conversation.conversationparticipant_set.get(user=subscription.user)
+        payload = ConversationSerializer(participant, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
 

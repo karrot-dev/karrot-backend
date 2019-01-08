@@ -8,7 +8,7 @@ def convert_email_notification_setting(apps, schema_editor):
     ConversationParticipant = apps.get_model('conversations', 'ConversationParticipant')
     ConversationParticipant.objects.all().update(
         muted=Case(
-            When(email_notification=False, then=True),
+            When(email_notifications=False, then=True),
             default=False,
         )
     )

@@ -36,13 +36,6 @@ class ConversationQuerySet(models.QuerySet):
             target_type=ContentType.objects.get_for_model(target),
         )
 
-    def annotate_unread_message_count_for(self, user):
-        exclude_replies = Q(messages__thread_id=None) | Q(messages__id=F('messages__thread_id'))
-        unread_messages = Q(conversationparticipant__seen_up_to=None) \
-            | Q(messages__id__gt=F('conversationparticipant__seen_up_to'))
-        filter = Q(conversationparticipant__user=user) & unread_messages & exclude_replies
-        return self.annotate(unread_message_count=Count('messages', filter=filter, distinct=True))
-
 
 class Conversation(BaseModel, UpdatedAtMixin):
     """A conversation between one or more users."""
@@ -98,8 +91,22 @@ class Conversation(BaseModel, UpdatedAtMixin):
         return type
 
 
+class ConversationParticipantQuerySet(QuerySet):
+    def annotate_unread_message_count(self):
+        exclude_replies = (
+            Q(conversation__messages__thread_id=None) |
+            Q(conversation__messages__id=F('conversation__messages__thread_id'))
+        )
+        unread_messages = Q(seen_up_to=None) | Q(conversation__messages__id__gt=F('seen_up_to'))
+        filter = unread_messages & exclude_replies
+        return self.annotate(unread_message_count=Count('conversation__messages', filter=filter, distinct=True))
+
+
 class ConversationParticipant(BaseModel, UpdatedAtMixin):
     """The join table between Conversation and User."""
+
+    objects = ConversationParticipantQuerySet.as_manager()
+
     user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     conversation = ForeignKey(Conversation, on_delete=models.CASCADE)
     seen_up_to = ForeignKey(
