@@ -51,8 +51,7 @@ def process_inactive_users():
     ):
         # only send emails if group itself is marked as active
         if membership.group.status == GroupStatus.ACTIVE.value:
-            email = prepare_user_inactive_in_group_email(membership.user, membership.group)
-            email.send()
+            prepare_user_inactive_in_group_email(membership.user, membership.group).send()
         membership.inactive_at = now
         membership.save()
         count_users_flagged_inactive += 1
@@ -65,8 +64,7 @@ def process_inactive_users():
     for membership in GroupMembership.objects.filter(removal_notification_at=None,
                                                      inactive_at__lte=removal_notification_date):
         if membership.group.status == GroupStatus.ACTIVE.value:
-            email = prepare_user_removal_from_group_email(membership.user, membership.group)
-            email.send()
+            prepare_user_removal_from_group_email(membership.user, membership.group).send()
         membership.removal_notification_at = now
         membership.save()
         count_users_flagged_for_removal += 1
