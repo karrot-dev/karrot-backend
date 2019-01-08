@@ -219,6 +219,7 @@ class GroupMembership(BaseModel):
     lastseen_at = DateTimeField(default=tz.now)
     inactive_at = DateTimeField(null=True)
     notification_types = ArrayField(TextField(), default=get_default_notification_types)
+    removal_notification_at = DateTimeField(null=True)
 
     class Meta:
         db_table = 'groups_group_members'

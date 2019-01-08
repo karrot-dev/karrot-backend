@@ -1,6 +1,6 @@
-from datetime import timedelta
-
 from anymail.exceptions import AnymailAPIError
+from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 from django.db.models import Count
 from django.utils import timezone
 from huey import crontab
@@ -12,7 +12,7 @@ from config import settings
 from foodsaving.applications.stats import get_group_application_stats
 from foodsaving.groups.emails import (
     prepare_user_inactive_in_group_email, prepare_group_summary_data, calculate_group_summary_dates,
-    prepare_group_summary_emails
+    prepare_group_summary_emails, prepare_user_removal_from_group_email
 )
 from foodsaving.groups.models import Group, GroupStatus
 from foodsaving.groups.models import GroupMembership
@@ -39,6 +39,10 @@ def process_inactive_users():
     now = timezone.now()
 
     count_users_flagged_inactive = 0
+    count_users_flagged_for_removal = 0
+    count_users_removed = 0
+
+    # first, we mark them as inactive
 
     inactive_threshold_date = now - timedelta(days=settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP)
     for membership in GroupMembership.objects.filter(
@@ -53,9 +57,32 @@ def process_inactive_users():
         membership.save()
         count_users_flagged_inactive += 1
 
+    # then, if they have been inactive for some time, we warn them we will remove them
+
+    removal_notification_date = now - relativedelta(
+        months=settings.NUMBER_OF_INACTIVE_MONTHS_UNTIL_REMOVAL_FROM_GROUP_NOTIFICATION
+    )
+    for membership in GroupMembership.objects.filter(removal_notification_at=None,
+                                                     inactive_at__lte=removal_notification_date):
+        if membership.group.status == GroupStatus.ACTIVE.value:
+            email = prepare_user_removal_from_group_email(membership.user, membership.group)
+            email.send()
+        membership.removal_notification_at = now
+        membership.save()
+        count_users_flagged_for_removal += 1
+
+    # and finally, actually remove them
+
+    removal_date = now - timedelta(days=settings.NUMBER_OF_DAYS_AFTER_REMOVAL_NOTIFICATION_WE_ACTUALLY_REMOVE_THEM)
+    for membership in GroupMembership.objects.filter(removal_notification_at__lte=removal_date):
+        membership.delete()
+        count_users_removed += 1
+
     stats_utils.periodic_task(
         'group__process_inactive_users', {
             'count_users_flagged_inactive': count_users_flagged_inactive,
+            'count_users_flagged_for_removal': count_users_flagged_for_removal,
+            'count_users_removed': count_users_removed,
         }
     )
 

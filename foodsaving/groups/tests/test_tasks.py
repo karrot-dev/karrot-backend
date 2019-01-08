@@ -16,12 +16,25 @@ from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
 
 
-def set_member_inactive(group, user):
-    inactive_email_date = timezone.now() - timedelta(days=settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP + 1)
-    inactive_membership = GroupMembership.objects.get(group=group, user=user)
-    inactive_membership.lastseen_at = inactive_email_date
-    inactive_membership.save()
-    return inactive_membership
+def set_lastseen_at(group, user, **kwargs):
+    membership = GroupMembership.objects.get(group=group, user=user)
+    membership.lastseen_at = timezone.now() - relativedelta(**kwargs)
+    membership.save()
+    return membership
+
+
+def set_inactive_at(group, user, **kwargs):
+    membership = GroupMembership.objects.get(group=group, user=user)
+    membership.inactive_at = timezone.now() - relativedelta(**kwargs)
+    membership.save()
+    return membership
+
+
+def set_removal_notification_at(group, user, **kwargs):
+    membership = GroupMembership.objects.get(group=group, user=user)
+    membership.removal_notification_at = timezone.now() - relativedelta(**kwargs)
+    membership.save()
+    return membership
 
 
 class TestProcessInactiveUsers(TestCase):
@@ -31,7 +44,9 @@ class TestProcessInactiveUsers(TestCase):
         self.group = GroupFactory(members=[self.active_user, self.inactive_user])
 
         self.active_membership = GroupMembership.objects.get(group=self.group, user=self.active_user)
-        self.inactive_membership = set_member_inactive(self.group, self.inactive_user)
+        self.inactive_membership = set_lastseen_at(
+            self.group, self.inactive_user, days=settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP + 1
+        )
 
         mail.outbox = []
 
@@ -49,6 +64,57 @@ class TestProcessInactiveUsers(TestCase):
         process_inactive_users()
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, [self.inactive_user.email])
+        self.assertEqual(mail.outbox[0].subject, '{} is missing you!'.format(self.group.name))
+
+
+class TestProcessInactiveUsersForRemoval(TestCase):
+    def setUp(self):
+        self.active_user = UserFactory()
+        self.inactive_user = UserFactory()
+        self.group = GroupFactory(members=[self.active_user, self.inactive_user])
+
+        self.active_membership = GroupMembership.objects.get(group=self.group, user=self.active_user)
+        set_lastseen_at(self.group, self.inactive_user, days=99999)
+        self.inactive_membership = set_inactive_at(
+            self.group,
+            self.inactive_user,
+            months=settings.NUMBER_OF_INACTIVE_MONTHS_UNTIL_REMOVAL_FROM_GROUP_NOTIFICATION,
+        )
+
+        mail.outbox = []
+
+    def test_notifies_user_about_removal(self):
+        self.assertIsNone(self.inactive_membership.removal_notification_at)
+        process_inactive_users()
+        self.inactive_membership.refresh_from_db()
+        self.assertIsNotNone(self.inactive_membership.removal_notification_at)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, [self.inactive_user.email])
+        self.assertEqual(mail.outbox[0].subject, '{} is really missing you!'.format(self.group.name))
+
+
+class TestProcessInactiveUsersRemovesOldUsers(TestCase):
+    def setUp(self):
+        self.active_user = UserFactory()
+        self.inactive_user = UserFactory()
+        self.group = GroupFactory(members=[self.active_user, self.inactive_user])
+
+        self.active_membership = GroupMembership.objects.get(group=self.group, user=self.active_user)
+        set_lastseen_at(self.group, self.inactive_user, days=99999)
+        set_inactive_at(self.group, self.inactive_user, days=99999)
+        self.inactive_membership = set_removal_notification_at(
+            self.group,
+            self.inactive_user,
+            days=settings.NUMBER_OF_DAYS_AFTER_REMOVAL_NOTIFICATION_WE_ACTUALLY_REMOVE_THEM
+        )
+        mail.outbox = []
+
+    def test_removes_old_users(self):
+        member = self.group.members.filter(pk=self.inactive_user.id)
+        self.assertTrue(member.exists())
+        process_inactive_users()
+        self.assertFalse(member.exists())
+        self.assertEqual(len(mail.outbox), 0)
 
 
 class TestProcessInactiveUsersNonActiveGroup(TestCase):
@@ -57,8 +123,8 @@ class TestProcessInactiveUsersNonActiveGroup(TestCase):
         playground_group = PlaygroundGroupFactory(members=[inactive_user])
         inactive_group = InactiveGroupFactory(members=[inactive_user])
 
-        set_member_inactive(playground_group, inactive_user)
-        set_member_inactive(inactive_group, inactive_user)
+        set_lastseen_at(playground_group, inactive_user, days=settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP + 1)
+        set_lastseen_at(inactive_group, inactive_user, days=settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP + 1)
 
         mail.outbox = []
 
