@@ -108,6 +108,7 @@ class TestGroupsAPI(APITestCase):
         url = self.url + str(self.group.id) + '/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('photo_urls', response.data)
 
     def test_patch_group(self):
         url = self.url + str(self.group.id) + '/'
