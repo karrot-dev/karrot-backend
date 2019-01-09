@@ -9,6 +9,7 @@ from django.db.models import TextField, DateTimeField, QuerySet, Subquery, Outer
 from django.template.loader import render_to_string
 from django.utils import timezone as tz, timezone
 from timezone_field import TimeZoneField
+from versatileimagefield.fields import VersatileImageField
 
 from foodsaving.base.base_models import BaseModel, LocationModel
 from foodsaving.conversations.models import ConversationMixin
@@ -60,6 +61,11 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     )
     last_active_at = DateTimeField(default=tz.now)
     is_open = models.BooleanField(default=False)
+    photo = VersatileImageField(
+        'Group Photo',
+        upload_to='group_photos',
+        null=True,
+    )
 
     @property
     def group(self):
