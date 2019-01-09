@@ -35,6 +35,7 @@ INSTALLED_APPS = (
     'foodsaving',
     'foodsaving.applications.ApplicationsConfig',
     'foodsaving.base.BaseConfig',
+    'foodsaving.cases.CasesConfig',
     'foodsaving.userauth.UserAuthConfig',
     'foodsaving.subscriptions.SubscriptionsConfig',
     'foodsaving.users.UsersConfig',
@@ -231,6 +232,9 @@ NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP = 30
 
 # For marking groups inactive
 NUMBER_OF_DAYS_UNTIL_GROUP_INACTIVE = 14
+
+# Voting duration
+CASE_VOTING_DURATION_DAYS = 7
 
 # Default dummy settings, please override in local_settings.py
 DEFAULT_FROM_EMAIL = "testing@example.com"

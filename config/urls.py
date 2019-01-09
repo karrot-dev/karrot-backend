@@ -13,6 +13,7 @@ from django.views.static import serve
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 
+from foodsaving.cases.api import CasesViewSet, VotesViewSet
 from foodsaving.notifications.api import NotificationViewSet
 from rest_framework_swagger.views import get_swagger_view
 
@@ -37,6 +38,9 @@ router.register('groups', GroupViewSet)
 router.register('groups-info', GroupInfoViewSet, basename='groupinfo')
 router.register('group-applications', GroupApplicationViewSet, basename='groupapplication')
 router.register('agreements', AgreementViewSet)
+
+router.register('cases', CasesViewSet, basename='case')
+router.register('cases-votes', VotesViewSet, basename='case')
 
 # User endpoints
 router.register('users', UserViewSet)
