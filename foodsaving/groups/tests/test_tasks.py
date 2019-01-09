@@ -112,7 +112,9 @@ class TestProcessInactiveUsersRemovesOldUsers(TestCase):
 
     def test_removes_old_users(self):
         member = self.group.members.filter(pk=self.inactive_user.id)
-        history = History.objects.filter(typus=HistoryTypus.GROUP_LEAVE_INACTIVE, users__in=[self.inactive_user], group=self.group)
+        history = History.objects.filter(
+            typus=HistoryTypus.GROUP_LEAVE_INACTIVE, users__in=[self.inactive_user], group=self.group
+        )
         self.assertTrue(member.exists())
         self.assertFalse(history.exists())
         process_inactive_users()
