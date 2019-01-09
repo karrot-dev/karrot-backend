@@ -44,6 +44,11 @@ def shuffle_groups():
     return Group.objects.order_by('?')
 
 
+def random_message():
+    conversation = ConversationMessage.objects.order_by('?').first().conversation
+    return conversation.messages.exclude_replies().first()
+
+
 def random_messages():
     conversation = ConversationMessage.objects.order_by('?').first().conversation
     messages = conversation.messages.exclude_replies().all()
@@ -98,8 +103,8 @@ class Handlers:
         return foodsaving.users.emails.prepare_changemail_success_email(user=random_user())
 
     def conversation_message_notification(self):
-        return foodsaving.conversations.emails.prepare_conversation_message_notification(
-            user=random_user(), messages=random_messages()
+        return foodsaving.conversations.emails.prepare_group_conversation_message_notification(
+            user=random_user(), message=random_message()
         )
 
     def emailinvitation(self):
