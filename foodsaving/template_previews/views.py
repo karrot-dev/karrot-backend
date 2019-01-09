@@ -18,7 +18,7 @@ from foodsaving.applications.factories import GroupApplicationFactory
 from foodsaving.applications.models import GroupApplication
 from foodsaving.conversations.models import ConversationMessage
 from foodsaving.groups.emails import prepare_user_inactive_in_group_email, prepare_group_summary_emails, \
-    prepare_group_summary_data, prepare_user_became_editor_email
+    prepare_group_summary_data, prepare_user_became_editor_email, prepare_user_removal_from_group_email
 from foodsaving.groups.models import Group
 from foodsaving.invitations.models import Invitation
 from foodsaving.pickups.emails import prepare_pickup_notification_email
@@ -184,6 +184,9 @@ class Handlers:
 
     def user_inactive_in_group(self):
         return prepare_user_inactive_in_group_email(user=random_user(), group=random_group())
+
+    def user_removal_from_group(self):
+        return prepare_user_removal_from_group_email(user=random_user(), group=random_group())
 
 
 handlers = Handlers()

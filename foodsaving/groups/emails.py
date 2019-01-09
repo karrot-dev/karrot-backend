@@ -107,6 +107,19 @@ def prepare_user_inactive_in_group_email(user, group):
     )
 
 
+def prepare_user_removal_from_group_email(user, group):
+    return prepare_email(
+        template='user_removal_from_group',
+        user=user,
+        context={
+            'group_name': group.name,
+            'group_url': group_wall_url(group),
+            'num_months_inactive': settings.NUMBER_OF_INACTIVE_MONTHS_UNTIL_REMOVAL_FROM_GROUP_NOTIFICATION,
+            'num_removal_days': settings.NUMBER_OF_DAYS_AFTER_REMOVAL_NOTIFICATION_WE_ACTUALLY_REMOVE_THEM,
+        },
+    )
+
+
 def prepare_user_became_editor_email(user, group):
     return prepare_email(
         template='user_became_editor',
