@@ -11,6 +11,7 @@ from config import settings
 from foodsaving.groups.factories import GroupFactory, PlaygroundGroupFactory, InactiveGroupFactory
 from foodsaving.groups.models import GroupMembership, GroupStatus
 from foodsaving.groups.tasks import process_inactive_users, send_summary_emails, mark_inactive_groups
+from foodsaving.history.models import History, HistoryTypus
 from foodsaving.pickups.factories import PickupDateFactory, FeedbackFactory
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
@@ -111,9 +112,14 @@ class TestProcessInactiveUsersRemovesOldUsers(TestCase):
 
     def test_removes_old_users(self):
         member = self.group.members.filter(pk=self.inactive_user.id)
+        history = History.objects.filter(
+            typus=HistoryTypus.GROUP_LEAVE_INACTIVE, users__in=[self.inactive_user], group=self.group
+        )
         self.assertTrue(member.exists())
+        self.assertFalse(history.exists())
         process_inactive_users()
         self.assertFalse(member.exists())
+        self.assertTrue(history.exists())
         self.assertEqual(len(mail.outbox), 0)
 
 

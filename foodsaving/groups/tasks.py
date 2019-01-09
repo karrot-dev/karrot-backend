@@ -17,6 +17,7 @@ from foodsaving.groups.emails import (
 from foodsaving.groups.models import Group, GroupStatus
 from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.stats import get_group_members_stats, get_group_stores_stats, group_summary_email
+from foodsaving.history.models import History, HistoryTypus
 from foodsaving.utils import stats_utils
 
 
@@ -74,6 +75,11 @@ def process_inactive_users():
     removal_date = now - timedelta(days=settings.NUMBER_OF_DAYS_AFTER_REMOVAL_NOTIFICATION_WE_ACTUALLY_REMOVE_THEM)
     for membership in GroupMembership.objects.filter(removal_notification_at__lte=removal_date):
         membership.delete()
+        History.objects.create(
+            typus=HistoryTypus.GROUP_LEAVE_INACTIVE, group=membership.group, users=[
+                membership.user,
+            ]
+        )
         count_users_removed += 1
 
     stats_utils.periodic_task(
