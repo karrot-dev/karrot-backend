@@ -7,6 +7,8 @@ from pprint import pprint
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from foodsaving.cases.models import Voting
+from foodsaving.cases.tasks import process_expired_votings
 from foodsaving.conversations.models import Conversation
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.applications.factories import GroupApplicationFactory
@@ -43,17 +45,19 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
 
         voting = case['votings'][0]
 
-        # vote on proposal
-        proposals = voting['proposals']
-        response = self.client.post('/api/cases-votes/', {
-            'proposal': proposals[0]['id'],
-            'score': 5,
-        })
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # vote on option
+        options = voting['options']
+        for score, option in zip([1, 5], options):
+            response = self.client.post('/api/cases-votes/', {
+                'option': option['id'],
+                'score': score,
+            })
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # get results
         time_when_voting_expires = parse(voting['expires_at']) + relativedelta(hours=1)
         with freeze_time(time_when_voting_expires, tick=True):
+            process_expired_votings()
             response = self.client.get('/api/cases/{}/'.format(case['id']))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         case = response.data

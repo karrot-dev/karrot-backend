@@ -1,40 +1,30 @@
 from rest_framework import serializers
 
-from foodsaving.cases.models import Case, Voting, Vote, Proposal
+from foodsaving.cases.models import Case, Voting, Vote, Option
 
 
-class ProposalSerializer(serializers.ModelSerializer):
+class OptionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Proposal
+        model = Option
         fields = [
             'id',
             'type',
             'message',
             'affected_user',
-            'result',
+            'mean_score',
         ]
-
-    result = serializers.SerializerMethodField()
-
-    def get_result(self, proposal):
-        if not proposal.voting.is_expired():
-            return None
-        return {
-            'mean_score': 7.5,
-            'accepted': True,
-        }
 
 
 class VotingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Voting
         fields = [
-            'status',
             'expires_at',
-            'proposals',
+            'options',
+            'accepted_option',
         ]
 
-    proposals = ProposalSerializer(many=True, read_only=True)
+    options = OptionSerializer(many=True, read_only=True)
 
 
 class CasesSerializer(serializers.ModelSerializer):
@@ -44,16 +34,17 @@ class CasesSerializer(serializers.ModelSerializer):
             'id',
             'created_at',
             'created_by',
-            'status',
+            'is_decided',
             'type',
             'topic',
             'votings',
             'group',
+            'affected_user',
         ]
         read_only_fields = [
             'created_at',
             'created_by',
-            'status',
+            'is_decided',
             'type',
         ]
         extra_kwargs = {'created_by': {'default': serializers.CurrentUserDefault()}}
@@ -67,7 +58,10 @@ class CasesSerializer(serializers.ModelSerializer):
 class VoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vote
-        fields = ['proposal', 'score']
+        fields = [
+            'option',
+            'score',
+        ]
 
     def save(self, **kwargs):
         return super().save(user=self.context['request'].user)
