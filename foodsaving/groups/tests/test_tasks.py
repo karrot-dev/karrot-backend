@@ -1,3 +1,4 @@
+import datetime
 from datetime import timedelta
 from unittest.mock import patch
 
@@ -11,6 +12,7 @@ from config import settings
 from foodsaving.groups.factories import GroupFactory, PlaygroundGroupFactory, InactiveGroupFactory
 from foodsaving.groups.models import GroupMembership, GroupStatus
 from foodsaving.groups.tasks import process_inactive_users, send_summary_emails, mark_inactive_groups
+from foodsaving.groups.emails import calculate_group_summary_dates, prepare_group_summary_data
 from foodsaving.pickups.factories import PickupDateFactory, FeedbackFactory
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
@@ -164,6 +166,22 @@ class TestSummaryEmailTask(TestCase):
 
             # pickup feedback
             [FeedbackFactory(about=pickup, given_by=user) for pickup in pickups[:self.feedback_count]]
+
+    def test_summary_email_dates_printed_correctly(self):
+        with freeze_time(datetime.datetime(2018, 8, 19)):  # Sunday
+            group = GroupFactory()
+            from_date, to_date = calculate_group_summary_dates(group)
+            data = prepare_group_summary_data(group, from_date, to_date)
+
+        expected_format = 'Sunday, August 12, 2018 to Saturday, August 18, 2018'
+
+        FORMAT = '%A, %B %-d, %Y'
+        actual_format = '{} to {}'.format(
+            data['from_date'].strftime(FORMAT),
+            data['to_date'].strftime(FORMAT),
+        )
+
+        self.assertEqual(expected_format, actual_format)
 
     @patch('foodsaving.groups.stats.write_points')
     def test_collects_stats(self, write_points):
