@@ -107,7 +107,7 @@ def group_conversation_mute_url(user, group, conversation):
     return unsubscribe_url(user, group, conversation=conversation)
 
 
-def unsubscribe_url(user, group, conversation, thread):
+def unsubscribe_url(user, group, conversation=None, thread=None):
     return '{hostname}/#/unsubscribe/{token}'.format(
         hostname=settings.HOSTNAME,
         token=generate_token(
