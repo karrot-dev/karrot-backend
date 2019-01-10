@@ -111,7 +111,7 @@ class Conversation(BaseModel, UpdatedAtMixin):
         if type == 'group':
             return self.target
 
-        raise Exception('cannot detirmine group for conversation {}'.format(self.id))
+        raise Exception('cannot determine group for conversation {}'.format(self.id))
 
 
 class ConversationParticipant(BaseModel, UpdatedAtMixin):
