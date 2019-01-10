@@ -47,18 +47,21 @@ def prepare_group_thread_message_notification(user, messages):
     reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
     from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
+    unsubscribe_url = thread_mute_url(user, group, thread)
+
     return prepare_email(
         template='thread_message_notification',
         from_email=from_email,
         user=user,
         reply_to=[reply_to],
+        unsubscribe_url=unsubscribe_url,
         context={
             'messages': messages,
             'conversation_name': conversation_name,
             'thread_author': thread.author,
             'thread_message_content': thread.content_rendered(truncate_words=40),
             'thread_url': thread_url(thread),
-            'mute_url': thread_mute_url(user, group, thread),
+            'mute_url': unsubscribe_url,
         }
     )
 
@@ -75,16 +78,19 @@ def prepare_group_conversation_message_notification(user, message):
     reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
     from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
+    unsubscribe_url = group_conversation_mute_url(user, group, conversation)
+
     return prepare_email(
         template='conversation_message_notification',
         from_email=from_email,
         user=user,
         reply_to=[reply_to],
+        unsubscribe_url=unsubscribe_url,
         context={
             'messages': [message],
             'conversation_name': conversation_name,
             'conversation_url': group_wall_url(group),
-            'mute_url': group_conversation_mute_url(user, group, conversation),
+            'mute_url': unsubscribe_url,
         }
     )
 
@@ -135,16 +141,19 @@ def prepare_pickup_conversation_message_notification(user, messages):
             reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
             from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
+            unsubscribe_url = pickup_conversation_mute_url(pickup, conversation)
+
             return prepare_email(
                 template='conversation_message_notification',
                 from_email=from_email,
                 user=user,
                 reply_to=[reply_to],
+                unsubscribe_url=unsubscribe_url,
                 context={
                     'messages': messages,
                     'conversation_name': conversation_name,
                     'conversation_url': pickup_detail_url(pickup),
-                    'mute_url': pickup_conversation_mute_url(pickup, conversation),
+                    'mute_url': unsubscribe_url,
                 }
             )
 
@@ -159,16 +168,19 @@ def prepare_private_user_conversation_message_notification(user, messages):
     reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
     from_email = formataddr((author.display_name, settings.DEFAULT_FROM_EMAIL))
 
+    unsubscribe_url = user_conversation_mute_url(author, conversation)
+
     return prepare_email(
         template='conversation_message_notification',
         from_email=from_email,
         user=user,
         reply_to=[reply_to],
+        unsubscribe_url=unsubscribe_url,
         context={
             'messages': messages,
             'conversation_name': author.display_name,
             'conversation_url': user_detail_url(author),
-            'mute_url': user_conversation_mute_url(author, conversation),
+            'mute_url': unsubscribe_url,
         }
     )
 
@@ -200,15 +212,18 @@ def prepare_group_application_message_notification(user, messages):
         reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
         from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
+        unsubscribe_url = group_application_mute_url(application, conversation)
+
         return prepare_email(
             template='conversation_message_notification',
             from_email=from_email,
             user=user,
             reply_to=[reply_to],
+            unsubscribe_url=unsubscribe_url,
             context={
                 'messages': messages,
                 'conversation_name': conversation_name,
                 'conversation_url': group_application_url(application),
-                'mute_url': group_application_mute_url(application, conversation),
+                'mute_url': unsubscribe_url,
             }
         )

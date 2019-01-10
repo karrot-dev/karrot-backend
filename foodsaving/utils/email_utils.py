@@ -63,7 +63,7 @@ class StatCollectingAnymailMessage(AnymailMessage):
             raise exception
 
 
-def prepare_email(template, user=None, context=None, to=None, language=None, **kwargs):
+def prepare_email(template, user=None, context=None, to=None, language=None, unsubscribe_url=None, **kwargs):
     context = dict(context) if context else {}
 
     default_context = {
@@ -98,11 +98,19 @@ def prepare_email(template, user=None, context=None, to=None, language=None, **k
 
     from_email = formataddr((settings.SITE_NAME, settings.DEFAULT_FROM_EMAIL))
 
+    headers = {}
+
+    if unsubscribe_url:
+        headers.update({
+            'List-Unsubscribe': '<{}>'.format(unsubscribe_url),
+        })
+
     message_kwargs = {
         'subject': subject,
         'body': text_content,
         'to': to,
         'from_email': from_email,
+        'headers': headers,
         'track_clicks': False,
         'track_opens': False,
         **kwargs,

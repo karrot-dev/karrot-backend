@@ -16,18 +16,21 @@ def prepare_new_application_notification_email(user, application):
     reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
     from_email = formataddr((applicant.display_name, settings.DEFAULT_FROM_EMAIL))
 
+    unsubscribe_url = group_application_mute_url(application, conversation)
+
     return prepare_email(
         template='new_application',
         from_email=from_email,
         user=user,
         reply_to=[reply_to],
+        unsubscribe_url=unsubscribe_url,
         context={
             'applicant': applicant,
             'group': application.group,
             'questions': application.questions_rendered(),
             'answers': application.answers_rendered(),
             'conversation_url': group_application_url(application),
-            'mute_url': group_application_mute_url(application, conversation),
+            'mute_url': unsubscribe_url,
             'settings_url': group_settings_url(application.group),
             'group_applications_url': group_applications_url(application.group),
             'group_edit_url': group_edit_url(application.group),
