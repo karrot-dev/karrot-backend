@@ -1,4 +1,5 @@
 import json
+import os
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
@@ -215,6 +216,41 @@ class TestGroupsAPI(APITestCase):
         url = self.url + str(self.group.id) + '/'
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+class TestUploadPhoto(APITestCase):
+    def setUp(self):
+        self.group = GroupFactory()
+        self.user = UserFactory()
+        self.group.add_member(self.user)
+        # self.group.memberships[str(self.user.id)]['roles'].append['editor']
+        self.url = '/api/groups/' + str(self.group.id) + '/'
+        self.photo_file = os.path.join(os.path.dirname(__file__), './photo.jpg')
+
+    def test_upload_and_delete_photo(self):
+        self.client.force_login(user=self.user)
+        response = self.client.get(self.url)
+        self.assertIn(self.user.id, response.data['members'])
+        self.assertEqual('editor', response.data['memberships'][str(self.user.id)]['roles'])
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue('full_size' not in response.data['photo_urls'])
+
+        with open(self.photo_file, 'rb') as photo:
+            response = self.client.patch(self.url, {'photo': photo})
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.get(self.url)
+        self.assertTrue('full_size' in response.data['photo_urls'])
+        self.assertTrue('thumbnail' in response.data['photo_urls'])
+        self.assertTrue(response.data['photo_urls']['full_size'].startswith('http://testserver'))
+
+        # delete photo
+        response = self.client.patch(self.url, {'photo': None}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+        response = self.client.get(self.url)
+        self.assertTrue('full_size' not in response.data['photo_urls'])
+        self.assertTrue('thumbnail' not in response.data['photo_urls'])
 
 
 class TestPlaygroundGroupAPI(APITestCase):
