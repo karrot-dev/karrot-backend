@@ -97,6 +97,22 @@ class Conversation(BaseModel, UpdatedAtMixin):
 
         return type
 
+    def find_group(self):
+        if self.is_private:
+            return None
+        if self.target_type_id is None:
+            return None
+
+        type = self.type()
+        if type == 'pickup':
+            return self.target.store.group
+        if type == 'application':
+            return self.target.group
+        if type == 'group':
+            return self.target
+
+        raise Exception('cannot detirmine group for conversation {}'.format(self.id))
+
 
 class ConversationParticipant(BaseModel, UpdatedAtMixin):
     """The join table between Conversation and User."""

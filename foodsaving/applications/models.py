@@ -7,6 +7,7 @@ from django.utils import timezone
 from foodsaving.applications.stats import application_status_update
 from foodsaving.applications.tasks import notify_about_accepted_application, notify_about_declined_application
 from foodsaving.base.base_models import BaseModel
+from foodsaving.conversations.models import ConversationMixin
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.utils import markdown
 
@@ -18,7 +19,7 @@ class GroupApplicationStatus(Enum):
     WITHDRAWN = 'withdrawn'
 
 
-class GroupApplication(BaseModel):
+class GroupApplication(BaseModel, ConversationMixin):
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     decided_at = models.DateTimeField(null=True)

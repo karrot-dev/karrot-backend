@@ -34,6 +34,7 @@ def prepare_conversation_message_notification(user, messages):
 def prepare_group_thread_message_notification(user, messages):
     first_message = messages[0]
     conversation = first_message.conversation
+    group = conversation.find_group()
     thread = first_message.thread
 
     thread_text_beginning = Truncator(thread.content).chars(num=60)
@@ -57,7 +58,7 @@ def prepare_group_thread_message_notification(user, messages):
             'thread_author': thread.author,
             'thread_message_content': thread.content_rendered(truncate_words=40),
             'thread_url': thread_url(thread),
-            'mute_url': thread_mute_url(thread),
+            'mute_url': thread_mute_url(user, group, thread),
         }
     )
 
@@ -83,7 +84,7 @@ def prepare_group_conversation_message_notification(user, message):
             'messages': [message],
             'conversation_name': conversation_name,
             'conversation_url': group_wall_url(group),
-            'mute_url': group_conversation_mute_url(group, conversation),
+            'mute_url': group_conversation_mute_url(user, group, conversation),
         }
     )
 

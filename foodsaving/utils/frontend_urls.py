@@ -1,6 +1,7 @@
 from furl import furl
 
 from config import settings
+from foodsaving.unsubscribe.utils import generate_token
 
 
 def conversation_url(conversation, user):
@@ -80,8 +81,8 @@ def thread_url(thread):
     )
 
 
-def thread_mute_url(thread):
-    return '{}?mute'.format(thread_url(thread))
+def thread_mute_url(user, group, thread):
+    return unsubscribe_url(user, group, thread=thread)
 
 
 def group_wall_url(group):
@@ -102,8 +103,20 @@ def group_edit_url(group):
     )
 
 
-def group_conversation_mute_url(group, conversation):
-    return '{}?mute_conversation={}'.format(group_wall_url(group), conversation.id)
+def group_conversation_mute_url(user, group, conversation):
+    return unsubscribe_url(user, group, conversation=conversation)
+
+
+def unsubscribe_url(user, group, conversation, thread):
+    return '{hostname}/#/unsubscribe/{token}'.format(
+        hostname=settings.HOSTNAME,
+        token=generate_token(
+            user,
+            group,
+            conversation=conversation,
+            thread=thread,
+        ),
+    )
 
 
 def group_settings_url(group):
