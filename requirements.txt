@@ -20,7 +20,7 @@ autopep8==1.4.3
 babel==2.6.0
 backcall==0.1.0           # via ipython
 bleach-whitelist==0.0.9
-bleach==3.0.2
+bleach==3.1.0
 cchardet==2.1.4           # via talon
 certifi==2018.11.29       # via requests
 cffi==1.11.5              # via argon2-cffi
