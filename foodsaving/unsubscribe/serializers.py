@@ -12,10 +12,9 @@ class UnsubscribeSerializer(serializers.Serializer):
     @staticmethod
     def validate_token(token):
         try:
-            data = parse_token(token)  # will throw an exception if invalid
+            return parse_token(token)  # will throw an exception if invalid
         except BadSignature:
             raise serializers.ValidationError()
-        return data
 
     def create(self, validated_data):
         token_data = validated_data.get('token')
