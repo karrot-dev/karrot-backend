@@ -218,7 +218,7 @@ class TestGroupsAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class TestUploadPhoto(APITestCase):
+class TestUploadGroupPhoto(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.group = GroupFactory(members=[self.user])

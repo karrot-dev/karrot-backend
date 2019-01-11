@@ -59,7 +59,7 @@ class GroupHistorySerializer(GroupBaseSerializer):
 
     class Meta:
         model = GroupModel
-        fields = '__all__'
+        exclude = ['photo']
 
 
 class GroupDetailSerializer(GroupBaseSerializer):
