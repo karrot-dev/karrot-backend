@@ -6,6 +6,35 @@ from django.utils.translation import ugettext as _
 from foodsaving.cases.models import Case, Voting, Vote, Option
 
 
+class VoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vote
+        fields = [
+            'option',
+            'score',
+            'user',
+        ]
+        extra_kwargs = {
+            'option': {
+                'write_only': True
+            },
+            'user': {
+                'write_only': True
+            },
+        }
+
+    def create(self, validated_data):
+        option = validated_data['option']
+        user = validated_data['user']
+        option.votes.filter(user=user).delete()
+        return super().create(validated_data)
+
+    def validate_score(self, score):
+        if score > 5:
+            raise serializers.ValidationError('Score too high')
+        return score
+
+
 class OptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Option
@@ -15,13 +44,24 @@ class OptionSerializer(serializers.ModelSerializer):
             'message',
             'affected_user',
             'mean_score',
+            'your_score',
         ]
+
+    your_score = serializers.SerializerMethodField()
+
+    def get_your_score(self, option):
+        try:
+            vote = option.votes.get(user=self.context['request'].user)
+        except Vote.DoesNotExist:
+            return None
+        return vote.score
 
 
 class VotingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Voting
         fields = [
+            'id',
             'expires_at',
             'options',
             'accepted_option',
@@ -72,15 +112,3 @@ class CasesSerializer(serializers.ModelSerializer):
 
     def save(self, **kwargs):
         return super().save(created_by=self.context['request'].user)
-
-
-class VoteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Vote
-        fields = [
-            'option',
-            'score',
-        ]
-
-    def save(self, **kwargs):
-        return super().save(user=self.context['request'].user)

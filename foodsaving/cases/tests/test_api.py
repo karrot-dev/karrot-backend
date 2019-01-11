@@ -1,25 +1,14 @@
-import json
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
-from django.core import mail
-from django.utils import timezone
 from freezegun import freeze_time
-from pprint import pprint
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from foodsaving.cases.factories import CaseFactory
-from foodsaving.cases.models import Voting
 from foodsaving.cases.tasks import process_expired_votings
-from foodsaving.conversations.models import Conversation
 from foodsaving.groups.factories import GroupFactory
-from foodsaving.applications.factories import GroupApplicationFactory
-from foodsaving.groups.models import GroupMembership, GroupNotificationType
-from foodsaving.applications.models import GroupApplicationStatus
 from foodsaving.tests.utils import ExtractPaginationMixin
-from foodsaving.users.factories import UserFactory, VerifiedUserFactory
-from foodsaving.users.serializers import UserSerializer
-from foodsaving.utils.tests.fake import faker
+from foodsaving.users.factories import VerifiedUserFactory
 
 
 class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
@@ -27,6 +16,9 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
         self.member = VerifiedUserFactory()
         self.affected_member = VerifiedUserFactory()
         self.group = GroupFactory(members=[self.member, self.affected_member])
+
+    def create_case(self, **kwargs):
+        return CaseFactory(group=self.group, created_by=self.member, **kwargs)
 
     def test_create_conflict_resolution_case(self):
         self.client.force_login(user=self.member)
@@ -49,11 +41,11 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
         # vote on option
         options = voting['options']
         for score, option in zip([1, 5], options):
-            response = self.client.post('/api/cases-votes/', {
-                'option': option['id'],
-                'score': score,
-            })
-            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            response = self.client.post(
+                '/api/cases/options/{}/vote/'.format(option['id']),
+                {'score': score}, format='json'
+            )
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
         # get results
         time_when_voting_expires = parse(voting['expires_at']) + relativedelta(hours=1)
@@ -61,6 +53,20 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
             process_expired_votings()
             response = self.client.get('/api/cases/{}/'.format(case['id']))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_vote_can_be_updated(self):
+        self.client.force_login(user=self.member)
+        case = self.create_case()
+        option = case.votings.first().options.first()
+
+        response = self.client.post('/api/cases/options/{}/vote/'.format(option.id), {'score': 1}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+
+        response = self.client.post('/api/cases/options/{}/vote/'.format(option.id), {'score': 2}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+
+        option.refresh_from_db()
+        self.assertEqual(option.votes.first().score, 2)
 
 
 class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):

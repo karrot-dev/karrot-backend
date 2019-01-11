@@ -6,7 +6,7 @@ from django.utils import timezone
 from enum import Enum
 
 from foodsaving.base.base_models import BaseModel
-from foodsaving.conversations.models import Conversation, ConversationMixin
+from foodsaving.conversations.models import ConversationMixin
 from foodsaving.groups.models import GroupMembership
 
 
