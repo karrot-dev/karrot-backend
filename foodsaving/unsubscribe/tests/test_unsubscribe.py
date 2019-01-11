@@ -37,12 +37,20 @@ class TestUnsubscribeFromAllConversationsInGroup(TestCase):
         self.user = UserFactory()
         self.group = GroupFactory(members=[self.user])
         self.store = StoreFactory(group=self.group)
+        self.other_group = GroupFactory(members=[self.user])
+        self.other_store = StoreFactory(group=self.other_group)
 
     def test_unsubscribe_from_group_wall(self):
         participant = self.group.conversation.conversationparticipant_set.filter(user=self.user)
         self.assertTrue(participant.get().email_notifications)
         unsubscribe_from_all_conversations_in_group(self.user, self.group)
         self.assertFalse(participant.get().email_notifications)
+
+    def test_does_not_unsubscribe_from_other_group_wall(self):
+        participant = self.other_group.conversation.conversationparticipant_set.filter(user=self.user)
+        self.assertTrue(participant.get().email_notifications)
+        unsubscribe_from_all_conversations_in_group(self.user, self.group)
+        self.assertTrue(participant.get().email_notifications)
 
     def test_unsubscribe_from_group_wall_thread(self):
         thread = self.group.conversation.messages.create(author=self.user, content='foo')
@@ -58,6 +66,13 @@ class TestUnsubscribeFromAllConversationsInGroup(TestCase):
         self.assertTrue(participant.get().email_notifications)
         unsubscribe_from_all_conversations_in_group(self.user, self.group)
         self.assertFalse(participant.get().email_notifications)
+
+    def test_does_not_unsubscribe_from_other_group_pickup_conversations(self):
+        pickup = PickupDateFactory(store=self.other_store, collectors=[self.user])
+        participant = pickup.conversation.conversationparticipant_set.filter(user=self.user)
+        self.assertTrue(participant.get().email_notifications)
+        unsubscribe_from_all_conversations_in_group(self.user, self.group)
+        self.assertTrue(participant.get().email_notifications)
 
     def test_unsubscribe_from_group_applications(self):
         application = GroupApplicationFactory(group=self.group, user=UserFactory())

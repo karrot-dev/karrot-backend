@@ -1,8 +1,6 @@
-from django.contrib.contenttypes.models import ContentType
 from django.core import signing
 
 from foodsaving.conversations.models import ConversationThreadParticipant, ConversationParticipant
-from foodsaving.pickups.models import PickupDate
 
 
 def generate_token(user, group=None, conversation=None, thread=None):
@@ -48,35 +46,30 @@ def unsubscribe_from_all_conversations_in_group(user, group):
     unsubscribe from ALL conversations related to this group
     """
 
-    # wall
-    participant = group.conversation.conversationparticipant_set.get(user=user)
-    participant.email_notifications = False
-    participant.save()
+    def is_related(conversation):
+        """
+        check if the conversation targets' related group is our intended group
 
-    # wall threads
+        each conversation target must implement a group attribute
+        """
+        target = conversation.target
+        return target is not None and target.group == group
+
+    # load all the users conversations
+    conversation_ids = [conversation.id for conversation in user.conversation_set.all() if is_related(conversation)]
+
+    # disable email notifications for all these conversations
+    ConversationParticipant.objects.filter(
+        user=user,
+        conversation_id__in=conversation_ids,
+    ).update(
+        email_notifications=False,
+    )
+
+    # ... and mute any threads
     ConversationThreadParticipant.objects.filter(
         user=user,
-        thread__conversation=group.conversation,
+        thread__conversation_id__in=conversation_ids,
     ).update(
         muted=True,
-    )
-
-    # pickup chats
-    ConversationParticipant.objects.filter(
-        user=user,
-        # need to check if these actually are AND'ing... ORing would not be good
-        conversation__target_id__in=PickupDate.objects.filter(store__group=group),
-        conversation__target_type=ContentType.objects.get_for_model(PickupDate),
-    ).update(
-        email_notifications=False,
-    )
-
-    # group applications
-    ConversationParticipant.objects.filter(
-        user=user,
-        # need to check if these actually are AND'ing... ORing would not be good
-        conversation__target_id__in=group.groupapplication_set.values_list('pk', flat=True),
-        conversation__target_type=ContentType.objects.get(app_label='applications', model='groupapplication'),
-    ).update(
-        email_notifications=False,
     )

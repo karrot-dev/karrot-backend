@@ -13,6 +13,7 @@ class TestUnsubscribeAPI(APITestCase):
         self.user = UserFactory()
         self.group = GroupFactory(members=[self.user])
         self.store = StoreFactory(group=self.group)
+        self.other_group = GroupFactory(members=[self.user])
 
     def test_unsubscribe_from_conversation(self):
         participant = self.group.conversation.conversationparticipant_set.filter(user=self.user)
@@ -36,3 +37,10 @@ class TestUnsubscribeAPI(APITestCase):
         self.assertTrue(participant.get().email_notifications)
         self.client.post(self.url.format(token), {'choice': 'group'}, format='json')
         self.assertFalse(participant.get().email_notifications)
+
+    def test_does_not_unsubscribe_from_other_group(self):
+        token = generate_token(self.user, self.group)
+        participant = self.other_group.conversation.conversationparticipant_set.filter(user=self.user)
+        self.assertTrue(participant.get().email_notifications)
+        self.client.post(self.url.format(token), {'choice': 'group'}, format='json')
+        self.assertTrue(participant.get().email_notifications)
