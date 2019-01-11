@@ -1,12 +1,19 @@
 from django_filters import rest_framework as filters
 from rest_framework import mixins
 from rest_framework.decorators import action
+from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.cases.models import Case, Vote
 from foodsaving.cases.serializers import CasesSerializer, VoteSerializer
 from foodsaving.conversations.api import RetrieveConversationMixin
+from foodsaving.groups.models import Group
+
+
+class CasesPagination(CursorPagination):
+    page_size = 10
+    ordering = 'id'
 
 
 class CasesViewSet(
@@ -21,6 +28,11 @@ class CasesViewSet(
     filterset_fields = ('group', )
     serializer_class = CasesSerializer
     permission_classes = (IsAuthenticated, )
+    pagination_class = CasesPagination
+
+    def get_queryset(self):
+        groups = Group.objects.user_is_editor(self.request.user)
+        return super().get_queryset().filter(group__in=groups)
 
     @action(
         detail=True,

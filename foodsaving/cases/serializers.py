@@ -1,4 +1,7 @@
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
+
+from django.utils.translation import ugettext as _
 
 from foodsaving.cases.models import Case, Voting, Vote, Option
 
@@ -50,6 +53,22 @@ class CasesSerializer(serializers.ModelSerializer):
         extra_kwargs = {'created_by': {'default': serializers.CurrentUserDefault()}}
 
     votings = VotingSerializer(many=True, read_only=True)
+
+    def validate_group(self, group):
+        if not group.is_member(self.context['request'].user):
+            raise PermissionDenied(_('You are not a member of this group.'))
+        if not group.is_editor(self.context['request'].user):
+            raise PermissionDenied(_('You need to be a group editor'))
+        return group
+
+    def validate(self, attrs):
+        group = attrs['group']
+        affected_user = attrs['affected_user']
+        if not group.is_member(affected_user):
+            raise serializers.ValidationError(_('Affected user is not part of that group'))
+        if Case.objects.filter(group=group, affected_user=affected_user, is_decided=False).exists():
+            raise serializers.ValidationError(_('A case about that user in that group has already been started'))
+        return attrs
 
     def save(self, **kwargs):
         return super().save(created_by=self.context['request'].user)

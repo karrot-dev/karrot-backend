@@ -6,7 +6,7 @@ from django.utils import timezone
 from enum import Enum
 
 from foodsaving.base.base_models import BaseModel
-from foodsaving.conversations.models import Conversation
+from foodsaving.conversations.models import Conversation, ConversationMixin
 from foodsaving.groups.models import GroupMembership
 
 
@@ -14,7 +14,7 @@ class CaseTypes(Enum):
     CONFLICT_RESOLUTION = 'conflict_resolution'
 
 
-class Case(BaseModel):
+class Case(BaseModel, ConversationMixin):
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='cases')
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='cases_opened')
     is_decided = models.BooleanField(default=False)
