@@ -97,6 +97,11 @@ class Conversation(BaseModel, UpdatedAtMixin):
 
         return type
 
+    def find_group(self):
+        if self.is_private or self.target_type_id is None:
+            return None
+        return self.target.group
+
 
 class ConversationParticipant(BaseModel, UpdatedAtMixin):
     """The join table between Conversation and User."""
