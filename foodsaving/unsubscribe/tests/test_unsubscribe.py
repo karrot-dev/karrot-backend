@@ -16,20 +16,18 @@ class TestTokenParser(TestCase):
     def test_with_a_conversation(self):
         token = generate_token(self.user, self.group, conversation=self.group.conversation)
         data = parse_token(token)
-        self.assertEqual(self.user.id, data['u'])
-        self.assertEqual(self.group.id, data['g'])
-        self.assertEqual(self.group.name, data['gn'])
-        self.assertEqual(self.group.conversation.id, data['c'])
+        self.assertEqual(self.user, data['user'])
+        self.assertEqual(self.group, data['group'])
+        self.assertEqual(self.group.conversation, data['conversation'])
 
     def test_with_a_thread(self):
         thread = self.group.conversation.messages.create(author=self.user, content='foo')
         self.group.conversation.messages.create(author=self.user, content='foo reply', thread=thread)
         token = generate_token(self.user, self.group, thread=thread)
         data = parse_token(token)
-        self.assertEqual(self.user.id, data['u'])
-        self.assertEqual(self.group.id, data['g'])
-        self.assertEqual(self.group.name, data['gn'])
-        self.assertEqual(thread.id, data['t'])
+        self.assertEqual(self.user, data['user'])
+        self.assertEqual(self.group, data['group'])
+        self.assertEqual(thread, data['thread'])
 
 
 class TestUnsubscribeFromAllConversationsInGroup(TestCase):

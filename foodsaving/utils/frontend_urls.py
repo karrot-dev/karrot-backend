@@ -43,8 +43,8 @@ def pickup_detail_url(pickup):
     )
 
 
-def pickup_conversation_mute_url(pickup, conversation):
-    return '{}?mute_conversation={}'.format(pickup_detail_url(pickup), conversation.id)
+def pickup_conversation_mute_url(user, pickup, conversation):
+    return unsubscribe_url(user, pickup.store.group, conversation=conversation)
 
 
 def group_application_url(application):
@@ -55,8 +55,8 @@ def group_application_url(application):
     )
 
 
-def group_application_mute_url(application, conversation):
-    return '{}?mute_conversation={}'.format(group_application_url(application), conversation.id)
+def group_application_mute_url(user, application, conversation):
+    return unsubscribe_url(user, application.group, conversation=conversation)
 
 
 def user_detail_url(user):

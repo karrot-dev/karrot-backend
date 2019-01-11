@@ -141,7 +141,7 @@ def prepare_pickup_conversation_message_notification(user, messages):
             reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
             from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
-            unsubscribe_url = pickup_conversation_mute_url(pickup, conversation)
+            unsubscribe_url = pickup_conversation_mute_url(user, pickup, conversation)
 
             return prepare_email(
                 template='conversation_message_notification',
@@ -212,7 +212,7 @@ def prepare_group_application_message_notification(user, messages):
         reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
         from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
-        unsubscribe_url = group_application_mute_url(application, conversation)
+        unsubscribe_url = group_application_mute_url(user, application, conversation)
 
         return prepare_email(
             template='conversation_message_notification',

@@ -1,6 +1,7 @@
+from django.contrib.auth import get_user_model
 from django.core import signing
 
-from foodsaving.conversations.models import ConversationThreadParticipant, ConversationParticipant
+from foodsaving.conversations.models import ConversationThreadParticipant, ConversationParticipant, ConversationMessage
 
 
 def generate_token(user, group=None, conversation=None, thread=None):
@@ -20,7 +21,20 @@ def generate_token(user, group=None, conversation=None, thread=None):
 
 
 def parse_token(token):
-    return signing.loads(token)
+    data = signing.loads(token)
+    user = get_user_model().objects.get(pk=data['u'])
+    result = {'user': user}
+
+    if 'g' in data:
+        result.update({'group': user.groups.get(pk=data['g'])})
+
+    if 'c' in data:
+        result.update({'conversation': user.conversation_set.get(pk=data['c'])})
+
+    if 't' in data:
+        result.update({'thread': ConversationMessage.objects.only_threads_with_user(user).get(pk=data['t'])})
+
+    return result
 
 
 def unsubscribe_from_conversation(user, conversation):

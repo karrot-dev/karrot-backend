@@ -1,3 +1,4 @@
+from rest_framework import status
 from rest_framework.test import APITestCase
 
 from foodsaving.groups.factories import GroupFactory
@@ -44,3 +45,22 @@ class TestUnsubscribeAPI(APITestCase):
         self.assertTrue(participant.get().email_notifications)
         self.client.post(self.url.format(token), {'choice': 'group'}, format='json')
         self.assertTrue(participant.get().email_notifications)
+
+    def test_fails_with_invalid_token(self):
+        response = self.client.post(self.url.format('invalidtoken'), {'choice': 'group'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
+    def test_fails_without_a_conversation(self):
+        token = generate_token(self.user, self.group)
+        response = self.client.post(self.url.format(token), {'choice': 'conversation'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
+    def test_fails_without_a_thread(self):
+        token = generate_token(self.user, self.group, conversation=self.group.conversation)
+        response = self.client.post(self.url.format(token), {'choice': 'thread'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
+    def test_fails_without_a_group(self):
+        token = generate_token(self.user, conversation=self.group.conversation)
+        response = self.client.post(self.url.format(token), {'choice': 'group'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
