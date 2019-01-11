@@ -63,11 +63,8 @@ def unsubscribe_from_all_conversations_in_group(user, group):
     def is_related(conversation):
         """
         check if the conversation targets' related group is our intended group
-
-        each conversation target must implement a group attribute
         """
-        target = conversation.target
-        return target is not None and target.group == group
+        return conversation.find_group() == group
 
     # load all the users conversations
     conversation_ids = [conversation.id for conversation in user.conversation_set.all() if is_related(conversation)]

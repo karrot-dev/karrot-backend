@@ -98,20 +98,9 @@ class Conversation(BaseModel, UpdatedAtMixin):
         return type
 
     def find_group(self):
-        if self.is_private:
+        if self.is_private or self.target_type_id is None:
             return None
-        if self.target_type_id is None:
-            return None
-
-        type = self.type()
-        if type == 'pickup':
-            return self.target.store.group
-        if type == 'application':
-            return self.target.group
-        if type == 'group':
-            return self.target
-
-        raise Exception('cannot determine group for conversation {}'.format(self.id))
+        return self.target.group
 
 
 class ConversationParticipant(BaseModel, UpdatedAtMixin):
