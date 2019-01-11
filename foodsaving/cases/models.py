@@ -1,7 +1,7 @@
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.db import models
-from django.db.models import Avg, F
+from django.db.models import Avg
 from django.utils import timezone
 from enum import Enum
 
@@ -27,13 +27,16 @@ class Case(BaseModel, ConversationMixin):
         settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE, related_name='affected_by_case'
     )
 
+    def decide(self):
+        self.is_decided = True
+        self.save()
+
     def save(self, **kwargs):
         super().save(**kwargs)
 
         if self.votings.count() == 0:
             voting = self.votings.create()
-            voting.options.create(type=OptionTypes.FURTHER_DISCUSSION.value)
-            voting.options.create(type=OptionTypes.REMOVE_USER.value, affected_user=self.affected_user)
+            voting.create_options(self.affected_user)
 
 
 def voting_expiration_time():
@@ -53,14 +56,23 @@ class Voting(BaseModel):
     def is_expired(self):
         return self.expires_at < timezone.now()
 
+    def create_options(self, affected_user):
+        self.options.create(type=OptionTypes.FURTHER_DISCUSSION.value)
+        self.options.create(type=OptionTypes.NO_CHANGE.value)
+        self.options.create(type=OptionTypes.REMOVE_USER.value, affected_user=affected_user)
+
     def calculate_results(self):
-        options = self.options.annotate(_mean_score=Avg('votes__score')).order_by('_mean_score')
+        options = list(self.options.annotate(_mean_score=Avg('votes__score')).order_by('_mean_score'))
         for option in options:
             option.mean_score = option._mean_score
             option.save()
 
-        # TODO how to handle ties?
-        self.accepted_option = options.last()
+        accepted_option = options[-1]
+        if options[-2].mean_score == accepted_option.mean_score:
+            # tie!
+            accepted_option = next(o for o in options if o.type == OptionTypes.FURTHER_DISCUSSION.value)
+
+        self.accepted_option = accepted_option
         self.save()
 
         self.accepted_option.do_action()
@@ -68,6 +80,7 @@ class Voting(BaseModel):
 
 class OptionTypes(Enum):
     FURTHER_DISCUSSION = 'further_discussion'
+    NO_CHANGE = 'no_change'
     REMOVE_USER = 'remove_user'
 
 
@@ -85,7 +98,7 @@ class Option(BaseModel):
 
     def do_action(self):
         if self.type != OptionTypes.FURTHER_DISCUSSION.value:
-            self.voting.case.is_decided = True
+            self.voting.case.decide()
 
         if self.type == OptionTypes.FURTHER_DISCUSSION.value:
             self._further_discussion()
