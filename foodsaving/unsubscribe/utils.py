@@ -2,9 +2,10 @@ from django.contrib.auth import get_user_model
 from django.core import signing
 
 from foodsaving.conversations.models import ConversationThreadParticipant, ConversationParticipant, ConversationMessage
+from foodsaving.groups.models import GroupMembership
 
 
-def generate_token(user, group=None, conversation=None, thread=None):
+def generate_token(user, group=None, conversation=None, thread=None, notification_type=None):
     data = {'u': user.id}
     if group:
         data.update({
@@ -17,6 +18,8 @@ def generate_token(user, group=None, conversation=None, thread=None):
         if not thread.is_first_in_thread():
             raise Exception('your thread is not a thread!')
         data.update({'t': thread.id})
+    if notification_type:
+        data.update({'n': notification_type})
     return signing.dumps(data)
 
 
@@ -33,6 +36,9 @@ def parse_token(token):
 
     if 't' in data:
         result.update({'thread': ConversationMessage.objects.only_threads_with_user(user).get(pk=data['t'])})
+
+    if 'n' in data:
+        result.update({'notification_type': data['n']})
 
     return result
 
@@ -53,6 +59,12 @@ def unsubscribe_from_thread(user, thread):
     ).update(
         muted=True,
     )
+
+
+def unsubscribe_from_notification_type(user, group, notification_type):
+    membership = group.groupmembership_set.get(user=user)
+    membership.remove_notification_types([notification_type])
+    membership.save()
 
 
 def unsubscribe_from_all_conversations_in_group(user, group):
@@ -83,4 +95,12 @@ def unsubscribe_from_all_conversations_in_group(user, group):
         thread__conversation_id__in=conversation_ids,
     ).update(
         muted=True,
+    )
+
+    # save them from these notifications too
+    GroupMembership.objects.filter(
+        group=group,
+        user=user,
+    ).update(
+        notification_types=[],
     )

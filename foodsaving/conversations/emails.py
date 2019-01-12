@@ -6,8 +6,8 @@ from django.utils.translation import ugettext as _
 from config import settings
 from foodsaving.utils.email_utils import prepare_email, formataddr
 from foodsaving.utils.frontend_urls import (
-    group_wall_url, group_conversation_mute_url, pickup_detail_url, pickup_conversation_mute_url, user_detail_url,
-    user_conversation_mute_url, group_application_url, group_application_mute_url, thread_url, thread_mute_url
+    group_wall_url, conversation_unsubscribe_url, pickup_detail_url, user_detail_url, group_application_url,
+    thread_url, thread_unsubscribe_url
 )
 from foodsaving.webhooks.api import make_local_part
 
@@ -47,7 +47,7 @@ def prepare_group_thread_message_notification(user, messages):
     reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
     from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
-    unsubscribe_url = thread_mute_url(user, group, thread)
+    unsubscribe_url = thread_unsubscribe_url(user, group, thread)
 
     return prepare_email(
         template='thread_message_notification',
@@ -78,7 +78,7 @@ def prepare_group_conversation_message_notification(user, message):
     reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
     from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
-    unsubscribe_url = group_conversation_mute_url(user, group, conversation)
+    unsubscribe_url = conversation_unsubscribe_url(user, group=group, conversation=conversation)
 
     return prepare_email(
         template='conversation_message_notification',
@@ -141,7 +141,7 @@ def prepare_pickup_conversation_message_notification(user, messages):
             reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
             from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
-            unsubscribe_url = pickup_conversation_mute_url(user, pickup, conversation)
+            unsubscribe_url = conversation_unsubscribe_url(user, group=pickup.store.group, conversation=conversation)
 
             return prepare_email(
                 template='conversation_message_notification',
@@ -168,7 +168,7 @@ def prepare_private_user_conversation_message_notification(user, messages):
     reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
     from_email = formataddr((author.display_name, settings.DEFAULT_FROM_EMAIL))
 
-    unsubscribe_url = user_conversation_mute_url(author, conversation)
+    unsubscribe_url = conversation_unsubscribe_url(author, conversation=conversation)
 
     return prepare_email(
         template='conversation_message_notification',
@@ -212,7 +212,7 @@ def prepare_group_application_message_notification(user, messages):
         reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
         from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
-        unsubscribe_url = group_application_mute_url(user, application, conversation)
+        unsubscribe_url = conversation_unsubscribe_url(user, group=application.group, conversation=conversation)
 
         return prepare_email(
             template='conversation_message_notification',

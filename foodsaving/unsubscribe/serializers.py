@@ -2,11 +2,13 @@ from django.core.signing import BadSignature
 from rest_framework import serializers
 
 from foodsaving.unsubscribe.utils import parse_token, unsubscribe_from_conversation, unsubscribe_from_thread, \
-    unsubscribe_from_all_conversations_in_group
+    unsubscribe_from_all_conversations_in_group, unsubscribe_from_notification_type
 
 
 class UnsubscribeSerializer(serializers.Serializer):
-    choice = serializers.ChoiceField(choices=['conversation', 'thread', 'group'], default='conversation')
+    choice = serializers.ChoiceField(
+        choices=['conversation', 'thread', 'notification_type', 'group'], default='conversation'
+    )
     token = serializers.CharField()
 
     @staticmethod
@@ -31,6 +33,13 @@ class UnsubscribeSerializer(serializers.Serializer):
             if 'thread' not in token_data:
                 raise serializers.ValidationError()
             unsubscribe_from_thread(user, token_data['thread'])
+
+        elif choice == 'notification_type':
+            if 'group' not in token_data:
+                raise serializers.ValidationError()
+            elif 'notification_type' not in token_data:
+                raise serializers.ValidationError()
+            unsubscribe_from_notification_type(user, token_data['group'], token_data['notification_type'])
 
         elif choice == 'group':
             if 'group' not in token_data:

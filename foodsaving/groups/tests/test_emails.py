@@ -38,7 +38,7 @@ class TestGroupSummaryEmails(APITestCase):
             membership.inactive_at = timezone.now()
             membership.save()
 
-    def test_creates_one_email_for_one_language(self):
+    def test_creates_one_email_per_person(self):
         n = 5
         for i in list(range(n)):
             self.group.add_member(VerifiedUserFactory(language='en'))
@@ -46,17 +46,19 @@ class TestGroupSummaryEmails(APITestCase):
         from_date, to_date = group_emails.calculate_group_summary_dates(self.group)
         context = group_emails.prepare_group_summary_data(self.group, from_date, to_date)
         emails = group_emails.prepare_group_summary_emails(self.group, context)
-        self.assertEqual(len(emails), 1)
+        self.assertEqual(len(emails), 5)
 
         expected_members = self.group.members.filter(
             groupmembership__in=GroupMembership.objects.active().
             with_notification_type(GroupNotificationType.WEEKLY_SUMMARY)
         ).exclude(groupmembership__user__in=get_user_model().objects.unverified_or_ignored())
 
-        self.assertEqual(sorted(emails[0].to), sorted([member.email for member in expected_members]))
+        self.assertEqual(
+            sorted([email.to[0] for email in emails]), sorted([member.email for member in expected_members])
+        )
         self.assertNotIn(self.user_without_notifications.email, emails[0].to)
 
-    def test_creates_three_emails_for_three_languages(self):
+    def test_creates_one_email_per_person_with_different_languages(self):
         n = 5
 
         for _ in list(range(n)):
@@ -71,7 +73,7 @@ class TestGroupSummaryEmails(APITestCase):
         from_date, to_date = group_emails.calculate_group_summary_dates(self.group)
         context = group_emails.prepare_group_summary_data(self.group, from_date, to_date)
         emails = group_emails.prepare_group_summary_emails(self.group, context)
-        self.assertEqual(len(emails), 3)
+        self.assertEqual(len(emails), 15)
 
         to = []
         for email in emails:
@@ -95,14 +97,16 @@ class TestGroupSummaryEmails(APITestCase):
         from_date, to_date = group_emails.calculate_group_summary_dates(self.group)
         context = group_emails.prepare_group_summary_data(self.group, from_date, to_date)
         emails = group_emails.prepare_group_summary_emails(self.group, context)
-        self.assertEqual(len(emails), 1)
+        self.assertEqual(len(emails), 5)
 
         expected_members = self.group.members.filter(
             groupmembership__in=GroupMembership.objects.active().
             with_notification_type(GroupNotificationType.WEEKLY_SUMMARY)
         ).exclude(groupmembership__user__in=get_user_model().objects.unverified_or_ignored())
 
-        self.assertEqual(sorted(emails[0].to), sorted([member.email for member in expected_members]))
+        self.assertEqual(
+            sorted([email.to[0] for email in emails]), sorted([member.email for member in expected_members])
+        )
         self.assertNotIn(self.user_without_notifications.email, emails[0].to)
 
     def test_ignores_deleted_pickups(self):
