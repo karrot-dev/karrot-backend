@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from foodsaving.groups.factories import GroupFactory
+from foodsaving.groups.models import GroupNotificationType
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.unsubscribe.utils import generate_token
 from foodsaving.users.factories import UserFactory
@@ -31,6 +32,20 @@ class TestUnsubscribeAPI(APITestCase):
         self.assertFalse(participant.get().muted)
         self.client.post(self.url.format(token), {'choice': 'thread'}, format='json')
         self.assertTrue(participant.get().muted)
+
+    def test_unsubscribe_from_notification_type(self):
+        token = generate_token(
+            self.user,
+            group=self.group,
+            notification_type=GroupNotificationType.NEW_APPLICATION,
+        )
+        notification_types = self.group.groupmembership_set.filter(user=self.user).values_list(
+            'notification_types',
+            flat=True,
+        )
+        self.assertIn('new_application', notification_types.get())
+        self.client.post(self.url.format(token), {'choice': 'notification_type'}, format='json')
+        self.assertNotIn('new_application', notification_types.get())
 
     def test_unsubscribe_from_group(self):
         token = generate_token(self.user, self.group)

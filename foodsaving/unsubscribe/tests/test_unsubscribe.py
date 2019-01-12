@@ -2,9 +2,11 @@ from django.test import TestCase
 
 from foodsaving.applications.factories import GroupApplicationFactory
 from foodsaving.groups.factories import GroupFactory
+from foodsaving.groups.models import GroupNotificationType
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.stores.factories import StoreFactory
-from foodsaving.unsubscribe.utils import unsubscribe_from_all_conversations_in_group, generate_token, parse_token
+from foodsaving.unsubscribe.utils import unsubscribe_from_all_conversations_in_group, generate_token, parse_token, \
+    unsubscribe_from_notification_type
 from foodsaving.users.factories import UserFactory
 
 
@@ -28,6 +30,28 @@ class TestTokenParser(TestCase):
         self.assertEqual(self.user, data['user'])
         self.assertEqual(self.group, data['group'])
         self.assertEqual(thread, data['thread'])
+
+    def test_with_notification_types(self):
+        token = generate_token(
+            self.user, self.group, notification_type=GroupNotificationType.DAILY_PICKUP_NOTIFICATION
+        )
+        data = parse_token(token)
+        self.assertEqual(data['notification_type'], 'daily_pickup_notification')
+
+
+class TestUnsubscribeFromNotificationTypes(TestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.group = GroupFactory(members=[self.user])
+
+    def test_unsubscribe_from_weekly_summaries(self):
+        notification_types = self.group.groupmembership_set.filter(user=self.user).values_list(
+            'notification_types',
+            flat=True,
+        )
+        self.assertIn(GroupNotificationType.WEEKLY_SUMMARY, notification_types.get())
+        unsubscribe_from_notification_type(self.user, self.group, GroupNotificationType.WEEKLY_SUMMARY)
+        self.assertNotIn(GroupNotificationType.WEEKLY_SUMMARY, notification_types.get())
 
 
 class TestUnsubscribeFromAllConversationsInGroup(TestCase):
@@ -57,6 +81,18 @@ class TestUnsubscribeFromAllConversationsInGroup(TestCase):
         self.assertFalse(participant.get().muted)
         unsubscribe_from_all_conversations_in_group(self.user, self.group)
         self.assertTrue(participant.get().muted)
+
+    def test_unsubscribe_from_all_group_notifications(self):
+        membership = self.group.groupmembership_set.filter(user=self.user)
+        self.assertEqual(
+            membership.get().notification_types, [
+                'weekly_summary',
+                'daily_pickup_notification',
+                'new_application',
+            ]
+        )
+        unsubscribe_from_all_conversations_in_group(self.user, self.group)
+        self.assertEqual(membership.get().notification_types, [])
 
     def test_unsubscribe_from_pickup_conversation(self):
         pickup = PickupDateFactory(store=self.store, collectors=[self.user])

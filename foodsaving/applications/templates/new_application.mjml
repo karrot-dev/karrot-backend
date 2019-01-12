@@ -30,7 +30,7 @@
                 <mj-text font-size="13px" line-height="18px" color="#777">
                     <p>
                         {% trans %}You are receiving this because you are subscribed to <strong>User application</strong> emails for this group.{% endtrans %}
-                        <a href="{{ settings_url }}">{% trans %}Click here to unsubscribe{% endtrans %}</a>.
+                        <a href="{{ new_application_unsubscribe_url }}">{% trans %}Click here to unsubscribe{% endtrans %}</a>.
                     </p>
                     <p>
                         {% trans %}Reply to this email directly, <a href="{{ conversation_url }}">view it on {{ site_name }}</a>, or <a href="{{ mute_url }}">mute the conversation</a>.{% endtrans %}

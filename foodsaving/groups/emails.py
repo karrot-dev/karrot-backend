@@ -11,7 +11,7 @@ from foodsaving.conversations.models import ConversationMessage
 from foodsaving.groups.models import Group, GroupNotificationType, GroupMembership
 from foodsaving.pickups.models import PickupDate, Feedback
 from foodsaving.utils.email_utils import prepare_email
-from foodsaving.utils.frontend_urls import group_wall_url, group_settings_url
+from foodsaving.utils.frontend_urls import group_wall_url, group_settings_url, group_summary_unsubscribe_url
 
 
 def prepare_group_summary_data(group, from_date, to_date):
@@ -67,6 +67,18 @@ def prepare_group_summary_emails(group, context):
         groupmembership__in=GroupMembership.objects.active().
         with_notification_type(GroupNotificationType.WEEKLY_SUMMARY)
     ).exclude(groupmembership__user__in=get_user_model().objects.unverified_or_ignored())
+
+    return [
+        prepare_email(
+            template='group_summary',
+            context={
+                'unsubscribe_url': group_summary_unsubscribe_url(member, group),
+                **context,
+            },
+            to=[member.email],
+            language=member.language,
+        ) for member in members
+    ]
 
     grouped_members = itertools.groupby(members.order_by('language'), key=lambda member: member.language)
     return [

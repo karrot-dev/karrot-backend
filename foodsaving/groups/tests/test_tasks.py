@@ -181,8 +181,7 @@ class TestSummaryEmailTask(TestCase):
 
         send_summary_emails()
 
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(len(mail.outbox[0].to), self.new_user_count)
+        self.assertEqual(len(mail.outbox), self.new_user_count)
         write_points.assert_called_with([{
             'measurement': 'karrot.email.group_summary',
             'tags': {
