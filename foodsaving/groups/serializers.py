@@ -153,6 +153,9 @@ class GroupDetailSerializer(GroupBaseSerializer):
                 if field in validated_data:
                     del validated_data[field]
 
+        if 'photo' in validated_data and validated_data['photo'] is None:
+            group.delete_photo()
+
         changed_data = find_changed(group, validated_data)
         before_data = GroupHistorySerializer(group).data
         group = super().update(group, validated_data)

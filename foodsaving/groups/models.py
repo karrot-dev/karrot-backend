@@ -142,6 +142,12 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         trust_threshold = min(settings.GROUP_EDITOR_TRUST_MAX_THRESHOLD, dynamic_threshold)
         return trust_threshold
 
+    def delete_photo(self):
+        # Deletes Image Renditions
+        self.photo.delete_all_created_images()
+        # Deletes Original Image
+        self.photo.delete(save=False)
+
 
 class Agreement(BaseModel):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
