@@ -89,6 +89,10 @@ def get_message_title(message, language):
         else:
             return '{} / {}'.format(application_title, author_name)
 
+    if type == 'case':
+        # TODO add custom push title
+        return author_name
+
     return author_name
 
 
