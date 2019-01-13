@@ -2,7 +2,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.utils import timezone
 from enum import Enum
 
@@ -38,6 +38,14 @@ class Case(BaseModel, ConversationMixin):
         if self.votings.count() == 0:
             voting = self.votings.create()
             voting.create_options(self.affected_user)
+
+    def user_queryset(self):
+        editors = Q(groupmembership__in=self.group.groupmembership_set.editors())
+        affected_user = Q(id=self.affected_user_id)
+        return get_user_model().objects.filter(editors | affected_user)
+
+    def latest_voting(self):
+        return self.votings.latest('created_at')
 
 
 def voting_expiration_time():

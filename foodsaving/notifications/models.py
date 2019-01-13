@@ -24,6 +24,9 @@ class NotificationType(Enum):
     PICKUP_DISABLED = 'pickup_disabled'
     PICKUP_ENABLED = 'pickup_enabled'
     PICKUP_MOVED = 'pickup_moved'
+    CONFLICT_RESOLUTION_CASE_CREATED = 'conflict_resolution_case_created'
+    CONFLICT_RESOLUTION_CASE_CONTINUED = 'conflict_resolution_case_continued'
+    CONFLICT_RESOLUTION_CASE_DECIDED = 'conflict_resolution_case_decided'
 
 
 class NotificationQuerySet(models.QuerySet):

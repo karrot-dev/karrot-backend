@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 from foodsaving.applications.models import GroupApplication, GroupApplicationStatus
+from foodsaving.cases.models import Case, Voting
 from foodsaving.notifications.models import Notification, NotificationType
 from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
@@ -250,4 +251,55 @@ def pickup_modified(sender, instance, **kwargs):
         Notification.objects.create_for_pickup_collectors(
             collectors=collectors.exclude(user=pickup.last_changed_by),
             type=NotificationType.PICKUP_MOVED.value,
+        )
+
+
+def create_notification_about_case(case, user, type):
+    return Notification.objects.create(
+        user=user,
+        type=type,
+        context={
+            'case': case.id,
+            'group': case.group.id,
+            'affected_user': case.affected_user.id,
+        }
+    )
+
+
+@receiver(post_save, sender=Voting)
+def conflict_resolution_case_created_or_continued(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    voting = instance
+    case = voting.case
+
+    # if there's only one voting, the case has just been created
+    if case.votings.count() <= 1:
+        for user in case.user_queryset().exclude(id=case.created_by_id).distinct():
+            create_notification_about_case(
+                case=case, user=user, type=NotificationType.CONFLICT_RESOLUTION_CASE_CREATED.value
+            )
+    else:
+        for user in case.user_queryset().distinct():
+            create_notification_about_case(
+                case=case, user=user, type=NotificationType.CONFLICT_RESOLUTION_CASE_CONTINUED.value
+            )
+
+
+@receiver(pre_save, sender=Case)
+def conflict_resolution_case_decided(sender, instance, **kwargs):
+    case = instance
+
+    # abort if just created
+    if not case.id:
+        return
+
+    old = Case.objects.get(id=case.id)
+    if old.is_decided or not case.is_decided:
+        return
+
+    for user in case.user_queryset().distinct():
+        create_notification_about_case(
+            case=case, user=user, type=NotificationType.CONFLICT_RESOLUTION_CASE_DECIDED.value
         )

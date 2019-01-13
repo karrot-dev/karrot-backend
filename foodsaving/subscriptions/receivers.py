@@ -396,9 +396,7 @@ def notification_meta_saved(sender, instance, **kwargs):
 
 # Case
 def send_case_updates(case):
-    # send to fellow editors
-    memberships = GroupMembership.objects.filter(group=case.group).editors()
-    for subscription in ChannelSubscription.objects.recent().filter(user__groupmembership__in=memberships).distinct():
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=case.user_queryset()).distinct():
         payload = CaseSerializer(case, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic='cases:case', payload=payload)
 
