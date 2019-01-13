@@ -2,10 +2,12 @@ from django.core import mail
 from django.db import IntegrityError
 from django.test import TestCase
 
+from foodsaving.cases.factories import CaseFactory
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import Conversation, ConversationMessage, ConversationMessageReaction, \
     ConversationThreadParticipant
 from foodsaving.groups.factories import GroupFactory
+from foodsaving.groups.models import GroupNotificationType
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
@@ -178,6 +180,29 @@ class TestPickupConversations(TestCase):
         self.assertEqual(actual_recipients, expected_recipients)
 
         self.assertEqual(len(mail.outbox), 2)
+
+
+class TestCaseConversations(TestCase):
+    def setUp(self):
+        self.user = VerifiedUserFactory()
+        self.more_users = [VerifiedUserFactory() for _ in range(2)]
+        self.group = GroupFactory(members=[self.user, *self.more_users])
+        for membership in self.group.groupmembership_set.all():
+            membership.add_notification_types([GroupNotificationType.NEW_CASE])
+            membership.save()
+        self.case = CaseFactory(group=self.group, created_by=self.user)
+        self.conversation = self.case.conversation
+        mail.outbox = []
+
+    def test_send_email_notifications(self):
+        ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
+
+        self.assertEqual(len(mail.outbox), 2)
+
+        actual_recipients = set(m.to[0] for m in mail.outbox)
+        expected_recipients = set(u.email for u in self.more_users)
+
+        self.assertEqual(actual_recipients, expected_recipients)
 
 
 class TestPrivateUserConversations(TestCase):

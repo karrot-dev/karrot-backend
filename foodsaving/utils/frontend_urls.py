@@ -69,6 +69,14 @@ def group_application_url(application):
     )
 
 
+def conflict_resolution_case_url(case):
+    return '{hostname}/#/group/{group_id}/conflict_resolutions/{case_id}'.format(
+        hostname=settings.HOSTNAME,
+        group_id=case.group.id,
+        case_id=case.id,
+    )
+
+
 def user_detail_url(user):
     return '{hostname}/#/user/{user_id}/detail'.format(
         hostname=settings.HOSTNAME,

@@ -7,7 +7,7 @@ from config import settings
 from foodsaving.utils.email_utils import prepare_email, formataddr
 from foodsaving.utils.frontend_urls import (
     group_wall_url, conversation_unsubscribe_url, pickup_detail_url, user_detail_url, group_application_url,
-    thread_url, thread_unsubscribe_url
+    thread_url, thread_unsubscribe_url, conflict_resolution_case_url
 )
 from foodsaving.webhooks.api import make_local_part
 
@@ -26,6 +26,8 @@ def prepare_conversation_message_notification(user, messages):
         return prepare_pickup_conversation_message_notification(user, messages)
     if type == 'application':
         return prepare_group_application_message_notification(user, messages)
+    if type == 'case':
+        return prepare_case_message_notification(user, messages)
     if type == 'private':
         return prepare_private_user_conversation_message_notification(user, messages)
     raise Exception('Cannot send message notification because conversation doesn\'t have a known type')
@@ -224,6 +226,46 @@ def prepare_group_application_message_notification(user, messages):
                 'messages': messages,
                 'conversation_name': conversation_name,
                 'conversation_url': group_application_url(application),
+                'mute_url': unsubscribe_url,
+            }
+        )
+
+
+def prepare_case_message_notification(user, messages):
+    first_message = messages[0]
+    conversation = first_message.conversation
+    author = first_message.author
+    reply_to_name = author.display_name
+    case = conversation.target
+
+    language = user.language
+
+    if not translation.check_for_language(language):
+        language = 'en'
+
+    with translation.override(language):
+        conversation_name = _('New message in conflict resolution in %(group_name)s') % {
+            'group_name': case.group.name,
+        }
+
+        from_text = author_names(messages)
+
+        local_part = make_local_part(conversation, user)
+        reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
+        from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
+
+        unsubscribe_url = conversation_unsubscribe_url(user, group=case.group, conversation=conversation)
+
+        return prepare_email(
+            template='conversation_message_notification',
+            from_email=from_email,
+            user=user,
+            reply_to=[reply_to],
+            unsubscribe_url=unsubscribe_url,
+            context={
+                'messages': messages,
+                'conversation_name': conversation_name,
+                'conversation_url': conflict_resolution_case_url(case),
                 'mute_url': unsubscribe_url,
             }
         )
