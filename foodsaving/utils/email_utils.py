@@ -63,7 +63,16 @@ class StatCollectingAnymailMessage(AnymailMessage):
             raise exception
 
 
-def prepare_email(template, user=None, context=None, to=None, language=None, unsubscribe_url=None, **kwargs):
+def prepare_email(
+        template,
+        user=None,
+        context=None,
+        to=None,
+        language=None,
+        unsubscribe_url=None,
+        transactional=False,
+        **kwargs,
+):
     context = dict(context) if context else {}
 
     default_context = {
@@ -113,6 +122,14 @@ def prepare_email(template, user=None, context=None, to=None, language=None, uns
         'headers': headers,
         'track_clicks': False,
         'track_opens': False,
+
+        # Add extra parameters for SparkPost
+        # See https://anymail.readthedocs.io/en/stable/esps/sparkpost/
+        'esp_extra': {
+            # Can mark emails as transactional, to not be affected by suppression list
+            # See https://www.sparkpost.com/resources/infographics/email-difference-transactional-vs-commercial-emails/
+            'transactional': transactional,
+        },
         **kwargs,
     }
 

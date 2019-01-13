@@ -6,6 +6,7 @@ def prepare_accountdelete_request_email(user, verification_code):
     return prepare_email(
         template='accountdelete_request',
         user=user,
+        transactional=True,
         context={'url': user_delete_url(verification_code.code)},
     )
 
@@ -14,6 +15,7 @@ def prepare_accountdelete_success_email(user):
     return prepare_email(
         template='accountdelete_success',
         user=user,
+        transactional=True,
     )
 
 
@@ -25,6 +27,7 @@ def prepare_changemail_request_email(user, verification_code):
             'url': user_emailverification_url(verification_code.code),
         },
         to=user.unverified_email,
+        transactional=True,
     )
 
 
@@ -32,6 +35,7 @@ def prepare_changemail_success_email(user):
     return prepare_email(
         template='changemail_success',
         user=user,
+        transactional=True,
     )
 
 
@@ -40,6 +44,7 @@ def prepare_passwordreset_request_email(user, verification_code):
         template='passwordreset_request',
         user=user,
         context={'url': user_passwordreset_url(verification_code.code)},
+        transactional=True,
     )
 
 
@@ -47,6 +52,7 @@ def prepare_passwordreset_success_email(user):
     return prepare_email(
         template='passwordreset_success',
         user=user,
+        transactional=True,
     )
 
 
@@ -56,4 +62,5 @@ def prepare_signup_email(user, verification_code):
         user=user,
         context={'url': user_emailverification_url(verification_code.code)},
         to=user.unverified_email,
+        transactional=True,
     )
