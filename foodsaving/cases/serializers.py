@@ -47,10 +47,11 @@ class VoteSerializer(serializers.ModelSerializer):
             },
         }
 
-    def valiate_option(self, option):
+    def validate_option(self, option):
         voting = self.context['voting']
         if option.voting != voting:
             raise serializers.ValidationError(_('Provided option is not part of this voting'))
+        return option
 
     def validate_score(self, score):
         if not -2 <= score <= 2:

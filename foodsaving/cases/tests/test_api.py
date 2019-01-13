@@ -216,8 +216,8 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
 
     def test_cannot_vote_in_expired_voting(self):
         case = self.create_case()
-        self.client.force_login(user=self.member)
         voting = case.votings.first()
+        self.client.force_login(user=self.member)
         with self.fast_forward_to_voting_expiration(voting):
             process_expired_votings()
             response = self.vote_via_API(voting)
@@ -225,8 +225,8 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
 
     def test_cannot_change_vote_in_expired_voting(self):
         case = self.create_case()
-        self.client.force_login(user=self.member)
         voting = case.votings.first()
+        self.client.force_login(user=self.member)
         response = self.vote_via_API(voting)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         with self.fast_forward_to_voting_expiration(voting):
@@ -236,8 +236,8 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
 
     def test_cannot_delete_vote_in_expired_voting(self):
         case = self.create_case()
-        self.client.force_login(user=self.member)
         voting = case.votings.first()
+        self.client.force_login(user=self.member)
         response = self.vote_via_API(voting)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         with self.fast_forward_to_voting_expiration(voting):
@@ -247,16 +247,21 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
 
     def test_must_provide_score_for_all_options_in_voting(self):
         case = self.create_case()
-        self.client.force_login(user=self.member)
         voting = case.votings.first()
+        self.client.force_login(user=self.member)
         response = self.vote_via_API(voting, data=[{'option': voting.options.first().id, 'score': 1}])
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual('You need to provide a score for all options', response.data['non_field_errors'][0])
 
     def test_cannot_provide_score_for_options_in_other_voting(self):
         case = self.create_case()
-        case2 = self.create_case()
-        self.client.force_login(user=self.member)
         voting = case.votings.first()
+        case2 = self.create_case()
         voting2 = case2.votings.first()
+        self.client.force_login(user=self.member)
         response = self.vote_via_API(voting, data=[{'option': voting2.options.first().id, 'score': 1}])
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual('Provided option is not part of this voting', response.data[0]['option'][0])
+
+    def test_cannot_create_case_against_yourself(self):
+        pass
