@@ -95,7 +95,7 @@ class VotingSerializer(serializers.ModelSerializer):
     options = OptionSerializer(many=True, read_only=True)
 
 
-class CasesSerializer(serializers.ModelSerializer):
+class CaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Case
         fields = [

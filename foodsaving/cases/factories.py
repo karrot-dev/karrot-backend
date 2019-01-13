@@ -13,4 +13,5 @@ class CaseFactory(DjangoModelFactory):
 
     group = SubFactory(GroupFactory)
     created_by = SubFactory(UserFactory)
+    affected_user = SubFactory(UserFactory)
     topic = LazyAttribute(lambda x: faker.sentence(nb_words=4))

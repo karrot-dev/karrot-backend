@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.cases.models import Case, Vote, Voting
-from foodsaving.cases.serializers import CasesSerializer, VoteSerializer
+from foodsaving.cases.serializers import CaseSerializer, VoteSerializer
 from foodsaving.conversations.api import RetrieveConversationMixin
 from foodsaving.groups.models import Group
 
@@ -36,7 +36,7 @@ class CasesViewSet(
     queryset = Case.objects
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_fields = ('group', 'is_decided')
-    serializer_class = CasesSerializer
+    serializer_class = CaseSerializer
     permission_classes = (IsAuthenticated, )
     pagination_class = CasesPagination
 
