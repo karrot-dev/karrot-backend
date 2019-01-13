@@ -1,7 +1,8 @@
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db import models
-from django.db.models import Avg
+from django.db.models import Sum
 from django.utils import timezone
 from enum import Enum
 
@@ -56,19 +57,33 @@ class Voting(BaseModel):
     def is_expired(self):
         return self.expires_at < timezone.now()
 
+    def participants(self):
+        return get_user_model().objects.filter(votes_given__option__voting=self).distinct().count()
+
     def create_options(self, affected_user):
-        self.options.create(type=OptionTypes.FURTHER_DISCUSSION.value)
-        self.options.create(type=OptionTypes.NO_CHANGE.value)
-        self.options.create(type=OptionTypes.REMOVE_USER.value, affected_user=affected_user)
+        options = [
+            {
+                'type': OptionTypes.FURTHER_DISCUSSION.value,
+            },
+            {
+                'type': OptionTypes.NO_CHANGE.value,
+            },
+            {
+                'type': OptionTypes.REMOVE_USER.value,
+                'affected_user': affected_user,
+            },
+        ]
+        for option in options:
+            self.options.create(**option)
 
     def calculate_results(self):
-        options = list(self.options.annotate(_mean_score=Avg('votes__score')).order_by('_mean_score'))
+        options = list(self.options.annotate(_sum_score=Sum('votes__score')).order_by('_sum_score'))
         for option in options:
-            option.mean_score = option._mean_score
+            option.sum_score = option._sum_score
             option.save()
 
         accepted_option = options[-1]
-        if options[-2].mean_score == accepted_option.mean_score:
+        if options[-2].sum_score == accepted_option.sum_score:
             # tie!
             accepted_option = next(o for o in options if o.type == OptionTypes.FURTHER_DISCUSSION.value)
 
@@ -94,7 +109,7 @@ class Option(BaseModel):
         related_name='affected_by_voting_options',
     )
     message = models.TextField(null=True)
-    mean_score = models.FloatField(null=True)
+    sum_score = models.FloatField(null=True)
 
     def do_action(self):
         if self.type != OptionTypes.FURTHER_DISCUSSION.value:
@@ -124,4 +139,4 @@ class Option(BaseModel):
 class Vote(BaseModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='votes_given')
     option = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='votes')
-    score = models.PositiveIntegerField()
+    score = models.IntegerField()

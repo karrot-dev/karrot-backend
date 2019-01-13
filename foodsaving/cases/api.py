@@ -1,16 +1,24 @@
+from django.utils.translation import ugettext_lazy as _
 from django_filters import rest_framework as filters
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import CursorPagination
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from foodsaving.cases.models import Case, Vote, Option
+from foodsaving.cases.models import Case, Vote, Voting
 from foodsaving.cases.serializers import CasesSerializer, VoteSerializer
 from foodsaving.conversations.api import RetrieveConversationMixin
 from foodsaving.groups.models import Group
+
+
+class IsNotExpired(BasePermission):
+    message = _('Cannot modify expired votings')
+
+    def has_object_permission(self, request, view, obj):
+        return not obj.is_expired()
 
 
 class CasesPagination(CursorPagination):
@@ -46,29 +54,34 @@ class CasesViewSet(
     @action(
         detail=False,
         methods=['POST', 'DELETE'],
-        url_name='vote-option',
-        url_path='options/(?P<option_id>[^/.]+)/vote',
-        serializer_class=VoteSerializer
+        url_name='vote-case',
+        url_path='votings/(?P<voting_id>[^/.]+)/vote',
+        serializer_class=VoteSerializer,
+        permission_classes=(IsAuthenticated, IsNotExpired)
     )
-    def vote(self, request, option_id):
+    def vote(self, request, voting_id):
         self.check_permissions(request)
         cases = self.get_queryset()
-        queryset = Option.objects.filter(voting__case__in=cases)
-        option = get_object_or_404(queryset, id=option_id)
-        self.check_object_permissions(request, option)
+        queryset = Voting.objects.filter(case__in=cases)
+        voting = get_object_or_404(queryset, id=voting_id)
+        self.check_object_permissions(request, voting)
+
+        vote_qs = Vote.objects.filter(option__voting=voting, user=request.user)
 
         if request.method == 'POST':
-            serializer = VoteSerializer(data={
-                **request.data,
-                'option': option.id,
-                'user': request.user.id,
-            })
+            instances = vote_qs.all()
+            context = self.get_serializer_context()
+            context['voting'] = voting
+            serializer = VoteSerializer(data=request.data, instance=instances, many=True, context=context)
             serializer.is_valid(raise_exception=True)
-            serializer.save()
+            instances = serializer.save()
+
+            # somehow serializer.data is empty, we need to re-serialize...
+            serializer = VoteSerializer(instance=instances, many=True)
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            deleted_rows, _ = Vote.objects.filter(option=option, user=request.user).delete()
+            deleted_rows, _ = vote_qs.delete()
             return Response(
                 data={},
                 status=status.HTTP_204_NO_CONTENT if deleted_rows > 0 else status.HTTP_404_NOT_FOUND,

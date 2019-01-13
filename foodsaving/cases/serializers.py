@@ -6,32 +6,55 @@ from django.utils.translation import ugettext as _
 from foodsaving.cases.models import Case, Voting, Vote, Option
 
 
+class VoteListSerializer(serializers.ListSerializer):
+    def validate(self, attrs):
+        mapping = {vote['option'].id: vote for vote in attrs}
+        voting = self.context['voting']
+        if not all((option.id in mapping) for option in voting.options.all()):
+            raise serializers.ValidationError(_('You need to provide a score for all options'))
+
+        return mapping
+
+    def save(self, **kwargs):
+        return self.update(self.instance, self.validated_data)
+
+    def update(self, instance, validated_data):
+        votes = {vote.option_id: vote for vote in instance}
+
+        created = []
+        for option_id, data in validated_data.items():
+            vote = votes.get(option_id, None)
+            if vote is not None:
+                vote.delete()
+            created.append(Vote.objects.create(**data))
+
+        return created
+
+
 class VoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vote
+        list_serializer_class = VoteListSerializer
         fields = [
             'option',
             'score',
             'user',
         ]
         extra_kwargs = {
-            'option': {
-                'write_only': True
-            },
             'user': {
-                'write_only': True
+                'write_only': True,
+                'default': serializers.CurrentUserDefault(),
             },
         }
 
-    def create(self, validated_data):
-        option = validated_data['option']
-        user = validated_data['user']
-        option.votes.filter(user=user).delete()
-        return super().create(validated_data)
+    def valiate_option(self, option):
+        voting = self.context['voting']
+        if option.voting != voting:
+            raise serializers.ValidationError(_('Provided option is not part of this voting'))
 
     def validate_score(self, score):
-        if score > 5:
-            raise serializers.ValidationError('Score too high')
+        if not -2 <= score <= 2:
+            raise serializers.ValidationError(_('Provided score is outside of allowed range'))
         return score
 
 
@@ -43,7 +66,7 @@ class OptionSerializer(serializers.ModelSerializer):
             'type',
             'message',
             'affected_user',
-            'mean_score',
+            'sum_score',
             'your_score',
         ]
 
@@ -65,6 +88,7 @@ class VotingSerializer(serializers.ModelSerializer):
             'expires_at',
             'options',
             'accepted_option',
+            'participants',
         ]
 
     options = OptionSerializer(many=True, read_only=True)
