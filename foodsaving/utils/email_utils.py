@@ -64,14 +64,7 @@ class StatCollectingAnymailMessage(AnymailMessage):
 
 
 def prepare_email(
-        template,
-        user=None,
-        context=None,
-        to=None,
-        language=None,
-        unsubscribe_url=None,
-        transactional=False,
-        **kwargs,
+        template, user=None, context=None, to=None, language=None, unsubscribe_url=None, transactional=False, **kwargs
 ):
     context = dict(context) if context else {}
 
