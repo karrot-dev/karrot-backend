@@ -1,0 +1,44 @@
+<mjml>
+    <mj-head>
+        <mj-include path="../../base/templates/_base-head.mjml"/>
+        <mj-title>{{ group_name }}</mj-title>
+    </mj-head>
+    <mj-body>
+        <mj-include path="../../base/templates/_header.mjml"/>
+        <mj-section>
+            <mj-column>
+                <mj-text>
+                    <p>
+                        {% trans %}Hey, we're really missing you!{% endtrans %}
+                    </p>
+                    <p>
+                        {% trans %}It's been {{ num_months_inactive }} months since we noticed you were inactive in
+                            <a href="{{ group_url }}">{{ group_name }}</a>.{% endtrans %}
+                    </p>
+                    <p>
+                        {% trans %}If you want to stay part of the group, just visit the group again!{% endtrans %}
+                    </p>
+                </mj-text>
+                <mj-button href="{{ group_url }}">
+                    {% trans %}Visit {{ group_name }}{% endtrans %}
+                </mj-button>
+                <mj-text>
+                    <p>
+                        ({% trans %}Otherwise we'll remove you from the group in {{ num_removal_days }}
+                        days.{% endtrans %})
+                    </p>
+                </mj-text>
+                <mj-divider/>
+                <mj-text font-size="13px" line-height="18px" color="#777">
+                    <p>
+                        {% trans %}You are receiving this because you are a member of <strong>{{ group_name }}</strong>
+                            .{% endtrans %}
+                        {% trans %}You can leave the group from the <a href="{{ group_url }}">group page</a>
+                            .{% endtrans %}
+                    </p>
+                </mj-text>
+            </mj-column>
+        </mj-section>
+        <mj-include path="../../base/templates/_footer.mjml"/>
+    </mj-body>
+</mjml>

@@ -140,6 +140,7 @@ class GroupViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUp
         membership = get_object_or_404(GroupMembership.objects, group=pk, user=request.user)
         membership.lastseen_at = timezone.now()
         membership.inactive_at = None
+        membership.removal_notification_at = None
         membership.save()
         stats.group_activity(membership.group)
         return Response(status=status.HTTP_204_NO_CONTENT)

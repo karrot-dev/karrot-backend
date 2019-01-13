@@ -1,6 +1,8 @@
 from furl import furl
 
 from config import settings
+from foodsaving.groups.models import GroupNotificationType
+from foodsaving.unsubscribe.utils import generate_token
 
 
 def conversation_url(conversation, user):
@@ -42,8 +44,21 @@ def pickup_detail_url(pickup):
     )
 
 
-def pickup_conversation_mute_url(pickup, conversation):
-    return '{}?mute_conversation={}'.format(pickup_detail_url(pickup), conversation.id)
+def weekly_summary_unsubscribe_url(user, group):
+    return unsubscribe_url(user, group, notification_type=GroupNotificationType.WEEKLY_SUMMARY)
+
+
+def group_summary_unsubscribe_url(user, group):
+    return unsubscribe_url(user, group, notification_type=GroupNotificationType.WEEKLY_SUMMARY)
+
+
+def new_application_unsubscribe_url(user, application):
+    return unsubscribe_url(
+        user,
+        group=application.group,
+        conversation=application.conversation,
+        notification_type=GroupNotificationType.NEW_APPLICATION,
+    )
 
 
 def group_application_url(application):
@@ -54,19 +69,11 @@ def group_application_url(application):
     )
 
 
-def group_application_mute_url(application, conversation):
-    return '{}?mute_conversation={}'.format(group_application_url(application), conversation.id)
-
-
 def user_detail_url(user):
     return '{hostname}/#/user/{user_id}/detail'.format(
         hostname=settings.HOSTNAME,
         user_id=user.id,
     )
-
-
-def user_conversation_mute_url(user, conversation):
-    return '{}?mute_conversation={}'.format(user_detail_url(user), conversation.id)
 
 
 def thread_url(thread):
@@ -80,8 +87,8 @@ def thread_url(thread):
     )
 
 
-def thread_mute_url(thread):
-    return '{}?mute'.format(thread_url(thread))
+def thread_unsubscribe_url(user, group, thread):
+    return unsubscribe_url(user, group, thread=thread)
 
 
 def group_wall_url(group):
@@ -102,8 +109,21 @@ def group_edit_url(group):
     )
 
 
-def group_conversation_mute_url(group, conversation):
-    return '{}?mute_conversation={}'.format(group_wall_url(group), conversation.id)
+def conversation_unsubscribe_url(user, conversation, group=None):
+    return unsubscribe_url(user, group=group, conversation=conversation)
+
+
+def unsubscribe_url(user, group=None, conversation=None, thread=None, notification_type=None):
+    return '{hostname}/#/unsubscribe/{token}'.format(
+        hostname=settings.HOSTNAME,
+        token=generate_token(
+            user,
+            group=group,
+            conversation=conversation,
+            thread=thread,
+            notification_type=notification_type,
+        ),
+    )
 
 
 def group_settings_url(group):

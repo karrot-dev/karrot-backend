@@ -18,7 +18,7 @@ from foodsaving.applications.factories import GroupApplicationFactory
 from foodsaving.applications.models import GroupApplication
 from foodsaving.conversations.models import ConversationMessage
 from foodsaving.groups.emails import prepare_user_inactive_in_group_email, prepare_group_summary_emails, \
-    prepare_group_summary_data, prepare_user_became_editor_email
+    prepare_group_summary_data, prepare_user_became_editor_email, prepare_user_removal_from_group_email
 from foodsaving.groups.models import Group
 from foodsaving.invitations.models import Invitation
 from foodsaving.pickups.emails import prepare_pickup_notification_email
@@ -42,6 +42,11 @@ def random_group():
 
 def shuffle_groups():
     return Group.objects.order_by('?')
+
+
+def random_message():
+    conversation = ConversationMessage.objects.order_by('?').first().conversation
+    return conversation.messages.exclude_replies().first()
 
 
 def random_messages():
@@ -98,8 +103,8 @@ class Handlers:
         return foodsaving.users.emails.prepare_changemail_success_email(user=random_user())
 
     def conversation_message_notification(self):
-        return foodsaving.conversations.emails.prepare_conversation_message_notification(
-            user=random_user(), messages=random_messages()
+        return foodsaving.conversations.emails.prepare_group_conversation_message_notification(
+            user=random_user(), message=random_message()
         )
 
     def emailinvitation(self):
@@ -184,6 +189,9 @@ class Handlers:
 
     def user_inactive_in_group(self):
         return prepare_user_inactive_in_group_email(user=random_user(), group=random_group())
+
+    def user_removal_from_group(self):
+        return prepare_user_removal_from_group_email(user=random_user(), group=random_group())
 
 
 handlers = Handlers()

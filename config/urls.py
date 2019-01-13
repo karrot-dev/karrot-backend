@@ -24,6 +24,7 @@ from foodsaving.pickups.api import PickupDateViewSet, PickupDateSeriesViewSet, F
 from foodsaving.stores.api import StoreViewSet
 from foodsaving.subscriptions.api import PushSubscriptionViewSet
 from foodsaving.template_previews import views as template_preview_views
+from foodsaving.unsubscribe.api import UnsubscribeView
 from foodsaving.userauth.api import AuthUserView, AuthView, LogoutView, \
     RequestResetPasswordView, ChangePasswordView, VerifyMailView, ResendMailVerificationCodeView, ResetPasswordView, \
     ChangeMailView, RequestDeleteUserView, FailedEmailDeliveryView
@@ -85,6 +86,7 @@ urlpatterns = [
     path('api/auth/password/reset/', ResetPasswordView.as_view()),
     path('api/webhooks/incoming_email/', IncomingEmailView.as_view()),
     path('api/webhooks/email_event/', EmailEventView.as_view()),
+    path('api/unsubscribe/<token>/', UnsubscribeView.as_view()),
     path('api/auth/', AuthView.as_view()),
     path('api/', include((router.urls))),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
