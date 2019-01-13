@@ -57,7 +57,7 @@ class Voting(BaseModel):
     def is_expired(self):
         return self.expires_at < timezone.now()
 
-    def participants(self):
+    def participant_count(self):
         return get_user_model().objects.filter(votes_given__option__voting=self).distinct().count()
 
     def create_options(self, affected_user):

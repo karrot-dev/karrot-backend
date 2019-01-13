@@ -53,6 +53,7 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
         self.assertLessEqual(parse(case['created_at']), timezone.now())
 
         voting = case['votings'][0]
+        self.assertEqual(voting['participant_count'], 0)
 
         # vote on option
         response = self.client.post(
@@ -120,8 +121,8 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
     def create_case_via_API(self, **kwargs):
         return self.client.post(
             '/api/cases/', {
-                'group': self.group.id,
-                'topic': 'asdf',
+                'group': kwargs.get('group', self.group).id,
+                'topic': kwargs.get('topic', 'asdf'),
                 'affected_user': kwargs.get('affected_user', self.affected_member).id,
             },
             format='json'
@@ -151,6 +152,11 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         response = self.create_case_via_API()
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
+    def test_cannot_create_case_with_empty_topic(self):
+        self.client.force_login(user=self.member)
+        response = self.create_case_via_API(topic='')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
     def test_cannot_create_twice_for_same_person(self):
         self.client.force_login(user=self.member)
         response = self.create_case_via_API()
@@ -162,6 +168,19 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
     def test_cannot_create_case_about_nonmember(self):
         self.client.force_login(user=self.member)
         response = self.create_case_via_API(affected_user=VerifiedUserFactory())
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
+    def test_cannot_create_case_about_yourself(self):
+        self.client.force_login(user=self.member)
+        response = self.create_case_via_API(affected_user=self.member)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
+    def test_cannot_create_case_in_open_group(self):
+        member = VerifiedUserFactory()
+        member2 = VerifiedUserFactory()
+        open_group = GroupFactory(members=[member, member2], is_open=True)
+        self.client.force_login(user=member)
+        response = self.create_case_via_API(group=open_group, affected_user=member2)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_cannot_list_cases_as_nonmember(self):
@@ -262,6 +281,3 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         response = self.vote_via_API(voting, data=[{'option': voting2.options.first().id, 'score': 1}])
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual('Provided option is not part of this voting', response.data[0]['option'][0])
-
-    def test_cannot_create_case_against_yourself(self):
-        pass

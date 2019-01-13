@@ -89,7 +89,7 @@ class VotingSerializer(serializers.ModelSerializer):
             'expires_at',
             'options',
             'accepted_option',
-            'participants',
+            'participant_count',
         ]
 
     options = OptionSerializer(many=True, read_only=True)
@@ -124,7 +124,19 @@ class CasesSerializer(serializers.ModelSerializer):
             raise PermissionDenied(_('You are not a member of this group.'))
         if not group.is_editor(self.context['request'].user):
             raise PermissionDenied(_('You need to be a group editor'))
+        if group.is_open:
+            raise serializers.ValidationError('Cannot create case in open group')
         return group
+
+    def validate_affected_user(self, affected_user):
+        if affected_user == self.context['request'].user:
+            raise serializers.ValidationError(_('You cannot open a case against yourself'))
+        return affected_user
+
+    def validate_topic(self, topic):
+        if len(topic) < 1:
+            raise serializers.ValidationError(_('Topic cannot be empty'))
+        return topic
 
     def validate(self, attrs):
         group = attrs['group']
