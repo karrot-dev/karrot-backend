@@ -71,7 +71,7 @@ class TestPickupdatesAPIFilter(APITestCase, ExtractPaginationMixin):
         for _ in response.data:
             self.assertGreater(parse(_['date']), query_date)
         selected_pickups = PickupDateModel.objects.filter(store__group__members=self.member) \
-            .filter(date__gte=query_date)
+            .filter(date__startswith__gte=query_date)
         self.assertEqual(len(response.data), selected_pickups.count())
 
     def test_filter_before_date(self):
@@ -82,7 +82,7 @@ class TestPickupdatesAPIFilter(APITestCase, ExtractPaginationMixin):
         for _ in response.data:
             self.assertLess(parse(_['date']), query_date)
         selected_pickups = PickupDateModel.objects.filter(store__group__members=self.member) \
-            .filter(date__lte=query_date)
+            .filter(date__startswith__lte=query_date)
         self.assertEqual(len(response.data), selected_pickups.count())
 
 

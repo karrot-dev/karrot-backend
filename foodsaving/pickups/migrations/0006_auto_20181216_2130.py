@@ -11,7 +11,7 @@ def keep_moved_pickups(apps, schema_editor):
 This is a placeholder for a pickup that was moved.
 The pickup still exists and has been converted into a one-time pickup."""
 
-    moved_pickups = PickupDate.objects.filter(is_date_changed=True, date__gte=timezone.now())
+    moved_pickups = PickupDate.objects.filter(is_date_changed=True, date__startswith__gte=timezone.now())
     for pickup in moved_pickups:
         first_date_change = History.objects.filter(typus=8, before__id=pickup.id, before__is_date_changed=False,
                                                    after__is_date_changed=True).first()

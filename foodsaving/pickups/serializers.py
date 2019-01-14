@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import ugettext as _
+from drf_extra_fields.fields import DateTimeRangeField
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.validators import UniqueTogetherValidator
@@ -47,6 +48,8 @@ class PickupDateSerializer(serializers.ModelSerializer):
     collector_ids = serializers.SerializerMethodField()
     feedback_due = serializers.DateTimeField(read_only=True)
 
+    date = DateTimeRangeField()
+
     def get_collector_ids(self, pickup):
         return [c.user_id for c in pickup.pickupdatecollector_set.all()]
 
@@ -77,7 +80,10 @@ class PickupDateSerializer(serializers.ModelSerializer):
         return store
 
     def validate_date(self, date):
-        if not date > timezone.now() + timedelta(minutes=10):
+        if date.lower is None and date.upper is None:
+            raise Exception('hmmmmmmmm lower and  upper were both None')
+            #  return date
+        if not date.lower > timezone.now() + timedelta(minutes=10):
             raise serializers.ValidationError(_('The date should be in the future.'))
         return date
 

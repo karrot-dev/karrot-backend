@@ -47,8 +47,8 @@ def fetch_pickup_notification_data_for_group(group):
     midnight = localnow.replace(hour=0, minute=0, second=0, microsecond=0) + relativedelta(days=1)
     midnight_tomorrow = midnight + relativedelta(days=1)
 
-    tonight = {'date__gte': localnow, 'date__lt': midnight}
-    tomorrow = {'date__gte': midnight, 'date__lt': midnight_tomorrow}
+    tonight = {'date__startswith__gte': localnow, 'date__startswith__lt': midnight}
+    tomorrow = {'date__startswith__gte': midnight, 'date__startswith__lt': midnight_tomorrow}
 
     empty = {'num_collectors': 0}
     not_full = {'num_collectors__gt': 0, 'num_collectors__lt': F('max_collectors')}

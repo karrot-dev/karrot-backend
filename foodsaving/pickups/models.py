@@ -43,7 +43,7 @@ class PickupDateSeries(BaseModel):
 
     def create_pickup(self, date):
         return self.pickup_dates.create(
-            date=date,
+            date=DateTimeTZRange(date, date + timedelta(minutes=30)),  # TODO: make duration part of series?
             max_collectors=self.max_collectors,
             series=self,
             store=self.store,
@@ -66,7 +66,7 @@ class PickupDateSeries(BaseModel):
 
     def get_matched_pickups(self):
         return match_pickups_with_dates(
-            pickups=self.pickup_dates.order_by('date').filter(date__gt=self.period_start()),
+            pickups=self.pickup_dates.order_by('date').filter(date__startswith__gt=self.period_start()),
             new_dates=self.dates(),
         )
 
@@ -113,7 +113,7 @@ class PickupDateSeries(BaseModel):
 class PickupDateQuerySet(models.QuerySet):
     def _feedback_possible_q(self, user):
         return Q(feedback_possible=True) \
-               & Q(date__gte=timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)) \
+               & Q(date__endswith__gte=timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)) \
                & Q(collectors=user) \
                & ~Q(feedback__given_by=user)
 
@@ -134,16 +134,16 @@ class PickupDateQuerySet(models.QuerySet):
 
     def due_soon(self):
         in_some_hours = timezone.now() + relativedelta(hours=settings.PICKUPDATE_DUE_SOON_HOURS)
-        return self.exclude_disabled().filter(date__gt=timezone.now(), date__lt=in_some_hours)
+        return self.exclude_disabled().filter(date__startswith__gt=timezone.now(), date__startswith__lt=in_some_hours)
 
     def missed(self):
-        return self.exclude_disabled().filter(date__lt=timezone.now(), collectors=None)
+        return self.exclude_disabled().filter(date__startswith__lt=timezone.now(), collectors=None)
 
     def done(self):
-        return self.exclude_disabled().filter(date__lt=timezone.now()).exclude(collectors=None)
+        return self.exclude_disabled().filter(date__startswith__lt=timezone.now()).exclude(collectors=None)
 
     def upcoming(self):
-        return self.filter(date__gt=timezone.now())
+        return self.filter(date__startswith__gt=timezone.now())
 
     @transaction.atomic
     def process_finished_pickup_dates(self):
@@ -153,7 +153,7 @@ class PickupDateQuerySet(models.QuerySet):
         """
         for pickup in self.exclude_disabled().filter(
             feedback_possible=False,
-            date__lt=timezone.now(),
+            date__startswith__lt=timezone.now(),
         ):
             if not pickup.store.is_active():
                 # Make sure we don't process this pickup again, even if the store gets active in future
@@ -173,7 +173,7 @@ class PickupDateQuerySet(models.QuerySet):
                     typus=HistoryTypus.PICKUP_MISSED,
                     group=pickup.store.group,
                     store=pickup.store,
-                    date=pickup.date,
+                    date=pickup.date.lower,
                     payload=payload,
                 )
             else:
@@ -183,7 +183,7 @@ class PickupDateQuerySet(models.QuerySet):
                     group=pickup.store.group,
                     store=pickup.store,
                     users=pickup.collectors.all(),
-                    date=pickup.date,
+                    date=pickup.date.lower,
                     payload=payload,
                 )
 
@@ -193,6 +193,17 @@ class PickupDateQuerySet(models.QuerySet):
 
 def default_pickup_date_range():
     return DateTimeTZRange(timezone.now(), timezone.now() + timedelta(minutes=30))
+
+
+def range_add(range, **kwargs):
+    upper = range.upper
+    lower = range.lower
+    delta = relativedelta(**kwargs)
+    if lower:
+        lower = lower + delta
+    if upper:
+        upper = upper + delta
+    return DateTimeTZRange(lower, upper, range._bounds)
 
 
 class PickupDate(BaseModel, ConversationMixin):
@@ -243,13 +254,13 @@ class PickupDate(BaseModel, ConversationMixin):
         return self.store.group
 
     def __str__(self):
-        return 'PickupDate {} - {}'.format(self.date, self.store)
+        return 'PickupDate {} - {}'.format(self.date.lower, self.store)
 
     def feedback_due(self):
-        return self.date + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
+        return self.date.lower + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
     def is_upcoming(self):
-        return self.date > timezone.now()
+        return self.date.lower > timezone.now()
 
     def is_full(self):
         if not self.max_collectors:
@@ -263,7 +274,7 @@ class PickupDate(BaseModel, ConversationMixin):
         return self.collectors.count() == 0
 
     def is_recent(self):
-        return self.date >= timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
+        return self.date.lower >= timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
     def empty_collectors_count(self):
         return max(0, self.max_collectors - self.collectors.count())

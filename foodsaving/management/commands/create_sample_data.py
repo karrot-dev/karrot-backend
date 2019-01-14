@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import random
 import time
 
@@ -7,11 +9,12 @@ from django.core import mail
 from django.core.management.base import BaseCommand
 from django.http import request
 from django.utils import timezone
+from psycopg2._range import DateTimeTZRange
 from rest_framework.test import APIClient
 
 from foodsaving.groups.models import Group, GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
-from foodsaving.pickups.models import PickupDate, PickupDateSeries
+from foodsaving.pickups.models import PickupDate, PickupDateSeries, range_add
 from foodsaving.stores.models import Store
 from foodsaving.users.models import User
 from foodsaving.utils.tests.fake import faker
@@ -190,15 +193,26 @@ class Command(BaseCommand):
             print('deleted series: ', series)
             return data
 
+        def date_range(date, **kwargs):
+            return DateTimeTZRange(date, date + timedelta(**kwargs))
+
+        def api_date_range(date, **kwargs):
+            return {
+                'lower': date,
+                'upper': date + timedelta(**kwargs),
+            }
+
         def make_pickup(store):
             data = c.post(
                 '/api/pickup-dates/', {
-                    'date': faker.date_time_between(start_date='+2d', end_date='+7d', tzinfo=pytz.utc),
+                    'date': api_date_range(faker.date_time_between(start_date='+2d', end_date='+7d', tzinfo=pytz.utc), minutes=30),
                     'store': store,
                     'max_collectors': 10
-                }
+                },
+                format='json',
             ).data
-            print('created pickup: ', data)
+            p = PickupDate.objects.get(pk=data['id'])
+            print('created pickup: ', data, p.date)
             return data
 
         def modify_pickup(pickup):
@@ -212,9 +226,9 @@ class Command(BaseCommand):
             return data
 
         def join_pickup(pickup):
-            data = c.post('/api/pickup-dates/{}/add/'.format(pickup)).data
+            response = c.post('/api/pickup-dates/{}/add/'.format(pickup))
             print('joined pickup: ', pickup)
-            return data
+            return response.data
 
         def leave_pickup(pickup):
             data = c.post('/api/pickup-dates/{}/remove/'.format(pickup)).data
@@ -235,12 +249,12 @@ class Command(BaseCommand):
 
         def create_done_pickup(store, user_id):
             pickup = PickupDate.objects.create(
-                date=faker.date_time_between(start_date='-9d', end_date='-1d', tzinfo=pytz.utc),
+                date=date_range(faker.date_time_between(start_date='-9d', end_date='-1d', tzinfo=pytz.utc), minutes=30),
                 store_id=store,
                 max_collectors=10,
             )
             pickup.add_collector(User.objects.get(pk=user_id))
-            print('created pickup: ', pickup)
+            print('created done pickup: ', pickup)
             return pickup
 
         ######################
@@ -264,7 +278,7 @@ class Command(BaseCommand):
                 join_pickup(pickup['id'])
                 make_message(group['id'])
                 done_pickup = create_done_pickup(store['id'], user['id'])
-                join_pickup(done_pickup.id)
+                #join_pickup(done_pickup.id)
                 make_feedback(done_pickup.id, user['id'])
 
         # group members
@@ -310,7 +324,7 @@ class Command(BaseCommand):
             u = login_user()
             p = PickupDate.objects.filter(store__group__members=u).first()
             join_pickup(p.id)
-            p.date = p.date - relativedelta(weeks=4)
+            p.date = range_add(p.date, weeks=4)
             p.save()
             print('picked up some food at', p.date)
         PickupDate.objects.process_finished_pickup_dates()

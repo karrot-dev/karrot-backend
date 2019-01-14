@@ -14,6 +14,7 @@ from foodsaving.invitations.models import Invitation
 from foodsaving.notifications.models import Notification, NotificationType
 from foodsaving.notifications.tasks import create_pickup_upcoming_notifications
 from foodsaving.pickups.factories import PickupDateFactory
+from foodsaving.pickups.models import range_add
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory
 
@@ -218,7 +219,7 @@ class TestNotificationReceivers(TestCase):
         Notification.objects.all().delete()
 
         pickup.last_changed_by = user2
-        pickup.date = pickup.date + relativedelta(days=2)
+        pickup.date = range_add(pickup.date, days=2)
         pickup.save()
 
         notifications = Notification.objects.all()

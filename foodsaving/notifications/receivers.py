@@ -126,7 +126,7 @@ def feedback_possible(sender, instance, **kwargs):
 
     # TODO take into account that settings can change
     # better save feedback possible expiry in pickup too
-    expiry_date = pickup.date + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
+    expiry_date = pickup.date.upper + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
     for user in pickup.collectors.all():
         Notification.objects.create(
@@ -248,7 +248,7 @@ def pickup_modified(sender, instance, **kwargs):
             )
             # pickup_upcoming notifications will automatically get created by cronjob
 
-    if abs((old.date - pickup.date).total_seconds()) > 60:
+    if abs((old.date.lower - pickup.date.lower).total_seconds()) > 60:
         Notification.objects.create_for_pickup_collectors(
             collectors=collectors.exclude(user=pickup.last_changed_by),
             type=NotificationType.PICKUP_MOVED.value,

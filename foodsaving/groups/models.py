@@ -230,7 +230,7 @@ class GroupMembershipQuerySet(QuerySet):
     def pickup_active_within(self, **kwargs):
         now = timezone.now()
         pickups = PickupDate.objects.exclude_disabled().filter(
-            store__group=OuterRef('group'), date__lt=now, date__gte=now - relativedelta(**kwargs)
+            store__group=OuterRef('group'), date__startswith__lt=now, date__startswith__gte=now - relativedelta(**kwargs)
         )
         return self.filter(user__pickup_dates__in=Subquery(pickups.only('pk'))).distinct()
 

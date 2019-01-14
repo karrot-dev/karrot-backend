@@ -16,7 +16,7 @@ def match_pickups_with_dates(pickups, new_dates):
     new_dates = peekable(new_dates)
 
     def get_diff(pickup, date):
-        return abs(pickup.date - date)
+        return abs(pickup.date.lower - date)
 
     pickup = next(pickups, None)
     date = next(new_dates, None)
@@ -35,7 +35,7 @@ def match_pickups_with_dates(pickups, new_dates):
         next_pickup = pickups.peek(None)
         next_date = new_dates.peek(None)
 
-        if (not diff_is_small or (next_pickup and get_diff(next_pickup, date) < diff)) and pickup.date < date:
+        if (not diff_is_small or (next_pickup and get_diff(next_pickup, date) < diff)) and pickup.date.lower < date:
             # diff is too big or the next pickup is closer to given date, so the current pickup doesn't match a date
             yield pickup, None
             pickup = next(pickups, None)
