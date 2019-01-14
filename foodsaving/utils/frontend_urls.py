@@ -70,6 +70,7 @@ def group_application_url(application):
 
 
 def conflict_resolution_case_url(case):
+    # TODO update url
     return '{hostname}/#/group/{group_id}/conflict_resolutions/{case_id}'.format(
         hostname=settings.HOSTNAME,
         group_id=case.group.id,
