@@ -2,6 +2,7 @@ import datetime
 import pytz
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
+from psycopg2._range import DateTimeTZRange
 
 from foodsaving.tests.utils import TestMigrations
 from foodsaving.utils.tests.fake import faker
@@ -123,3 +124,30 @@ class TestMovedPickupMigration(TestMigrations):
         self.assertEqual(pickups.count(), 1)
         self.assertIsNotNone(pickups[0].series)
         self.assertFalse(pickups[0].deleted)
+
+
+class TestConvertPickupDateToRangeMigration(TestMigrations):
+    migrate_from = [
+        ('groups', '0035_groupmembership_removal_notification_at'),
+        ('stores', '0031_auto_20181216_2133'),
+        ('pickups', '0010_pickupdate_date_range'),
+    ]
+    migrate_to = [
+        ('pickups', '0011_pickupdate_migrate_to_date_range'),
+    ]
+
+    def setUpBeforeMigration(self, apps):
+        Group = apps.get_model('groups', 'Group')
+        Store = apps.get_model('stores', 'Store')
+        PickupDate = apps.get_model('pickups', 'PickupDate')
+        group = Group.objects.create(name=faker.name())
+        store = Store.objects.create(name=faker.name(), group=group)
+        pickup = PickupDate.objects.create(store=store, date=timezone.now())
+        self.assertIsNone(pickup.date_range)
+        self.pickup_id = pickup.id
+
+    def test_sets_date_range_from_date(self):
+        PickupDate = self.apps.get_model('pickups', 'PickupDate')
+        pickup = PickupDate.objects.get(pk=self.pickup_id)
+        self.assertIsNotNone(pickup.date_range)
+        self.assertEqual(pickup.date_range, DateTimeTZRange(pickup.date, pickup.date + datetime.timedelta(minutes=30)))

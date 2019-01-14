@@ -1,11 +1,14 @@
 import dateutil
+from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
+from django.contrib.postgres.fields import DateTimeRangeField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db import transaction
 from django.db.models import Count, Q
 from django.utils import timezone
+from psycopg2._range import DateTimeTZRange
 
 from foodsaving.base.base_models import BaseModel
 from foodsaving.conversations.models import ConversationMixin
@@ -149,8 +152,8 @@ class PickupDateQuerySet(models.QuerySet):
         add them to history and mark as processed
         """
         for pickup in self.exclude_disabled().filter(
-                feedback_possible=False,
-                date__lt=timezone.now(),
+            feedback_possible=False,
+            date__lt=timezone.now(),
         ):
             if not pickup.store.is_active():
                 # Make sure we don't process this pickup again, even if the store gets active in future
@@ -188,6 +191,10 @@ class PickupDateQuerySet(models.QuerySet):
             pickup.save()
 
 
+def default_pickup_date_range():
+    return DateTimeTZRange(timezone.now(), timezone.now() + timedelta(minutes=30))
+
+
 class PickupDate(BaseModel, ConversationMixin):
     objects = PickupDateQuerySet.as_manager()
 
@@ -217,7 +224,7 @@ class PickupDate(BaseModel, ConversationMixin):
         through='Feedback',
         through_fields=('about', 'given_by')
     )
-    date = models.DateTimeField()
+    date = DateTimeRangeField(default=default_pickup_date_range)
     description = models.TextField(blank=True)
     max_collectors = models.PositiveIntegerField(null=True)
     is_disabled = models.BooleanField(default=False)
@@ -287,7 +294,7 @@ class PickupDateCollector(BaseModel):
 
     class Meta:
         db_table = 'pickups_pickupdate_collectors'
-        unique_together = (('pickupdate', 'user'), )
+        unique_together = (('pickupdate', 'user'),)
         ordering = ['created_at']
 
 
