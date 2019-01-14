@@ -1,11 +1,11 @@
 from anymail.exceptions import AnymailAPIError
+from django.db.models import Q
 from huey.contrib.djhuey import db_task
 from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from foodsaving.conversations.emails import prepare_conversation_message_notification, \
     prepare_group_conversation_message_notification
 from foodsaving.conversations.models import ConversationParticipant, ConversationThreadParticipant
-from foodsaving.groups.models import GroupMembership
 from foodsaving.users.models import User
 
 
@@ -20,6 +20,13 @@ def get_participants_to_notify(message):
             conversation=message.conversation,
             email_notifications=True,
         )
+
+    group = message.conversation.find_group()
+    if group is not None:
+        # prevent sending emails to inactive group members, but still send to non-members (e.g. for applicants)
+        active_members = Q(user__groupmembership__inactive_at__isnull=True, user__groupmembership__group=group)
+        not_in_group = ~Q(user__groupmembership__group=group)
+        participants_to_notify = participants_to_notify.filter(active_members | not_in_group)
 
     return participants_to_notify.exclude(
         user=message.author,
@@ -43,13 +50,7 @@ def send_and_mark(participant, message, email):
 
 
 def notify_group_conversation_participants(message):
-    # only send to users who are active in that group
-    participants_to_notify = get_participants_to_notify(message).filter(
-        user__groupmembership__in=GroupMembership.objects.active(),
-        user__groupmembership__group=message.conversation.target,
-    )
-
-    for participant in participants_to_notify:
+    for participant in get_participants_to_notify(message):
         email = prepare_group_conversation_message_notification(
             user=participant.user,
             message=message,
