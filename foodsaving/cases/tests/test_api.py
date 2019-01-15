@@ -209,6 +209,18 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         response = self.get_results('/api/cases/{}/'.format(case.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
+    def test_cannot_retrieve_case_conversation_as_nonmember(self):
+        case = self.create_case()
+        self.client.force_login(user=VerifiedUserFactory())
+        response = self.get_results('/api/cases/{}/conversation/'.format(case.id))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
+
+    def test_cannot_retrieve_case_conversation_as_newcomer(self):
+        case = self.create_case()
+        self.client.force_login(user=self.newcomer)
+        response = self.get_results('/api/cases/{}/conversation/'.format(case.id))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
+
     def test_cannot_vote_as_nonmember(self):
         case = self.create_case()
         self.client.force_login(user=VerifiedUserFactory())

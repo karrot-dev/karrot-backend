@@ -199,6 +199,7 @@ def invitation_accepted(sender, instance, **kwargs):
     )
 
 
+# Pickups
 @receiver(pre_delete, sender=PickupDateCollector)
 def delete_pickup_notifications_when_collector_leaves(sender, instance, **kwargs):
     collector = instance
@@ -254,6 +255,7 @@ def pickup_modified(sender, instance, **kwargs):
         )
 
 
+# Cases
 def create_notification_about_case(case, user, type):
     return Notification.objects.create(
         user=user,

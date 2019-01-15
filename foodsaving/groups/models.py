@@ -153,7 +153,7 @@ class GroupNotificationType(object):
     WEEKLY_SUMMARY = 'weekly_summary'
     DAILY_PICKUP_NOTIFICATION = 'daily_pickup_notification'
     NEW_APPLICATION = 'new_application'
-    NEW_CASE = 'new_case'
+    CONFLICT_RESOLUTION = 'conflict_resolution'
 
 
 def get_default_notification_types():

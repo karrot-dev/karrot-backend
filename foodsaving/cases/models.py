@@ -9,6 +9,7 @@ from enum import Enum
 from foodsaving.base.base_models import BaseModel
 from foodsaving.conversations.models import ConversationMixin
 from foodsaving.groups.models import GroupMembership
+from foodsaving.utils import markdown
 
 
 class CaseTypes(Enum):
@@ -46,6 +47,9 @@ class Case(BaseModel, ConversationMixin):
 
     def latest_voting(self):
         return self.votings.latest('created_at')
+
+    def topic_rendered(self, **kwargs):
+        return markdown.render(self.topic, **kwargs)
 
 
 def voting_expiration_time():

@@ -61,6 +61,15 @@ def new_application_unsubscribe_url(user, application):
     )
 
 
+def conflict_resolution_unsubscribe_url(user, case):
+    return unsubscribe_url(
+        user,
+        group=case.group,
+        conversation=case.conversation,
+        notification_type=GroupNotificationType.CONFLICT_RESOLUTION,
+    )
+
+
 def group_application_url(application):
     return '{hostname}/#/group/{group_id}/applications/{application_id}'.format(
         hostname=settings.HOSTNAME,
@@ -69,12 +78,20 @@ def group_application_url(application):
     )
 
 
-def conflict_resolution_case_url(case):
+def conflict_resolution_url(case):
     # TODO update url
     return '{hostname}/#/group/{group_id}/conflict_resolutions/{case_id}'.format(
         hostname=settings.HOSTNAME,
         group_id=case.group.id,
         case_id=case.id,
+    )
+
+
+def conflict_resolution_list_url(group):
+    # TODO update url
+    return '{hostname}/#/group/{group_id}/conflict_resolutions'.format(
+        hostname=settings.HOSTNAME,
+        group_id=group.id,
     )
 
 

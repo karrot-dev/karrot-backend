@@ -188,7 +188,7 @@ class TestCaseConversations(TestCase):
         self.more_users = [VerifiedUserFactory() for _ in range(2)]
         self.group = GroupFactory(members=[self.user, *self.more_users])
         for membership in self.group.groupmembership_set.all():
-            membership.add_notification_types([GroupNotificationType.NEW_CASE])
+            membership.add_notification_types([GroupNotificationType.CONFLICT_RESOLUTION])
             membership.save()
         self.case = CaseFactory(group=self.group, created_by=self.user)
         self.conversation = self.case.conversation
