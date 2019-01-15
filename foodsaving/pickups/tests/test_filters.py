@@ -1,4 +1,5 @@
 from datetime import timedelta
+from django.db import DataError
 from django.test import TestCase
 from django.utils import timezone
 
@@ -109,3 +110,12 @@ class TestPickupDateFilters(TestCase):
             date_max=pickup.date.upper + timedelta(seconds=5),
             results=[pickup],
         )
+
+    def test_fails_if_date_max_less_than_date_min(self):
+        now = timezone.now()
+        qs = PickupDate.objects.filter(store=self.store)
+        with self.assertRaises(DataError):
+            list(PickupDatesFilter(data={
+                'date_min': now,
+                'date_max': now - timedelta(hours=1),
+            }, queryset=qs).qs)
