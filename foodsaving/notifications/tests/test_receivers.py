@@ -14,7 +14,7 @@ from foodsaving.invitations.models import Invitation
 from foodsaving.notifications.models import Notification, NotificationType
 from foodsaving.notifications.tasks import create_pickup_upcoming_notifications
 from foodsaving.pickups.factories import PickupDateFactory
-from foodsaving.pickups.models import range_add
+from foodsaving.pickups.models import range_add, date_range
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory
 
@@ -101,7 +101,7 @@ class TestNotificationReceivers(TestCase):
         notification = Notification.objects.filter(user=member, type=NotificationType.FEEDBACK_POSSIBLE.value)
         self.assertEqual(notification.count(), 1)
         self.assertLessEqual(
-            notification[0].expires_at, pickup.date + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
+            notification[0].expires_at, pickup.date.upper + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
         )
 
     def test_creates_new_store_notification(self):
@@ -155,7 +155,7 @@ class TestNotificationReceivers(TestCase):
         user = UserFactory()
         group = GroupFactory(members=[user])
         store = StoreFactory(group=group)
-        in_one_hour = timezone.now() + relativedelta(hours=1)
+        in_one_hour = date_range(timezone.now() + relativedelta(hours=1), minutes=30)
         pickup = PickupDateFactory(store=store, date=in_one_hour, collectors=[user])
         Notification.objects.all().delete()
 
@@ -169,7 +169,7 @@ class TestNotificationReceivers(TestCase):
         user1, user2 = UserFactory(), UserFactory()
         group = GroupFactory(members=[user1, user2])
         store = StoreFactory(group=group)
-        in_one_hour = timezone.now() + relativedelta(hours=1)
+        in_one_hour = date_range(timezone.now() + relativedelta(hours=1), minutes=30)
         pickup = PickupDateFactory(store=store, date=in_one_hour, collectors=[user1, user2])
         Notification.objects.all().delete()
 

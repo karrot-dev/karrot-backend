@@ -10,7 +10,7 @@ from rest_framework.test import APITestCase
 
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership
-from foodsaving.pickups.models import PickupDate
+from foodsaving.pickups.models import PickupDate, date_range
 from foodsaving.pickups.tasks import daily_pickup_notifications, fetch_pickup_notification_data_for_group
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.stores.models import StoreStatus
@@ -53,7 +53,7 @@ class TestPickupNotificationTask(APITestCase):
             store = self.store
         return PickupDate.objects.create(
             store=store,
-            date=timezone.localtime() + delta,
+            date=date_range(timezone.localtime() + delta, minutes=30),
             max_collectors=1,
         )
 
@@ -62,7 +62,7 @@ class TestPickupNotificationTask(APITestCase):
             store = self.store
         pickup = PickupDate.objects.create(
             store=store,
-            date=timezone.localtime() + delta,
+            date=date_range(timezone.localtime() + delta, minutes=30),
             max_collectors=2,
         )
         pickup.add_collector(self.other_user)
@@ -74,7 +74,7 @@ class TestPickupNotificationTask(APITestCase):
             store = self.store
         pickup = PickupDate.objects.create(
             store=store,
-            date=timezone.localtime() + delta,
+            date=date_range(timezone.localtime() + delta, minutes=30),
             **kwargs,
         )
         pickup.add_collector(self.user)
@@ -86,7 +86,7 @@ class TestPickupNotificationTask(APITestCase):
             store = self.store
         return PickupDate.objects.create(
             store=store,
-            date=timezone.localtime() + delta,
+            date=date_range(timezone.localtime() + delta, minutes=30),
             max_collectors=1,
             deleted=True,
         )
@@ -96,7 +96,7 @@ class TestPickupNotificationTask(APITestCase):
             store = self.store
         return PickupDate.objects.create(
             store=store,
-            date=timezone.localtime() + delta,
+            date=date_range(timezone.localtime() + delta, minutes=30),
             max_collectors=1,
             is_disabled=True,
         )

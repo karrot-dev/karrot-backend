@@ -12,6 +12,7 @@ from rest_framework.test import APITestCase
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupStatus
 from foodsaving.pickups.factories import PickupDateSeriesFactory, PickupDateFactory, FeedbackFactory
+from foodsaving.pickups.models import date_range
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.stores.models import StoreStatus
 from foodsaving.tests.utils import ExtractPaginationMixin
@@ -205,7 +206,7 @@ class TestStoreChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
         response = self.get_results(url, {'series': self.series.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         for _ in response.data:
-            self.assertLessEqual(parse(_['date']), self.now + relativedelta(weeks=2, hours=1))
+            self.assertLessEqual(parse(_['date'][0]), self.now + relativedelta(weeks=2, hours=1))
 
     def test_increase_weeks_in_advance(self):
         self.client.force_login(user=self.member)
@@ -213,7 +214,7 @@ class TestStoreChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
         url = '/api/pickup-dates/'
         response = self.get_results(url, {'series': self.series.id, 'date_min': self.now})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        original_dates = [parse(_['date']) for _ in response.data]
+        original_dates = [parse(_['date'][0]) for _ in response.data]
 
         response = self.client.patch(self.store_url, {'weeks_in_advance': 10})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
@@ -224,7 +225,7 @@ class TestStoreChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertGreater(len(response.data), len(original_dates))
         for return_date in response.data:
-            self.assertLessEqual(parse(return_date['date']), self.now + relativedelta(weeks=10))
+            self.assertLessEqual(parse(return_date['date'][0]), self.now + relativedelta(weeks=10))
 
     def test_set_weeks_to_invalid_low_value(self):
         self.client.force_login(user=self.member)
@@ -262,7 +263,7 @@ class TestStoreStatisticsAPI(APITestCase):
             'pickups_done': 0,
         })
 
-        one_day_ago = timezone.now() - relativedelta(days=1)
+        one_day_ago = date_range(timezone.now() - relativedelta(days=1), minutes=30)
 
         users = [UserFactory() for _ in range(9)]
         pickups = [

@@ -8,7 +8,7 @@ from django.db import models
 from django.db import transaction
 from django.db.models import Count, Q
 from django.utils import timezone
-from psycopg2._range import DateTimeTZRange
+from psycopg2.extras import DateTimeTZRange
 
 from foodsaving.base.base_models import BaseModel
 from foodsaving.conversations.models import ConversationMixin
@@ -152,8 +152,8 @@ class PickupDateQuerySet(models.QuerySet):
         add them to history and mark as processed
         """
         for pickup in self.exclude_disabled().filter(
-            feedback_possible=False,
-            date__startswith__lt=timezone.now(),
+                feedback_possible=False,
+                date__startswith__lt=timezone.now(),
         ):
             if not pickup.store.is_active():
                 # Make sure we don't process this pickup again, even if the store gets active in future
@@ -204,6 +204,15 @@ def range_add(range, **kwargs):
     if upper:
         upper = upper + delta
     return DateTimeTZRange(lower, upper, range._bounds)
+
+
+def date_range(date, **kwargs):
+    return DateTimeTZRange(date, date + timedelta(**kwargs))
+
+
+# TODO: probably move this elsewhere.... or make it do it automatically, or something...
+def api_date_range(range):
+    return [range.lower, range.upper]
 
 
 class PickupDate(BaseModel, ConversationMixin):
@@ -305,7 +314,7 @@ class PickupDateCollector(BaseModel):
 
     class Meta:
         db_table = 'pickups_pickupdate_collectors'
-        unique_together = (('pickupdate', 'user'),)
+        unique_together = (('pickupdate', 'user'), )
         ordering = ['created_at']
 
 

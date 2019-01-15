@@ -1,20 +1,16 @@
-from datetime import timedelta
-
-import random
 import time
 
 import pytz
-from dateutil.relativedelta import relativedelta
+import random
 from django.core import mail
 from django.core.management.base import BaseCommand
 from django.http import request
 from django.utils import timezone
-from psycopg2._range import DateTimeTZRange
 from rest_framework.test import APIClient
 
 from foodsaving.groups.models import Group, GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
-from foodsaving.pickups.models import PickupDate, PickupDateSeries, range_add
+from foodsaving.pickups.models import PickupDate, PickupDateSeries, range_add, date_range, api_date_range
 from foodsaving.stores.models import Store
 from foodsaving.users.models import User
 from foodsaving.utils.tests.fake import faker
@@ -193,19 +189,12 @@ class Command(BaseCommand):
             print('deleted series: ', series)
             return data
 
-        def date_range(date, **kwargs):
-            return DateTimeTZRange(date, date + timedelta(**kwargs))
-
-        def api_date_range(date, **kwargs):
-            return {
-                'lower': date,
-                'upper': date + timedelta(**kwargs),
-            }
-
         def make_pickup(store):
+            date = date_range(faker.date_time_between(start_date='+2d', end_date='+7d', tzinfo=pytz.utc), minutes=30)
             data = c.post(
-                '/api/pickup-dates/', {
-                    'date': api_date_range(faker.date_time_between(start_date='+2d', end_date='+7d', tzinfo=pytz.utc), minutes=30),
+                '/api/pickup-dates/',
+                {
+                    'date': api_date_range(date),
                     'store': store,
                     'max_collectors': 10
                 },
@@ -249,7 +238,9 @@ class Command(BaseCommand):
 
         def create_done_pickup(store, user_id):
             pickup = PickupDate.objects.create(
-                date=date_range(faker.date_time_between(start_date='-9d', end_date='-1d', tzinfo=pytz.utc), minutes=30),
+                date=date_range(
+                    faker.date_time_between(start_date='-9d', end_date='-1d', tzinfo=pytz.utc), minutes=30
+                ),
                 store_id=store,
                 max_collectors=10,
             )
@@ -278,7 +269,7 @@ class Command(BaseCommand):
                 join_pickup(pickup['id'])
                 make_message(group['id'])
                 done_pickup = create_done_pickup(store['id'], user['id'])
-                #join_pickup(done_pickup.id)
+                # join_pickup(done_pickup.id)
                 make_feedback(done_pickup.id, user['id'])
 
         # group members

@@ -33,7 +33,6 @@ daphne
 channels
 channels_redis==2.3.2 # last version to support python 3.5
 more-itertools
-django-extra-fields
 
 # dev dependencies
 pip-tools

@@ -9,7 +9,7 @@ from foodsaving.notifications import tasks
 from foodsaving.notifications.models import Notification, NotificationType
 from foodsaving.notifications.tasks import create_pickup_upcoming_notifications, create_voting_ends_soon_notifications
 from foodsaving.pickups.factories import PickupDateFactory
-from foodsaving.pickups.models import PickupDateCollector
+from foodsaving.pickups.models import PickupDateCollector, date_range
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory
 
@@ -53,9 +53,9 @@ class TestPickupUpcomingTask(TestCase):
         users = [UserFactory() for _ in range(3)]
         group = GroupFactory(members=users)
         store = StoreFactory(group=group)
-        in_one_hour = timezone.now() + relativedelta(hours=1)
+        in_one_hour = date_range(timezone.now() + relativedelta(hours=1), minutes=30)
         pickup1 = PickupDateFactory(store=store, date=in_one_hour, collectors=users)
-        in_two_hours = timezone.now() + relativedelta(hours=1)
+        in_two_hours = date_range(timezone.now() + relativedelta(hours=1), minutes=30)
         PickupDateFactory(store=store, date=in_two_hours, collectors=users)
         Notification.objects.all().delete()
 
@@ -75,13 +75,13 @@ class TestPickupUpcomingTask(TestCase):
                 'pickup_collector': pickup1_user1_collector.id,
             }
         )
-        self.assertEqual(pickup1_user1_notification.expires_at, pickup1.date)
+        self.assertEqual(pickup1_user1_notification.expires_at, pickup1.date.upper)
 
     def test_creates_only_one_pickup_upcoming_notification(self):
         user = UserFactory()
         group = GroupFactory(members=[user])
         store = StoreFactory(group=group)
-        in_one_hour = timezone.now() + relativedelta(hours=1)
+        in_one_hour = date_range(timezone.now() + relativedelta(hours=1), minutes=30)
         PickupDateFactory(store=store, date=in_one_hour, collectors=[user])
         Notification.objects.all().delete()
 
@@ -95,7 +95,7 @@ class TestPickupUpcomingTask(TestCase):
         user = UserFactory()
         group = GroupFactory(members=[user])
         store = StoreFactory(group=group)
-        in_one_day = timezone.now() + relativedelta(days=1)
+        in_one_day = date_range(timezone.now() + relativedelta(days=1), minutes=30)
         PickupDateFactory(store=store, date=in_one_day, collectors=[user])
         Notification.objects.all().delete()
 
@@ -107,7 +107,7 @@ class TestPickupUpcomingTask(TestCase):
         user = UserFactory()
         group = GroupFactory(members=[user])
         store = StoreFactory(group=group)
-        one_hour_ago = timezone.now() - relativedelta(hours=1)
+        one_hour_ago = date_range(timezone.now() - relativedelta(hours=1), minutes=30)
         PickupDateFactory(store=store, date=one_hour_ago, collectors=[user])
         Notification.objects.all().delete()
 

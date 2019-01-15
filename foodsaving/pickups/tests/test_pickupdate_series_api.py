@@ -14,6 +14,7 @@ from rest_framework.test import APITestCase
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupStatus
 from foodsaving.pickups.factories import PickupDateSeriesFactory
+from foodsaving.pickups.models import api_date_range, range_add
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.users.factories import UserFactory
@@ -103,7 +104,7 @@ class TestPickupDateSeriesCreationAPI(APITestCase, ExtractPaginationMixin):
 
         # verify date field
         for response_data_item, expected_date in zip(response.data, dates_list):
-            self.assertEqual(parse(response_data_item['date']), expected_date, response_data_item['date'])
+            self.assertEqual(parse(response_data_item['date'][0]), expected_date, response_data_item['date'])
 
         # verify non-date fields, don't need parsing
         for _ in response.data:
@@ -184,7 +185,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         url = '/api/pickup-dates/'
         response = self.get_results(url, {'series': self.series.id, 'date_min': self.now})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        original_dates = [parse(_['date']) for _ in response.data]
+        original_dates = [parse(_['date'][0]) for _ in response.data]
 
         # change times
         url = '/api/pickup-date-series/{}/'.format(self.series.id)
@@ -201,7 +202,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         for response_pickup, old_date in zip(response.data, original_dates):
             self.assertEqual(
-                parse(response_pickup['date']),
+                parse(response_pickup['date'][0]),
                 shift_date_in_local_time(old_date, relativedelta(hours=2, minutes=20), self.group.timezone)
             )
 
@@ -211,7 +212,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         url = '/api/pickup-dates/'
         response = self.get_results(url, {'series': self.series.id, 'date_min': self.now})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        original_dates = [parse(_['date']) for _ in response.data]
+        original_dates = [parse(_['date'][0]) for _ in response.data]
 
         # change dates
         url = '/api/pickup-date-series/{}/'.format(self.series.id)
@@ -226,7 +227,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         for response_pickup, old_date in zip_longest(response.data, original_dates):
             self.assertEqual(
-                parse(response_pickup['date']),
+                parse(response_pickup['date'][0]),
                 shift_date_in_local_time(old_date, relativedelta(days=5), self.group.timezone)
             )
 
@@ -236,7 +237,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         url = '/api/pickup-dates/'
         response = self.get_results(url, {'series': self.series.id, 'date_min': self.now})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        original_dates = [parse(_['date']) for _ in response.data]
+        original_dates = [parse(_['date'][0]) for _ in response.data]
 
         # change dates
         url = '/api/pickup-date-series/{}/'.format(self.series.id)
@@ -257,7 +258,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
                 # date too far in future
                 self.assertIsNone(response_pickup)
             else:
-                self.assertEqual(parse(response_pickup['date']), new_date)
+                self.assertEqual(parse(response_pickup['date'][0]), new_date)
 
     def test_set_end_date(self):
         self.client.force_login(user=self.member)
@@ -432,7 +433,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
 
         response = self.client.get('/api/pickup-dates/?series={}'.format(self.series.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual([parse(p['date']) for p in response.data['results']], [
+        self.assertEqual([parse(p['date'][0]) for p in response.data['results']], [
             shift_date_in_local_time(self.series.start_date, delta, self.group.timezone) for delta in (
                 relativedelta(days=0),
                 relativedelta(days=1),
@@ -476,7 +477,11 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         pickup = self.series.pickup_dates.last()
 
         response = self.client.patch(
-            '/api/pickup-dates/{}/'.format(pickup.id), {'date': pickup.date + relativedelta(weeks=7)}
+            '/api/pickup-dates/{}/'.format(pickup.id),
+            {
+                'date': api_date_range(range_add(pickup.date, weeks=7)),
+            },
+            format='json',
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

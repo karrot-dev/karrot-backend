@@ -34,7 +34,7 @@ def create_pickup_upcoming_notifications():
         Notification.objects.create(
             type=NotificationType.PICKUP_UPCOMING.value,
             user=collector.user,
-            expires_at=collector.pickupdate.date,
+            expires_at=collector.pickupdate.date.upper,
             context={
                 'group': collector.pickupdate.store.group.id,
                 'store': collector.pickupdate.store.id,

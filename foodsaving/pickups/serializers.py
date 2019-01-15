@@ -4,9 +4,10 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import ugettext as _
-from drf_extra_fields.fields import DateTimeRangeField
+from psycopg2.extras import DateTimeTZRange
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.fields import DateTimeField
 from rest_framework.validators import UniqueTogetherValidator
 
 from foodsaving.history.models import History, HistoryTypus
@@ -21,6 +22,27 @@ class PickupDateHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = PickupDateModel
         fields = '__all__'
+
+
+class DateTimeRangeField(serializers.Field):
+    child = DateTimeField()
+
+    def to_representation(self, value):
+        return [
+            self.child.to_representation(value.lower),
+            self.child.to_representation(value.upper),
+        ]
+
+    def to_internal_value(self, data):
+        try:
+            lower, upper = data
+        except ValueError:
+            raise Exception('failed to unpack [{}] ({})'.format(data, type(data)))
+        if lower:
+            lower = self.child.to_internal_value(lower)
+        if upper:
+            upper = self.child.to_internal_value(upper)
+        return DateTimeTZRange(lower, upper)
 
 
 class PickupDateSerializer(serializers.ModelSerializer):
@@ -80,9 +102,6 @@ class PickupDateSerializer(serializers.ModelSerializer):
         return store
 
     def validate_date(self, date):
-        if date.lower is None and date.upper is None:
-            raise Exception('hmmmmmmmm lower and  upper were both None')
-            #  return date
         if not date.lower > timezone.now() + timedelta(minutes=10):
             raise serializers.ValidationError(_('The date should be in the future.'))
         return date
@@ -93,6 +112,8 @@ class PickupDateUpdateSerializer(PickupDateSerializer):
         model = PickupDateModel
         fields = PickupDateSerializer.Meta.fields
         read_only_fields = PickupDateSerializer.Meta.read_only_fields + ['store']
+
+    date = DateTimeRangeField()
 
     def save(self, **kwargs):
         pickupdate = self.instance
@@ -138,7 +159,7 @@ class PickupDateUpdateSerializer(PickupDateSerializer):
         return pickupdate
 
     def validate_date(self, date):
-        if self.instance.series is not None and abs((self.instance.date - date).total_seconds()) > 1:
+        if self.instance.series is not None and abs((self.instance.date.lower - date.lower).total_seconds()) > 1:
             raise serializers.ValidationError(_('You can\'t move pickups that are part of a series.'))
         return super().validate_date(date)
 

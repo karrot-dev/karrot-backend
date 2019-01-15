@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 from rest_framework import status
@@ -6,6 +8,7 @@ from rest_framework.test import APITestCase
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership, GroupStatus
 from foodsaving.pickups.factories import PickupDateFactory
+from foodsaving.pickups.models import date_range, api_date_range
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.users.factories import UserFactory
@@ -31,18 +34,20 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
 
         # another pickup date for above store
         self.pickup_data = {
-            'date': timezone.now() + relativedelta(days=2),
+            'date': api_date_range(date_range(timezone.now() + relativedelta(days=2), minutes=30)),
             'max_collectors': 5,
             'store': self.store.id
         }
 
         # past pickup date
         self.past_pickup_data = {
-            'date': timezone.now() - relativedelta(days=1),
+            'date': api_date_range(date_range(timezone.now() - relativedelta(days=1), minutes=30)),
             'max_collectors': 5,
             'store': self.store.id
         }
-        self.past_pickup = PickupDateFactory(store=self.store, date=timezone.now() - relativedelta(days=1))
+        self.past_pickup = PickupDateFactory(
+            store=self.store, date=date_range(timezone.now() - relativedelta(days=1), minutes=30)
+        )
         self.past_pickup_url = self.url + str(self.past_pickup.id) + '/'
         self.past_join_url = self.past_pickup_url + 'add/'
         self.past_leave_url = self.past_pickup_url + 'remove/'
@@ -294,6 +299,18 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(self.member.id, response.data['participants'])
         self.assertEqual(response.data['type'], 'pickup')
+
+    def test_foo(self):
+        self.client.force_login(user=self.member)
+        response = self.client.patch(
+            self.pickup_url, {
+                'date': [timezone.now() + timedelta(hours=1),
+                         timezone.now() + timedelta(hours=2)],
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.pickup.refresh_from_db()
 
 
 class TestPickupDatesListAPI(APITestCase, ExtractPaginationMixin):

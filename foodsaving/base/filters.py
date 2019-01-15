@@ -3,7 +3,7 @@ from django.utils.dateparse import parse_datetime
 from django.utils.encoding import force_str
 from django_filters import rest_framework as filters
 from django_filters.fields import RangeField
-from psycopg2._range import DateTimeTZRange
+from psycopg2.extras import DateTimeTZRange
 
 
 class ISODateTimeField(forms.DateTimeField):

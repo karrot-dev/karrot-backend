@@ -10,7 +10,7 @@ from django.utils import timezone
 
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.pickups.factories import PickupDateFactory, PickupDateSeriesFactory, FeedbackFactory
-from foodsaving.pickups.models import PickupDate as PickupDateModel
+from foodsaving.pickups.models import PickupDate as PickupDateModel, date_range
 from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.users.factories import UserFactory
 from foodsaving.stores.factories import StoreFactory
@@ -65,22 +65,22 @@ class TestPickupdatesAPIFilter(APITestCase, ExtractPaginationMixin):
 
     def test_filter_after_date(self):
         self.client.force_login(user=self.member)
-        query_date = self.pickup.date + timedelta(days=1)
+        query_date = self.pickup.date.lower + timedelta(days=1)
         response = self.get_results(self.url, {'date_min': query_date})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         for _ in response.data:
-            self.assertGreater(parse(_['date']), query_date)
+            self.assertGreater(parse(_['date'][0]), query_date)
         selected_pickups = PickupDateModel.objects.filter(store__group__members=self.member) \
             .filter(date__startswith__gte=query_date)
         self.assertEqual(len(response.data), selected_pickups.count())
 
     def test_filter_before_date(self):
         self.client.force_login(user=self.member)
-        query_date = self.pickup.date + timedelta(days=10)
+        query_date = self.pickup.date.lower + timedelta(days=10)
         response = self.get_results(self.url, {'date_max': query_date})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         for _ in response.data:
-            self.assertLess(parse(_['date']), query_date)
+            self.assertLess(parse(_['date'][0]), query_date)
         selected_pickups = PickupDateModel.objects.filter(store__group__members=self.member) \
             .filter(date__startswith__lte=query_date)
         self.assertEqual(len(response.data), selected_pickups.count())
@@ -89,8 +89,10 @@ class TestPickupdatesAPIFilter(APITestCase, ExtractPaginationMixin):
 class TestFeedbackPossibleFilter(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.url = '/api/pickup-dates/'
-        self.oneWeekAgo = timezone.now() - relativedelta(weeks=1)
-        self.tooLongAgo = timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS + 1)
+        self.oneWeekAgo = date_range(timezone.now() - relativedelta(weeks=1), minutes=30)
+        self.tooLongAgo = date_range(
+            timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS + 1), minutes=30
+        )
 
         self.member = UserFactory()
         self.member2 = UserFactory()
