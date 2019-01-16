@@ -1,10 +1,15 @@
+from datetime import timedelta
+
 from django.db import DataError
 from django.db import IntegrityError
 from django.test import TestCase
+from django.utils import timezone
 
 from foodsaving.conversations.models import Conversation, ConversationParticipant
 from foodsaving.groups.factories import GroupFactory, PlaygroundGroupFactory
 from foodsaving.groups.models import Group, GroupMembership, get_default_notification_types
+from foodsaving.pickups.factories import PickupDateFactory
+from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory
 
 
@@ -39,3 +44,31 @@ class TestGroupModel(TestCase):
     def test_uses_default_application_questions_if_not_specified(self):
         group = GroupFactory(application_questions='')
         self.assertIn('Hey there', group.get_application_questions_or_default())
+
+
+class TestGroupMembershipModel(TestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.other_user = UserFactory()
+        self.group = GroupFactory(members=[self.user, self.other_user])
+        self.other_group = GroupFactory(members=[self.user, self.other_user])
+        self.store = StoreFactory(group=self.group)
+        self.other_store = StoreFactory(group=self.other_group)
+
+    def test_pickup_active_within(self):
+        PickupDateFactory(store=self.store, date=timezone.now() - timedelta(days=2), collectors=[self.user])
+        PickupDateFactory(store=self.store, date=timezone.now() - timedelta(days=9), collectors=[self.other_user])
+        memberships = self.group.groupmembership_set.pickup_active_within(days=7)
+        self.assertEqual(memberships.count(), 1)
+
+    def test_pickup_active_within_does_not_double_count(self):
+        for _ in range(1, 10):
+            PickupDateFactory(store=self.store, date=timezone.now() - timedelta(days=2), collectors=[self.user])
+            PickupDateFactory(store=self.store, date=timezone.now() - timedelta(days=9), collectors=[self.other_user])
+        memberships = self.group.groupmembership_set.pickup_active_within(days=7)
+        self.assertEqual(memberships.count(), 1)
+
+    def test_does_not_count_from_other_groups(self):
+        PickupDateFactory(store=self.other_store, date=timezone.now() - timedelta(days=2), collectors=[self.user])
+        memberships = self.group.groupmembership_set.pickup_active_within(days=7)
+        self.assertEqual(memberships.count(), 0)
