@@ -10,6 +10,7 @@ from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from config import settings
 from foodsaving.applications.stats import get_group_application_stats
+from foodsaving.cases.stats import get_case_stats
 from foodsaving.groups.emails import (
     prepare_user_inactive_in_group_email, prepare_group_summary_data, calculate_group_summary_dates,
     prepare_group_summary_emails, prepare_user_removal_from_group_email
@@ -31,6 +32,7 @@ def record_group_stats():
         points.extend(get_group_members_stats(group))
         points.extend(get_group_stores_stats(group))
         points.extend(get_group_application_stats(group))
+        points.extend(get_case_stats(group))
 
     write_points(points)
 

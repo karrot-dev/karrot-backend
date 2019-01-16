@@ -3,6 +3,7 @@ from rest_framework.exceptions import PermissionDenied
 
 from django.utils.translation import ugettext as _
 
+from foodsaving.cases import stats
 from foodsaving.cases.models import Case, Voting, Vote, Option
 
 
@@ -22,13 +23,23 @@ class VoteListSerializer(serializers.ListSerializer):
         votes = {vote.option_id: vote for vote in instance}
 
         created = []
+        existing = []
         for option_id, data in validated_data.items():
             vote = votes.get(option_id, None)
             if vote is not None:
+                if vote.score == data['score']:
+                    existing.append(vote)
+                    continue
                 vote.delete()
             created.append(Vote.objects.create(**data))
 
-        return created
+        voting = self.context['voting']
+        if len(votes) == 0:
+            stats.voted(voting.case)
+        elif len(created) > 0:
+            stats.vote_changed(voting.case)
+
+        return created + existing
 
 
 class VoteSerializer(serializers.ModelSerializer):

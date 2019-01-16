@@ -7,6 +7,7 @@ from django.utils import timezone
 from enum import Enum
 
 from foodsaving.base.base_models import BaseModel
+from foodsaving.cases import stats
 from foodsaving.conversations.models import ConversationMixin
 from foodsaving.groups.models import GroupMembership
 from foodsaving.utils import markdown
@@ -34,11 +35,15 @@ class Case(BaseModel, ConversationMixin):
         self.save()
 
     def save(self, **kwargs):
+        created = self.pk is None
         super().save(**kwargs)
 
         if self.votings.count() == 0:
             voting = self.votings.create()
             voting.create_options(self.affected_user)
+
+        if created:
+            stats.case_created(self)
 
     def user_queryset(self):
         editors = Q(groupmembership__in=self.group.groupmembership_set.editors())

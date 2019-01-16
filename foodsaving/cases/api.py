@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from foodsaving.cases import stats
 from foodsaving.cases.models import Case, Vote, Voting
 from foodsaving.cases.serializers import CaseSerializer, VoteSerializer
 from foodsaving.conversations.api import RetrieveConversationMixin
@@ -82,7 +83,12 @@ class CasesViewSet(
 
         if request.method == 'DELETE':
             deleted_rows, _ = vote_qs.delete()
+            deleted = deleted_rows > 0
+
+            if deleted:
+                stats.vote_deleted(voting.case)
+
             return Response(
                 data={},
-                status=status.HTTP_204_NO_CONTENT if deleted_rows > 0 else status.HTTP_404_NOT_FOUND,
+                status=status.HTTP_204_NO_CONTENT if deleted else status.HTTP_404_NOT_FOUND,
             )
