@@ -8,7 +8,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 from foodsaving.applications.models import GroupApplication, GroupApplicationStatus
-from foodsaving.cases.models import Case, Voting
+from foodsaving.cases.models import Case, Voting, OptionTypes
 from foodsaving.notifications.models import Notification, NotificationType
 from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
@@ -297,6 +297,7 @@ def conflict_resolution_case_decided(sender, instance, **kwargs):
     if not case.id:
         return
 
+    # abort if case is not decided or was already decided
     old = Case.objects.get(id=case.id)
     if old.is_decided or not case.is_decided:
         return
@@ -304,4 +305,14 @@ def conflict_resolution_case_decided(sender, instance, **kwargs):
     for user in case.user_queryset().distinct():
         create_notification_about_case(
             case=case, user=user, type=NotificationType.CONFLICT_RESOLUTION_CASE_DECIDED.value
+        )
+
+    accepted_option = case.latest_voting().accepted_option
+    if accepted_option.type == OptionTypes.REMOVE_USER.value:
+        return Notification.objects.create(
+            user=accepted_option.affected_user,
+            type=NotificationType.YOU_WERE_REMOVED.value,
+            context={
+                'group': case.group.id,
+            }
         )

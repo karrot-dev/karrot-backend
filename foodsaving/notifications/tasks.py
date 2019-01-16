@@ -4,6 +4,7 @@ from django.db.models.functions import Cast
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task
 
+from foodsaving.cases.models import Voting
 from foodsaving.notifications.models import Notification, NotificationType
 from foodsaving.pickups.models import PickupDate, PickupDateCollector
 
@@ -41,3 +42,21 @@ def create_pickup_upcoming_notifications():
                 'pickup_collector': collector.id,
             },
         )
+
+
+@db_periodic_task(crontab(minute='*/5'))  # every five minutes
+def create_voting_ends_soon_notifications():
+    existing_notifications = Notification.objects.order_by().filter(type=NotificationType.VOTING_ENDS_SOON.value
+                                                                    ).values_list('user_id', 'context__case')
+    for voting in Voting.objects.order_by().due_soon():
+        for user in voting.case.user_queryset():
+            if (user.id, voting.case_id) not in existing_notifications:
+                Notification.objects.create(
+                    type=NotificationType.VOTING_ENDS_SOON.value,
+                    user=user,
+                    expires_at=voting.expires_at,
+                    context={
+                        'group': voting.case.group_id,
+                        'case': voting.case_id,
+                    },
+                )

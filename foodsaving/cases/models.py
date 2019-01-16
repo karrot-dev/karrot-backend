@@ -57,11 +57,19 @@ class Case(BaseModel, ConversationMixin):
         return markdown.render(self.topic, **kwargs)
 
 
+class VotingQuerySet(models.QuerySet):
+    def due_soon(self):
+        in_some_hours = timezone.now() + relativedelta(hours=settings.VOTING_DUE_SOON_HOURS)
+        return self.filter(expires_at__gt=timezone.now(), expires_at__lt=in_some_hours)
+
+
 def voting_expiration_time():
     return timezone.now() + relativedelta(days=settings.CASE_VOTING_DURATION_DAYS)
 
 
 class Voting(BaseModel):
+    objects = VotingQuerySet.as_manager()
+
     case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='votings')
     expires_at = models.DateTimeField(default=voting_expiration_time)
     accepted_option = models.ForeignKey(

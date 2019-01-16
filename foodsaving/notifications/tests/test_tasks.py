@@ -2,10 +2,11 @@ from dateutil.relativedelta import relativedelta
 from django.test import TestCase
 from django.utils import timezone
 
+from foodsaving.cases.factories import CaseFactory, fast_forward_just_before_voting_expiration
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.notifications import tasks
 from foodsaving.notifications.models import Notification, NotificationType
-from foodsaving.notifications.tasks import create_pickup_upcoming_notifications
+from foodsaving.notifications.tasks import create_pickup_upcoming_notifications, create_voting_ends_soon_notifications
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.pickups.models import PickupDateCollector
 from foodsaving.stores.factories import StoreFactory
@@ -112,3 +113,21 @@ class TestPickupUpcomingTask(TestCase):
         create_pickup_upcoming_notifications.call_local()
         notifications = Notification.objects.filter(type=NotificationType.PICKUP_UPCOMING.value)
         self.assertEqual(notifications.count(), 0)
+
+
+class TestVotingEndsSoonTask(TestCase):
+    def test_create_voting_ends_soon_notifications(self):
+        case = CaseFactory()
+        voting = case.latest_voting()
+        Notification.objects.all().delete()
+
+        with fast_forward_just_before_voting_expiration(voting):
+            create_voting_ends_soon_notifications()
+            # can call it a second time without duplicating notifications
+            create_voting_ends_soon_notifications()
+
+        notifications = Notification.objects.filter(type=NotificationType.VOTING_ENDS_SOON.value)
+        self.assertEqual(notifications.count(), 2)
+        self.assertEqual(
+            sorted([n.user_id for n in notifications]), sorted([case.affected_user_id, case.created_by_id])
+        )
