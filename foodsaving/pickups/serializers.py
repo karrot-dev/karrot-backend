@@ -27,6 +27,12 @@ class PickupDateHistorySerializer(serializers.ModelSerializer):
 class DateTimeRangeField(serializers.Field):
     child = DateTimeField()
 
+    default_error_messages = {
+        'list': _('Must be a list'),
+        'length': _('Must be a list with one or two values'),
+        'required': _('Must pass start value'),
+    }
+
     def to_representation(self, value):
         return [
             self.child.to_representation(value.lower),
@@ -34,14 +40,17 @@ class DateTimeRangeField(serializers.Field):
         ]
 
     def to_internal_value(self, data):
-        try:
-            lower, upper = data
-        except ValueError:
-            raise Exception('failed to unpack [{}] ({})'.format(data, type(data)))
-        if lower:
-            lower = self.child.to_internal_value(lower)
-        if upper:
-            upper = self.child.to_internal_value(upper)
+        if not isinstance(data, list):
+            self.fail('list')
+        if not 0 < len(data) <= 2:
+            self.fail('length')
+        lower = data[0]
+        upper = data[1] if len(data) > 1 else None
+        lower = self.child.to_internal_value(lower) if lower else None
+        upper = self.child.to_internal_value(upper) if upper else None
+        if not lower:
+            self.fail('required')
+        upper = lower + timedelta(minutes=30) if not upper else upper
         return DateTimeTZRange(lower, upper)
 
 

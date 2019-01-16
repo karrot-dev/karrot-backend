@@ -1,7 +1,7 @@
 from datetime import timedelta
-
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
+from psycopg2.extras import DateTimeTZRange
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -300,17 +300,48 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         self.assertIn(self.member.id, response.data['participants'])
         self.assertEqual(response.data['type'], 'pickup')
 
-    def test_foo(self):
+    def test_patch_date(self):
         self.client.force_login(user=self.member)
+        start = timezone.now() + timedelta(hours=1)
+        end = timezone.now() + timedelta(hours=2)
         response = self.client.patch(
             self.pickup_url, {
-                'date': [timezone.now() + timedelta(hours=1),
-                         timezone.now() + timedelta(hours=2)],
-            },
-            format='json'
+                'date': [start, end],
+            }, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.pickup.refresh_from_db()
+        self.assertEqual(self.pickup.date, DateTimeTZRange(start, end))
+
+    def test_patch_start_date_only_uses_default_duration(self):
+        self.client.force_login(user=self.member)
+        start = timezone.now() + timedelta(hours=1)
+        response = self.client.patch(
+            self.pickup_url, {
+                'date': [start],
+            }, format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.pickup.refresh_from_db()
+        self.assertEqual(self.pickup.date.upper, start + timedelta(minutes=30))
+
+    def test_patch_date_with_single_date_fails(self):
+        self.client.force_login(user=self.member)
+        response = self.client.patch(
+            self.pickup_url, {
+                'date': timezone.now(),
+            }, format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
+    def test_patch_end_date_only_fails(self):
+        self.client.force_login(user=self.member)
+        response = self.client.patch(
+            self.pickup_url, {
+                'date': [None, timezone.now()],
+            }, format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
 
 class TestPickupDatesListAPI(APITestCase, ExtractPaginationMixin):
