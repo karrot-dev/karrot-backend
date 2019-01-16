@@ -22,6 +22,6 @@ class TestGroupSerializer(TestCase):
 
     def test_preview(self):
         serializer = GroupPreviewSerializer(self.group)
-        self.assertEqual(len(serializer.data.keys()), 10)
+        self.assertEqual(len(serializer.data.keys()), 11)
         self.assertEqual(serializer.data['id'], self.group.id)
         self.assertEqual(serializer.data['name'], self.group.name)

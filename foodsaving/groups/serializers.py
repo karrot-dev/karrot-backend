@@ -256,6 +256,7 @@ class GroupPreviewSerializer(GroupBaseSerializer):
     should be readonly
     """
     application_questions = serializers.SerializerMethodField()
+    photo_urls = VersatileImageFieldSerializer(sizes='user_profile', read_only=True, source='photo')
 
     class Meta:
         model = GroupModel
