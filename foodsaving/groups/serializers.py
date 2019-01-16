@@ -153,7 +153,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
                 if field in validated_data:
                     del validated_data[field]
 
-        if 'photo' in validated_data and validated_data['photo'] is None:
+        if 'photo' in validated_data:
             group.delete_photo()
 
         changed_data = find_changed(group, validated_data)
@@ -270,6 +270,7 @@ class GroupPreviewSerializer(GroupBaseSerializer):
             'members',
             'status',
             'is_open',
+            'photo_urls',
         ]
 
     def get_application_questions(self, group):
