@@ -49,7 +49,8 @@ def create_voting_ends_soon_notifications():
     existing_notifications = Notification.objects.order_by().filter(type=NotificationType.VOTING_ENDS_SOON.value
                                                                     ).values_list('user_id', 'context__case')
     for voting in Voting.objects.order_by().due_soon():
-        for user in voting.case.user_queryset():
+        # only notify users that haven't voted already
+        for user in voting.case.user_queryset().exclude(votes_given__option__voting=voting):
             if (user.id, voting.case_id) not in existing_notifications:
                 Notification.objects.create(
                     type=NotificationType.VOTING_ENDS_SOON.value,
