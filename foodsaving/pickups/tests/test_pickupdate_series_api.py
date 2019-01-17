@@ -412,11 +412,14 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         [p.add_collector(self.member) for p in self.series.pickup_dates.all()]
 
         # change series rule to add another day
+        today = self.now.astimezone(self.group.timezone).weekday()
+        tomorrow = shift_date_in_local_time(self.now, relativedelta(days=1),
+                                            self.group.timezone).astimezone(self.group.timezone).weekday()
         recurrence = rrule.rrule(
             freq=rrule.WEEKLY,
             byweekday=[
-                self.now.weekday(),
-                (self.now + relativedelta(days=1)).weekday(),
+                today,
+                tomorrow,
             ],
         )
         series_url = '/api/pickup-date-series/{}/'.format(self.series.id)
