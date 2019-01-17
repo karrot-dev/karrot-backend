@@ -69,9 +69,9 @@ class GroupDetailSerializer(GroupBaseSerializer):
     application_questions_default = serializers.SerializerMethodField()
     trust_threshold_for_newcomer = serializers.SerializerMethodField()
     member_inactive_after_days = serializers.SerializerMethodField()
-    photo = VersatileImageFieldSerializer(sizes='user_profile', required=False,
+    photo = VersatileImageFieldSerializer(sizes='group_logo', required=False,
                                           allow_null=True, write_only=True)
-    photo_urls = VersatileImageFieldSerializer(sizes='user_profile', read_only=True, source='photo')
+    photo_urls = VersatileImageFieldSerializer(sizes='group_logo', read_only=True, source='photo')
     timezone = TimezoneField()
 
     class Meta:
@@ -256,7 +256,7 @@ class GroupPreviewSerializer(GroupBaseSerializer):
     should be readonly
     """
     application_questions = serializers.SerializerMethodField()
-    photo_urls = VersatileImageFieldSerializer(sizes='user_profile', read_only=True, source='photo')
+    photo_urls = VersatileImageFieldSerializer(sizes='group_logo', read_only=True, source='photo')
 
     class Meta:
         model = GroupModel
