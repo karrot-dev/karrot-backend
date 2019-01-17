@@ -160,6 +160,10 @@ VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
         ('full_size', 'url'),
         ('thumbnail', 'thumbnail__120x120'),
     ],
+    'group_logo': [
+        ('full_size', 'url'),
+        ('thumbnail', 'thumbnail__120x120'),
+    ]
 }
 
 # Internationalization
