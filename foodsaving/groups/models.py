@@ -143,6 +143,8 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         return trust_threshold
 
     def delete_photo(self):
+        if self.photo.name is None:
+            return
         # Deletes Image Renditions
         self.photo.delete_all_created_images()
         # Deletes Original Image

@@ -105,6 +105,8 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         return self.display_name
 
     def delete_photo(self):
+        if self.photo.name is None:
+            return
         # Deletes Image Renditions
         self.photo.delete_all_created_images()
         # Deletes Original Image
