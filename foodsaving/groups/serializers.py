@@ -4,6 +4,7 @@ from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, PermissionDenied
+from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
     GroupNotificationType
@@ -58,7 +59,7 @@ class GroupHistorySerializer(GroupBaseSerializer):
 
     class Meta:
         model = GroupModel
-        fields = '__all__'
+        exclude = ['photo']
 
 
 class GroupDetailSerializer(GroupBaseSerializer):
@@ -68,7 +69,9 @@ class GroupDetailSerializer(GroupBaseSerializer):
     application_questions_default = serializers.SerializerMethodField()
     trust_threshold_for_newcomer = serializers.SerializerMethodField()
     member_inactive_after_days = serializers.SerializerMethodField()
-
+    photo = VersatileImageFieldSerializer(sizes='user_profile', required=False,
+                                          allow_null=True, write_only=True)
+    photo_urls = VersatileImageFieldSerializer(sizes='user_profile', read_only=True, source='photo')
     timezone = TimezoneField()
 
     class Meta:
@@ -92,6 +95,8 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'is_open',
             'trust_threshold_for_newcomer',
             'member_inactive_after_days',
+            'photo',
+            'photo_urls',
         ]
         extra_kwargs = {
             'name': {
@@ -147,6 +152,9 @@ class GroupDetailSerializer(GroupBaseSerializer):
             for field in ['name', 'public_description']:
                 if field in validated_data:
                     del validated_data[field]
+
+        if 'photo' in validated_data:
+            group.delete_photo()
 
         changed_data = find_changed(group, validated_data)
         before_data = GroupHistorySerializer(group).data
@@ -248,6 +256,7 @@ class GroupPreviewSerializer(GroupBaseSerializer):
     should be readonly
     """
     application_questions = serializers.SerializerMethodField()
+    photo_urls = VersatileImageFieldSerializer(sizes='user_profile', read_only=True, source='photo')
 
     class Meta:
         model = GroupModel
@@ -262,6 +271,7 @@ class GroupPreviewSerializer(GroupBaseSerializer):
             'members',
             'status',
             'is_open',
+            'photo_urls',
         ]
 
     def get_application_questions(self, group):
