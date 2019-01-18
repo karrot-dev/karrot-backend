@@ -139,6 +139,8 @@ class GroupViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUp
         self.check_permissions(request)
         membership = get_object_or_404(GroupMembership.objects, group=pk, user=request.user)
         membership.lastseen_at = timezone.now()
+        if membership.inactive_at is not None:
+            stats.member_returned(membership)
         membership.inactive_at = None
         membership.removal_notification_at = None
         membership.save()
