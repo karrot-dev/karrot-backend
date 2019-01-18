@@ -48,7 +48,7 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
         # create case
         self.client.force_login(user=self.member)
         response = self.client.post(
-            '/api/cases/', {
+            '/api/conflict-resolution/', {
                 'group': self.group.id,
                 'topic': 'I complain about this user',
                 'affected_user': self.affected_member.id,
@@ -77,7 +77,7 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
 
         # vote on option
         response = self.client.post(
-            '/api/cases/votings/{}/vote/'.format(voting['id']), make_vote_data(voting['options']), format='json'
+            '/api/conflict-resolution/votings/{}/vote/'.format(voting['id']), make_vote_data(voting['options']), format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         votes = response.data
@@ -89,11 +89,11 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
         time_when_voting_expires = parse(voting['expires_at']) + relativedelta(hours=1)
         with freeze_time(time_when_voting_expires, tick=True):
             process_expired_votings()
-            response = self.client.get('/api/cases/{}/'.format(case['id']))
+            response = self.client.get('/api/conflict-resolution/{}/'.format(case['id']))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # get conversation
-        response = self.client.get('/api/cases/{}/conversation/'.format(case['id']))
+        response = self.client.get('/api/conflict-resolution/{}/conversation/'.format(case['id']))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_vote_can_be_updated_and_deleted(self):
@@ -104,14 +104,14 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
         option_count = options.count()
 
         response = self.client.post(
-            '/api/cases/votings/{}/vote/'.format(voting.id),
+            '/api/conflict-resolution/votings/{}/vote/'.format(voting.id),
             make_vote_data(options, [1] * option_count),
             format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
         response = self.client.post(
-            '/api/cases/votings/{}/vote/'.format(voting.id),
+            '/api/conflict-resolution/votings/{}/vote/'.format(voting.id),
             make_vote_data(options, [2] * option_count),
             format='json'
         )
@@ -119,7 +119,7 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
 
         self.assertEqual([v.score for v in Vote.objects.all()], [2] * option_count)
 
-        response = self.client.delete('/api/cases/votings/{}/vote/'.format(voting.id))
+        response = self.client.delete('/api/conflict-resolution/votings/{}/vote/'.format(voting.id))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.data)
 
         self.assertEqual(Vote.objects.count(), 0)
@@ -140,7 +140,7 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
 
     def create_case_via_API(self, **kwargs):
         return self.client.post(
-            '/api/cases/', {
+            '/api/conflict-resolution/', {
                 'group': kwargs.get('group', self.group).id,
                 'topic': kwargs.get('topic', 'asdf'),
                 'affected_user': kwargs.get('affected_user', self.affected_member).id,
@@ -150,7 +150,7 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
 
     def vote_via_API(self, voting, data=None):
         return self.client.post(
-            '/api/cases/votings/{}/vote/'.format(voting.id),
+            '/api/conflict-resolution/votings/{}/vote/'.format(voting.id),
             data or make_vote_data(voting.options.all()),
             format='json'
         )
@@ -160,7 +160,7 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         return freeze_time(time_when_voting_expires, tick=True)
 
     def delete_vote_via_API(self, voting):
-        return self.client.delete('/api/cases/votings/{}/vote/'.format(voting.id))
+        return self.client.delete('/api/conflict-resolution/votings/{}/vote/'.format(voting.id))
 
     def test_cannot_create_case_as_nonmember(self):
         self.client.force_login(user=VerifiedUserFactory())
@@ -206,39 +206,39 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
     def test_cannot_list_cases_as_nonmember(self):
         self.create_case()
         self.client.force_login(user=self.newcomer)
-        response = self.get_results('/api/cases/?group={}'.format(self.group.id))
+        response = self.get_results('/api/conflict-resolution/?group={}'.format(self.group.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 0)
 
     def test_cannot_list_cases_as_newcomer(self):
         self.create_case()
         self.client.force_login(user=self.newcomer)
-        response = self.get_results('/api/cases/?group={}'.format(self.group.id))
+        response = self.get_results('/api/conflict-resolution/?group={}'.format(self.group.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 0)
 
     def test_cannot_retrieve_cases_as_nonmember(self):
         case = self.create_case()
         self.client.force_login(user=VerifiedUserFactory())
-        response = self.get_results('/api/cases/{}/'.format(case.id))
+        response = self.get_results('/api/conflict-resolution/{}/'.format(case.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
     def test_cannot_retrieve_cases_as_newcomer(self):
         case = self.create_case()
         self.client.force_login(user=self.newcomer)
-        response = self.get_results('/api/cases/{}/'.format(case.id))
+        response = self.get_results('/api/conflict-resolution/{}/'.format(case.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
     def test_cannot_retrieve_case_conversation_as_nonmember(self):
         case = self.create_case()
         self.client.force_login(user=VerifiedUserFactory())
-        response = self.get_results('/api/cases/{}/conversation/'.format(case.id))
+        response = self.get_results('/api/conflict-resolution/{}/conversation/'.format(case.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
     def test_cannot_retrieve_case_conversation_as_newcomer(self):
         case = self.create_case()
         self.client.force_login(user=self.newcomer)
-        response = self.get_results('/api/cases/{}/conversation/'.format(case.id))
+        response = self.get_results('/api/conflict-resolution/{}/conversation/'.format(case.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
     def test_cannot_vote_as_nonmember(self):

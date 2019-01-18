@@ -14,7 +14,7 @@ from raven.contrib.django.raven_compat.models import client as sentry_client
 from foodsaving.applications.models import GroupApplication
 from foodsaving.applications.serializers import GroupApplicationSerializer
 from foodsaving.cases.models import Case, Voting, Option, Vote
-from foodsaving.cases.serializers import CaseSerializer
+from foodsaving.cases.serializers import ConflictResolutionSerializer
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction, \
     ConversationThreadParticipant
 from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer
@@ -397,7 +397,7 @@ def notification_meta_saved(sender, instance, **kwargs):
 # Case
 def send_case_updates(case):
     for subscription in ChannelSubscription.objects.recent().filter(user__in=case.user_queryset()).distinct():
-        payload = CaseSerializer(case, context={'request': MockRequest(user=subscription.user)}).data
+        payload = ConflictResolutionSerializer(case, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic='cases:case', payload=payload)
 
 

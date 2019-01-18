@@ -10,7 +10,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.cases import stats
 from foodsaving.cases.models import Case, Vote, Voting
-from foodsaving.cases.serializers import CaseSerializer, VoteSerializer
+from foodsaving.cases.serializers import ConflictResolutionSerializer, VoteSerializer
 from foodsaving.conversations.api import RetrieveConversationMixin
 from foodsaving.groups.models import Group
 
@@ -27,7 +27,7 @@ class CasesPagination(CursorPagination):
     ordering = 'id'
 
 
-class CasesViewSet(
+class ConflictResolutionsViewSet(
         mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
         mixins.ListModelMixin,
@@ -37,7 +37,7 @@ class CasesViewSet(
     queryset = Case.objects
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_fields = ('group', 'status')
-    serializer_class = CaseSerializer
+    serializer_class = ConflictResolutionSerializer
     permission_classes = (IsAuthenticated, )
     pagination_class = CasesPagination
 

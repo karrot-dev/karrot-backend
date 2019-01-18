@@ -112,7 +112,7 @@ class VotingSerializer(serializers.ModelSerializer):
     options = OptionSerializer(many=True, read_only=True)
 
 
-class CaseSerializer(serializers.ModelSerializer):
+class ConflictResolutionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Case
         fields = [
@@ -142,12 +142,12 @@ class CaseSerializer(serializers.ModelSerializer):
         if not group.is_editor(self.context['request'].user):
             raise PermissionDenied(_('You need to be a group editor'))
         if group.is_open:
-            raise serializers.ValidationError('Cannot create case in open group')
+            raise serializers.ValidationError('Cannot create conflict resolution in open group')
         return group
 
     def validate_affected_user(self, affected_user):
         if affected_user == self.context['request'].user:
-            raise serializers.ValidationError(_('You cannot open a case against yourself'))
+            raise serializers.ValidationError('You cannot start a conflict resolution against yourself')
         return affected_user
 
     def validate_topic(self, topic):
@@ -161,7 +161,9 @@ class CaseSerializer(serializers.ModelSerializer):
         if not group.is_member(affected_user):
             raise serializers.ValidationError(_('Affected user is not part of that group'))
         if Case.objects.ongoing().filter(group=group, affected_user=affected_user).exists():
-            raise serializers.ValidationError(_('A case about that user in that group has already been started'))
+            raise serializers.ValidationError(
+                _('A conflict resolution about that user in that group has already been started')
+            )
         return attrs
 
     def save(self, **kwargs):
