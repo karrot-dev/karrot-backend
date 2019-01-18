@@ -81,7 +81,9 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
 
         # vote on option
         response = self.client.post(
-            '/api/conflict-resolution/votings/{}/vote/'.format(voting['id']), make_vote_data(voting['options']), format='json'
+            '/api/conflict-resolution/votings/{}/vote/'.format(voting['id']),
+            make_vote_data(voting['options']),
+            format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         votes = response.data

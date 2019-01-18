@@ -69,8 +69,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
     application_questions_default = serializers.SerializerMethodField()
     trust_threshold_for_newcomer = serializers.SerializerMethodField()
     member_inactive_after_days = serializers.SerializerMethodField()
-    photo = VersatileImageFieldSerializer(sizes='group_logo', required=False,
-                                          allow_null=True, write_only=True)
+    photo = VersatileImageFieldSerializer(sizes='group_logo', required=False, allow_null=True, write_only=True)
     photo_urls = VersatileImageFieldSerializer(sizes='group_logo', read_only=True, source='photo')
     timezone = TimezoneField()
 

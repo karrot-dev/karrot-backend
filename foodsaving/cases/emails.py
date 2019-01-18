@@ -89,7 +89,6 @@ def prepare_conflict_resolution_case_continued_email(user, case):
 
 
 def prepare_conflict_resolution_case_continued_email_to_affected_user(user, case):
-    affected_user = case.affected_user
     voting = case.latest_voting()
 
     unsubscribe_url = conflict_resolution_unsubscribe_url(user, case)
