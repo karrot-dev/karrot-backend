@@ -104,3 +104,4 @@ class CaseModelTests(TestCase):
 
         self.case.refresh_from_db()
         self.assertTrue(self.case.is_cancelled())
+

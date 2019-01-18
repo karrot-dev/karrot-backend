@@ -32,6 +32,10 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
         self.affected_member = VerifiedUserFactory()
         self.group = GroupFactory(members=[self.member, self.affected_member])
 
+        # effectively disable throttling
+        from foodsaving.cases.api import ConflictResolutionThrottle
+        ConflictResolutionThrottle.rate = '1000/min'
+
     def create_case(self, **kwargs):
         return CaseFactory(group=self.group, created_by=self.member, **kwargs)
 
@@ -95,6 +99,12 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
         # get conversation
         response = self.client.get('/api/conflict-resolution/{}/conversation/'.format(case['id']))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        conversation_id = response.data['id']
+
+        # post message in conversation
+        data = {'conversation': conversation_id, 'content': 'a nice message'}
+        response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_vote_can_be_updated_and_deleted(self):
         self.client.force_login(user=self.member)
@@ -134,6 +144,10 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
             members=[self.member, self.affected_member],
             newcomers=[self.newcomer],
         )
+
+        # effectively disable throttling
+        from foodsaving.cases.api import ConflictResolutionThrottle
+        ConflictResolutionThrottle.rate = '1000/min'
 
     def create_case(self, **kwargs):
         return CaseFactory(group=self.group, created_by=self.member, **kwargs)

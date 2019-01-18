@@ -6,6 +6,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
+from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.cases import stats
@@ -20,6 +21,10 @@ class IsNotExpired(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return not obj.is_expired()
+
+
+class ConflictResolutionThrottle(UserRateThrottle):
+    rate = '10/day'
 
 
 class CasesPagination(CursorPagination):
@@ -40,6 +45,11 @@ class ConflictResolutionsViewSet(
     serializer_class = ConflictResolutionSerializer
     permission_classes = (IsAuthenticated, )
     pagination_class = CasesPagination
+
+    def get_throttles(self):
+        if self.action == 'create':
+            self.throttle_classes = (ConflictResolutionThrottle, )
+        return super().get_throttles()
 
     def get_queryset(self):
         groups = Group.objects.user_is_editor(self.request.user)
