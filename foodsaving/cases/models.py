@@ -10,6 +10,7 @@ from foodsaving.base.base_models import BaseModel
 from foodsaving.cases import stats
 from foodsaving.conversations.models import ConversationMixin
 from foodsaving.groups.models import GroupMembership
+from foodsaving.history.models import History, HistoryTypus
 from foodsaving.utils import markdown
 
 
@@ -190,10 +191,12 @@ class Option(BaseModel):
             )
 
     def _remove_user(self):
+        group = self.voting.case.group
         GroupMembership.objects.filter(
-            group=self.voting.case.group,
+            group=group,
             user=self.affected_user,
         ).delete()
+        History.objects.create(typus=HistoryTypus.MEMBER_REMOVED, group=group, users=[self.affected_user])
 
 
 class Vote(BaseModel):

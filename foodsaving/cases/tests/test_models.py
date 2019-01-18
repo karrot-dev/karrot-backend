@@ -9,6 +9,7 @@ from foodsaving.cases.tasks import process_expired_votings
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupNotificationType
 from foodsaving.groups.roles import GROUP_EDITOR
+from foodsaving.history.models import History, HistoryTypus
 from foodsaving.users.factories import VerifiedUserFactory
 
 
@@ -46,6 +47,7 @@ class CaseModelTests(TestCase):
 
     def test_removes_user(self):
         self.vote_on(OptionTypes.REMOVE_USER.value)
+        History.objects.all().delete()
         self.process_votings()
 
         with self.fast_forward_to_voting_expiration():
@@ -54,6 +56,9 @@ class CaseModelTests(TestCase):
             self.assertFalse(self.group.is_member(self.affected_member))
             self.assertEqual(self.case.votings.count(), 1)
             self.assertTrue(self.get_voting().is_expired())
+
+        self.assertEqual(History.objects.count(), 1)
+        self.assertEqual(History.objects.first().typus, HistoryTypus.MEMBER_REMOVED)
 
     def test_further_discussion(self):
         self.vote_on(OptionTypes.FURTHER_DISCUSSION.value)
