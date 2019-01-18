@@ -26,8 +26,6 @@ def case_created(sender, instance, created, **kwargs):
     conversation.join(case.affected_user)
     conversation.conversationparticipant_set.filter(user=case.affected_user).update(email_notifications=True)
 
-    notify_about_new_conflict_resolution_case(case)
-
 
 @receiver(post_save, sender=Voting)
 def voting_created(sender, instance, created, **kwargs):
@@ -37,10 +35,11 @@ def voting_created(sender, instance, created, **kwargs):
     voting = instance
     case = voting.case
 
-    if case.votings.count() <= 1:
-        return
-
-    notify_about_continued_conflict_resolution_case(case)
+    voting_count = case.votings.count()
+    if voting_count == 1:
+        notify_about_new_conflict_resolution_case(case)
+    elif voting_count > 1:
+        notify_about_continued_conflict_resolution_case(case)
 
 
 @receiver(pre_save, sender=GroupMembership)

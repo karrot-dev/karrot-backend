@@ -1,0 +1,38 @@
+<mjml>
+    <mj-head>
+        <mj-include path="../../base/templates/_base-head.mjml"/>
+        <mj-title>{% trans creator_name=created_by.display_name %}{{ creator_name }} opened a discussion about a conflict with you{% endtrans %}</mj-title>
+    </mj-head>
+    <mj-body>
+        <mj-include path="../../base/templates/_header.mjml"/>
+        <mj-section background-color="#ffffff" padding="40px 0 40px 0">
+            <mj-column>
+                <mj-text>
+                    <h1>{% trans creator_name=created_by.display_name %}{{ creator_name }} opened a discussion about a conflict with you{% endtrans %}</h1>
+                    <div class="message">
+                        <h2>{% trans %}Topic{% endtrans %}</h2>
+                        <div class="message-content">
+                            {{ topic | safe }}
+                        </div>
+                    </div>
+                    <p>{% trans %}You can discuss the topic and give your opinion in the voting.{% endtrans %}</p>
+                    <p>{% trans expiry_date=expires_at|date %}This voting round ends at {{ expiry_date }}.{% endtrans %}</p>
+                </mj-text>
+                <mj-button href="{{ conflict_resolution_case_url }}">
+                    {% trans %}View discussion{% endtrans %}
+                </mj-button>
+                <mj-divider/>
+                <mj-text font-size="13px" line-height="18px" color="#777">
+                    <p>
+                        {% trans %}You are receiving this because you are subscribed to <strong>Conflict Resolution</strong> emails for this group.{% endtrans %}
+                        <a href="{{ unsubscribe_url }}">{% trans %}Click here to unsubscribe{% endtrans %}</a>.
+                    </p>
+                    <p>
+                        {% trans mute_url=unsubscribe_url %}Reply to this email directly, <a href="{{ conversation_url }}">view it on {{ site_name }}</a>, or <a href="{{ mute_url }}">mute the conversation</a>.{% endtrans %}
+                    </p>
+                </mj-text>
+            </mj-column>
+        </mj-section>
+        <mj-include path="../../base/templates/_footer.mjml"/>
+    </mj-body>
+</mjml>

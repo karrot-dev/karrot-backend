@@ -1,5 +1,6 @@
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
+from django.core import mail
 from django.utils import timezone
 from freezegun import freeze_time
 from rest_framework import status
@@ -8,7 +9,9 @@ from rest_framework.test import APITestCase
 from foodsaving.cases.factories import CaseFactory
 from foodsaving.cases.models import Vote
 from foodsaving.cases.tasks import process_expired_votings
+from foodsaving.groups import roles
 from foodsaving.groups.factories import GroupFactory
+from foodsaving.groups.models import GroupNotificationType
 from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.users.factories import VerifiedUserFactory
 
@@ -33,6 +36,16 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
         return CaseFactory(group=self.group, created_by=self.member, **kwargs)
 
     def test_create_conflict_resolution_case_and_vote(self):
+        # add another editor
+        notification_member = VerifiedUserFactory()
+        self.group.groupmembership_set.create(user=notification_member, roles=[roles.GROUP_EDITOR])
+        # add notification type to send out emails
+        for membership in self.group.groupmembership_set.all():
+            membership.add_notification_types([GroupNotificationType.CONFLICT_RESOLUTION])
+            membership.save()
+        mail.outbox = []
+
+        # create case
         self.client.force_login(user=self.member)
         response = self.client.post(
             '/api/cases/', {
@@ -54,6 +67,13 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
 
         voting = case['votings'][0]
         self.assertEqual(voting['participant_count'], 0)
+
+        # check if emails have been sent
+        self.assertEqual(len(mail.outbox), 2)
+        email_to_affected_user = next(email for email in mail.outbox if email.to[0] == self.affected_member.email)
+        email_to_editor = next(email for email in mail.outbox if email.to[0] == notification_member.email)
+        self.assertIn('with you', email_to_affected_user.subject)
+        self.assertIn('with {}'.format(self.affected_member.display_name), email_to_editor.subject)
 
         # vote on option
         response = self.client.post(
