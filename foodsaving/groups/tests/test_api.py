@@ -11,6 +11,7 @@ from foodsaving.groups import roles
 from foodsaving.groups.factories import GroupFactory, PlaygroundGroupFactory
 from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
     GroupNotificationType, get_default_notification_types, Group
+from foodsaving.history.models import History, HistoryTypus
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory
@@ -230,6 +231,8 @@ class TestUploadGroupPhoto(APITestCase):
         response = self.client.get(self.url)
         self.assertTrue('full_size' not in response.data['photo_urls'])
 
+        History.objects.all().delete()
+
         with open(self.photo_file, 'rb') as photo:
             response = self.client.patch(self.url, {'photo': photo})
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
@@ -239,6 +242,11 @@ class TestUploadGroupPhoto(APITestCase):
         self.assertTrue('thumbnail' in response.data['photo_urls'])
         self.assertTrue(response.data['photo_urls']['full_size'].startswith('http://testserver'))
 
+        self.assertEqual(History.objects.count(), 1)
+        self.assertEqual(History.objects.first().typus, HistoryTypus.GROUP_CHANGE_PHOTO)
+
+        History.objects.all().delete()
+
         # delete photo
         response = self.client.patch(self.url, {'photo': None}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
@@ -246,6 +254,9 @@ class TestUploadGroupPhoto(APITestCase):
         response = self.client.get(self.url)
         self.assertTrue('full_size' not in response.data['photo_urls'])
         self.assertTrue('thumbnail' not in response.data['photo_urls'])
+
+        self.assertEqual(History.objects.count(), 1)
+        self.assertEqual(History.objects.first().typus, HistoryTypus.GROUP_DELETE_PHOTO)
 
 
 class TestPlaygroundGroupAPI(APITestCase):

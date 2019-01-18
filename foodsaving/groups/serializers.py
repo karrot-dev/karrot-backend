@@ -174,6 +174,14 @@ class GroupDetailSerializer(GroupBaseSerializer):
                 before=before_data,
                 after=after_data,
             )
+
+        if 'photo' in validated_data:
+            deleted = validated_data['photo'] is None
+            History.objects.create(
+                typus=HistoryTypus.GROUP_DELETE_PHOTO if deleted else HistoryTypus.GROUP_CHANGE_PHOTO,
+                group=group,
+                users=[self.context['request'].user],
+            )
         return group
 
     def create(self, validated_data):
