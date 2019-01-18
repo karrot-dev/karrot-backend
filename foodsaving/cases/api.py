@@ -36,7 +36,7 @@ class CasesViewSet(
 ):
     queryset = Case.objects
     filter_backends = (filters.DjangoFilterBackend, )
-    filterset_fields = ('group', 'is_decided')
+    filterset_fields = ('group', 'status')
     serializer_class = CaseSerializer
     permission_classes = (IsAuthenticated, )
     pagination_class = CasesPagination

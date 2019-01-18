@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from foodsaving.cases.factories import CaseFactory
-from foodsaving.cases.models import Vote
+from foodsaving.cases.models import Vote, CaseStatus
 from foodsaving.cases.tasks import process_expired_votings
 from foodsaving.groups import roles
 from foodsaving.groups.factories import GroupFactory
@@ -57,7 +57,7 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         case = response.data
         self.assertEqual(case['created_by'], self.member.id)
-        self.assertFalse(case['is_decided'])
+        self.assertEqual(case['status'], CaseStatus.ONGOING.value)
         self.assertEqual(case['type'], 'conflict_resolution')
         self.assertEqual(case['topic'], 'I complain about this user')
         self.assertEqual(case['group'], self.group.id)

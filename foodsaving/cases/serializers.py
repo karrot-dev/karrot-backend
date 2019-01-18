@@ -119,7 +119,7 @@ class CaseSerializer(serializers.ModelSerializer):
             'id',
             'created_at',
             'created_by',
-            'is_decided',
+            'status',
             'type',
             'topic',
             'votings',
@@ -129,7 +129,7 @@ class CaseSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'created_at',
             'created_by',
-            'is_decided',
+            'status',
             'type',
         ]
         extra_kwargs = {'created_by': {'default': serializers.CurrentUserDefault()}}
@@ -160,7 +160,7 @@ class CaseSerializer(serializers.ModelSerializer):
         affected_user = attrs['affected_user']
         if not group.is_member(affected_user):
             raise serializers.ValidationError(_('Affected user is not part of that group'))
-        if Case.objects.filter(group=group, affected_user=affected_user, is_decided=False).exists():
+        if Case.objects.ongoing().filter(group=group, affected_user=affected_user).exists():
             raise serializers.ValidationError(_('A case about that user in that group has already been started'))
         return attrs
 

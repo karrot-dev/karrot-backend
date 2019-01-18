@@ -17,10 +17,32 @@ class CaseTypes(Enum):
     CONFLICT_RESOLUTION = 'conflict_resolution'
 
 
+class CaseStatus(Enum):
+    ONGOING = 'ongoing'
+    DECIDED = 'decided'
+    CANCELLED = 'cancelled'
+
+
+class CaseQuerySet(models.QuerySet):
+    def ongoing(self):
+        return self.filter(status=CaseStatus.ONGOING.value)
+
+    def decided(self):
+        return self.filter(status=CaseStatus.DECIDED.value)
+
+    def cancelled(self):
+        return self.filter(status=CaseStatus.CANCELLED.value)
+
+
 class Case(BaseModel, ConversationMixin):
+    objects = CaseQuerySet.as_manager()
+
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='cases')
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='cases_opened')
-    is_decided = models.BooleanField(default=False)
+    status = models.TextField(
+        default=CaseStatus.ONGOING.value,
+        choices=[(status.value, status.value) for status in CaseStatus],
+    )
     type = models.TextField(
         default=CaseTypes.CONFLICT_RESOLUTION.value,
         choices=[(status.value, status.value) for status in CaseTypes],
@@ -31,7 +53,11 @@ class Case(BaseModel, ConversationMixin):
     )
 
     def decide(self):
-        self.is_decided = True
+        self.status = CaseStatus.DECIDED.value
+        self.save()
+
+    def cancel(self):
+        self.status = CaseStatus.CANCELLED.value
         self.save()
 
     def save(self, **kwargs):
@@ -55,6 +81,15 @@ class Case(BaseModel, ConversationMixin):
 
     def topic_rendered(self, **kwargs):
         return markdown.render(self.topic, **kwargs)
+
+    def is_decided(self):
+        return self.status == CaseStatus.DECIDED.value
+
+    def is_ongoing(self):
+        return self.status == CaseStatus.ONGOING.value
+
+    def is_cancelled(self):
+        return self.status == CaseStatus.CANCELLED.value
 
 
 class VotingQuerySet(models.QuerySet):

@@ -299,7 +299,7 @@ def conflict_resolution_case_decided(sender, instance, **kwargs):
 
     # abort if case is not decided or was already decided
     old = Case.objects.get(id=case.id)
-    if old.is_decided or not case.is_decided:
+    if old.is_decided() or not case.is_decided():
         return
 
     for user in case.user_queryset().distinct():

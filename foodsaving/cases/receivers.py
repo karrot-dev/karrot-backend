@@ -73,3 +73,7 @@ def group_member_removed(sender, instance, **kwargs):
         conversation = Conversation.objects.get_for_target(case)
         if conversation:
             conversation.leave(user)
+
+    # if user was affected by ongoing case, cancel that case
+    for case in group.cases.ongoing().filter(affected_user=user):
+        case.cancel()

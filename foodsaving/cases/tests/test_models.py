@@ -50,7 +50,7 @@ class CaseModelTests(TestCase):
 
         with self.fast_forward_to_voting_expiration():
             self.case.refresh_from_db()
-            self.assertTrue(self.case.is_decided)
+            self.assertTrue(self.case.is_decided())
             self.assertFalse(self.group.is_member(self.affected_member))
             self.assertEqual(self.case.votings.count(), 1)
             self.assertTrue(self.get_voting().is_expired())
@@ -62,7 +62,7 @@ class CaseModelTests(TestCase):
 
         with self.fast_forward_to_voting_expiration():
             self.case.refresh_from_db()
-            self.assertFalse(self.case.is_decided)
+            self.assertFalse(self.case.is_decided())
             self.assertTrue(self.group.is_member(self.affected_member))
             self.assertEqual(self.case.votings.count(), 2)
             self.assertEqual([v.is_expired() for v in self.case.votings.order_by('created_at')], [True, False])
@@ -80,7 +80,7 @@ class CaseModelTests(TestCase):
 
         with self.fast_forward_to_voting_expiration():
             self.case.refresh_from_db()
-            self.assertTrue(self.case.is_decided)
+            self.assertTrue(self.case.is_decided())
             self.assertTrue(self.group.is_member(self.affected_member))
             self.assertEqual(self.case.votings.count(), 1)
             self.assertTrue(self.get_voting().is_expired())
@@ -93,3 +93,9 @@ class CaseModelTests(TestCase):
 
         with self.fast_forward_to_voting_expiration():
             self.assertEqual(self.get_voting().accepted_option.type, OptionTypes.FURTHER_DISCUSSION.value)
+
+    def test_voluntary_user_removal_results_in_closed_case(self):
+        self.group.groupmembership_set.filter(user=self.affected_member).delete()
+
+        self.case.refresh_from_db()
+        self.assertTrue(self.case.is_cancelled())
