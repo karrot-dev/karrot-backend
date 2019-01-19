@@ -4,7 +4,8 @@ from django.test import TestCase
 from django.utils import timezone
 
 from foodsaving.applications.factories import GroupApplicationFactory
-from foodsaving.cases.factories import CaseFactory, vote_for_further_discussion, fast_forward_to_voting_expiration, vote_for_remove_user
+from foodsaving.cases.factories import CaseFactory, vote_for_further_discussion, fast_forward_to_voting_expiration, \
+    vote_for_remove_user
 from foodsaving.cases.tasks import process_expired_votings
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership

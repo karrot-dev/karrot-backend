@@ -9,7 +9,6 @@ from enum import Enum
 from foodsaving.base.base_models import BaseModel
 from foodsaving.cases import stats
 from foodsaving.conversations.models import ConversationMixin
-from foodsaving.groups.models import GroupMembership
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.utils import markdown
 
