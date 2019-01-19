@@ -147,7 +147,7 @@ class ConflictResolutionSerializer(serializers.ModelSerializer):
         if (group.groupmembership_set.active().editors().count() <
                 settings.CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION):
             raise serializers.ValidationError(
-                _('You need more than %(count)s active editors in your group to start this process.') %
+                _('You need at least %(count)s active trusted users in your group to start this process.') %
                 {'count': settings.CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION}
             )
         return group
