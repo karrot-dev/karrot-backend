@@ -66,9 +66,8 @@ class GroupDetailSerializer(GroupBaseSerializer):
     "use this also for creating and updating a group"
     memberships = serializers.SerializerMethodField()
     notification_types = serializers.SerializerMethodField()
-    application_questions_default = serializers.SerializerMethodField()
-    trust_threshold_for_newcomer = serializers.SerializerMethodField()
     member_inactive_after_days = serializers.SerializerMethodField()
+    active_editors_required_for_conflict_resolution = serializers.SerializerMethodField()
     photo = VersatileImageFieldSerializer(sizes='group_logo', required=False, allow_null=True, write_only=True)
     photo_urls = VersatileImageFieldSerializer(sizes='group_logo', read_only=True, source='photo')
     timezone = TimezoneField()
@@ -94,6 +93,8 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'is_open',
             'trust_threshold_for_newcomer',
             'member_inactive_after_days',
+            'active_editors_count',
+            'active_editors_required_for_conflict_resolution',
             'photo',
             'photo_urls',
         ]
@@ -132,17 +133,14 @@ class GroupDetailSerializer(GroupBaseSerializer):
         if 'request' not in self.context:
             return []
         user = self.context['request'].user
-        membership = group.groupmembership_set.get(user=user)
+        membership = next(m for m in group.groupmembership_set.all() if m.user_id == user.id)
         return membership.notification_types
-
-    def get_application_questions_default(self, group):
-        return group.get_application_questions_default()
-
-    def get_trust_threshold_for_newcomer(self, group):
-        return group.get_trust_threshold_for_newcomer()
 
     def get_member_inactive_after_days(self, group):
         return settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP
+
+    def get_active_editors_required_for_conflict_resolution(self, group):
+        return settings.CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION
 
     def update(self, group, validated_data):
         if group.is_playground():
