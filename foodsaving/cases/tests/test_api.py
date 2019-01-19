@@ -7,7 +7,7 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from foodsaving.cases.factories import CaseFactory
+from foodsaving.cases.factories import CaseFactory, vote_for_remove_user
 from foodsaving.cases.models import Vote, CaseStatus
 from foodsaving.cases.tasks import process_expired_votings
 from foodsaving.groups import roles
@@ -338,3 +338,17 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         response = self.vote_via_API(voting, data=[{'option': voting2.options.first().id, 'score': 1}])
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual('Provided option is not part of this voting', response.data[0]['option'][0])
+
+    def test_removed_member_cannot_access_case(self):
+        case = self.create_case(affected_user=self.affected_member)
+        vote_for_remove_user(voting=case.latest_voting(), user=case.created_by)
+        with self.fast_forward_to_voting_expiration(case.latest_voting()):
+            process_expired_votings()
+
+        self.client.force_login(user=self.affected_member)
+        # cannot access case
+        response = self.get_results('/api/conflict-resolution/{}/'.format(case.id))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
+        # cannot access conversation
+        response = self.get_results('/api/conversations/{}/'.format(case.conversation.id))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)

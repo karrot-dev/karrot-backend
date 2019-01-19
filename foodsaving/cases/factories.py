@@ -20,8 +20,9 @@ class CaseFactory(DjangoModelFactory):
     topic = LazyAttribute(lambda x: faker.sentence(nb_words=4))
 
     @post_generation
-    def make_editor(self, create, extracted, **kwargs):
+    def add_members(self, create, extracted, **kwargs):
         self.group.groupmembership_set.get_or_create(user=self.created_by, roles=[roles.GROUP_EDITOR])
+        self.group.groupmembership_set.get_or_create(user=self.affected_user)
 
 
 def vote_for(voting, user, type):
@@ -35,6 +36,10 @@ def vote_for_further_discussion(**kwargs):
 
 def vote_for_no_change(**kwargs):
     vote_for(type=OptionTypes.NO_CHANGE.value, **kwargs)
+
+
+def vote_for_remove_user(**kwargs):
+    vote_for(type=OptionTypes.REMOVE_USER.value, **kwargs)
 
 
 def fast_forward_to_voting_expiration(voting):

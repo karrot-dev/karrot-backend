@@ -28,7 +28,9 @@ def case_created(sender, instance, created, **kwargs):
 
     # make sure affected user is in conversation and has email notifications enabled
     conversation.join(case.affected_user)
-    conversation.conversationparticipant_set.filter(user=case.affected_user).update(email_notifications=True)
+    participant = conversation.conversationparticipant_set.get(user=case.affected_user)
+    participant.email_notifications = True
+    participant.save()
 
 
 @receiver(post_save, sender=Voting)
@@ -51,7 +53,8 @@ def group_member_removed(sender, instance, **kwargs):
     group = instance.group
     user = instance.user
 
-    CaseParticipant.objects.filter(user=user, case__group=group).delete()
+    for participant in CaseParticipant.objects.filter(user=user, case__group=group):
+        participant.delete()
 
     for case in group.cases.all():
         conversation = Conversation.objects.get_for_target(case)

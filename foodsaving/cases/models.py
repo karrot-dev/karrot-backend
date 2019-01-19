@@ -190,10 +190,8 @@ class Option(BaseModel):
         case = self.voting.case
         group = case.group
         affected_user = case.affected_user
-        GroupMembership.objects.filter(
-            group=group,
-            user=affected_user,
-        ).delete()
+        membership = group.groupmembership_set.get(user=affected_user)
+        membership.delete()
         History.objects.create(typus=HistoryTypus.MEMBER_REMOVED, group=group, users=[affected_user])
 
 
