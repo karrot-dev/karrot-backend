@@ -94,6 +94,8 @@ class Conversation(BaseModel, UpdatedAtMixin):
             return 'pickup'
         if type == 'group application':
             return 'application'
+        if type == 'group case':
+            return 'case'
 
         return type
 
