@@ -4,8 +4,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from foodsaving.applications.factories import GroupApplicationFactory
-from foodsaving.cases.factories import CaseFactory, vote_for_further_discussion, fast_forward_to_voting_expiration, \
-    vote_for_no_change
+from foodsaving.cases.factories import CaseFactory, vote_for_further_discussion, fast_forward_to_voting_expiration, vote_for_remove_user
 from foodsaving.cases.tasks import process_expired_votings
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership
@@ -255,10 +254,16 @@ class TestNotificationReceivers(TestCase):
 
         Notification.objects.all().delete()
         voting = case.latest_voting()
-        vote_for_no_change(voting=voting, user=user1)
+        vote_for_remove_user(voting=voting, user=user1)
         with fast_forward_to_voting_expiration(voting):
             process_expired_votings()
 
         notifications = Notification.objects.all()
-        self.assertEqual(notifications.count(), 2)
-        self.assertEqual(notifications[0].type, NotificationType.CONFLICT_RESOLUTION_CASE_DECIDED.value)
+        self.assertEqual(notifications.count(), 3)
+        self.assertEqual(
+            sorted(notifications.values_list('type', flat=True)), [
+                NotificationType.CONFLICT_RESOLUTION_CASE_DECIDED.value,
+                NotificationType.CONFLICT_RESOLUTION_CASE_DECIDED.value,
+                NotificationType.YOU_WERE_REMOVED.value,
+            ]
+        )
