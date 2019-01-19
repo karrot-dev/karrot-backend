@@ -8,7 +8,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 from foodsaving.applications.models import GroupApplication, GroupApplicationStatus
-from foodsaving.cases.models import Case, Voting, OptionTypes
+from foodsaving.cases.models import GroupCase, Voting, OptionTypes
 from foodsaving.notifications.models import Notification, NotificationType
 from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
@@ -289,7 +289,7 @@ def conflict_resolution_case_created_or_continued(sender, instance, created, **k
             )
 
 
-@receiver(pre_save, sender=Case)
+@receiver(pre_save, sender=GroupCase)
 def conflict_resolution_case_decided(sender, instance, **kwargs):
     case = instance
 
@@ -298,7 +298,7 @@ def conflict_resolution_case_decided(sender, instance, **kwargs):
         return
 
     # abort if case is not decided or was already decided
-    old = Case.objects.get(id=case.id)
+    old = GroupCase.objects.get(id=case.id)
     if old.is_decided() or not case.is_decided():
         return
 

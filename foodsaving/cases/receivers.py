@@ -1,14 +1,14 @@
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
-from foodsaving.cases.models import Case, Voting, CaseParticipant
+from foodsaving.cases.models import GroupCase, Voting, CaseParticipant
 from foodsaving.cases.tasks import notify_about_new_conflict_resolution_case, \
     notify_about_continued_conflict_resolution_case
 from foodsaving.conversations.models import Conversation
 from foodsaving.groups.models import GroupNotificationType, GroupMembership
 
 
-@receiver(post_save, sender=Case)
+@receiver(post_save, sender=GroupCase)
 def case_created(sender, instance, created, **kwargs):
     if not created:
         return

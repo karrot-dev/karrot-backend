@@ -35,7 +35,7 @@ class CaseQuerySet(models.QuerySet):
         return self.filter(status=CaseStatus.CANCELLED.value)
 
 
-class Case(BaseModel, ConversationMixin):
+class GroupCase(BaseModel, ConversationMixin):
     objects = CaseQuerySet.as_manager()
 
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='cases')
@@ -93,7 +93,7 @@ class CaseParticipant(models.Model):
     class Meta:
         unique_together = ('case', 'user')
 
-    case = models.ForeignKey(Case, on_delete=models.CASCADE)
+    case = models.ForeignKey(GroupCase, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
 
@@ -110,7 +110,7 @@ def voting_expiration_time():
 class Voting(BaseModel):
     objects = VotingQuerySet.as_manager()
 
-    case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='votings')
+    case = models.ForeignKey(GroupCase, on_delete=models.CASCADE, related_name='votings')
     expires_at = models.DateTimeField(default=voting_expiration_time)
     accepted_option = models.ForeignKey(
         'Option',

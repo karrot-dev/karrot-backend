@@ -5,7 +5,7 @@ from rest_framework.exceptions import PermissionDenied
 from django.utils.translation import ugettext as _
 
 from foodsaving.cases import stats
-from foodsaving.cases.models import Case, Voting, Vote, Option
+from foodsaving.cases.models import GroupCase, Voting, Vote, Option
 
 
 class VoteListSerializer(serializers.ListSerializer):
@@ -115,7 +115,7 @@ class VotingSerializer(serializers.ModelSerializer):
 
 class ConflictResolutionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Case
+        model = GroupCase
         fields = [
             'id',
             'created_at',
@@ -167,7 +167,7 @@ class ConflictResolutionSerializer(serializers.ModelSerializer):
         affected_user = attrs['affected_user']
         if not group.is_member(affected_user):
             raise serializers.ValidationError(_('Affected user is not part of that group'))
-        if Case.objects.ongoing().filter(group=group, affected_user=affected_user).exists():
+        if GroupCase.objects.ongoing().filter(group=group, affected_user=affected_user).exists():
             raise serializers.ValidationError(
                 _('A conflict resolution about that user in that group has already been started')
             )

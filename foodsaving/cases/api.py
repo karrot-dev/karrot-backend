@@ -10,7 +10,7 @@ from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.cases import stats
-from foodsaving.cases.models import Case, Vote, Voting
+from foodsaving.cases.models import GroupCase, Vote, Voting
 from foodsaving.cases.serializers import ConflictResolutionSerializer, VoteSerializer
 from foodsaving.conversations.api import RetrieveConversationMixin
 
@@ -38,7 +38,7 @@ class ConflictResolutionsViewSet(
         RetrieveConversationMixin,
         GenericViewSet,
 ):
-    queryset = Case.objects
+    queryset = GroupCase.objects
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_fields = ('group', 'status')
     serializer_class = ConflictResolutionSerializer
