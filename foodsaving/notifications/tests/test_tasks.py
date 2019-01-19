@@ -4,7 +4,6 @@ from django.utils import timezone
 
 from foodsaving.cases.factories import CaseFactory, fast_forward_just_before_voting_expiration, \
     vote_for_further_discussion
-from foodsaving.groups import roles
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.notifications import tasks
 from foodsaving.notifications.models import Notification, NotificationType
@@ -119,10 +118,11 @@ class TestPickupUpcomingTask(TestCase):
 
 class TestVotingEndsSoonTask(TestCase):
     def test_create_voting_ends_soon_notifications(self):
-        case = CaseFactory()
-        voter = UserFactory()
-        case.group.groupmembership_set.create(user=voter, roles=[roles.GROUP_EDITOR])
+        creator, affected_user, voter = UserFactory(), UserFactory(), UserFactory()
+        group = GroupFactory(members=[creator, affected_user, voter])
+        case = CaseFactory(group=group, created_by=creator, affected_user=affected_user)
         voting = case.latest_voting()
+        # let's vote with user "voter"
         vote_for_further_discussion(voting=voting, user=voter)
         Notification.objects.all().delete()
 

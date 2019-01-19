@@ -6,6 +6,7 @@ from freezegun import freeze_time
 from foodsaving.cases.factories import CaseFactory
 from foodsaving.cases.models import OptionTypes
 from foodsaving.cases.tasks import process_expired_votings
+from foodsaving.groups import roles
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupNotificationType
 from foodsaving.groups.roles import GROUP_EDITOR
@@ -104,3 +105,24 @@ class CaseModelTests(TestCase):
 
         self.case.refresh_from_db()
         self.assertTrue(self.case.is_cancelled())
+
+    def test_new_members_are_not_in_existing_cases(self):
+        # create a new member and a new editor
+        self.group.groupmembership_set.create(user=VerifiedUserFactory(), roles=[roles.GROUP_EDITOR])
+        self.group.groupmembership_set.create(user=VerifiedUserFactory())
+
+        # ...but they shouldn't become part of existing cases
+        expected_ids = sorted([self.member.id, self.affected_member.id])
+        participant_ids = sorted(self.case.participants.values_list('id', flat=True))
+        conversation_participant_ids = sorted(self.case.conversation.participants.values_list('id', flat=True))
+        self.assertEqual(participant_ids, expected_ids)
+        self.assertEqual(conversation_participant_ids, expected_ids)
+
+    def test_remove_participant_if_they_leave_group(self):
+        self.assertTrue(self.case.participants.filter(id=self.member.id).exists())
+        self.assertTrue(self.case.conversation.participants.filter(id=self.member.id).exists())
+
+        self.group.groupmembership_set.filter(user=self.member).delete()
+
+        self.assertFalse(self.case.participants.filter(id=self.member.id).exists())
+        self.assertFalse(self.case.conversation.participants.filter(id=self.member.id).exists())

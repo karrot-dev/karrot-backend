@@ -2,7 +2,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.db.models import Sum, Q
+from django.db.models import Sum
 from django.utils import timezone
 from enum import Enum
 
@@ -40,6 +40,7 @@ class Case(BaseModel, ConversationMixin):
 
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='cases')
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='cases_opened')
+    participants = models.ManyToManyField(settings.AUTH_USER_MODEL, through='CaseParticipant', related_name='cases')
     status = models.TextField(
         default=CaseStatus.ONGOING.value,
         choices=[(status.value, status.value) for status in CaseStatus],
@@ -72,11 +73,6 @@ class Case(BaseModel, ConversationMixin):
         if created:
             stats.case_created(self)
 
-    def user_queryset(self):
-        editors = Q(groupmembership__in=self.group.groupmembership_set.editors())
-        affected_user = Q(id=self.affected_user_id)
-        return get_user_model().objects.filter(editors | affected_user)
-
     def latest_voting(self):
         return self.votings.latest('created_at')
 
@@ -91,6 +87,14 @@ class Case(BaseModel, ConversationMixin):
 
     def is_cancelled(self):
         return self.status == CaseStatus.CANCELLED.value
+
+
+class CaseParticipant(models.Model):
+    class Meta:
+        unique_together = ('case', 'user')
+
+    case = models.ForeignKey(Case, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
 
 class VotingQuerySet(models.QuerySet):

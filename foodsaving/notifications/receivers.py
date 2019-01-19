@@ -278,12 +278,12 @@ def conflict_resolution_case_created_or_continued(sender, instance, created, **k
 
     # if there's only one voting, the case has just been created
     if case.votings.count() <= 1:
-        for user in case.user_queryset().exclude(id=case.created_by_id).distinct():
+        for user in case.participants.exclude(id=case.created_by_id).distinct():
             create_notification_about_case(
                 case=case, user=user, type=NotificationType.CONFLICT_RESOLUTION_CASE_CREATED.value
             )
     else:
-        for user in case.user_queryset().distinct():
+        for user in case.participants.distinct():
             create_notification_about_case(
                 case=case, user=user, type=NotificationType.CONFLICT_RESOLUTION_CASE_CONTINUED.value
             )
@@ -302,7 +302,7 @@ def conflict_resolution_case_decided(sender, instance, **kwargs):
     if old.is_decided() or not case.is_decided():
         return
 
-    for user in case.user_queryset().distinct():
+    for user in case.participants.distinct():
         create_notification_about_case(
             case=case, user=user, type=NotificationType.CONFLICT_RESOLUTION_CASE_DECIDED.value
         )

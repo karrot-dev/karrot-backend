@@ -13,7 +13,6 @@ from foodsaving.cases import stats
 from foodsaving.cases.models import Case, Vote, Voting
 from foodsaving.cases.serializers import ConflictResolutionSerializer, VoteSerializer
 from foodsaving.conversations.api import RetrieveConversationMixin
-from foodsaving.groups.models import Group
 
 
 class IsNotExpired(BasePermission):
@@ -52,8 +51,7 @@ class ConflictResolutionsViewSet(
         return super().get_throttles()
 
     def get_queryset(self):
-        groups = Group.objects.user_is_editor(self.request.user)
-        return super().get_queryset().filter(group__in=groups)
+        return super().get_queryset().filter(participants=self.request.user)
 
     @action(
         detail=True,

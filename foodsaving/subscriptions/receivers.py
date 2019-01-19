@@ -396,7 +396,7 @@ def notification_meta_saved(sender, instance, **kwargs):
 
 # Case
 def send_case_updates(case):
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=case.user_queryset()).distinct():
+    for subscription in ChannelSubscription.objects.recent().filter(user__caseparticipant__case=case).distinct():
         payload = ConflictResolutionSerializer(case, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic='cases:case', payload=payload)
 

@@ -19,7 +19,7 @@ def process_expired_votings():
 
 
 def get_users_to_notify(case):
-    return case.user_queryset().filter(
+    return case.participants.filter(
         groupmembership__notification_types__contains=[GroupNotificationType.CONFLICT_RESOLUTION],
         groupmembership__inactive_at__isnull=True,
     ).exclude(id__in=get_user_model().objects.unverified_or_ignored()).distinct()
