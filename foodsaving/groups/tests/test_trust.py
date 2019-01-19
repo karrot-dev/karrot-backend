@@ -23,21 +23,21 @@ class TestTrustThreshold(TestCase):
     def test_min_threshold(self):
         self.create_group_with_members(1)
         self.assertEqual(
-            self.group.get_trust_threshold_for_newcomer(),
+            self.group.trust_threshold_for_newcomer(),
             1,
         )
 
     def test_ramp_up_threshold(self):
         self.create_group_with_members(5)
         self.assertEqual(
-            self.group.get_trust_threshold_for_newcomer(),
+            self.group.trust_threshold_for_newcomer(),
             2,
         )
 
     def test_max_threshold(self):
         self.create_group_with_members(6)
         self.assertEqual(
-            self.group.get_trust_threshold_for_newcomer(),
+            self.group.trust_threshold_for_newcomer(),
             3,
         )
 
@@ -45,7 +45,7 @@ class TestTrustThreshold(TestCase):
         self.create_group_with_members(1)
         [self.group.add_member(UserFactory()) for _ in range(5)]
         self.assertEqual(
-            self.group.get_trust_threshold_for_newcomer(),
+            self.group.trust_threshold_for_newcomer(),
             1,
         )
 

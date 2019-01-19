@@ -204,8 +204,13 @@ FEEDBACK_POSSIBLE_DAYS = 30
 MESSAGE_EDIT_DAYS = 2
 GROUP_EDITOR_TRUST_MAX_THRESHOLD = 3
 PICKUPDATE_DUE_SOON_HOURS = 6
-VOTING_DUE_SOON_HOURS = 12
 STORE_MAX_WEEKS_IN_ADVANCE = 52
+
+# Voting duration
+CASE_VOTING_DURATION_DAYS = 7
+VOTING_DUE_SOON_HOURS = 12
+
+CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION = 4
 
 # Names that shouldn't be used used by groups or users because they are either confusing or unspecific
 # Values are case-insensitive
@@ -242,9 +247,6 @@ NUMBER_OF_DAYS_AFTER_REMOVAL_NOTIFICATION_WE_ACTUALLY_REMOVE_THEM = 7
 
 # For marking groups inactive
 NUMBER_OF_DAYS_UNTIL_GROUP_INACTIVE = 14
-
-# Voting duration
-CASE_VOTING_DURATION_DAYS = 7
 
 # Default dummy settings, please override in local_settings.py
 DEFAULT_FROM_EMAIL = "testing@example.com"

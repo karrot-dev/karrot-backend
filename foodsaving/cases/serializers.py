@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
@@ -143,6 +144,12 @@ class ConflictResolutionSerializer(serializers.ModelSerializer):
             raise PermissionDenied(_('You need to be a group editor'))
         if group.is_open:
             raise serializers.ValidationError('Cannot create conflict resolution in open group')
+        if (group.groupmembership_set.active().editors().count() <
+                settings.CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION):
+            raise serializers.ValidationError(
+                _('You need more than %(count)s active editors in your group to start this process.') %
+                {'count': settings.CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION}
+            )
         return group
 
     def validate_affected_user(self, affected_user):

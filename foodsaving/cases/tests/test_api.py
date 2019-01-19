@@ -1,5 +1,6 @@
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.core import mail
 from django.utils import timezone
 from freezegun import freeze_time
@@ -28,6 +29,7 @@ def make_vote_data(options, scores=None):
 
 class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):
+        settings.CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION = 1
         self.member = VerifiedUserFactory()
         self.affected_member = VerifiedUserFactory()
         self.group = GroupFactory(members=[self.member, self.affected_member])
@@ -139,6 +141,7 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
 
 class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
     def setUp(self):
+        settings.CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION = 1
         self.member = VerifiedUserFactory()
         self.newcomer = VerifiedUserFactory()
         self.affected_member = VerifiedUserFactory()
@@ -217,6 +220,12 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         open_group = GroupFactory(members=[member, member2], is_open=True)
         self.client.force_login(user=member)
         response = self.create_case_via_API(group=open_group, affected_user=member2)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
+    def test_cannot_create_case_if_there_are_not_enough_active_editors(self):
+        settings.CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION = 4
+        self.client.force_login(user=self.member)
+        response = self.create_case_via_API()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_cannot_list_cases_as_nonmember(self):
