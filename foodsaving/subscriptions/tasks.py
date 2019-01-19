@@ -90,8 +90,10 @@ def get_message_title(message, language):
             return '{} / {}'.format(application_title, author_name)
 
     if type == 'case':
-        # TODO add custom push title
-        return author_name
+        case = conversation.target
+        if message.author == case.affected_user:
+            return '💣 {}'.format(author_name)
+        return '💣 {} / {}'.format(case.affected_user, author_name)
 
     return author_name
 
