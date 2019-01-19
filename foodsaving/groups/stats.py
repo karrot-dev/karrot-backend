@@ -1,4 +1,5 @@
 from django.db.models import Count
+from django.utils import timezone
 from influxdb_metrics.loader import write_points
 
 
@@ -26,6 +27,32 @@ def group_left(group):
         'fields': {
             'group_left': 1
         },
+    }])
+
+
+def member_returned(membership):
+    fields = {
+        'group_member_returned': 1,
+    }
+
+    def get_seconds_to_now(date):
+        return round((timezone.now() - date).total_seconds())
+
+    if membership.removal_notification_at is not None:
+        fields.update({
+            'group_member_returned_seconds_since_marked_for_removal':
+            get_seconds_to_now(membership.removal_notification_at)
+        })
+    else:
+        fields.update({
+            'group_member_returned_seconds_since_marked_as_inactive':
+            get_seconds_to_now(membership.inactive_at)
+        })
+
+    write_points([{
+        'measurement': 'karrot.events',
+        'tags': group_tags(membership.group),
+        'fields': fields,
     }])
 
 

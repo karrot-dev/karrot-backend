@@ -78,9 +78,10 @@ def process_inactive_users():
     for membership in GroupMembership.objects.filter(removal_notification_at__lte=removal_date):
         membership.delete()
         History.objects.create(
-            typus=HistoryTypus.GROUP_LEAVE_INACTIVE, group=membership.group, users=[
-                membership.user,
-            ]
+            typus=HistoryTypus.GROUP_LEAVE_INACTIVE,
+            group=membership.group,
+            users=[membership.user],
+            payload={'display_name': membership.user.display_name}
         )
         count_users_removed += 1
 
