@@ -68,7 +68,7 @@ class GroupCase(BaseModel, ConversationMixin):
 
         if self.votings.count() == 0:
             voting = self.votings.create()
-            voting.create_options(self.affected_user)
+            voting.create_options()
 
         if created:
             stats.case_created(self)
@@ -125,7 +125,7 @@ class Voting(BaseModel):
     def participant_count(self):
         return get_user_model().objects.filter(votes_given__option__voting=self).distinct().count()
 
-    def create_options(self, affected_user):
+    def create_options(self):
         options = [
             {
                 'type': OptionTypes.FURTHER_DISCUSSION.value,
@@ -135,7 +135,6 @@ class Voting(BaseModel):
             },
             {
                 'type': OptionTypes.REMOVE_USER.value,
-                'affected_user': affected_user,
             },
         ]
         for option in options:
@@ -167,12 +166,6 @@ class OptionTypes(Enum):
 class Option(BaseModel):
     voting = models.ForeignKey(Voting, on_delete=models.CASCADE, related_name='options')
     type = models.TextField(choices=[(status.value, status.value) for status in OptionTypes])
-    affected_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        null=True,
-        on_delete=models.CASCADE,
-        related_name='affected_by_voting_options',
-    )
     message = models.TextField(null=True)
     sum_score = models.FloatField(null=True)
 
@@ -190,17 +183,18 @@ class Option(BaseModel):
         for option in self.voting.options.all():
             new_voting.options.create(
                 type=option.type,
-                affected_user=option.affected_user,
                 message=option.message,
             )
 
     def _remove_user(self):
-        group = self.voting.case.group
+        case = self.voting.case
+        group = case.group
+        affected_user = case.affected_user
         GroupMembership.objects.filter(
             group=group,
-            user=self.affected_user,
+            user=affected_user,
         ).delete()
-        History.objects.create(typus=HistoryTypus.MEMBER_REMOVED, group=group, users=[self.affected_user])
+        History.objects.create(typus=HistoryTypus.MEMBER_REMOVED, group=group, users=[affected_user])
 
 
 class Vote(BaseModel):

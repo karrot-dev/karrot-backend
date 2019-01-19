@@ -310,9 +310,7 @@ def conflict_resolution_case_decided(sender, instance, **kwargs):
     accepted_option = case.latest_voting().accepted_option
     if accepted_option.type == OptionTypes.REMOVE_USER.value:
         return Notification.objects.create(
-            user=accepted_option.affected_user,
-            type=NotificationType.YOU_WERE_REMOVED.value,
-            context={
+            user=case.affected_user, type=NotificationType.YOU_WERE_REMOVED.value, context={
                 'group': case.group.id,
             }
         )

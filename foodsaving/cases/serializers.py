@@ -78,7 +78,6 @@ class OptionSerializer(serializers.ModelSerializer):
             'id',
             'type',
             'message',
-            'affected_user',
             'sum_score',
             'your_score',
         ]
