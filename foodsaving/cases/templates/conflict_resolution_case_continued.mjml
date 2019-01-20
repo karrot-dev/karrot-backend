@@ -9,7 +9,7 @@
         <mj-section background-color="#ffffff" padding="40px 0 40px 0">
             <mj-column>
                 <mj-text>
-                    <h1>{% trans affected_user_name=affected_user.display_name|safe %}Continue the discussion about the conflict with {{ affected_user_name }}{% endtrans %}
+                    <h1>{% trans affected_user_name=affected_user.display_name|safe %}Continue the discussion about the conflict with {{ affected_user_name }}{% endtrans %}</h1>
                     <p>{% trans %}The most acceptable outcome of the last voting round is to continue discussion and start another round of voting.{% endtrans %}</p>
                     <p>{% trans expiry_date=expires_at|date %}This voting round ends at {{ expiry_date }}.{% endtrans %}</p>
                 </mj-text>

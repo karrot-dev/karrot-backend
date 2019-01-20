@@ -34,7 +34,7 @@ def notify_about_new_conflict_resolution_case(case):
     for user in get_users_to_notify(case).exclude(id=case.created_by_id):
         try:
             if user.id == case.affected_user_id:
-                prepare_new_conflict_resolution_email_to_affected_user(user, case).send()
+                prepare_new_conflict_resolution_email_to_affected_user(case).send()
             else:
                 prepare_new_conflict_resolution_email(user, case).send()
         except AnymailAPIError:
@@ -46,7 +46,7 @@ def notify_about_continued_conflict_resolution_case(case):
     for user in get_users_to_notify(case):
         try:
             if user.id == case.affected_user_id:
-                prepare_conflict_resolution_case_continued_email_to_affected_user(user, case).send()
+                prepare_conflict_resolution_case_continued_email_to_affected_user(case).send()
             else:
                 prepare_conflict_resolution_case_continued_email(user, case).send()
         except AnymailAPIError:

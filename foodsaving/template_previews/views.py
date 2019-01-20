@@ -10,12 +10,14 @@ from django.template.utils import get_app_template_dirs
 from django.utils import timezone
 
 import foodsaving.applications.emails
+import foodsaving.cases.emails
 import foodsaving.conversations.emails
 import foodsaving.invitations.emails
 import foodsaving.users.emails
 from config import settings
 from foodsaving.applications.factories import GroupApplicationFactory
 from foodsaving.applications.models import GroupApplication
+from foodsaving.cases.factories import CaseFactory
 from foodsaving.conversations.models import ConversationMessage
 from foodsaving.groups.emails import prepare_user_inactive_in_group_email, prepare_group_summary_emails, \
     prepare_group_summary_data, prepare_user_became_editor_email, prepare_user_removal_from_group_email
@@ -42,6 +44,10 @@ def random_group():
 
 def shuffle_groups():
     return Group.objects.order_by('?')
+
+
+def random_case():
+    return CaseFactory(group=random_group(), created_by=random_user(), affected_user=random_user())
 
 
 def random_message():
@@ -102,6 +108,14 @@ class Handlers:
     def changemail_success(self):
         return foodsaving.users.emails.prepare_changemail_success_email(user=random_user())
 
+    def conflict_resolution_case_continued(self):
+        case = random_case()
+        return foodsaving.cases.emails.prepare_conflict_resolution_case_continued_email(case.created_by, case)
+
+    def conflict_resolution_case_continued_affected_user(self):
+        case = random_case()
+        return foodsaving.cases.emails.prepare_conflict_resolution_case_continued_email_to_affected_user(case)
+
     def conversation_message_notification(self):
         return foodsaving.conversations.emails.prepare_group_conversation_message_notification(
             user=random_user(), message=random_message()
@@ -121,6 +135,14 @@ class Handlers:
         application = get_or_create_application()
         member = application.group.members.first()
         return foodsaving.applications.emails.prepare_new_application_notification_email(member, application)
+
+    def new_conflict_resolution_case(self):
+        case = random_case()
+        return foodsaving.cases.emails.prepare_new_conflict_resolution_email(case.created_by, case)
+
+    def new_conflict_resolution_case_affected_user(self):
+        case = random_case()
+        return foodsaving.cases.emails.prepare_new_conflict_resolution_email_to_affected_user(case)
 
     def group_summary(self):
         from_date = timezone.now() - relativedelta(days=7)

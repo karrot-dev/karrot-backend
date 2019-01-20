@@ -9,7 +9,7 @@
         <mj-section background-color="#ffffff" padding="40px 0 40px 0">
             <mj-column>
                 <mj-text>
-                    <h1>{% trans %}Continue the discussion about the conflict with you{% endtrans %}
+                    <h1>{% trans %}Continue the discussion about the conflict with you{% endtrans %}</h1>
                     <p>{% trans %}The most acceptable outcome of the last voting round is to continue discussion and start another round of voting.{% endtrans %}</p>
                     <p>{% trans expiry_date=expires_at|date %}This voting round ends at {{ expiry_date }}.{% endtrans %}</p>
                 </mj-text>
@@ -17,12 +17,6 @@
                     {% trans %}View conflict resolution case{% endtrans %}
                 </mj-button>
                 <mj-divider/>
-                <mj-text font-size="13px" line-height="18px" color="#777">
-                    <p>
-                        {% trans %}You are receiving this because you are subscribed to <strong>Conflict Resolution</strong> emails for this group.{% endtrans %}
-                        <a href="{{ mute_url }}">{% trans %}Click here to unsubscribe{% endtrans %}</a>.
-                    </p>
-                </mj-text>
             </mj-column>
         </mj-section>
         <mj-include path="../../base/templates/_footer.mjml"/>
