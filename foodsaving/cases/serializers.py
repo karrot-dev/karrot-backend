@@ -91,10 +91,16 @@ class OptionSerializer(serializers.ModelSerializer):
         return option.sum_score
 
     def get_your_score(self, option):
-        try:
-            vote = option.votes.get(user=self.context['request'].user)
-        except Vote.DoesNotExist:
-            return None
+        if hasattr(option, 'your_votes'):
+            try:
+                vote = next(v for v in option.your_votes if v.option_id == option.id)
+            except StopIteration:
+                return None
+        else:
+            try:
+                vote = option.votes.get(user=self.context['request'].user)
+            except Vote.DoesNotExist:
+                return None
         return vote.score
 
 

@@ -138,6 +138,16 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
 
         self.assertEqual(Vote.objects.count(), 0)
 
+    def test_list_cases_efficiently(self):
+        self.create_case()
+        self.create_case()
+        self.create_case()
+
+        self.client.force_login(user=self.member)
+        with self.assertNumQueries(6):
+            response = self.get_results('/api/conflict-resolution/', {'group': self.group.id}, format='json')
+        self.assertEqual(len(response.data), 3)
+
 
 class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
     def setUp(self):

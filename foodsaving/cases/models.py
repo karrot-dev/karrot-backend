@@ -2,7 +2,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, Count, Prefetch
 from django.utils import timezone
 from enum import Enum
 
@@ -32,6 +32,13 @@ class CaseQuerySet(models.QuerySet):
 
     def cancelled(self):
         return self.filter(status=CaseStatus.CANCELLED.value)
+
+    def prefetch_stuff(self, user):
+        return self.prefetch_related(
+            Prefetch('votings', Voting.objects.annotate_participant_count()),
+            'votings__options',
+            Prefetch('votings__options__votes', Vote.objects.filter(user=user), to_attr='your_votes'),
+        )
 
 
 class GroupCase(BaseModel, ConversationMixin):
@@ -101,6 +108,9 @@ class VotingQuerySet(models.QuerySet):
         in_some_hours = timezone.now() + relativedelta(hours=settings.VOTING_DUE_SOON_HOURS)
         return self.filter(expires_at__gt=timezone.now(), expires_at__lt=in_some_hours)
 
+    def annotate_participant_count(self):
+        return self.annotate(_participant_count=Count('options__votes__user', distinct=True))
+
 
 def voting_expiration_time():
     return timezone.now() + relativedelta(days=settings.CASE_VOTING_DURATION_DAYS)
@@ -122,7 +132,10 @@ class Voting(BaseModel):
         return self.expires_at < timezone.now()
 
     def participant_count(self):
-        return get_user_model().objects.filter(votes_given__option__voting=self).distinct().count()
+        count = getattr(self, '_participant_count', None)
+        if count is None:
+            count = get_user_model().objects.filter(votes_given__option__voting=self).distinct().count()
+        return count
 
     def create_options(self):
         options = [

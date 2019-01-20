@@ -58,7 +58,7 @@ class ConflictResolutionsViewSet(
         return super().get_throttles()
 
     def get_queryset(self):
-        return super().get_queryset().filter(participants=self.request.user)
+        return super().get_queryset().filter(participants=self.request.user).prefetch_stuff(user=self.request.user)
 
     @action(
         detail=True,

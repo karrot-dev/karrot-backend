@@ -8,6 +8,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from foodsaving.applications.factories import GroupApplicationFactory
+from foodsaving.cases.factories import CaseFactory
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationParticipant, Conversation, ConversationMessage, \
     ConversationMessageReaction
@@ -57,19 +58,21 @@ class TestConversationsAPI(APITestCase):
         store = StoreFactory(group=group)
         pickup = PickupDateFactory(store=store)
         application = GroupApplicationFactory(user=UserFactory(), group=group)
+        case = CaseFactory(group=group)
 
-        conversations = [Conversation.objects.get_or_create_for_target(t) for t in (group, pickup, application)]
+        conversations = [t.conversation for t in (group, pickup, application, case)]
         [c.sync_users([user]) for c in conversations]
         [c.messages.create(content='hey', author=user) for c in conversations]
 
         self.client.force_login(user=user)
-        with self.assertNumQueries(10):
+        with self.assertNumQueries(14):
             response = self.client.get('/api/conversations/', {'group': group.id}, format='json')
         results = response.data['results']
 
         self.assertEqual(len(results['conversations']), len(conversations))
         self.assertEqual(results['pickups'][0]['id'], pickup.id)
         self.assertEqual(results['applications'][0]['id'], application.id)
+        self.assertEqual(results['cases'][0]['id'], case.id)
 
     def test_list_only_unread_conversations(self):
         self.conversation1.messages.create(author=self.participant2, content='unread')
