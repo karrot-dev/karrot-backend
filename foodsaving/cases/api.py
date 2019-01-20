@@ -2,7 +2,6 @@ from django.utils.translation import ugettext_lazy as _
 from django_filters import rest_framework as filters
 from rest_framework import mixins, status
 from rest_framework.decorators import action
-from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
@@ -10,23 +9,16 @@ from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.cases import stats
-from foodsaving.cases.models import GroupCase, Vote, Voting
+from foodsaving.cases.models import GroupCase, Vote
 from foodsaving.cases.serializers import ConflictResolutionSerializer, VoteSerializer
 from foodsaving.conversations.api import RetrieveConversationMixin
 
 
-class IsNotExpired(BasePermission):
-    message = _('Cannot modify expired votings')
+class IsOngoing(BasePermission):
+    message = _('Cannot only modify vote for ongoing cases')
 
     def has_object_permission(self, request, view, obj):
-        return not obj.is_expired()
-
-
-class IsCaseOngoing(BasePermission):
-    message = _('Cannot only modify votings for ongoing cases')
-
-    def has_object_permission(self, request, view, obj):
-        return obj.case.is_ongoing()
+        return obj.is_ongoing()
 
 
 class ConflictResolutionThrottle(UserRateThrottle):
@@ -68,20 +60,17 @@ class ConflictResolutionsViewSet(
         return self.retrieve_conversation(request, pk)
 
     @action(
-        detail=False,
+        detail=True,
         methods=['POST', 'DELETE'],
-        url_name='vote-case',
-        url_path='votings/(?P<voting_id>[^/.]+)/vote',
         serializer_class=VoteSerializer,
-        permission_classes=(IsAuthenticated, IsNotExpired, IsCaseOngoing)
+        permission_classes=(IsAuthenticated, IsOngoing)
     )
-    def vote(self, request, voting_id):
+    def vote(self, request, **kwargs):
         self.check_permissions(request)
-        cases = self.get_queryset()
-        queryset = Voting.objects.filter(case__in=cases)
-        voting = get_object_or_404(queryset, id=voting_id)
-        self.check_object_permissions(request, voting)
+        case = self.get_object()
+        self.check_object_permissions(request, case)
 
+        voting = case.latest_voting()
         vote_qs = Vote.objects.filter(option__voting=voting, user=request.user)
 
         if request.method == 'POST':

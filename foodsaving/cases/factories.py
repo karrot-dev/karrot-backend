@@ -34,6 +34,10 @@ def vote_for_further_discussion(**kwargs):
     vote_for(type=OptionTypes.FURTHER_DISCUSSION.value, **kwargs)
 
 
+def vote_for_no_change(**kwargs):
+    vote_for(type=OptionTypes.NO_CHANGE.value, **kwargs)
+
+
 def vote_for_remove_user(**kwargs):
     vote_for(type=OptionTypes.REMOVE_USER.value, **kwargs)
 

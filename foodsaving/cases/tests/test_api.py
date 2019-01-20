@@ -7,7 +7,7 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from foodsaving.cases.factories import CaseFactory, vote_for_remove_user
+from foodsaving.cases.factories import CaseFactory, vote_for_remove_user, vote_for_no_change
 from foodsaving.cases.models import Vote, CaseStatus
 from foodsaving.cases.tasks import process_expired_votings
 from foodsaving.groups import roles
@@ -83,9 +83,7 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
 
         # vote on option
         response = self.client.post(
-            '/api/conflict-resolution/votings/{}/vote/'.format(voting['id']),
-            make_vote_data(voting['options']),
-            format='json'
+            '/api/conflict-resolution/{}/vote/'.format(case['id']), make_vote_data(voting['options']), format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         votes = response.data
@@ -113,19 +111,19 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
     def test_vote_can_be_updated_and_deleted(self):
         self.client.force_login(user=self.member)
         case = self.create_case()
-        voting = case.votings.first()
+        voting = case.latest_voting()
         options = voting.options.all()
         option_count = options.count()
 
         response = self.client.post(
-            '/api/conflict-resolution/votings/{}/vote/'.format(voting.id),
+            '/api/conflict-resolution/{}/vote/'.format(case.id),
             make_vote_data(options, [1] * option_count),
             format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
         response = self.client.post(
-            '/api/conflict-resolution/votings/{}/vote/'.format(voting.id),
+            '/api/conflict-resolution/{}/vote/'.format(case.id),
             make_vote_data(options, [2] * option_count),
             format='json'
         )
@@ -133,7 +131,7 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
 
         self.assertEqual([v.score for v in Vote.objects.all()], [2] * option_count)
 
-        response = self.client.delete('/api/conflict-resolution/votings/{}/vote/'.format(voting.id))
+        response = self.client.delete('/api/conflict-resolution/{}/vote/'.format(case.id))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.data)
 
         self.assertEqual(Vote.objects.count(), 0)
@@ -177,9 +175,10 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
             format='json'
         )
 
-    def vote_via_API(self, voting, data=None):
+    def vote_via_API(self, case, data=None):
+        voting = case.latest_voting()
         return self.client.post(
-            '/api/conflict-resolution/votings/{}/vote/'.format(voting.id),
+            '/api/conflict-resolution/{}/vote/'.format(case.id),
             data or make_vote_data(voting.options.all()),
             format='json'
         )
@@ -188,8 +187,8 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         time_when_voting_expires = voting.expires_at + relativedelta(hours=1)
         return freeze_time(time_when_voting_expires, tick=True)
 
-    def delete_vote_via_API(self, voting):
-        return self.client.delete('/api/conflict-resolution/votings/{}/vote/'.format(voting.id))
+    def delete_vote_via_API(self, case):
+        return self.client.delete('/api/conflict-resolution/{}/vote/'.format(case.id))
 
     def test_cannot_create_case_as_nonmember(self):
         self.client.force_login(user=VerifiedUserFactory())
@@ -279,56 +278,53 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
     def test_cannot_vote_as_nonmember(self):
         case = self.create_case()
         self.client.force_login(user=VerifiedUserFactory())
-        response = self.vote_via_API(case.votings.first())
+        response = self.vote_via_API(case)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
     def test_cannot_vote_as_newcomer(self):
         case = self.create_case()
         self.client.force_login(user=self.newcomer)
-        response = self.vote_via_API(case.votings.first())
+        response = self.vote_via_API(case)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
     def test_cannot_delete_vote_as_nonmember(self):
         case = self.create_case()
         self.client.force_login(user=VerifiedUserFactory())
-        response = self.delete_vote_via_API(case.votings.first())
+        response = self.delete_vote_via_API(case)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
     def test_cannot_delete_vote_as_newcomer(self):
         case = self.create_case()
         self.client.force_login(user=self.newcomer)
-        response = self.delete_vote_via_API(case.votings.first())
+        response = self.delete_vote_via_API(case)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
     def test_cannot_vote_in_expired_voting(self):
         case = self.create_case()
         voting = case.votings.first()
+        vote_for_no_change(voting=voting, user=self.affected_member)
         self.client.force_login(user=self.member)
         with self.fast_forward_to_voting_expiration(voting):
             process_expired_votings()
-            response = self.vote_via_API(voting)
+            response = self.vote_via_API(case)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
-    def test_cannot_change_vote_in_expired_voting(self):
+    def test_cannot_change_vote_in_decided_case(self):
         case = self.create_case()
         voting = case.votings.first()
-        self.client.force_login(user=self.member)
-        response = self.vote_via_API(voting)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        vote_for_no_change(voting=voting, user=self.member)
         with self.fast_forward_to_voting_expiration(voting):
             process_expired_votings()
-            response = self.vote_via_API(voting)
+            response = self.vote_via_API(case)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
-    def test_cannot_delete_vote_in_expired_voting(self):
+    def test_cannot_delete_vote_in_decided_case(self):
         case = self.create_case()
         voting = case.votings.first()
-        self.client.force_login(user=self.member)
-        response = self.vote_via_API(voting)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        vote_for_no_change(voting=voting, user=self.member)
         with self.fast_forward_to_voting_expiration(voting):
             process_expired_votings()
-            response = self.delete_vote_via_API(voting)
+            response = self.delete_vote_via_API(case)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_cannote_change_and_delete_vote_in_cancelled_case(self):
@@ -341,27 +337,26 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.client.force_login(user=case.created_by)
-        response = self.vote_via_API(voting)
+        response = self.vote_via_API(case)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
-        response = self.delete_vote_via_API(voting)
+        response = self.delete_vote_via_API(case)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_must_provide_score_for_all_options_in_voting(self):
         case = self.create_case()
         voting = case.votings.first()
         self.client.force_login(user=self.member)
-        response = self.vote_via_API(voting, data=[{'option': voting.options.first().id, 'score': 1}])
+        response = self.vote_via_API(case, data=[{'option': voting.options.first().id, 'score': 1}])
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual('You need to provide a score for all options', response.data['non_field_errors'][0])
 
     def test_cannot_provide_score_for_options_in_other_voting(self):
         case = self.create_case()
-        voting = case.votings.first()
         case2 = self.create_case()
         voting2 = case2.votings.first()
         self.client.force_login(user=self.member)
-        response = self.vote_via_API(voting, data=[{'option': voting2.options.first().id, 'score': 1}])
+        response = self.vote_via_API(case, data=[{'option': voting2.options.first().id, 'score': 1}])
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual('Provided option is not part of this voting', response.data[0]['option'][0])
 
