@@ -8,13 +8,17 @@ from raven.contrib.django.raven_compat.models import client as sentry_client
 from foodsaving.cases.emails import prepare_new_conflict_resolution_email, \
     prepare_conflict_resolution_case_continued_email, prepare_new_conflict_resolution_email_to_affected_user, \
     prepare_conflict_resolution_case_continued_email_to_affected_user
-from foodsaving.cases.models import Voting
+from foodsaving.cases.models import Voting, CaseStatus
 from foodsaving.groups.models import GroupNotificationType
 
 
 @db_periodic_task(crontab(minute='*'))  # every minute
 def process_expired_votings():
-    for voting in Voting.objects.filter(expires_at__lte=timezone.now(), accepted_option__isnull=True):
+    for voting in Voting.objects.filter(
+            expires_at__lte=timezone.now(),
+            accepted_option__isnull=True,
+            case__status=CaseStatus.ONGOING.value,
+    ):
         voting.calculate_results()
 
 

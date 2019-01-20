@@ -321,6 +321,22 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
             response = self.delete_vote_via_API(voting)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
+    def test_cannote_change_and_delete_vote_in_cancelled_case(self):
+        case = self.create_case(affected_user=self.affected_member)
+        voting = case.votings.first()
+        vote_for_remove_user(voting=voting, user=case.created_by)
+
+        self.client.force_login(user=case.affected_user)
+        response = self.client.post('/api/groups/{}/leave/'.format(case.group.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.client.force_login(user=case.created_by)
+        response = self.vote_via_API(voting)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+        response = self.delete_vote_via_API(voting)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
     def test_must_provide_score_for_all_options_in_voting(self):
         case = self.create_case()
         voting = case.votings.first()

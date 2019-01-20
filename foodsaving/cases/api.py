@@ -22,6 +22,13 @@ class IsNotExpired(BasePermission):
         return not obj.is_expired()
 
 
+class IsCaseOngoing(BasePermission):
+    message = _('Cannot only modify votings for ongoing cases')
+
+    def has_object_permission(self, request, view, obj):
+        return obj.case.is_ongoing()
+
+
 class ConflictResolutionThrottle(UserRateThrottle):
     rate = '10/day'
 
@@ -66,7 +73,7 @@ class ConflictResolutionsViewSet(
         url_name='vote-case',
         url_path='votings/(?P<voting_id>[^/.]+)/vote',
         serializer_class=VoteSerializer,
-        permission_classes=(IsAuthenticated, IsNotExpired)
+        permission_classes=(IsAuthenticated, IsNotExpired, IsCaseOngoing)
     )
     def vote(self, request, voting_id):
         self.check_permissions(request)
