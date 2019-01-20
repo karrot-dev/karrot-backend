@@ -1,14 +1,14 @@
 <mjml>
     <mj-head>
         <mj-include path="../../base/templates/_base-head.mjml"/>
-        <mj-title>{% trans creator_name=created_by.display_name %}{{ creator_name }} opened a discussion about a conflict with you{% endtrans %}</mj-title>
+        <mj-title>{% trans %}A conflict resolution process was started about you{% endtrans %}</mj-title>
     </mj-head>
     <mj-body>
         <mj-include path="../../base/templates/_header.mjml"/>
         <mj-section background-color="#ffffff" padding="40px 0 40px 0">
             <mj-column>
                 <mj-text>
-                    <h1>{% trans creator_name=created_by.display_name %}{{ creator_name }} opened a discussion about a conflict with you{% endtrans %}</h1>
+                    <h1>{% trans %}A conflict resolution process was started about you{% endtrans %}</h1>
                     <div class="message">
                         <a class="message-author" href="{{ user_url(created_by) }}">{{ created_by.display_name }}</a><br>
                         <div class="message-content">
