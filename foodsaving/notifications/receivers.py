@@ -280,12 +280,22 @@ def conflict_resolution_issue_created_or_continued(sender, instance, created, **
     if issue.votings.count() <= 1:
         for user in issue.participants.exclude(id=issue.created_by_id).distinct():
             create_notification_about_issue(
-                issue=issue, user=user, type=NotificationType.CONFLICT_RESOLUTION_CREATED.value
+                issue=issue,
+                user=user,
+                type=(
+                    NotificationType.CONFLICT_RESOLUTION_CREATED.value if user.id != issue.affected_user_id else
+                    NotificationType.CONFLICT_RESOLUTION_CREATED_ABOUT_YOU.value
+                )
             )
     else:
         for user in issue.participants.distinct():
             create_notification_about_issue(
-                issue=issue, user=user, type=NotificationType.CONFLICT_RESOLUTION_CONTINUED.value
+                issue=issue,
+                user=user,
+                type=(
+                    NotificationType.CONFLICT_RESOLUTION_CONTINUED.value if user.id != issue.affected_user_id else
+                    NotificationType.CONFLICT_RESOLUTION_CONTINUED_ABOUT_YOU.value
+                )
             )
 
 
@@ -304,14 +314,19 @@ def conflict_resolution_issue_decided(sender, instance, **kwargs):
 
     for user in issue.participants.distinct():
         create_notification_about_issue(
-            issue=issue, user=user, type=NotificationType.CONFLICT_RESOLUTION_DECIDED.value
+            issue=issue,
+            user=user,
+            type=(
+                NotificationType.CONFLICT_RESOLUTION_DECIDED.value
+                if user.id != issue.affected_user_id else NotificationType.CONFLICT_RESOLUTION_DECIDED_ABOUT_YOU.value
+            )
         )
 
     accepted_option = issue.latest_voting().accepted_option
     if accepted_option.type == OptionTypes.REMOVE_USER.value:
         Notification.objects.create(
             user=issue.affected_user,
-            type=NotificationType.YOU_WERE_REMOVED.value,
+            type=NotificationType.CONFLICT_RESOLUTION_YOU_WERE_REMOVED.value,
             context={
                 'group': issue.group.id,
             }
