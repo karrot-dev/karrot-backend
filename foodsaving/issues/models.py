@@ -7,31 +7,31 @@ from django.utils import timezone
 from enum import Enum
 
 from foodsaving.base.base_models import BaseModel
-from foodsaving.cases import stats
+from foodsaving.issues import stats
 from foodsaving.conversations.models import ConversationMixin
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.utils import markdown
 
 
-class CaseTypes(Enum):
+class IssueTypes(Enum):
     CONFLICT_RESOLUTION = 'conflict_resolution'
 
 
-class CaseStatus(Enum):
+class IssueStatus(Enum):
     ONGOING = 'ongoing'
     DECIDED = 'decided'
     CANCELLED = 'cancelled'
 
 
-class CaseQuerySet(models.QuerySet):
+class IssueQuerySet(models.QuerySet):
     def ongoing(self):
-        return self.filter(status=CaseStatus.ONGOING.value)
+        return self.filter(status=IssueStatus.ONGOING.value)
 
     def decided(self):
-        return self.filter(status=CaseStatus.DECIDED.value)
+        return self.filter(status=IssueStatus.DECIDED.value)
 
     def cancelled(self):
-        return self.filter(status=CaseStatus.CANCELLED.value)
+        return self.filter(status=IssueStatus.CANCELLED.value)
 
     def prefetch_stuff(self, user):
         return self.prefetch_related(
@@ -41,31 +41,31 @@ class CaseQuerySet(models.QuerySet):
         )
 
 
-class GroupCase(BaseModel, ConversationMixin):
-    objects = CaseQuerySet.as_manager()
+class Issue(BaseModel, ConversationMixin):
+    objects = IssueQuerySet.as_manager()
 
-    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='cases')
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='cases_opened')
-    participants = models.ManyToManyField(settings.AUTH_USER_MODEL, through='CaseParticipant', related_name='cases')
+    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='issues')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='issues_created')
+    participants = models.ManyToManyField(settings.AUTH_USER_MODEL, through='IssueParticipant', related_name='issues')
     status = models.TextField(
-        default=CaseStatus.ONGOING.value,
-        choices=[(status.value, status.value) for status in CaseStatus],
+        default=IssueStatus.ONGOING.value,
+        choices=[(status.value, status.value) for status in IssueStatus],
     )
     type = models.TextField(
-        default=CaseTypes.CONFLICT_RESOLUTION.value,
-        choices=[(status.value, status.value) for status in CaseTypes],
+        default=IssueTypes.CONFLICT_RESOLUTION.value,
+        choices=[(status.value, status.value) for status in IssueTypes],
     )
     topic = models.TextField()
     affected_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE, related_name='affected_by_case'
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE, related_name='affected_by_issue'
     )
 
     def decide(self):
-        self.status = CaseStatus.DECIDED.value
+        self.status = IssueStatus.DECIDED.value
         self.save()
 
     def cancel(self):
-        self.status = CaseStatus.CANCELLED.value
+        self.status = IssueStatus.CANCELLED.value
         self.save()
 
     def save(self, **kwargs):
@@ -77,7 +77,7 @@ class GroupCase(BaseModel, ConversationMixin):
             voting.create_options()
 
         if created:
-            stats.case_created(self)
+            stats.issue_created(self)
 
     def latest_voting(self):
         return self.votings.latest('created_at')
@@ -86,20 +86,20 @@ class GroupCase(BaseModel, ConversationMixin):
         return markdown.render(self.topic, **kwargs)
 
     def is_decided(self):
-        return self.status == CaseStatus.DECIDED.value
+        return self.status == IssueStatus.DECIDED.value
 
     def is_ongoing(self):
-        return self.status == CaseStatus.ONGOING.value
+        return self.status == IssueStatus.ONGOING.value
 
     def is_cancelled(self):
-        return self.status == CaseStatus.CANCELLED.value
+        return self.status == IssueStatus.CANCELLED.value
 
 
-class CaseParticipant(models.Model):
+class IssueParticipant(models.Model):
     class Meta:
-        unique_together = ('case', 'user')
+        unique_together = ('issue', 'user')
 
-    case = models.ForeignKey(GroupCase, on_delete=models.CASCADE)
+    issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
 
@@ -113,13 +113,13 @@ class VotingQuerySet(models.QuerySet):
 
 
 def voting_expiration_time():
-    return timezone.now() + relativedelta(days=settings.CASE_VOTING_DURATION_DAYS)
+    return timezone.now() + relativedelta(days=settings.ISSUE_VOTING_DURATION_DAYS)
 
 
 class Voting(BaseModel):
     objects = VotingQuerySet.as_manager()
 
-    case = models.ForeignKey(GroupCase, on_delete=models.CASCADE, related_name='votings')
+    issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='votings')
     expires_at = models.DateTimeField(default=voting_expiration_time)
     accepted_option = models.ForeignKey(
         'Option',
@@ -183,7 +183,7 @@ class Option(BaseModel):
 
     def do_action(self):
         if self.type != OptionTypes.FURTHER_DISCUSSION.value:
-            self.voting.case.decide()
+            self.voting.issue.decide()
 
         if self.type == OptionTypes.FURTHER_DISCUSSION.value:
             self._further_discussion()
@@ -191,7 +191,7 @@ class Option(BaseModel):
             self._remove_user()
 
     def _further_discussion(self):
-        new_voting = self.voting.case.votings.create()
+        new_voting = self.voting.issue.votings.create()
         for option in self.voting.options.all():
             new_voting.options.create(
                 type=option.type,
@@ -199,9 +199,9 @@ class Option(BaseModel):
             )
 
     def _remove_user(self):
-        case = self.voting.case
-        group = case.group
-        affected_user = case.affected_user
+        issue = self.voting.issue
+        group = issue.group
+        affected_user = issue.affected_user
         membership = group.groupmembership_set.get(user=affected_user)
         membership.delete()
         History.objects.create(typus=HistoryTypus.MEMBER_REMOVED, group=group, users=[affected_user])

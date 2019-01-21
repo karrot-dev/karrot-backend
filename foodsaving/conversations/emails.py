@@ -26,8 +26,8 @@ def prepare_conversation_message_notification(user, messages):
         return prepare_pickup_conversation_message_notification(user, messages)
     if type == 'application':
         return prepare_group_application_message_notification(user, messages)
-    if type == 'case':
-        return prepare_case_message_notification(user, messages)
+    if type == 'issue':
+        return prepare_issue_message_notification(user, messages)
     if type == 'private':
         return prepare_private_user_conversation_message_notification(user, messages)
     raise Exception('Cannot send message notification because conversation doesn\'t have a known type')
@@ -231,12 +231,12 @@ def prepare_group_application_message_notification(user, messages):
         )
 
 
-def prepare_case_message_notification(user, messages):
+def prepare_issue_message_notification(user, messages):
     first_message = messages[0]
     conversation = first_message.conversation
     author = first_message.author
     reply_to_name = author.display_name
-    case = conversation.target
+    issue = conversation.target
 
     language = user.language
 
@@ -245,7 +245,7 @@ def prepare_case_message_notification(user, messages):
 
     with translation.override(language):
         conversation_name = _('New message in conflict resolution in %(group_name)s') % {
-            'group_name': case.group.name,
+            'group_name': issue.group.name,
         }
 
         from_text = author_names(messages)
@@ -254,7 +254,7 @@ def prepare_case_message_notification(user, messages):
         reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
         from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
-        unsubscribe_url = conversation_unsubscribe_url(user, group=case.group, conversation=conversation)
+        unsubscribe_url = conversation_unsubscribe_url(user, group=issue.group, conversation=conversation)
 
         return prepare_email(
             template='conversation_message_notification',
@@ -265,7 +265,7 @@ def prepare_case_message_notification(user, messages):
             context={
                 'messages': messages,
                 'conversation_name': conversation_name,
-                'conversation_url': conflict_resolution_url(case),
+                'conversation_url': conflict_resolution_url(issue),
                 'mute_url': unsubscribe_url,
             }
         )

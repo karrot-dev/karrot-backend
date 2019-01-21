@@ -2,7 +2,7 @@ from dateutil.relativedelta import relativedelta
 from django.test import TestCase
 from django.utils import timezone
 
-from foodsaving.cases.factories import CaseFactory, fast_forward_just_before_voting_expiration, \
+from foodsaving.issues.factories import IssueFactory, fast_forward_just_before_voting_expiration, \
     vote_for_further_discussion
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.notifications import tasks
@@ -120,8 +120,8 @@ class TestVotingEndsSoonTask(TestCase):
     def test_create_voting_ends_soon_notifications(self):
         creator, affected_user, voter = UserFactory(), UserFactory(), UserFactory()
         group = GroupFactory(members=[creator, affected_user, voter])
-        case = CaseFactory(group=group, created_by=creator, affected_user=affected_user)
-        voting = case.latest_voting()
+        issue = IssueFactory(group=group, created_by=creator, affected_user=affected_user)
+        voting = issue.latest_voting()
         # let's vote with user "voter"
         vote_for_further_discussion(voting=voting, user=voter)
         Notification.objects.all().delete()
@@ -134,5 +134,5 @@ class TestVotingEndsSoonTask(TestCase):
         notifications = Notification.objects.filter(type=NotificationType.VOTING_ENDS_SOON.value)
         # user "voter" is not being notified
         self.assertEqual(
-            sorted([n.user_id for n in notifications]), sorted([case.affected_user_id, case.created_by_id])
+            sorted([n.user_id for n in notifications]), sorted([issue.affected_user_id, issue.created_by_id])
         )

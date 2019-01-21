@@ -1,34 +1,34 @@
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
-from foodsaving.cases.models import GroupCase, Voting, CaseParticipant
-from foodsaving.cases.tasks import notify_about_new_conflict_resolution_case, \
-    notify_about_continued_conflict_resolution_case
+from foodsaving.issues.models import Issue, Voting, IssueParticipant
+from foodsaving.issues.tasks import notify_about_new_conflict_resolution, \
+    notify_about_continued_conflict_resolution
 from foodsaving.conversations.models import Conversation
 from foodsaving.groups.models import GroupNotificationType, GroupMembership
 
 
-@receiver(post_save, sender=GroupCase)
-def case_created(sender, instance, created, **kwargs):
+@receiver(post_save, sender=Issue)
+def issue_created(sender, instance, created, **kwargs):
     if not created:
         return
 
-    case = instance
+    issue = instance
     group = instance.group
 
     for membership in group.groupmembership_set.editors():
-        case.caseparticipant_set.create(user=membership.user)
-    case.caseparticipant_set.get_or_create(user=case.affected_user)
+        issue.issueparticipant_set.create(user=membership.user)
+    issue.issueparticipant_set.get_or_create(user=issue.affected_user)
 
     # add conversation
-    conversation = Conversation.objects.get_or_create_for_target(case)
+    conversation = Conversation.objects.get_or_create_for_target(issue)
     for membership in group.groupmembership_set.editors():
         notifications_enabled = GroupNotificationType.CONFLICT_RESOLUTION in membership.notification_types
         conversation.join(membership.user, email_notifications=notifications_enabled)
 
     # make sure affected user is in conversation and has email notifications enabled
-    conversation.join(case.affected_user)
-    participant = conversation.conversationparticipant_set.get(user=case.affected_user)
+    conversation.join(issue.affected_user)
+    participant = conversation.conversationparticipant_set.get(user=issue.affected_user)
     participant.email_notifications = True
     participant.save()
 
@@ -39,13 +39,13 @@ def voting_created(sender, instance, created, **kwargs):
         return
 
     voting = instance
-    case = voting.case
+    issue = voting.issue
 
-    voting_count = case.votings.count()
+    voting_count = issue.votings.count()
     if voting_count == 1:
-        notify_about_new_conflict_resolution_case(case)
+        notify_about_new_conflict_resolution(issue)
     elif voting_count > 1:
-        notify_about_continued_conflict_resolution_case(case)
+        notify_about_continued_conflict_resolution(issue)
 
 
 @receiver(pre_delete, sender=GroupMembership)
@@ -53,14 +53,14 @@ def group_member_removed(sender, instance, **kwargs):
     group = instance.group
     user = instance.user
 
-    for participant in CaseParticipant.objects.filter(user=user, case__group=group):
+    for participant in IssueParticipant.objects.filter(user=user, issue__group=group):
         participant.delete()
 
-    for case in group.cases.all():
-        conversation = Conversation.objects.get_for_target(case)
+    for issue in group.issues.all():
+        conversation = Conversation.objects.get_for_target(issue)
         if conversation:
             conversation.leave(user)
 
-    # if user was affected by ongoing case, cancel that case
-    for case in group.cases.ongoing().filter(affected_user=user):
-        case.cancel()
+    # if user was affected by ongoing issue, cancel that issue
+    for issue in group.issues.ongoing().filter(affected_user=user):
+        issue.cancel()

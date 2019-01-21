@@ -8,7 +8,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 from foodsaving.applications.models import GroupApplication, GroupApplicationStatus
-from foodsaving.cases.models import GroupCase, Voting, OptionTypes
+from foodsaving.issues.models import Issue, Voting, OptionTypes
 from foodsaving.notifications.models import Notification, NotificationType
 from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
@@ -255,62 +255,64 @@ def pickup_modified(sender, instance, **kwargs):
         )
 
 
-# Cases
-def create_notification_about_case(case, user, type):
+# Issue
+def create_notification_about_issue(issue, user, type):
     return Notification.objects.create(
         user=user,
         type=type,
         context={
-            'case': case.id,
-            'group': case.group.id,
-            'affected_user': case.affected_user.id,
+            'issue': issue.id,
+            'group': issue.group.id,
+            'affected_user': issue.affected_user.id,
         }
     )
 
 
 @receiver(post_save, sender=Voting)
-def conflict_resolution_case_created_or_continued(sender, instance, created, **kwargs):
+def conflict_resolution_issue_created_or_continued(sender, instance, created, **kwargs):
     if not created:
         return
 
     voting = instance
-    case = voting.case
+    issue = voting.issue
 
-    # if there's only one voting, the case has just been created
-    if case.votings.count() <= 1:
-        for user in case.participants.exclude(id=case.created_by_id).distinct():
-            create_notification_about_case(
-                case=case, user=user, type=NotificationType.CONFLICT_RESOLUTION_CASE_CREATED.value
+    # if there's only one voting, the issue has just been created
+    if issue.votings.count() <= 1:
+        for user in issue.participants.exclude(id=issue.created_by_id).distinct():
+            create_notification_about_issue(
+                issue=issue, user=user, type=NotificationType.CONFLICT_RESOLUTION_CREATED.value
             )
     else:
-        for user in case.participants.distinct():
-            create_notification_about_case(
-                case=case, user=user, type=NotificationType.CONFLICT_RESOLUTION_CASE_CONTINUED.value
+        for user in issue.participants.distinct():
+            create_notification_about_issue(
+                issue=issue, user=user, type=NotificationType.CONFLICT_RESOLUTION_CONTINUED.value
             )
 
 
-@receiver(pre_save, sender=GroupCase)
-def conflict_resolution_case_decided(sender, instance, **kwargs):
-    case = instance
+@receiver(pre_save, sender=Issue)
+def conflict_resolution_issue_decided(sender, instance, **kwargs):
+    issue = instance
 
     # abort if just created
-    if not case.id:
+    if not issue.id:
         return
 
-    # abort if case is not decided or was already decided
-    old = GroupCase.objects.get(id=case.id)
-    if old.is_decided() or not case.is_decided():
+    # abort if issue is not decided or was already decided
+    old = Issue.objects.get(id=issue.id)
+    if old.is_decided() or not issue.is_decided():
         return
 
-    for user in case.participants.distinct():
-        create_notification_about_case(
-            case=case, user=user, type=NotificationType.CONFLICT_RESOLUTION_CASE_DECIDED.value
+    for user in issue.participants.distinct():
+        create_notification_about_issue(
+            issue=issue, user=user, type=NotificationType.CONFLICT_RESOLUTION_DECIDED.value
         )
 
-    accepted_option = case.latest_voting().accepted_option
+    accepted_option = issue.latest_voting().accepted_option
     if accepted_option.type == OptionTypes.REMOVE_USER.value:
         Notification.objects.create(
-            user=case.affected_user, type=NotificationType.YOU_WERE_REMOVED.value, context={
-                'group': case.group.id,
+            user=issue.affected_user,
+            type=NotificationType.YOU_WERE_REMOVED.value,
+            context={
+                'group': issue.group.id,
             }
         )

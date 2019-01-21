@@ -8,45 +8,45 @@ from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import GenericViewSet
 
-from foodsaving.cases import stats
-from foodsaving.cases.models import GroupCase, Vote
-from foodsaving.cases.serializers import ConflictResolutionSerializer, VoteSerializer
+from foodsaving.issues import stats
+from foodsaving.issues.models import Issue, Vote
+from foodsaving.issues.serializers import IssueSerializer, VoteSerializer
 from foodsaving.conversations.api import RetrieveConversationMixin
 
 
 class IsOngoing(BasePermission):
-    message = _('Cannot only modify vote for ongoing cases')
+    message = _('Cannot only modify vote for ongoing issues')
 
     def has_object_permission(self, request, view, obj):
         return obj.is_ongoing()
 
 
-class ConflictResolutionThrottle(UserRateThrottle):
+class IssuesCreateThrottle(UserRateThrottle):
     rate = '10/day'
 
 
-class CasesPagination(CursorPagination):
+class IssuePagination(CursorPagination):
     page_size = 10
     ordering = 'id'
 
 
-class ConflictResolutionsViewSet(
+class IssuesViewSet(
         mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
         mixins.ListModelMixin,
         RetrieveConversationMixin,
         GenericViewSet,
 ):
-    queryset = GroupCase.objects
+    queryset = Issue.objects
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_fields = ('group', 'status')
-    serializer_class = ConflictResolutionSerializer
+    serializer_class = IssueSerializer
     permission_classes = (IsAuthenticated, )
-    pagination_class = CasesPagination
+    pagination_class = IssuePagination
 
     def get_throttles(self):
         if self.action == 'create':
-            self.throttle_classes = (ConflictResolutionThrottle, )
+            self.throttle_classes = (IssuesCreateThrottle, )
         return super().get_throttles()
 
     def get_queryset(self):
@@ -56,7 +56,7 @@ class ConflictResolutionsViewSet(
         detail=True,
     )
     def conversation(self, request, pk=None):
-        """Get conversation ID of this case"""
+        """Get conversation ID of this issue"""
         return self.retrieve_conversation(request, pk)
 
     @action(
@@ -67,10 +67,10 @@ class ConflictResolutionsViewSet(
     )
     def vote(self, request, **kwargs):
         self.check_permissions(request)
-        case = self.get_object()
-        self.check_object_permissions(request, case)
+        issue = self.get_object()
+        self.check_object_permissions(request, issue)
 
-        voting = case.latest_voting()
+        voting = issue.latest_voting()
         vote_qs = Vote.objects.filter(option__voting=voting, user=request.user)
 
         if request.method == 'POST':
@@ -90,7 +90,7 @@ class ConflictResolutionsViewSet(
             deleted = deleted_rows > 0
 
             if deleted:
-                stats.vote_deleted(voting.case)
+                stats.vote_deleted(voting.issue)
 
             return Response(
                 data={},

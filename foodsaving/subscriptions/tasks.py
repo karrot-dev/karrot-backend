@@ -89,11 +89,11 @@ def get_message_title(message, language):
         else:
             return '{} / {}'.format(application_title, author_name)
 
-    if type == 'case':
-        case = conversation.target
-        if message.author == case.affected_user:
+    if type == 'issue':
+        issue = conversation.target
+        if message.author == issue.affected_user:
             return '💣 {}'.format(author_name)
-        return '💣 {} / {}'.format(case.affected_user, author_name)
+        return '💣 {} / {}'.format(issue.affected_user, author_name)
 
     return author_name
 

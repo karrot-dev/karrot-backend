@@ -2,16 +2,16 @@ from dateutil.relativedelta import relativedelta
 from factory import DjangoModelFactory, CREATE_STRATEGY, SubFactory, LazyAttribute, post_generation
 from freezegun import freeze_time
 
-from foodsaving.cases.models import GroupCase, OptionTypes
+from foodsaving.issues.models import Issue, OptionTypes
 from foodsaving.groups import roles
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.users.factories import UserFactory
 from foodsaving.utils.tests.fake import faker
 
 
-class CaseFactory(DjangoModelFactory):
+class IssueFactory(DjangoModelFactory):
     class Meta:
-        model = GroupCase
+        model = Issue
         strategy = CREATE_STRATEGY
 
     group = SubFactory(GroupFactory)

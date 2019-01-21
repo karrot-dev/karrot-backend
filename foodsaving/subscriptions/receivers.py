@@ -13,8 +13,8 @@ from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from foodsaving.applications.models import GroupApplication
 from foodsaving.applications.serializers import GroupApplicationSerializer
-from foodsaving.cases.models import GroupCase, Voting, Option, Vote
-from foodsaving.cases.serializers import ConflictResolutionSerializer
+from foodsaving.issues.models import Issue, Voting, Option, Vote
+from foodsaving.issues.serializers import IssueSerializer
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction, \
     ConversationThreadParticipant
 from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer
@@ -394,29 +394,29 @@ def notification_meta_saved(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='notifications:meta', payload=payload)
 
 
-# GroupCase
-def send_case_updates(case):
-    for subscription in ChannelSubscription.objects.recent().filter(user__caseparticipant__case=case).distinct():
-        payload = ConflictResolutionSerializer(case, context={'request': MockRequest(user=subscription.user)}).data
-        send_in_channel(subscription.reply_channel, topic='cases:case', payload=payload)
+# Issue
+def send_issue_updates(issue):
+    for subscription in ChannelSubscription.objects.recent().filter(user__issueparticipant__issue=issue).distinct():
+        payload = IssueSerializer(issue, context={'request': MockRequest(user=subscription.user)}).data
+        send_in_channel(subscription.reply_channel, topic='issues:issue', payload=payload)
 
 
-@receiver(post_save, sender=GroupCase)
-def case_saved(sender, instance, **kwargs):
-    send_case_updates(instance)
+@receiver(post_save, sender=Issue)
+def issue_saved(sender, instance, **kwargs):
+    send_issue_updates(instance)
 
 
 @receiver(post_save, sender=Voting)
 def voting_saved(sender, instance, **kwargs):
-    send_case_updates(instance.case)
+    send_issue_updates(instance.issue)
 
 
 @receiver(post_save, sender=Option)
 def option_saved(sender, instance, **kwargs):
-    send_case_updates(instance.voting.case)
+    send_issue_updates(instance.voting.issue)
 
 
 @receiver(pre_delete, sender=Vote)
 @receiver(post_save, sender=Vote)
 def vote_saved(sender, instance, **kwargs):
-    send_case_updates(instance.option.voting.case)
+    send_issue_updates(instance.option.voting.issue)

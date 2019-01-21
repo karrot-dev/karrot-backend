@@ -107,7 +107,7 @@ class TestFeedbackPossibleFilter(APITestCase, ExtractPaginationMixin):
             ], date=self.oneWeekAgo
         )
 
-        # now the cases where no feedback can be given
+        # now the issues where no feedback can be given
         self.pickupUpcoming = PickupDateFactory(
             store=self.store, collectors=[
                 self.member,

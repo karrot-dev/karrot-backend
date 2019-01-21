@@ -2,7 +2,7 @@ from django.core import mail
 from django.db import IntegrityError
 from django.test import TestCase
 
-from foodsaving.cases.factories import CaseFactory
+from foodsaving.issues.factories import IssueFactory
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import Conversation, ConversationMessage, ConversationMessageReaction, \
     ConversationThreadParticipant
@@ -190,8 +190,8 @@ class TestCaseConversations(TestCase):
         for membership in self.group.groupmembership_set.all():
             membership.add_notification_types([GroupNotificationType.CONFLICT_RESOLUTION])
             membership.save()
-        self.case = CaseFactory(group=self.group, created_by=self.user)
-        self.conversation = self.case.conversation
+        self.issue = IssueFactory(group=self.group, created_by=self.user)
+        self.conversation = self.issue.conversation
         mail.outbox = []
 
     def test_send_email_notifications(self):

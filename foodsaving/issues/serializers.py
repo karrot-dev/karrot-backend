@@ -4,8 +4,8 @@ from rest_framework.exceptions import PermissionDenied
 
 from django.utils.translation import ugettext as _
 
-from foodsaving.cases import stats
-from foodsaving.cases.models import GroupCase, Voting, Vote, Option
+from foodsaving.issues import stats
+from foodsaving.issues.models import Issue, Voting, Vote, Option
 
 
 class VoteListSerializer(serializers.ListSerializer):
@@ -36,9 +36,9 @@ class VoteListSerializer(serializers.ListSerializer):
 
         voting = self.context['voting']
         if len(votes) == 0:
-            stats.voted(voting.case)
+            stats.voted(voting.issue)
         elif len(created) > 0:
-            stats.vote_changed(voting.case)
+            stats.vote_changed(voting.issue)
 
         return created + existing
 
@@ -118,9 +118,9 @@ class VotingSerializer(serializers.ModelSerializer):
     options = OptionSerializer(many=True, read_only=True)
 
 
-class ConflictResolutionSerializer(serializers.ModelSerializer):
+class IssueSerializer(serializers.ModelSerializer):
     class Meta:
-        model = GroupCase
+        model = Issue
         fields = [
             'id',
             'created_at',
@@ -159,7 +159,7 @@ class ConflictResolutionSerializer(serializers.ModelSerializer):
 
     def validate_affected_user(self, affected_user):
         if affected_user == self.context['request'].user:
-            raise serializers.ValidationError('You cannot start a conflict resolution against yourself')
+            raise serializers.ValidationError('You cannot start a conflict resolution about yourself')
         return affected_user
 
     def validate_topic(self, topic):
@@ -172,10 +172,8 @@ class ConflictResolutionSerializer(serializers.ModelSerializer):
         affected_user = attrs['affected_user']
         if not group.is_member(affected_user):
             raise serializers.ValidationError(_('Affected user is not part of that group'))
-        if GroupCase.objects.ongoing().filter(group=group, affected_user=affected_user).exists():
-            raise serializers.ValidationError(
-                _('A conflict resolution about that user in that group has already been started')
-            )
+        if Issue.objects.ongoing().filter(group=group, affected_user=affected_user).exists():
+            raise serializers.ValidationError(_('A conflict resolution about that user has already been started'))
         return attrs
 
     def save(self, **kwargs):

@@ -4,7 +4,7 @@ from django.db.models.functions import Cast
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task
 
-from foodsaving.cases.models import Voting, CaseStatus
+from foodsaving.issues.models import Voting, IssueStatus
 from foodsaving.notifications.models import Notification, NotificationType
 from foodsaving.pickups.models import PickupDate, PickupDateCollector
 
@@ -47,17 +47,17 @@ def create_pickup_upcoming_notifications():
 @db_periodic_task(crontab(minute='*/5'))  # every five minutes
 def create_voting_ends_soon_notifications():
     existing_notifications = Notification.objects.order_by().filter(type=NotificationType.VOTING_ENDS_SOON.value
-                                                                    ).values_list('user_id', 'context__case')
-    for voting in Voting.objects.order_by().due_soon().filter(case__status=CaseStatus.ONGOING.value):
+                                                                    ).values_list('user_id', 'context__issue')
+    for voting in Voting.objects.order_by().due_soon().filter(issue__status=IssueStatus.ONGOING.value):
         # only notify users that haven't voted already
-        for user in voting.case.participants.exclude(votes_given__option__voting=voting):
-            if (user.id, voting.case_id) not in existing_notifications:
+        for user in voting.issue.participants.exclude(votes_given__option__voting=voting):
+            if (user.id, voting.issue_id) not in existing_notifications:
                 Notification.objects.create(
                     type=NotificationType.VOTING_ENDS_SOON.value,
                     user=user,
                     expires_at=voting.expires_at,
                     context={
-                        'group': voting.case.group_id,
-                        'case': voting.case_id,
+                        'group': voting.issue.group_id,
+                        'issue': voting.issue_id,
                     },
                 )

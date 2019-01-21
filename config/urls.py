@@ -14,7 +14,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 
 from foodsaving.applications.api import GroupApplicationViewSet
-from foodsaving.cases.api import ConflictResolutionsViewSet
+from foodsaving.issues.api import IssuesViewSet
 from foodsaving.conversations.api import ConversationMessageViewSet, ConversationViewSet
 from foodsaving.groups.api import GroupViewSet, AgreementViewSet, GroupInfoViewSet
 from foodsaving.history.api import HistoryViewSet
@@ -39,7 +39,7 @@ router.register('groups-info', GroupInfoViewSet, basename='groupinfo')
 router.register('group-applications', GroupApplicationViewSet, basename='groupapplication')
 router.register('agreements', AgreementViewSet)
 
-router.register('conflict-resolution', ConflictResolutionsViewSet, basename='conflictresolution')
+router.register('issues', IssuesViewSet, basename='issues')
 
 # User endpoints
 router.register('users', UserViewSet)

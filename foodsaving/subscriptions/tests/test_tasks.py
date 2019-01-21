@@ -4,7 +4,7 @@ from dateutil.parser import parse
 from django.test import TestCase
 
 from foodsaving.applications.factories import GroupApplicationFactory
-from foodsaving.cases.factories import CaseFactory
+from foodsaving.issues.factories import IssueFactory
 from foodsaving.conversations.models import Conversation, ConversationMessage, ConversationThreadParticipant, \
     ConversationParticipant
 from foodsaving.groups.factories import GroupFactory
@@ -179,10 +179,10 @@ class TestMessagePushNotificationTitles(TestCase):
         title = get_message_title(message, 'en')
         self.assertEqual(title, '🗑️ {}'.format(applicant.display_name))
 
-    def test_case_message_title(self):
-        case = CaseFactory()
-        author = case.participants.first()
-        conversation = case.conversation
+    def test_issue_message_title(self):
+        issue = IssueFactory()
+        author = issue.participants.first()
+        conversation = issue.conversation
         message = conversation.messages.create(author=author, content='bla')
 
         title = get_message_title(message, 'en')

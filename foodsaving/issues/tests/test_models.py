@@ -3,9 +3,9 @@ from django.core import mail
 from django.test import TestCase
 from freezegun import freeze_time
 
-from foodsaving.cases.factories import CaseFactory
-from foodsaving.cases.models import OptionTypes
-from foodsaving.cases.tasks import process_expired_votings
+from foodsaving.issues.factories import IssueFactory
+from foodsaving.issues.models import OptionTypes
+from foodsaving.issues.tasks import process_expired_votings
 from foodsaving.groups import roles
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupNotificationType
@@ -14,12 +14,12 @@ from foodsaving.history.models import History, HistoryTypus
 from foodsaving.users.factories import VerifiedUserFactory
 
 
-class CaseModelTests(TestCase):
+class IssueModelTests(TestCase):
     def setUp(self):
         self.member = VerifiedUserFactory()
         self.affected_member = VerifiedUserFactory()
         self.group = GroupFactory(members=[self.member, self.affected_member])
-        self.case = CaseFactory(group=self.group, created_by=self.member, affected_user=self.affected_member)
+        self.issue = IssueFactory(group=self.group, created_by=self.member, affected_user=self.affected_member)
 
         # add notification type to send out emails
         for membership in self.group.groupmembership_set.all():
@@ -27,7 +27,7 @@ class CaseModelTests(TestCase):
             membership.save()
 
     def get_voting(self):
-        return self.case.votings.first()
+        return self.issue.votings.first()
 
     def vote_on(self, option_type, user=None):
         for option in self.get_voting().options.all():
@@ -52,10 +52,10 @@ class CaseModelTests(TestCase):
         self.process_votings()
 
         with self.fast_forward_to_voting_expiration():
-            self.case.refresh_from_db()
-            self.assertTrue(self.case.is_decided())
+            self.issue.refresh_from_db()
+            self.assertTrue(self.issue.is_decided())
             self.assertFalse(self.group.is_member(self.affected_member))
-            self.assertEqual(self.case.votings.count(), 1)
+            self.assertEqual(self.issue.votings.count(), 1)
             self.assertTrue(self.get_voting().is_expired())
 
         self.assertEqual(History.objects.count(), 1)
@@ -67,11 +67,11 @@ class CaseModelTests(TestCase):
         self.process_votings()
 
         with self.fast_forward_to_voting_expiration():
-            self.case.refresh_from_db()
-            self.assertFalse(self.case.is_decided())
+            self.issue.refresh_from_db()
+            self.assertFalse(self.issue.is_decided())
             self.assertTrue(self.group.is_member(self.affected_member))
-            self.assertEqual(self.case.votings.count(), 2)
-            self.assertEqual([v.is_expired() for v in self.case.votings.order_by('created_at')], [True, False])
+            self.assertEqual(self.issue.votings.count(), 2)
+            self.assertEqual([v.is_expired() for v in self.issue.votings.order_by('created_at')], [True, False])
 
         # check if emails have been sent
         self.assertEqual(len(mail.outbox), 2)
@@ -85,10 +85,10 @@ class CaseModelTests(TestCase):
         self.process_votings()
 
         with self.fast_forward_to_voting_expiration():
-            self.case.refresh_from_db()
-            self.assertTrue(self.case.is_decided())
+            self.issue.refresh_from_db()
+            self.assertTrue(self.issue.is_decided())
             self.assertTrue(self.group.is_member(self.affected_member))
-            self.assertEqual(self.case.votings.count(), 1)
+            self.assertEqual(self.issue.votings.count(), 1)
             self.assertTrue(self.get_voting().is_expired())
 
     def test_tie_results_in_further_discussion(self):
@@ -100,29 +100,29 @@ class CaseModelTests(TestCase):
         with self.fast_forward_to_voting_expiration():
             self.assertEqual(self.get_voting().accepted_option.type, OptionTypes.FURTHER_DISCUSSION.value)
 
-    def test_voluntary_user_removal_results_in_closed_case(self):
+    def test_voluntary_user_removal_results_in_closed_issue(self):
         self.group.groupmembership_set.filter(user=self.affected_member).delete()
 
-        self.case.refresh_from_db()
-        self.assertTrue(self.case.is_cancelled())
+        self.issue.refresh_from_db()
+        self.assertTrue(self.issue.is_cancelled())
 
-    def test_new_members_are_not_in_existing_cases(self):
+    def test_new_members_are_not_in_existing_issues(self):
         # create a new member and a new editor
         self.group.groupmembership_set.create(user=VerifiedUserFactory(), roles=[roles.GROUP_EDITOR])
         self.group.groupmembership_set.create(user=VerifiedUserFactory())
 
-        # ...but they shouldn't become part of existing cases
+        # ...but they shouldn't become part of existing issues
         expected_ids = sorted([self.member.id, self.affected_member.id])
-        participant_ids = sorted(self.case.participants.values_list('id', flat=True))
-        conversation_participant_ids = sorted(self.case.conversation.participants.values_list('id', flat=True))
+        participant_ids = sorted(self.issue.participants.values_list('id', flat=True))
+        conversation_participant_ids = sorted(self.issue.conversation.participants.values_list('id', flat=True))
         self.assertEqual(participant_ids, expected_ids)
         self.assertEqual(conversation_participant_ids, expected_ids)
 
     def test_remove_participant_if_they_leave_group(self):
-        self.assertTrue(self.case.participants.filter(id=self.member.id).exists())
-        self.assertTrue(self.case.conversation.participants.filter(id=self.member.id).exists())
+        self.assertTrue(self.issue.participants.filter(id=self.member.id).exists())
+        self.assertTrue(self.issue.conversation.participants.filter(id=self.member.id).exists())
 
         self.group.groupmembership_set.filter(user=self.member).delete()
 
-        self.assertFalse(self.case.participants.filter(id=self.member.id).exists())
-        self.assertFalse(self.case.conversation.participants.filter(id=self.member.id).exists())
+        self.assertFalse(self.issue.participants.filter(id=self.member.id).exists())
+        self.assertFalse(self.issue.conversation.participants.filter(id=self.member.id).exists())
