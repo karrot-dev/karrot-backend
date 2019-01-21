@@ -1,7 +1,7 @@
 from django.apps import AppConfig
 
 
-class CasesConfig(AppConfig):
+class IssuesConfig(AppConfig):
     name = 'foodsaving.issues'
 
     def ready(self):

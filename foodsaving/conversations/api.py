@@ -153,7 +153,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
         issue_conversations = [item for item in conversations if item.target_type == issues_ct]
         issues = Issue.objects. \
             filter(id__in=[c.target_id for c in issue_conversations]). \
-            prefetch_stuff(user=request.user)
+            prefetch_for_serializer(user=request.user)
 
         # Applicant does not have access to group member profiles, so we attach reduced user profiles
         my_applications = [a for a in applications if a.user == request.user]

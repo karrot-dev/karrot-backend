@@ -33,7 +33,7 @@ class IssueQuerySet(models.QuerySet):
     def cancelled(self):
         return self.filter(status=IssueStatus.CANCELLED.value)
 
-    def prefetch_stuff(self, user):
+    def prefetch_for_serializer(self, user):
         return self.prefetch_related(
             Prefetch('votings', Voting.objects.annotate_participant_count()),
             'votings__options',
