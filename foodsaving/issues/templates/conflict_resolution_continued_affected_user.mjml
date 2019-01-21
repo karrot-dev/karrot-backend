@@ -1,0 +1,24 @@
+<mjml>
+    <mj-head>
+        <mj-include path="../../base/templates/_base-head.mjml"/>
+        <mj-title>{% trans %}Keep discussing about the conflict with you{% endtrans %}
+        </mj-title>
+    </mj-head>
+    <mj-body>
+        <mj-include path="../../base/templates/_header.mjml"/>
+        <mj-section background-color="#ffffff" padding="40px 0 40px 0">
+            <mj-column>
+                <mj-text>
+                    <h1>{% trans %}Keep discussing about the conflict with you{% endtrans %}</h1>
+                    <p>{% trans %}The result of the last voting round is to continue discussion and start another round of voting.{% endtrans %}</p>
+                    <p>{% trans expiry_date=expires_at|date %}The new voting round ends at {{ expiry_date }}.{% endtrans %}</p>
+                </mj-text>
+                <mj-button href="{{ conflict_resolution_case_url }}">
+                    {% trans %}View conflict resolution case{% endtrans %}
+                </mj-button>
+                <mj-divider/>
+            </mj-column>
+        </mj-section>
+        <mj-include path="../../base/templates/_footer.mjml"/>
+    </mj-body>
+</mjml>

@@ -13,14 +13,13 @@ from django.views.static import serve
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 
-from foodsaving.notifications.api import NotificationViewSet
-from rest_framework_swagger.views import get_swagger_view
-
+from foodsaving.applications.api import GroupApplicationViewSet
+from foodsaving.issues.api import IssuesViewSet
 from foodsaving.conversations.api import ConversationMessageViewSet, ConversationViewSet
 from foodsaving.groups.api import GroupViewSet, AgreementViewSet, GroupInfoViewSet
-from foodsaving.applications.api import GroupApplicationViewSet
 from foodsaving.history.api import HistoryViewSet
 from foodsaving.invitations.api import InvitationsViewSet, InvitationAcceptViewSet
+from foodsaving.notifications.api import NotificationViewSet
 from foodsaving.pickups.api import PickupDateViewSet, PickupDateSeriesViewSet, FeedbackViewSet
 from foodsaving.stores.api import StoreViewSet
 from foodsaving.subscriptions.api import PushSubscriptionViewSet
@@ -31,6 +30,7 @@ from foodsaving.userauth.api import AuthUserView, AuthView, LogoutView, \
     ChangeMailView, RequestDeleteUserView, FailedEmailDeliveryView
 from foodsaving.users.api import UserViewSet, UserInfoViewSet
 from foodsaving.webhooks.api import IncomingEmailView, EmailEventView
+from rest_framework_swagger.views import get_swagger_view
 
 router = DefaultRouter()
 
@@ -38,6 +38,8 @@ router.register('groups', GroupViewSet)
 router.register('groups-info', GroupInfoViewSet, basename='groupinfo')
 router.register('group-applications', GroupApplicationViewSet, basename='groupapplication')
 router.register('agreements', AgreementViewSet)
+
+router.register('issues', IssuesViewSet, basename='issues')
 
 # User endpoints
 router.register('users', UserViewSet)

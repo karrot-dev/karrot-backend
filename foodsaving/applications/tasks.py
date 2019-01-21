@@ -16,7 +16,7 @@ def notify_members_about_new_application(application):
             GroupNotificationType.NEW_APPLICATION
         ),
     ).exclude(
-        groupmembership__user__in=get_user_model().objects.unverified_or_ignored(),
+        id__in=get_user_model().objects.unverified_or_ignored(),
     )
 
     for user in users:

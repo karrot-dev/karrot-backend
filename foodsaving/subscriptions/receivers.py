@@ -13,6 +13,8 @@ from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from foodsaving.applications.models import GroupApplication
 from foodsaving.applications.serializers import GroupApplicationSerializer
+from foodsaving.issues.models import Issue, Voting, Option, Vote
+from foodsaving.issues.serializers import IssueSerializer
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction, \
     ConversationThreadParticipant
 from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer
@@ -390,3 +392,31 @@ def notification_meta_saved(sender, instance, **kwargs):
     payload = NotificationMetaSerializer(meta).data
     for subscription in ChannelSubscription.objects.recent().filter(user=meta.user):
         send_in_channel(subscription.reply_channel, topic='notifications:meta', payload=payload)
+
+
+# Issue
+def send_issue_updates(issue):
+    for subscription in ChannelSubscription.objects.recent().filter(user__issueparticipant__issue=issue).distinct():
+        payload = IssueSerializer(issue, context={'request': MockRequest(user=subscription.user)}).data
+        send_in_channel(subscription.reply_channel, topic='issues:issue', payload=payload)
+
+
+@receiver(post_save, sender=Issue)
+def issue_saved(sender, instance, **kwargs):
+    send_issue_updates(instance)
+
+
+@receiver(post_save, sender=Voting)
+def voting_saved(sender, instance, **kwargs):
+    send_issue_updates(instance.issue)
+
+
+@receiver(post_save, sender=Option)
+def option_saved(sender, instance, **kwargs):
+    send_issue_updates(instance.voting.issue)
+
+
+@receiver(pre_delete, sender=Vote)
+@receiver(post_save, sender=Vote)
+def vote_saved(sender, instance, **kwargs):
+    send_issue_updates(instance.option.voting.issue)

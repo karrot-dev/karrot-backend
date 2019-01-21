@@ -25,7 +25,7 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
 
         # effectively disable throttling
         from foodsaving.applications.api import ApplicationsPerDayThrottle
-        ApplicationsPerDayThrottle.rate = '1000/day'
+        ApplicationsPerDayThrottle.rate = '1000/min'
 
     def test_apply_for_group(self):
         self.client.force_login(user=self.applicant)

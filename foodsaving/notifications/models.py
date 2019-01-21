@@ -24,6 +24,14 @@ class NotificationType(Enum):
     PICKUP_DISABLED = 'pickup_disabled'
     PICKUP_ENABLED = 'pickup_enabled'
     PICKUP_MOVED = 'pickup_moved'
+    CONFLICT_RESOLUTION_CREATED = 'conflict_resolution_created'
+    CONFLICT_RESOLUTION_CREATED_ABOUT_YOU = 'conflict_resolution_created_about_you'
+    CONFLICT_RESOLUTION_CONTINUED = 'conflict_resolution_continued'
+    CONFLICT_RESOLUTION_CONTINUED_ABOUT_YOU = 'conflict_resolution_continued_about_you'
+    CONFLICT_RESOLUTION_DECIDED = 'conflict_resolution_decided'
+    CONFLICT_RESOLUTION_DECIDED_ABOUT_YOU = 'conflict_resolution_decided_about_you'
+    CONFLICT_RESOLUTION_YOU_WERE_REMOVED = 'conflict_resolution_you_were_removed'
+    VOTING_ENDS_SOON = 'voting_ends_soon'
 
 
 class NotificationQuerySet(models.QuerySet):

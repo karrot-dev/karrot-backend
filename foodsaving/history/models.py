@@ -35,6 +35,7 @@ class HistoryTypus(enum.Enum):
     GROUP_LEAVE_INACTIVE = 21
     GROUP_CHANGE_PHOTO = 22
     GROUP_DELETE_PHOTO = 23
+    MEMBER_REMOVED = 24
 
 
 class HistoryQuerySet(models.QuerySet):

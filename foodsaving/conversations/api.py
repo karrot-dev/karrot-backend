@@ -18,6 +18,8 @@ from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.applications.models import GroupApplication
 from foodsaving.applications.serializers import GroupApplicationSerializer
+from foodsaving.issues.models import Issue
+from foodsaving.issues.serializers import IssueSerializer
 from foodsaving.conversations.models import (
     Conversation, ConversationMessage, ConversationMessageReaction, ConversationParticipant
 )
@@ -147,7 +149,13 @@ class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
             filter(id__in=[c.target_id for c in application_conversations]). \
             select_related('user')
 
-        # Applicant does not have access to group member profiles, so we sideload reduced user profiles
+        issues_ct = ContentType.objects.get_for_model(Issue)
+        issue_conversations = [item for item in conversations if item.target_type == issues_ct]
+        issues = Issue.objects. \
+            filter(id__in=[c.target_id for c in issue_conversations]). \
+            prefetch_for_serializer(user=request.user)
+
+        # Applicant does not have access to group member profiles, so we attach reduced user profiles
         my_applications = [a for a in applications if a.user == request.user]
 
         def get_conversation(application):
@@ -162,6 +170,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
         message_serializer = ConversationMessageSerializer(messages, many=True, context=context)
         pickups_serializer = PickupDateSerializer(pickups, many=True, context=context)
         application_serializer = GroupApplicationSerializer(applications, many=True, context=context)
+        issue_serializer = IssueSerializer(issues, many=True, context=context)
         user_serializer = UserInfoSerializer(users, many=True, context=context)
 
         return self.get_paginated_response({
@@ -169,6 +178,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, GenericViewSet):
             'messages': message_serializer.data,
             'pickups': pickups_serializer.data,
             'applications': application_serializer.data,
+            'issues': issue_serializer.data,
             'users_info': user_serializer.data,
         })
 
