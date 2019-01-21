@@ -113,7 +113,7 @@ class VotingQuerySet(models.QuerySet):
 
 
 def voting_expiration_time():
-    return timezone.now() + relativedelta(days=settings.ISSUE_VOTING_DURATION_DAYS)
+    return timezone.now() + relativedelta(days=settings.VOTING_DURATION_DAYS)
 
 
 class Voting(BaseModel):
