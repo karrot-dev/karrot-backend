@@ -32,7 +32,7 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
         settings.CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION = 1
         self.member = VerifiedUserFactory()
         self.affected_member = VerifiedUserFactory()
-        self.group = GroupFactory(members=[self.member, self.affected_member])
+        self.group = GroupFactory(members=[self.member], newcomers=[self.affected_member])
 
         # effectively disable throttling
         from foodsaving.issues.api import IssuesCreateThrottle
@@ -41,14 +41,17 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
     def create_issue(self, **kwargs):
         return IssueFactory(group=self.group, created_by=self.member, **kwargs)
 
-    def test_create_conflict_resolution_issue_and_vote(self):
+    def test_create_conflict_resolution_and_vote(self):
         # add another editor
         notification_member = VerifiedUserFactory()
-        self.group.groupmembership_set.create(user=notification_member, roles=[roles.GROUP_EDITOR])
+        self.group.groupmembership_set.create(
+            user=notification_member,
+            roles=[roles.GROUP_EDITOR],
+            notification_types=[GroupNotificationType.CONFLICT_RESOLUTION]
+        )
         # add notification type to send out emails
-        for membership in self.group.groupmembership_set.all():
-            membership.add_notification_types([GroupNotificationType.CONFLICT_RESOLUTION])
-            membership.save()
+        self.group.groupmembership_set.filter(user=self.member
+                                              ).update(notification_types=[GroupNotificationType.CONFLICT_RESOLUTION])
         mail.outbox = []
 
         # create issue

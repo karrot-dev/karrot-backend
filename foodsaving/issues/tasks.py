@@ -29,25 +29,24 @@ def get_users_to_notify(issue):
     ).exclude(id__in=get_user_model().objects.unverified_or_ignored()).distinct()
 
 
+def send_or_report_error(email):
+    try:
+        email.send()
+    except AnymailAPIError:
+        sentry_client.captureException()
+
+
 @db_task()
 def notify_about_new_conflict_resolution(issue):
-    for user in get_users_to_notify(issue).exclude(id=issue.created_by_id):
-        try:
-            if user.id == issue.affected_user_id:
-                prepare_new_conflict_resolution_email_to_affected_user(issue).send()
-            else:
-                prepare_new_conflict_resolution_email(user, issue).send()
-        except AnymailAPIError:
-            sentry_client.captureException()
+    send_or_report_error(prepare_new_conflict_resolution_email_to_affected_user(issue))
+
+    for user in get_users_to_notify(issue).exclude(id=issue.created_by_id).exclude(id=issue.affected_user_id):
+        send_or_report_error(prepare_new_conflict_resolution_email(user, issue))
 
 
 @db_task()
 def notify_about_continued_conflict_resolution(issue):
-    for user in get_users_to_notify(issue):
-        try:
-            if user.id == issue.affected_user_id:
-                prepare_conflict_resolution_continued_email_to_affected_user(issue).send()
-            else:
-                prepare_conflict_resolution_continued_email(user, issue).send()
-        except AnymailAPIError:
-            sentry_client.captureException()
+    send_or_report_error(prepare_conflict_resolution_continued_email_to_affected_user(issue))
+
+    for user in get_users_to_notify(issue).exclude(id=issue.affected_user_id):
+        send_or_report_error(prepare_conflict_resolution_continued_email(user, issue))
