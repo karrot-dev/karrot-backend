@@ -127,7 +127,7 @@ class TestHistoryAPIWithExistingStore(APITestCase, ExtractPaginationMixin):
         self.client.post(
             '/api/pickup-dates/',
             {
-                'date': to_range(timezone.now() + relativedelta(days=1), minutes=30).as_list(),
+                'date': to_range(timezone.now() + relativedelta(days=1)).as_list(),
                 'store': self.store.id
             },
             format='json'
@@ -235,9 +235,7 @@ class TestHistoryAPIWithDonePickup(APITestCase, ExtractPaginationMixin):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
-        self.pickup = PickupDateFactory(
-            store=self.store, date=to_range(timezone.now() - relativedelta(days=1), minutes=30)
-        )
+        self.pickup = PickupDateFactory(store=self.store, date=to_range(timezone.now() - relativedelta(days=1)))
         self.pickup.add_collector(self.member)
         PickupDate.objects.process_finished_pickup_dates()
 
@@ -260,9 +258,7 @@ class TestHistoryAPIWithMissedPickup(APITestCase, ExtractPaginationMixin):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group)
-        self.pickup = PickupDateFactory(
-            store=self.store, date=to_range(timezone.now() - relativedelta(days=1), minutes=30)
-        )
+        self.pickup = PickupDateFactory(store=self.store, date=to_range(timezone.now() - relativedelta(days=1)))
         # No one joined the pickup
         PickupDate.objects.process_finished_pickup_dates()
 
@@ -285,9 +281,7 @@ class TestHistoryAPIPickupForInactiveStore(APITestCase, ExtractPaginationMixin):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.store = StoreFactory(group=self.group, status='archived')
-        self.pickup = PickupDateFactory(
-            store=self.store, date=to_range(timezone.now() - relativedelta(days=1), minutes=30)
-        )
+        self.pickup = PickupDateFactory(store=self.store, date=to_range(timezone.now() - relativedelta(days=1)))
         self.pickup.add_collector(self.member)
 
         PickupDateFactory(store=self.store, date=to_range(timezone.now() - relativedelta(days=1), minutes=30))
@@ -311,7 +305,7 @@ class TestHistoryAPIWithDisabledPickup(APITestCase, ExtractPaginationMixin):
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(
             store=self.store,
-            date=to_range(timezone.now() - relativedelta(days=1), minutes=30),
+            date=to_range(timezone.now() - relativedelta(days=1)),
             is_disabled=True,
         )
         PickupDate.objects.process_finished_pickup_dates()

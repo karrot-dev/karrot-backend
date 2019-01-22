@@ -185,19 +185,15 @@ class TestGroupsAPI(APITestCase):
     def test_leave_group(self):
         store = StoreFactory(group=self.group)
         pickupdate = PickupDateFactory(
-            store=store,
-            collectors=[self.member, self.user],
-            date=to_range(timezone.now() + relativedelta(weeks=1), minutes=30)
+            store=store, collectors=[self.member, self.user], date=to_range(timezone.now() + relativedelta(weeks=1))
         )
         past_pickupdate = PickupDateFactory(
-            store=store,
-            collectors=[
+            store=store, collectors=[
                 self.member,
-            ],
-            date=to_range(timezone.now() - relativedelta(weeks=1), minutes=30)
+            ], date=to_range(timezone.now() - relativedelta(weeks=1))
         )
         unrelated_pickupdate = PickupDateFactory(
-            date=to_range(timezone.now() + relativedelta(weeks=1), minutes=30),
+            date=to_range(timezone.now() + relativedelta(weeks=1)),
             collectors=[
                 self.member,
             ],

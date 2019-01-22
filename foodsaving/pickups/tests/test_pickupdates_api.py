@@ -34,20 +34,18 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
 
         # another pickup date for above store
         self.pickup_data = {
-            'date': to_range(timezone.now() + relativedelta(days=2), minutes=30).as_list(),
+            'date': to_range(timezone.now() + relativedelta(days=2)).as_list(),
             'max_collectors': 5,
             'store': self.store.id
         }
 
         # past pickup date
         self.past_pickup_data = {
-            'date': to_range(timezone.now() - relativedelta(days=1), minutes=30).as_list(),
+            'date': to_range(timezone.now() - relativedelta(days=1)).as_list(),
             'max_collectors': 5,
             'store': self.store.id
         }
-        self.past_pickup = PickupDateFactory(
-            store=self.store, date=to_range(timezone.now() - relativedelta(days=1), minutes=30)
-        )
+        self.past_pickup = PickupDateFactory(store=self.store, date=to_range(timezone.now() - relativedelta(days=1)))
         self.past_pickup_url = self.url + str(self.past_pickup.id) + '/'
         self.past_join_url = self.past_pickup_url + 'add/'
         self.past_leave_url = self.past_pickup_url + 'remove/'

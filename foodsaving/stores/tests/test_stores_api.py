@@ -263,7 +263,7 @@ class TestStoreStatisticsAPI(APITestCase):
             'pickups_done': 0,
         })
 
-        one_day_ago = to_range(timezone.now() - relativedelta(days=1), minutes=30)
+        one_day_ago = to_range(timezone.now() - relativedelta(days=1))
 
         users = [UserFactory() for _ in range(9)]
         pickups = [

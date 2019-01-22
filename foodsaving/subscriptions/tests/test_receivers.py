@@ -556,7 +556,7 @@ class PickupDateReceiverTests(WSTestCase):
         self.client = self.connect_as(self.member)
 
         # change property
-        date = to_range(faker.future_datetime(end_date='+30d', tzinfo=timezone.utc), minutes=30)
+        date = to_range(faker.future_datetime(end_date='+30d', tzinfo=timezone.utc))
         self.pickup.date = date
         self.pickup.save()
 
@@ -657,7 +657,7 @@ class FinishedPickupReceiverTest(WSTestCase):
         self.pickup = PickupDateFactory(store=self.store, collectors=[self.member])
 
     def test_receive_history_and_notification(self):
-        self.pickup.date = to_range(timezone.now() - relativedelta(days=1), minutes=30)
+        self.pickup.date = to_range(timezone.now() - relativedelta(days=1))
         self.pickup.save()
 
         self.client = self.connect_as(self.member)

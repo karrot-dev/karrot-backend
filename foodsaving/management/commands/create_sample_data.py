@@ -191,7 +191,7 @@ class Command(BaseCommand):
             return data
 
         def make_pickup(store):
-            date = to_range(faker.date_time_between(start_date='+2d', end_date='+7d', tzinfo=pytz.utc), minutes=30)
+            date = to_range(faker.date_time_between(start_date='+2d', end_date='+7d', tzinfo=pytz.utc))
             data = c.post(
                 '/api/pickup-dates/',
                 {
@@ -239,9 +239,7 @@ class Command(BaseCommand):
 
         def create_done_pickup(store, user_id):
             pickup = PickupDate.objects.create(
-                date=to_range(
-                    faker.date_time_between(start_date='-9d', end_date='-1d', tzinfo=pytz.utc), minutes=30
-                ),
+                date=to_range(faker.date_time_between(start_date='-9d', end_date='-1d', tzinfo=pytz.utc), minutes=30),
                 store_id=store,
                 max_collectors=10,
             )

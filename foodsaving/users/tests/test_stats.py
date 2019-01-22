@@ -20,9 +20,7 @@ class TestUserStats(TestCase):
             GroupMembership.objects.filter(user=user).update(lastseen_at=timezone.now() - relativedelta(**kwargs))
 
         def do_pickup(store, user, **kwargs):
-            pickup = PickupDateFactory(
-                store=store, date=to_range(timezone.now() - relativedelta(**kwargs), minutes=30)
-            )
+            pickup = PickupDateFactory(store=store, date=to_range(timezone.now() - relativedelta(**kwargs)))
             pickup.add_collector(user)
 
         # 9 verified users, 1 unverified user

@@ -22,12 +22,8 @@ class TestFeedbackAPIFilter(APITestCase, ExtractPaginationMixin):
         self.group2 = GroupFactory(members=[self.collector, self.collector2])
         self.store = StoreFactory(group=self.group)
         self.store2 = StoreFactory(group=self.group)
-        self.pickup = PickupDateFactory(
-            store=self.store, date=to_range(timezone.now() - relativedelta(days=1), minutes=30)
-        )
-        self.pickup2 = PickupDateFactory(
-            store=self.store2, date=to_range(timezone.now() - relativedelta(days=1), minutes=30)
-        )
+        self.pickup = PickupDateFactory(store=self.store, date=to_range(timezone.now() - relativedelta(days=1)))
+        self.pickup2 = PickupDateFactory(store=self.store2, date=to_range(timezone.now() - relativedelta(days=1)))
 
         # create a feedback data
         self.feedback_get = {'given_by': self.collector, 'about': self.pickup, 'weight': 1, 'comment': 'asfjk'}

@@ -89,7 +89,7 @@ class TestPickupdatesAPIFilter(APITestCase, ExtractPaginationMixin):
 class TestFeedbackPossibleFilter(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.url = '/api/pickup-dates/'
-        self.oneWeekAgo = to_range(timezone.now() - relativedelta(weeks=1), minutes=30)
+        self.oneWeekAgo = to_range(timezone.now() - relativedelta(weeks=1))
         self.tooLongAgo = to_range(
             timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS + 1), minutes=30
         )

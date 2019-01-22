@@ -142,9 +142,7 @@ class TestMessagePushNotificationTitles(TestCase):
         author = UserFactory()
         group = GroupFactory(members=[author], timezone='Europe/Berlin')
         store = StoreFactory(group=group)
-        pickup = PickupDateFactory(
-            store=store, collectors=[author], date=to_range(parse('2018-11-11T20:00:00Z'), minutes=30)
-        )
+        pickup = PickupDateFactory(store=store, collectors=[author], date=to_range(parse('2018-11-11T20:00:00Z')))
         conversation = Conversation.objects.get_or_create_for_target(pickup)
         message = conversation.messages.create(author=author, content='bla')
 

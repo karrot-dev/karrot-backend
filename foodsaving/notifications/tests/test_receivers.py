@@ -155,7 +155,7 @@ class TestNotificationReceivers(TestCase):
         user = UserFactory()
         group = GroupFactory(members=[user])
         store = StoreFactory(group=group)
-        in_one_hour = to_range(timezone.now() + relativedelta(hours=1), minutes=30)
+        in_one_hour = to_range(timezone.now() + relativedelta(hours=1))
         pickup = PickupDateFactory(store=store, date=in_one_hour, collectors=[user])
         Notification.objects.all().delete()
 
@@ -169,7 +169,7 @@ class TestNotificationReceivers(TestCase):
         user1, user2 = UserFactory(), UserFactory()
         group = GroupFactory(members=[user1, user2])
         store = StoreFactory(group=group)
-        in_one_hour = to_range(timezone.now() + relativedelta(hours=1), minutes=30)
+        in_one_hour = to_range(timezone.now() + relativedelta(hours=1))
         pickup = PickupDateFactory(store=store, date=in_one_hour, collectors=[user1, user2])
         Notification.objects.all().delete()
 

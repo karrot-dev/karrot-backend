@@ -53,9 +53,9 @@ class TestPickupUpcomingTask(TestCase):
         users = [UserFactory() for _ in range(3)]
         group = GroupFactory(members=users)
         store = StoreFactory(group=group)
-        in_one_hour = to_range(timezone.now() + relativedelta(hours=1), minutes=30)
+        in_one_hour = to_range(timezone.now() + relativedelta(hours=1))
         pickup1 = PickupDateFactory(store=store, date=in_one_hour, collectors=users)
-        in_two_hours = to_range(timezone.now() + relativedelta(hours=1), minutes=30)
+        in_two_hours = to_range(timezone.now() + relativedelta(hours=1))
         PickupDateFactory(store=store, date=in_two_hours, collectors=users)
         Notification.objects.all().delete()
 
@@ -81,7 +81,7 @@ class TestPickupUpcomingTask(TestCase):
         user = UserFactory()
         group = GroupFactory(members=[user])
         store = StoreFactory(group=group)
-        in_one_hour = to_range(timezone.now() + relativedelta(hours=1), minutes=30)
+        in_one_hour = to_range(timezone.now() + relativedelta(hours=1))
         PickupDateFactory(store=store, date=in_one_hour, collectors=[user])
         Notification.objects.all().delete()
 
@@ -95,7 +95,7 @@ class TestPickupUpcomingTask(TestCase):
         user = UserFactory()
         group = GroupFactory(members=[user])
         store = StoreFactory(group=group)
-        in_one_day = to_range(timezone.now() + relativedelta(days=1), minutes=30)
+        in_one_day = to_range(timezone.now() + relativedelta(days=1))
         PickupDateFactory(store=store, date=in_one_day, collectors=[user])
         Notification.objects.all().delete()
 
@@ -107,7 +107,7 @@ class TestPickupUpcomingTask(TestCase):
         user = UserFactory()
         group = GroupFactory(members=[user])
         store = StoreFactory(group=group)
-        one_hour_ago = to_range(timezone.now() - relativedelta(hours=1), minutes=30)
+        one_hour_ago = to_range(timezone.now() - relativedelta(hours=1))
         PickupDateFactory(store=store, date=one_hour_ago, collectors=[user])
         Notification.objects.all().delete()
 

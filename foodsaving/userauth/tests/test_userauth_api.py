@@ -115,12 +115,12 @@ class TestUserDeleteAPI(APITestCase):
         self.store = StoreFactory(group=self.group)
         self.pickupdate = PickupDateFactory(
             store=self.store,
-            date=to_range(timezone.now() + relativedelta(days=1), minutes=30),
+            date=to_range(timezone.now() + relativedelta(days=1)),
             collectors=[self.user],
         )
         self.past_pickupdate = PickupDateFactory(
             store=self.store,
-            date=to_range(timezone.now() - relativedelta(days=1), minutes=30),
+            date=to_range(timezone.now() - relativedelta(days=1)),
             collectors=[self.user],
         )
         self.url_user = '/api/auth/user/'

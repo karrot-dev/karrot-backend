@@ -13,7 +13,7 @@ from foodsaving.utils.tests.fake import faker
 
 
 def in_one_day():
-    return to_range(timezone.now() + timedelta(days=1), minutes=30)
+    return to_range(timezone.now() + timedelta(days=1))
 
 
 class PickupDateFactory(DjangoModelFactory):

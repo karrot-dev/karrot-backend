@@ -1,11 +1,9 @@
-from datetime import timedelta
-
+from django.contrib.postgres.fields import DateTimeRangeField
 from django.db import connection
 from django.db.models import Model, AutoField, Field, DateTimeField, TextField, FloatField
 from django.db.models.fields.related import RelatedField
 from django.utils import timezone
 from psycopg2.extras import DateTimeTZRange, register_range
-from django.contrib.postgres.fields import DateTimeRangeField
 
 
 class NicelyFormattedModel(Model):

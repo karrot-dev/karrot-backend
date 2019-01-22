@@ -17,9 +17,7 @@ class TestGroupStats(TestCase):
             GroupMembership.objects.filter(user=user).update(lastseen_at=timezone.now() - relativedelta(**kwargs))
 
         def do_pickup(user, **kwargs):
-            pickup = PickupDateFactory(
-                store=store, date=to_range(timezone.now() - relativedelta(**kwargs), minutes=30)
-            )
+            pickup = PickupDateFactory(store=store, date=to_range(timezone.now() - relativedelta(**kwargs)))
             pickup.add_collector(user)
 
         def set_as_newcomer(user):

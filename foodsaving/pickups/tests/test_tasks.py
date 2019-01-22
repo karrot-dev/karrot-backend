@@ -53,7 +53,7 @@ class TestPickupNotificationTask(APITestCase):
             store = self.store
         return PickupDate.objects.create(
             store=store,
-            date=to_range(timezone.localtime() + delta, minutes=30),
+            date=to_range(timezone.localtime() + delta),
             max_collectors=1,
         )
 
@@ -62,7 +62,7 @@ class TestPickupNotificationTask(APITestCase):
             store = self.store
         pickup = PickupDate.objects.create(
             store=store,
-            date=to_range(timezone.localtime() + delta, minutes=30),
+            date=to_range(timezone.localtime() + delta),
             max_collectors=2,
         )
         pickup.add_collector(self.other_user)
@@ -74,7 +74,7 @@ class TestPickupNotificationTask(APITestCase):
             store = self.store
         pickup = PickupDate.objects.create(
             store=store,
-            date=to_range(timezone.localtime() + delta, minutes=30),
+            date=to_range(timezone.localtime() + delta),
             **kwargs,
         )
         pickup.add_collector(self.user)
@@ -86,7 +86,7 @@ class TestPickupNotificationTask(APITestCase):
             store = self.store
         return PickupDate.objects.create(
             store=store,
-            date=to_range(timezone.localtime() + delta, minutes=30),
+            date=to_range(timezone.localtime() + delta),
             max_collectors=1,
             deleted=True,
         )
@@ -96,7 +96,7 @@ class TestPickupNotificationTask(APITestCase):
             store = self.store
         return PickupDate.objects.create(
             store=store,
-            date=to_range(timezone.localtime() + delta, minutes=30),
+            date=to_range(timezone.localtime() + delta),
             max_collectors=1,
             is_disabled=True,
         )

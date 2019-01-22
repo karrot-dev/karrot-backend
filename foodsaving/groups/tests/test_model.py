@@ -57,13 +57,9 @@ class TestGroupMembershipModel(TestCase):
         self.other_store = StoreFactory(group=self.other_group)
 
     def test_pickup_active_within(self):
+        PickupDateFactory(store=self.store, date=to_range(timezone.now() - timedelta(days=2)), collectors=[self.user])
         PickupDateFactory(
-            store=self.store, date=to_range(timezone.now() - timedelta(days=2), minutes=30), collectors=[self.user]
-        )
-        PickupDateFactory(
-            store=self.store,
-            date=to_range(timezone.now() - timedelta(days=9), minutes=30),
-            collectors=[self.other_user]
+            store=self.store, date=to_range(timezone.now() - timedelta(days=9)), collectors=[self.other_user]
         )
         memberships = self.group.groupmembership_set.pickup_active_within(days=7)
         self.assertEqual(memberships.count(), 1)
@@ -71,23 +67,17 @@ class TestGroupMembershipModel(TestCase):
     def test_pickup_active_within_does_not_double_count(self):
         for _ in range(1, 10):
             PickupDateFactory(
-                store=self.store,
-                date=to_range(timezone.now() - timedelta(days=2), minutes=30),
-                collectors=[self.user]
+                store=self.store, date=to_range(timezone.now() - timedelta(days=2)), collectors=[self.user]
             )
             PickupDateFactory(
-                store=self.store,
-                date=to_range(timezone.now() - timedelta(days=9), minutes=30),
-                collectors=[self.other_user]
+                store=self.store, date=to_range(timezone.now() - timedelta(days=9)), collectors=[self.other_user]
             )
         memberships = self.group.groupmembership_set.pickup_active_within(days=7)
         self.assertEqual(memberships.count(), 1)
 
     def test_does_not_count_from_other_groups(self):
         PickupDateFactory(
-            store=self.other_store,
-            date=to_range(timezone.now() - timedelta(days=2), minutes=30),
-            collectors=[self.user]
+            store=self.other_store, date=to_range(timezone.now() - timedelta(days=2)), collectors=[self.user]
         )
         memberships = self.group.groupmembership_set.pickup_active_within(days=7)
         self.assertEqual(memberships.count(), 0)
