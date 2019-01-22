@@ -14,7 +14,7 @@
                             <ul>
                                 {% for pickup in pickups %}
                                     <li>
-                                        {{ pickup.date_start | time }} @
+                                        {{ pickup.date.start | time }} @
                                         <a href="{{ store_url(pickup.store) }}">
                                             {{ pickup.store.name }}
                                         </a>
