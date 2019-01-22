@@ -23,7 +23,7 @@ class TestInvitationAPIIntegration(APITestCase):
 
         # effectively disable throttling
         from foodsaving.invitations.api import InvitesPerDayThrottle
-        InvitesPerDayThrottle.rate = '1000/day'
+        InvitesPerDayThrottle.rate = '1000/min'
 
         mail.outbox = []
 
@@ -70,7 +70,7 @@ class TestInviteCreate(APITestCase):
 
         # effectively disable throttling
         from foodsaving.invitations.api import InvitesPerDayThrottle
-        InvitesPerDayThrottle.rate = '1000/day'
+        InvitesPerDayThrottle.rate = '1000/min'
 
     def test_invite_same_email_twice(self):
         self.client.force_login(self.member)
@@ -173,7 +173,7 @@ class TestInvitationAcceptAPI(APITestCase):
 
         # effectively disable throttling
         from foodsaving.invitations.api import InvitesPerDayThrottle
-        InvitesPerDayThrottle.rate = '1000/day'
+        InvitesPerDayThrottle.rate = '1000/min'
 
         mail.outbox = []
 

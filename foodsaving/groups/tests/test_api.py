@@ -1,15 +1,19 @@
 import json
+import os
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
+from unittest.mock import patch, call
 
 from foodsaving.groups import roles
 from foodsaving.groups.factories import GroupFactory, PlaygroundGroupFactory
 from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
     GroupNotificationType, get_default_notification_types, Group
+from foodsaving.groups.stats import group_tags
+from foodsaving.history.models import History, HistoryTypus
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory
@@ -93,7 +97,8 @@ class TestGroupsAPI(APITestCase):
 
     def test_list_groups(self):
         self.client.force_login(user=self.member)
-        response = self.client.get(self.url)
+        with self.assertNumQueries(5):
+            response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data[0]['id'], self.group.id)
 
@@ -106,8 +111,10 @@ class TestGroupsAPI(APITestCase):
     def test_retrieve_group_as_member(self):
         self.client.force_login(user=self.member)
         url = self.url + str(self.group.id) + '/'
-        response = self.client.get(url)
+        with self.assertNumQueries(5):
+            response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('photo_urls', response.data)
 
     def test_patch_group(self):
         url = self.url + str(self.group.id) + '/'
@@ -216,6 +223,46 @@ class TestGroupsAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
+class TestUploadGroupPhoto(APITestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.group = GroupFactory(members=[self.user])
+        self.url = '/api/groups/' + str(self.group.id) + '/'
+        self.photo_file = os.path.join(os.path.dirname(__file__), './photo.jpg')
+
+    def test_upload_and_delete_photo(self):
+        self.client.force_login(user=self.user)
+        response = self.client.get(self.url)
+        self.assertTrue('full_size' not in response.data['photo_urls'])
+
+        History.objects.all().delete()
+
+        with open(self.photo_file, 'rb') as photo:
+            response = self.client.patch(self.url, {'photo': photo})
+            self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+        response = self.client.get(self.url)
+        self.assertTrue('full_size' in response.data['photo_urls'])
+        self.assertTrue('thumbnail' in response.data['photo_urls'])
+        self.assertTrue(response.data['photo_urls']['full_size'].startswith('http://testserver'))
+
+        self.assertEqual(History.objects.count(), 1)
+        self.assertEqual(History.objects.first().typus, HistoryTypus.GROUP_CHANGE_PHOTO)
+
+        History.objects.all().delete()
+
+        # delete photo
+        response = self.client.patch(self.url, {'photo': None}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+        response = self.client.get(self.url)
+        self.assertTrue('full_size' not in response.data['photo_urls'])
+        self.assertTrue('thumbnail' not in response.data['photo_urls'])
+
+        self.assertEqual(History.objects.count(), 1)
+        self.assertEqual(History.objects.first().typus, HistoryTypus.GROUP_DELETE_PHOTO)
+
+
 class TestPlaygroundGroupAPI(APITestCase):
     def setUp(self):
         self.member = UserFactory()
@@ -256,16 +303,42 @@ class TestGroupMemberLastSeenAPI(APITestCase):
         self.user = UserFactory()
         self.group = GroupFactory(members=[self.user])
         self.membership = self.group.groupmembership_set.get(user=self.user)
+        self.membership.inactive_at = timezone.now() - relativedelta(months=7)
+        self.membership.removal_notification_at = timezone.now() - relativedelta(hours=2)
+        self.membership.save()
 
-    def test_mark_user_as_seen_in_group(self):
+    @patch('foodsaving.groups.stats.write_points')
+    def test_mark_user_as_seen_in_group(self, write_points):
         before = timezone.now()
         self.assertLess(self.membership.lastseen_at, before)
+
         self.client.force_login(user=self.user)
         response = self.client.post('/api/groups/{}/mark_user_active/'.format(self.group.id), format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.membership.refresh_from_db()
         self.assertGreater(self.membership.lastseen_at, before)
         self.assertEqual(self.membership.inactive_at, None)
+        self.assertEqual(self.membership.removal_notification_at, None)
+
+        expected_stats = [
+            call([{
+                'measurement': 'karrot.events',
+                'tags': group_tags(self.group),
+                'fields': {
+                    'group_member_returned': 1,
+                    'group_member_returned_seconds_since_marked_for_removal': 60 * 60 * 2,
+                },
+            }]),
+            call([{
+                'measurement': 'karrot.events',
+                'tags': group_tags(self.group),
+                'fields': {
+                    'group_activity': 1,
+                },
+            }]),
+        ]
+
+        self.assertEqual(write_points.call_args_list, expected_stats)
 
 
 class TestGroupNotificationTypes(APITestCase):

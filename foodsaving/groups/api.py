@@ -54,7 +54,11 @@ class IsGroupEditor(BasePermission):
         return True
 
 
-class GroupInfoViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
+class GroupInfoViewSet(
+        mixins.RetrieveModelMixin,
+        mixins.ListModelMixin,
+        GenericViewSet,
+):
     """
     Group Info - public information
 
@@ -70,12 +74,22 @@ class GroupInfoViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, Generic
     serializer_class = GroupPreviewSerializer
 
 
-class GroupViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUpdateModelMixin, mixins.ListModelMixin,
-                   RetrieveConversationMixin, GenericViewSet):
+class GroupViewSet(
+        mixins.CreateModelMixin,
+        mixins.RetrieveModelMixin,
+        PartialUpdateModelMixin,
+        mixins.ListModelMixin,
+        RetrieveConversationMixin,
+        GenericViewSet,
+):
     """
     Your groups: list, create, update
     """
-    queryset = GroupModel.objects
+    queryset = GroupModel.objects.annotate_active_editors_count().annotate_yesterdays_member_count().prefetch_related(
+        'members',
+        'groupmembership_set',
+        'groupmembership_set__trusted_by',
+    )
     filter_backends = (SearchFilter, filters.DjangoFilterBackend)
     filterset_class = GroupsFilter
     search_fields = ('name', 'public_description')
@@ -139,7 +153,10 @@ class GroupViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUp
         self.check_permissions(request)
         membership = get_object_or_404(GroupMembership.objects, group=pk, user=request.user)
         membership.lastseen_at = timezone.now()
+        if membership.inactive_at is not None:
+            stats.member_returned(membership)
         membership.inactive_at = None
+        membership.removal_notification_at = None
         membership.save()
         stats.group_activity(membership.group)
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -192,8 +209,13 @@ class GroupViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUp
         return Response(GroupMembershipInfoSerializer(membership).data)
 
 
-class AgreementViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, PartialUpdateModelMixin,
-                       mixins.ListModelMixin, GenericViewSet):
+class AgreementViewSet(
+        mixins.CreateModelMixin,
+        mixins.RetrieveModelMixin,
+        PartialUpdateModelMixin,
+        mixins.ListModelMixin,
+        GenericViewSet,
+):
     queryset = Agreement.objects
     serializer_class = AgreementSerializer
     permission_classes = (IsAuthenticated, )

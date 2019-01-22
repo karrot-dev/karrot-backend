@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.crypto import get_random_string
 
 from foodsaving.applications.factories import GroupApplicationFactory
+from foodsaving.issues.factories import IssueFactory
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationMessage, \
     ConversationMessageReaction
@@ -24,7 +25,7 @@ from foodsaving.pickups.models import PickupDate
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.subscriptions.models import ChannelSubscription, \
     PushSubscription, PushSubscriptionPlatform
-from foodsaving.users.factories import UserFactory
+from foodsaving.users.factories import UserFactory, VerifiedUserFactory
 from foodsaving.utils.tests.fake import faker
 
 
@@ -734,6 +735,25 @@ class UserReceiverTest(WSTestCase):
         self.member.save()
 
         self.assertEqual(len(self.client.messages), 0)
+
+
+class IssueReceiverTest(WSTestCase):
+    def test_issue_created(self):
+        member = VerifiedUserFactory()
+        member2 = VerifiedUserFactory()
+        group = GroupFactory(members=[member, member2])
+
+        client = self.connect_as(member)
+        IssueFactory(group=group, affected_user=member2, created_by=member)
+        messages = client.messages_by_topic
+
+        self.assertIn('issues:issue', messages)
+        self.assertIn('conversations:conversation', messages)
+
+        # TODO make it create less messages
+        # self.assertEqual(len(client.messages), 2)
+        # self.assertEqual(len(messages['issues:issue']), 1)
+        # self.assertEqual(len(messages['conversations:conversation']), 1)
 
 
 @patch('foodsaving.subscriptions.tasks.notify_subscribers')

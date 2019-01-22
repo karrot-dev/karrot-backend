@@ -5,10 +5,11 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import TextField, DateTimeField, QuerySet, Subquery, OuterRef
+from django.db.models import TextField, DateTimeField, QuerySet, Subquery, OuterRef, Count, Q
 from django.template.loader import render_to_string
 from django.utils import timezone as tz, timezone
 from timezone_field import TimeZoneField
+from versatileimagefield.fields import VersatileImageField
 
 from foodsaving.base.base_models import BaseModel, LocationModel
 from foodsaving.conversations.models import ConversationMixin
@@ -28,6 +29,29 @@ class GroupQuerySet(models.QuerySet):
         return self.filter(
             groupmembership__roles__contains=[roles.GROUP_EDITOR],
             groupmembership__user=user,
+        )
+
+    def annotate_active_editors_count(self):
+        return self.annotate(
+            _active_editors_count=Count(
+                'groupmembership',
+                filter=Q(
+                    groupmembership__roles__contains=[roles.GROUP_EDITOR],
+                    groupmembership__inactive_at__isnull=True,
+                )
+            )
+        )
+
+    def annotate_yesterdays_member_count(self):
+        one_day_ago = timezone.now() - relativedelta(days=1)
+        return self.annotate(
+            _yesterdays_member_count=Count(
+                'groupmembership',
+                filter=Q(
+                    groupmembership__created_at__lte=one_day_ago,
+                    groupmembership__inactive_at__isnull=True,
+                )
+            )
         )
 
 
@@ -60,6 +84,11 @@ class Group(BaseModel, LocationModel, ConversationMixin):
     )
     last_active_at = DateTimeField(default=tz.now)
     is_open = models.BooleanField(default=False)
+    photo = VersatileImageField(
+        'Group Photo',
+        upload_to='group_photos',
+        null=True,
+    )
 
     @property
     def group(self):
@@ -125,16 +154,33 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         return self.last_active_at >= tz.now() - timedelta(days=settings.NUMBER_OF_DAYS_UNTIL_GROUP_INACTIVE)
 
     def get_application_questions_or_default(self):
-        return self.application_questions or self.get_application_questions_default()
+        return self.application_questions or self.application_questions_default()
 
-    def get_application_questions_default(self):
+    def application_questions_default(self):
         return render_to_string('default_application_questions.nopreview.jinja2')
 
-    def get_trust_threshold_for_newcomer(self):
-        one_day_ago = timezone.now() - relativedelta(days=1)
-        dynamic_threshold = max(1, self.groupmembership_set.active().filter(created_at__lte=one_day_ago).count() // 2)
+    def trust_threshold_for_newcomer(self):
+        count = getattr(self, '_yesterdays_member_count', None)
+        if count is None:
+            one_day_ago = timezone.now() - relativedelta(days=1)
+            count = self.groupmembership_set.active().filter(created_at__lte=one_day_ago).count()
+        dynamic_threshold = max(1, count // 2)
         trust_threshold = min(settings.GROUP_EDITOR_TRUST_MAX_THRESHOLD, dynamic_threshold)
         return trust_threshold
+
+    def active_editors_count(self):
+        count = getattr(self, '_active_editors_count', None)
+        if count is None:
+            count = self.groupmembership_set.active().editors().count()
+        return count
+
+    def delete_photo(self):
+        if self.photo.name is None:
+            return
+        # Deletes Image Renditions
+        self.photo.delete_all_created_images()
+        # Deletes Original Image
+        self.photo.delete(save=False)
 
 
 class Agreement(BaseModel):
@@ -153,6 +199,7 @@ class GroupNotificationType(object):
     WEEKLY_SUMMARY = 'weekly_summary'
     DAILY_PICKUP_NOTIFICATION = 'daily_pickup_notification'
     NEW_APPLICATION = 'new_application'
+    CONFLICT_RESOLUTION = 'conflict_resolution'
 
 
 def get_default_notification_types():
@@ -185,7 +232,7 @@ class GroupMembershipQuerySet(QuerySet):
         pickups = PickupDate.objects.exclude_disabled().filter(
             store__group=OuterRef('group'), date__lt=now, date__gte=now - relativedelta(**kwargs)
         )
-        return self.filter(user__pickup_dates__in=Subquery(pickups.only('pk')))
+        return self.filter(user__pickup_dates__in=Subquery(pickups.only('pk'))).distinct()
 
     def editors(self):
         return self.with_role(roles.GROUP_EDITOR)
@@ -219,6 +266,7 @@ class GroupMembership(BaseModel):
     lastseen_at = DateTimeField(default=tz.now)
     inactive_at = DateTimeField(null=True)
     notification_types = ArrayField(TextField(), default=get_default_notification_types)
+    removal_notification_at = DateTimeField(null=True)
 
     class Meta:
         db_table = 'groups_group_members'

@@ -11,7 +11,7 @@ from foodsaving.conversations.models import ConversationMessage
 from foodsaving.groups.models import Group, GroupNotificationType, GroupMembership
 from foodsaving.pickups.models import PickupDate, Feedback
 from foodsaving.utils.email_utils import prepare_email
-from foodsaving.utils.frontend_urls import group_wall_url, group_settings_url
+from foodsaving.utils.frontend_urls import group_wall_url, group_settings_url, group_summary_unsubscribe_url
 
 
 def prepare_group_summary_data(group, from_date, to_date):
@@ -68,6 +68,18 @@ def prepare_group_summary_emails(group, context):
         with_notification_type(GroupNotificationType.WEEKLY_SUMMARY)
     ).exclude(groupmembership__user__in=get_user_model().objects.unverified_or_ignored())
 
+    return [
+        prepare_email(
+            template='group_summary',
+            context={
+                'unsubscribe_url': group_summary_unsubscribe_url(member, group),
+                **context,
+            },
+            to=[member.email],
+            language=member.language,
+        ) for member in members
+    ]
+
     grouped_members = itertools.groupby(members.order_by('language'), key=lambda member: member.language)
     return [
         prepare_email(
@@ -103,6 +115,19 @@ def prepare_user_inactive_in_group_email(user, group):
             'group_name': group.name,
             'group_url': group_wall_url(group),
             'num_days_inactive': settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP,
+        },
+    )
+
+
+def prepare_user_removal_from_group_email(user, group):
+    return prepare_email(
+        template='user_removal_from_group',
+        user=user,
+        context={
+            'group_name': group.name,
+            'group_url': group_wall_url(group),
+            'num_months_inactive': settings.NUMBER_OF_INACTIVE_MONTHS_UNTIL_REMOVAL_FROM_GROUP_NOTIFICATION,
+            'num_removal_days': settings.NUMBER_OF_DAYS_AFTER_REMOVAL_NOTIFICATION_WE_ACTUALLY_REMOVE_THEM,
         },
     )
 

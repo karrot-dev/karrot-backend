@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 from foodsaving.applications.models import GroupApplication, GroupApplicationStatus
+from foodsaving.issues.models import Issue, Voting, OptionTypes
 from foodsaving.notifications.models import Notification, NotificationType
 from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
@@ -198,6 +199,7 @@ def invitation_accepted(sender, instance, **kwargs):
     )
 
 
+# Pickups
 @receiver(pre_delete, sender=PickupDateCollector)
 def delete_pickup_notifications_when_collector_leaves(sender, instance, **kwargs):
     collector = instance
@@ -250,4 +252,82 @@ def pickup_modified(sender, instance, **kwargs):
         Notification.objects.create_for_pickup_collectors(
             collectors=collectors.exclude(user=pickup.last_changed_by),
             type=NotificationType.PICKUP_MOVED.value,
+        )
+
+
+# Issue
+def create_notification_about_issue(issue, user, type):
+    return Notification.objects.create(
+        user=user,
+        type=type,
+        context={
+            'issue': issue.id,
+            'group': issue.group.id,
+            'affected_user': issue.affected_user.id,
+        }
+    )
+
+
+@receiver(post_save, sender=Voting)
+def conflict_resolution_issue_created_or_continued(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    voting = instance
+    issue = voting.issue
+
+    # if there's only one voting, the issue has just been created
+    if issue.votings.count() <= 1:
+        for user in issue.participants.exclude(id=issue.created_by_id).distinct():
+            create_notification_about_issue(
+                issue=issue,
+                user=user,
+                type=(
+                    NotificationType.CONFLICT_RESOLUTION_CREATED.value if user.id != issue.affected_user_id else
+                    NotificationType.CONFLICT_RESOLUTION_CREATED_ABOUT_YOU.value
+                )
+            )
+    else:
+        for user in issue.participants.distinct():
+            create_notification_about_issue(
+                issue=issue,
+                user=user,
+                type=(
+                    NotificationType.CONFLICT_RESOLUTION_CONTINUED.value if user.id != issue.affected_user_id else
+                    NotificationType.CONFLICT_RESOLUTION_CONTINUED_ABOUT_YOU.value
+                )
+            )
+
+
+@receiver(pre_save, sender=Issue)
+def conflict_resolution_issue_decided(sender, instance, **kwargs):
+    issue = instance
+
+    # abort if just created
+    if not issue.id:
+        return
+
+    # abort if issue is not decided or was already decided
+    old = Issue.objects.get(id=issue.id)
+    if old.is_decided() or not issue.is_decided():
+        return
+
+    for user in issue.participants.distinct():
+        create_notification_about_issue(
+            issue=issue,
+            user=user,
+            type=(
+                NotificationType.CONFLICT_RESOLUTION_DECIDED.value
+                if user.id != issue.affected_user_id else NotificationType.CONFLICT_RESOLUTION_DECIDED_ABOUT_YOU.value
+            )
+        )
+
+    accepted_option = issue.latest_voting().accepted_option
+    if accepted_option.type == OptionTypes.REMOVE_USER.value:
+        Notification.objects.create(
+            user=issue.affected_user,
+            type=NotificationType.CONFLICT_RESOLUTION_YOU_WERE_REMOVED.value,
+            context={
+                'group': issue.group.id,
+            }
         )

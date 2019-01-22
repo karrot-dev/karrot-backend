@@ -32,6 +32,10 @@ class HistoryTypus(enum.Enum):
     MEMBER_BECAME_EDITOR = 18
     PICKUP_DISABLE = 19
     PICKUP_ENABLE = 20
+    GROUP_LEAVE_INACTIVE = 21
+    GROUP_CHANGE_PHOTO = 22
+    GROUP_DELETE_PHOTO = 23
+    MEMBER_REMOVED = 24
 
 
 class HistoryQuerySet(models.QuerySet):

@@ -14,8 +14,54 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Application definition
 
+# Karrot constants
+
+# Generic
+DESCRIPTION_MAX_LENGTH = 100000
+NAME_MAX_LENGTH = 80
+# Names that shouldn't be used used by groups or users because they are either confusing or unspecific
+# Values are case-insensitive
+RESERVED_NAMES = (
+    'karrot',
+    'foodsaving',
+    'foodsharing',
+)
+
+# Users
+# Verification codes:
+# Time until a verification code expires
+EMAIL_VERIFICATION_TIME_LIMIT_HOURS = 7 * 24
+PASSWORD_RESET_TIME_LIMIT_MINUTES = 180
+ACCOUNT_DELETE_TIME_LIMIT_MINUTES = 180
+
+# Groups
+GROUP_EDITOR_TRUST_MAX_THRESHOLD = 3
+# For marking groups inactive
+NUMBER_OF_DAYS_UNTIL_GROUP_INACTIVE = 14
+# For marking users inactive
+NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP = 30
+# For removing inactive users from groups
+NUMBER_OF_INACTIVE_MONTHS_UNTIL_REMOVAL_FROM_GROUP_NOTIFICATION = 6
+NUMBER_OF_DAYS_AFTER_REMOVAL_NOTIFICATION_WE_ACTUALLY_REMOVE_THEM = 7
+
+# Stores
+STORE_MAX_WEEKS_IN_ADVANCE = 52
+
+# Pickups
+FEEDBACK_POSSIBLE_DAYS = 30
+PICKUPDATE_DUE_SOON_HOURS = 6
+
+# Conversations
+MESSAGE_EDIT_DAYS = 2
+
+# Issues
+VOTING_DURATION_DAYS = 7
+VOTING_DUE_SOON_HOURS = 12
+CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION = 4
+
+
+# Django configuration
 INSTALLED_APPS = (
     # Should be loaded first
     'channels',
@@ -35,6 +81,7 @@ INSTALLED_APPS = (
     'foodsaving',
     'foodsaving.applications.ApplicationsConfig',
     'foodsaving.base.BaseConfig',
+    'foodsaving.issues.IssuesConfig',
     'foodsaving.userauth.UserAuthConfig',
     'foodsaving.subscriptions.SubscriptionsConfig',
     'foodsaving.users.UsersConfig',
@@ -42,6 +89,7 @@ INSTALLED_APPS = (
     'foodsaving.history.HistoryConfig',
     'foodsaving.groups.GroupsConfig',
     'foodsaving.stores.StoresConfig',
+    'foodsaving.unsubscribe',
     'foodsaving.pickups.PickupsConfig',
     'foodsaving.invitations.InvitationsConfig',
     'foodsaving.template_previews',
@@ -158,6 +206,10 @@ VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
         ('full_size', 'url'),
         ('thumbnail', 'thumbnail__120x120'),
     ],
+    'group_logo': [
+        ('full_size', 'url'),
+        ('thumbnail', 'thumbnail__120x120'),
+    ]
 }
 
 # Internationalization
@@ -192,22 +244,6 @@ SILENCED_SYSTEM_CHECKS = [
     'urls.W005',  # we don't need to reverse backend URLs
 ]
 
-DESCRIPTION_MAX_LENGTH = 100000
-NAME_MAX_LENGTH = 80
-FEEDBACK_POSSIBLE_DAYS = 30
-MESSAGE_EDIT_DAYS = 2
-GROUP_EDITOR_TRUST_MAX_THRESHOLD = 3
-PICKUPDATE_DUE_SOON_HOURS = 6
-STORE_MAX_WEEKS_IN_ADVANCE = 52
-
-# Names that shouldn't be used used by groups or users because they are either confusing or unspecific
-# Values are case-insensitive
-RESERVED_NAMES = (
-    'karrot',
-    'foodsaving',
-    'foodsharing',
-)
-
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
@@ -219,18 +255,6 @@ CHANNEL_LAYERS = {
 }
 
 ASGI_APPLICATION = 'foodsaving.subscriptions.routing.application'
-
-# Verification codes:
-# Time until a verification code expires
-EMAIL_VERIFICATION_TIME_LIMIT_HOURS = 7 * 24
-PASSWORD_RESET_TIME_LIMIT_MINUTES = 180
-ACCOUNT_DELETE_TIME_LIMIT_MINUTES = 180
-
-# For marking users inactive
-NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP = 30
-
-# For marking groups inactive
-NUMBER_OF_DAYS_UNTIL_GROUP_INACTIVE = 14
 
 # Default dummy settings, please override in local_settings.py
 DEFAULT_FROM_EMAIL = "testing@example.com"

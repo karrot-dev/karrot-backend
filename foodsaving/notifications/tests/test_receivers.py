@@ -4,12 +4,15 @@ from django.test import TestCase
 from django.utils import timezone
 
 from foodsaving.applications.factories import GroupApplicationFactory
-from foodsaving.notifications.models import Notification, NotificationType
-from foodsaving.notifications.tasks import create_pickup_upcoming_notifications
+from foodsaving.issues.factories import IssueFactory, vote_for_further_discussion, fast_forward_to_voting_expiration, \
+    vote_for_remove_user
+from foodsaving.issues.tasks import process_expired_votings
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
 from foodsaving.invitations.models import Invitation
+from foodsaving.notifications.models import Notification, NotificationType
+from foodsaving.notifications.tasks import create_pickup_upcoming_notifications
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory
@@ -226,3 +229,47 @@ class TestNotificationReceivers(TestCase):
         self.assertEqual(context['group'], group.id)
         self.assertEqual(context['pickup'], pickup.id)
         self.assertEqual(context['store'], store.id)
+
+    def test_conflict_resolution_notifications(self):
+        user1, user2, user3 = UserFactory(), UserFactory(), UserFactory()
+        group = GroupFactory(members=[user1, user2, user3])
+        Notification.objects.all().delete()
+
+        issue = IssueFactory(group=group, created_by=user1, affected_user=user2)
+
+        notifications = Notification.objects.order_by('type')
+        self.assertEqual(notifications.count(), 2)
+        self.assertEqual(notifications[1].type, NotificationType.CONFLICT_RESOLUTION_CREATED_ABOUT_YOU.value)
+        self.assertEqual(notifications[1].user, user2)
+        self.assertEqual(notifications[1].context, {'issue': issue.id, 'group': group.id, 'affected_user': user2.id})
+        self.assertEqual(notifications[0].type, NotificationType.CONFLICT_RESOLUTION_CREATED.value)
+        self.assertEqual(notifications[0].user, user3)
+
+        # keep discussing
+        Notification.objects.all().delete()
+        voting = issue.latest_voting()
+        vote_for_further_discussion(voting=voting, user=user1)
+        with fast_forward_to_voting_expiration(voting):
+            process_expired_votings()
+
+        notifications = Notification.objects.order_by('type')
+        self.assertEqual(notifications.count(), 3)
+        self.assertEqual(notifications[0].type, NotificationType.CONFLICT_RESOLUTION_CONTINUED.value)
+        self.assertEqual(notifications[1].type, NotificationType.CONFLICT_RESOLUTION_CONTINUED.value)
+        self.assertEqual(notifications[2].type, NotificationType.CONFLICT_RESOLUTION_CONTINUED_ABOUT_YOU.value)
+
+        # remove user
+        Notification.objects.all().delete()
+        voting = issue.latest_voting()
+        vote_for_remove_user(voting=voting, user=user1)
+        with fast_forward_to_voting_expiration(voting):
+            process_expired_votings()
+
+        notifications = Notification.objects.order_by('type')
+        self.assertEqual(notifications.count(), 4)
+        self.assertEqual([n.type for n in notifications], [
+            NotificationType.CONFLICT_RESOLUTION_DECIDED.value,
+            NotificationType.CONFLICT_RESOLUTION_DECIDED.value,
+            NotificationType.CONFLICT_RESOLUTION_DECIDED_ABOUT_YOU.value,
+            NotificationType.CONFLICT_RESOLUTION_YOU_WERE_REMOVED.value,
+        ])

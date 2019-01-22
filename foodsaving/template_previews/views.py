@@ -10,15 +10,17 @@ from django.template.utils import get_app_template_dirs
 from django.utils import timezone
 
 import foodsaving.applications.emails
+import foodsaving.issues.emails
 import foodsaving.conversations.emails
 import foodsaving.invitations.emails
 import foodsaving.users.emails
 from config import settings
 from foodsaving.applications.factories import GroupApplicationFactory
 from foodsaving.applications.models import GroupApplication
+from foodsaving.issues.factories import IssueFactory
 from foodsaving.conversations.models import ConversationMessage
 from foodsaving.groups.emails import prepare_user_inactive_in_group_email, prepare_group_summary_emails, \
-    prepare_group_summary_data, prepare_user_became_editor_email
+    prepare_group_summary_data, prepare_user_became_editor_email, prepare_user_removal_from_group_email
 from foodsaving.groups.models import Group
 from foodsaving.invitations.models import Invitation
 from foodsaving.pickups.emails import prepare_pickup_notification_email
@@ -42,6 +44,15 @@ def random_group():
 
 def shuffle_groups():
     return Group.objects.order_by('?')
+
+
+def random_issue():
+    return IssueFactory(group=random_group(), created_by=random_user(), affected_user=random_user())
+
+
+def random_message():
+    conversation = ConversationMessage.objects.order_by('?').first().conversation
+    return conversation.messages.exclude_replies().first()
 
 
 def random_messages():
@@ -97,9 +108,17 @@ class Handlers:
     def changemail_success(self):
         return foodsaving.users.emails.prepare_changemail_success_email(user=random_user())
 
+    def conflict_resolution_continued(self):
+        issue = random_issue()
+        return foodsaving.issues.emails.prepare_conflict_resolution_continued_email(issue.created_by, issue)
+
+    def conflict_resolution_continued_affected_user(self):
+        issue = random_issue()
+        return foodsaving.issues.emails.prepare_conflict_resolution_continued_email_to_affected_user(issue)
+
     def conversation_message_notification(self):
-        return foodsaving.conversations.emails.prepare_conversation_message_notification(
-            user=random_user(), messages=random_messages()
+        return foodsaving.conversations.emails.prepare_group_conversation_message_notification(
+            user=random_user(), message=random_message()
         )
 
     def emailinvitation(self):
@@ -116,6 +135,14 @@ class Handlers:
         application = get_or_create_application()
         member = application.group.members.first()
         return foodsaving.applications.emails.prepare_new_application_notification_email(member, application)
+
+    def new_conflict_resolution_issue(self):
+        issue = random_issue()
+        return foodsaving.issues.emails.prepare_new_conflict_resolution_email(issue.created_by, issue)
+
+    def new_conflict_resolution_issue_affected_user(self):
+        issue = random_issue()
+        return foodsaving.issues.emails.prepare_new_conflict_resolution_email_to_affected_user(issue)
 
     def group_summary(self):
         from_date = timezone.now() - relativedelta(days=7)
@@ -184,6 +211,9 @@ class Handlers:
 
     def user_inactive_in_group(self):
         return prepare_user_inactive_in_group_email(user=random_user(), group=random_group())
+
+    def user_removal_from_group(self):
+        return prepare_user_removal_from_group_email(user=random_user(), group=random_group())
 
 
 handlers = Handlers()

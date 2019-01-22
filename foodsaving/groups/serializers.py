@@ -4,6 +4,7 @@ from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, PermissionDenied
+from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
     GroupNotificationType
@@ -58,17 +59,17 @@ class GroupHistorySerializer(GroupBaseSerializer):
 
     class Meta:
         model = GroupModel
-        fields = '__all__'
+        exclude = ['photo']
 
 
 class GroupDetailSerializer(GroupBaseSerializer):
     "use this also for creating and updating a group"
     memberships = serializers.SerializerMethodField()
     notification_types = serializers.SerializerMethodField()
-    application_questions_default = serializers.SerializerMethodField()
-    trust_threshold_for_newcomer = serializers.SerializerMethodField()
     member_inactive_after_days = serializers.SerializerMethodField()
-
+    active_editors_required_for_conflict_resolution = serializers.SerializerMethodField()
+    photo = VersatileImageFieldSerializer(sizes='group_logo', required=False, allow_null=True, write_only=True)
+    photo_urls = VersatileImageFieldSerializer(sizes='group_logo', read_only=True, source='photo')
     timezone = TimezoneField()
 
     class Meta:
@@ -92,6 +93,10 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'is_open',
             'trust_threshold_for_newcomer',
             'member_inactive_after_days',
+            'active_editors_count',
+            'active_editors_required_for_conflict_resolution',
+            'photo',
+            'photo_urls',
         ]
         extra_kwargs = {
             'name': {
@@ -128,17 +133,14 @@ class GroupDetailSerializer(GroupBaseSerializer):
         if 'request' not in self.context:
             return []
         user = self.context['request'].user
-        membership = group.groupmembership_set.get(user=user)
+        membership = next(m for m in group.groupmembership_set.all() if m.user_id == user.id)
         return membership.notification_types
-
-    def get_application_questions_default(self, group):
-        return group.get_application_questions_default()
-
-    def get_trust_threshold_for_newcomer(self, group):
-        return group.get_trust_threshold_for_newcomer()
 
     def get_member_inactive_after_days(self, group):
         return settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP
+
+    def get_active_editors_required_for_conflict_resolution(self, group):
+        return settings.CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION
 
     def update(self, group, validated_data):
         if group.is_playground():
@@ -147,6 +149,9 @@ class GroupDetailSerializer(GroupBaseSerializer):
             for field in ['name', 'public_description']:
                 if field in validated_data:
                     del validated_data[field]
+
+        if 'photo' in validated_data:
+            group.delete_photo()
 
         changed_data = find_changed(group, validated_data)
         before_data = GroupHistorySerializer(group).data
@@ -165,6 +170,14 @@ class GroupDetailSerializer(GroupBaseSerializer):
                          for k in changed_data.keys()},
                 before=before_data,
                 after=after_data,
+            )
+
+        if 'photo' in validated_data:
+            deleted = validated_data['photo'] is None
+            History.objects.create(
+                typus=HistoryTypus.GROUP_DELETE_PHOTO if deleted else HistoryTypus.GROUP_CHANGE_PHOTO,
+                group=group,
+                users=[self.context['request'].user],
             )
         return group
 
@@ -248,6 +261,7 @@ class GroupPreviewSerializer(GroupBaseSerializer):
     should be readonly
     """
     application_questions = serializers.SerializerMethodField()
+    photo_urls = VersatileImageFieldSerializer(sizes='group_logo', read_only=True, source='photo')
 
     class Meta:
         model = GroupModel
@@ -262,6 +276,7 @@ class GroupPreviewSerializer(GroupBaseSerializer):
             'members',
             'status',
             'is_open',
+            'photo_urls',
         ]
 
     def get_application_questions(self, group):
@@ -304,6 +319,7 @@ class GroupMembershipAddNotificationTypeSerializer(serializers.Serializer):
             GroupNotificationType.WEEKLY_SUMMARY,
             GroupNotificationType.DAILY_PICKUP_NOTIFICATION,
             GroupNotificationType.NEW_APPLICATION,
+            GroupNotificationType.CONFLICT_RESOLUTION,
         )],
         required=True,
         write_only=True

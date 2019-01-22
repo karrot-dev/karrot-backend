@@ -1,5 +1,5 @@
 from foodsaving.utils.email_utils import prepare_email
-from foodsaving.utils.frontend_urls import group_settings_url
+from foodsaving.utils.frontend_urls import weekly_summary_unsubscribe_url
 
 
 def prepare_pickup_notification_email(
@@ -29,11 +29,13 @@ def prepare_pickup_notification_email(
         ]
     ])
 
+    unsubscribe_url = weekly_summary_unsubscribe_url(user, group)
+
     return prepare_email(
         template='pickup_notification',
         user=user,
         context={
-            'settings_url': group_settings_url(group),
+            'unsubscribe_url': unsubscribe_url,
             'group': group,
             'tonight_date': tonight_date,
             'tomorrow_date': tomorrow_date,

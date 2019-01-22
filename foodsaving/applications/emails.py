@@ -1,8 +1,8 @@
 from config import settings
 from foodsaving.conversations.models import Conversation
 from foodsaving.utils.email_utils import prepare_email, formataddr
-from foodsaving.utils.frontend_urls import group_wall_url, group_settings_url, group_application_url, \
-    group_application_mute_url, group_applications_url, group_edit_url
+from foodsaving.utils.frontend_urls import group_wall_url, group_application_url, \
+    group_applications_url, group_edit_url, new_application_unsubscribe_url
 from foodsaving.webhooks.api import make_local_part
 
 
@@ -16,19 +16,22 @@ def prepare_new_application_notification_email(user, application):
     reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
     from_email = formataddr((applicant.display_name, settings.DEFAULT_FROM_EMAIL))
 
+    unsubscribe_url = new_application_unsubscribe_url(user, application)
+
     return prepare_email(
         template='new_application',
         from_email=from_email,
         user=user,
         reply_to=[reply_to],
+        unsubscribe_url=unsubscribe_url,
         context={
             'applicant': applicant,
             'group': application.group,
             'questions': application.questions_rendered(),
             'answers': application.answers_rendered(),
             'conversation_url': group_application_url(application),
-            'mute_url': group_application_mute_url(application, conversation),
-            'settings_url': group_settings_url(application.group),
+            'mute_url': unsubscribe_url,
+            'new_application_unsubscribe_url': unsubscribe_url,
             'group_applications_url': group_applications_url(application.group),
             'group_edit_url': group_edit_url(application.group),
         }

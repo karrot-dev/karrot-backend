@@ -2,10 +2,12 @@ from dateutil.relativedelta import relativedelta
 from django.test import TestCase
 from django.utils import timezone
 
+from foodsaving.issues.factories import IssueFactory, fast_forward_just_before_voting_expiration, \
+    vote_for_further_discussion
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.notifications import tasks
 from foodsaving.notifications.models import Notification, NotificationType
-from foodsaving.notifications.tasks import create_pickup_upcoming_notifications
+from foodsaving.notifications.tasks import create_pickup_upcoming_notifications, create_voting_ends_soon_notifications
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.pickups.models import PickupDateCollector
 from foodsaving.stores.factories import StoreFactory
@@ -112,3 +114,25 @@ class TestPickupUpcomingTask(TestCase):
         create_pickup_upcoming_notifications.call_local()
         notifications = Notification.objects.filter(type=NotificationType.PICKUP_UPCOMING.value)
         self.assertEqual(notifications.count(), 0)
+
+
+class TestVotingEndsSoonTask(TestCase):
+    def test_create_voting_ends_soon_notifications(self):
+        creator, affected_user, voter = UserFactory(), UserFactory(), UserFactory()
+        group = GroupFactory(members=[creator, affected_user, voter])
+        issue = IssueFactory(group=group, created_by=creator, affected_user=affected_user)
+        voting = issue.latest_voting()
+        # let's vote with user "voter"
+        vote_for_further_discussion(voting=voting, user=voter)
+        Notification.objects.all().delete()
+
+        with fast_forward_just_before_voting_expiration(voting):
+            create_voting_ends_soon_notifications()
+            # can call it a second time without duplicating notifications
+            create_voting_ends_soon_notifications()
+
+        notifications = Notification.objects.filter(type=NotificationType.VOTING_ENDS_SOON.value)
+        # user "voter" is not being notified
+        self.assertEqual(
+            sorted([n.user_id for n in notifications]), sorted([issue.affected_user_id, issue.created_by_id])
+        )
