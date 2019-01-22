@@ -5,6 +5,7 @@ from django.utils import timezone
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership
 from foodsaving.pickups.factories import PickupDateFactory
+from foodsaving.pickups.models import to_range
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users import stats
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
@@ -19,7 +20,7 @@ class TestUserStats(TestCase):
             GroupMembership.objects.filter(user=user).update(lastseen_at=timezone.now() - relativedelta(**kwargs))
 
         def do_pickup(store, user, **kwargs):
-            pickup = PickupDateFactory(store=store, date=timezone.now() - relativedelta(**kwargs))
+            pickup = PickupDateFactory(store=store, date=to_range(timezone.now() - relativedelta(**kwargs)))
             pickup.add_collector(user)
 
         # 9 verified users, 1 unverified user

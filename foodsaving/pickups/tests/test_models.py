@@ -9,7 +9,7 @@ from freezegun import freeze_time
 from foodsaving.history.models import History
 from foodsaving.pickups.factories import PickupDateFactory, \
     PickupDateSeriesFactory
-from foodsaving.pickups.models import Feedback, PickupDate, PickupDateSeries
+from foodsaving.pickups.models import Feedback, PickupDate, PickupDateSeries, to_range
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.stores.models import StoreStatus
 from foodsaving.users.factories import UserFactory
@@ -71,7 +71,7 @@ class TestPickupDateSeriesModel(TestCase):
         for month, day in [(3, 18), (3, 25), (4, 1), (4, 8)]:
             expected_dates.append(self.store.group.timezone.localize(datetime(2017, month, day, 15, 0)))
         for actual_date, expected_date in zip(PickupDate.objects.filter(series=series), expected_dates):
-            self.assertEqual(actual_date.date, expected_date)
+            self.assertEqual(actual_date.date.start, expected_date)
 
     def test_daylight_saving_time_to_winter(self):
         start_date = self.store.group.timezone.localize(datetime.now().replace(2016, 10, 22, 15, 0, 0, 0))
@@ -84,7 +84,7 @@ class TestPickupDateSeriesModel(TestCase):
         for month, day in [(10, 22), (10, 29), (11, 5), (11, 12)]:
             expected_dates.append(self.store.group.timezone.localize(datetime(2016, month, day, 15, 0)))
         for actual_date, expected_date in zip(PickupDate.objects.filter(series=series), expected_dates):
-            self.assertEqual(actual_date.date, expected_date)
+            self.assertEqual(actual_date.date.start, expected_date)
 
     def test_delete(self):
         now = timezone.now()
@@ -93,17 +93,17 @@ class TestPickupDateSeriesModel(TestCase):
             series = PickupDateSeriesFactory(store=self.store, start_date=two_weeks_ago)
 
         pickup_dates = series.pickup_dates.all()
-        past_date_count = pickup_dates.filter(date__lt=now).count()
+        past_date_count = pickup_dates.filter(date__startswith__lt=now).count()
         self.assertGreater(pickup_dates.count(), 2)
         series.delete()
-        upcoming_pickups = PickupDate.objects.filter(date__gte=now, is_disabled=False)
+        upcoming_pickups = PickupDate.objects.filter(date__startswith__gte=now, is_disabled=False)
         self.assertEqual(upcoming_pickups.count(), 0, upcoming_pickups)
-        self.assertEqual(PickupDate.objects.filter(date__lt=now).count(), past_date_count)
+        self.assertEqual(PickupDate.objects.filter(date__startswith__lt=now).count(), past_date_count)
 
 
 class TestProcessFinishedPickupDates(TestCase):
     def setUp(self):
-        self.pickup = PickupDateFactory(date=timezone.now() - relativedelta(weeks=1))
+        self.pickup = PickupDateFactory(date=to_range(timezone.now() - relativedelta(weeks=1), minutes=30))
 
     def test_process_finished_pickup_dates(self):
         PickupDate.objects.process_finished_pickup_dates()

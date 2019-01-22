@@ -111,18 +111,18 @@ def prepare_pickup_conversation_message_notification(user, messages):
     with translation.override(language):
         with timezone.override(group_tz):
             weekday = format_date(
-                pickup.date.astimezone(timezone.get_current_timezone()),
+                pickup.date.start.astimezone(timezone.get_current_timezone()),
                 'EEEE',
                 locale=translation.to_locale(language),
             )
             time = format_time(
-                pickup.date,
+                pickup.date.start,
                 format='short',
                 locale=translation.to_locale(language),
                 tzinfo=timezone.get_current_timezone(),
             )
             date = format_date(
-                pickup.date.astimezone(timezone.get_current_timezone()),
+                pickup.date.start.astimezone(timezone.get_current_timezone()),
                 format='long',
                 locale=translation.to_locale(language),
             )

@@ -9,6 +9,7 @@ from foodsaving.conversations.models import Conversation, ConversationMessage, C
     ConversationParticipant
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.pickups.factories import PickupDateFactory
+from foodsaving.pickups.models import to_range
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.subscriptions.models import PushSubscription, PushSubscriptionPlatform
 from foodsaving.subscriptions.tasks import get_message_title, notify_message_push_subscribers
@@ -141,7 +142,7 @@ class TestMessagePushNotificationTitles(TestCase):
         author = UserFactory()
         group = GroupFactory(members=[author], timezone='Europe/Berlin')
         store = StoreFactory(group=group)
-        pickup = PickupDateFactory(store=store, collectors=[author], date=parse('2018-11-11T20:00:00Z'))
+        pickup = PickupDateFactory(store=store, collectors=[author], date=to_range(parse('2018-11-11T20:00:00Z')))
         conversation = Conversation.objects.get_or_create_for_target(pickup)
         message = conversation.messages.create(author=author, content='bla')
 
