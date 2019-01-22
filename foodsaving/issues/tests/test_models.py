@@ -100,7 +100,13 @@ class IssueModelTests(TestCase):
         with self.fast_forward_to_voting_expiration():
             self.assertEqual(self.get_voting().accepted_option.type, OptionTypes.FURTHER_DISCUSSION.value)
 
-    def test_voluntary_user_removal_results_in_closed_issue(self):
+    def test_no_vote_results_in_cancelled_issue(self):
+        self.process_votings()
+
+        self.issue.refresh_from_db()
+        self.assertTrue(self.issue.is_cancelled())
+
+    def test_voluntary_user_removal_results_in_cancelled_issue(self):
         self.group.groupmembership_set.filter(user=self.affected_member).delete()
 
         self.issue.refresh_from_db()

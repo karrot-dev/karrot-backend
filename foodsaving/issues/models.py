@@ -159,8 +159,8 @@ class Voting(BaseModel):
             option.save()
 
         accepted_option = options[-1]
+        # if two option have the same highest score, we have a tie and choose further discussion
         if options[-2].sum_score == accepted_option.sum_score:
-            # tie!
             accepted_option = next(o for o in options if o.type == OptionTypes.FURTHER_DISCUSSION.value)
 
         self.accepted_option = accepted_option

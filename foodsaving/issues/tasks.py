@@ -19,6 +19,11 @@ def process_expired_votings():
             accepted_option__isnull=True,
             issue__status=IssueStatus.ONGOING.value,
     ):
+        # if nobody participated in the voting, cancel it!
+        # otherwise it would result in a tie and continue forever
+        if voting.participant_count() == 0:
+            voting.issue.cancel()
+            continue
         voting.calculate_results()
 
 
