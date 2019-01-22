@@ -21,7 +21,7 @@ def prepare_group_summary_data(group, from_date, to_date):
     ).all()
 
     pickup_dates = PickupDate.objects.in_group(group).exclude_disabled().filter(
-        date__gte=from_date, date__lt=to_date
+        date__startswith__gte=from_date, date__startswith__lt=to_date
     ).annotate_num_collectors()
 
     pickups_done_count = pickup_dates.done().count()

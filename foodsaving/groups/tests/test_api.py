@@ -15,6 +15,7 @@ from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agree
 from foodsaving.groups.stats import group_tags
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.pickups.factories import PickupDateFactory
+from foodsaving.pickups.models import to_range
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory
 from foodsaving.utils.tests.fake import faker
@@ -184,15 +185,15 @@ class TestGroupsAPI(APITestCase):
     def test_leave_group(self):
         store = StoreFactory(group=self.group)
         pickupdate = PickupDateFactory(
-            store=store, collectors=[self.member, self.user], date=timezone.now() + relativedelta(weeks=1)
+            store=store, collectors=[self.member, self.user], date=to_range(timezone.now() + relativedelta(weeks=1))
         )
         past_pickupdate = PickupDateFactory(
             store=store, collectors=[
                 self.member,
-            ], date=timezone.now() - relativedelta(weeks=1)
+            ], date=to_range(timezone.now() - relativedelta(weeks=1))
         )
         unrelated_pickupdate = PickupDateFactory(
-            date=timezone.now() + relativedelta(weeks=1),
+            date=to_range(timezone.now() + relativedelta(weeks=1)),
             collectors=[
                 self.member,
             ],

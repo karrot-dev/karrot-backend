@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters
 
-from foodsaving.base.filters import ISODateTimeFromToRangeFilter
+from foodsaving.base.filters import ISODateTimeFromToRangeFilter, ISODateTimeRangeFromToRangeFilter
 from foodsaving.pickups.models import PickupDate, PickupDateSeries, Feedback
 
 
@@ -15,7 +15,7 @@ class PickupDateSeriesFilter(filters.FilterSet):
 class PickupDatesFilter(filters.FilterSet):
     store = filters.NumberFilter(field_name='store')
     group = filters.NumberFilter(field_name='store__group__id')
-    date = ISODateTimeFromToRangeFilter(field_name='date')
+    date = ISODateTimeRangeFromToRangeFilter(field_name='date', lookup_expr='overlap')
     feedback_possible = filters.BooleanFilter(method='filter_feedback_possible')
 
     class Meta:

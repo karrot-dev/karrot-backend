@@ -1,6 +1,9 @@
+from django.contrib.postgres.fields import DateTimeRangeField
+from django.db import connection
 from django.db.models import Model, AutoField, Field, DateTimeField, TextField, FloatField
 from django.db.models.fields.related import RelatedField
 from django.utils import timezone
+from psycopg2.extras import DateTimeTZRange, register_range
 
 
 class NicelyFormattedModel(Model):
@@ -51,3 +54,38 @@ class LocationModel(Model):
     address = TextField(null=True)
     latitude = FloatField(null=True)
     longitude = FloatField(null=True)
+
+
+class CustomDateTimeTZRange(DateTimeTZRange):
+    """
+    Similar to psycopg2.extras.DateTimeTZRange but with extra helpers
+    """
+
+    @property
+    def start(self):
+        return self.lower
+
+    @property
+    def end(self):
+        return self.upper
+
+    def __add__(self, delta):
+        return CustomDateTimeTZRange(
+            self.lower + delta if self.lower else None, self.upper + delta if self.upper else None
+        )
+
+    def __sub__(self, delta):
+        return CustomDateTimeTZRange(
+            self.lower - delta if self.lower else None, self.upper - delta if self.upper else None
+        )
+
+    def as_list(self):
+        return [self.start, self.end]
+
+
+class CustomDateTimeRangeField(DateTimeRangeField):
+    range_type = CustomDateTimeTZRange
+
+
+with connection.cursor() as c:
+    register_range('pg_catalog.tstzrange', CustomDateTimeTZRange, c, True)
