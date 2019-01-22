@@ -24,12 +24,12 @@ def issue_created(sender, instance, created, **kwargs):
     conversation = Conversation.objects.get_or_create_for_target(issue)
     for membership in group.groupmembership_set.editors():
         notifications_enabled = GroupNotificationType.CONFLICT_RESOLUTION in membership.notification_types
-        conversation.join(membership.user, email_notifications=notifications_enabled)
+        conversation.join(membership.user, muted=not notifications_enabled)
 
     # make sure affected user is in conversation and has email notifications enabled
     conversation.join(issue.affected_user)
     participant = conversation.conversationparticipant_set.get(user=issue.affected_user)
-    participant.email_notifications = True
+    participant.muted = False
     participant.save()
 
 

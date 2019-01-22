@@ -79,7 +79,7 @@ class TestMessagePushNotifications(TestCase):
         message = conversation.messages.create(author=author, content='bla')
 
         participant = ConversationParticipant.objects.get(user=user, conversation=conversation)
-        participant.email_notifications = False
+        participant.muted = True
         participant.save()
         PushSubscription.objects.create(user=user, token='', platform=PushSubscriptionPlatform.ANDROID.value)
 

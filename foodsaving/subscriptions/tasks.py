@@ -23,7 +23,7 @@ def notify_message_push_subscribers(message):
     else:
         subscriptions = PushSubscription.objects.filter(
             user__conversationparticipant__conversation=message.conversation,
-            user__conversationparticipant__email_notifications=True,
+            user__conversationparticipant__muted=False,
         )
 
     subscriptions = subscriptions.exclude(user=message.author).\

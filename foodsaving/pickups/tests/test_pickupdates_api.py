@@ -284,7 +284,7 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.post(self.past_leave_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
-    def test_get_conversation_not_as_collector(self):
+    def test_cannot_get_conversation_as_noncollector(self):
         self.client.force_login(user=self.member)
         response = self.client.get(self.conversation_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

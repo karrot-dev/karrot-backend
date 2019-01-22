@@ -41,7 +41,7 @@ def group_member_added(sender, instance, created, **kwargs):
         membership.save()
 
     conversation = Conversation.objects.get_or_create_for_target(group)
-    conversation.join(user, email_notifications=not group.is_playground())
+    conversation.join(user, muted=group.is_playground())
 
     stats.group_joined(group)
 

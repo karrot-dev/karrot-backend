@@ -5,7 +5,7 @@ from django.test import TestCase
 from foodsaving.issues.factories import IssueFactory
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import Conversation, ConversationMessage, ConversationMessageReaction, \
-    ConversationThreadParticipant
+    ConversationThreadParticipant, ConversationParticipant
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupNotificationType
 from foodsaving.pickups.factories import PickupDateFactory
@@ -137,11 +137,11 @@ class ConversationThreadModelTests(TestCase):
         self.thread.participants.create(user=self.user2)
         self.create_reply()
 
-        message = Conversation.objects \
-            .annotate_unread_message_count_for(self.user2) \
-            .get(pk=self.conversation.id)
+        participant = ConversationParticipant.objects \
+            .annotate_unread_message_count() \
+            .get(conversation=self.conversation, user=self.user2)
 
-        self.assertEqual(message.unread_message_count, 1)
+        self.assertEqual(participant.unread_message_count, 1)
 
     def test_default_replies_count_property(self):
         self.assertEqual(self.thread.replies_count, 0)

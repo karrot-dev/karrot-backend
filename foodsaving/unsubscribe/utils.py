@@ -48,7 +48,7 @@ def unsubscribe_from_conversation(user, conversation):
         user=user,
         conversation=conversation,
     ).update(
-        email_notifications=False,
+        muted=True,
     )
 
 
@@ -86,7 +86,7 @@ def unsubscribe_from_all_conversations_in_group(user, group):
         user=user,
         conversation_id__in=conversation_ids,
     ).update(
-        email_notifications=False,
+        muted=True,
     )
 
     # ... and mute any threads

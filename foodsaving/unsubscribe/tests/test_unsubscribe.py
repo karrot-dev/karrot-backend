@@ -64,15 +64,15 @@ class TestUnsubscribeFromAllConversationsInGroup(TestCase):
 
     def test_unsubscribe_from_group_wall(self):
         participant = self.group.conversation.conversationparticipant_set.filter(user=self.user)
-        self.assertTrue(participant.get().email_notifications)
+        self.assertFalse(participant.get().muted)
         unsubscribe_from_all_conversations_in_group(self.user, self.group)
-        self.assertFalse(participant.get().email_notifications)
+        self.assertTrue(participant.get().muted)
 
     def test_does_not_unsubscribe_from_other_group_wall(self):
         participant = self.other_group.conversation.conversationparticipant_set.filter(user=self.user)
-        self.assertTrue(participant.get().email_notifications)
+        self.assertFalse(participant.get().muted)
         unsubscribe_from_all_conversations_in_group(self.user, self.group)
-        self.assertTrue(participant.get().email_notifications)
+        self.assertFalse(participant.get().muted)
 
     def test_unsubscribe_from_group_wall_thread(self):
         thread = self.group.conversation.messages.create(author=self.user, content='foo')
@@ -97,20 +97,20 @@ class TestUnsubscribeFromAllConversationsInGroup(TestCase):
     def test_unsubscribe_from_pickup_conversation(self):
         pickup = PickupDateFactory(store=self.store, collectors=[self.user])
         participant = pickup.conversation.conversationparticipant_set.filter(user=self.user)
-        self.assertTrue(participant.get().email_notifications)
+        self.assertFalse(participant.get().muted)
         unsubscribe_from_all_conversations_in_group(self.user, self.group)
-        self.assertFalse(participant.get().email_notifications)
+        self.assertTrue(participant.get().muted)
 
     def test_does_not_unsubscribe_from_other_group_pickup_conversations(self):
         pickup = PickupDateFactory(store=self.other_store, collectors=[self.user])
         participant = pickup.conversation.conversationparticipant_set.filter(user=self.user)
-        self.assertTrue(participant.get().email_notifications)
+        self.assertFalse(participant.get().muted)
         unsubscribe_from_all_conversations_in_group(self.user, self.group)
-        self.assertTrue(participant.get().email_notifications)
+        self.assertFalse(participant.get().muted)
 
     def test_unsubscribe_from_group_applications(self):
         application = GroupApplicationFactory(group=self.group, user=UserFactory())
         participant = application.conversation.conversationparticipant_set.filter(user=self.user)
-        self.assertTrue(participant.get().email_notifications)
+        self.assertFalse(participant.get().muted)
         unsubscribe_from_all_conversations_in_group(self.user, self.group)
-        self.assertFalse(participant.get().email_notifications)
+        self.assertTrue(participant.get().muted)

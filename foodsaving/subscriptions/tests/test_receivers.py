@@ -67,7 +67,7 @@ def make_conversation_broadcast(conversation, **kwargs):
             'updated_at': conversation.updated_at,
             'seen_up_to': None,
             'unread_message_count': 0,
-            'email_notifications': True,
+            'muted': False,
             'type': None,
             'target_id': None,
         }

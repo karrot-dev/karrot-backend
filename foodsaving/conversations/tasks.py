@@ -18,7 +18,7 @@ def get_participants_to_notify(message):
     else:
         participants_to_notify = ConversationParticipant.objects.filter(
             conversation=message.conversation,
-            email_notifications=True,
+            muted=False,
         )
 
     group = message.conversation.find_group()

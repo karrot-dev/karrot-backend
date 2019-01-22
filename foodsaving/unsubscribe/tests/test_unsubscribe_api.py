@@ -20,9 +20,9 @@ class TestUnsubscribeAPI(APITestCase):
     def test_unsubscribe_from_conversation(self):
         participant = self.group.conversation.conversationparticipant_set.filter(user=self.user)
         token = generate_token(self.user, self.group, conversation=self.group.conversation)
-        self.assertTrue(participant.get().email_notifications)
+        self.assertFalse(participant.get().muted)
         self.client.post(self.url.format(token), {'choice': 'conversation'}, format='json')
-        self.assertFalse(participant.get().email_notifications)
+        self.assertTrue(participant.get().muted)
 
     def test_unsubscribe_from_thread(self):
         thread = self.group.conversation.messages.create(author=self.user, content='foo')
@@ -50,16 +50,16 @@ class TestUnsubscribeAPI(APITestCase):
     def test_unsubscribe_from_group(self):
         token = generate_token(self.user, self.group)
         participant = self.group.conversation.conversationparticipant_set.filter(user=self.user)
-        self.assertTrue(participant.get().email_notifications)
+        self.assertFalse(participant.get().muted)
         self.client.post(self.url.format(token), {'choice': 'group'}, format='json')
-        self.assertFalse(participant.get().email_notifications)
+        self.assertTrue(participant.get().muted)
 
     def test_does_not_unsubscribe_from_other_group(self):
         token = generate_token(self.user, self.group)
         participant = self.other_group.conversation.conversationparticipant_set.filter(user=self.user)
-        self.assertTrue(participant.get().email_notifications)
+        self.assertFalse(participant.get().muted)
         self.client.post(self.url.format(token), {'choice': 'group'}, format='json')
-        self.assertTrue(participant.get().email_notifications)
+        self.assertFalse(participant.get().muted)
 
     def test_fails_with_invalid_token(self):
         response = self.client.post(self.url.format('invalidtoken'), {'choice': 'group'}, format='json')
