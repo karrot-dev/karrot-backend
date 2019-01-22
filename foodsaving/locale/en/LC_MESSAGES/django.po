@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-01-21 13:44+0000\n"
+"POT-Creation-Date: 2019-01-22 20:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,7 +24,7 @@ msgstr ""
 #: foodsaving/applications/api.py:29 foodsaving/groups/api.py:49
 #: foodsaving/invitations/serializers.py:27
 #: foodsaving/issues/serializers.py:149 foodsaving/pickups/permissions.py:67
-#: foodsaving/pickups/serializers.py:76 foodsaving/pickups/serializers.py:239
+#: foodsaving/pickups/serializers.py:110 foodsaving/pickups/serializers.py:275
 #: foodsaving/stores/api.py:18 foodsaving/stores/serializers.py:73
 msgid "You need to be a group editor"
 msgstr ""
@@ -119,28 +119,27 @@ msgid ""
 "conversation</a>."
 msgstr ""
 
-#: foodsaving/conversations/api.py:53
-#: foodsaving/conversations/serializers.py:155
-#: foodsaving/conversations/serializers.py:211
+#: foodsaving/conversations/api.py:60 foodsaving/conversations/api.py:366
+#: foodsaving/conversations/serializers.py:154
 msgid "You are not in this conversation"
 msgstr ""
 
-#: foodsaving/conversations/api.py:75
+#: foodsaving/conversations/api.py:82
 msgid "You are not the author of this message"
 msgstr ""
 
-#: foodsaving/conversations/api.py:84
+#: foodsaving/conversations/api.py:91
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its "
 "creation."
 msgstr ""
 
-#: foodsaving/conversations/api.py:301
+#: foodsaving/conversations/api.py:297
 msgid "Must be first in thread"
 msgstr ""
 
-#: foodsaving/conversations/api.py:304
+#: foodsaving/conversations/api.py:300
 msgid "You are not a participant in this thread"
 msgstr ""
 
@@ -165,19 +164,19 @@ msgstr ""
 msgid "New message in conflict resolution in %(group_name)s"
 msgstr ""
 
-#: foodsaving/conversations/serializers.py:163
+#: foodsaving/conversations/serializers.py:162
 msgid "You cannot change the thread of a message"
 msgstr ""
 
-#: foodsaving/conversations/serializers.py:170
+#: foodsaving/conversations/serializers.py:169
 msgid "Thread is not in the same conversation"
 msgstr ""
 
-#: foodsaving/conversations/serializers.py:174
+#: foodsaving/conversations/serializers.py:173
 msgid "You can only reply to Group messages"
 msgstr ""
 
-#: foodsaving/conversations/serializers.py:178
+#: foodsaving/conversations/serializers.py:177
 msgid "You cannot reply to replies"
 msgstr ""
 
@@ -503,10 +502,8 @@ msgstr ""
 msgid "Affected user is not part of that group"
 msgstr ""
 
-#: foodsaving/issues/serializers.py:177
-msgid ""
-"A conflict resolution about that user in that group has already been "
-"started"
+#: foodsaving/issues/serializers.py:176
+msgid "A conflict resolution about that user has already been started"
 msgstr ""
 
 #: foodsaving/issues/templates/conflict_resolution_continued.html.jinja2:6
@@ -600,41 +597,53 @@ msgstr ""
 msgid "This feedback is given by another user."
 msgstr ""
 
-#: foodsaving/pickups/permissions.py:57 foodsaving/pickups/serializers.py:333
+#: foodsaving/pickups/permissions.py:57 foodsaving/pickups/serializers.py:369
 #, python-format
 msgid "You can't give feedback for pickups more than %(days_number)s days ago."
 msgstr ""
 
-#: foodsaving/pickups/serializers.py:74 foodsaving/pickups/serializers.py:241
-#: foodsaving/pickups/serializers.py:326
+#: foodsaving/pickups/serializers.py:31
+msgid "Must be a list"
+msgstr ""
+
+#: foodsaving/pickups/serializers.py:32
+msgid "Must be a list with one or two values"
+msgstr ""
+
+#: foodsaving/pickups/serializers.py:33
+msgid "Must pass start value"
+msgstr ""
+
+#: foodsaving/pickups/serializers.py:108 foodsaving/pickups/serializers.py:277
+#: foodsaving/pickups/serializers.py:362
 msgid "You are not member of the store's group."
 msgstr ""
 
-#: foodsaving/pickups/serializers.py:81
+#: foodsaving/pickups/serializers.py:115
 msgid "The date should be in the future."
 msgstr ""
 
-#: foodsaving/pickups/serializers.py:136
+#: foodsaving/pickups/serializers.py:172
 msgid "You can't move pickups that are part of a series."
 msgstr ""
 
-#: foodsaving/pickups/serializers.py:252
+#: foodsaving/pickups/serializers.py:288
 msgid "Invalid recurrence rule."
 msgstr ""
 
-#: foodsaving/pickups/serializers.py:254
+#: foodsaving/pickups/serializers.py:290
 msgid "Only single recurrence rules are allowed."
 msgstr ""
 
-#: foodsaving/pickups/serializers.py:328
+#: foodsaving/pickups/serializers.py:364
 msgid "The pickup is not done yet"
 msgstr ""
 
-#: foodsaving/pickups/serializers.py:330
+#: foodsaving/pickups/serializers.py:366
 msgid "You aren't assigned to the pickup."
 msgstr ""
 
-#: foodsaving/pickups/serializers.py:347
+#: foodsaving/pickups/serializers.py:383
 msgid "Both comment and weight cannot be blank."
 msgstr ""
 
