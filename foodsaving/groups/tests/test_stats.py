@@ -6,7 +6,7 @@ from foodsaving.groups import stats, roles
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership
 from foodsaving.pickups.factories import PickupDateFactory
-from foodsaving.pickups.models import date_range
+from foodsaving.pickups.models import to_range
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory
 
@@ -18,7 +18,7 @@ class TestGroupStats(TestCase):
 
         def do_pickup(user, **kwargs):
             pickup = PickupDateFactory(
-                store=store, date=date_range(timezone.now() - relativedelta(**kwargs), minutes=30)
+                store=store, date=to_range(timezone.now() - relativedelta(**kwargs), minutes=30)
             )
             pickup.add_collector(user)
 

@@ -4,12 +4,12 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import ugettext as _
-from psycopg2.extras import DateTimeTZRange
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.fields import DateTimeField
 from rest_framework.validators import UniqueTogetherValidator
 
+from foodsaving.base.base_models import CustomDateTimeTZRange
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.pickups import stats
 from foodsaving.pickups.models import (
@@ -51,7 +51,7 @@ class DateTimeRangeField(serializers.Field):
         if not lower:
             self.fail('required')
         upper = lower + timedelta(minutes=30) if not upper else upper
-        return DateTimeTZRange(lower, upper)
+        return CustomDateTimeTZRange(lower, upper)
 
 
 class PickupDateSerializer(serializers.ModelSerializer):
@@ -111,7 +111,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
         return store
 
     def validate_date(self, date):
-        if not date_start > timezone.now() + timedelta(minutes=10):
+        if not date.start > timezone.now() + timedelta(minutes=10):
             raise serializers.ValidationError(_('The date should be in the future.'))
         return date
 
@@ -168,7 +168,7 @@ class PickupDateUpdateSerializer(PickupDateSerializer):
         return pickupdate
 
     def validate_date(self, date):
-        if self.instance.series is not None and abs((self.instance.date_start - date_start).total_seconds()) > 1:
+        if self.instance.series is not None and abs((self.instance.date.start - date.start).total_seconds()) > 1:
             raise serializers.ValidationError(_('You can\'t move pickups that are part of a series.'))
         return super().validate_date(date)
 

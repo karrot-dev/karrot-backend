@@ -14,7 +14,6 @@ from rest_framework.test import APITestCase
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupStatus
 from foodsaving.pickups.factories import PickupDateSeriesFactory
-from foodsaving.pickups.models import api_date_range, range_add
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.users.factories import UserFactory
@@ -479,7 +478,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.patch(
             '/api/pickup-dates/{}/'.format(pickup.id),
             {
-                'date': api_date_range(range_add(pickup.date, weeks=7)),
+                'date': (pickup.date + relativedelta(weeks=7)).as_list(),
             },
             format='json',
         )

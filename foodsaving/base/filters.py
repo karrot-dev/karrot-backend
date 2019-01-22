@@ -3,7 +3,8 @@ from django.utils.dateparse import parse_datetime
 from django.utils.encoding import force_str
 from django_filters import rest_framework as filters
 from django_filters.fields import RangeField
-from psycopg2.extras import DateTimeTZRange
+
+from foodsaving.base.base_models import CustomDateTimeTZRange
 
 
 class ISODateTimeField(forms.DateTimeField):
@@ -41,5 +42,5 @@ class ISODateTimeRangeFromToRangeFilter(filters.Filter):
 
     def filter(self, qs, value):
         if value:
-            value = DateTimeTZRange(value.start, value.stop)
+            value = CustomDateTimeTZRange(value.start, value.stop)
         return super().filter(qs, value)

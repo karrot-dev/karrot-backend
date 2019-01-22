@@ -12,7 +12,7 @@ from rest_framework.test import APITestCase
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupStatus
 from foodsaving.pickups.factories import PickupDateSeriesFactory, PickupDateFactory, FeedbackFactory
-from foodsaving.pickups.models import date_range
+from foodsaving.pickups.models import to_range
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.stores.models import StoreStatus
 from foodsaving.tests.utils import ExtractPaginationMixin
@@ -263,7 +263,7 @@ class TestStoreStatisticsAPI(APITestCase):
             'pickups_done': 0,
         })
 
-        one_day_ago = date_range(timezone.now() - relativedelta(days=1), minutes=30)
+        one_day_ago = to_range(timezone.now() - relativedelta(days=1), minutes=30)
 
         users = [UserFactory() for _ in range(9)]
         pickups = [

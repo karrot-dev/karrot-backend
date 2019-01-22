@@ -4,17 +4,17 @@ from django.test import TestCase
 from django.utils import timezone
 
 from foodsaving.applications.factories import GroupApplicationFactory
-from foodsaving.issues.factories import IssueFactory, vote_for_further_discussion, fast_forward_to_voting_expiration, \
-    vote_for_remove_user
-from foodsaving.issues.tasks import process_expired_votings
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
 from foodsaving.invitations.models import Invitation
+from foodsaving.issues.factories import IssueFactory, vote_for_further_discussion, fast_forward_to_voting_expiration, \
+    vote_for_remove_user
+from foodsaving.issues.tasks import process_expired_votings
 from foodsaving.notifications.models import Notification, NotificationType
 from foodsaving.notifications.tasks import create_pickup_upcoming_notifications
 from foodsaving.pickups.factories import PickupDateFactory
-from foodsaving.pickups.models import range_add, date_range
+from foodsaving.pickups.models import to_range
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory
 
@@ -101,7 +101,7 @@ class TestNotificationReceivers(TestCase):
         notification = Notification.objects.filter(user=member, type=NotificationType.FEEDBACK_POSSIBLE.value)
         self.assertEqual(notification.count(), 1)
         self.assertLessEqual(
-            notification[0].expires_at, pickup.date_end + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
+            notification[0].expires_at, pickup.date.end + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
         )
 
     def test_creates_new_store_notification(self):
@@ -155,7 +155,7 @@ class TestNotificationReceivers(TestCase):
         user = UserFactory()
         group = GroupFactory(members=[user])
         store = StoreFactory(group=group)
-        in_one_hour = date_range(timezone.now() + relativedelta(hours=1), minutes=30)
+        in_one_hour = to_range(timezone.now() + relativedelta(hours=1), minutes=30)
         pickup = PickupDateFactory(store=store, date=in_one_hour, collectors=[user])
         Notification.objects.all().delete()
 
@@ -169,7 +169,7 @@ class TestNotificationReceivers(TestCase):
         user1, user2 = UserFactory(), UserFactory()
         group = GroupFactory(members=[user1, user2])
         store = StoreFactory(group=group)
-        in_one_hour = date_range(timezone.now() + relativedelta(hours=1), minutes=30)
+        in_one_hour = to_range(timezone.now() + relativedelta(hours=1), minutes=30)
         pickup = PickupDateFactory(store=store, date=in_one_hour, collectors=[user1, user2])
         Notification.objects.all().delete()
 
@@ -219,7 +219,7 @@ class TestNotificationReceivers(TestCase):
         Notification.objects.all().delete()
 
         pickup.last_changed_by = user2
-        pickup.date = range_add(pickup.date, days=2)
+        pickup.date = pickup.date + relativedelta(days=2)
         pickup.save()
 
         notifications = Notification.objects.all()

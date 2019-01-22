@@ -6,14 +6,14 @@ from django.utils import timezone
 from factory import DjangoModelFactory, SubFactory, LazyFunction, LazyAttribute, post_generation
 
 from foodsaving.pickups.models import (
-    PickupDate as PickupDateModel, PickupDateSeries as PickupDateSeriesModel, Feedback as FeedbackModel, date_range
+    PickupDate as PickupDateModel, PickupDateSeries as PickupDateSeriesModel, Feedback as FeedbackModel, to_range
 )
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.utils.tests.fake import faker
 
 
 def in_one_day():
-    return date_range(timezone.now() + timedelta(days=1), minutes=30)
+    return to_range(timezone.now() + timedelta(days=1), minutes=30)
 
 
 class PickupDateFactory(DjangoModelFactory):

@@ -7,7 +7,7 @@ from foodsaving.groups.factories import GroupFactory
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.users.factories import UserFactory
-from foodsaving.pickups.models import Feedback, date_range
+from foodsaving.pickups.models import Feedback, to_range
 from foodsaving.pickups.factories import PickupDateFactory
 
 
@@ -23,10 +23,10 @@ class TestFeedbackAPIFilter(APITestCase, ExtractPaginationMixin):
         self.store = StoreFactory(group=self.group)
         self.store2 = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(
-            store=self.store, date=date_range(timezone.now() - relativedelta(days=1), minutes=30)
+            store=self.store, date=to_range(timezone.now() - relativedelta(days=1), minutes=30)
         )
         self.pickup2 = PickupDateFactory(
-            store=self.store2, date=date_range(timezone.now() - relativedelta(days=1), minutes=30)
+            store=self.store2, date=to_range(timezone.now() - relativedelta(days=1), minutes=30)
         )
 
         # create a feedback data

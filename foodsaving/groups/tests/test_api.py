@@ -15,7 +15,7 @@ from foodsaving.groups.models import Group as GroupModel, GroupMembership, Agree
 from foodsaving.groups.stats import group_tags
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.pickups.factories import PickupDateFactory
-from foodsaving.pickups.models import date_range
+from foodsaving.pickups.models import to_range
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.users.factories import UserFactory
 from foodsaving.utils.tests.fake import faker
@@ -187,17 +187,17 @@ class TestGroupsAPI(APITestCase):
         pickupdate = PickupDateFactory(
             store=store,
             collectors=[self.member, self.user],
-            date=date_range(timezone.now() + relativedelta(weeks=1), minutes=30)
+            date=to_range(timezone.now() + relativedelta(weeks=1), minutes=30)
         )
         past_pickupdate = PickupDateFactory(
             store=store,
             collectors=[
                 self.member,
             ],
-            date=date_range(timezone.now() - relativedelta(weeks=1), minutes=30)
+            date=to_range(timezone.now() - relativedelta(weeks=1), minutes=30)
         )
         unrelated_pickupdate = PickupDateFactory(
-            date=date_range(timezone.now() + relativedelta(weeks=1), minutes=30),
+            date=to_range(timezone.now() + relativedelta(weeks=1), minutes=30),
             collectors=[
                 self.member,
             ],

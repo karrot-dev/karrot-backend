@@ -7,7 +7,7 @@ from rest_framework.test import APITestCase
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupStatus
 from foodsaving.stores.factories import StoreFactory
-from foodsaving.pickups.models import Feedback, date_range
+from foodsaving.pickups.models import Feedback, to_range
 from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.users.factories import UserFactory
 from foodsaving.pickups.factories import PickupDateFactory, FeedbackFactory
@@ -28,7 +28,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.store = StoreFactory(group=self.group)
         self.pickup = PickupDateFactory(
             store=self.store,
-            date=date_range(timezone.now() + relativedelta(days=1), minutes=30),
+            date=to_range(timezone.now() + relativedelta(days=1), minutes=30),
             collectors=[self.collector, self.collector2, self.collector3],
         )
 
@@ -38,14 +38,14 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         # past pickup date
         self.past_pickup = PickupDateFactory(
             store=self.store,
-            date=date_range(timezone.now() - relativedelta(days=1), minutes=30),
+            date=to_range(timezone.now() - relativedelta(days=1), minutes=30),
             collectors=[self.collector, self.evil_collector, self.collector2, self.collector3],
         )
 
         # old pickup date with feedback
         self.old_pickup = PickupDateFactory(
             store=self.store,
-            date=date_range(timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS + 2), minutes=30),
+            date=to_range(timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS + 2), minutes=30),
             collectors=[
                 self.collector3,
             ]

@@ -2,7 +2,7 @@ from dateutil.relativedelta import relativedelta
 from django.test import TestCase
 from django.utils import timezone
 
-from foodsaving.pickups.models import PickupDate, date_range
+from foodsaving.pickups.models import PickupDate, to_range
 from foodsaving.pickups.utils import match_pickups_with_dates
 
 
@@ -13,7 +13,7 @@ class TestMatchPickups(TestCase):
     def test_matches_identical_pickups(self):
         now = timezone.now()
         every_day = [now + relativedelta(days=n) for n in range(1, 5)]
-        pickups = [PickupDate(date=date_range(d, minutes=30)) for d in every_day]
+        pickups = [PickupDate(date=to_range(d, minutes=30)) for d in every_day]
 
         self.assertIteratorEqual(
             match_pickups_with_dates(pickups, every_day),
@@ -23,7 +23,7 @@ class TestMatchPickups(TestCase):
     def test_matches_partially(self):
         now = timezone.now()
         every_day = [now + relativedelta(days=n) for n in range(1, 5)]
-        pickups = [PickupDate(date=date_range(d, minutes=30)) for d in every_day]
+        pickups = [PickupDate(date=to_range(d, minutes=30)) for d in every_day]
 
         self.assertIteratorEqual(
             match_pickups_with_dates(pickups[::2], every_day),
@@ -45,7 +45,7 @@ class TestMatchPickups(TestCase):
     def test_matches_shifted_pickups_within_few_seconds(self):
         now = timezone.now()
         every_day = [now + relativedelta(days=n) for n in range(1, 5)]
-        pickups = [PickupDate(date=date_range(d + relativedelta(seconds=20), minutes=30)) for d in every_day]
+        pickups = [PickupDate(date=to_range(d + relativedelta(seconds=20), minutes=30)) for d in every_day]
 
         self.assertIteratorEqual(
             match_pickups_with_dates(pickups, every_day),
@@ -55,7 +55,7 @@ class TestMatchPickups(TestCase):
     def test_not_matches_shifted_pickups_with_more_difference(self):
         now = timezone.now()
         every_day = [now + relativedelta(days=n) for n in range(1, 3)]
-        pickups = [PickupDate(date=date_range(d + relativedelta(minutes=10), minutes=30)) for d in every_day]
+        pickups = [PickupDate(date=to_range(d + relativedelta(minutes=10), minutes=30)) for d in every_day]
 
         self.assertIteratorEqual(
             match_pickups_with_dates(pickups, every_day),
@@ -72,7 +72,7 @@ class TestMatchPickups(TestCase):
 
         # shift pickups
         every_minute = [now + relativedelta(minutes=n) for n in range(1, 5)]
-        pickups = [PickupDate(date=date_range(d + relativedelta(seconds=30), minutes=30)) for d in every_minute]
+        pickups = [PickupDate(date=to_range(d + relativedelta(seconds=30), minutes=30)) for d in every_minute]
 
         self.assertIteratorEqual(
             match_pickups_with_dates(pickups, every_minute),
@@ -80,7 +80,7 @@ class TestMatchPickups(TestCase):
         )
 
         # shift dates
-        pickups = [PickupDate(date=date_range(d, minutes=30)) for d in every_minute]
+        pickups = [PickupDate(date=to_range(d, minutes=30)) for d in every_minute]
         every_minute = [n + relativedelta(seconds=30) for n in every_minute]
 
         self.assertIteratorEqual(
@@ -91,7 +91,7 @@ class TestMatchPickups(TestCase):
     def test_matches_empty(self):
         now = timezone.now()
         every_day = [now + relativedelta(days=n) for n in range(1, 3)]
-        pickups = [PickupDate(date=date_range(d, minutes=30)) for d in every_day]
+        pickups = [PickupDate(date=to_range(d, minutes=30)) for d in every_day]
 
         self.assertIteratorEqual(
             match_pickups_with_dates([], every_day),

@@ -2,16 +2,13 @@ import dateutil
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.contrib.postgres.fields import DateTimeRangeField, RangeField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.contrib.postgres import forms
 from django.db import transaction
 from django.db.models import Count, Q
 from django.utils import timezone
-from psycopg2.extras import DateTimeTZRange
 
-from foodsaving.base.base_models import BaseModel
+from foodsaving.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField
 from foodsaving.conversations.models import ConversationMixin
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.pickups import stats
@@ -44,7 +41,7 @@ class PickupDateSeries(BaseModel):
 
     def create_pickup(self, date):
         return self.pickup_dates.create(
-            date=DateTimeTZRange(date, date + timedelta(minutes=30)),  # TODO: make duration part of series?
+            date=CustomDateTimeTZRange(date, date + timedelta(minutes=30)),  # TODO: make duration part of series?
             max_collectors=self.max_collectors,
             series=self,
             store=self.store,
@@ -153,8 +150,8 @@ class PickupDateQuerySet(models.QuerySet):
         add them to history and mark as processed
         """
         for pickup in self.exclude_disabled().filter(
-            feedback_possible=False,
-            date__startswith__lt=timezone.now(),
+                feedback_possible=False,
+                date__startswith__lt=timezone.now(),
         ):
             if not pickup.store.is_active():
                 # Make sure we don't process this pickup again, even if the store gets active in future
@@ -174,7 +171,7 @@ class PickupDateQuerySet(models.QuerySet):
                     typus=HistoryTypus.PICKUP_MISSED,
                     group=pickup.store.group,
                     store=pickup.store,
-                    date=pickup.date_start,
+                    date=pickup.date.start,
                     payload=payload,
                 )
             else:
@@ -184,7 +181,7 @@ class PickupDateQuerySet(models.QuerySet):
                     group=pickup.store.group,
                     store=pickup.store,
                     users=pickup.collectors.all(),
-                    date=pickup.date_start,
+                    date=pickup.date.start,
                     payload=payload,
                 )
 
@@ -193,27 +190,13 @@ class PickupDateQuerySet(models.QuerySet):
 
 
 def default_pickup_date_range():
-    return DateTimeTZRange(timezone.now(), timezone.now() + timedelta(minutes=30))
+    return CustomDateTimeTZRange(timezone.now(), timezone.now() + timedelta(minutes=30))
 
 
-def range_add(range, **kwargs):
-    upper = range.upper
-    lower = range.lower
-    delta = relativedelta(**kwargs)
-    if lower:
-        lower = lower + delta
-    if upper:
-        upper = upper + delta
-    return DateTimeTZRange(lower, upper, range._bounds)
-
-
-def date_range(date, **kwargs):
-    return DateTimeTZRange(date, date + timedelta(**kwargs))
-
-
-# TODO: probably move this elsewhere.... or make it do it automatically, or something...
-def api_date_range(range):
-    return [range.lower, range.upper]
+def to_range(date, **kwargs):
+    if not kwargs:
+        kwargs['minutes'] = 30
+    return CustomDateTimeTZRange(date, date + timedelta(**kwargs))
 
 
 class PickupDate(BaseModel, ConversationMixin):
@@ -245,7 +228,7 @@ class PickupDate(BaseModel, ConversationMixin):
         through='Feedback',
         through_fields=('about', 'given_by')
     )
-    date = DateTimeRangeField(default=default_pickup_date_range)
+    date = CustomDateTimeRangeField(default=default_pickup_date_range)
     description = models.TextField(blank=True)
     max_collectors = models.PositiveIntegerField(null=True)
     is_disabled = models.BooleanField(default=False)
@@ -260,25 +243,17 @@ class PickupDate(BaseModel, ConversationMixin):
     feedback_possible = models.BooleanField(default=False)
 
     @property
-    def date_start(self):
-        return self.date.lower
-
-    @property
-    def date_end(self):
-        return self.date.upper
-
-    @property
     def group(self):
         return self.store.group
 
     def __str__(self):
-        return 'PickupDate {} - {}'.format(self.date_start, self.store)
+        return 'PickupDate {} - {}'.format(self.date.start, self.store)
 
     def feedback_due(self):
-        return self.date_end + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
+        return self.date.end + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
     def is_upcoming(self):
-        return self.date_start > timezone.now()
+        return self.date.start > timezone.now()
 
     def is_full(self):
         if not self.max_collectors:
@@ -292,7 +267,7 @@ class PickupDate(BaseModel, ConversationMixin):
         return self.collectors.count() == 0
 
     def is_recent(self):
-        return self.date_start >= timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
+        return self.date.start >= timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
     def empty_collectors_count(self):
         return max(0, self.max_collectors - self.collectors.count())
@@ -323,7 +298,7 @@ class PickupDateCollector(BaseModel):
 
     class Meta:
         db_table = 'pickups_pickupdate_collectors'
-        unique_together = (('pickupdate', 'user'),)
+        unique_together = (('pickupdate', 'user'), )
         ordering = ['created_at']
 
 

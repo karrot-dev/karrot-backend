@@ -2,6 +2,7 @@ import time
 
 import pytz
 import random
+from dateutil.relativedelta import relativedelta
 from django.core import mail
 from django.core.management.base import BaseCommand
 from django.http import request
@@ -10,7 +11,7 @@ from rest_framework.test import APIClient
 
 from foodsaving.groups.models import Group, GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
-from foodsaving.pickups.models import PickupDate, PickupDateSeries, range_add, date_range, api_date_range
+from foodsaving.pickups.models import PickupDate, PickupDateSeries, to_range
 from foodsaving.stores.models import Store
 from foodsaving.users.models import User
 from foodsaving.utils.tests.fake import faker
@@ -190,11 +191,11 @@ class Command(BaseCommand):
             return data
 
         def make_pickup(store):
-            date = date_range(faker.date_time_between(start_date='+2d', end_date='+7d', tzinfo=pytz.utc), minutes=30)
+            date = to_range(faker.date_time_between(start_date='+2d', end_date='+7d', tzinfo=pytz.utc), minutes=30)
             data = c.post(
                 '/api/pickup-dates/',
                 {
-                    'date': api_date_range(date),
+                    'date': date.as_list(),
                     'store': store,
                     'max_collectors': 10
                 },
@@ -238,7 +239,7 @@ class Command(BaseCommand):
 
         def create_done_pickup(store, user_id):
             pickup = PickupDate.objects.create(
-                date=date_range(
+                date=to_range(
                     faker.date_time_between(start_date='-9d', end_date='-1d', tzinfo=pytz.utc), minutes=30
                 ),
                 store_id=store,
@@ -314,7 +315,7 @@ class Command(BaseCommand):
             u = login_user()
             p = PickupDate.objects.filter(store__group__members=u).first()
             join_pickup(p.id)
-            p.date = range_add(p.date, weeks=4)
+            p.date = p.date + relativedelta(weeks=4)
             p.save()
             print('picked up some food at', p.date)
         PickupDate.objects.process_finished_pickup_dates()

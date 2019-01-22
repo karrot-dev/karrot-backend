@@ -21,7 +21,7 @@ from foodsaving.groups.factories import GroupFactory
 from foodsaving.invitations.models import Invitation
 from foodsaving.pickups.factories import FeedbackFactory, PickupDateFactory, \
     PickupDateSeriesFactory
-from foodsaving.pickups.models import PickupDate, date_range
+from foodsaving.pickups.models import PickupDate, to_range
 from foodsaving.stores.factories import StoreFactory
 from foodsaving.subscriptions.models import ChannelSubscription, \
     PushSubscription, PushSubscriptionPlatform
@@ -556,12 +556,12 @@ class PickupDateReceiverTests(WSTestCase):
         self.client = self.connect_as(self.member)
 
         # change property
-        date = date_range(faker.future_datetime(end_date='+30d', tzinfo=timezone.utc), minutes=30)
+        date = to_range(faker.future_datetime(end_date='+30d', tzinfo=timezone.utc), minutes=30)
         self.pickup.date = date
         self.pickup.save()
 
         response = self.client.messages_by_topic.get('pickups:pickupdate')[0]
-        self.assertEqual(parse(response['payload']['date'][0]), date_start)
+        self.assertEqual(parse(response['payload']['date'][0]), date.start)
 
         # join
         self.client = self.connect_as(self.member)
@@ -657,7 +657,7 @@ class FinishedPickupReceiverTest(WSTestCase):
         self.pickup = PickupDateFactory(store=self.store, collectors=[self.member])
 
     def test_receive_history_and_notification(self):
-        self.pickup.date = date_range(timezone.now() - relativedelta(days=1), minutes=30)
+        self.pickup.date = to_range(timezone.now() - relativedelta(days=1), minutes=30)
         self.pickup.save()
 
         self.client = self.connect_as(self.member)
