@@ -323,7 +323,7 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.pickup.refresh_from_db()
-        self.assertEqual(self.pickup.date.upper, start + timedelta(minutes=30))
+        self.assertEqual(self.pickup.date_end, start + timedelta(minutes=30))
 
     def test_patch_date_with_single_date_fails(self):
         self.client.force_login(user=self.member)

@@ -269,7 +269,6 @@ class Command(BaseCommand):
                 join_pickup(pickup['id'])
                 make_message(group['id'])
                 done_pickup = create_done_pickup(store['id'], user['id'])
-                # join_pickup(done_pickup.id)
                 make_feedback(done_pickup.id, user['id'])
 
         # group members

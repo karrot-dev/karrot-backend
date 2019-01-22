@@ -561,7 +561,7 @@ class PickupDateReceiverTests(WSTestCase):
         self.pickup.save()
 
         response = self.client.messages_by_topic.get('pickups:pickupdate')[0]
-        self.assertEqual(parse(response['payload']['date'][0]), date.lower)
+        self.assertEqual(parse(response['payload']['date'][0]), date_start)
 
         # join
         self.client = self.connect_as(self.member)

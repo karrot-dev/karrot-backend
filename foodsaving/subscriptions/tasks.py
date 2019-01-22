@@ -53,12 +53,12 @@ def get_message_title(message, language):
         group_tz = pickup.store.group.timezone
         with timezone.override(group_tz):
             weekday = format_date(
-                pickup.date.lower.astimezone(timezone.get_current_timezone()),
+                pickup.date_start.astimezone(timezone.get_current_timezone()),
                 'EEEE',
                 locale=translation.to_locale(language),
             )
             time = format_time(
-                pickup.date.lower,
+                pickup.date_start,
                 format='short',
                 locale=translation.to_locale(language),
                 tzinfo=timezone.get_current_timezone(),

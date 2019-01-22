@@ -200,7 +200,7 @@ class TestHistoryAPIWithExistingPickups(APITestCase, ExtractPaginationMixin):
         self.client.post(self.pickup_url + 'add/')
         response = self.get_results(history_url)
         self.assertEqual(response.data[0]['typus'], 'PICKUP_JOIN')
-        self.assertEqual(parse(response.data[0]['payload']['date'][0]), self.pickup.date.lower)
+        self.assertEqual(parse(response.data[0]['payload']['date'][0]), self.pickup.date_start)
 
     def test_leave_pickup(self):
         self.client.force_login(self.member)
@@ -208,7 +208,7 @@ class TestHistoryAPIWithExistingPickups(APITestCase, ExtractPaginationMixin):
         self.client.post(self.pickup_url + 'remove/')
         response = self.get_results(history_url)
         self.assertEqual(response.data[0]['typus'], 'PICKUP_LEAVE')
-        self.assertEqual(parse(response.data[0]['payload']['date'][0]), self.pickup.date.lower)
+        self.assertEqual(parse(response.data[0]['payload']['date'][0]), self.pickup.date_start)
 
     def test_disable_pickup(self):
         self.client.force_login(self.member)

@@ -65,7 +65,7 @@ class TestPickupdatesAPIFilter(APITestCase, ExtractPaginationMixin):
 
     def test_filter_after_date(self):
         self.client.force_login(user=self.member)
-        query_date = self.pickup.date.lower + timedelta(days=1)
+        query_date = self.pickup.date_start + timedelta(days=1)
         response = self.get_results(self.url, {'date_min': query_date})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         for _ in response.data:
@@ -76,7 +76,7 @@ class TestPickupdatesAPIFilter(APITestCase, ExtractPaginationMixin):
 
     def test_filter_before_date(self):
         self.client.force_login(user=self.member)
-        query_date = self.pickup.date.lower + timedelta(days=10)
+        query_date = self.pickup.date_start + timedelta(days=10)
         response = self.get_results(self.url, {'date_max': query_date})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         for _ in response.data:

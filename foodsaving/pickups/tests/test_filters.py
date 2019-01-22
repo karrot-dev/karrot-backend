@@ -47,7 +47,7 @@ class TestPickupDateFilters(TestCase):
     def test_no_results_with_date_min_at_pickup_end(self):
         pickup = PickupDate.objects.create(store=self.store)
         self.expect_results(
-            date_min=pickup.date.upper,
+            date_min=pickup.date_end,
             results=[],
         )
 
@@ -61,53 +61,53 @@ class TestPickupDateFilters(TestCase):
     def test_with_date_max_after_pickup(self):
         pickup = PickupDate.objects.create(store=self.store)
         self.expect_results(
-            date_max=pickup.date.upper + timedelta(hours=2),
+            date_max=pickup.date_end + timedelta(hours=2),
             results=[pickup],
         )
 
     def test_no_results_with_date_max_before_pickup(self):
         pickup = PickupDate.objects.create(store=self.store)
         self.expect_results(
-            date_max=pickup.date.lower - timedelta(hours=2),
+            date_max=pickup.date_start - timedelta(hours=2),
             results=[],
         )
 
     def test_no_results_with_date_max_at_pickup_start(self):
         pickup = PickupDate.objects.create(store=self.store)
         self.expect_results(
-            date_max=pickup.date.lower,
+            date_max=pickup.date_start,
             results=[],
         )
 
     def test_with_date_max_and_min_during_pickup(self):
         pickup = PickupDate.objects.create(store=self.store)
         self.expect_results(
-            date_min=pickup.date.lower + timedelta(seconds=5),
-            date_max=pickup.date.upper - timedelta(seconds=5),
+            date_min=pickup.date_start + timedelta(seconds=5),
+            date_max=pickup.date_end - timedelta(seconds=5),
             results=[pickup],
         )
 
     def test_with_date_max_and_min_overlapping_pickup_start(self):
         pickup = PickupDate.objects.create(store=self.store)
         self.expect_results(
-            date_min=pickup.date.lower - timedelta(seconds=5),
-            date_max=pickup.date.lower + timedelta(seconds=5),
+            date_min=pickup.date_start - timedelta(seconds=5),
+            date_max=pickup.date_start + timedelta(seconds=5),
             results=[pickup],
         )
 
     def test_with_date_max_and_min_overlapping_pickup_end(self):
         pickup = PickupDate.objects.create(store=self.store)
         self.expect_results(
-            date_min=pickup.date.upper - timedelta(seconds=5),
-            date_max=pickup.date.upper + timedelta(seconds=5),
+            date_min=pickup.date_end - timedelta(seconds=5),
+            date_max=pickup.date_end + timedelta(seconds=5),
             results=[pickup],
         )
 
     def test_with_date_max_and_min_containing_pickup(self):
         pickup = PickupDate.objects.create(store=self.store)
         self.expect_results(
-            date_min=pickup.date.lower - timedelta(seconds=5),
-            date_max=pickup.date.upper + timedelta(seconds=5),
+            date_min=pickup.date_start - timedelta(seconds=5),
+            date_max=pickup.date_end + timedelta(seconds=5),
             results=[pickup],
         )
 

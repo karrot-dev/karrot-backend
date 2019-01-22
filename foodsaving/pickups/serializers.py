@@ -111,7 +111,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
         return store
 
     def validate_date(self, date):
-        if not date.lower > timezone.now() + timedelta(minutes=10):
+        if not date_start > timezone.now() + timedelta(minutes=10):
             raise serializers.ValidationError(_('The date should be in the future.'))
         return date
 
@@ -168,7 +168,7 @@ class PickupDateUpdateSerializer(PickupDateSerializer):
         return pickupdate
 
     def validate_date(self, date):
-        if self.instance.series is not None and abs((self.instance.date.lower - date.lower).total_seconds()) > 1:
+        if self.instance.series is not None and abs((self.instance.date_start - date_start).total_seconds()) > 1:
             raise serializers.ValidationError(_('You can\'t move pickups that are part of a series.'))
         return super().validate_date(date)
 

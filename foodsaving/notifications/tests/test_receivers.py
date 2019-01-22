@@ -101,7 +101,7 @@ class TestNotificationReceivers(TestCase):
         notification = Notification.objects.filter(user=member, type=NotificationType.FEEDBACK_POSSIBLE.value)
         self.assertEqual(notification.count(), 1)
         self.assertLessEqual(
-            notification[0].expires_at, pickup.date.upper + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
+            notification[0].expires_at, pickup.date_end + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
         )
 
     def test_creates_new_store_notification(self):

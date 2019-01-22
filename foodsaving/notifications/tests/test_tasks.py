@@ -75,7 +75,7 @@ class TestPickupUpcomingTask(TestCase):
                 'pickup_collector': pickup1_user1_collector.id,
             }
         )
-        self.assertEqual(pickup1_user1_notification.expires_at, pickup1.date.upper)
+        self.assertEqual(pickup1_user1_notification.expires_at, pickup1.date_end)
 
     def test_creates_only_one_pickup_upcoming_notification(self):
         user = UserFactory()
