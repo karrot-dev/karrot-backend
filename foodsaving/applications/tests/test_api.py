@@ -43,7 +43,6 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
         data = response.data
         application_id = data['id']
         del data['id']
-        conversation_id = data['conversation']
         created_at = parse(data['created_at'])
         data['created_at'] = created_at
         self.assertEqual(
@@ -53,7 +52,6 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
                 'answers': answers,
                 'user': UserSerializer(self.applicant).data,
                 'group': self.group.id,
-                'conversation': conversation_id,
                 'status': 'pending',
                 'created_at': created_at,
                 'decided_by': None,
@@ -61,11 +59,12 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
             },
         )
 
-        # check conversation
-        conversation_response = self.client.get('/api/conversations/{}/'.format(conversation_id))
+        # get conversation
+        conversation_response = self.client.get('/api/group-applications/{}/conversation/'.format(application_id))
         self.assertEqual(conversation_response.status_code, status.HTTP_200_OK)
         for user_id in (self.applicant.id, self.member.id):
             self.assertIn(user_id, conversation_response.data['participants'])
+        conversation_id = conversation_response.data['id']
         message_response = self.get_results('/api/messages/?conversation={}'.format(conversation_id))
         self.assertEqual(len(message_response.data), 0)
 
@@ -83,7 +82,6 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
                 'answers': answers,
                 'user': UserSerializer(self.applicant).data,
                 'group': self.group.id,
-                'conversation': conversation_id,
                 'status': 'pending',
                 'created_at': created_at,
                 'decided_by': None,

@@ -2,12 +2,10 @@ from django.utils.translation import ugettext as _
 from rest_framework import serializers
 
 from foodsaving.applications.models import GroupApplication, GroupApplicationStatus
-from foodsaving.conversations.models import Conversation
 from foodsaving.users.serializers import UserSerializer
 
 
 class GroupApplicationSerializer(serializers.ModelSerializer):
-    conversation = serializers.SerializerMethodField()
     user = UserSerializer(read_only=True)
 
     class Meta:
@@ -17,7 +15,6 @@ class GroupApplicationSerializer(serializers.ModelSerializer):
             'created_at',
             'user',
             'group',
-            'conversation',
             'questions',
             'answers',
             'status',
@@ -29,9 +26,6 @@ class GroupApplicationSerializer(serializers.ModelSerializer):
             'questions',
             'status',
         ]
-
-    def get_conversation(self, application):
-        return Conversation.objects.get_or_create_for_target(application).id
 
     def validate(self, attrs):
         if GroupApplication.objects.filter(

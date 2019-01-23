@@ -10,6 +10,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.applications.models import GroupApplication
 from foodsaving.applications.serializers import GroupApplicationSerializer
+from foodsaving.conversations.api import RetrieveConversationMixin
 
 
 class ApplicationsPerDayThrottle(UserRateThrottle):
@@ -46,6 +47,7 @@ class GroupApplicationViewSet(
         mixins.RetrieveModelMixin,
         mixins.ListModelMixin,
         GenericViewSet,
+        RetrieveConversationMixin,
 ):
     queryset = GroupApplication.objects
     serializer_class = GroupApplicationSerializer
@@ -105,3 +107,10 @@ class GroupApplicationViewSet(
         application.withdraw()
         serializer = self.get_serializer(application)
         return Response(data=serializer.data)
+
+    @action(
+        detail=True,
+    )
+    def conversation(self, request, pk=None):
+        """Get conversation ID of this application"""
+        return self.retrieve_conversation(request, pk)
