@@ -148,7 +148,7 @@ class PickupDateViewSet(
     def get_queryset(self):
         qs = self.queryset.filter(store__group__members=self.request.user, store__status='active')
         if self.action == 'list':
-            # because we have collector_ids field in the serializer
+            # because we have collectors field in the serializer
             # only prefetch on read_only actions, otherwise there are caching problems when collectors get added
             qs = qs.prefetch_related('pickupdatecollector_set', 'feedback_given_by')
         return qs

@@ -63,7 +63,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
             'series',
             'store',
             'max_collectors',
-            'collector_ids',
+            'collectors',
             'description',
             'feedback_due',
             'feedback_given_by',
@@ -72,16 +72,15 @@ class PickupDateSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id',
             'series',
-            'collector_ids',
+            'collectors',
         ]
 
-    # TODO change to collectors to make it uniform with other endpoints
-    collector_ids = serializers.SerializerMethodField()
+    collectors = serializers.SerializerMethodField()
     feedback_due = serializers.DateTimeField(read_only=True)
 
     date = DateTimeRangeField()
 
-    def get_collector_ids(self, pickup):
+    def get_collectors(self, pickup):
         return [c.user_id for c in pickup.pickupdatecollector_set.all()]
 
     def save(self, **kwargs):

@@ -568,7 +568,7 @@ class PickupDateReceiverTests(WSTestCase):
         self.pickup.add_collector(self.member)
 
         response = self.client.messages_by_topic.get('pickups:pickupdate')[0]
-        self.assertEqual(response['payload']['collector_ids'], [self.member.id])
+        self.assertEqual(response['payload']['collectors'], [self.member.id])
 
         response = self.client.messages_by_topic.get('conversations:conversation')[0]
         self.assertEqual(response['payload']['participants'], [self.member.id])
@@ -578,7 +578,7 @@ class PickupDateReceiverTests(WSTestCase):
         self.pickup.remove_collector(self.member)
 
         response = self.client.messages_by_topic.get('pickups:pickupdate')[0]
-        self.assertEqual(response['payload']['collector_ids'], [])
+        self.assertEqual(response['payload']['collectors'], [])
 
         self.assertIn('conversations:leave', self.client.messages_by_topic.keys())
 

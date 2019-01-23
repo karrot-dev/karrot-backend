@@ -114,7 +114,7 @@ class TestPickupDateSeriesCreationAPI(APITestCase, ExtractPaginationMixin):
             created_pickup_dates.append({
                 'max_collectors': 5,
                 'series': series_id,
-                'collector_ids': [],
+                'collectors': [],
                 'store': self.store.id,
                 'description': '',
                 'feedback_given_by': [],
@@ -307,13 +307,13 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         url = '/api/pickup-dates/'
         response = self.get_results(url, {'date_min': self.now})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        empty_pickups = [p for p in response.data if len(p['collector_ids']) == 0]
+        empty_pickups = [p for p in response.data if len(p['collectors']) == 0]
         self.assertEqual(empty_pickups, [])
 
         url = '/api/pickup-dates/{}/'.format(joined_pickup.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data['collector_ids'], [self.member.id])
+        self.assertEqual(response.data['collectors'], [self.member.id])
         self.assertFalse(response.data['is_disabled'])
 
     def test_change_max_collectors_to_invalid_number_fails(self):
@@ -445,7 +445,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
             )
         ])
         self.assertEqual(
-            [p['collector_ids'] for p in response.data['results']],
+            [p['collectors'] for p in response.data['results']],
             list(interleave(
                 [[self.member.id] for _ in range(4)],
                 [[] for _ in range(4)],
@@ -469,7 +469,7 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['id'], joined_pickup.id)
-        self.assertEqual(response.data[0]['collector_ids'], [self.member.id])
+        self.assertEqual(response.data[0]['collectors'], [self.member.id])
 
     def test_cannot_move_pickups_in_a_series(self):
         self.client.force_login(user=self.member)
