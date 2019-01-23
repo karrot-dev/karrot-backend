@@ -5,10 +5,8 @@ from rest_framework.fields import DateTimeField
 
 from foodsaving.conversations.helpers import normalize_emoji_name
 from foodsaving.conversations.models import (
-    ConversationMessage,
-    ConversationParticipant,
-    ConversationMessageReaction,
-    ConversationThreadParticipant,
+    ConversationMessage, ConversationParticipant, ConversationMessageReaction, ConversationThreadParticipant,
+    ConversationMeta
 )
 
 
@@ -233,3 +231,9 @@ class ConversationSerializer(serializers.ModelSerializer):
             participant.muted = validated_data['muted']
         participant.save()
         return participant
+
+
+class ConversationMetaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConversationMeta
+        fields = ['marked_at']

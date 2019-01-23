@@ -96,6 +96,11 @@ class Conversation(BaseModel, UpdatedAtMixin):
         return self.target.group
 
 
+class ConversationMeta(BaseModel):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    marked_at = models.DateTimeField(null=True)
+
+
 class ConversationParticipantQuerySet(QuerySet):
     def annotate_unread_message_count(self):
         exclude_replies = (
