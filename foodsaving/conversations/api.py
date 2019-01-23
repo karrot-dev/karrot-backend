@@ -17,8 +17,8 @@ from rest_framework.response import Response
 from rest_framework.schemas import ManualSchema
 from rest_framework.viewsets import GenericViewSet
 
-from foodsaving.applications.models import GroupApplication
-from foodsaving.applications.serializers import GroupApplicationSerializer
+from foodsaving.applications.models import Application
+from foodsaving.applications.serializers import ApplicationSerializer
 from foodsaving.issues.models import Issue
 from foodsaving.issues.serializers import IssueSerializer
 from foodsaving.conversations.models import (
@@ -158,9 +158,9 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
             filter(id__in=[c.target_id for c in pickup_conversations]). \
             prefetch_related('pickupdatecollector_set', 'feedback_given_by')
 
-        applications_ct = ContentType.objects.get_for_model(GroupApplication)
+        applications_ct = ContentType.objects.get_for_model(Application)
         application_conversations = [item for item in conversations if item.target_type == applications_ct]
-        applications = GroupApplication.objects. \
+        applications = Application.objects. \
             filter(id__in=[c.target_id for c in application_conversations]). \
             select_related('user')
 
@@ -184,7 +184,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
         serializer = self.get_serializer(participations, many=True)
         message_serializer = ConversationMessageSerializer(messages, many=True, context=context)
         pickups_serializer = PickupDateSerializer(pickups, many=True, context=context)
-        application_serializer = GroupApplicationSerializer(applications, many=True, context=context)
+        application_serializer = ApplicationSerializer(applications, many=True, context=context)
         issue_serializer = IssueSerializer(issues, many=True, context=context)
         user_serializer = UserInfoSerializer(users, many=True, context=context)
         meta, _ = ConversationMeta.objects.get_or_create(user=request.user)

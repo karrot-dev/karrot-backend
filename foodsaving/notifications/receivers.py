@@ -7,7 +7,7 @@ from django.db.models.signals import post_save, pre_save, pre_delete
 from django.dispatch import receiver
 from django.utils import timezone
 
-from foodsaving.applications.models import GroupApplication, GroupApplicationStatus
+from foodsaving.applications.models import Application, ApplicationStatus
 from foodsaving.issues.models import Issue, Voting, OptionTypes
 from foodsaving.notifications.models import Notification, NotificationType
 from foodsaving.groups.models import GroupMembership
@@ -48,7 +48,7 @@ def user_became_editor(sender, instance, **kwargs):
         )
 
 
-@receiver(post_save, sender=GroupApplication)
+@receiver(post_save, sender=Application)
 def new_applicant(sender, instance, created, **kwargs):
     if not created:
         return
@@ -67,20 +67,20 @@ def new_applicant(sender, instance, created, **kwargs):
         )
 
 
-@receiver(pre_save, sender=GroupApplication)
+@receiver(pre_save, sender=Application)
 def application_decided(sender, instance, **kwargs):
     application = instance
 
     if application.status not in (
-            GroupApplicationStatus.ACCEPTED.value,
-            GroupApplicationStatus.DECLINED.value,
-            GroupApplicationStatus.WITHDRAWN.value,
+            ApplicationStatus.ACCEPTED.value,
+            ApplicationStatus.DECLINED.value,
+            ApplicationStatus.WITHDRAWN.value,
     ):
         return
 
     if application.id:
         # skip if status was not changed
-        old = GroupApplication.objects.get(id=application.id)
+        old = Application.objects.get(id=application.id)
         if old.status == application.status:
             return
 
@@ -91,7 +91,7 @@ def application_decided(sender, instance, **kwargs):
     ).delete()
 
     # do not create more notifications if application was withdrawn
-    if application.status == GroupApplicationStatus.WITHDRAWN.value:
+    if application.status == ApplicationStatus.WITHDRAWN.value:
         return
 
     notification_data = {
@@ -101,9 +101,9 @@ def application_decided(sender, instance, **kwargs):
         },
     }
 
-    if application.status == GroupApplicationStatus.ACCEPTED.value:
+    if application.status == ApplicationStatus.ACCEPTED.value:
         notification_data['type'] = NotificationType.APPLICATION_ACCEPTED.value
-    elif application.status == GroupApplicationStatus.DECLINED.value:
+    elif application.status == ApplicationStatus.DECLINED.value:
         notification_data['type'] = NotificationType.APPLICATION_DECLINED.value
 
     Notification.objects.create(user=application.user, **notification_data)

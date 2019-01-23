@@ -7,16 +7,16 @@ from rest_framework.test import APITestCase
 
 from foodsaving.conversations.models import Conversation
 from foodsaving.groups.factories import GroupFactory
-from foodsaving.applications.factories import GroupApplicationFactory
+from foodsaving.applications.factories import ApplicationFactory
 from foodsaving.groups.models import GroupMembership, GroupNotificationType
-from foodsaving.applications.models import GroupApplicationStatus
+from foodsaving.applications.models import ApplicationStatus
 from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
 from foodsaving.users.serializers import UserSerializer
 from foodsaving.utils.tests.fake import faker
 
 
-class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
+class TestCreateApplication(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.applicant = VerifiedUserFactory()
         self.member = VerifiedUserFactory()
@@ -33,7 +33,7 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
 
         # create application
         response = self.client.post(
-            '/api/group-applications/',
+            '/api/applications/',
             {
                 'group': self.group.id,
                 'answers': answers,
@@ -60,7 +60,7 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
         )
 
         # get conversation
-        conversation_response = self.client.get('/api/group-applications/{}/conversation/'.format(application_id))
+        conversation_response = self.client.get('/api/applications/{}/conversation/'.format(application_id))
         self.assertEqual(conversation_response.status_code, status.HTTP_200_OK)
         for user_id in (self.applicant.id, self.member.id):
             self.assertIn(user_id, conversation_response.data['participants'])
@@ -69,7 +69,7 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
         self.assertEqual(len(message_response.data), 0)
 
         # list application
-        application_list_response = self.client.get('/api/group-applications/')
+        application_list_response = self.client.get('/api/applications/')
         self.assertEqual(application_list_response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(application_list_response.data), 1)
         data = application_list_response.data[0]
@@ -96,13 +96,13 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
         self.assertEqual(len(mail.outbox), 1)
 
     def test_cannot_have_two_pending_applications(self):
-        GroupApplicationFactory(group=self.group, user=self.applicant)
+        ApplicationFactory(group=self.group, user=self.applicant)
 
         # create another application
         self.client.force_login(user=self.applicant)
         answers = faker.text()
         response = self.client.post(
-            '/api/group-applications/',
+            '/api/applications/',
             {
                 'group': self.group.id,
                 'answers': answers,
@@ -111,16 +111,16 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_can_apply_again(self):
-        GroupApplicationFactory(
+        ApplicationFactory(
             group=self.group,
             user=self.applicant,
-            status=GroupApplicationStatus.WITHDRAWN.value,
+            status=ApplicationStatus.WITHDRAWN.value,
         )
 
         # create another application
         self.client.force_login(user=self.applicant)
         response = self.client.post(
-            '/api/group-applications/',
+            '/api/applications/',
             {
                 'group': self.group.id,
                 'answers': faker.text(),
@@ -132,7 +132,7 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
         user = UserFactory()
         self.client.force_login(user=user)
         response = self.client.post(
-            '/api/group-applications/',
+            '/api/applications/',
             {
                 'group': self.group.id,
                 'answers': faker.text(),
@@ -143,7 +143,7 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
     def test_cannot_apply_when_already_member(self):
         self.client.force_login(user=self.member)
         response = self.client.post(
-            '/api/group-applications/',
+            '/api/applications/',
             {
                 'group': self.group.id,
                 'answers': faker.text(),
@@ -155,7 +155,7 @@ class TestCreateGroupApplication(APITestCase, ExtractPaginationMixin):
         open_group = GroupFactory(members=[self.member], is_open=True)
         self.client.force_login(user=self.applicant)
         response = self.client.post(
-            '/api/group-applications/',
+            '/api/applications/',
             {
                 'group': open_group.id,
                 'answers': faker.text(),
@@ -184,7 +184,7 @@ class TestApplicationNotifications(APITestCase):
         # create application
         self.client.force_login(user=self.applicant)
         answers = faker.text()
-        self.client.post('/api/group-applications/', {
+        self.client.post('/api/applications/', {
             'group': self.group.id,
             'answers': answers,
         })
@@ -198,7 +198,7 @@ class TestApplicationConversation(APITestCase):
         self.applicant = VerifiedUserFactory()
         self.member = VerifiedUserFactory()
         self.group = GroupFactory(members=[self.member])
-        self.application = GroupApplicationFactory(group=self.group, user=self.applicant)
+        self.application = ApplicationFactory(group=self.group, user=self.applicant)
         self.conversation = Conversation.objects.get_for_target(self.application)
         mail.outbox = []
 
@@ -256,13 +256,13 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
         self.member = VerifiedUserFactory()
         self.newcomer = VerifiedUserFactory()
         self.group = GroupFactory(members=[self.member], newcomers=[self.newcomer])
-        self.application = GroupApplicationFactory(group=self.group, user=self.applicant)
+        self.application = ApplicationFactory(group=self.group, user=self.applicant)
         self.conversation = Conversation.objects.get_for_target(self.application)
 
         def make_application():
             applicant = VerifiedUserFactory()
             group = GroupFactory(members=[self.member])
-            GroupApplicationFactory(group=group, user=applicant)
+            ApplicationFactory(group=group, user=applicant)
 
         [make_application() for _ in range(5)]
 
@@ -270,31 +270,31 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
 
     def test_list_applications_for_group(self):
         self.client.force_login(user=self.member)
-        response = self.get_results('/api/group-applications/?group={}'.format(self.group.id))
+        response = self.get_results('/api/applications/?group={}'.format(self.group.id))
         self.assertEqual(len(response.data), 1)
 
     def test_list_applications_for_group_as_newcomer(self):
         newcomer = UserFactory()
         self.group.groupmembership_set.create(user=newcomer)
         self.client.force_login(user=newcomer)
-        response = self.get_results('/api/group-applications/?group={}'.format(self.group.id))
+        response = self.get_results('/api/applications/?group={}'.format(self.group.id))
         self.assertEqual(len(response.data), 1)
 
     def test_list_own_applications(self):
-        [GroupApplicationFactory(group=self.group, user=UserFactory()) for _ in range(4)]
+        [ApplicationFactory(group=self.group, user=UserFactory()) for _ in range(4)]
         self.client.force_login(user=self.applicant)
-        response = self.get_results('/api/group-applications/?user={}'.format(self.applicant.id))
+        response = self.get_results('/api/applications/?user={}'.format(self.applicant.id))
         self.assertEqual(len(response.data), 1)
 
     def test_list_pending_applications(self):
-        [GroupApplicationFactory(group=self.group, user=self.applicant, status='withdrawn') for _ in range(4)]
+        [ApplicationFactory(group=self.group, user=self.applicant, status='withdrawn') for _ in range(4)]
         self.client.force_login(user=self.applicant)
-        response = self.get_results('/api/group-applications/?status={}'.format(self.applicant.id))
+        response = self.get_results('/api/applications/?status={}'.format(self.applicant.id))
         self.assertEqual(len(response.data), 1)
 
     def test_accept_application(self):
         self.client.force_login(user=self.member)
-        response = self.client.post('/api/group-applications/{}/accept/'.format(self.application.id))
+        response = self.client.post('/api/applications/{}/accept/'.format(self.application.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['status'], 'accepted')
         self.assertEqual(response.data['decided_by'], self.member.id)
@@ -317,12 +317,12 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
 
     def test_newcomer_cannot_accept_application(self):
         self.client.force_login(user=self.newcomer)
-        response = self.client.post('/api/group-applications/{}/accept/'.format(self.application.id))
+        response = self.client.post('/api/applications/{}/accept/'.format(self.application.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_decline_application(self):
         self.client.force_login(user=self.member)
-        response = self.client.post('/api/group-applications/{}/decline/'.format(self.application.id))
+        response = self.client.post('/api/applications/{}/decline/'.format(self.application.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['status'], 'declined')
         self.assertEqual(response.data['decided_by'], self.member.id)
@@ -339,17 +339,17 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
 
     def test_newcomer_cannot_decline_application(self):
         self.client.force_login(user=self.newcomer)
-        response = self.client.post('/api/group-applications/{}/decline/'.format(self.application.id))
+        response = self.client.post('/api/applications/{}/decline/'.format(self.application.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_applicant_cannot_decline_application(self):
         self.client.force_login(user=self.applicant)
-        response = self.client.post('/api/group-applications/{}/decline/'.format(self.application.id))
+        response = self.client.post('/api/applications/{}/decline/'.format(self.application.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_withdraw_application(self):
         self.client.force_login(user=self.applicant)
-        response = self.client.post('/api/group-applications/{}/withdraw/'.format(self.application.id))
+        response = self.client.post('/api/applications/{}/withdraw/'.format(self.application.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['status'], 'withdrawn')
         self.assertFalse(GroupMembership.objects.filter(
@@ -359,7 +359,7 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
 
     def test_group_member_cannot_withdraw_application(self):
         self.client.force_login(user=self.member)
-        response = self.client.post('/api/group-applications/{}/withdraw/'.format(self.application.id))
+        response = self.client.post('/api/applications/{}/withdraw/'.format(self.application.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
@@ -368,7 +368,7 @@ class TestApplicationUserProfileAccess(APITestCase, ExtractPaginationMixin):
         self.applicant = VerifiedUserFactory()
         self.member = VerifiedUserFactory()
         self.group = GroupFactory(members=[self.member])
-        self.application = GroupApplicationFactory(group=self.group, user=self.applicant)
+        self.application = ApplicationFactory(group=self.group, user=self.applicant)
 
     def test_applicant_cannot_view_group_members_profile_information(self):
         self.client.force_login(user=self.applicant)

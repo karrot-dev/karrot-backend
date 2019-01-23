@@ -8,8 +8,8 @@ from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import GenericViewSet
 
-from foodsaving.applications.models import GroupApplication
-from foodsaving.applications.serializers import GroupApplicationSerializer
+from foodsaving.applications.models import Application
+from foodsaving.applications.serializers import ApplicationSerializer
 from foodsaving.conversations.api import RetrieveConversationMixin
 
 
@@ -42,15 +42,15 @@ class IsApplicant(permissions.BasePermission):
         return application.user == request.user
 
 
-class GroupApplicationViewSet(
+class ApplicationViewSet(
         mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
         mixins.ListModelMixin,
         GenericViewSet,
         RetrieveConversationMixin,
 ):
-    queryset = GroupApplication.objects
-    serializer_class = GroupApplicationSerializer
+    queryset = Application.objects
+    serializer_class = ApplicationSerializer
     permission_classes = (
         IsAuthenticated,
         HasVerifiedEmailAddress,

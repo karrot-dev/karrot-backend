@@ -7,7 +7,7 @@ from django.utils.translation import ugettext as _
 from furl import furl
 from huey.contrib.djhuey import db_task
 
-from foodsaving.applications.models import GroupApplicationStatus
+from foodsaving.applications.models import ApplicationStatus
 from foodsaving.subscriptions.fcm import notify_subscribers
 from foodsaving.subscriptions.models import PushSubscription, PushSubscriptionPlatform
 from foodsaving.utils import frontend_urls
@@ -76,11 +76,11 @@ def get_message_title(message, language):
             applicant_name = '(?)'
 
         emoji = '❓'
-        if application.status == GroupApplicationStatus.ACCEPTED.value:
+        if application.status == ApplicationStatus.ACCEPTED.value:
             emoji = '✅'
-        elif application.status == GroupApplicationStatus.DECLINED.value:
+        elif application.status == ApplicationStatus.DECLINED.value:
             emoji = '❌'
-        elif application.status == GroupApplicationStatus.WITHDRAWN.value:
+        elif application.status == ApplicationStatus.WITHDRAWN.value:
             emoji = '🗑️'
         application_title = '{} {}'.format(emoji, applicant_name)
 

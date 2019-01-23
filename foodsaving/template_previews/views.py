@@ -15,8 +15,8 @@ import foodsaving.conversations.emails
 import foodsaving.invitations.emails
 import foodsaving.users.emails
 from config import settings
-from foodsaving.applications.factories import GroupApplicationFactory
-from foodsaving.applications.models import GroupApplication
+from foodsaving.applications.factories import ApplicationFactory
+from foodsaving.applications.models import Application
 from foodsaving.issues.factories import IssueFactory
 from foodsaving.conversations.models import ConversationMessage
 from foodsaving.groups.emails import prepare_user_inactive_in_group_email, prepare_group_summary_emails, \
@@ -72,7 +72,7 @@ def pseudo_verification_code():
 
 
 def get_or_create_application():
-    application = GroupApplication.objects.order_by('?').first()
+    application = Application.objects.order_by('?').first()
 
     if application is None:
         new_user = VerifiedUserFactory()
@@ -80,7 +80,7 @@ def get_or_create_application():
         if group.application_questions == '':
             group.application_questions = faker.text()
             group.save()
-        application = GroupApplicationFactory(
+        application = ApplicationFactory(
             group=group,
             user=new_user,
         )

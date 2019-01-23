@@ -3,7 +3,7 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 
-from foodsaving.applications.factories import GroupApplicationFactory
+from foodsaving.applications.factories import ApplicationFactory
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
@@ -44,7 +44,7 @@ class TestNotificationReceivers(TestCase):
         )
 
         user = UserFactory()
-        GroupApplicationFactory(user=user, group=group)
+        ApplicationFactory(user=user, group=group)
 
         self.assertEqual(
             Notification.objects.filter(user=member, type=NotificationType.NEW_APPLICANT.value).count(), 1
@@ -55,7 +55,7 @@ class TestNotificationReceivers(TestCase):
         group = GroupFactory(members=[member])
 
         users = [UserFactory() for _ in range(3)]
-        applications = [GroupApplicationFactory(user=user, group=group) for user in users]
+        applications = [ApplicationFactory(user=user, group=group) for user in users]
         applications[0].withdraw()
         applications[1].accept(member)
         applications[2].decline(member)
@@ -67,7 +67,7 @@ class TestNotificationReceivers(TestCase):
         group = GroupFactory(members=[member])
 
         user = UserFactory()
-        application = GroupApplicationFactory(user=user, group=group)
+        application = ApplicationFactory(user=user, group=group)
         application.accept(member)
 
         self.assertEqual(
@@ -80,7 +80,7 @@ class TestNotificationReceivers(TestCase):
         group = GroupFactory(members=[member])
 
         user = UserFactory()
-        application = GroupApplicationFactory(user=user, group=group)
+        application = ApplicationFactory(user=user, group=group)
         application.decline(member)
 
         self.assertEqual(

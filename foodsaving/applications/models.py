@@ -12,14 +12,14 @@ from foodsaving.history.models import History, HistoryTypus
 from foodsaving.utils import markdown
 
 
-class GroupApplicationStatus(Enum):
+class ApplicationStatus(Enum):
     PENDING = 'pending'
     ACCEPTED = 'accepted'
     DECLINED = 'declined'
     WITHDRAWN = 'withdrawn'
 
 
-class GroupApplication(BaseModel, ConversationMixin):
+class Application(BaseModel, ConversationMixin):
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     decided_at = models.DateTimeField(null=True)
@@ -27,13 +27,13 @@ class GroupApplication(BaseModel, ConversationMixin):
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='groupapplication_decided',
+        related_name='application_decided',
     )
     questions = models.TextField()
     answers = models.TextField()
     status = models.CharField(
-        default=GroupApplicationStatus.PENDING.value,
-        choices=[(status.value, status.value) for status in GroupApplicationStatus],
+        default=ApplicationStatus.PENDING.value,
+        choices=[(status.value, status.value) for status in ApplicationStatus],
         max_length=100,
     )
 
@@ -51,7 +51,7 @@ class GroupApplication(BaseModel, ConversationMixin):
 
     @transaction.atomic
     def accept(self, accepted_by):
-        self.status = GroupApplicationStatus.ACCEPTED.value
+        self.status = ApplicationStatus.ACCEPTED.value
         self.decided_by = accepted_by
         self.decided_at = timezone.now()
         self.save()
@@ -67,7 +67,7 @@ class GroupApplication(BaseModel, ConversationMixin):
 
     @transaction.atomic
     def decline(self, declined_by):
-        self.status = GroupApplicationStatus.DECLINED.value
+        self.status = ApplicationStatus.DECLINED.value
         self.decided_by = declined_by
         self.decided_at = timezone.now()
         self.save()
@@ -86,7 +86,7 @@ class GroupApplication(BaseModel, ConversationMixin):
 
     @transaction.atomic
     def withdraw(self):
-        self.status = GroupApplicationStatus.WITHDRAWN.value
+        self.status = ApplicationStatus.WITHDRAWN.value
         self.decided_by = self.user
         self.decided_at = timezone.now()
         self.save()

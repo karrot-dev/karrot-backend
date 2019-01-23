@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from foodsaving.applications.factories import GroupApplicationFactory
+from foodsaving.applications.factories import ApplicationFactory
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupNotificationType
 from foodsaving.pickups.factories import PickupDateFactory
@@ -108,8 +108,8 @@ class TestUnsubscribeFromAllConversationsInGroup(TestCase):
         unsubscribe_from_all_conversations_in_group(self.user, self.group)
         self.assertFalse(participant.get().muted)
 
-    def test_unsubscribe_from_group_applications(self):
-        application = GroupApplicationFactory(group=self.group, user=UserFactory())
+    def test_unsubscribe_from_applications(self):
+        application = ApplicationFactory(group=self.group, user=UserFactory())
         participant = application.conversation.conversationparticipant_set.filter(user=self.user)
         self.assertFalse(participant.get().muted)
         unsubscribe_from_all_conversations_in_group(self.user, self.group)

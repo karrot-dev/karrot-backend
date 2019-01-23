@@ -1,12 +1,12 @@
 from factory import DjangoModelFactory, LazyAttribute
 
-from foodsaving.applications.models import GroupApplication
+from foodsaving.applications.models import Application
 from foodsaving.utils.tests.fake import faker
 
 
-class GroupApplicationFactory(DjangoModelFactory):
+class ApplicationFactory(DjangoModelFactory):
     class Meta:
-        model = GroupApplication
+        model = Application
 
     questions = LazyAttribute(lambda application: application.group.application_questions)
     answers = LazyAttribute(lambda x: faker.text())

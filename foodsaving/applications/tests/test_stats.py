@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from foodsaving.applications import stats
 from foodsaving.groups.factories import GroupFactory
-from foodsaving.applications.factories import GroupApplicationFactory
+from foodsaving.applications.factories import ApplicationFactory
 from foodsaving.users.factories import UserFactory
 
 
@@ -14,10 +14,10 @@ class TestApplicationStats(TestCase):
     def test_group_application_stats(self):
         group = GroupFactory()
 
-        [GroupApplicationFactory(group=group, user=UserFactory(), status='pending') for _ in range(3)]
-        [GroupApplicationFactory(group=group, user=UserFactory(), status='accepted') for _ in range(4)]
-        [GroupApplicationFactory(group=group, user=UserFactory(), status='declined') for _ in range(5)]
-        [GroupApplicationFactory(group=group, user=UserFactory(), status='withdrawn') for _ in range(6)]
+        [ApplicationFactory(group=group, user=UserFactory(), status='pending') for _ in range(3)]
+        [ApplicationFactory(group=group, user=UserFactory(), status='accepted') for _ in range(4)]
+        [ApplicationFactory(group=group, user=UserFactory(), status='declined') for _ in range(5)]
+        [ApplicationFactory(group=group, user=UserFactory(), status='withdrawn') for _ in range(6)]
 
         points = stats.get_group_application_stats(group)
 
@@ -43,7 +43,7 @@ class TestApplicationStats(TestCase):
         two_hours_ago = timezone.now() - relativedelta(hours=2)
 
         write_points.reset_mock()
-        application = GroupApplicationFactory(group=GroupFactory(), user=UserFactory(), created_at=two_hours_ago)
+        application = ApplicationFactory(group=GroupFactory(), user=UserFactory(), created_at=two_hours_ago)
 
         write_points.assert_called_with([{
             'measurement': 'karrot.events',
