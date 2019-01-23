@@ -89,7 +89,7 @@ pip-tools==3.2.0
 pluggy==0.8.1             # via pytest
 prompt-toolkit==2.0.7     # via ipython
 psutil==5.4.8             # via python-server-metrics
-psycopg2-binary==2.7.6.1
+psycopg2-binary==2.7.7
 ptyprocess==0.6.0         # via pexpect
 py==1.7.0                 # via pytest
 pycodestyle==2.4.0        # via autopep8, flake8
