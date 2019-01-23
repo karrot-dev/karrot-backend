@@ -24,7 +24,7 @@ def application_status_update(application):
     }])
 
 
-def get_group_application_stats(group):
+def get_application_stats(group):
     fields = {
         'count_total': group.application_set.count(),
     }

@@ -14,7 +14,7 @@ def conversation_url(conversation, user):
     elif type == 'private':
         return user_detail_url(user)
     elif type == 'application':
-        return group_application_url(conversation.target)
+        return application_url(conversation.target)
     return None
 
 
@@ -70,7 +70,7 @@ def conflict_resolution_unsubscribe_url(user, issue):
     )
 
 
-def group_application_url(application):
+def application_url(application):
     return '{hostname}/#/group/{group_id}/applications/{application_id}'.format(
         hostname=settings.HOSTNAME,
         group_id=application.group.id,

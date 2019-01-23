@@ -6,8 +6,8 @@ from django.utils.translation import ugettext as _
 from config import settings
 from foodsaving.utils.email_utils import prepare_email, formataddr
 from foodsaving.utils.frontend_urls import (
-    group_wall_url, conversation_unsubscribe_url, pickup_detail_url, user_detail_url, group_application_url,
-    thread_url, thread_unsubscribe_url, conflict_resolution_url
+    group_wall_url, conversation_unsubscribe_url, pickup_detail_url, user_detail_url, application_url, thread_url,
+    thread_unsubscribe_url, conflict_resolution_url
 )
 from foodsaving.webhooks.api import make_local_part
 
@@ -25,7 +25,7 @@ def prepare_conversation_message_notification(user, messages):
     if type == 'pickup':
         return prepare_pickup_conversation_message_notification(user, messages)
     if type == 'application':
-        return prepare_group_application_message_notification(user, messages)
+        return prepare_application_message_notification(user, messages)
     if type == 'issue':
         return prepare_issue_message_notification(user, messages)
     if type == 'private':
@@ -187,7 +187,7 @@ def prepare_private_user_conversation_message_notification(user, messages):
     )
 
 
-def prepare_group_application_message_notification(user, messages):
+def prepare_application_message_notification(user, messages):
     first_message = messages[0]
     conversation = first_message.conversation
     application = conversation.target
@@ -225,7 +225,7 @@ def prepare_group_application_message_notification(user, messages):
             context={
                 'messages': messages,
                 'conversation_name': conversation_name,
-                'conversation_url': group_application_url(application),
+                'conversation_url': application_url(application),
                 'mute_url': unsubscribe_url,
             }
         )

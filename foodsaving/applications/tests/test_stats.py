@@ -11,7 +11,7 @@ from foodsaving.users.factories import UserFactory
 
 
 class TestApplicationStats(TestCase):
-    def test_group_application_stats(self):
+    def test_application_stats(self):
         group = GroupFactory()
 
         [ApplicationFactory(group=group, user=UserFactory(), status='pending') for _ in range(3)]
@@ -19,7 +19,7 @@ class TestApplicationStats(TestCase):
         [ApplicationFactory(group=group, user=UserFactory(), status='declined') for _ in range(5)]
         [ApplicationFactory(group=group, user=UserFactory(), status='withdrawn') for _ in range(6)]
 
-        points = stats.get_group_application_stats(group)
+        points = stats.get_application_stats(group)
 
         self.assertEqual(
             points, [{
@@ -39,7 +39,7 @@ class TestApplicationStats(TestCase):
         )
 
     @patch('foodsaving.applications.stats.write_points')
-    def test_group_application_status_update(self, write_points):
+    def test_application_status_update(self, write_points):
         two_hours_ago = timezone.now() - relativedelta(hours=2)
 
         write_points.reset_mock()

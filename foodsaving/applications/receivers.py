@@ -9,7 +9,7 @@ from foodsaving.users.models import post_erase_user
 
 
 @receiver(post_save, sender=Application)
-def group_application_saved(sender, instance, created, **kwargs):
+def application_saved(sender, instance, created, **kwargs):
     if created:
         application = instance
         group = instance.group
@@ -25,7 +25,7 @@ def group_application_saved(sender, instance, created, **kwargs):
 
 
 @receiver(pre_delete, sender=Application)
-def delete_group_application_conversation(sender, instance, **kwargs):
+def delete_application_conversation(sender, instance, **kwargs):
     application = instance
 
     conversation = Conversation.objects.get_for_target(application)

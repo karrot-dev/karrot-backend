@@ -1,7 +1,7 @@
 from config import settings
 from foodsaving.conversations.models import Conversation
 from foodsaving.utils.email_utils import prepare_email, formataddr
-from foodsaving.utils.frontend_urls import group_wall_url, group_application_url, \
+from foodsaving.utils.frontend_urls import group_wall_url, application_url, \
     applications_url, group_edit_url, new_application_unsubscribe_url
 from foodsaving.webhooks.api import make_local_part
 
@@ -29,7 +29,7 @@ def prepare_new_application_notification_email(user, application):
             'group': application.group,
             'questions': application.questions_rendered(),
             'answers': application.answers_rendered(),
-            'conversation_url': group_application_url(application),
+            'conversation_url': application_url(application),
             'mute_url': unsubscribe_url,
             'new_application_unsubscribe_url': unsubscribe_url,
             'applications_url': applications_url(application.group),

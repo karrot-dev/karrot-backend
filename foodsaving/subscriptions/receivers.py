@@ -239,7 +239,7 @@ def send_group_member_left(sender, instance, **kwargs):
 
 # Applications
 @receiver(post_save, sender=Application)
-def send_group_application_updates(sender, instance, **kwargs):
+def send_application_updates(sender, instance, **kwargs):
     application = instance
     group = application.group
     payload = ApplicationSerializer(application).data

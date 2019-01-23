@@ -23,7 +23,7 @@
                         </div>
                     </div>
                 </mj-text>
-                <mj-button href="{{ group_applications_url }}">
+                <mj-button href="{{ applications_url }}">
                     {% trans %}View applications{% endtrans %}
                 </mj-button>
                 <mj-divider/>

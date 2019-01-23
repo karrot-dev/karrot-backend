@@ -72,7 +72,7 @@ class Application(BaseModel, ConversationMixin):
         self.decided_at = timezone.now()
         self.save()
         History.objects.create(
-            typus=HistoryTypus.GROUP_APPLICATION_DECLINED,
+            typus=HistoryTypus.APPLICATION_DECLINED,
             group=self.group,
             users=[declined_by],
             payload={
