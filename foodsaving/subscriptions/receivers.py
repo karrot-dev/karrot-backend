@@ -16,8 +16,9 @@ from foodsaving.applications.serializers import GroupApplicationSerializer
 from foodsaving.issues.models import Issue, Voting, Option, Vote
 from foodsaving.issues.serializers import IssueSerializer
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction, \
-    ConversationThreadParticipant
-from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer
+    ConversationThreadParticipant, ConversationMeta
+from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer, \
+    ConversationMetaSerializer
 from foodsaving.groups.models import Group, Trust, GroupMembership
 from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer
 from foodsaving.history.models import history_created
@@ -121,6 +122,14 @@ def send_conversation_update(sender, instance, **kwargs):
 
     for subscription in ChannelSubscription.objects.recent().filter(user=instance.user):
         send_in_channel(subscription.reply_channel, topic, payload)
+
+
+@receiver(post_save, sender=ConversationMeta)
+def conversation_meta_saved(sender, instance, **kwargs):
+    meta = instance
+    payload = ConversationMetaSerializer(meta).data
+    for subscription in ChannelSubscription.objects.recent().filter(user=meta.user):
+        send_in_channel(subscription.reply_channel, topic='conversations:meta', payload=payload)
 
 
 @receiver(post_save, sender=ConversationThreadParticipant)

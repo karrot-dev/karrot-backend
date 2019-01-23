@@ -11,7 +11,7 @@ from foodsaving.applications.factories import GroupApplicationFactory
 from foodsaving.issues.factories import IssueFactory
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationParticipant, Conversation, ConversationMessage, \
-    ConversationMessageReaction
+    ConversationMessageReaction, ConversationMeta
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupStatus
 from foodsaving.pickups.factories import PickupDateFactory
@@ -51,6 +51,9 @@ class TestConversationsAPI(APITestCase):
             [conversation['id'] for conversation in response_conversations],
             [conversation2.id, self.conversation1.id, self.conversation2.id],
         )
+        self.assertEqual(response.data['results']['meta'], {
+            'marked_at': None,
+        })
 
     def test_list_conversations_with_related_data_efficiently(self):
         user = UserFactory()
@@ -64,8 +67,10 @@ class TestConversationsAPI(APITestCase):
         [c.sync_users([user]) for c in conversations]
         [c.messages.create(content='hey', author=user) for c in conversations]
 
+        ConversationMeta.objects.get_or_create(user=user)
+
         self.client.force_login(user=user)
-        with self.assertNumQueries(13):
+        with self.assertNumQueries(14):
             response = self.client.get('/api/conversations/', {'group': group.id}, format='json')
         results = response.data['results']
 
@@ -139,6 +144,19 @@ class TestConversationsAPI(APITestCase):
         data = {'conversation': self.conversation3.id, 'content': 'a nice message'}
         response = self.client.post('/api/messages/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_can_mark_all_as_seen(self):
+        self.client.force_login(user=self.participant1)
+
+        response = self.client.post('/api/conversations/mark_all_seen/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        time1 = parse(response.data['marked_at'])
+        self.assertLess(time1, timezone.now())
+
+        # time should naturally increase each time we mark
+        response = self.client.post('/api/conversations/mark_all_seen/')
+        time2 = parse(response.data['marked_at'])
+        self.assertLess(time1, time2)
 
 
 class TestConversationThreadsAPI(APITestCase):

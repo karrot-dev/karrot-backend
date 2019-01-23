@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import prefetch_related_objects, F
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django_filters import rest_framework as filters
 from rest_framework import mixins
@@ -21,11 +22,11 @@ from foodsaving.applications.serializers import GroupApplicationSerializer
 from foodsaving.issues.models import Issue
 from foodsaving.issues.serializers import IssueSerializer
 from foodsaving.conversations.models import (
-    Conversation, ConversationMessage, ConversationMessageReaction, ConversationParticipant
+    Conversation, ConversationMessage, ConversationMessageReaction, ConversationParticipant, ConversationMeta
 )
 from foodsaving.conversations.serializers import (
     ConversationSerializer, ConversationMessageSerializer, ConversationMessageReactionSerializer, EmojiField,
-    ConversationThreadSerializer
+    ConversationThreadSerializer, ConversationMetaSerializer
 )
 from foodsaving.pickups.models import PickupDate
 from foodsaving.pickups.serializers import PickupDateSerializer
@@ -186,6 +187,8 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
         application_serializer = GroupApplicationSerializer(applications, many=True, context=context)
         issue_serializer = IssueSerializer(issues, many=True, context=context)
         user_serializer = UserInfoSerializer(users, many=True, context=context)
+        meta, _ = ConversationMeta.objects.get_or_create(user=request.user)
+        meta_serializer = ConversationMetaSerializer(meta, context=self.get_serializer_context())
 
         return self.get_paginated_response({
             'conversations': serializer.data,
@@ -194,7 +197,16 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
             'applications': application_serializer.data,
             'issues': issue_serializer.data,
             'users_info': user_serializer.data,
+            'meta': meta_serializer.data,
         })
+
+    @action(detail=False, methods=['POST'])
+    def mark_all_seen(self, request):
+        """Trigger this endpoint to mark when the user has seen notifications about new messages in conversations"""
+        self.check_permissions(request)
+        meta, _ = ConversationMeta.objects.update_or_create({'marked_at': timezone.now()}, user=request.user)
+        serializer = ConversationMetaSerializer(meta)
+        return Response(serializer.data)
 
 
 class ConversationMessageFilter(filters.FilterSet):
