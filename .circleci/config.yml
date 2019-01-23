@@ -76,7 +76,7 @@ jobs:
           command: |
             set -xe
             cp config/local_settings.py.ci config/local_settings.py
-            env/bin/python manage.py makemessages
+            env/bin/pybabel extract -F babel.cfg -o foodsaving/locale/en/LC_MESSAGES/django.po .
             env/bin/tx push -s --no-interactive
 
   deploy-dev:
