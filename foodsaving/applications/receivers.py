@@ -4,12 +4,12 @@ from django.dispatch import receiver
 from foodsaving.applications.tasks import notify_members_about_new_application
 from foodsaving.conversations.models import Conversation
 from foodsaving.groups.models import GroupMembership, GroupNotificationType
-from foodsaving.applications.models import GroupApplication, GroupApplicationStatus
+from foodsaving.applications.models import Application, ApplicationStatus
 from foodsaving.users.models import post_erase_user
 
 
-@receiver(post_save, sender=GroupApplication)
-def group_application_saved(sender, instance, created, **kwargs):
+@receiver(post_save, sender=Application)
+def application_saved(sender, instance, created, **kwargs):
     if created:
         application = instance
         group = instance.group
@@ -24,8 +24,8 @@ def group_application_saved(sender, instance, created, **kwargs):
         notify_members_about_new_application(application)
 
 
-@receiver(pre_delete, sender=GroupApplication)
-def delete_group_application_conversation(sender, instance, **kwargs):
+@receiver(pre_delete, sender=Application)
+def delete_application_conversation(sender, instance, **kwargs):
     application = instance
 
     conversation = Conversation.objects.get_for_target(application)
@@ -38,7 +38,7 @@ def group_member_added(sender, instance, created, **kwargs):
         group = instance.group
         user = instance.user
 
-        for application in group.groupapplication_set.all():
+        for application in group.application_set.all():
             conversation = Conversation.objects.get_for_target(application)
             conversation.join(user)
 
@@ -48,7 +48,7 @@ def group_member_removed(sender, instance, **kwargs):
     group = instance.group
     user = instance.user
 
-    for application in group.groupapplication_set.all():
+    for application in group.application_set.all():
         conversation = Conversation.objects.get_for_target(application)
         if conversation:
             conversation.leave(user)
@@ -57,5 +57,5 @@ def group_member_removed(sender, instance, **kwargs):
 @receiver(post_erase_user)
 def user_erased(sender, instance, **kwargs):
     user = instance
-    for application in user.groupapplication_set.filter(status=GroupApplicationStatus.PENDING.value):
+    for application in user.application_set.filter(status=ApplicationStatus.PENDING.value):
         application.withdraw()

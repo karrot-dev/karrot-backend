@@ -7,7 +7,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from foodsaving.applications.factories import GroupApplicationFactory
+from foodsaving.applications.factories import ApplicationFactory
 from foodsaving.issues.factories import IssueFactory
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationParticipant, Conversation, ConversationMessage, \
@@ -60,7 +60,7 @@ class TestConversationsAPI(APITestCase):
         group = GroupFactory(members=[user])
         store = StoreFactory(group=group)
         pickup = PickupDateFactory(store=store)
-        application = GroupApplicationFactory(user=UserFactory(), group=group)
+        application = ApplicationFactory(user=UserFactory(), group=group)
         issue = IssueFactory(group=group)
 
         conversations = [t.conversation for t in (group, pickup, application, issue)]

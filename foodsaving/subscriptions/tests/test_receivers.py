@@ -12,7 +12,7 @@ from django.test import TestCase
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 
-from foodsaving.applications.factories import GroupApplicationFactory
+from foodsaving.applications.factories import ApplicationFactory
 from foodsaving.issues.factories import IssueFactory
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationMessage, \
@@ -448,7 +448,7 @@ class GroupMembershipReceiverTests(WSTestCase):
         self.assertNotIn('memberships', response['payload'])
 
 
-class GroupApplicationReceiverTests(WSTestCase):
+class ApplicationReceiverTests(WSTestCase):
     def setUp(self):
         super().setUp()
         self.member = UserFactory()
@@ -461,7 +461,7 @@ class GroupApplicationReceiverTests(WSTestCase):
     def test_member_receives_application_create(self):
         self.client = self.connect_as(self.member)
 
-        application = GroupApplicationFactory(user=self.user, group=self.group)
+        application = ApplicationFactory(user=self.user, group=self.group)
 
         messages = self.application_update_messages()
         self.assertEqual(len(messages), 1)
@@ -469,7 +469,7 @@ class GroupApplicationReceiverTests(WSTestCase):
         self.assertEqual(response['payload']['id'], application.id)
 
     def test_member_receives_application_update(self):
-        application = GroupApplicationFactory(user=self.user, group=self.group)
+        application = ApplicationFactory(user=self.user, group=self.group)
 
         self.client = self.connect_as(self.member)
 
@@ -482,7 +482,7 @@ class GroupApplicationReceiverTests(WSTestCase):
         self.assertEqual(response['payload']['id'], application.id)
 
     def test_applicant_receives_application_update(self):
-        application = GroupApplicationFactory(user=self.user, group=self.group)
+        application = ApplicationFactory(user=self.user, group=self.group)
 
         self.client = self.connect_as(self.user)
 

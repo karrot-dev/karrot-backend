@@ -3,7 +3,7 @@ from unittest.mock import patch, call
 from dateutil.parser import parse
 from django.test import TestCase
 
-from foodsaving.applications.factories import GroupApplicationFactory
+from foodsaving.applications.factories import ApplicationFactory
 from foodsaving.issues.factories import IssueFactory
 from foodsaving.conversations.models import Conversation, ConversationMessage, ConversationThreadParticipant, \
     ConversationParticipant
@@ -153,7 +153,7 @@ class TestMessagePushNotificationTitles(TestCase):
         author = UserFactory()
         group = GroupFactory(members=[author])
         applicant = UserFactory()
-        application = GroupApplicationFactory(group=group, user=applicant)
+        application = ApplicationFactory(group=group, user=applicant)
         conversation = Conversation.objects.get_or_create_for_target(application)
         message = conversation.messages.create(author=author, content='bla')
 

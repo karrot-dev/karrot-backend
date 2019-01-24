@@ -1,15 +1,15 @@
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
 
-from foodsaving.applications.models import GroupApplication, GroupApplicationStatus
+from foodsaving.applications.models import Application, ApplicationStatus
 from foodsaving.users.serializers import UserSerializer
 
 
-class GroupApplicationSerializer(serializers.ModelSerializer):
+class ApplicationSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
 
     class Meta:
-        model = GroupApplication
+        model = Application
         fields = [
             'id',
             'created_at',
@@ -28,10 +28,10 @@ class GroupApplicationSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, attrs):
-        if GroupApplication.objects.filter(
+        if Application.objects.filter(
                 group=attrs.get('group'),
                 user=self.context['request'].user,
-                status=GroupApplicationStatus.PENDING.value,
+                status=ApplicationStatus.PENDING.value,
         ).exists():
             raise serializers.ValidationError(_('Application is already pending'))
         return attrs

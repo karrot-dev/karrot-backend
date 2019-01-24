@@ -2,9 +2,9 @@ from rest_framework.test import APITestCase
 
 from foodsaving.conversations.models import Conversation
 from foodsaving.groups.factories import GroupFactory
-from foodsaving.applications.factories import GroupApplicationFactory
+from foodsaving.applications.factories import ApplicationFactory
 from foodsaving.groups.models import GroupMembership
-from foodsaving.applications.models import GroupApplication, GroupApplicationStatus
+from foodsaving.applications.models import Application, ApplicationStatus
 from foodsaving.users.factories import VerifiedUserFactory
 
 
@@ -13,7 +13,7 @@ class TestApplicationConversationModel(APITestCase):
         self.applicant = VerifiedUserFactory()
         self.member = VerifiedUserFactory()
         self.group = GroupFactory(members=[self.member])
-        self.application = GroupApplicationFactory(group=self.group, user=self.applicant)
+        self.application = ApplicationFactory(group=self.group, user=self.applicant)
         self.conversation = Conversation.objects.get_for_target(self.application)
 
     def test_member_leaves_group(self):
@@ -28,8 +28,8 @@ class TestApplicationConversationModel(APITestCase):
         self.applicant.erase()
 
         self.application.refresh_from_db()
-        self.assertEqual(self.application.status, GroupApplicationStatus.WITHDRAWN.value)
+        self.assertEqual(self.application.status, ApplicationStatus.WITHDRAWN.value)
 
     def test_deleting_application_deletes_conversation(self):
-        GroupApplication.objects.filter(user=self.applicant, group=self.group).delete()
+        Application.objects.filter(user=self.applicant, group=self.group).delete()
         self.assertIsNone(Conversation.objects.get_for_target(self.application))

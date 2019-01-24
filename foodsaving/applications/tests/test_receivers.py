@@ -4,7 +4,7 @@ from foodsaving.users.factories import UserFactory
 from rest_framework.test import APITestCase
 
 
-class TestGroupApplicationReceivers(APITestCase):
+class TestApplicationReceivers(APITestCase):
     def setUp(self):
         self.new_member = UserFactory()
         self.existing_member = UserFactory()

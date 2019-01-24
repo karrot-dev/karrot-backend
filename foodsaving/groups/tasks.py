@@ -9,7 +9,7 @@ from influxdb_metrics.loader import write_points
 from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from config import settings
-from foodsaving.applications.stats import get_group_application_stats
+from foodsaving.applications.stats import get_application_stats
 from foodsaving.issues.stats import get_issue_stats
 from foodsaving.groups.emails import (
     prepare_user_inactive_in_group_email, prepare_group_summary_data, calculate_group_summary_dates,
@@ -31,7 +31,7 @@ def record_group_stats():
     for group in Group.objects.all():
         points.extend(get_group_members_stats(group))
         points.extend(get_group_stores_stats(group))
-        points.extend(get_group_application_stats(group))
+        points.extend(get_application_stats(group))
         points.extend(get_issue_stats(group))
 
     write_points(points)

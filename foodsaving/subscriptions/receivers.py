@@ -11,8 +11,8 @@ from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
 from raven.contrib.django.raven_compat.models import client as sentry_client
 
-from foodsaving.applications.models import GroupApplication
-from foodsaving.applications.serializers import GroupApplicationSerializer
+from foodsaving.applications.models import Application
+from foodsaving.applications.serializers import ApplicationSerializer
 from foodsaving.issues.models import Issue, Voting, Option, Vote
 from foodsaving.issues.serializers import IssueSerializer
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction, \
@@ -238,11 +238,11 @@ def send_group_member_left(sender, instance, **kwargs):
 
 
 # Applications
-@receiver(post_save, sender=GroupApplication)
-def send_group_application_updates(sender, instance, **kwargs):
+@receiver(post_save, sender=Application)
+def send_application_updates(sender, instance, **kwargs):
     application = instance
     group = application.group
-    payload = GroupApplicationSerializer(application).data
+    payload = ApplicationSerializer(application).data
     q = Q(user__in=group.members.all()) | Q(user=application.user)
     for subscription in ChannelSubscription.objects.recent().filter(q).distinct():
         send_in_channel(subscription.reply_channel, topic='applications:update', payload=payload)

@@ -24,12 +24,12 @@ def application_status_update(application):
     }])
 
 
-def get_group_application_stats(group):
+def get_application_stats(group):
     fields = {
-        'count_total': group.groupapplication_set.count(),
+        'count_total': group.application_set.count(),
     }
 
-    for entry in group.groupapplication_set.values('status').annotate(count=Count('status')):
+    for entry in group.application_set.values('status').annotate(count=Count('status')):
         fields['count_status_{}'.format(entry['status'])] = entry['count']
 
     return [{
