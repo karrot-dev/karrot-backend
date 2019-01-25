@@ -7,7 +7,7 @@ from config import settings
 from foodsaving.utils.email_utils import prepare_email, formataddr
 from foodsaving.utils.frontend_urls import (
     group_wall_url, conversation_unsubscribe_url, pickup_detail_url, user_detail_url, application_url, thread_url,
-    thread_unsubscribe_url, conflict_resolution_url
+    thread_unsubscribe_url, conflict_resolution_url, store_wall_url
 )
 from foodsaving.webhooks.api import make_local_part
 
@@ -21,6 +21,8 @@ def prepare_conversation_message_notification(user, messages):
     type = first_message.conversation.type()
 
     if type == 'group' and first_message.is_thread_reply():
+        return prepare_group_thread_message_notification(user, messages)
+    if type == 'store' and first_message.is_thread_reply():
         return prepare_group_thread_message_notification(user, messages)
     if type == 'pickup':
         return prepare_pickup_conversation_message_notification(user, messages)
@@ -92,6 +94,35 @@ def prepare_group_conversation_message_notification(user, message):
             'messages': [message],
             'conversation_name': conversation_name,
             'conversation_url': group_wall_url(group),
+            'mute_url': unsubscribe_url,
+        }
+    )
+
+
+def prepare_store_conversation_message_notification(user, message):
+    conversation = message.conversation
+    store = conversation.target
+
+    from_text = message.author.display_name
+    reply_to_name = store.name
+    conversation_name = store.name
+
+    local_part = make_local_part(conversation, user, message)
+    reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
+    from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
+
+    unsubscribe_url = conversation_unsubscribe_url(user, group=store.group, conversation=conversation)
+
+    return prepare_email(
+        template='conversation_message_notification',
+        from_email=from_email,
+        user=user,
+        reply_to=[reply_to],
+        unsubscribe_url=unsubscribe_url,
+        context={
+            'messages': [message],
+            'conversation_name': conversation_name,
+            'conversation_url': store_wall_url(store),
             'mute_url': unsubscribe_url,
         }
     )

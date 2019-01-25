@@ -179,6 +179,21 @@ class TestStoresAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.delete(self.store_url)
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
+    def test_get_conversation(self):
+        self.client.force_login(user=self.member)
+        response = self.client.get('/api/stores/{}/conversation/'.format(self.store.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertIn(self.member.id, response.data['participants'])
+        self.assertEqual(response.data['type'], 'store')
+        self.assertEqual(len(response.data['participants']), 2)
+
+        # post message in conversation
+        data = {'conversation': response.data['id'], 'content': 'a nice message'}
+        response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Why doesn't it send out notifications?
+
 
 class TestStoreChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):

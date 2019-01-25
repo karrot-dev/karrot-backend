@@ -6,7 +6,7 @@ from rest_framework.exceptions import PermissionDenied
 
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.utils.misc import find_changed
-from foodsaving.stores.models import Store as StoreModel, StoreStatus
+from foodsaving.stores.models import Store as StoreModel, StoreStatus, StoreSubscription
 
 
 class StoreHistorySerializer(serializers.ModelSerializer):
@@ -116,3 +116,22 @@ class StoreUpdateSerializer(StoreSerializer):
             )
         store.group.refresh_active_status()
         return store
+
+
+class StoreSubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StoreSubscription
+        fields = [
+            'store',
+        ]
+
+    def save(self, **kwargs):
+        return super().save(user=self.context['request'].user)
+
+    def validate_store(self, store):
+        if store.storesubscription_set.filter(user=self.context['request'].user).exists():
+            raise serializers.ValidationError(_('You are already subscribed to this store'))
+        return store
+
+    def create(self, validated_data):
+        return StoreSubscription.objects.create(**validated_data)

@@ -1,16 +1,17 @@
 from django.db.models import Avg, Count, Q, Sum
 from django_filters import rest_framework as filters
 from django.utils.translation import ugettext_lazy as _
-from rest_framework import mixins, permissions
+from rest_framework import mixins, permissions, status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from foodsaving.conversations.api import RetrieveConversationMixin
 from foodsaving.pickups.models import PickupDate
-from foodsaving.stores.models import Store as StoreModel
-from foodsaving.stores.serializers import StoreSerializer, StoreUpdateSerializer
+from foodsaving.stores.models import Store as StoreModel, StoreSubscription
+from foodsaving.stores.serializers import StoreSerializer, StoreUpdateSerializer, StoreSubscriptionSerializer
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 
@@ -29,6 +30,7 @@ class StoreViewSet(
         PartialUpdateModelMixin,
         mixins.ListModelMixin,
         GenericViewSet,
+        RetrieveConversationMixin,
 ):
     """
     Stores
@@ -72,3 +74,37 @@ class StoreViewSet(
             'pickups_done': instance.pickups_done,
         }
         return Response(data)
+
+    @action(
+        detail=True,
+    )
+    def conversation(self, request, pk=None):
+        """Get conversation ID of this store"""
+        return self.retrieve_conversation(request, pk)
+
+    @action(
+        detail=True,
+        methods=['POST', 'DELETE'],
+        serializer_class=StoreSubscriptionSerializer,
+    )
+    def subscription(self, request, pk):
+        self.check_permissions(request)
+        store = self.get_object()
+        self.check_object_permissions(request, store)
+
+        if request.method == 'POST':
+            serializer = self.get_serializer(data={'store': store.id})
+            serializer.is_valid(raise_exception=True)
+            subscription = serializer.save()
+
+            serializer = self.get_serializer(instance=subscription)
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+
+        if request.method == 'DELETE':
+            deleted_rows, _ = StoreSubscription.objects.filter(store=store, user=self.request.user).delete()
+            deleted = deleted_rows > 0
+
+            return Response(
+                data={},
+                status=status.HTTP_204_NO_CONTENT if deleted else status.HTTP_404_NOT_FOUND,
+            )
