@@ -1,0 +1,20 @@
+<mjml>
+    <mj-head>
+        <mj-include path="../../base/templates/_base-head.mjml"/>
+        <mj-title>Your reply was not accepted</mj-title>
+    </mj-head>
+    <mj-body>
+        <mj-include path="../../base/templates/_header.mjml"/>
+        <mj-section>
+            <mj-column>
+                <mj-text>
+                    <h1>Your reply was not accepted</h1>
+                </mj-text>
+                <mj-text>
+                    <p>{{ content }}</p>
+                </mj-text>
+            </mj-column>
+        </mj-section>
+        <mj-include path="../../base/templates/_footer.mjml"/>
+    </mj-body>
+</mjml>

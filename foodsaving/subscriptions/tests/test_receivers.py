@@ -70,6 +70,7 @@ def make_conversation_broadcast(conversation, **kwargs):
             'muted': False,
             'type': None,
             'target_id': None,
+            'is_closed': False,
         }
     }
     response['payload'].update(kwargs)

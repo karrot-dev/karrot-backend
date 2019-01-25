@@ -1,5 +1,7 @@
+from anymail.exceptions import AnymailAPIError
 from base64 import b64decode, b64encode
 from email.utils import parseaddr
+from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -10,6 +12,8 @@ from rest_framework.response import Response
 from talon import quotations
 
 from foodsaving.conversations.models import Conversation, ConversationMessage
+from foodsaving.webhooks import stats
+from foodsaving.webhooks.emails import prepare_incoming_email_rejected_email
 from foodsaving.webhooks.models import EmailEvent, IncomingEmail
 
 
@@ -30,6 +34,14 @@ def make_local_part(conversation, user, thread=None):
     signed_part = signed_part.encode('utf8')
     encoded = b64encode(signed_part)
     return encoded.decode('utf8')
+
+
+def notify_about_rejected_email(user, content):
+    try:
+        prepare_incoming_email_rejected_email(user, content).send()
+    except AnymailAPIError:
+        sentry_client.captureException()
+    stats.incoming_email_rejected()
 
 
 class IncomingEmailView(views.APIView):
@@ -72,6 +84,10 @@ class IncomingEmailView(views.APIView):
                 # 3. extract the email reply text and add it to the conversation
                 text_content = content['text']
                 reply_plain = quotations.extract_from_plain(text_content)
+
+                if conversation.is_closed:
+                    notify_about_rejected_email(user, reply_plain)
+                    continue
 
                 created_message = ConversationMessage.objects.create(
                     author=user,

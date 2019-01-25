@@ -1,11 +1,15 @@
 from anymail.exceptions import AnymailAPIError
+from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.db.models import Q
-from huey.contrib.djhuey import db_task
+from django.utils import timezone
+from huey import crontab
+from huey.contrib.djhuey import db_task, db_periodic_task
 from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from foodsaving.conversations.emails import prepare_conversation_message_notification, \
     prepare_group_conversation_message_notification
-from foodsaving.conversations.models import ConversationParticipant, ConversationThreadParticipant
+from foodsaving.conversations.models import ConversationParticipant, ConversationThreadParticipant, Conversation
 from foodsaving.users.models import User
 
 
@@ -90,3 +94,16 @@ def notify_participants(message):
             message=message,
             email=email,
         )
+
+
+@db_periodic_task(crontab(hour=3, minute=9))  # around 3am every day
+def mark_conversations_as_closed():
+    close_threshold = timezone.now() - relativedelta(days=settings.CONVERSATION_CLOSED_DAYS)
+    for conversation in Conversation.objects.filter(
+            is_closed=False,
+            latest_message__created_at__lt=close_threshold,
+            target_id__isnull=False,
+    ):
+        if conversation.target.has_ended:
+            conversation.is_closed = True
+            conversation.save()

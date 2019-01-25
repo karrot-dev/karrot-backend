@@ -60,6 +60,10 @@ class Issue(BaseModel, ConversationMixin):
         settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE, related_name='affected_by_issue'
     )
 
+    @property
+    def has_ended(self):
+        return self.status != IssueStatus.ONGOING.value
+
     def decide(self):
         self.status = IssueStatus.DECIDED.value
         self.save()
