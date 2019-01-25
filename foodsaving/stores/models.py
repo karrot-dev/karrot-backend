@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db import models
 
 from foodsaving.base.base_models import BaseModel, LocationModel
+from foodsaving.conversations.models import ConversationMixin
 
 
 class StoreStatus(Enum):
@@ -14,13 +15,13 @@ class StoreStatus(Enum):
     ARCHIVED = 'archived'
 
 
-class Store(BaseModel, LocationModel):
+class Store(BaseModel, LocationModel, ConversationMixin):
     class Meta:
         unique_together = ('group', 'name')
 
     DEFAULT_STATUS = StoreStatus.CREATED.value
 
-    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='store')
+    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='stores')
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH)
     description = models.TextField(blank=True)
     weeks_in_advance = models.PositiveIntegerField(default=4)

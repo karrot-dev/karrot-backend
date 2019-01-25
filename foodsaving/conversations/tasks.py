@@ -4,7 +4,7 @@ from huey.contrib.djhuey import db_task
 from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from foodsaving.conversations.emails import prepare_conversation_message_notification, \
-    prepare_group_conversation_message_notification
+    prepare_group_conversation_message_notification, prepare_store_conversation_message_notification
 from foodsaving.conversations.models import ConversationParticipant, ConversationThreadParticipant
 from foodsaving.users.models import User
 
@@ -62,12 +62,29 @@ def notify_group_conversation_participants(message):
         )
 
 
+def notify_store_conversation_participants(message):
+    for participant in get_participants_to_notify(message):
+        email = prepare_store_conversation_message_notification(
+            user=participant.user,
+            message=message,
+        )
+        send_and_mark(
+            participant=participant,
+            message=message,
+            email=email,
+        )
+
+
 @db_task()
 def notify_participants(message):
     # send individual notification emails for group conversation message,
     # because replies via email will go into a thread
     if message.conversation.type() == 'group' and not message.is_thread_reply():
         notify_group_conversation_participants(message)
+        return
+
+    if message.conversation.type() == 'store' and not message.is_thread_reply():
+        notify_store_conversation_participants(message)
         return
 
     # skip this notification if this is not the most recent message, allows us to batch messages

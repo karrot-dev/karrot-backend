@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from foodsaving.conversations.api import RetrieveConversationMixin
 from foodsaving.pickups.models import PickupDate
 from foodsaving.stores.models import Store as StoreModel
 from foodsaving.stores.serializers import StoreSerializer, StoreUpdateSerializer
@@ -29,6 +30,7 @@ class StoreViewSet(
         PartialUpdateModelMixin,
         mixins.ListModelMixin,
         GenericViewSet,
+        RetrieveConversationMixin,
 ):
     """
     Stores
@@ -72,3 +74,10 @@ class StoreViewSet(
             'pickups_done': instance.pickups_done,
         }
         return Response(data)
+
+    @action(
+        detail=True,
+    )
+    def conversation(self, request, pk=None):
+        """Get conversation ID of this store"""
+        return self.retrieve_conversation(request, pk)
