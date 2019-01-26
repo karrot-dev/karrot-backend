@@ -1,3 +1,4 @@
+from anymail.exceptions import AnymailAPIError
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
@@ -34,7 +35,10 @@ class InvitationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data['invited_by'] = self.context['request'].user
-        return self.Meta.model.objects.create_and_send(**validated_data)
+        try:
+            return self.Meta.model.objects.create_and_send(**validated_data)
+        except AnymailAPIError:
+            raise serializers.ValidationError(_('Email could not be sent'))
 
 
 class InvitationAcceptSerializer(serializers.Serializer):
