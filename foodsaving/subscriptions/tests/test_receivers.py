@@ -1,24 +1,25 @@
 import itertools
+
 import os
 import pathlib
-from operator import itemgetter
-from shutil import copyfile
-from unittest.mock import patch
-
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 from django.utils.crypto import get_random_string
+from operator import itemgetter
+from shutil import copyfile
+from unittest.mock import patch
 
 from foodsaving.applications.factories import ApplicationFactory
-from foodsaving.issues.factories import IssueFactory
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationMessage, \
     ConversationMessageReaction
+from foodsaving.groups import roles
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.invitations.models import Invitation
+from foodsaving.issues.factories import IssueFactory
 from foodsaving.pickups.factories import FeedbackFactory, PickupDateFactory, \
     PickupDateSeriesFactory
 from foodsaving.pickups.models import PickupDate, to_range
@@ -402,51 +403,61 @@ class GroupMembershipReceiverTests(WSTestCase):
         self.user = UserFactory()
         self.group = GroupFactory(members=[self.member])
 
-    def test_receive_group_join_as_member(self):
-        self.client = self.connect_as(self.member)
+    def test_receive_group_join(self):
+        member_client = self.connect_as(self.member)
+        joining_client = self.connect_as(self.user)
+        nonmember_client = self.connect_as(UserFactory())
 
         self.group.add_member(self.user)
 
-        response = self.client.messages_by_topic.get('groups:group_detail')[0]
+        response = member_client.messages_by_topic.get('groups:group_detail')[0]
         self.assertIn(self.user.id, response['payload']['members'])
         self.assertIn(self.user.id, response['payload']['memberships'].keys())
 
-        response = self.client.messages_by_topic.get('groups:group_preview')[0]
+        response = member_client.messages_by_topic.get('groups:group_preview')[0]
         self.assertIn(self.user.id, response['payload']['members'])
         self.assertNotIn('memberships', response['payload'])
 
-    def test_receive_group_join_as_joining_user(self):
-        self.client = self.connect_as(self.user)
-
-        self.group.add_member(self.user)
-
-        response = self.client.messages_by_topic.get('groups:group_detail')[0]
+        response = joining_client.messages_by_topic.get('groups:group_detail')[0]
         self.assertIn(self.user.id, response['payload']['members'])
-        self.assertIn(self.user.id, response['payload']['memberships'].keys())
 
-        response = self.client.messages_by_topic.get('groups:group_preview')[0]
+        response = joining_client.messages_by_topic.get('groups:group_preview')[0]
         self.assertIn(self.user.id, response['payload']['members'])
-        self.assertNotIn('memberships', response['payload'])
 
-    def test_receive_group_join_as_nonmember(self):
-        self.client = self.connect_as(self.user)
-
-        join_user = UserFactory()
-        self.group.add_member(join_user)
-
-        self.assertNotIn('groups:group_detail', self.client.messages_by_topic.keys())
-        response = self.client.messages_by_topic.get('groups:group_preview')[0]
-        self.assertIn(join_user.id, response['payload']['members'])
+        self.assertNotIn('groups:group_detail', nonmember_client.messages_by_topic.keys())
+        response = nonmember_client.messages_by_topic.get('groups:group_preview')[0]
+        self.assertIn(self.user.id, response['payload']['members'])
         self.assertNotIn('memberships', response['payload'])
 
     def test_receive_group_leave_as_leaving_user(self):
-        self.client = self.connect_as(self.member)
+        client = self.connect_as(self.member)
 
         self.group.remove_member(self.member)
 
-        response = self.client.messages_by_topic.get('groups:group_preview')[0]
+        response = client.messages_by_topic.get('groups:group_preview')[0]
         self.assertNotIn(self.user.id, response['payload']['members'])
         self.assertNotIn('memberships', response['payload'])
+        self.assertEqual([m['topic'] for m in client.messages], [
+            'history:history',
+            'conversations:leave',
+            'groups:group_preview',
+        ])
+
+    def test_receive_group_roles_update(self):
+        membership = self.group.add_member(self.user)
+        client = self.connect_as(self.member)
+
+        membership.add_roles([roles.GROUP_EDITOR])
+        membership.save()
+
+        response = client.messages_by_topic.get('groups:group_detail')[0]
+        self.assertIn(roles.GROUP_EDITOR, response['payload']['memberships'][self.user.id]['roles'])
+
+        self.assertEqual([m['topic'] for m in client.messages], [
+            'notifications:notification',
+            'groups:group_detail',
+            'groups:group_preview',
+        ])
 
 
 class ApplicationReceiverTests(WSTestCase):

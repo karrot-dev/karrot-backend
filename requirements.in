@@ -6,6 +6,7 @@ django-enumfield==1.6b3
 django-extensions
 django-redis
 django-jinja
+django-dirtyfields
 djangorestframework
 hiredis
 markdown

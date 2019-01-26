@@ -1,4 +1,5 @@
 from datetime import timedelta
+from dirtyfields import DirtyFieldsMixin
 from enum import Enum
 
 from dateutil.relativedelta import relativedelta
@@ -246,7 +247,7 @@ class GroupMembershipQuerySet(QuerySet):
         return self.exclude(group__status=GroupStatus.PLAYGROUND)
 
 
-class GroupMembership(BaseModel):
+class GroupMembership(BaseModel, DirtyFieldsMixin):
     objects = GroupMembershipQuerySet.as_manager()
 
     group = models.ForeignKey(
