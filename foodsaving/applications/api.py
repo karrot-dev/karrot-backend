@@ -3,6 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 from django_filters import rest_framework as filters
 from rest_framework import permissions, mixins
 from rest_framework.decorators import action
+from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
@@ -15,6 +16,11 @@ from foodsaving.conversations.api import RetrieveConversationMixin
 
 class ApplicationsPerDayThrottle(UserRateThrottle):
     rate = '20/day'
+
+
+class ApplicationPagination(CursorPagination):
+    page_size = 20
+    ordering = '-id'
 
 
 class HasVerifiedEmailAddress(permissions.BasePermission):
@@ -57,6 +63,7 @@ class ApplicationViewSet(
     )
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_fields = ('group', 'user', 'status')
+    pagination_class = ApplicationPagination
 
     def get_throttles(self):
         if self.action == 'create':
