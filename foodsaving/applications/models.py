@@ -37,6 +37,10 @@ class Application(BaseModel, ConversationMixin):
         max_length=100,
     )
 
+    @property
+    def has_ended(self):
+        return self.status != ApplicationStatus.PENDING.value
+
     def questions_rendered(self, **kwargs):
         return markdown.render(self.questions, **kwargs)
 

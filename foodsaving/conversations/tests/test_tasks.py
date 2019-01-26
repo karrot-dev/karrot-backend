@@ -1,12 +1,14 @@
-from unittest.mock import patch
-
+from dateutil.relativedelta import relativedelta
 from django.core import mail
 from django.test import TestCase
 from django.utils import timezone
+from unittest.mock import patch
 
 from foodsaving.conversations import tasks
 from foodsaving.conversations.models import ConversationParticipant, ConversationThreadParticipant, Conversation
+from foodsaving.conversations.tasks import mark_conversations_as_closed
 from foodsaving.groups.factories import GroupFactory
+from foodsaving.issues.factories import IssueFactory
 from foodsaving.users.factories import VerifiedUserFactory, UserFactory
 
 
@@ -135,3 +137,36 @@ class TestConversationNotificationTask(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn('second thread reply', mail.outbox[0].body)
         self.assertNotIn('first thread reply', mail.outbox[0].body)
+
+
+class TestMarkConversationClosedTask(TestCase):
+    def test_mark_conversation_as_closed(self):
+        long_time_ago = timezone.now() - relativedelta(days=30)
+
+        # not cancelled -> should stay open
+        issue = IssueFactory()
+        conversation = issue.conversation
+        conversation.messages.create(content='hello', author=issue.created_by, created_at=long_time_ago)
+
+        # cancelled but recently commented on -> should stay open
+        issue_ended_recently = IssueFactory()
+        issue_ended_recently.cancel()
+        conversation_ended_recently = issue_ended_recently.conversation
+        conversation_ended_recently.messages.create(
+            content='hello', author=issue_ended_recently.created_by, created_at=timezone.now()
+        )
+
+        # cancelled and not commented on -> should be closed
+        issue_ended = IssueFactory()
+        issue_ended.cancel()
+        conversation_ended = issue_ended.conversation
+        conversation_ended.messages.create(content='hello', author=issue_ended.created_by, created_at=long_time_ago)
+
+        conversations = Conversation.objects.filter(target_type__model='issue')
+        self.assertEqual(conversations.count(), 3)
+        self.assertEqual(conversations.filter(is_closed=False).count(), 3)
+
+        mark_conversations_as_closed()
+
+        self.assertEqual(conversations.filter(is_closed=False).count(), 2)
+        self.assertEqual(conversations.filter(is_closed=True).first(), conversation_ended)

@@ -150,6 +150,8 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
     def validate_conversation(self, conversation):
         if self.context['request'].user not in conversation.participants.all():
             raise PermissionDenied(_('You are not in this conversation'))
+        if conversation.is_closed:
+            raise PermissionDenied(_('This conversation has been closed'))
         return conversation
 
     def validate(self, data):
@@ -193,12 +195,14 @@ class ConversationSerializer(serializers.ModelSerializer):
             'muted',
             'type',
             'target_id',
+            'is_closed',
         ]
 
     id = serializers.IntegerField(source='conversation.id', read_only=True)
     participants = serializers.PrimaryKeyRelatedField(source='conversation.participants', many=True, read_only=True)
     type = serializers.CharField(source='conversation.type', read_only=True)
     target_id = serializers.IntegerField(source='conversation.target_id', read_only=True)
+    is_closed = serializers.BooleanField(source='conversation.is_closed', read_only=True)
 
     unread_message_count = serializers.SerializerMethodField()
     updated_at = serializers.SerializerMethodField()
