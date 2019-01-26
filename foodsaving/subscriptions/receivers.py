@@ -7,7 +7,7 @@ from channels.layers import get_channel_layer
 from django.conf import settings
 from django.contrib.auth import user_logged_out
 from django.db.models import Q
-from django.db.models.signals import post_save, pre_delete, post_delete, pre_save
+from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
 from raven.contrib.django.raven_compat.models import client as sentry_client
 
