@@ -33,6 +33,32 @@ from foodsaving.pickups.models import PickupDate
 from foodsaving.pickups.serializers import PickupDateSerializer
 from foodsaving.users.serializers import UserInfoSerializer
 from foodsaving.utils.mixins import PartialUpdateModelMixin
+"""
+{
+  messages: [],
+  conversations: [],
+  applications: [],
+  pickups: [],
+  groups: [],
+  search_results: [
+    more_posts: true,
+    more_users: true,
+    term: "term in:pickups"
+  ],
+}
+
+search:
+- all/any by group
+- message content
+  - by target
+  - before/after date
+  - by author
+- stores
+  - title
+  - description (but it's not archived..)
+- history
+
+"""
 
 
 class SearchViewSet(GenericViewSet):
