@@ -21,6 +21,7 @@ from foodsaving.history.api import HistoryViewSet
 from foodsaving.invitations.api import InvitationsViewSet, InvitationAcceptViewSet
 from foodsaving.notifications.api import NotificationViewSet
 from foodsaving.pickups.api import PickupDateViewSet, PickupDateSeriesViewSet, FeedbackViewSet
+from foodsaving.search.api import SearchViewSet
 from foodsaving.stores.api import StoreViewSet
 from foodsaving.subscriptions.api import PushSubscriptionViewSet
 from foodsaving.template_previews import views as template_preview_views
@@ -40,6 +41,8 @@ router.register('applications', ApplicationViewSet, basename='application')
 router.register('agreements', AgreementViewSet)
 
 router.register('issues', IssuesViewSet, basename='issues')
+
+router.register('search', SearchViewSet, basename='search')
 
 # User endpoints
 router.register('users', UserViewSet)

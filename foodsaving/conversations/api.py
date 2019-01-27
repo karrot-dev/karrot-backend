@@ -2,6 +2,7 @@ import coreapi
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from django.db.models import prefetch_related_objects, F
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -19,8 +20,6 @@ from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.applications.models import Application
 from foodsaving.applications.serializers import ApplicationSerializer
-from foodsaving.issues.models import Issue
-from foodsaving.issues.serializers import IssueSerializer
 from foodsaving.conversations.models import (
     Conversation, ConversationMessage, ConversationMessageReaction, ConversationParticipant, ConversationMeta
 )
@@ -28,6 +27,8 @@ from foodsaving.conversations.serializers import (
     ConversationSerializer, ConversationMessageSerializer, ConversationMessageReactionSerializer, EmojiField,
     ConversationThreadSerializer, ConversationMetaSerializer
 )
+from foodsaving.issues.models import Issue
+from foodsaving.issues.serializers import IssueSerializer
 from foodsaving.pickups.models import PickupDate
 from foodsaving.pickups.serializers import PickupDateSerializer
 from foodsaving.users.serializers import UserInfoSerializer
@@ -211,15 +212,22 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
 
 class ConversationMessageFilter(filters.FilterSet):
     exclude_read = filters.BooleanFilter(field_name='unread_replies_count', method='filter_exclude_read')
+    search = filters.CharFilter(field_name='content', method='filter_search')
 
     def filter_exclude_read(self, qs, name, value):
         if value is True:
             return qs.exclude(unread_replies_count=0)
         return qs
 
+    def filter_search(self, qs, name, value):
+        vector = SearchVector('content')
+        query = SearchQuery(value)
+        rank = SearchRank(vector, query)
+        return qs.order_by().annotate(rank=rank).order_by('-rank').filter(rank__gt=0)[:20]
+
     class Meta:
         model = ConversationMessage
-        fields = ('conversation', 'thread', 'exclude_read')
+        fields = ('conversation', 'thread', 'exclude_read', 'search')
 
 
 class ConversationMessageViewSet(
@@ -243,7 +251,7 @@ class ConversationMessageViewSet(
     )
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = ConversationMessageFilter
-    pagination_class = MessagePagination
+    # pagination_class = MessagePagination
 
     @property
     def paginator(self):
