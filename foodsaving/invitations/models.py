@@ -61,5 +61,12 @@ class Invitation(BaseModel):
 
         self.delete()
 
+    def resend_invitation_email(self):
+        self.expires_at = get_default_expiry_date()
+        self.created_at = timezone.now()
+        self.send_mail()
+        self.save()
+
+
     def __str__(self):
         return "Invite to {0} by {1}".format(self.group.name, self.invited_by.display_name)

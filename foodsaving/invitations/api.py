@@ -8,7 +8,8 @@ from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.invitations.models import Invitation
-from foodsaving.invitations.serializers import InvitationSerializer, InvitationAcceptSerializer
+from foodsaving.invitations.serializers import InvitationSerializer, InvitationAcceptSerializer, \
+                                                InvitationResendEmailSerializer
 
 
 class InvitesPerDayThrottle(UserRateThrottle):
@@ -65,4 +66,30 @@ class InvitationAcceptViewSet(GenericViewSet):
         serializer = self.get_serializer(instance, request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        return Response(serializer.data)
+
+class InvitationResendEmailViewSet(GenericViewSet):
+    queryset = Invitation.objects
+    serializer_class = InvitationResendEmailSerializer
+    permission_classes = (
+        IsAuthenticated,
+    )
+    lookup_field = 'pk'
+
+    def get_queryset(self):
+        return self.queryset.filter(expires_at__gte=timezone.now())
+
+    @action(detail=True, methods=["POST"])
+    def resend_invitation_email(self, request, **kwargs):
+        """
+        Resend invitation email
+        """
+        self.check_permissions(request)
+        instance = self.get_object()
+        self.check_object_permissions(request, instance)
+
+        serializer = self.get_serializer(instance, request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
         return Response(serializer.data)

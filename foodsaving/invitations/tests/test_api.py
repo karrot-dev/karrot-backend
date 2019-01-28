@@ -79,6 +79,21 @@ class TestInviteCreate(APITestCase):
         response = self.client.post(base_url, {'email': 'please@join.com', 'group': self.group.id})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_invite_again_after_one_hour(self):
+        from datetime import timedelta
+
+        self.client.force_login(self.member)
+        response = self.client.post(base_url, {'email': 'please@join.com', 'group': self.group.id})
+
+        # make invitation get one hour behind the timezone to allow resending email
+        i = Invitation.objects.get(id=response.data['id'])
+        i.created_at = i.created_at - timedelta(hours=1)
+        i.save()
+
+        data = {'created_at': i.created_at}
+        response = self.client.post(base_url + str(i.id) + '/resend_invitation_email/', data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
     def test_invite_again_when_expired(self):
         self.client.force_login(self.member)
         response = self.client.post(base_url, {'email': 'please@join.com', 'group': self.group.id})

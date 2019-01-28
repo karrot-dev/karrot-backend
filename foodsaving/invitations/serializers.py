@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
@@ -16,7 +18,7 @@ class InvitationSerializer(serializers.ModelSerializer):
             UniqueTogetherValidator(
                 queryset=Invitation.objects.filter(expires_at__gte=timezone.now()),
                 fields=('email', 'group'),
-                message=_('An invitation has already been sent to this e-mail address')
+                message=_('An invitation has already been sent to this e-mail address, you can only resend after one hour!')
             )
         ]
 
@@ -40,4 +42,21 @@ class InvitationSerializer(serializers.ModelSerializer):
 class InvitationAcceptSerializer(serializers.Serializer):
     def update(self, invitation, validated_data):
         invitation.accept(self.context['request'].user)
+        return invitation
+
+class InvitationResendEmailSerializer(serializers.Serializer):
+    from datetime import timedelta
+    from django.utils import timezone
+
+    created_at = serializers.DateTimeField()
+
+    def validate(self, attrs):
+        if not self.timezone.now() >= attrs['created_at'] + self.timedelta(hours=1):
+            raise serializers.ValidationError(
+                _('An invitation has already been sent to this e-mail address, you can only resend after one hour!')
+            )
+        return attrs
+
+    def update(self, invitation, validated_data):
+        invitation.resend_invitation_email()
         return invitation
