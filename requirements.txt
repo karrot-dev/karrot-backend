@@ -86,9 +86,9 @@ pathlib2==2.3.3
 pexpect==4.6.0            # via ipython
 pickleshare==0.7.5        # via ipython
 pillow==5.4.1             # via django-versatileimagefield
-pip-tools==3.3.1
+pip-tools==3.3.2
 pluggy==0.8.1             # via pytest
-prompt-toolkit==2.0.7     # via ipython
+prompt-toolkit==2.0.8     # via ipython
 psutil==5.5.0             # via python-server-metrics
 psycopg2-binary==2.7.7
 ptyprocess==0.6.0         # via pexpect

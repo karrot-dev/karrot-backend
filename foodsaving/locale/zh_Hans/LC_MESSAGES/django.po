@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-01-24 17:43+0000\n"
+"POT-Creation-Date: 2019-01-26 21:45+0000\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
 "Last-Translator: Tilmann Becker <tilmann.becker+github@gmail.com>, 2019\n"
 "Language-Team: Chinese (China) (https://www.transifex.com/yunity-1/teams/68631/zh_CN/)\n"
@@ -22,19 +22,19 @@ msgstr ""
 "Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: foodsaving/applications/api.py:21
+#: foodsaving/applications/api.py:27
 msgid "You need to have a verified email address"
 msgstr "你需要一個經過驗證的電郵地址"
 
-#: foodsaving/applications/api.py:30 foodsaving/groups/api.py:49
-#: foodsaving/invitations/serializers.py:27
+#: foodsaving/applications/api.py:36 foodsaving/groups/api.py:49
+#: foodsaving/invitations/serializers.py:28
 #: foodsaving/issues/serializers.py:149 foodsaving/pickups/permissions.py:67
 #: foodsaving/pickups/serializers.py:109 foodsaving/pickups/serializers.py:274
 #: foodsaving/stores/api.py:18 foodsaving/stores/serializers.py:73
 msgid "You need to be a group editor"
 msgstr "你必須擁有社團編輯權"
 
-#: foodsaving/applications/api.py:38
+#: foodsaving/applications/api.py:44
 msgid "You need to be the applicant"
 msgstr "你必須是申請者"
 
@@ -169,19 +169,23 @@ msgstr "你的%(group_name)s申請的新訊息"
 msgid "New message in conflict resolution in %(group_name)s"
 msgstr ""
 
-#: foodsaving/conversations/serializers.py:160
+#: foodsaving/conversations/serializers.py:154
+msgid "This conversation has been closed"
+msgstr ""
+
+#: foodsaving/conversations/serializers.py:162
 msgid "You cannot change the thread of a message"
 msgstr "你不可以更改訊息的討論串中"
 
-#: foodsaving/conversations/serializers.py:167
+#: foodsaving/conversations/serializers.py:169
 msgid "Thread is not in the same conversation"
 msgstr "討論串中不在同一個對話"
 
-#: foodsaving/conversations/serializers.py:171
+#: foodsaving/conversations/serializers.py:173
 msgid "You can only reply to Group messages"
 msgstr "你只能回覆群組對話"
 
-#: foodsaving/conversations/serializers.py:175
+#: foodsaving/conversations/serializers.py:177
 msgid "You cannot reply to replies"
 msgstr "你無法回覆留言"
 
@@ -439,18 +443,22 @@ msgstr ""
 msgid "%(group_name)s is really missing you!"
 msgstr ""
 
-#: foodsaving/invitations/serializers.py:19
+#: foodsaving/invitations/serializers.py:20
 msgid "An invitation has already been sent to this e-mail address"
 msgstr "邀請信已寄送至下列電子郵件信箱："
 
-#: foodsaving/invitations/serializers.py:25
+#: foodsaving/invitations/serializers.py:26
 #: foodsaving/issues/serializers.py:147 foodsaving/stores/serializers.py:71
 msgid "You are not a member of this group."
 msgstr "你並不是此社團的成員。"
 
-#: foodsaving/invitations/serializers.py:32
+#: foodsaving/invitations/serializers.py:33
 msgid "User is already member of group"
 msgstr "用戶已經是社團的成員了"
+
+#: foodsaving/invitations/serializers.py:41
+msgid "Email could not be sent"
+msgstr ""
 
 #: foodsaving/invitations/templates/emailinvitation.html.jinja2:6
 #: foodsaving/invitations/templates/emailinvitation.subject.jinja2:1
