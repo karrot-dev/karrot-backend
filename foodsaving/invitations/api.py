@@ -68,6 +68,7 @@ class InvitationAcceptViewSet(GenericViewSet):
         serializer.save()
         return Response(serializer.data)
 
+
 class InvitationResendEmailViewSet(GenericViewSet):
     queryset = Invitation.objects
     serializer_class = InvitationResendEmailSerializer

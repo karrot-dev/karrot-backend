@@ -1,6 +1,3 @@
-from datetime import datetime, timedelta
-
-from anymail.exceptions import AnymailAPIError
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
@@ -48,6 +45,7 @@ class InvitationAcceptSerializer(serializers.Serializer):
 class InvitationResendEmailSerializer(serializers.Serializer):
     from datetime import timedelta
     from django.utils import timezone
+
 
     created_at = serializers.DateTimeField()
 

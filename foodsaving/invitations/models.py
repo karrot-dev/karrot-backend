@@ -67,6 +67,5 @@ class Invitation(BaseModel):
         self.send_mail()
         self.save()
 
-
     def __str__(self):
         return "Invite to {0} by {1}".format(self.group.name, self.invited_by.display_name)
