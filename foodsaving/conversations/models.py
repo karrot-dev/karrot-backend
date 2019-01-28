@@ -47,6 +47,7 @@ class Conversation(BaseModel, UpdatedAtMixin):
 
     participants = ManyToManyField(settings.AUTH_USER_MODEL, through='ConversationParticipant')
     is_private = models.BooleanField(default=False)
+    is_closed = models.BooleanField(default=False)
 
     target_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
     target_id = models.PositiveIntegerField(null=True)
@@ -279,6 +280,18 @@ class ConversationMixin(object):
     @property
     def conversation(self):
         return Conversation.objects.get_or_create_for_target(self)
+
+    @property
+    def has_ended(self):
+        """Override this property if the conversation should be closed after the target has ended"""
+        return False
+
+    @property
+    def group(self):
+        """Returns the group that the target belongs to
+        Override this property if you have the group at another location
+        """
+        return self.group
 
 
 class ConversationMessageReaction(BaseModel):

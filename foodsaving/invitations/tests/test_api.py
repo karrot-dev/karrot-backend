@@ -1,4 +1,5 @@
 import re
+from anymail.exceptions import AnymailAPIError
 
 from dateutil.relativedelta import relativedelta
 from django.core import mail
@@ -6,6 +7,7 @@ from django.utils import timezone
 from furl import furl
 from rest_framework import status
 from rest_framework.test import APITestCase
+from unittest.mock import patch
 
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.history.models import History
@@ -136,6 +138,14 @@ class TestInviteCreate(APITestCase):
         self.client.force_login(self.member)
         response = self.client.post(base_url, {'email': 'pleasehä', 'group': self.group.id})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @patch('foodsaving.utils.email_utils.AnymailMessage.send')
+    def test_invite_with_rejected_email(self, send):
+        send.side_effect = AnymailAPIError()
+        self.client.force_login(self.member)
+        response = self.client.post(base_url, {'email': 'rejected@foo.com', 'group': self.group.id})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Invitation.objects.count(), 0)
 
     def test_invite_when_inviting_user_is_not_member_of_group(self):
         self.client.force_login(self.member2)

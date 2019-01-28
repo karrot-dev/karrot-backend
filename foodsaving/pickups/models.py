@@ -246,6 +246,10 @@ class PickupDate(BaseModel, ConversationMixin):
     def group(self):
         return self.store.group
 
+    @property
+    def has_ended(self):
+        return not self.is_upcoming()
+
     def __str__(self):
         return 'PickupDate {} - {}'.format(self.date.start, self.store)
 
