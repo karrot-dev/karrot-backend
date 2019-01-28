@@ -44,10 +44,10 @@ class InvitationAcceptSerializer(serializers.Serializer):
 
 class InvitationResendEmailSerializer(serializers.Serializer):
     from datetime import timedelta
-    from django.utils import timezone
 
 
     created_at = serializers.DateTimeField()
+
 
     def validate(self, attrs):
         if not self.timezone.now() >= attrs['created_at'] + self.timedelta(hours=1):
