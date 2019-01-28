@@ -69,7 +69,7 @@ class TestCreateApplication(APITestCase, ExtractPaginationMixin):
         self.assertEqual(len(message_response.data), 0)
 
         # list application
-        application_list_response = self.client.get('/api/applications/')
+        application_list_response = self.get_results('/api/applications/')
         self.assertEqual(application_list_response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(application_list_response.data), 1)
         data = application_list_response.data[0]

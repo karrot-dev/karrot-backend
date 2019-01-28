@@ -225,10 +225,14 @@ def send_group_updates(sender, instance, **kwargs):
 # GroupMembership
 @receiver(post_save, sender=GroupMembership)
 def send_group_membership_updates(sender, instance, created, **kwargs):
-    group = instance.group
-    if not created:
-        return
-    send_group_updates(sender, group)
+    membership = instance
+    group = membership.group
+
+    dirty_fields = membership.get_dirty_fields()
+
+    # Send updates if the membership was created or the roles field changed
+    if created or 'roles' in dirty_fields.keys():
+        send_group_updates(sender, group)
 
 
 @receiver(post_delete, sender=GroupMembership)
@@ -252,7 +256,6 @@ def send_application_updates(sender, instance, **kwargs):
 @receiver(post_save, sender=Trust)
 def send_trust_updates(sender, instance, **kwargs):
     send_group_updates(sender, instance.membership.group)
-    send_user_updates(sender, instance.membership.user)  # TODO check if needed
 
 
 # Invitations

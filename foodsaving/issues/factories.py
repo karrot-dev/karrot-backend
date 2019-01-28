@@ -2,6 +2,7 @@ from dateutil.relativedelta import relativedelta
 from factory import DjangoModelFactory, CREATE_STRATEGY, SubFactory, LazyAttribute, post_generation
 from freezegun import freeze_time
 
+from foodsaving.groups.models import GroupMembership
 from foodsaving.issues.models import Issue, OptionTypes
 from foodsaving.groups import roles
 from foodsaving.groups.factories import GroupFactory
@@ -21,8 +22,16 @@ class IssueFactory(DjangoModelFactory):
 
     @post_generation
     def add_members(self, create, extracted, **kwargs):
-        self.group.groupmembership_set.get_or_create(user=self.created_by, roles=[roles.GROUP_EDITOR])
+        GroupMembership.objects.update_or_create(
+            {
+                'roles': [roles.GROUP_EDITOR]
+            },
+            user=self.created_by,
+            group=self.group,
+        )
         self.group.groupmembership_set.get_or_create(user=self.affected_user)
+        self.issueparticipant_set.get_or_create(user=self.created_by)
+        self.conversation.join(self.created_by)
 
 
 def vote_for(voting, user, type):

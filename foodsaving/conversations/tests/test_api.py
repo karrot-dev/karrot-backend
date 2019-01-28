@@ -816,3 +816,14 @@ class TestWallMessagesUpdateStatus(APITestCase):
         self.assertEqual(response.data['content'], data['content'])
         self.group.refresh_from_db()
         self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)
+
+
+class TestClosedConversation(APITestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.conversation = ConversationFactory(participants=[self.user], is_closed=True)
+
+    def test_write_message_in_closed_conversation_fails(self):
+        self.client.force_login(user=self.user)
+        response = self.client.post('/api/messages/', {'conversation': self.conversation.id, 'content': 'hello'})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
