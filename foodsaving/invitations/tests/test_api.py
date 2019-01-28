@@ -99,7 +99,7 @@ class TestInviteCreate(APITestCase):
         # make invitation.created_at back to timezone.now() to not allow resend the email
         i.created_at = timezone.now()
         i.save()
-        
+
         data = {'created_at': i.created_at}
         response = self.client.post(base_url + str(i.id) + '/resend_invitation_email/', data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
