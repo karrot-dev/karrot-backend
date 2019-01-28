@@ -1,5 +1,3 @@
-import itertools
-
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
@@ -78,16 +76,6 @@ def prepare_group_summary_emails(group, context):
             to=[member.email],
             language=member.language,
         ) for member in members
-    ]
-
-    grouped_members = itertools.groupby(members.order_by('language'), key=lambda member: member.language)
-    return [
-        prepare_email(
-            template='group_summary',
-            context=context,
-            to=[member.email for member in members],
-            language=language,
-        ) for (language, members) in grouped_members
     ]
 
 
