@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from anymail.exceptions import AnymailAPIError
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
