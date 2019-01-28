@@ -54,7 +54,7 @@ class InvitationResendEmailSerializer(serializers.Serializer):
 
 
     def validate(self, attrs):
-        if not self.timezone.now() >= attrs['created_at'] + self.timedelta(hours=1):
+        if not timezone.now() >= attrs['created_at'] + self.timedelta(hours=1):
             raise serializers.ValidationError(
                 _('An invitation has already been sent to this e-mail address, you can only resend after one hour!')
             )
