@@ -1,6 +1,9 @@
+from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
-from foodsaving.groups.models import GroupMembership
+from foodsaving.groups.models import GroupMembership, GroupStatus
+from foodsaving.pickups.models import PickupDate
 from foodsaving.webhooks.models import EmailEvent
 
 
@@ -30,10 +33,16 @@ def get_users_stats():
             groupmembership__in=GroupMembership.objects.exclude_playgrounds().active_within(days=n),
             deleted=False,
         ).distinct()
+        now = timezone.now()
         pickup_active_users = User.objects.filter(
-            groupmembership__in=GroupMembership.objects.exclude_playgrounds().pickup_active_within(days=n),
-            deleted=False,
-        ).distinct()
+            pickup_dates__in=PickupDate.objects.exclude_disabled().filter(
+                date__startswith__lt=now,
+                date__startswith__gte=now - relativedelta(days=n)
+            ).exclude(
+                store__group__status=GroupStatus.PLAYGROUND,
+            ),
+            deleted=False
+        )
         fields.update({
             'count_active_{}d'.format(n): active_users.count(),
             'count_pickup_active_{}d'.format(n): pickup_active_users.count(),
