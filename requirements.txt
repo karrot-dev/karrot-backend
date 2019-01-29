@@ -111,7 +111,7 @@ python-server-metrics==0.2.1
 python-slugify==1.2.6     # via transifex-client
 pytz==2018.9
 raven==6.10.0
-redis==3.0.1
+redis==3.1.0
 regex==2019.1.24          # via talon
 requests-mock==1.5.2
 requests-toolbelt==0.8.0  # via pyfcm
