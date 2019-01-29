@@ -19,6 +19,7 @@ class NotInGroup(BasePermission):
     def has_object_permission(self, request, view, obj):
         return not obj.group.is_member(request.user)
 
+
 class CanResend(BasePermission):
     from datetime import timedelta
 
