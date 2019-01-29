@@ -92,17 +92,18 @@ class TestInviteCreate(APITestCase):
         i.created_at = i.created_at - timedelta(hours=1)
         i.save()
 
-        data = {'created_at': i.created_at}
-        response = self.client.post(base_url + str(i.id) + '/resend_invitation_email/', data)
+        response = self.client.post(base_url + str(i.id) + '/resend/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_cannot_invite_again_in_less_then_one_hour(self):
         # make invitation.created_at back to timezone.now() to not allow resend the email
-        i.created_at = timezone.now()
-        i.save()
+        self.client.force_login(self.member)
+        response = self.client.post(base_url, {'email': 'please@join.com', 'group': self.group.id})
 
-        data = {'created_at': i.created_at}
-        response = self.client.post(base_url + str(i.id) + '/resend_invitation_email/', data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        i = Invitation.objects.get(id=response.data['id'])
+
+        response = self.client.post(base_url + str(i.id) + '/resend/')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_invite_again_when_expired(self):
         self.client.force_login(self.member)
