@@ -42,7 +42,7 @@ def get_users_stats():
                 store__group__status=GroupStatus.PLAYGROUND,
             ),
             deleted=False
-        )
+        ).distinct()
         fields.update({
             'count_active_{}d'.format(n): active_users.count(),
             'count_pickup_active_{}d'.format(n): pickup_active_users.count(),
