@@ -110,7 +110,7 @@ class PickupDateSeries(BaseModel):
 
 class PickupDateQuerySet(models.QuerySet):
     def _feedback_possible_q(self, user):
-        return Q(feedback_possible=True) \
+        return Q(is_done=True) \
                & Q(date__endswith__gte=timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)) \
                & Q(collectors=user) \
                & ~Q(feedback__given_by=user)
@@ -150,7 +150,7 @@ class PickupDateQuerySet(models.QuerySet):
         add them to history and mark as processed
         """
         for pickup in self.exclude_disabled().filter(
-                feedback_possible=False,
+                is_done=False,
                 date__startswith__lt=timezone.now(),
         ):
             if not pickup.store.is_active():
@@ -185,7 +185,7 @@ class PickupDateQuerySet(models.QuerySet):
                     payload=payload,
                 )
 
-            pickup.feedback_possible = True
+            pickup.is_done = True
             pickup.save()
 
 
@@ -239,8 +239,7 @@ class PickupDate(BaseModel, ConversationMixin):
         on_delete=models.SET_NULL,
     )
 
-    # Is set to true when the pickup is done
-    feedback_possible = models.BooleanField(default=False)
+    is_done = models.BooleanField(default=False)
 
     @property
     def group(self):
