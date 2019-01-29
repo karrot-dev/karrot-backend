@@ -39,7 +39,9 @@ router.register('groups-info', GroupInfoViewSet, basename='groupinfo')
 router.register('applications', ApplicationViewSet, basename='application')
 router.register('agreements', AgreementViewSet)
 
-router.register('issues', IssuesViewSet, basename='issues')
+if settings.DEBUG or settings.SITE_NAME == 'karrot.world beta':
+    # TODO remove before release
+    router.register('issues', IssuesViewSet, basename='issues')
 
 # User endpoints
 router.register('users', UserViewSet)

@@ -64,9 +64,10 @@ class IssuesViewSet(
         detail=True,
         methods=['POST', 'DELETE'],
         serializer_class=VoteSerializer,
-        permission_classes=(IsAuthenticated, IsOngoing)
+        permission_classes=(IsAuthenticated, IsOngoing),
     )
     def vote(self, request, **kwargs):
+        """Vote on an issue or delete a vote - send a list of vote objects that covers all options"""
         self.check_permissions(request)
         issue = self.get_object()
         self.check_object_permissions(request, issue)
