@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-01-24 17:43+0000\n"
+"POT-Creation-Date: 2019-01-26 21:45+0000\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
 "Last-Translator: Thiago Mendes, 2019\n"
 "Language-Team: Portuguese (Brazil) (https://www.transifex.com/yunity-1/teams/68631/pt_BR/)\n"
@@ -23,19 +23,19 @@ msgstr ""
 "Language: pt_BR\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: foodsaving/applications/api.py:21
+#: foodsaving/applications/api.py:27
 msgid "You need to have a verified email address"
 msgstr ""
 
-#: foodsaving/applications/api.py:30 foodsaving/groups/api.py:49
-#: foodsaving/invitations/serializers.py:27
+#: foodsaving/applications/api.py:36 foodsaving/groups/api.py:49
+#: foodsaving/invitations/serializers.py:28
 #: foodsaving/issues/serializers.py:149 foodsaving/pickups/permissions.py:67
 #: foodsaving/pickups/serializers.py:109 foodsaving/pickups/serializers.py:274
 #: foodsaving/stores/api.py:18 foodsaving/stores/serializers.py:73
 msgid "You need to be a group editor"
 msgstr ""
 
-#: foodsaving/applications/api.py:38
+#: foodsaving/applications/api.py:44
 msgid "You need to be the applicant"
 msgstr ""
 
@@ -168,19 +168,23 @@ msgstr ""
 msgid "New message in conflict resolution in %(group_name)s"
 msgstr ""
 
-#: foodsaving/conversations/serializers.py:160
+#: foodsaving/conversations/serializers.py:154
+msgid "This conversation has been closed"
+msgstr ""
+
+#: foodsaving/conversations/serializers.py:162
 msgid "You cannot change the thread of a message"
 msgstr ""
 
-#: foodsaving/conversations/serializers.py:167
+#: foodsaving/conversations/serializers.py:169
 msgid "Thread is not in the same conversation"
 msgstr ""
 
-#: foodsaving/conversations/serializers.py:171
+#: foodsaving/conversations/serializers.py:173
 msgid "You can only reply to Group messages"
 msgstr ""
 
-#: foodsaving/conversations/serializers.py:175
+#: foodsaving/conversations/serializers.py:177
 msgid "You cannot reply to replies"
 msgstr ""
 
@@ -431,17 +435,21 @@ msgstr ""
 msgid "%(group_name)s is really missing you!"
 msgstr ""
 
-#: foodsaving/invitations/serializers.py:19
+#: foodsaving/invitations/serializers.py:20
 msgid "An invitation has already been sent to this e-mail address"
 msgstr "Um convite já foi enviado para este e-mail"
 
-#: foodsaving/invitations/serializers.py:25
+#: foodsaving/invitations/serializers.py:26
 #: foodsaving/issues/serializers.py:147 foodsaving/stores/serializers.py:71
 msgid "You are not a member of this group."
 msgstr "Você não é um membro deste grupo."
 
-#: foodsaving/invitations/serializers.py:32
+#: foodsaving/invitations/serializers.py:33
 msgid "User is already member of group"
+msgstr ""
+
+#: foodsaving/invitations/serializers.py:41
+msgid "Email could not be sent"
 msgstr ""
 
 #: foodsaving/invitations/templates/emailinvitation.html.jinja2:6
