@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-01-26 21:45+0000\n"
+"POT-Creation-Date: 2019-01-29 18:43+0000\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
 "Last-Translator: Tilmann Becker <tilmann.becker+github@gmail.com>, 2019\n"
 "Language-Team: Esperanto (https://www.transifex.com/yunity-1/teams/68631/eo/)\n"
@@ -29,7 +29,7 @@ msgstr ""
 
 #: foodsaving/applications/api.py:36 foodsaving/groups/api.py:49
 #: foodsaving/invitations/serializers.py:28
-#: foodsaving/issues/serializers.py:149 foodsaving/pickups/permissions.py:67
+#: foodsaving/issues/serializers.py:143 foodsaving/pickups/permissions.py:67
 #: foodsaving/pickups/serializers.py:109 foodsaving/pickups/serializers.py:274
 #: foodsaving/stores/api.py:18 foodsaving/stores/serializers.py:73
 msgid "You need to be a group editor"
@@ -440,7 +440,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "An invitation has already been sent to this e-mail address"
 
 #: foodsaving/invitations/serializers.py:26
-#: foodsaving/issues/serializers.py:147 foodsaving/stores/serializers.py:71
+#: foodsaving/issues/serializers.py:141 foodsaving/stores/serializers.py:71
 msgid "You are not a member of this group."
 msgstr "Vi ne membras en ĉi tiu grupo"
 
@@ -486,30 +486,30 @@ msgstr ""
 msgid "You need to provide a score for all options"
 msgstr ""
 
-#: foodsaving/issues/serializers.py:65
+#: foodsaving/issues/serializers.py:59
 msgid "Provided option is not part of this voting"
 msgstr ""
 
-#: foodsaving/issues/serializers.py:70
+#: foodsaving/issues/serializers.py:64
 msgid "Provided score is outside of allowed range"
 msgstr ""
 
-#: foodsaving/issues/serializers.py:155
+#: foodsaving/issues/serializers.py:149
 #, python-format
 msgid ""
 "You need at least %(count)s active trusted users in your group to start this"
 " process."
 msgstr ""
 
-#: foodsaving/issues/serializers.py:167
+#: foodsaving/issues/serializers.py:161
 msgid "Topic cannot be empty"
 msgstr ""
 
-#: foodsaving/issues/serializers.py:174
+#: foodsaving/issues/serializers.py:168
 msgid "Affected user is not part of that group"
 msgstr ""
 
-#: foodsaving/issues/serializers.py:176
+#: foodsaving/issues/serializers.py:170
 msgid "A conflict resolution about that user has already been started"
 msgstr ""
 
