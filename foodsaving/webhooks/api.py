@@ -127,8 +127,13 @@ class EmailEventView(views.APIView):
 
         for events in [e['msys'].values() for e in request.data]:
             for event in events:
-                EmailEvent.objects.get_or_create(
-                    id=event['event_id'], address=event['rcpt_to'], event=event['type'], payload=event
+                EmailEvent.objects.update_or_create(
+                    id=event['event_id'],
+                    defaults={
+                        'address': event['rcpt_to'],
+                        'event': event['type'],
+                        'payload': event
+                    },
                 )
 
         return Response(status=status.HTTP_200_OK, data={})
