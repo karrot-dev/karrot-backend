@@ -33,7 +33,7 @@ coreapi==2.3.3            # via openapi-codec
 coreschema==0.0.4         # via coreapi
 coverage==4.5.2           # via pytest-cov
 cssselect==1.0.3          # via talon
-daphne==2.2.4
+daphne==2.2.5
 decorator==4.3.2          # via ipython, traitlets
 django-anymail==5.0
 django-cors-headers==2.4.0
