@@ -172,7 +172,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         Comment field can be empty
         """
         self.client.force_login(user=self.collector3)
-        response = self.client.post(self.url, {k: v for (k, v) in self.feedback_post.items() if k is not 'comment'})
+        response = self.client.post(self.url, {k: v for (k, v) in self.feedback_post.items() if k != 'comment'})
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertEqual(response.data['comment'], '')
 

@@ -29,7 +29,7 @@ def daily_pickup_notifications():
 
     for group in Group.objects.all():
         with timezone.override(group.timezone):
-            if timezone.localtime().hour is not 20:  # only at 8pm local time
+            if timezone.localtime().hour != 20:  # only at 8pm local time
                 continue
 
             for data in fetch_pickup_notification_data_for_group(group):
