@@ -3,7 +3,10 @@
 import subprocess
 import os
 import glob
+import sys
 from os.path import dirname, realpath, join
+
+process_mjml = '--no-mjml' not in sys.argv[1:]
 
 
 def color(num):
@@ -31,17 +34,19 @@ base = dirname(realpath(__file__))
 header("Installing python dependencies")
 subprocess.run(['pip-sync', 'requirements.txt'], env=environ)
 
-header("Installing node js dependencies")
-subprocess.run(['yarn'], env=environ, cwd=join(base, 'mjml'))
+if process_mjml:
 
-header("Removing old templates")
+    header("Installing node js dependencies")
+    subprocess.run(['yarn'], env=environ, cwd=join(base, 'mjml'))
 
-entries = glob.glob(join(base, 'foodsaving/*/templates/*.html.jinja2'))
-for entry in entries:
-    os.remove(entry)
-print('Removed {} entries'.format(len(entries)))
+    header("Removing old templates")
 
-header("Generating new templates")
-subprocess.run(['./mjml/convert'], env=environ)
+    entries = glob.glob(join(base, 'foodsaving/*/templates/*.html.jinja2'))
+    for entry in entries:
+        os.remove(entry)
+    print('Removed {} entries'.format(len(entries)))
+
+    header("Generating new templates")
+    subprocess.run(['./mjml/convert'], env=environ)
 
 header('All done ☺')
