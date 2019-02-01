@@ -87,5 +87,10 @@ class CustomDateTimeRangeField(DateTimeRangeField):
     range_type = CustomDateTimeTZRange
 
 
-with connection.cursor() as c:
-    register_range('pg_catalog.tstzrange', CustomDateTimeTZRange, c, True)
+def register_custom_date_time_tz_range():
+    connection.ensure_connection()
+    register_range('pg_catalog.tstzrange', CustomDateTimeTZRange, connection.connection, True)
+    connection.close()  # don't leave connection lying around as we might be actually running the app now
+
+
+register_custom_date_time_tz_range()
