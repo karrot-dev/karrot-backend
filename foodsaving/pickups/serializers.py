@@ -237,6 +237,7 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
             'start_date',
             'description',
             'dates_preview',
+            'duration',
         ]
         read_only_fields = [
             'id',

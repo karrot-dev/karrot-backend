@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db import transaction
-from django.db.models import Count, Q
+from django.db.models import Count, Q, DurationField
 from django.utils import timezone
 
 from foodsaving.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField
@@ -31,6 +31,7 @@ class PickupDateSeries(BaseModel):
     rule = models.TextField()
     start_date = models.DateTimeField()
     description = models.TextField(blank=True)
+    duration = DurationField(default=timedelta(minutes=30))
 
     last_changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -41,7 +42,7 @@ class PickupDateSeries(BaseModel):
 
     def create_pickup(self, date):
         return self.pickup_dates.create(
-            date=CustomDateTimeTZRange(date, date + timedelta(minutes=30)),  # TODO: make duration part of series?
+            date=CustomDateTimeTZRange(date, date + self.duration),
             max_collectors=self.max_collectors,
             series=self,
             store=self.store,
@@ -94,12 +95,15 @@ class PickupDateSeries(BaseModel):
         if old:
             description_changed = old.description != self.description
             max_collectors_changed = old.max_collectors != self.max_collectors
-            if description_changed or max_collectors_changed:
+            duration_changed = old.duration != self.duration
+            if description_changed or max_collectors_changed or duration_changed:
                 for pickup in self.pickup_dates.upcoming():
                     if description_changed and old.description == pickup.description:
                         pickup.description = self.description
                     if max_collectors_changed and old.max_collectors == pickup.max_collectors:
                         pickup.max_collectors = self.max_collectors
+                    if duration_changed:
+                        pickup.date = CustomDateTimeTZRange(pickup.date.start, pickup.date.start + self.duration)
                     pickup.save()
 
     def delete(self, **kwargs):
