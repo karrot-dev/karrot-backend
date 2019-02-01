@@ -5,6 +5,22 @@ import os
 import glob
 from os.path import dirname, realpath, join
 
+
+def color(num):
+    def format(val):
+        return '\033[' + str(num) + 'm' + val + '\033[0m'
+
+    return format
+
+
+green = color(92)
+yellow = color(93)
+
+
+def header(val):
+    print('\n', yellow('★'), green(val), '\n')
+
+
 environ = os.environ.copy()
 
 # do not prompt if dependency source already exists, just wipe and get the required version
@@ -12,15 +28,20 @@ environ['PIP_EXISTS_ACTION'] = 'w'
 
 base = dirname(realpath(__file__))
 
-print("★ Installing python dependencies")
+header("Installing python dependencies")
 subprocess.run(['pip-sync', 'requirements.txt'], env=environ)
 
-print("★ Installing node js dependencies")
+header("Installing node js dependencies")
 subprocess.run(['yarn'], env=environ, cwd=join(base, 'mjml'))
 
-print("★ Removing old templates")
-for entry in glob.glob(join(base, 'foodsaving/*/templates/*.html.jinja2')):
-    os.remove(entry)
+header("Removing old templates")
 
-print("★ Generating new templates")
+entries = glob.glob(join(base, 'foodsaving/*/templates/*.html.jinja2'))
+for entry in entries:
+    os.remove(entry)
+print('Removed {} entries'.format(len(entries)))
+
+header("Generating new templates")
 subprocess.run(['./mjml/convert'], env=environ)
+
+header('All done ☺')
