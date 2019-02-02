@@ -209,9 +209,8 @@ def default_pickup_date_range():
 
 
 def to_range(date, **kwargs):
-    if not kwargs:
-        kwargs['minutes'] = default_duration.minutes
-    return CustomDateTimeTZRange(date, date + timedelta(**kwargs))
+    duration = timedelta(**kwargs) if kwargs else default_duration
+    return CustomDateTimeTZRange(date, date + duration)
 
 
 class PickupDate(BaseModel, ConversationMixin):
