@@ -66,7 +66,7 @@ class TestPickupDateSeriesCreationAPI(APITestCase, ExtractPaginationMixin):
             'store': self.store.id,
             'rule': str(recurrence),
             'description': '',
-            'duration': 1800,
+            'duration': None,
         }
         self.assertEqual(response.data, expected_series_data)
 
@@ -120,6 +120,7 @@ class TestPickupDateSeriesCreationAPI(APITestCase, ExtractPaginationMixin):
                 'description': '',
                 'feedback_given_by': [],
                 'is_disabled': False,
+                'has_duration': False,
             })
         self.assertEqual(response.data, created_pickup_dates, response.data)
 

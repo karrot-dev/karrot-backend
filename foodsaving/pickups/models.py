@@ -31,7 +31,7 @@ class PickupDateSeries(BaseModel):
     rule = models.TextField()
     start_date = models.DateTimeField()
     description = models.TextField(blank=True)
-    duration = DurationField(default=timedelta(minutes=30))
+    duration = DurationField(null=True)
 
     last_changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -42,7 +42,8 @@ class PickupDateSeries(BaseModel):
 
     def create_pickup(self, date):
         return self.pickup_dates.create(
-            date=CustomDateTimeTZRange(date, date + self.duration),
+            date=CustomDateTimeTZRange(date, date + (self.duration if self.duration else timedelta(minutes=30))),
+            has_duration=self.duration is not None,
             max_collectors=self.max_collectors,
             series=self,
             store=self.store,
@@ -233,6 +234,8 @@ class PickupDate(BaseModel, ConversationMixin):
         through_fields=('about', 'given_by')
     )
     date = CustomDateTimeRangeField(default=default_pickup_date_range)
+    has_duration = models.BooleanField(default=False)
+
     description = models.TextField(blank=True)
     max_collectors = models.PositiveIntegerField(null=True)
     is_disabled = models.BooleanField(default=False)
