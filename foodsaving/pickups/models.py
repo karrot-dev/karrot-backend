@@ -42,7 +42,7 @@ class PickupDateSeries(BaseModel):
 
     def create_pickup(self, date):
         return self.pickup_dates.create(
-            date=CustomDateTimeTZRange(date, date + (self.duration if self.duration else timedelta(minutes=30))),
+            date=CustomDateTimeTZRange(date, date + (self.duration if self.duration else default_duration)),
             has_duration=self.duration is not None,
             max_collectors=self.max_collectors,
             series=self,
@@ -104,7 +104,14 @@ class PickupDateSeries(BaseModel):
                     if max_collectors_changed and old.max_collectors == pickup.max_collectors:
                         pickup.max_collectors = self.max_collectors
                     if duration_changed:
-                        pickup.date = CustomDateTimeTZRange(pickup.date.start, pickup.date.start + self.duration)
+                        if self.duration:
+                            pickup.has_duration = True
+                            pickup.date = CustomDateTimeTZRange(pickup.date.start, pickup.date.start + self.duration)
+                        else:
+                            pickup.has_duration = False
+                            pickup.date = CustomDateTimeTZRange(
+                                pickup.date.start, pickup.date.start + default_duration
+                            )
                     pickup.save()
 
     def delete(self, **kwargs):
@@ -194,13 +201,16 @@ class PickupDateQuerySet(models.QuerySet):
             pickup.save()
 
 
+default_duration = timedelta(minutes=30)
+
+
 def default_pickup_date_range():
-    return CustomDateTimeTZRange(timezone.now(), timezone.now() + timedelta(minutes=30))
+    return CustomDateTimeTZRange(timezone.now(), timezone.now() + default_duration)
 
 
 def to_range(date, **kwargs):
     if not kwargs:
-        kwargs['minutes'] = 30
+        kwargs['minutes'] = default_duration.minutes
     return CustomDateTimeTZRange(date, date + timedelta(**kwargs))
 
 

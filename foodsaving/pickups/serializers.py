@@ -5,7 +5,6 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
-from rest_framework.compat import MinValueValidator
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.fields import DateTimeField, Field
 from rest_framework.validators import UniqueTogetherValidator
@@ -264,7 +263,7 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
         source='dates',
     )
 
-    duration = DurationInSecondsField(required=False)
+    duration = DurationInSecondsField(required=False, allow_null=True)
 
     def save(self, **kwargs):
         return super().save(last_changed_by=self.context['request'].user)
@@ -314,7 +313,7 @@ class PickupDateSeriesUpdateSerializer(PickupDateSeriesSerializer):
         fields = PickupDateSeriesSerializer.Meta.fields
         read_only_fields = PickupDateSeriesSerializer.Meta.read_only_fields + ['store']
 
-    duration = DurationInSecondsField(required=False)
+    duration = DurationInSecondsField(required=False, allow_null=True)
 
     def save(self, **kwargs):
         self._validated_data = find_changed(self.instance, self.validated_data)
