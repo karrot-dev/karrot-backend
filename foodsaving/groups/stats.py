@@ -126,17 +126,17 @@ def get_group_members_stats(group):
     }]
 
 
-def get_group_stores_stats(group):
+def get_group_places_stats(group):
     fields = {
-        'count_total': group.store.count(),
+        'count_total': group.place.count(),
     }
 
-    for entry in group.store.values('status').annotate(count=Count('status')):
-        # record one value per store status too
+    for entry in group.place.values('status').annotate(count=Count('status')):
+        # record one value per place status too
         fields['count_status_{}'.format(entry['status'])] = entry['count']
 
     return [{
-        'measurement': 'karrot.group.stores',
+        'measurement': 'karrot.group.places',
         'tags': group_tags(group),
         'fields': fields,
     }]

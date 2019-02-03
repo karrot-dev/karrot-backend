@@ -3,7 +3,7 @@ from rest_framework.test import APITestCase
 
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupNotificationType
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 from foodsaving.unsubscribe.utils import generate_token
 from foodsaving.users.factories import UserFactory
 
@@ -14,7 +14,7 @@ class TestUnsubscribeAPI(APITestCase):
         self.url = '/api/unsubscribe/{}/'
         self.user = UserFactory()
         self.group = GroupFactory(members=[self.user])
-        self.store = StoreFactory(group=self.group)
+        self.place = PlaceFactory(group=self.group)
         self.other_group = GroupFactory(members=[self.user])
 
     def test_unsubscribe_from_conversation(self):

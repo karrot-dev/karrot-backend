@@ -235,7 +235,7 @@ class GroupMembershipQuerySet(QuerySet):
                 date__startswith__lt=now,
                 date__startswith__gte=now - relativedelta(**kwargs),
             ),
-            user__pickup_dates__store__group=F('group'),
+            user__pickup_dates__place__group=F('group'),
         ).distinct()
 
     def editors(self):

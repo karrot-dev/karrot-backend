@@ -13,20 +13,20 @@ from foodsaving.conversations.models import ConversationMixin
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.pickups import stats
 from foodsaving.pickups.utils import match_pickups_with_dates, rrule_between_dates_in_local_time
-from foodsaving.stores.models import StoreStatus
+from foodsaving.places.models import PlaceStatus
 
 
 class PickupDateSeriesQuerySet(models.QuerySet):
     @transaction.atomic
     def update_pickups(self):
-        for series in self.filter(store__status=StoreStatus.ACTIVE.value):
+        for series in self.filter(place__status=PlaceStatus.ACTIVE.value):
             series.update_pickups()
 
 
 class PickupDateSeries(BaseModel):
     objects = PickupDateSeriesQuerySet.as_manager()
 
-    store = models.ForeignKey('stores.Store', related_name='series', on_delete=models.CASCADE)
+    place = models.ForeignKey('places.Place', related_name='series', on_delete=models.CASCADE)
     max_collectors = models.PositiveIntegerField(blank=True, null=True)
     rule = models.TextField()
     start_date = models.DateTimeField()
@@ -44,7 +44,7 @@ class PickupDateSeries(BaseModel):
             date=CustomDateTimeTZRange(date, date + timedelta(minutes=30)),  # TODO: make duration part of series?
             max_collectors=self.max_collectors,
             series=self,
-            store=self.store,
+            place=self.place,
             description=self.description,
             last_changed_by=self.last_changed_by,
         )
@@ -57,9 +57,9 @@ class PickupDateSeries(BaseModel):
         return rrule_between_dates_in_local_time(
             rule=self.rule,
             dtstart=self.start_date,
-            tz=self.store.group.timezone,
+            tz=self.place.group.timezone,
             period_start=self.period_start(),
-            period_duration=relativedelta(weeks=self.store.weeks_in_advance)
+            period_duration=relativedelta(weeks=self.place.weeks_in_advance)
         )
 
     def get_matched_pickups(self):
@@ -81,7 +81,7 @@ class PickupDateSeries(BaseModel):
                     pickup.delete()
 
     def __str__(self):
-        return 'PickupDateSeries {} - {}'.format(self.rule, self.store)
+        return 'PickupDateSeries {} - {}'.format(self.rule, self.place)
 
     def save(self, *args, **kwargs):
         old = type(self).objects.get(pk=self.pk) if self.pk else None
@@ -128,7 +128,7 @@ class PickupDateQuerySet(models.QuerySet):
         return self.filter(is_disabled=False)
 
     def in_group(self, group):
-        return self.filter(store__group=group)
+        return self.filter(place__group=group)
 
     def due_soon(self):
         in_some_hours = timezone.now() + relativedelta(hours=settings.PICKUPDATE_DUE_SOON_HOURS)
@@ -153,8 +153,8 @@ class PickupDateQuerySet(models.QuerySet):
                 feedback_possible=False,
                 date__startswith__lt=timezone.now(),
         ):
-            if not pickup.store.is_active():
-                # Make sure we don't process this pickup again, even if the store gets active in future
+            if not pickup.place.is_active():
+                # Make sure we don't process this pickup again, even if the place gets active in future
                 pickup.is_disabled = True
                 pickup.save()
                 continue
@@ -169,8 +169,8 @@ class PickupDateQuerySet(models.QuerySet):
                 stats.pickup_missed(pickup)
                 History.objects.create(
                     typus=HistoryTypus.PICKUP_MISSED,
-                    group=pickup.store.group,
-                    store=pickup.store,
+                    group=pickup.place.group,
+                    place=pickup.place,
                     date=pickup.date.start,
                     payload=payload,
                 )
@@ -178,8 +178,8 @@ class PickupDateQuerySet(models.QuerySet):
                 stats.pickup_done(pickup)
                 History.objects.create(
                     typus=HistoryTypus.PICKUP_DONE,
-                    group=pickup.store.group,
-                    store=pickup.store,
+                    group=pickup.place.group,
+                    place=pickup.place,
                     users=pickup.collectors.all(),
                     date=pickup.date.start,
                     payload=payload,
@@ -211,8 +211,8 @@ class PickupDate(BaseModel, ConversationMixin):
         on_delete=models.SET_NULL,
         null=True,
     )
-    store = models.ForeignKey(
-        'stores.Store',
+    place = models.ForeignKey(
+        'places.Place',
         related_name='pickup_dates',
         on_delete=models.CASCADE,
     )
@@ -244,14 +244,14 @@ class PickupDate(BaseModel, ConversationMixin):
 
     @property
     def group(self):
-        return self.store.group
+        return self.place.group
 
     @property
     def has_ended(self):
         return not self.is_upcoming()
 
     def __str__(self):
-        return 'PickupDate {} - {}'.format(self.date.start, self.store)
+        return 'PickupDate {} - {}'.format(self.date.start, self.place)
 
     def feedback_due(self):
         return self.date.end + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)

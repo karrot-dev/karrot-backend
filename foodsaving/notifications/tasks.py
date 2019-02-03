@@ -36,8 +36,8 @@ def create_pickup_upcoming_notifications():
             user=collector.user,
             expires_at=collector.pickupdate.date.start,
             context={
-                'group': collector.pickupdate.store.group.id,
-                'store': collector.pickupdate.store.id,
+                'group': collector.pickupdate.place.group.id,
+                'place': collector.pickupdate.place.id,
                 'pickup': collector.pickupdate.id,
                 'pickup_collector': collector.id,
             },

@@ -8,7 +8,7 @@ from factory import DjangoModelFactory, SubFactory, LazyFunction, LazyAttribute,
 from foodsaving.pickups.models import (
     PickupDate as PickupDateModel, PickupDateSeries as PickupDateSeriesModel, Feedback as FeedbackModel, to_range
 )
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 from foodsaving.utils.tests.fake import faker
 
 
@@ -28,7 +28,7 @@ class PickupDateFactory(DjangoModelFactory):
             for user in collectors:
                 self.add_collector(user)
 
-    store = SubFactory(StoreFactory)
+    place = SubFactory(PlaceFactory)
     date = LazyFunction(in_one_day)
     max_collectors = 5
 
@@ -37,7 +37,7 @@ class PickupDateSeriesFactory(DjangoModelFactory):
     class Meta:
         model = PickupDateSeriesModel
 
-    store = SubFactory(StoreFactory)
+    place = SubFactory(PlaceFactory)
     start_date = LazyAttribute(lambda _: timezone.now().replace(second=0, microsecond=0) + relativedelta(minutes=15))
     rule = 'FREQ=WEEKLY'
 
