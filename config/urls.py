@@ -21,7 +21,7 @@ from foodsaving.history.api import HistoryViewSet
 from foodsaving.invitations.api import InvitationsViewSet, InvitationAcceptViewSet
 from foodsaving.notifications.api import NotificationViewSet
 from foodsaving.pickups.api import PickupDateViewSet, PickupDateSeriesViewSet, FeedbackViewSet
-from foodsaving.stores.api import StoreViewSet
+from foodsaving.places.api import PlaceViewSet
 from foodsaving.subscriptions.api import PushSubscriptionViewSet
 from foodsaving.template_previews import views as template_preview_views
 from foodsaving.unsubscribe.api import UnsubscribeView
@@ -62,8 +62,8 @@ router.register('notifications', NotificationViewSet)
 # Subscription endpoints
 router.register('subscriptions/push', PushSubscriptionViewSet)
 
-# Store endpoints
-router.register('stores', StoreViewSet)
+# Place endpoints
+router.register('places', PlaceViewSet)
 
 # History endpoints
 router.register('history', HistoryViewSet)

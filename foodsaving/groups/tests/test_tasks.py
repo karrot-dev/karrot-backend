@@ -13,7 +13,7 @@ from foodsaving.groups.models import GroupMembership, GroupStatus
 from foodsaving.groups.tasks import process_inactive_users, send_summary_emails, mark_inactive_groups
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.pickups.factories import PickupDateFactory, FeedbackFactory
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
 
 
@@ -148,7 +148,7 @@ class TestSummaryEmailTask(TestCase):
         self.pickups_done_count = 8
 
     def make_activity_in_group(self, group):
-        store = StoreFactory(group=group)
+        place = PlaceFactory(group=group)
         new_users = [VerifiedUserFactory() for _ in range(self.new_user_count)]
         user = new_users[0]
 
@@ -160,11 +160,11 @@ class TestSummaryEmailTask(TestCase):
             [group.conversation.messages.create(author=user, content='hello') for _ in range(self.message_count)]
 
             # missed pickups
-            [PickupDateFactory(store=store) for _ in range(self.pickups_missed_count)]
+            [PickupDateFactory(place=place) for _ in range(self.pickups_missed_count)]
 
             # fullfilled pickups
             pickups = [
-                PickupDateFactory(store=store, max_collectors=1, collectors=[user])
+                PickupDateFactory(place=place, max_collectors=1, collectors=[user])
                 for _ in range(self.pickups_done_count)
             ]
 

@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('groups', '0010_auto_20170214_1624'),
-        ('stores', '0008_auto_20170220_1858'),
+        ('places', '0008_auto_20170220_1858'),
     ]
 
     operations = [
@@ -31,8 +31,8 @@ class Migration(migrations.Migration):
                                                                enum=foodsaving.history.models.HistoryTypus)),
                 ('payload', django.contrib.postgres.fields.jsonb.JSONField(null=True)),
                 ('group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='groups.Group')),
-                ('store', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE,
-                                            to='stores.Store')),
+                ('place', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE,
+                                            to='places.Place')),
                 ('users', models.ManyToManyField(to=settings.AUTH_USER_MODEL)),
             ],
             options={

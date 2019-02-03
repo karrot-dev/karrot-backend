@@ -14,7 +14,7 @@
                     <p>
                         {% trans trimmed %}
                             You've received enough trust from fellow group members to grant you <strong>editing permissions</strong>.
-                            For example, you can now modify your group, stores and pickup dates, or create new ones.
+                            For example, you can now modify your group, places and pickup dates, or create new ones.
                         {% endtrans %}
                     </p>
                     <p>

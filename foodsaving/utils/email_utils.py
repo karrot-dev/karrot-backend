@@ -13,7 +13,7 @@ from jinja2 import Environment
 
 from config import settings
 from foodsaving.utils import stats
-from foodsaving.utils.frontend_urls import store_url, user_url
+from foodsaving.utils.frontend_urls import place_url, user_url
 
 
 def date_filter(value):
@@ -37,7 +37,7 @@ def jinja2_environment(**options):
     env = Environment(**options)
     env.filters['date'] = date_filter
     env.filters['time'] = time_filter
-    env.globals['store_url'] = store_url
+    env.globals['place_url'] = place_url
     env.globals['user_url'] = user_url
     return env
 

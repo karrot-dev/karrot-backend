@@ -17,7 +17,7 @@ from foodsaving.groups.emails import (
 )
 from foodsaving.groups.models import Group, GroupStatus
 from foodsaving.groups.models import GroupMembership
-from foodsaving.groups.stats import get_group_members_stats, get_group_stores_stats, group_summary_email
+from foodsaving.groups.stats import get_group_members_stats, get_group_places_stats, group_summary_email
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.utils import stats_utils
 
@@ -30,7 +30,7 @@ def record_group_stats():
 
     for group in Group.objects.all():
         points.extend(get_group_members_stats(group))
-        points.extend(get_group_stores_stats(group))
+        points.extend(get_group_places_stats(group))
         points.extend(get_application_stats(group))
         points.extend(get_issue_stats(group))
 

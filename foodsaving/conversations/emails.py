@@ -101,7 +101,7 @@ def prepare_pickup_conversation_message_notification(user, messages):
     first_message = messages[0]
     conversation = first_message.conversation
     pickup = conversation.target
-    group_tz = pickup.store.group.timezone
+    group_tz = pickup.place.group.timezone
 
     language = user.language
 
@@ -143,7 +143,7 @@ def prepare_pickup_conversation_message_notification(user, messages):
             reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
             from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
-            unsubscribe_url = conversation_unsubscribe_url(user, group=pickup.store.group, conversation=conversation)
+            unsubscribe_url = conversation_unsubscribe_url(user, group=pickup.place.group, conversation=conversation)
 
             return prepare_email(
                 template='conversation_message_notification',
