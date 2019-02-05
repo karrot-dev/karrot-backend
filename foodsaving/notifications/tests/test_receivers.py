@@ -122,7 +122,7 @@ class TestNotificationReceivers(TestCase):
         group = GroupFactory(members=[member, creator])
         place = PlaceFactory(group=group, last_changed_by=creator)
 
-        notifications = Notification.objects.filter(type=NotificationType.NEW_STORE.value)
+        notifications = Notification.objects.filter(type=NotificationType.NEW_PLACE.value)
         # creator does not get a notification
         self.assertEqual(notifications.count(), 1)
         self.assertEqual(notifications[0].user, member)
