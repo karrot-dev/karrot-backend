@@ -153,7 +153,7 @@ def new_place(sender, instance, created, **kwargs):
     for user in place.group.members.exclude(id=place.last_changed_by_id):
         Notification.objects.create(
             user=user,
-            type=NotificationType.NEW_STORE.value,
+            type=NotificationType.NEW_PLACE.value,
             context={
                 'group': place.group.id,
                 'place': place.id,
