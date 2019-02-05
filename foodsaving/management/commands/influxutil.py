@@ -85,8 +85,6 @@ class Command(BaseCommand):
                 'influx',
                 *influx_args,
                 '-import',
-                '-database',
-                'karrot-foo',
                 '-compressed',
                 '-path={}'.format(dump),
             ])
