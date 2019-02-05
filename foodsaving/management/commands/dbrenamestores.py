@@ -36,7 +36,7 @@ class Command(BaseCommand):
         def rename_jsonb_field(table, column, field_from, field_to):
             query = """
             update {}
-            set {} = {} - '{}' || jsonb_build_object('{}', {}->>'{}')
+            set {} = {} - '{}' || jsonb_build_object('{}', {}->'{}')
             where {} ? '{}'
             """.format(table, column, column, field_from, field_to, column, field_from, column, field_from)
             return re.sub('\\s+', ' ', query).strip()
