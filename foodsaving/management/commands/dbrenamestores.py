@@ -1,3 +1,4 @@
+import re
 from django.core.management import BaseCommand
 from django.db import connection
 
@@ -28,8 +29,24 @@ class Command(BaseCommand):
             "update django_content_type set app_label = 'places' where app_label = 'stores'",
             "update django_content_type set model = 'place' where model = 'store'",
             "update django_migrations set app = 'places' where app = 'stores'",
-            "update django_migrations set name = replace(name, 'store', 'place')"
+            "update django_migrations set name = replace(name, 'store', 'place')",
+            "update notifications_notification set type = 'new_place' where type = 'new_store'"
         ]
+
+        def rename_jsonb_field(table, column, field_from, field_to):
+            query = """
+            update {}
+            set {} = {} - '{}' || jsonb_build_object('{}', {}->>'{}')
+            where {} ? '{}'
+            """.format(table, column, column, field_from, field_to, column, field_from, column, field_from)
+            return re.sub('\\s+', ' ', query).strip()
+
+        # rename 'store' -> 'place' inside jsonb fields
+
+        queries.append(rename_jsonb_field('notifications_notification', 'context', 'store', 'place'))
+        queries.append(rename_jsonb_field('history_history', 'payload', 'store', 'place'))
+        queries.append(rename_jsonb_field('history_history', 'before', 'store', 'place'))
+        queries.append(rename_jsonb_field('history_history', 'after', 'store', 'place'))
 
         # foreign key columns
 
