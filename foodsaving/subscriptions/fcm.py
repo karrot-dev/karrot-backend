@@ -45,6 +45,7 @@ def _notify_multiple_devices(**kwargs):
         return 0, 0
 
     response = fcm.notify_multiple_devices(**kwargs)
+    sentry_client.extra_context(response)
     tokens = kwargs.get('registration_ids', [])
 
     # check for invalid tokens and remove any corresponding push subscriptions

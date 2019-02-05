@@ -357,6 +357,13 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual('Provided option is not part of this voting', response.data[0]['option'][0])
 
+    def test_cannot_provide_single_vote(self):
+        issue = self.create_issue()
+        voting = issue.latest_voting()
+        self.client.force_login(user=self.member)
+        response = self.vote_via_API(issue, data={'option': voting.options.first().id, 'score': 1})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
     def test_removed_member_cannot_access_issue(self):
         issue = self.create_issue(affected_user=self.affected_member)
         vote_for_remove_user(voting=issue.latest_voting(), user=issue.created_by)

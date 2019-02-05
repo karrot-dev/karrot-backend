@@ -163,7 +163,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         Weight field can be empty
         """
         self.client.force_login(user=self.collector3)
-        response = self.client.post(self.url, {k: v for (k, v) in self.feedback_post.items() if k is not 'weight'})
+        response = self.client.post(self.url, {k: v for (k, v) in self.feedback_post.items() if k != 'weight'})
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertIsNone(response.data['weight'])
 
@@ -172,7 +172,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         Comment field can be empty
         """
         self.client.force_login(user=self.collector3)
-        response = self.client.post(self.url, {k: v for (k, v) in self.feedback_post.items() if k is not 'comment'})
+        response = self.client.post(self.url, {k: v for (k, v) in self.feedback_post.items() if k != 'comment'})
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertEqual(response.data['comment'], '')
 

@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from foodsaving.applications.factories import ApplicationFactory
-from foodsaving.groups.factories import GroupFactory
+from foodsaving.groups.factories import GroupFactory, PlaygroundGroupFactory
 from foodsaving.groups.models import GroupMembership
 from foodsaving.groups.roles import GROUP_EDITOR
 from foodsaving.invitations.models import Invitation
@@ -35,6 +35,18 @@ class TestNotificationReceivers(TestCase):
         self.assertEqual(you_became_editor.user, user)
         user_became_editor = Notification.objects.get(type=NotificationType.USER_BECAME_EDITOR.value)
         self.assertEqual(user_became_editor.user, user1)
+
+    def test_prevent_user_became_editor_when_joining_playground(self):
+        user1 = UserFactory()
+        group = PlaygroundGroupFactory(newcomers=[user1])
+        Notification.objects.all().delete()
+
+        user = UserFactory()
+        group.add_member(user)
+
+        self.assertEqual(Notification.objects.count(), 1)
+        you_became_editor = Notification.objects.get(type=NotificationType.YOU_BECAME_EDITOR.value)
+        self.assertEqual(you_became_editor.user, user)
 
     def test_creates_new_applicant_notification(self):
         member = UserFactory()

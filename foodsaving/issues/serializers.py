@@ -32,6 +32,7 @@ class VoteListSerializer(serializers.ListSerializer):
                     existing.append(vote)
                     continue
                 vote.delete()
+            data['user'] = self.context['request'].user
             created.append(Vote.objects.create(**data))
 
         voting = self.context['voting']
@@ -50,14 +51,7 @@ class VoteSerializer(serializers.ModelSerializer):
         fields = [
             'option',
             'score',
-            'user',
         ]
-        extra_kwargs = {
-            'user': {
-                'write_only': True,
-                'default': serializers.CurrentUserDefault(),
-            },
-        }
 
     def validate_option(self, option):
         voting = self.context['voting']

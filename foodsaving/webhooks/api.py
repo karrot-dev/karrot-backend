@@ -1,5 +1,5 @@
 from anymail.exceptions import AnymailAPIError
-from base64 import b64decode, b64encode
+from base64 import b64decode, b32decode, b32encode
 from email.utils import parseaddr
 from raven.contrib.django.raven_compat.models import client as sentry_client
 
@@ -18,7 +18,11 @@ from foodsaving.webhooks.models import EmailEvent, IncomingEmail
 
 
 def parse_local_part(part):
-    signed_part = b64decode(part)
+    if part.startswith('b32+'):
+        signed_part = b32decode(part[4:], casefold=True)
+    else:
+        # TODO: stay compatible with already sent emails, can be removed in some months
+        signed_part = b64decode(part)
     signed_part_decoded = signed_part.decode('utf8')
     parts = signing.loads(signed_part_decoded)
     if len(parts) == 2:
@@ -32,8 +36,9 @@ def make_local_part(conversation, user, thread=None):
         data.append(thread.id)
     signed_part = signing.dumps(data)
     signed_part = signed_part.encode('utf8')
-    encoded = b64encode(signed_part)
-    return encoded.decode('utf8')
+    b32 = b32encode(signed_part)
+    b32_string = 'b32+' + b32.decode('utf8')
+    return b32_string
 
 
 def notify_about_rejected_email(user, content):
@@ -68,7 +73,11 @@ class IncomingEmailView(views.APIView):
 
                 # 2. check local part of reply-to and extract conversation and user (fail if they don't exist)
                 local_part = reply_to.split('@')[0]
-                conversation_id, user_id, thread_id = parse_local_part(local_part)
+                try:
+                    conversation_id, user_id, thread_id = parse_local_part(local_part)
+                except UnicodeDecodeError:
+                    sentry_client.captureException()
+                    continue
                 user = get_user_model().objects.get(id=user_id)
 
                 thread = None
@@ -127,8 +136,13 @@ class EmailEventView(views.APIView):
 
         for events in [e['msys'].values() for e in request.data]:
             for event in events:
-                EmailEvent.objects.get_or_create(
-                    id=event['event_id'], address=event['rcpt_to'], event=event['type'], payload=event
+                EmailEvent.objects.update_or_create(
+                    id=event['event_id'],
+                    defaults={
+                        'address': event['rcpt_to'],
+                        'event': event['type'],
+                        'payload': event
+                    },
                 )
 
         return Response(status=status.HTTP_200_OK, data={})

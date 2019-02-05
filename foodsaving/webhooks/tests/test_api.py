@@ -1,5 +1,5 @@
 from base64 import b64encode
-from django.core import mail
+from django.core import mail, signing
 
 from django.test import override_settings
 from rest_framework import status
@@ -18,8 +18,8 @@ class TestEmailReplyAPI(APITestCase):
         self.conversation = ConversationFactory()
         self.conversation.join(self.user)
 
-    def make_message(self):
-        reply_token = make_local_part(self.conversation, self.user)
+    def make_message(self, reply_token=None):
+        reply_token = reply_token or make_local_part(self.conversation, self.user)
         relay_message = {
             'rcpt_to': '{}@example.com'.format(reply_token),
             'content': {
@@ -55,6 +55,39 @@ class TestEmailReplyAPI(APITestCase):
         self.assertEqual(incoming_email.user, self.user)
         self.assertEqual(incoming_email.payload, relay_message)
         self.assertEqual(incoming_email.message, message)
+
+    @override_settings(SPARKPOST_RELAY_SECRET='test_key')
+    def test_receive_incoming_email_with_casefolding(self):
+        relay_message = self.make_message()
+        relay_message['rcpt_to'] = relay_message['rcpt_to'].lower()
+        response = self.send_message(relay_message)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(self.conversation.messages.count(), 1)
+        message = ConversationMessage.objects.first()
+        self.assertEqual(message.received_via, 'email')
+
+    @override_settings(SPARKPOST_RELAY_SECRET='test_key')
+    def test_handles_legacy_base64_encodings(self):
+        reply_token = signing.dumps([self.conversation.id, self.user.id]).encode('utf8')
+        reply_token_b64 = b64encode(reply_token).decode('utf8')
+        relay_message = self.make_message(reply_token=reply_token_b64)
+        response = self.send_message(relay_message)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(self.conversation.messages.count(), 1)
+        message = ConversationMessage.objects.first()
+        self.assertEqual(message.received_via, 'email')
+
+    @override_settings(SPARKPOST_RELAY_SECRET='test_key')
+    def test_decode_error_returns_success(self):
+        relay_message = self.make_message()
+        # make invalid reply-to field
+        relay_message['rcpt_to'] = relay_message['rcpt_to'][10:]
+        response = self.send_message(relay_message)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(ConversationMessage.objects.count(), 0)
 
     @override_settings(SPARKPOST_RELAY_SECRET='test_key')
     def test_reject_incoming_email_if_conversation_is_closed(self):
