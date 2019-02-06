@@ -90,12 +90,11 @@ class Command(BaseCommand):
             ])
         elif command == 'rewrite':
             filename = argv.pop(0)
-            from_db_name = settings.INFLUXDB_DATABASE
             to_db_name = argv.pop(0)
             sed = '; '.join([
                 's/store/place/g',
-                's/DATABASE {} WITH/DATABASE "{}" WITH/g'.format(from_db_name, to_db_name),
-                's/CONTEXT-DATABASE:{}/CONTEXT-DATABASE:{}/g'.format(from_db_name, to_db_name),
+                's/CREATE DATABASE.*WITH/CREATE DATABASE "{}" WITH/'.format(to_db_name),
+                's/CONTEXT-DATABASE:.*/CONTEXT-DATABASE:{}/'.format(to_db_name),
             ])
             execute(
                 'zcat {} | sed {} | gzip > {}'.format(quote(filename), quote(sed), quote(filename + '.rewritten')),
