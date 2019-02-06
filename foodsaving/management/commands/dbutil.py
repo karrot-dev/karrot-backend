@@ -86,7 +86,7 @@ class Command(BaseCommand):
             # pg_restore only uses it to issue the CREATE DATABASE command for mydb.
             # With -C, data is always restored into the database name that appears in the dump file.
             dump = argv.pop(0)
-            execute(['pg_restore', '-C', '-d', 'postgres', dump])
+            execute(['pg_restore', '-d', db['NAME'], dump])
         elif command == 'rename-to':
             from_name = db['NAME']
             to_name = argv.pop(0)
