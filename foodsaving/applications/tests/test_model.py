@@ -33,3 +33,6 @@ class TestApplicationConversationModel(APITestCase):
     def test_deleting_application_deletes_conversation(self):
         Application.objects.filter(user=self.applicant, group=self.group).delete()
         self.assertIsNone(Conversation.objects.get_for_target(self.application))
+
+    def test_sets_group(self):
+        self.assertEqual(self.conversation.group, self.group)

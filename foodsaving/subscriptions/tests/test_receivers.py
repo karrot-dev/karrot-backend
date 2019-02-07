@@ -72,6 +72,7 @@ def make_conversation_broadcast(conversation, **kwargs):
             'type': None,
             'target_id': None,
             'is_closed': False,
+            'is_participant': True,
         }
     }
     response['payload'].update(kwargs)

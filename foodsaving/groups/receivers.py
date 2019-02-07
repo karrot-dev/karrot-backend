@@ -79,6 +79,7 @@ def trust_given(sender, instance, created, **kwargs):
         )
 
         # new editors should also get informed about new applications
+        # TODO: really? maybe ask them beforehand...
         membership.add_notification_types([GroupNotificationType.NEW_APPLICATION])
         membership.save()
         prepare_user_became_editor_email(user=membership.user, group=membership.group).send()

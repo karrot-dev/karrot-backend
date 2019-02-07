@@ -1,3 +1,6 @@
+from django.utils import timezone
+
+from foodsaving.pickups.models import to_range
 from foodsaving.tests.utils import TestMigrations
 from foodsaving.utils.tests.fake import faker
 
@@ -30,3 +33,55 @@ class TestEmailNotificationSettingMigration(TestMigrations):
 
         self.assertFalse(ConversationParticipant.objects.get(id=self.non_muted_id).muted)
         self.assertTrue(ConversationParticipant.objects.get(id=self.muted_id).muted)
+
+
+class TestConversationGroupMigration(TestMigrations):
+    migrate_from = [
+        ('contenttypes', '0002_remove_content_type_name'),
+        ('groups', '0036_group_photo'),
+        ('places', '0031_auto_20181216_2133'),
+        ('pickups', '0013_auto_20190122_1210'),
+        ('applications', '0005_auto_20190125_1230'),
+        ('conversations', '0028_auto_20190205_1558'),
+    ]
+    migrate_to = [
+        ('conversations', '0029_set_conversation_group'),
+    ]
+
+    def setUpBeforeMigration(self, apps):
+        User = apps.get_model('users', 'User')
+        Group = apps.get_model('groups', 'Group')
+        Place = apps.get_model('places', 'Place')
+        Conversation = apps.get_model('conversations', 'Conversation')
+        PickupDate = apps.get_model('pickups', 'PickupDate')
+        Application = apps.get_model('applications', 'Application')
+        ContentType = apps.get_model('contenttypes', 'ContentType')
+
+        self.group = Group.objects.create(name='hello')
+        target_type = ContentType.objects.get(app_label='groups', model='group')
+        self.group_conversation = Conversation.objects.create(target_type=target_type, target_id=self.group.id)
+
+        self.none_conversation = Conversation.objects.create()
+
+        self.private_conversation = Conversation.objects.create(is_private=True)
+
+        place = Place.objects.create(group=self.group)
+        pickup = PickupDate.objects.create(place=place, date=to_range(timezone.now()))
+        target_type = ContentType.objects.get(app_label='pickups', model='pickupdate')
+        self.pickup_conversation = Conversation.objects.create(target_type=target_type, target_id=pickup.id)
+
+        user = User.objects.create(email=faker.email())
+        application = Application.objects.create(user=user, group=self.group)
+        target_type = ContentType.objects.get(app_label='applications', model='application')
+        self.application_conversation = Conversation.objects.create(target_type=target_type, target_id=application.id)
+
+    def test_sets_conversation_group(self):
+        self.group_conversation.refresh_from_db()
+        self.pickup_conversation.refresh_from_db()
+        self.application_conversation.refresh_from_db()
+
+        self.assertIsNone(self.none_conversation.target_id)
+        self.assertIsNone(self.private_conversation.target_id)
+        self.assertEqual(self.group_conversation.group, self.group)
+        self.assertEqual(self.pickup_conversation.group, self.group)
+        self.assertEqual(self.application_conversation.group, self.group)

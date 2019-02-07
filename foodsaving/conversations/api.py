@@ -2,7 +2,8 @@ import coreapi
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import prefetch_related_objects, F
+from django.db.models import prefetch_related_objects, F, Q
+from django.http import Http404
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django_filters import rest_framework as filters
@@ -26,7 +27,7 @@ from foodsaving.conversations.models import (
 )
 from foodsaving.conversations.serializers import (
     ConversationSerializer, ConversationMessageSerializer, ConversationMessageReactionSerializer, EmojiField,
-    ConversationThreadSerializer, ConversationMetaSerializer
+    ConversationThreadSerializer, ConversationMetaSerializer, ConversationInfoSerializer
 )
 from foodsaving.pickups.models import PickupDate
 from foodsaving.pickups.serializers import PickupDateSerializer
@@ -68,13 +69,23 @@ class IsConversationParticipant(BasePermission):
 
         # if they specify a conversation, check they are in it
         if conversation_id:
-            return ConversationParticipant.objects.filter(conversation=conversation_id, user=request.user).exists()
+            # TODO could be written in one db access maybe
+            if ConversationParticipant.objects.filter(conversation=conversation_id, user=request.user).exists():
+                return True
+            try:
+                conversation = Conversation.objects.get(id=conversation_id)
+            except Conversation.DoesNotExist:
+                return False
+            else:
+                return conversation.can_access(request.user)
 
         # otherwise it is fine (messages will be filtered for the users conversations)
         return True
 
     def has_object_permission(self, request, view, message):
-        return message.conversation.participants.filter(id=request.user.id).exists()
+        return message.conversation.participants.filter(
+            id=request.user.id
+        ).exists() or message.conversation.group.is_member(request.user)
 
 
 class IsAuthorConversationMessage(BasePermission):
@@ -111,7 +122,7 @@ class ConversationFilter(filters.FilterSet):
         fields = ['exclude_read']
 
 
-class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, GenericViewSet):
+class ConversationViewSet(PartialUpdateModelMixin, GenericViewSet):
     """
     Conversations
     """
@@ -128,6 +139,22 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
+
+    def retrieve(self, request, pk, *args, **kwargs):
+        try:
+            participant = self.get_object()
+        except Http404:
+            # user is not participant, return conversation info if they are in the right group
+            queryset = Conversation.objects.filter(
+                group__groupmembership__user=self.request.user,
+                is_group_public=True,
+            )
+            conversation = get_object_or_404(queryset, id=pk)
+            serializer = ConversationInfoSerializer(conversation, context=self.get_serializer_context())
+            return Response(serializer.data)
+
+        serializer = self.get_serializer(participant)
+        return Response(serializer.data)
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset() \
@@ -255,7 +282,12 @@ class ConversationMessageViewSet(
         if self.action in ('partial_update', 'thread'):
             return self.queryset
         qs = self.queryset \
-            .filter(conversation__participants=self.request.user) \
+            .filter(
+                Q(conversation__participants=self.request.user) |
+                Q(
+                    conversation__group__groupmembership__user=self.request.user,
+                    conversation__is_group_public=True
+                )) \
             .annotate_replies_count() \
             .annotate_unread_replies_count_for(self.request.user)
 
@@ -372,12 +404,16 @@ class RetrieveConversationMixin(object):
             prefetch_related('conversationparticipant_set'). \
             select_related('target_type'). \
             get_or_create_for_target(target)
+
         try:
             participant = conversation.conversationparticipant_set.get(user=request.user)
         except ConversationParticipant.DoesNotExist:
-            self.permission_denied(request, message=_('You are not in this conversation'))
-        serializer = ConversationSerializer(participant, data={}, context=self.get_serializer_context())
-        serializer.is_valid(raise_exception=True)
+            if conversation.group is not None and conversation.group.is_member(request.user):
+                serializer = ConversationInfoSerializer(conversation, context=self.get_serializer_context())
+            else:
+                self.permission_denied(request, message=_('You are not in this conversation'))
+        else:
+            serializer = ConversationSerializer(participant, context=self.get_serializer_context())
         return Response(serializer.data)
 
 
@@ -391,6 +427,5 @@ class RetrievePrivateConversationMixin(object):
         except Exception:
             return Response(status=status.HTTP_404_NOT_FOUND, data={})
         participant = conversation.conversationparticipant_set.get(user=request.user)
-        serializer = ConversationSerializer(participant, data={}, context=self.get_serializer_context())
-        serializer.is_valid(raise_exception=True)
+        serializer = ConversationSerializer(participant, context=self.get_serializer_context())
         return Response(serializer.data)

@@ -159,6 +159,21 @@ class TestConversationsAPI(APITestCase):
         self.assertLess(time1, time2)
 
 
+class TestGroupPublicConversation(APITestCase):
+    def test_can_access_messages_if_not_participant(self):
+        user = UserFactory()
+        author = UserFactory()
+        group = GroupFactory(members=[user, author])
+        pickup = PickupDateFactory(place=PlaceFactory(group=group))
+        conversation = pickup.conversation
+        conversation.messages.create(author=author, content='asdf')
+
+        self.client.force_login(user=user)
+        response = self.client.get('/api/messages/?conversation={}'.format(conversation.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data['results']), 1, response.data['results'])
+
+
 class TestConversationThreadsAPI(APITestCase):
     def setUp(self):
         self.user = VerifiedUserFactory()
