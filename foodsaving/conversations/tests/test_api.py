@@ -90,7 +90,8 @@ class TestConversationsAPI(APITestCase):
 
     def test_list_messages(self):
         self.client.force_login(user=self.participant1)
-        response = self.client.get('/api/messages/?conversation={}'.format(self.conversation1.id), format='json')
+        with self.assertNumQueries(5):
+            response = self.client.get('/api/messages/?conversation={}'.format(self.conversation1.id), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 1)
         self.assertEqual(response.data['results'][0]['content'], 'hello')
@@ -113,12 +114,12 @@ class TestConversationsAPI(APITestCase):
     def test_cannot_get_messages_if_not_in_conversation(self):
         self.client.force_login(user=self.participant1)
         response = self.client.get('/api/messages/?conversation={}'.format(self.conversation3.id), format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_same_error_if_conversation_does_not_exist_as_if_you_are_just_not_in_it(self):
         self.client.force_login(user=self.participant1)
         response = self.client.get('/api/messages/?conversation={}'.format(982398723), format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_create_message(self):
         conversation = ConversationFactory(participants=[self.participant1])

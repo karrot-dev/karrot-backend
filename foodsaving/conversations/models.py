@@ -44,6 +44,10 @@ class ConversationQuerySet(models.QuerySet):
             target_type=ContentType.objects.get_for_model(target),
         )
 
+    def with_access(self, user):
+        return self.filter(Q(participants=user) |
+                           Q(group__groupmembership__user=user, is_group_public=True)).distinct()
+
 
 class Conversation(BaseModel, UpdatedAtMixin):
     """A conversation between one or more users."""

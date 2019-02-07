@@ -58,34 +58,11 @@ class ReverseMessagePagination(CursorPagination):
     ordering = 'created_at'
 
 
-class IsConversationParticipant(BasePermission):
+class CanAccessConversation(BasePermission):
     message = _('You are not in this conversation')
 
-    def has_permission(self, request, view):
-        """If the user asks to filter messages by conversation, return an error if
-        they are not part of the conversation (instead of returning empty result)
-        """
-        conversation_id = request.GET.get('conversation', None)
-
-        # if they specify a conversation, check they are in it
-        if conversation_id:
-            # TODO could be written in one db access maybe
-            if ConversationParticipant.objects.filter(conversation=conversation_id, user=request.user).exists():
-                return True
-            try:
-                conversation = Conversation.objects.get(id=conversation_id)
-            except Conversation.DoesNotExist:
-                return False
-            else:
-                return conversation.can_access(request.user)
-
-        # otherwise it is fine (messages will be filtered for the users conversations)
-        return True
-
     def has_object_permission(self, request, view, message):
-        return message.conversation.participants.filter(
-            id=request.user.id
-        ).exists() or message.conversation.group.is_member(request.user)
+        return message.conversation.can_access(request.user)
 
 
 class IsAuthorConversationMessage(BasePermission):
@@ -236,7 +213,20 @@ class ConversationViewSet(PartialUpdateModelMixin, GenericViewSet):
         return Response(serializer.data)
 
 
+def message_conversation_queryset(request):
+    """If the user asks to filter messages by conversation, trigger 'invalid_choice' in the FilterSet"""
+    if request is None:
+        return Conversation.objects.none()
+
+    return Conversation.objects.with_access(request.user)
+
+
 class ConversationMessageFilter(filters.FilterSet):
+    conversation = filters.ModelChoiceFilter(
+        queryset=message_conversation_queryset,
+        error_messages={'invalid_choice': _('You are not in this conversation')}
+    )
+
     exclude_read = filters.BooleanFilter(field_name='unread_replies_count', method='filter_exclude_read')
 
     def filter_exclude_read(self, qs, name, value):
@@ -264,7 +254,7 @@ class ConversationMessageViewSet(
     serializer_class = ConversationMessageSerializer
     permission_classes = (
         IsAuthenticated,
-        IsConversationParticipant,
+        CanAccessConversation,
         IsAuthorConversationMessage,
         IsWithinUpdatePeriod,
     )
@@ -282,12 +272,7 @@ class ConversationMessageViewSet(
         if self.action in ('partial_update', 'thread'):
             return self.queryset
         qs = self.queryset \
-            .filter(
-                Q(conversation__participants=self.request.user) |
-                Q(
-                    conversation__group__groupmembership__user=self.request.user,
-                    conversation__is_group_public=True
-                )) \
+            .filter(conversation__in=Conversation.objects.with_access(self.request.user)) \
             .annotate_replies_count() \
             .annotate_unread_replies_count_for(self.request.user)
 
@@ -408,7 +393,7 @@ class RetrieveConversationMixin(object):
         try:
             participant = conversation.conversationparticipant_set.get(user=request.user)
         except ConversationParticipant.DoesNotExist:
-            if conversation.group is not None and conversation.group.is_member(request.user):
+            if conversation.can_access(request.user):
                 serializer = ConversationInfoSerializer(conversation, context=self.get_serializer_context())
             else:
                 self.permission_denied(request, message=_('You are not in this conversation'))

@@ -15,7 +15,7 @@ def set_conversation_group(apps, schema_editor):
         group = None
         if type == 'pickupdate':
             group = target.place.group
-        elif type == 'application' or type == 'issue' or type == 'store':
+        elif type == 'application' or type == 'issue' or type == 'place':
             group = target.group
         elif type == 'group':
             group = target
