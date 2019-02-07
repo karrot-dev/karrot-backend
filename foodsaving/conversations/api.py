@@ -2,7 +2,7 @@ import coreapi
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import prefetch_related_objects, F, Q
+from django.db.models import prefetch_related_objects, F
 from django.http import Http404
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -20,8 +20,6 @@ from rest_framework.viewsets import GenericViewSet
 
 from foodsaving.applications.models import Application
 from foodsaving.applications.serializers import ApplicationSerializer
-from foodsaving.issues.models import Issue
-from foodsaving.issues.serializers import IssueSerializer
 from foodsaving.conversations.models import (
     Conversation, ConversationMessage, ConversationMessageReaction, ConversationParticipant, ConversationMeta
 )
@@ -29,6 +27,8 @@ from foodsaving.conversations.serializers import (
     ConversationSerializer, ConversationMessageSerializer, ConversationMessageReactionSerializer, EmojiField,
     ConversationThreadSerializer, ConversationMetaSerializer, ConversationInfoSerializer
 )
+from foodsaving.issues.models import Issue
+from foodsaving.issues.serializers import IssueSerializer
 from foodsaving.pickups.models import PickupDate
 from foodsaving.pickups.serializers import PickupDateSerializer
 from foodsaving.users.serializers import UserInfoSerializer
