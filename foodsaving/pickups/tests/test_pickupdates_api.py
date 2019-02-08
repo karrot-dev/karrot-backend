@@ -259,7 +259,8 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
 
         # should be removed from chat
         response = self.client.get(self.conversation_url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(response.data['is_participant'])
 
     def test_leave_pickup_as_newcomer(self):
         newcomer = UserFactory()
@@ -284,19 +285,67 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.post(self.past_leave_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
-    def test_cannot_get_conversation_as_noncollector(self):
-        self.client.force_login(user=self.member)
-        response = self.client.get(self.conversation_url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(response.data['detail'], 'You are not in this conversation')
-
     def test_get_conversation_as_collector(self):
         self.client.force_login(user=self.member)
         self.pickup.add_collector(self.member)
+
+        # can get via pickup
         response = self.client.get(self.conversation_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(self.member.id, response.data['participants'])
         self.assertEqual(response.data['type'], 'pickup')
+
+        # can get via conversations
+        conversation_id = self.pickup.conversation.id
+        response = self.client.get('/api/conversations/{}/'.format(conversation_id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # can write a message
+        response = self.client.post('/api/messages/', {
+            'conversation': response.data['id'],
+            'content': 'hey',
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+
+    def test_can_participate_in_conversation_as_noncollector(self):
+        self.client.force_login(user=self.member)
+
+        # can get via pickup
+        response = self.client.get(self.conversation_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # can get via conversation
+        conversation_id = self.pickup.conversation.id
+        response = self.client.get('/api/conversations/{}/'.format(conversation_id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # can write a message
+        response = self.client.post('/api/messages/', {
+            'conversation': response.data['id'],
+            'content': 'hey',
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+
+    def test_cannot_get_conversation_as_nonmember(self):
+        self.client.force_login(user=self.user)
+
+        # cannot get via pickup
+        response = self.client.get(self.conversation_url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        # cannot get via conversation info
+        conversation_id = self.pickup.conversation.id
+        response = self.client.get('/api/conversations/{}/'.format(conversation_id))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        # cannot write a message
+        conversation_id = self.pickup.conversation.id
+        response = self.client.post('/api/messages/', {
+            'conversation': conversation_id,
+            'content': 'hey',
+        })
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+        self.assertEqual(response.data['detail'], 'You are not in this conversation')
 
     def test_patch_date(self):
         self.client.force_login(user=self.member)

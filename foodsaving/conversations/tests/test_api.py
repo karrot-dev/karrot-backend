@@ -90,7 +90,8 @@ class TestConversationsAPI(APITestCase):
 
     def test_list_messages(self):
         self.client.force_login(user=self.participant1)
-        response = self.client.get('/api/messages/?conversation={}'.format(self.conversation1.id), format='json')
+        with self.assertNumQueries(5):
+            response = self.client.get('/api/messages/?conversation={}'.format(self.conversation1.id), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 1)
         self.assertEqual(response.data['results'][0]['content'], 'hello')
@@ -113,12 +114,12 @@ class TestConversationsAPI(APITestCase):
     def test_cannot_get_messages_if_not_in_conversation(self):
         self.client.force_login(user=self.participant1)
         response = self.client.get('/api/messages/?conversation={}'.format(self.conversation3.id), format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_same_error_if_conversation_does_not_exist_as_if_you_are_just_not_in_it(self):
         self.client.force_login(user=self.participant1)
         response = self.client.get('/api/messages/?conversation={}'.format(982398723), format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_create_message(self):
         conversation = ConversationFactory(participants=[self.participant1])
@@ -157,6 +158,21 @@ class TestConversationsAPI(APITestCase):
         response = self.client.post('/api/conversations/mark_all_seen/')
         time2 = parse(response.data['marked_at'])
         self.assertLess(time1, time2)
+
+
+class TestGroupPublicConversation(APITestCase):
+    def test_can_access_messages_if_not_participant(self):
+        user = UserFactory()
+        author = UserFactory()
+        group = GroupFactory(members=[user, author])
+        pickup = PickupDateFactory(place=PlaceFactory(group=group))
+        conversation = pickup.conversation
+        conversation.messages.create(author=author, content='asdf')
+
+        self.client.force_login(user=user)
+        response = self.client.get('/api/messages/?conversation={}'.format(conversation.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data['results']), 1, response.data['results'])
 
 
 class TestConversationThreadsAPI(APITestCase):

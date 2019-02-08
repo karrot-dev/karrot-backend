@@ -6,7 +6,7 @@ from rest_framework.fields import DateTimeField
 from foodsaving.conversations.helpers import normalize_emoji_name
 from foodsaving.conversations.models import (
     ConversationMessage, ConversationParticipant, ConversationMessageReaction, ConversationThreadParticipant,
-    ConversationMeta
+    ConversationMeta, Conversation
 )
 
 
@@ -41,12 +41,9 @@ class ConversationThreadNonParticipantSerializer(serializers.ModelSerializer):
             'reply_count',
         ]
 
-    is_participant = serializers.SerializerMethodField()
+    is_participant = serializers.ReadOnlyField(default=False)
     participants = serializers.SerializerMethodField()
     reply_count = serializers.SerializerMethodField()
-
-    def get_is_participant(self, thread):
-        return False
 
     def get_participants(self, thread):
         return [participants.user_id for participants in thread.participants.all()]
@@ -67,13 +64,10 @@ class ConversationThreadSerializer(serializers.ModelSerializer):
             'unread_reply_count',
         ]
 
-    is_participant = serializers.SerializerMethodField()
+    is_participant = serializers.ReadOnlyField(default=True)
     participants = serializers.SerializerMethodField()
     reply_count = serializers.SerializerMethodField()
     unread_reply_count = serializers.SerializerMethodField()
-
-    def get_is_participant(self, participant):
-        return True
 
     def get_participants(self, participant):
         return [participants.user_id for participants in participant.thread.participants.all()]
@@ -148,7 +142,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
         return message.is_recent() and message.author_id == self.context['request'].user.id
 
     def validate_conversation(self, conversation):
-        if self.context['request'].user not in conversation.participants.all():
+        if not conversation.can_access(self.context['request'].user):
             raise PermissionDenied(_('You are not in this conversation'))
         if conversation.is_closed:
             raise PermissionDenied(_('This conversation has been closed'))
@@ -190,12 +184,13 @@ class ConversationSerializer(serializers.ModelSerializer):
             'id',
             'participants',
             'updated_at',
-            'seen_up_to',
-            'unread_message_count',
-            'muted',
             'type',
             'target_id',
             'is_closed',
+            'seen_up_to',
+            'unread_message_count',
+            'muted',
+            'is_participant',
         ]
 
     id = serializers.IntegerField(source='conversation.id', read_only=True)
@@ -203,6 +198,7 @@ class ConversationSerializer(serializers.ModelSerializer):
     type = serializers.CharField(source='conversation.type', read_only=True)
     target_id = serializers.IntegerField(source='conversation.target_id', read_only=True)
     is_closed = serializers.BooleanField(source='conversation.is_closed', read_only=True)
+    is_participant = serializers.ReadOnlyField(default=True)
 
     unread_message_count = serializers.SerializerMethodField()
     updated_at = serializers.SerializerMethodField()
@@ -235,6 +231,17 @@ class ConversationSerializer(serializers.ModelSerializer):
             participant.muted = validated_data['muted']
         participant.save()
         return participant
+
+
+class ConversationInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Conversation
+        fields = ConversationSerializer.Meta.fields
+
+    seen_up_to = serializers.ReadOnlyField(default=None)
+    unread_message_count = serializers.ReadOnlyField(default=0)
+    muted = serializers.ReadOnlyField(default=True)
+    is_participant = serializers.ReadOnlyField(default=False)
 
 
 class ConversationMetaSerializer(serializers.ModelSerializer):

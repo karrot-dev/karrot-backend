@@ -151,7 +151,7 @@ class Handlers:
         for group in shuffle_groups():
             context = prepare_group_summary_data(group, from_date, to_date)
             summary_emails = prepare_group_summary_emails(group, context)
-            if len(summary_emails) is 0:
+            if len(summary_emails) == 0:
                 continue
 
             return summary_emails[0]
