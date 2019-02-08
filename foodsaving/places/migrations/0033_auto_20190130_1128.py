@@ -9,6 +9,7 @@ def add_place_subscriptions(apps, schema_editor):
     """Adds place subscribers
     Only adds users who signed up for pickups one week ago or later
     """
+    User = apps.get_model('users', 'User')
     Place = apps.get_model('places', 'Place')
     PlaceSubscription = apps.get_model('places', 'PlaceSubscription')
     Conversation = apps.get_model('conversations', 'Conversation')
@@ -19,7 +20,7 @@ def add_place_subscriptions(apps, schema_editor):
     for place in Place.objects.all():
         conversation, _ = Conversation.objects.get_or_create(target_type=ct, target_id=place.id)
         one_week_ago = timezone.now() - relativedelta(days=7)
-        recent_collectors = get_user_model().objects.filter(
+        recent_collectors = User.objects.filter(
             pickup_dates__date__startswith__gte=one_week_ago,
             pickup_dates__place_id=place.id,
         ).distinct()
@@ -31,6 +32,7 @@ def add_place_subscriptions(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('users', '0021_user_email_deletable'),
         ('places', '0032_auto_20190130_1128'),
         ('pickups', '0013_auto_20190122_1210'),
         ('conversations', '0026_conversationmeta'),
