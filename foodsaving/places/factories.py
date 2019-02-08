@@ -1,4 +1,4 @@
-from factory import DjangoModelFactory, SubFactory
+from factory import DjangoModelFactory, SubFactory, post_generation
 from factory import LazyAttribute
 
 from foodsaving.groups.factories import GroupFactory
@@ -14,3 +14,9 @@ class PlaceFactory(DjangoModelFactory):
     name = LazyAttribute(lambda x: faker.sentence(nb_words=4))
     description = LazyAttribute(lambda x: faker.name())
     status = 'active'
+
+    @post_generation
+    def subscribers(self, created, extracted, **kwargs):
+        if created and extracted:
+            for user in extracted:
+                self.placesubscription_set.create(user=user)

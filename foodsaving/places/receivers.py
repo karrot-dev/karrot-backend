@@ -2,7 +2,6 @@ from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 from foodsaving.conversations.models import Conversation
-from foodsaving.groups.models import GroupMembership
 from foodsaving.places.models import Place, PlaceSubscription
 
 

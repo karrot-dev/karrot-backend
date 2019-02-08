@@ -32,7 +32,7 @@ class TestPickupNotificationTask(APITestCase):
         self.other_user = VerifiedUserFactory()
         self.non_verified_user = UserFactory()
         self.group = GroupFactory(members=[self.user, self.other_user, self.non_verified_user])
-        self.place = PlaceFactory(group=self.group)
+        self.place = PlaceFactory(group=self.group, subscribers=[self.user, self.other_user, self.non_verified_user])
 
         self.declined_place = PlaceFactory(group=self.group, status=PlaceStatus.DECLINED.value)
 
