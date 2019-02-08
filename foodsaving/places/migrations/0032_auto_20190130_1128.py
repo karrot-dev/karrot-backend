@@ -27,22 +27,22 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='places', to='groups.Group'),
         ),
         migrations.AddField(
-            model_name='storesubscription',
+            model_name='placesubscription',
             name='place',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='places.Place'),
         ),
         migrations.AddField(
-            model_name='storesubscription',
+            model_name='placesubscription',
             name='user',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='place',
             name='subscribers',
-            field=models.ManyToManyField(related_name='stores_subscribed', through='places.PlaceSubscription', to=settings.AUTH_USER_MODEL),
+            field=models.ManyToManyField(related_name='places_subscribed', through='places.PlaceSubscription', to=settings.AUTH_USER_MODEL),
         ),
         migrations.AlterUniqueTogether(
-            name='storesubscription',
+            name='placesubscription',
             unique_together={('place', 'user')},
         ),
     ]

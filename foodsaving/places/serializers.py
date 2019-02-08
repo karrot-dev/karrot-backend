@@ -129,7 +129,7 @@ class PlaceSubscriptionSerializer(serializers.ModelSerializer):
         return super().save(user=self.context['request'].user)
 
     def validate_place(self, place):
-        if place.storesubscription_set.filter(user=self.context['request'].user).exists():
+        if place.placesubscription_set.filter(user=self.context['request'].user).exists():
             raise serializers.ValidationError(_('You are already subscribed to this place'))
         return place
 

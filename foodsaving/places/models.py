@@ -30,7 +30,7 @@ class Place(BaseModel, LocationModel, ConversationMixin):
     subscribers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         through='PlaceSubscription',
-        related_name='stores_subscribed',
+        related_name='places_subscribed',
     )
     last_changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
