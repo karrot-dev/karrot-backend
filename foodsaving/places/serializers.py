@@ -28,6 +28,7 @@ class PlaceSerializer(serializers.ModelSerializer):
             'longitude',
             'weeks_in_advance',
             'status',
+            'is_subscribed',
         ]
         extra_kwargs = {
             'name': {
@@ -45,6 +46,10 @@ class PlaceSerializer(serializers.ModelSerializer):
     status = serializers.ChoiceField(
         choices=[status.value for status in PlaceStatus], default=PlaceModel.DEFAULT_STATUS
     )
+    is_subscribed = serializers.SerializerMethodField()
+
+    def get_is_subscribed(self, place):
+        return place.placesubscription_set.filter(user=self.context['request'].user).exists()
 
     def save(self, **kwargs):
         return super().save(last_changed_by=self.context['request'].user)

@@ -13,23 +13,23 @@ from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from foodsaving.applications.models import Application
 from foodsaving.applications.serializers import ApplicationSerializer
-from foodsaving.issues.models import Issue, Voting, Option, Vote
-from foodsaving.issues.serializers import IssueSerializer
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction, \
     ConversationThreadParticipant, ConversationMeta
 from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer, \
-    ConversationMetaSerializer
+    ConversationMetaSerializer, ConversationInfoSerializer
 from foodsaving.groups.models import Group, Trust, GroupMembership
 from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer
 from foodsaving.history.models import history_created
 from foodsaving.history.serializers import HistorySerializer
 from foodsaving.invitations.models import Invitation
 from foodsaving.invitations.serializers import InvitationSerializer
+from foodsaving.issues.models import Issue, Voting, Option, Vote
+from foodsaving.issues.serializers import IssueSerializer
 from foodsaving.notifications.models import Notification, NotificationMeta
 from foodsaving.notifications.serializers import NotificationSerializer, NotificationMetaSerializer
 from foodsaving.pickups.models import PickupDate, PickupDateSeries, Feedback, PickupDateCollector
 from foodsaving.pickups.serializers import PickupDateSerializer, PickupDateSeriesSerializer, FeedbackSerializer
-from foodsaving.places.models import Place
+from foodsaving.places.models import Place, PlaceSubscription
 from foodsaving.places.serializers import PlaceSerializer
 from foodsaving.subscriptions import stats, tasks
 from foodsaving.subscriptions.models import ChannelSubscription
@@ -196,16 +196,21 @@ def remove_participant(sender, instance, **kwargs):
 
 @receiver(post_delete, sender=ConversationParticipant)
 def send_participant_left(sender, instance, **kwargs):
-    """Notify other conversation participants when someone leaves"""
+    """Notify conversation participants when someone leaves"""
     conversation = instance.conversation
 
     topic = 'conversations:conversation'
 
+    # TODO send to all group participants if it's a group_public conversation?
+
     for subscription in ChannelSubscription.objects.recent() \
-            .filter(user__in=conversation.participants.all()) \
-            .exclude(user=instance.user).distinct():
+            .filter(user__in=conversation.participants.all()).distinct():
         participant = conversation.conversationparticipant_set.get(user=subscription.user)
         payload = ConversationSerializer(participant, context={'request': MockRequest(user=subscription.user)}).data
+        send_in_channel(subscription.reply_channel, topic, payload)
+
+    for subscription in ChannelSubscription.objects.recent().filter(user=instance.user).distinct():
+        payload = ConversationInfoSerializer(conversation).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
 
@@ -281,8 +286,18 @@ def send_invitation_accept(sender, instance, **kwargs):
 @receiver(post_save, sender=Place)
 def send_place_updates(sender, instance, **kwargs):
     place = instance
-    payload = PlaceSerializer(place).data
     for subscription in ChannelSubscription.objects.recent().filter(user__in=place.group.members.all()).distinct():
+        payload = PlaceSerializer(place, context={'request': MockRequest(user=subscription.user)}).data
+        send_in_channel(subscription.reply_channel, topic='places:place', payload=payload)
+
+
+@receiver(post_save, sender=PlaceSubscription)
+@receiver(post_delete, sender=PlaceSubscription)
+def place_subscription_updated(sender, instance, **kwargs):
+    place = instance.place
+    user = instance.user
+    payload = PlaceSerializer(place, context={'request': MockRequest(user=user)}).data
+    for subscription in ChannelSubscription.objects.recent().filter(user=user).distinct():
         send_in_channel(subscription.reply_channel, topic='places:place', payload=payload)
 
 
