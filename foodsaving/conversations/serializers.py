@@ -169,7 +169,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(_('Thread is not in the same conversation'))
 
                 # only some types of messages can have threads
-                if conversation.type() not in ('group', 'store'):
+                if conversation.type() not in ('group', 'place'):
                     raise serializers.ValidationError(_('You can only reply to wall messages'))
 
             # you cannot reply to replies

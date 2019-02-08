@@ -23,7 +23,7 @@ from foodsaving.issues.factories import IssueFactory
 from foodsaving.pickups.factories import FeedbackFactory, PickupDateFactory, \
     PickupDateSeriesFactory
 from foodsaving.pickups.models import PickupDate, to_range
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 from foodsaving.subscriptions.models import ChannelSubscription, \
     PushSubscription, PushSubscriptionPlatform
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
@@ -536,21 +536,21 @@ class InvitationReceiverTests(WSTestCase):
         self.assertEqual(response['payload']['id'], id)
 
 
-class StoreReceiverTests(WSTestCase):
+class PlaceReceiverTests(WSTestCase):
     def setUp(self):
         super().setUp()
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
-        self.store = StoreFactory(group=self.group)
+        self.place = PlaceFactory(group=self.group)
 
-    def test_receive_store_changes(self):
+    def test_receive_place_changes(self):
         self.client = self.connect_as(self.member)
 
         name = faker.name()
-        self.store.name = name
-        self.store.save()
+        self.place.name = name
+        self.place.save()
 
-        response = self.client.messages_by_topic.get('stores:store')[0]
+        response = self.client.messages_by_topic.get('places:place')[0]
         self.assertEqual(response['payload']['name'], name)
 
         self.assertEqual(len(self.client.messages), 1)
@@ -561,8 +561,8 @@ class PickupDateReceiverTests(WSTestCase):
         super().setUp()
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
-        self.store = StoreFactory(group=self.group)
-        self.pickup = PickupDateFactory(store=self.store)
+        self.place = PlaceFactory(group=self.group)
+        self.pickup = PickupDateFactory(place=self.place)
 
     def test_receive_pickup_changes(self):
         self.client = self.connect_as(self.member)
@@ -611,11 +611,11 @@ class PickupDateSeriesReceiverTests(WSTestCase):
         super().setUp()
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
-        self.store = StoreFactory(group=self.group)
+        self.place = PlaceFactory(group=self.group)
 
         # Create far in the future to generate no pickup dates
         # They would lead to interfering websocket messages
-        self.series = PickupDateSeriesFactory(store=self.store, start_date=timezone.now() + relativedelta(months=2))
+        self.series = PickupDateSeriesFactory(place=self.place, start_date=timezone.now() + relativedelta(months=2))
 
     def test_receive_series_changes(self):
         self.client = self.connect_as(self.member)
@@ -646,8 +646,8 @@ class FeedbackReceiverTests(WSTestCase):
         super().setUp()
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
-        self.store = StoreFactory(group=self.group)
-        self.pickup = PickupDateFactory(store=self.store)
+        self.place = PlaceFactory(group=self.group)
+        self.pickup = PickupDateFactory(place=self.place)
 
     def test_receive_feedback_changes(self):
         self.client = self.connect_as(self.member)
@@ -665,8 +665,8 @@ class FinishedPickupReceiverTest(WSTestCase):
         super().setUp()
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
-        self.store = StoreFactory(group=self.group)
-        self.pickup = PickupDateFactory(store=self.store, collectors=[self.member])
+        self.place = PlaceFactory(group=self.group)
+        self.pickup = PickupDateFactory(place=self.place, collectors=[self.member])
 
     def test_receive_history_and_notification(self):
         self.pickup.date = to_range(timezone.now() - relativedelta(days=1))

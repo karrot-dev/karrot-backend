@@ -15,7 +15,7 @@ from foodsaving.notifications.models import Notification, NotificationType
 from foodsaving.notifications.tasks import create_pickup_upcoming_notifications
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.pickups.models import to_range
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 from foodsaving.users.factories import UserFactory
 
 
@@ -91,8 +91,8 @@ class TestNotificationReceivers(TestCase):
     def test_creates_feedback_possible_notification(self):
         member = UserFactory()
         group = GroupFactory(members=[member])
-        store = StoreFactory(group=group)
-        pickup = PickupDateFactory(store=store)
+        place = PlaceFactory(group=group)
+        pickup = PickupDateFactory(place=place)
 
         pickup.add_collector(member)
         pickup.feedback_possible = True
@@ -104,17 +104,17 @@ class TestNotificationReceivers(TestCase):
             notification[0].expires_at, pickup.date.end + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
         )
 
-    def test_creates_new_store_notification(self):
+    def test_creates_new_place_notification(self):
         member = UserFactory()
         creator = UserFactory()
         group = GroupFactory(members=[member, creator])
-        store = StoreFactory(group=group, last_changed_by=creator)
+        place = PlaceFactory(group=group, last_changed_by=creator)
 
-        notifications = Notification.objects.filter(type=NotificationType.NEW_STORE.value)
+        notifications = Notification.objects.filter(type=NotificationType.NEW_PLACE.value)
         # creator does not get a notification
         self.assertEqual(notifications.count(), 1)
         self.assertEqual(notifications[0].user, member)
-        self.assertEqual(notifications[0].context['store'], store.id)
+        self.assertEqual(notifications[0].context['place'], place.id)
         self.assertEqual(notifications[0].context['user'], creator.id)
 
     def test_creates_new_member_notification(self):
@@ -154,9 +154,9 @@ class TestNotificationReceivers(TestCase):
     def test_deletes_pickup_upcoming_notification(self):
         user = UserFactory()
         group = GroupFactory(members=[user])
-        store = StoreFactory(group=group)
+        place = PlaceFactory(group=group)
         in_one_hour = to_range(timezone.now() + relativedelta(hours=1))
-        pickup = PickupDateFactory(store=store, date=in_one_hour, collectors=[user])
+        pickup = PickupDateFactory(place=place, date=in_one_hour, collectors=[user])
         Notification.objects.all().delete()
 
         create_pickup_upcoming_notifications.call_local()
@@ -168,9 +168,9 @@ class TestNotificationReceivers(TestCase):
     def test_creates_pickup_disabled_notification_and_deletes_pickup_upcoming_notification(self):
         user1, user2 = UserFactory(), UserFactory()
         group = GroupFactory(members=[user1, user2])
-        store = StoreFactory(group=group)
+        place = PlaceFactory(group=group)
         in_one_hour = to_range(timezone.now() + relativedelta(hours=1))
-        pickup = PickupDateFactory(store=store, date=in_one_hour, collectors=[user1, user2])
+        pickup = PickupDateFactory(place=place, date=in_one_hour, collectors=[user1, user2])
         Notification.objects.all().delete()
 
         create_pickup_upcoming_notifications.call_local()
@@ -187,13 +187,13 @@ class TestNotificationReceivers(TestCase):
         context = pickup_disabled_notifications[0].context
         self.assertEqual(context['group'], group.id)
         self.assertEqual(context['pickup'], pickup.id)
-        self.assertEqual(context['store'], store.id)
+        self.assertEqual(context['place'], place.id)
 
     def test_creates_pickup_enabled_notification(self):
         user1, user2 = UserFactory(), UserFactory()
         group = GroupFactory(members=[user1, user2])
-        store = StoreFactory(group=group)
-        pickup = PickupDateFactory(store=store, collectors=[user1, user2])
+        place = PlaceFactory(group=group)
+        pickup = PickupDateFactory(place=place, collectors=[user1, user2])
         Notification.objects.all().delete()
 
         pickup.last_changed_by = user2
@@ -209,13 +209,13 @@ class TestNotificationReceivers(TestCase):
         context = pickup_enabled_notifications[0].context
         self.assertEqual(context['group'], group.id)
         self.assertEqual(context['pickup'], pickup.id)
-        self.assertEqual(context['store'], store.id)
+        self.assertEqual(context['place'], place.id)
 
     def test_creates_pickup_moved_notification(self):
         user1, user2 = UserFactory(), UserFactory()
         group = GroupFactory(members=[user1, user2])
-        store = StoreFactory(group=group)
-        pickup = PickupDateFactory(store=store, collectors=[user1, user2])
+        place = PlaceFactory(group=group)
+        pickup = PickupDateFactory(place=place, collectors=[user1, user2])
         Notification.objects.all().delete()
 
         pickup.last_changed_by = user2
@@ -229,7 +229,7 @@ class TestNotificationReceivers(TestCase):
         context = notifications[0].context
         self.assertEqual(context['group'], group.id)
         self.assertEqual(context['pickup'], pickup.id)
-        self.assertEqual(context['store'], store.id)
+        self.assertEqual(context['place'], place.id)
 
     def test_conflict_resolution_notifications(self):
         user1, user2, user3 = UserFactory(), UserFactory(), UserFactory()

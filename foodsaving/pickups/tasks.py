@@ -8,7 +8,7 @@ from foodsaving.groups.models import Group, GroupMembership, GroupNotificationTy
 from foodsaving.pickups import stats
 from foodsaving.pickups.emails import prepare_pickup_notification_email
 from foodsaving.pickups.models import PickupDate, PickupDateSeries
-from foodsaving.stores.models import StoreStatus
+from foodsaving.places.models import PlaceStatus
 from foodsaving.users.models import User
 from foodsaving.utils import stats_utils
 
@@ -54,8 +54,8 @@ def fetch_pickup_notification_data_for_group(group):
     not_full = {'num_collectors__gt': 0, 'num_collectors__lt': F('max_collectors')}
 
     pickups = PickupDate.objects.exclude_disabled().annotate_num_collectors().filter(
-        store__status=StoreStatus.ACTIVE.value,
-        store__group=group,
+        place__status=PlaceStatus.ACTIVE.value,
+        place__group=group,
     ).order_by('date')
 
     tonight_empty = pickups.filter(**tonight, **empty)
@@ -77,7 +77,7 @@ def fetch_pickup_notification_data_for_group(group):
     for user in users:
 
         user_pickups = PickupDate.objects.filter(
-            store__group=group,
+            place__group=group,
             collectors__in=[user],
         ).order_by('date')
 

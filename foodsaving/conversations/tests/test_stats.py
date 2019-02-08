@@ -4,7 +4,7 @@ from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.stats import conversation_tags
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.pickups.factories import PickupDateFactory
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 
 
 class TestConversationStats(TestCase):
@@ -19,8 +19,8 @@ class TestConversationStats(TestCase):
 
     def test_tags_for_pickup_conversation(self):
         group = GroupFactory()
-        store = StoreFactory(group=group)
-        pickup = PickupDateFactory(store=store)
+        place = PlaceFactory(group=group)
+        pickup = PickupDateFactory(place=place)
         tags = conversation_tags(pickup.conversation)
         self.assertEqual(tags, {
             'type': 'pickup',

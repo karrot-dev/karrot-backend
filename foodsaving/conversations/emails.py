@@ -7,7 +7,7 @@ from config import settings
 from foodsaving.utils.email_utils import prepare_email, formataddr
 from foodsaving.utils.frontend_urls import (
     group_wall_url, conversation_unsubscribe_url, pickup_detail_url, user_detail_url, application_url, thread_url,
-    thread_unsubscribe_url, conflict_resolution_url, store_wall_url
+    thread_unsubscribe_url, conflict_resolution_url, place_wall_url
 )
 from foodsaving.webhooks.api import make_local_part
 
@@ -22,7 +22,7 @@ def prepare_conversation_message_notification(user, messages):
 
     if type == 'group' and first_message.is_thread_reply():
         return prepare_group_thread_message_notification(user, messages)
-    if type == 'store' and first_message.is_thread_reply():
+    if type == 'place' and first_message.is_thread_reply():
         return prepare_group_thread_message_notification(user, messages)
     if type == 'pickup':
         return prepare_pickup_conversation_message_notification(user, messages)
@@ -99,19 +99,19 @@ def prepare_group_conversation_message_notification(user, message):
     )
 
 
-def prepare_store_conversation_message_notification(user, message):
+def prepare_place_conversation_message_notification(user, message):
     conversation = message.conversation
-    store = conversation.target
+    place = conversation.target
 
     from_text = message.author.display_name
-    reply_to_name = store.name
-    conversation_name = store.name
+    reply_to_name = place.name
+    conversation_name = place.name
 
     local_part = make_local_part(conversation, user, message)
     reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
     from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
-    unsubscribe_url = conversation_unsubscribe_url(user, group=store.group, conversation=conversation)
+    unsubscribe_url = conversation_unsubscribe_url(user, group=place.group, conversation=conversation)
 
     return prepare_email(
         template='conversation_message_notification',
@@ -122,7 +122,7 @@ def prepare_store_conversation_message_notification(user, message):
         context={
             'messages': [message],
             'conversation_name': conversation_name,
-            'conversation_url': store_wall_url(store),
+            'conversation_url': place_wall_url(place),
             'mute_url': unsubscribe_url,
         }
     )
@@ -132,7 +132,7 @@ def prepare_pickup_conversation_message_notification(user, messages):
     first_message = messages[0]
     conversation = first_message.conversation
     pickup = conversation.target
-    group_tz = pickup.store.group.timezone
+    group_tz = pickup.place.group.timezone
 
     language = user.language
 
@@ -174,7 +174,7 @@ def prepare_pickup_conversation_message_notification(user, messages):
             reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
             from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
-            unsubscribe_url = conversation_unsubscribe_url(user, group=pickup.store.group, conversation=conversation)
+            unsubscribe_url = conversation_unsubscribe_url(user, group=pickup.place.group, conversation=conversation)
 
             return prepare_email(
                 template='conversation_message_notification',

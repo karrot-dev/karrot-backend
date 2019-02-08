@@ -4,7 +4,7 @@ from foodsaving.applications.factories import ApplicationFactory
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupNotificationType
 from foodsaving.pickups.factories import PickupDateFactory
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 from foodsaving.unsubscribe.utils import unsubscribe_from_all_conversations_in_group, generate_token, parse_token, \
     unsubscribe_from_notification_type
 from foodsaving.users.factories import UserFactory
@@ -58,9 +58,9 @@ class TestUnsubscribeFromAllConversationsInGroup(TestCase):
     def setUp(self):
         self.user = UserFactory()
         self.group = GroupFactory(members=[self.user])
-        self.store = StoreFactory(group=self.group)
+        self.place = PlaceFactory(group=self.group)
         self.other_group = GroupFactory(members=[self.user])
-        self.other_store = StoreFactory(group=self.other_group)
+        self.other_place = PlaceFactory(group=self.other_group)
 
     def test_unsubscribe_from_group_wall(self):
         participant = self.group.conversation.conversationparticipant_set.filter(user=self.user)
@@ -95,14 +95,14 @@ class TestUnsubscribeFromAllConversationsInGroup(TestCase):
         self.assertEqual(membership.get().notification_types, [])
 
     def test_unsubscribe_from_pickup_conversation(self):
-        pickup = PickupDateFactory(store=self.store, collectors=[self.user])
+        pickup = PickupDateFactory(place=self.place, collectors=[self.user])
         participant = pickup.conversation.conversationparticipant_set.filter(user=self.user)
         self.assertFalse(participant.get().muted)
         unsubscribe_from_all_conversations_in_group(self.user, self.group)
         self.assertTrue(participant.get().muted)
 
     def test_does_not_unsubscribe_from_other_group_pickup_conversations(self):
-        pickup = PickupDateFactory(store=self.other_store, collectors=[self.user])
+        pickup = PickupDateFactory(place=self.other_place, collectors=[self.user])
         participant = pickup.conversation.conversationparticipant_set.filter(user=self.user)
         self.assertFalse(participant.get().muted)
         unsubscribe_from_all_conversations_in_group(self.user, self.group)

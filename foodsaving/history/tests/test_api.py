@@ -10,7 +10,7 @@ from foodsaving.history.models import History
 from foodsaving.pickups.factories import PickupDateFactory, \
     PickupDateSeriesFactory
 from foodsaving.pickups.models import PickupDate, to_range
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.users.factories import UserFactory
 
@@ -87,27 +87,27 @@ class TestHistoryAPIWithExistingGroup(APITestCase, ExtractPaginationMixin):
         response = self.get_results(history_url)
         self.assertEqual(response.data[0]['typus'], 'MEMBER_BECAME_EDITOR')
 
-    def test_create_store(self):
+    def test_create_place(self):
         self.client.force_login(self.member)
-        self.client.post('/api/stores/', {'name': 'xyzabc', 'group': self.group.id})
+        self.client.post('/api/places/', {'name': 'xyzabc', 'group': self.group.id})
         response = self.get_results(history_url)
         self.assertEqual(response.data[0]['typus'], 'STORE_CREATE')
 
 
-class TestHistoryAPIWithExistingStore(APITestCase, ExtractPaginationMixin):
+class TestHistoryAPIWithExistingPlace(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
-        self.store = StoreFactory(group=self.group)
-        self.store_url = '/api/stores/{}/'.format(self.store.id)
+        self.place = PlaceFactory(group=self.group)
+        self.place_url = '/api/places/{}/'.format(self.place.id)
 
-    def test_modify_store(self):
+    def test_modify_place(self):
         self.client.force_login(self.member)
         self.client.patch(
-            self.store_url,
+            self.place_url,
             {
                 'name': 'newnew',  # new value
-                'description': self.store.description  # no change
+                'description': self.place.description  # no change
             }
         )
         response = self.get_results(history_url)
@@ -116,9 +116,9 @@ class TestHistoryAPIWithExistingStore(APITestCase, ExtractPaginationMixin):
         self.assertEqual(history['typus'], 'STORE_MODIFY')
         self.assertEqual(history['payload']['name'], 'newnew')
 
-    def test_dont_modify_store(self):
+    def test_dont_modify_place(self):
         self.client.force_login(self.member)
-        self.client.patch(self.store_url, {'name': self.store.name})
+        self.client.patch(self.place_url, {'name': self.place.name})
         response = self.get_results(history_url)
         self.assertEqual(len(response.data), 0)
 
@@ -128,7 +128,7 @@ class TestHistoryAPIWithExistingStore(APITestCase, ExtractPaginationMixin):
             '/api/pickup-dates/',
             {
                 'date': to_range(timezone.now() + relativedelta(days=1)).as_list(),
-                'store': self.store.id
+                'place': self.place.id
             },
             format='json'
         )
@@ -142,7 +142,7 @@ class TestHistoryAPIWithExistingStore(APITestCase, ExtractPaginationMixin):
             {
                 'start_date': timezone.now(),
                 'rule': 'FREQ=WEEKLY',
-                'store': self.store.id
+                'place': self.place.id
             }
         )
         response = self.get_results(history_url)
@@ -153,10 +153,10 @@ class TestHistoryAPIWithExistingPickups(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
-        self.store = StoreFactory(group=self.group)
-        self.pickup = PickupDateFactory(store=self.store)
+        self.place = PlaceFactory(group=self.group)
+        self.pickup = PickupDateFactory(place=self.place)
         self.pickup_url = '/api/pickup-dates/{}/'.format(self.pickup.id)
-        self.series = PickupDateSeriesFactory(store=self.store)
+        self.series = PickupDateSeriesFactory(place=self.place)
         self.series_url = '/api/pickup-date-series/{}/'.format(self.series.id)
 
     def test_modify_pickup(self):
@@ -234,8 +234,8 @@ class TestHistoryAPIWithDonePickup(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
-        self.store = StoreFactory(group=self.group)
-        self.pickup = PickupDateFactory(store=self.store, date=to_range(timezone.now() - relativedelta(days=1)))
+        self.place = PlaceFactory(group=self.group)
+        self.pickup = PickupDateFactory(place=self.place, date=to_range(timezone.now() - relativedelta(days=1)))
         self.pickup.add_collector(self.member)
         PickupDate.objects.process_finished_pickup_dates()
 
@@ -257,8 +257,8 @@ class TestHistoryAPIWithMissedPickup(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
-        self.store = StoreFactory(group=self.group)
-        self.pickup = PickupDateFactory(store=self.store, date=to_range(timezone.now() - relativedelta(days=1)))
+        self.place = PlaceFactory(group=self.group)
+        self.pickup = PickupDateFactory(place=self.place, date=to_range(timezone.now() - relativedelta(days=1)))
         # No one joined the pickup
         PickupDate.objects.process_finished_pickup_dates()
 
@@ -276,23 +276,23 @@ class TestHistoryAPIWithMissedPickup(APITestCase, ExtractPaginationMixin):
         self.assertEqual(len(response.data), 0)
 
 
-class TestHistoryAPIPickupForInactiveStore(APITestCase, ExtractPaginationMixin):
+class TestHistoryAPIPickupForInactivePlace(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
-        self.store = StoreFactory(group=self.group, status='archived')
-        self.pickup = PickupDateFactory(store=self.store, date=to_range(timezone.now() - relativedelta(days=1)))
+        self.place = PlaceFactory(group=self.group, status='archived')
+        self.pickup = PickupDateFactory(place=self.place, date=to_range(timezone.now() - relativedelta(days=1)))
         self.pickup.add_collector(self.member)
 
-        PickupDateFactory(store=self.store, date=to_range(timezone.now() - relativedelta(days=1), minutes=30))
+        PickupDateFactory(place=self.place, date=to_range(timezone.now() - relativedelta(days=1), minutes=30))
         PickupDate.objects.process_finished_pickup_dates()
 
-    def test_no_pickup_done_for_inactive_store(self):
+    def test_no_pickup_done_for_inactive_place(self):
         self.client.force_login(self.member)
         response = self.get_results(history_url, {'typus': 'PICKUP_DONE'})
         self.assertEqual(len(response.data), 0)
 
-    def test_no_pickup_missed_for_inactive_store(self):
+    def test_no_pickup_missed_for_inactive_place(self):
         self.client.force_login(self.member)
         response = self.get_results(history_url, {'typus': 'PICKUP_MISSED'})
         self.assertEqual(len(response.data), 0)
@@ -302,9 +302,9 @@ class TestHistoryAPIWithDisabledPickup(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
-        self.store = StoreFactory(group=self.group)
+        self.place = PlaceFactory(group=self.group)
         self.pickup = PickupDateFactory(
-            store=self.store,
+            place=self.place,
             date=to_range(timezone.now() - relativedelta(days=1)),
             is_disabled=True,
         )

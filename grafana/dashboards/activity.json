@@ -30,7 +30,7 @@
         },
         "id": 31,
         "panels": [],
-        "title": "Stores, Pickups and Feedback",
+        "title": "Places, Pickups and Feedback",
         "type": "row"
       },
       {
@@ -109,7 +109,7 @@
                 "type": "fill"
               }
             ],
-            "measurement": "karrot.group.stores",
+            "measurement": "karrot.group.places",
             "orderByTime": "ASC",
             "policy": "default",
             "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
@@ -140,7 +140,7 @@
           }
         ],
         "thresholds": "",
-        "title": "Active store cooperations",
+        "title": "Active place cooperations",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
