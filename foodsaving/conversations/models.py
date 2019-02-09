@@ -78,8 +78,10 @@ class Conversation(BaseModel, UpdatedAtMixin):
     )
 
     def join(self, user, **kwargs):
-        if not self.conversationparticipant_set.filter(user=user).exists():
-            ConversationParticipant.objects.create(user=user, conversation=self, **kwargs)
+        participant = self.conversationparticipant_set.filter(user=user).first()
+        if participant is None:
+            participant = self.conversationparticipant_set.create(user=user, **kwargs)
+        return participant
 
     def leave(self, user):
         self.conversationparticipant_set.filter(user=user).delete()

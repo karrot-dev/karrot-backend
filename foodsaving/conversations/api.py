@@ -133,6 +133,33 @@ class ConversationViewSet(PartialUpdateModelMixin, GenericViewSet):
         serializer = self.get_serializer(participant)
         return Response(serializer.data)
 
+    def partial_update(self, request, pk, *args, **kwargs):
+        try:
+            participant = self.get_object()
+        except Http404:
+            # user is not participant, create participant if user is allowed to
+            queryset = Conversation.objects.filter(
+                group__groupmembership__user=self.request.user,
+                is_group_public=True,
+            )
+            conversation = get_object_or_404(queryset, id=pk)
+            serializer = ConversationSerializer(
+                data=request.data, context={
+                    **self.get_serializer_context(),
+                    'conversation': conversation,
+                }
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+
+        serializer = self.get_serializer(participant, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        participant = serializer.save()
+        if participant.id is None:
+            serializer = ConversationInfoSerializer(participant.conversation, context=self.get_serializer_context())
+        return Response(serializer.data)
+
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset() \
             .exclude(conversation__latest_message_id=None) \

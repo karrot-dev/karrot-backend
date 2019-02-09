@@ -183,6 +183,7 @@ class ConversationSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'participants',
+            'group',
             'updated_at',
             'type',
             'target_id',
@@ -195,10 +196,11 @@ class ConversationSerializer(serializers.ModelSerializer):
 
     id = serializers.IntegerField(source='conversation.id', read_only=True)
     participants = serializers.PrimaryKeyRelatedField(source='conversation.participants', many=True, read_only=True)
+    group = serializers.PrimaryKeyRelatedField(source='conversation.group', read_only=True)
     type = serializers.CharField(source='conversation.type', read_only=True)
     target_id = serializers.IntegerField(source='conversation.target_id', read_only=True)
     is_closed = serializers.BooleanField(source='conversation.is_closed', read_only=True)
-    is_participant = serializers.ReadOnlyField(default=True)
+    is_participant = serializers.BooleanField(default=True)
 
     unread_message_count = serializers.SerializerMethodField()
     updated_at = serializers.SerializerMethodField()
@@ -225,11 +227,26 @@ class ConversationSerializer(serializers.ModelSerializer):
         return message
 
     def update(self, participant, validated_data):
+        is_participant = validated_data.get('is_participant', True)
+        if not is_participant:
+            # delete participant on request
+            participant.delete()
+            return participant
         if 'seen_up_to' in validated_data:
             participant.seen_up_to = validated_data['seen_up_to']
         if 'muted' in validated_data:
             participant.muted = validated_data['muted']
         participant.save()
+        return participant
+
+    def create(self, validated_data):
+        is_participant = validated_data.pop('is_participant', False)
+        if is_participant:
+            print('creating participant with', validated_data)
+            participant = self.context['conversation'].join(self.context['request'].user, **validated_data)
+        else:
+            raise serializers.ValidationError('cannot create participant')
+
         return participant
 
 
