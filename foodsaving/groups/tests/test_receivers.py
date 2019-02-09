@@ -1,3 +1,4 @@
+from django.core import mail
 from unittest.mock import patch
 
 from django.contrib.contenttypes.models import ContentType
@@ -6,7 +7,7 @@ from django.utils import timezone
 
 from foodsaving.conversations.models import Conversation, ConversationParticipant
 from foodsaving.groups.factories import GroupFactory, PlaygroundGroupFactory
-from foodsaving.groups.models import GroupMembership
+from foodsaving.groups.models import GroupMembership, Trust
 from foodsaving.users.factories import UserFactory
 
 
@@ -87,5 +88,19 @@ class TestGroupPlaygroundReceivers(TestCase):
 
     def test_playground_members_are_always_editors(self):
         new_member = UserFactory()
+        mail.outbox = []
+
         self.group.add_member(new_member)
+
         self.assertTrue(self.group.is_editor(new_member))
+        # no email should be sent when joining playground
+        self.assertEqual(len(mail.outbox), 0)
+
+        # no email should be sent when giving trust
+        membership = GroupMembership.objects.get(group=self.group, user=new_member)
+        another_user = UserFactory()
+        self.group.add_member(another_user)
+        mail.outbox = []
+        Trust.objects.create(membership=membership, given_by=another_user)
+
+        self.assertEqual(len(mail.outbox), 0)

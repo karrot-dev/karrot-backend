@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import TextField, DateTimeField, QuerySet, Subquery, OuterRef, Count, Q
+from django.db.models import TextField, DateTimeField, QuerySet, Count, Q, F
 from django.template.loader import render_to_string
 from django.utils import timezone as tz, timezone
 from timezone_field import TimeZoneField
@@ -230,12 +230,13 @@ class GroupMembershipQuerySet(QuerySet):
 
     def pickup_active_within(self, **kwargs):
         now = timezone.now()
-        pickups = PickupDate.objects.exclude_disabled().filter(
-            place__group=OuterRef('group'),
-            date__startswith__lt=now,
-            date__startswith__gte=now - relativedelta(**kwargs)
-        )
-        return self.filter(user__pickup_dates__in=Subquery(pickups.only('pk'))).distinct()
+        return self.filter(
+            user__pickup_dates__in=PickupDate.objects.exclude_disabled().filter(
+                date__startswith__lt=now,
+                date__startswith__gte=now - relativedelta(**kwargs),
+            ),
+            user__pickup_dates__place__group=F('group'),
+        ).distinct()
 
     def editors(self):
         return self.with_role(roles.GROUP_EDITOR)
