@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.fields import DateTimeField
+from rest_framework.fields import DateTimeField, Field
 from rest_framework.validators import UniqueTogetherValidator
 
 from foodsaving.base.base_models import CustomDateTimeTZRange
@@ -68,6 +68,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
             'feedback_due',
             'feedback_given_by',
             'is_disabled',
+            'has_duration',
         ]
         read_only_fields = [
             'id',
@@ -220,6 +221,19 @@ class PickupDateLeaveSerializer(serializers.ModelSerializer):
         return pickupdate
 
 
+class DurationInSecondsField(Field):
+    default_error_messages = {}
+
+    def __init__(self, **kwargs):
+        super(DurationInSecondsField, self).__init__(**kwargs)
+
+    def to_internal_value(self, value):
+        return timedelta(seconds=value)
+
+    def to_representation(self, value):
+        return value.seconds
+
+
 class PickupDateSeriesHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = PickupDateSeriesModel
@@ -237,6 +251,7 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
             'start_date',
             'description',
             'dates_preview',
+            'duration',
         ]
         read_only_fields = [
             'id',
@@ -247,6 +262,8 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
         read_only=True,
         source='dates',
     )
+
+    duration = DurationInSecondsField(required=False, allow_null=True)
 
     def save(self, **kwargs):
         return super().save(last_changed_by=self.context['request'].user)
@@ -295,6 +312,8 @@ class PickupDateSeriesUpdateSerializer(PickupDateSeriesSerializer):
         model = PickupDateSeriesModel
         fields = PickupDateSeriesSerializer.Meta.fields
         read_only_fields = PickupDateSeriesSerializer.Meta.read_only_fields + ['place']
+
+    duration = DurationInSecondsField(required=False, allow_null=True)
 
     def save(self, **kwargs):
         self._validated_data = find_changed(self.instance, self.validated_data)
