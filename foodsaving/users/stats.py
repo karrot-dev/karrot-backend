@@ -39,7 +39,7 @@ def get_users_stats():
                 date__startswith__lt=now,
                 date__startswith__gte=now - relativedelta(days=n)
             ).exclude(
-                store__group__status=GroupStatus.PLAYGROUND,
+                place__group__status=GroupStatus.PLAYGROUND,
             ),
             deleted=False
         ).distinct()

@@ -68,5 +68,5 @@ class IsGroupEditor(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         if view.action in ('partial_update', 'destroy'):
-            return obj.store.group.is_editor(request.user)
+            return obj.place.group.is_editor(request.user)
         return True

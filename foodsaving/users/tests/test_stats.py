@@ -6,7 +6,7 @@ from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.pickups.models import to_range
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 from foodsaving.users import stats
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
 from foodsaving.webhooks.models import EmailEvent
@@ -19,8 +19,8 @@ class TestUserStats(TestCase):
         def update_member_activity(user, **kwargs):
             GroupMembership.objects.filter(user=user).update(lastseen_at=timezone.now() - relativedelta(**kwargs))
 
-        def do_pickup(store, user, **kwargs):
-            pickup = PickupDateFactory(store=store, date=to_range(timezone.now() - relativedelta(**kwargs)))
+        def do_pickup(place, user, **kwargs):
+            pickup = PickupDateFactory(place=place, date=to_range(timezone.now() - relativedelta(**kwargs)))
             pickup.add_collector(user)
 
         # 9 verified users, 1 unverified user
@@ -77,12 +77,12 @@ class TestUserStats(TestCase):
         GroupMembership.objects.filter(group=group_all_inactive).update(inactive_at=timezone.now())
 
         # do some pickups!
-        store = StoreFactory(group=group)
-        do_pickup(store, users[0], days=2)
-        do_pickup(store, users[1], days=8)
-        do_pickup(store, users[2], days=31)
-        do_pickup(store, users[3], days=61)
-        do_pickup(store, users[4], days=91)
+        place = PlaceFactory(group=group)
+        do_pickup(place, users[0], days=2)
+        do_pickup(place, users[1], days=8)
+        do_pickup(place, users[2], days=31)
+        do_pickup(place, users[3], days=61)
+        do_pickup(place, users[4], days=91)
 
         points = stats.get_users_stats()
 

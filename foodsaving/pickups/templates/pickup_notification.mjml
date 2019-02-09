@@ -15,8 +15,8 @@
                                 {% for pickup in pickups %}
                                     <li>
                                         {{ pickup.date.start | time }} @
-                                        <a href="{{ store_url(pickup.store) }}">
-                                            {{ pickup.store.name }}
+                                        <a href="{{ place_url(pickup.place) }}">
+                                            {{ pickup.place.name }}
                                         </a>
                                         {% if show_empty_collectors_count %}
                                             -

@@ -4,9 +4,9 @@ from foodsaving.groups.stats import group_tags
 
 
 def pickup_tags(pickup):
-    tags = group_tags(pickup.store.group)
+    tags = group_tags(pickup.place.group)
     tags.update({
-        'store': str(pickup.store.id),
+        'place': str(pickup.place.id),
     })
     return tags
 

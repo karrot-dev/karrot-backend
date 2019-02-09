@@ -45,7 +45,7 @@ NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP = 30
 NUMBER_OF_INACTIVE_MONTHS_UNTIL_REMOVAL_FROM_GROUP_NOTIFICATION = 6
 NUMBER_OF_DAYS_AFTER_REMOVAL_NOTIFICATION_WE_ACTUALLY_REMOVE_THEM = 7
 
-# Stores
+# Places
 STORE_MAX_WEEKS_IN_ADVANCE = 52
 
 # Pickups
@@ -89,7 +89,7 @@ INSTALLED_APPS = (
     'foodsaving.conversations.ConversationsConfig',
     'foodsaving.history.HistoryConfig',
     'foodsaving.groups.GroupsConfig',
-    'foodsaving.stores.StoresConfig',
+    'foodsaving.places.PlacesConfig',
     'foodsaving.unsubscribe',
     'foodsaving.pickups.PickupsConfig',
     'foodsaving.invitations.InvitationsConfig',
