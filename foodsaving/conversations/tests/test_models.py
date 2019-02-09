@@ -16,17 +16,14 @@ from foodsaving.users.factories import UserFactory, VerifiedUserFactory
 class ConversationModelTests(TestCase):
     def test_join(self):
         user = UserFactory()
-        conversation = ConversationFactory(participants=[
-            user,
-        ])
+        conversation = ConversationFactory(participants=[user])
         self.assertIn(user, conversation.participants.all())
 
     def test_leave(self):
         user = UserFactory()
-        conversation = ConversationFactory(participants=[
-            user,
-        ])
+        conversation = ConversationFactory(participants=[user])
         self.assertIn(user, conversation.participants.all())
+
         conversation.leave(user)
         self.assertNotIn(user, conversation.participants.all())
 
@@ -182,7 +179,7 @@ class TestPickupConversations(TestCase):
         self.assertEqual(len(mail.outbox), 2)
 
 
-class TestCaseConversations(TestCase):
+class TestIssueConversations(TestCase):
     def setUp(self):
         self.user = VerifiedUserFactory()
         self.more_users = [VerifiedUserFactory() for _ in range(2)]
@@ -241,6 +238,18 @@ class TestPrivateUserConversations(TestCase):
     def test_get_or_create_conversation_for_yourself_fails(self):
         with self.assertRaises(Exception):
             Conversation.objects.get_or_create_for_two_users(self.user, self.user)
+
+    def test_does_not_set_group(self):
+        conversation = Conversation.objects.get_or_create_for_two_users(self.user, self.user2)
+        self.assertIsNone(conversation.group)
+
+
+class TestGroupConversation(TestCase):
+    def test_sets_group(self):
+        user = VerifiedUserFactory()
+        group = GroupFactory(members=[user])
+        conversation = Conversation.objects.get_or_create_for_target(group)
+        self.assertEqual(conversation.group, group)
 
 
 class ReactionModelTests(TestCase):
