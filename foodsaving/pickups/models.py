@@ -42,7 +42,7 @@ class PickupDateSeries(BaseModel):
 
     def create_pickup(self, date):
         return self.pickup_dates.create(
-            date=CustomDateTimeTZRange(date, date + (self.duration if self.duration else default_duration)),
+            date=CustomDateTimeTZRange(date, date + (self.duration or default_duration)),
             has_duration=self.duration is not None,
             max_collectors=self.max_collectors,
             series=self,
