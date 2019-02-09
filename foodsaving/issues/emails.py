@@ -23,6 +23,7 @@ def prepare_new_conflict_resolution_email_to_affected_user(issue):
         template='new_conflict_resolution_affected_user',
         from_email=from_email,
         user=user,
+        tz=issue.group.timezone,
         reply_to=[reply_to],
         context={
             'created_by': created_by,
@@ -53,6 +54,7 @@ def prepare_new_conflict_resolution_email(user, issue):
         template='new_conflict_resolution',
         from_email=from_email,
         user=user,
+        tz=issue.group.timezone,
         reply_to=[reply_to],
         unsubscribe_url=unsubscribe_url,
         context={
@@ -77,6 +79,7 @@ def prepare_conflict_resolution_continued_email(user, issue):
     return prepare_email(
         template='conflict_resolution_continued',
         user=user,
+        tz=issue.group.timezone,
         context={
             'affected_user': affected_user,
             'unsubscribe_url': unsubscribe_url,
@@ -95,6 +98,7 @@ def prepare_conflict_resolution_continued_email_to_affected_user(issue):
     return prepare_email(
         template='conflict_resolution_continued_affected_user',
         user=user,
+        tz=issue.group.timezone,
         context={
             'conflict_resolution_url': issue_url,
             'expires_at': voting.expires_at,

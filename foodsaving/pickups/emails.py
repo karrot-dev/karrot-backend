@@ -34,6 +34,7 @@ def prepare_pickup_notification_email(
     return prepare_email(
         template='pickup_notification',
         user=user,
+        tz=group.timezone,
         context={
             'unsubscribe_url': unsubscribe_url,
             'group': group,

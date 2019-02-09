@@ -55,6 +55,7 @@ def prepare_group_thread_message_notification(user, messages):
         template='thread_message_notification',
         from_email=from_email,
         user=user,
+        tz=group.timezone,
         reply_to=[reply_to],
         unsubscribe_url=unsubscribe_url,
         context={
@@ -86,6 +87,7 @@ def prepare_group_conversation_message_notification(user, message):
         template='conversation_message_notification',
         from_email=from_email,
         user=user,
+        tz=group.timezone,
         reply_to=[reply_to],
         unsubscribe_url=unsubscribe_url,
         context={
@@ -149,6 +151,7 @@ def prepare_pickup_conversation_message_notification(user, messages):
                 template='conversation_message_notification',
                 from_email=from_email,
                 user=user,
+                tz=group_tz,
                 reply_to=[reply_to],
                 unsubscribe_url=unsubscribe_url,
                 context={
@@ -176,6 +179,7 @@ def prepare_private_user_conversation_message_notification(user, messages):
         template='conversation_message_notification',
         from_email=from_email,
         user=user,
+        # TODO: which timezone? maybe the user needs a timezone?
         reply_to=[reply_to],
         unsubscribe_url=unsubscribe_url,
         context={
@@ -220,6 +224,7 @@ def prepare_application_message_notification(user, messages):
             template='conversation_message_notification',
             from_email=from_email,
             user=user,
+            tz=application.group.timezone,
             reply_to=[reply_to],
             unsubscribe_url=unsubscribe_url,
             context={
@@ -260,6 +265,7 @@ def prepare_issue_message_notification(user, messages):
             template='conversation_message_notification',
             from_email=from_email,
             user=user,
+            tz=issue.group.timezone,
             reply_to=[reply_to],
             unsubscribe_url=unsubscribe_url,
             context={
