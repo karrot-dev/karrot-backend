@@ -8,7 +8,7 @@ from django.utils import timezone
 
 def add_place_subscriptions(apps, schema_editor):
     """Adds place subscribers
-    Only adds users who signed up for pickups one week ago or later
+    Only adds users who signed up for pickups three weeks ago or later
     """
     app_config = apps.get_app_config('places')
     app_config.models_module = app_config.models_module or True
@@ -24,9 +24,9 @@ def add_place_subscriptions(apps, schema_editor):
 
     for place in Place.objects.all():
         conversation, _ = Conversation.objects.get_or_create(target_type=ct, target_id=place.id)
-        one_week_ago = timezone.now() - relativedelta(days=7)
+        some_time_ago = timezone.now() - relativedelta(days=21)
         recent_collectors = User.objects.filter(
-            pickup_dates__date__startswith__gte=one_week_ago,
+            pickup_dates__date__startswith__gte=some_time_ago,
             pickup_dates__place_id=place.id,
         ).distinct()
         for user in recent_collectors:
