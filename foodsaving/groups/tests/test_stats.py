@@ -7,7 +7,7 @@ from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.pickups.models import to_range
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 from foodsaving.users.factories import UserFactory
 
 
@@ -17,7 +17,7 @@ class TestGroupStats(TestCase):
             GroupMembership.objects.filter(user=user).update(lastseen_at=timezone.now() - relativedelta(**kwargs))
 
         def do_pickup(user, **kwargs):
-            pickup = PickupDateFactory(store=store, date=to_range(timezone.now() - relativedelta(**kwargs)))
+            pickup = PickupDateFactory(place=place, date=to_range(timezone.now() - relativedelta(**kwargs)))
             pickup.add_collector(user)
 
         def set_as_newcomer(user):
@@ -27,7 +27,7 @@ class TestGroupStats(TestCase):
 
         members = [UserFactory() for _ in range(10)]
         group = GroupFactory(members=members)
-        store = StoreFactory(group=group)
+        place = PlaceFactory(group=group)
 
         set_as_newcomer(members[0])
         update_member_activity(members[0], days=2)
@@ -89,18 +89,18 @@ class TestGroupStats(TestCase):
             }]
         )
 
-    def test_group_stores_stats(self):
+    def test_group_places_stats(self):
         group = GroupFactory()
 
-        [StoreFactory(group=group, status='active') for _ in range(3)]
-        [StoreFactory(group=group, status='negotiating') for _ in range(7)]
-        [StoreFactory(group=group, status='archived') for _ in range(10)]
+        [PlaceFactory(group=group, status='active') for _ in range(3)]
+        [PlaceFactory(group=group, status='negotiating') for _ in range(7)]
+        [PlaceFactory(group=group, status='archived') for _ in range(10)]
 
-        points = stats.get_group_stores_stats(group)
+        points = stats.get_group_places_stats(group)
 
         self.assertEqual(
             points, [{
-                'measurement': 'karrot.group.stores',
+                'measurement': 'karrot.group.places',
                 'tags': {
                     'group': str(group.id),
                     'group_status': 'active',

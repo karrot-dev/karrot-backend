@@ -29,8 +29,8 @@ from foodsaving.notifications.models import Notification, NotificationMeta
 from foodsaving.notifications.serializers import NotificationSerializer, NotificationMetaSerializer
 from foodsaving.pickups.models import PickupDate, PickupDateSeries, Feedback, PickupDateCollector
 from foodsaving.pickups.serializers import PickupDateSerializer, PickupDateSeriesSerializer, FeedbackSerializer
-from foodsaving.stores.models import Store
-from foodsaving.stores.serializers import StoreSerializer
+from foodsaving.places.models import Place
+from foodsaving.places.serializers import PlaceSerializer
 from foodsaving.subscriptions import stats, tasks
 from foodsaving.subscriptions.models import ChannelSubscription
 from foodsaving.userauth.serializers import AuthUserSerializer
@@ -277,13 +277,13 @@ def send_invitation_accept(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='invitations:invitation_accept', payload=payload)
 
 
-# Store
-@receiver(post_save, sender=Store)
-def send_store_updates(sender, instance, **kwargs):
-    store = instance
-    payload = StoreSerializer(store).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=store.group.members.all()).distinct():
-        send_in_channel(subscription.reply_channel, topic='stores:store', payload=payload)
+# Place
+@receiver(post_save, sender=Place)
+def send_place_updates(sender, instance, **kwargs):
+    place = instance
+    payload = PlaceSerializer(place).data
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=place.group.members.all()).distinct():
+        send_in_channel(subscription.reply_channel, topic='places:place', payload=payload)
 
 
 # Pickup Dates
@@ -295,7 +295,7 @@ def send_pickup_updates(sender, instance, **kwargs):
         return
 
     payload = PickupDateSerializer(pickup).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.store.group.members.all()
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.place.group.members.all()
                                                                     ).distinct():
         send_in_channel(subscription.reply_channel, topic='pickups:pickupdate', payload=payload)
 
@@ -304,7 +304,7 @@ def send_pickup_updates(sender, instance, **kwargs):
 def send_pickup_deleted(sender, instance, **kwargs):
     pickup = instance
     payload = PickupDateSerializer(pickup).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.store.group.members.all()
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.place.group.members.all()
                                                                     ).distinct():
         send_in_channel(subscription.reply_channel, topic='pickups:pickupdate_deleted', payload=payload)
 
@@ -314,7 +314,7 @@ def send_pickup_deleted(sender, instance, **kwargs):
 def send_pickup_collector_updates(sender, instance, **kwargs):
     pickup = instance.pickupdate
     payload = PickupDateSerializer(pickup).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.store.group.members.all()
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.place.group.members.all()
                                                                     ).distinct():
         send_in_channel(subscription.reply_channel, topic='pickups:pickupdate', payload=payload)
 
@@ -324,7 +324,7 @@ def send_pickup_collector_updates(sender, instance, **kwargs):
 def send_pickup_series_updates(sender, instance, **kwargs):
     series = instance
     payload = PickupDateSeriesSerializer(series).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=series.store.group.members.all()
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=series.place.group.members.all()
                                                                     ).distinct():
         send_in_channel(subscription.reply_channel, topic='pickups:series', payload=payload)
 
@@ -333,7 +333,7 @@ def send_pickup_series_updates(sender, instance, **kwargs):
 def send_pickup_series_delete(sender, instance, **kwargs):
     series = instance
     payload = PickupDateSeriesSerializer(series).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=series.store.group.members.all()
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=series.place.group.members.all()
                                                                     ).distinct():
         send_in_channel(subscription.reply_channel, topic='pickups:series_deleted', payload=payload)
 
@@ -342,7 +342,7 @@ def send_pickup_series_delete(sender, instance, **kwargs):
 @receiver(post_save, sender=Feedback)
 def send_feedback_updates(sender, instance, **kwargs):
     feedback = instance
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=feedback.about.store.group.members.all()
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=feedback.about.place.group.members.all()
                                                                     ).distinct():
         payload = FeedbackSerializer(feedback, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic='feedback:feedback', payload=payload)

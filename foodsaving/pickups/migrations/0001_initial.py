@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('stores', '0028_extract_pickups_app'),
+        ('places', '0028_extract_pickups_app'),
     ]
 
     state_operations = [
@@ -61,8 +61,8 @@ class Migration(migrations.Migration):
                 ('rule', models.TextField()),
                 ('start_date', models.DateTimeField()),
                 ('description', models.TextField(blank=True)),
-                ('store', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='series',
-                                            to='stores.Store')),
+                ('place', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='series',
+                                            to='places.Place')),
             ],
             options={
                 'abstract': False,
@@ -76,9 +76,9 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='pickupdate',
-            name='store',
+            name='place',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                                    related_name='pickup_dates', to='stores.Store'),
+                                    related_name='pickup_dates', to='places.Place'),
         ),
         migrations.AddField(
             model_name='feedback',

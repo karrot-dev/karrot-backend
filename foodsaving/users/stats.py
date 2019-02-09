@@ -38,7 +38,7 @@ def get_users_stats():
             pickup_dates__in=PickupDate.objects.exclude_disabled().filter(
                 date__startswith__lt=now,
                 date__startswith__gte=now - relativedelta(days=n),
-            ).exclude(store__group__status=GroupStatus.PLAYGROUND, ),
+            ).exclude(place__group__status=GroupStatus.PLAYGROUND, ),
             deleted=False
         ).distinct()
         fields.update({

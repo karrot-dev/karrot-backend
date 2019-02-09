@@ -7,7 +7,7 @@ from foodsaving.history.models import History, HistoryTypus
 class HistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = History
-        fields = ['id', 'date', 'typus', 'group', 'store', 'users', 'payload']
+        fields = ['id', 'date', 'typus', 'group', 'place', 'users', 'payload']
 
     typus = SerializerMethodField()
 

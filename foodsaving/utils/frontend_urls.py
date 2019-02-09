@@ -18,11 +18,11 @@ def conversation_url(conversation, user):
     return None
 
 
-def store_url(store):
-    return '{hostname}/#/group/{group_id}/store/{store_id}/pickups'.format(
+def place_url(place):
+    return '{hostname}/#/group/{group_id}/place/{place_id}/pickups'.format(
         hostname=settings.HOSTNAME,
-        group_id=store.group.id,
-        store_id=store.id,
+        group_id=place.group.id,
+        place_id=place.id,
     )
 
 
@@ -34,12 +34,12 @@ def user_url(user):
 
 
 def pickup_detail_url(pickup):
-    store = pickup.store
-    group = store.group
-    return '{hostname}/#/group/{group_id}/store/{store_id}/pickups/{pickup_id}/detail'.format(
+    place = pickup.place
+    group = place.group
+    return '{hostname}/#/group/{group_id}/place/{place_id}/pickups/{pickup_id}/detail'.format(
         hostname=settings.HOSTNAME,
         group_id=group.id,
-        store_id=store.id,
+        place_id=place.id,
         pickup_id=pickup.id,
     )
 

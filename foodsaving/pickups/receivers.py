@@ -6,7 +6,7 @@ from foodsaving.conversations.models import Conversation
 from foodsaving.groups.models import GroupMembership
 from foodsaving.pickups import stats
 from foodsaving.pickups.models import PickupDate, Feedback, PickupDateCollector
-from foodsaving.stores.models import Store, StoreStatus
+from foodsaving.places.models import Place, PlaceStatus
 
 
 @receiver(pre_delete, sender=GroupMembership)
@@ -16,7 +16,7 @@ def leave_group_handler(sender, instance, **kwargs):
     for _ in PickupDate.objects. \
             filter(date__startswith__gte=timezone.now()). \
             filter(collectors__in=[user, ]). \
-            filter(store__group=group):
+            filter(place__group=group):
         _.remove_collector(user)
 
 
@@ -54,16 +54,16 @@ def sync_pickup_collectors_conversation(sender, instance, **kwargs):
     conversation.sync_users(pickup.collectors.all())
 
 
-@receiver(pre_save, sender=Store)
-def update_pickup_series_when_store_changes(sender, instance, **kwargs):
-    store = instance
+@receiver(pre_save, sender=Place)
+def update_pickup_series_when_place_changes(sender, instance, **kwargs):
+    place = instance
 
-    if not store.id:
+    if not place.id:
         return
 
-    old = Store.objects.get(id=store.id)
-    store_became_active = old.status != store.status and store.status == StoreStatus.ACTIVE.value
-    weeks_in_advance_changed = old.weeks_in_advance != store.weeks_in_advance
-    if store_became_active or weeks_in_advance_changed:
-        for series in store.series.all():
+    old = Place.objects.get(id=place.id)
+    place_became_active = old.status != place.status and place.status == PlaceStatus.ACTIVE.value
+    weeks_in_advance_changed = old.weeks_in_advance != place.weeks_in_advance
+    if place_became_active or weeks_in_advance_changed:
+        for series in place.series.all():
             series.update_pickups()

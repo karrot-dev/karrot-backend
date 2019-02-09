@@ -16,7 +16,7 @@ from foodsaving.groups.stats import group_tags
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.pickups.models import to_range
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 from foodsaving.users.factories import UserFactory
 from foodsaving.utils.tests.fake import faker
 
@@ -183,12 +183,12 @@ class TestGroupsAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_leave_group(self):
-        store = StoreFactory(group=self.group)
+        place = PlaceFactory(group=self.group)
         pickupdate = PickupDateFactory(
-            store=store, collectors=[self.member, self.user], date=to_range(timezone.now() + relativedelta(weeks=1))
+            place=place, collectors=[self.member, self.user], date=to_range(timezone.now() + relativedelta(weeks=1))
         )
         past_pickupdate = PickupDateFactory(
-            store=store, collectors=[
+            place=place, collectors=[
                 self.member,
             ], date=to_range(timezone.now() - relativedelta(weeks=1))
         )
@@ -198,7 +198,7 @@ class TestGroupsAPI(APITestCase):
                 self.member,
             ],
         )
-        GroupMembership.objects.create(group=unrelated_pickupdate.store.group, user=self.member)
+        GroupMembership.objects.create(group=unrelated_pickupdate.place.group, user=self.member)
 
         self.client.force_login(user=self.member)
         response = self.client.post('/api/groups/{}/leave/'.format(self.group.id))

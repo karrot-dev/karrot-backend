@@ -9,7 +9,7 @@ from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership, GroupStatus
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.pickups.models import to_range
-from foodsaving.stores.factories import StoreFactory
+from foodsaving.places.factories import PlaceFactory
 from foodsaving.tests.utils import ExtractPaginationMixin
 from foodsaving.users.factories import UserFactory
 
@@ -18,12 +18,12 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.url = '/api/pickup-dates/'
 
-        # pickup date for group with one member and one store
+        # pickup date for group with one member and one place
         self.member = UserFactory()
         self.second_member = UserFactory()
         self.group = GroupFactory(members=[self.member, self.second_member])
-        self.store = StoreFactory(group=self.group)
-        self.pickup = PickupDateFactory(store=self.store)
+        self.place = PlaceFactory(group=self.group)
+        self.pickup = PickupDateFactory(place=self.place)
         self.pickup_url = self.url + str(self.pickup.id) + '/'
         self.join_url = self.pickup_url + 'add/'
         self.leave_url = self.pickup_url + 'remove/'
@@ -32,20 +32,20 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         # not a member of the group
         self.user = UserFactory()
 
-        # another pickup date for above store
+        # another pickup date for above place
         self.pickup_data = {
             'date': to_range(timezone.now() + relativedelta(days=2)).as_list(),
             'max_collectors': 5,
-            'store': self.store.id
+            'place': self.place.id
         }
 
         # past pickup date
         self.past_pickup_data = {
             'date': to_range(timezone.now() - relativedelta(days=1)).as_list(),
             'max_collectors': 5,
-            'store': self.store.id
+            'place': self.place.id
         }
-        self.past_pickup = PickupDateFactory(store=self.store, date=to_range(timezone.now() - relativedelta(days=1)))
+        self.past_pickup = PickupDateFactory(place=self.place, date=to_range(timezone.now() - relativedelta(days=1)))
         self.past_pickup_url = self.url + str(self.past_pickup.id) + '/'
         self.past_join_url = self.past_pickup_url + 'add/'
         self.past_leave_url = self.past_pickup_url + 'remove/'
@@ -222,7 +222,7 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
 
     def test_join_pickup_without_max_collectors_as_member(self):
         self.client.force_login(user=self.member)
-        p = PickupDateFactory(max_collectors=None, store=self.store)
+        p = PickupDateFactory(max_collectors=None, place=self.place)
         response = self.client.post('/api/pickup-dates/{}/add/'.format(p.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
@@ -358,23 +358,23 @@ class TestPickupDatesListAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.url = '/api/pickup-dates/'
 
-        # pickup date for group with one member and one store
+        # pickup date for group with one member and one place
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
-        self.active_store = StoreFactory(group=self.group, status='active')
-        self.inactive_store = StoreFactory(group=self.group, status='created')
+        self.active_place = PlaceFactory(group=self.group, status='active')
+        self.inactive_place = PlaceFactory(group=self.group, status='created')
 
-        PickupDateFactory(store=self.active_store)
-        PickupDateFactory(store=self.inactive_store)
+        PickupDateFactory(place=self.active_place)
+        PickupDateFactory(place=self.inactive_place)
 
-    def test_list_pickups_for_active_store(self):
+    def test_list_pickups_for_active_place(self):
         self.client.force_login(user=self.member)
-        response = self.get_results(self.url, {'store': self.active_store.id})
+        response = self.get_results(self.url, {'place': self.active_place.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
 
-    def test_list_pickups_for_inactive_store(self):
+    def test_list_pickups_for_inactive_place(self):
         self.client.force_login(user=self.member)
-        response = self.get_results(self.url, {'store': self.inactive_store.id})
+        response = self.get_results(self.url, {'place': self.inactive_place.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 0)
