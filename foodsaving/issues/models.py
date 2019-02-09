@@ -61,6 +61,10 @@ class Issue(BaseModel, ConversationMixin):
     )
 
     @property
+    def conversation_is_group_public(self):
+        return False
+
+    @property
     def has_ended(self):
         return self.status != IssueStatus.ONGOING.value
 

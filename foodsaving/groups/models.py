@@ -207,7 +207,7 @@ def get_default_notification_types():
     return [
         GroupNotificationType.WEEKLY_SUMMARY,
         GroupNotificationType.DAILY_PICKUP_NOTIFICATION,
-        GroupNotificationType.NEW_APPLICATION,
+        GroupNotificationType.NEW_APPLICATION,  # TODO should not be default!
     ]
 
 

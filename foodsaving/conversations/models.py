@@ -13,6 +13,14 @@ from foodsaving.utils import markdown
 
 
 class ConversationQuerySet(models.QuerySet):
+    def create(self, **kwargs):
+        target = kwargs.get('target', None)
+        if target is not None:
+            kwargs['is_group_public'] = target.conversation_is_group_public
+            kwargs['group'] = target.group
+
+        return super().create(**kwargs)
+
     def get_for_target(self, target):
         return self.filter_for_target(target).first()
 
@@ -36,6 +44,10 @@ class ConversationQuerySet(models.QuerySet):
             target_type=ContentType.objects.get_for_model(target),
         )
 
+    def with_access(self, user):
+        return self.filter(Q(participants=user) |
+                           Q(group__groupmembership__user=user, is_group_public=True)).distinct()
+
 
 class Conversation(BaseModel, UpdatedAtMixin):
     """A conversation between one or more users."""
@@ -48,6 +60,11 @@ class Conversation(BaseModel, UpdatedAtMixin):
     participants = ManyToManyField(settings.AUTH_USER_MODEL, through='ConversationParticipant')
     is_private = models.BooleanField(default=False)
     is_closed = models.BooleanField(default=False)
+
+    # conversation belongs to this group
+    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, null=True)
+    # can any group member access this conversation?
+    is_group_public = models.BooleanField(default=False)
 
     target_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
     target_id = models.PositiveIntegerField(null=True)
@@ -77,6 +94,13 @@ class Conversation(BaseModel, UpdatedAtMixin):
             if user not in desired_users:
                 self.leave(user)
 
+    def can_access(self, user):
+        if self.conversationparticipant_set.filter(user=user).exists():
+            return True
+        if self.is_group_public and self.group is not None and self.group.is_member(user):
+            return True
+        return False
+
     def type(self):
         if self.is_private:
             return 'private'
@@ -95,6 +119,16 @@ class Conversation(BaseModel, UpdatedAtMixin):
         if self.is_private or self.target_type_id is None:
             return None
         return self.target.group
+
+    def save(self, **kwargs):
+        # keep group reference updated, even when target might change
+        # NB: this does not work if target changes its group - should not happen!
+        if self.target_id is not None:
+            old = type(self).objects.get(pk=self.pk) if self.pk else None
+            if old is None or old.target_id != self.target_id or old.target_type_id != self.target_type_id:
+                self.group = self.target.group
+
+        super().save(**kwargs)
 
 
 class ConversationMeta(BaseModel):
@@ -173,6 +207,11 @@ class ConversationMessageQuerySet(QuerySet):
 
 class ConversationMessageManager(BaseManager.from_queryset(ConversationMessageQuerySet)):
     def create(self, **kwargs):
+        # make sure author is participant (to receive notifications)
+        conversation = kwargs.get('conversation')
+        author = kwargs.get('author')
+        conversation.conversationparticipant_set.get_or_create(user=author)
+
         obj = super().create(**kwargs)
         # clear cached value
         if obj.thread and hasattr(obj.thread, '_replies_count'):
@@ -285,6 +324,11 @@ class ConversationMixin(object):
     def has_ended(self):
         """Override this property if the conversation should be closed after the target has ended"""
         return False
+
+    @property
+    def conversation_is_group_public(self):
+        """Override this property if the conversation should not be accessible to all group members"""
+        return True
 
     @property
     def group(self):
