@@ -1,13 +1,15 @@
+import datetime
 from datetime import timedelta
-from unittest.mock import patch
-
 from dateutil.relativedelta import relativedelta
 from django.core import mail
 from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
+from unittest.mock import patch
 
 from config import settings
+from foodsaving.groups.emails import calculate_group_summary_dates, prepare_group_summary_data, \
+    prepare_group_summary_emails
 from foodsaving.groups.factories import GroupFactory, PlaygroundGroupFactory, InactiveGroupFactory
 from foodsaving.groups.models import GroupMembership, GroupStatus
 from foodsaving.groups.tasks import process_inactive_users, send_summary_emails, mark_inactive_groups
@@ -170,6 +172,18 @@ class TestSummaryEmailTask(TestCase):
 
             # pickup feedback
             [FeedbackFactory(about=pickup, given_by=user) for pickup in pickups[:self.feedback_count]]
+
+    def test_summary_email_dates_printed_correctly(self):
+        with timezone.override(timezone.utc), freeze_time(datetime.datetime(2018, 8, 19)):  # Sunday
+            group = GroupFactory()
+            self.make_activity_in_group(group)
+            from_date, to_date = calculate_group_summary_dates(group)
+            context = prepare_group_summary_data(group, from_date, to_date)
+            emails = prepare_group_summary_emails(group, context)
+            self.assertGreater(len(emails), 0)
+            email = emails[0]
+            expected_format = 'Sunday, August 12, 2018 to Saturday, August 18, 2018'
+            self.assertIn(expected_format, email.body)
 
     @patch('foodsaving.groups.stats.write_points')
     def test_collects_stats(self, write_points):
