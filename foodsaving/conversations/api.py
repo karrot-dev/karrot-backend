@@ -390,15 +390,15 @@ class RetrieveConversationMixin(object):
             select_related('target_type'). \
             get_or_create_for_target(target)
 
-        try:
-            participant = conversation.conversationparticipant_set.get(user=request.user)
-        except ConversationParticipant.DoesNotExist:
+        participant = conversation.conversationparticipant_set.filter(user=request.user).first()
+        if participant:
+            serializer = ConversationSerializer(participant, context=self.get_serializer_context())
+        else:
             if conversation.can_access(request.user):
                 serializer = ConversationInfoSerializer(conversation, context=self.get_serializer_context())
             else:
                 self.permission_denied(request, message=_('You are not in this conversation'))
-        else:
-            serializer = ConversationSerializer(participant, context=self.get_serializer_context())
+
         return Response(serializer.data)
 
 

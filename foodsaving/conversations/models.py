@@ -97,7 +97,7 @@ class Conversation(BaseModel, UpdatedAtMixin):
     def can_access(self, user):
         if self.conversationparticipant_set.filter(user=user).exists():
             return True
-        if self.is_group_public and self.group is not None and self.group.is_member(user):
+        if self.is_group_public and self.group.is_member(user):
             return True
         return False
 
