@@ -226,6 +226,16 @@ class ConversationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Must refer to a message in the conversation')
         return message
 
+    def validate_is_participant(self, is_participant):
+        participant = self.instance
+        if participant is None:
+            if not is_participant:
+                # TODO maybe just return True?
+                raise serializers.ValidationError('You must become participant')
+        elif not is_participant and participant.conversation.is_private:
+            raise serializers.ValidationError('You cannot leave a private conversation')
+        return is_participant
+
     def update(self, participant, validated_data):
         is_participant = validated_data.get('is_participant', True)
         if not is_participant:

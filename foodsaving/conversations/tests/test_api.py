@@ -843,3 +843,20 @@ class TestClosedConversation(APITestCase):
         self.client.force_login(user=self.user)
         response = self.client.post('/api/messages/', {'conversation': self.conversation.id, 'content': 'hello'})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+
+class TestPrivateConversationAPI(APITestCase):
+    def setUp(self):
+        self.user = VerifiedUserFactory()
+        self.user2 = VerifiedUserFactory()
+
+    def test_cannot_leave_private_conversation(self):
+        self.client.force_login(user=self.user)
+        private_conversation = Conversation.objects.get_or_create_for_two_users(self.user, self.user2)
+        response = self.client.patch(
+            '/api/conversations/{}/'.format(private_conversation.id), {
+                'is_participant': False,
+            }, format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['is_participant'], ['You cannot leave a private conversation'])
