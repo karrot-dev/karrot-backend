@@ -115,7 +115,7 @@ class TestProcessFinishedPickupDates(TestCase):
         self.pickup.save()
         PickupDate.objects.process_finished_pickup_dates()
 
-        self.assertFalse(self.pickup.feedback_possible)
+        self.assertFalse(self.pickup.is_done)
         self.assertEqual(History.objects.count(), 0)
 
     def test_disables_past_pickups_of_inactive_places(self):

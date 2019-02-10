@@ -5,7 +5,7 @@ from anymail.message import AnymailMessage
 from babel.dates import format_date, format_time
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string, get_template
-from django.utils import translation
+from django.utils import translation, timezone
 from django.utils.text import Truncator
 from django.utils.timezone import get_current_timezone
 from django.utils.translation import to_locale, get_language
@@ -67,6 +67,7 @@ def prepare_email(
         template, user=None, context=None, to=None, language=None, unsubscribe_url=None, transactional=False, **kwargs
 ):
     context = dict(context) if context else {}
+    tz = kwargs.pop('tz', timezone.utc)
 
     default_context = {
         'site_name': settings.SITE_NAME,
@@ -96,7 +97,7 @@ def prepare_email(
     if user and not language:
         language = user.language
 
-    subject, text_content, html_content = prepare_email_content(template, context, language)
+    subject, text_content, html_content = prepare_email_content(template, context, tz, language)
 
     from_email = formataddr((settings.SITE_NAME, settings.DEFAULT_FROM_EMAIL))
 
@@ -134,11 +135,11 @@ def prepare_email(
     return email
 
 
-def prepare_email_content(template, context, language='en'):
+def prepare_email_content(template, context, tz, language='en'):
     if not translation.check_for_language(language):
         language = 'en'
 
-    with translation.override(language):
+    with timezone.override(tz), translation.override(language):
 
         html_content = None
 

@@ -289,7 +289,7 @@ class TestPlaceStatisticsAPI(APITestCase):
                 place=place,
                 date=one_day_ago,
                 collectors=users,
-                feedback_possible=True,
+                is_done=True,
             ) for _ in range(3)
         ]
         feedback = [FeedbackFactory(about=choice(pickups), given_by=u) for u in users]

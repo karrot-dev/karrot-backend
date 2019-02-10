@@ -305,7 +305,7 @@ def place_subscription_updated(sender, instance, **kwargs):
 @receiver(post_save, sender=PickupDate)
 def send_pickup_updates(sender, instance, **kwargs):
     pickup = instance
-    if pickup.feedback_possible:
+    if pickup.is_done:
         # doesn't change serialized data
         return
 

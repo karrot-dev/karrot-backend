@@ -390,6 +390,18 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
+    def test_mark_as_done(self):
+        self.client.force_login(user=self.member)
+        self.assertEqual(self.pickup.is_done, False)
+        response = self.client.patch(
+            self.pickup_url, {
+                'is_done': True,
+            }, format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.pickup.refresh_from_db()
+        self.assertEqual(self.pickup.is_done, True)
+
 
 class TestPickupDatesListAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):
