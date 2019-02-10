@@ -199,10 +199,11 @@ class ConversationMessageQuerySet(QuerySet):
 
 class ConversationMessageManager(BaseManager.from_queryset(ConversationMessageQuerySet)):
     def create(self, **kwargs):
-        # make sure author is participant (to receive notifications)
-        conversation = kwargs.get('conversation')
-        author = kwargs.get('author')
-        conversation.conversationparticipant_set.get_or_create(user=author)
+        if 'thread' not in kwargs:
+            # make sure author is participant (to receive notifications)
+            conversation = kwargs.get('conversation')
+            author = kwargs.get('author')
+            conversation.conversationparticipant_set.get_or_create(user=author)
 
         obj = super().create(**kwargs)
         # clear cached value

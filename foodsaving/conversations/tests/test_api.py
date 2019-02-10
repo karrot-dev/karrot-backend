@@ -200,6 +200,16 @@ class TestConversationThreadsAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['thread'], self.thread.id)
 
+    def test_reply_without_being_subscribed_to_conversation(self):
+        self.conversation.conversationparticipant_set.filter(user=self.user).delete()
+
+        self.client.force_login(user=self.user)
+        data = {'conversation': self.conversation.id, 'content': 'a nice message reply!', 'thread': self.thread.id}
+        response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        self.assertFalse(self.conversation.conversationparticipant_set.filter(user=self.user).exists())
+
     def test_thread_reply_a_few_times(self):
         self.client.force_login(user=self.user)
         data = {'conversation': self.conversation.id, 'content': 'a nice message reply!', 'thread': self.thread.id}
