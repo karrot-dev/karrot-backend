@@ -6,7 +6,7 @@ from rest_framework.fields import DateTimeField
 from foodsaving.conversations.helpers import normalize_emoji_name
 from foodsaving.conversations.models import (
     ConversationMessage, ConversationParticipant, ConversationMessageReaction, ConversationThreadParticipant,
-    ConversationMeta, Conversation, ConversationNotificationStatus
+    ConversationMeta, ConversationNotificationStatus
 )
 
 
