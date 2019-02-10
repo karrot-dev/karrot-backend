@@ -94,14 +94,28 @@ def process_inactive_users():
     )
 
 
-@db_periodic_task(crontab(day_of_week=0, hour=8, minute=0))  # send 8am every Sunday
+@db_periodic_task(crontab(day_of_week='0,6', minute=0))  # check every hour on saturday/sunday
 def send_summary_emails():
+    """
+    We want to send them on Sunday at 8am in the local time of the group
+    So we run this each hour to check if any group needs their summary email sending.
+    We limit it to just the weekend (Saturday, Sunday) as this will cover any possible timezone offset (-11/+12)
+    In cron Sunday is day 0 and Saturday is day 6
+    """
     email_count = 0
     recipient_count = 0
+
+    def is_8am_localtime(group):
+        with timezone.override(group.timezone):
+            localtime = timezone.localtime()
+            # Sunday is day 6 here, confusing!
+            return localtime.hour == 8 and localtime.weekday() == 6
 
     groups = Group.objects.annotate(member_count=Count('members')).filter(member_count__gt=0)
 
     for group in groups:
+        if not is_8am_localtime(group):
+            continue
 
         from_date, to_date = calculate_group_summary_dates(group)
 
