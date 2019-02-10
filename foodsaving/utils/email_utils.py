@@ -64,17 +64,10 @@ class StatCollectingAnymailMessage(AnymailMessage):
 
 
 def prepare_email(
-        template,
-        user=None,
-        context=None,
-        to=None,
-        tz=timezone.utc,
-        language=None,
-        unsubscribe_url=None,
-        transactional=False,
-        **kwargs,
+        template, user=None, context=None, to=None, language=None, unsubscribe_url=None, transactional=False, **kwargs
 ):
     context = dict(context) if context else {}
+    tz = kwargs.pop('tz', timezone.utc)
 
     default_context = {
         'site_name': settings.SITE_NAME,
