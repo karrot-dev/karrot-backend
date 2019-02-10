@@ -121,6 +121,7 @@ class TestPickupDateSeriesCreationAPI(APITestCase, ExtractPaginationMixin):
                 'feedback_given_by': [],
                 'is_disabled': False,
                 'has_duration': False,
+                'is_done': False,
             })
         self.assertEqual(response.data, created_pickup_dates, response.data)
 

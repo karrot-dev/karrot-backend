@@ -69,6 +69,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
             'feedback_given_by',
             'is_disabled',
             'has_duration',
+            'is_done',
         ]
         read_only_fields = [
             'id',
