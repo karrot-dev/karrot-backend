@@ -122,16 +122,6 @@ class Conversation(BaseModel, UpdatedAtMixin):
             return None
         return self.target.group
 
-    def save(self, **kwargs):
-        # keep group reference updated, even when target might change
-        # NB: this does not work if target changes its group - should not happen!
-        if self.target_id is not None:
-            old = type(self).objects.get(pk=self.pk) if self.pk else None
-            if old is None or old.target_id != self.target_id or old.target_type_id != self.target_type_id:
-                self.group = self.target.group
-
-        super().save(**kwargs)
-
 
 class ConversationMeta(BaseModel):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
