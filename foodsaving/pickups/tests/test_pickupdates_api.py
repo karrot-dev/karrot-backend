@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from foodsaving.base.base_models import CustomDateTimeTZRange
+from foodsaving.conversations.models import ConversationNotificationStatus
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupMembership, GroupStatus
 from foodsaving.pickups.factories import PickupDateFactory
@@ -260,7 +261,7 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         # should be removed from chat
         response = self.client.get(self.conversation_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertFalse(response.data['is_participant'])
+        self.assertEqual(response.data['notifications'], ConversationNotificationStatus.NONE.value)
 
     def test_leave_pickup_as_newcomer(self):
         newcomer = UserFactory()

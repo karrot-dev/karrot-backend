@@ -25,7 +25,7 @@ from foodsaving.conversations.models import (
 )
 from foodsaving.conversations.serializers import (
     ConversationSerializer, ConversationMessageSerializer, ConversationMessageReactionSerializer, EmojiField,
-    ConversationThreadSerializer, ConversationMetaSerializer, ConversationInfoSerializer
+    ConversationThreadSerializer, ConversationMetaSerializer
 )
 from foodsaving.issues.models import Issue
 from foodsaving.issues.serializers import IssueSerializer
@@ -99,7 +99,7 @@ class ConversationFilter(filters.FilterSet):
         fields = ['exclude_read']
 
 
-class ConversationViewSet(PartialUpdateModelMixin, GenericViewSet):
+class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, GenericViewSet):
     """
     Conversations
     """
@@ -117,48 +117,18 @@ class ConversationViewSet(PartialUpdateModelMixin, GenericViewSet):
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
 
-    def retrieve(self, request, pk, *args, **kwargs):
+    def get_object(self):
         try:
-            participant = self.get_object()
+            return super().get_object()
         except Http404:
-            # user is not participant, return conversation info if they are in the right group
+            # user is not participant, create mock participant that could be saved if needed
             queryset = Conversation.objects.filter(
                 group__groupmembership__user=self.request.user,
                 is_group_public=True,
             )
+            pk = self.kwargs['pk']
             conversation = get_object_or_404(queryset, id=pk)
-            serializer = ConversationInfoSerializer(conversation, context=self.get_serializer_context())
-            return Response(serializer.data)
-
-        serializer = self.get_serializer(participant)
-        return Response(serializer.data)
-
-    def partial_update(self, request, pk, *args, **kwargs):
-        try:
-            participant = self.get_object()
-        except Http404:
-            # user is not participant, create participant if user is allowed to
-            queryset = Conversation.objects.filter(
-                group__groupmembership__user=self.request.user,
-                is_group_public=True,
-            )
-            conversation = get_object_or_404(queryset, id=pk)
-            serializer = ConversationSerializer(
-                data=request.data, context={
-                    **self.get_serializer_context(),
-                    'conversation': conversation,
-                }
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
-
-        serializer = self.get_serializer(participant, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        participant = serializer.save()
-        if participant.id is None:
-            serializer = ConversationInfoSerializer(participant.conversation, context=self.get_serializer_context())
-        return Response(serializer.data)
+            return conversation.make_participant(user=self.request.user)
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset() \
@@ -418,14 +388,13 @@ class RetrieveConversationMixin(object):
             get_or_create_for_target(target)
 
         participant = conversation.conversationparticipant_set.filter(user=request.user).first()
-        if participant:
-            serializer = ConversationSerializer(participant, context=self.get_serializer_context())
-        else:
+        if not participant:
             if conversation.can_access(request.user):
-                serializer = ConversationInfoSerializer(conversation, context=self.get_serializer_context())
+                participant = conversation.make_participant()
             else:
                 self.permission_denied(request, message=_('You are not in this conversation'))
 
+        serializer = ConversationSerializer(participant, context=self.get_serializer_context())
         return Response(serializer.data)
 
 

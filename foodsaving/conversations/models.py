@@ -7,6 +7,7 @@ from django.db.models import ForeignKey, TextField, ManyToManyField, BooleanFiel
     DateTimeField
 from django.db.models.manager import BaseManager
 from django.utils import timezone
+from enum import Enum
 
 from foodsaving.base.base_models import BaseModel, UpdatedAtMixin
 from foodsaving.utils import markdown
@@ -77,10 +78,18 @@ class Conversation(BaseModel, UpdatedAtMixin):
         related_name='conversation_latest_message'
     )
 
+    def make_participant(self, **kwargs):
+        defaults = {
+            'updated_at': self.updated_at,
+        }
+        defaults.update(kwargs)
+        return ConversationParticipant(conversation=self, **defaults)
+
     def join(self, user, **kwargs):
         participant = self.conversationparticipant_set.filter(user=user).first()
         if participant is None:
-            participant = self.conversationparticipant_set.create(user=user, **kwargs)
+            participant = self.make_participant(user=user, **kwargs)
+            participant.save()
         return participant
 
     def leave(self, user):
@@ -139,6 +148,12 @@ class ConversationParticipantQuerySet(QuerySet):
         return self.annotate(unread_message_count=Count('conversation__messages', filter=filter, distinct=True))
 
 
+class ConversationNotificationStatus(Enum):
+    ALL = 'all'
+    MUTED = 'muted'
+    NONE = 'none'
+
+
 class ConversationParticipant(BaseModel, UpdatedAtMixin):
     """The join table between Conversation and User."""
 
@@ -159,6 +174,15 @@ class ConversationParticipant(BaseModel, UpdatedAtMixin):
         related_name='conversationparticipants_notified_up_to',
     )
     muted = BooleanField(default=False)
+
+    @property
+    def notifications(self):
+        if self.id is None:
+            # participant does not exist in database
+            return ConversationNotificationStatus.NONE.value
+        if self.muted:
+            return ConversationNotificationStatus.MUTED.value
+        return ConversationNotificationStatus.ALL.value
 
     def unseen_and_unnotified_messages(self):
         messages = self.conversation.messages.exclude_replies()

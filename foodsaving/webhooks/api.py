@@ -1,3 +1,5 @@
+import binascii
+
 from anymail.exceptions import AnymailAPIError
 from base64 import b64decode, b32decode, b32encode
 from email.utils import parseaddr
@@ -75,7 +77,7 @@ class IncomingEmailView(views.APIView):
                 local_part = reply_to.split('@')[0]
                 try:
                     conversation_id, user_id, thread_id = parse_local_part(local_part)
-                except UnicodeDecodeError:
+                except (UnicodeDecodeError, binascii.Error):
                     sentry_client.captureException()
                     continue
                 user = get_user_model().objects.get(id=user_id)

@@ -6,7 +6,7 @@ from rest_framework.fields import DateTimeField
 from foodsaving.conversations.helpers import normalize_emoji_name
 from foodsaving.conversations.models import (
     ConversationMessage, ConversationParticipant, ConversationMessageReaction, ConversationThreadParticipant,
-    ConversationMeta, Conversation
+    ConversationMeta, Conversation, ConversationNotificationStatus
 )
 
 
@@ -190,8 +190,7 @@ class ConversationSerializer(serializers.ModelSerializer):
             'is_closed',
             'seen_up_to',
             'unread_message_count',
-            'muted',
-            'is_participant',
+            'notifications',
         ]
 
     id = serializers.IntegerField(source='conversation.id', read_only=True)
@@ -200,7 +199,7 @@ class ConversationSerializer(serializers.ModelSerializer):
     type = serializers.CharField(source='conversation.type', read_only=True)
     target_id = serializers.IntegerField(source='conversation.target_id', read_only=True)
     is_closed = serializers.BooleanField(source='conversation.is_closed', read_only=True)
-    is_participant = serializers.BooleanField(default=True)
+    notifications = serializers.ChoiceField(choices=[(c.value, c.value) for c in ConversationNotificationStatus])
 
     unread_message_count = serializers.SerializerMethodField()
     updated_at = serializers.SerializerMethodField()
@@ -226,49 +225,30 @@ class ConversationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Must refer to a message in the conversation')
         return message
 
-    def validate_is_participant(self, is_participant):
+    def validate_notifications(self, notifications):
         participant = self.instance
-        if participant is None:
-            if not is_participant:
-                # TODO maybe just return True?
-                raise serializers.ValidationError('You must become participant')
-        elif not is_participant and participant.conversation.is_private:
+        print(participant, notifications, participant.conversation.is_private)
+        if (participant and notifications == ConversationNotificationStatus.NONE.value
+                and participant.conversation.is_private):
             raise serializers.ValidationError('You cannot leave a private conversation')
-        return is_participant
+        return notifications
 
     def update(self, participant, validated_data):
-        is_participant = validated_data.get('is_participant', True)
-        if not is_participant:
-            # delete participant on request
-            participant.delete()
+        notifications = validated_data.get('notifications', None)
+        if notifications == ConversationNotificationStatus.NONE.value:
+            if participant.id is not None:
+                # delete participant
+                participant.delete()
             return participant
+        elif notifications == ConversationNotificationStatus.MUTED.value:
+            participant.muted = True
+        elif notifications == ConversationNotificationStatus.ALL.value:
+            participant.muted = False
+
         if 'seen_up_to' in validated_data:
             participant.seen_up_to = validated_data['seen_up_to']
-        if 'muted' in validated_data:
-            participant.muted = validated_data['muted']
         participant.save()
         return participant
-
-    def create(self, validated_data):
-        is_participant = validated_data.pop('is_participant', False)
-        if is_participant:
-            print('creating participant with', validated_data)
-            participant = self.context['conversation'].join(self.context['request'].user, **validated_data)
-        else:
-            raise serializers.ValidationError('cannot create participant')
-
-        return participant
-
-
-class ConversationInfoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Conversation
-        fields = ConversationSerializer.Meta.fields
-
-    seen_up_to = serializers.ReadOnlyField(default=None)
-    unread_message_count = serializers.ReadOnlyField(default=0)
-    muted = serializers.ReadOnlyField(default=True)
-    is_participant = serializers.ReadOnlyField(default=False)
 
 
 class ConversationMetaSerializer(serializers.ModelSerializer):

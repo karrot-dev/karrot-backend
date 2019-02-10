@@ -16,7 +16,7 @@ from foodsaving.applications.serializers import ApplicationSerializer
 from foodsaving.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction, \
     ConversationThreadParticipant, ConversationMeta
 from foodsaving.conversations.serializers import ConversationMessageSerializer, ConversationSerializer, \
-    ConversationMetaSerializer, ConversationInfoSerializer
+    ConversationMetaSerializer
 from foodsaving.groups.models import Group, Trust, GroupMembership
 from foodsaving.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer
 from foodsaving.history.models import history_created
@@ -209,8 +209,9 @@ def send_participant_left(sender, instance, **kwargs):
         payload = ConversationSerializer(participant, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
+    participant = conversation.make_participant()
+    payload = ConversationSerializer(participant).data
     for subscription in ChannelSubscription.objects.recent().filter(user=instance.user).distinct():
-        payload = ConversationInfoSerializer(conversation).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
 

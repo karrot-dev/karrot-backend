@@ -11,7 +11,7 @@ from foodsaving.applications.factories import ApplicationFactory
 from foodsaving.issues.factories import IssueFactory
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationParticipant, Conversation, ConversationMessage, \
-    ConversationMessageReaction, ConversationMeta
+    ConversationMessageReaction, ConversationMeta, ConversationNotificationStatus
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupStatus
 from foodsaving.pickups.factories import PickupDateFactory
@@ -488,10 +488,10 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
 
         self.client.force_login(user=self.user)
 
-        data = {'muted': True}
+        data = {'notifications': ConversationNotificationStatus.MUTED.value}
         response = self.client.patch('/api/conversations/{}/'.format(self.conversation.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['muted'], True)
+        self.assertEqual(response.data['notifications'], ConversationNotificationStatus.MUTED.value)
 
         participant.refresh_from_db()
         self.assertTrue(participant.muted)
@@ -504,10 +504,10 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
 
         self.client.force_login(user=self.user)
 
-        data = {'muted': False}
+        data = {'notifications': ConversationNotificationStatus.ALL.value}
         response = self.client.patch('/api/conversations/{}/'.format(self.conversation.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['muted'], False)
+        self.assertEqual(response.data['notifications'], ConversationNotificationStatus.ALL.value)
 
         participant.refresh_from_db()
         self.assertFalse(participant.muted)
@@ -865,8 +865,9 @@ class TestPrivateConversationAPI(APITestCase):
         private_conversation = Conversation.objects.get_or_create_for_two_users(self.user, self.user2)
         response = self.client.patch(
             '/api/conversations/{}/'.format(private_conversation.id), {
-                'is_participant': False,
-            }, format='json'
+                'notifications': ConversationNotificationStatus.NONE.value,
+            },
+            format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['is_participant'], ['You cannot leave a private conversation'])
+        self.assertEqual(response.data['notifications'], ['You cannot leave a private conversation'])

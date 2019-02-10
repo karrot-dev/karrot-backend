@@ -15,7 +15,7 @@ from unittest.mock import patch
 from foodsaving.applications.factories import ApplicationFactory
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationMessage, \
-    ConversationMessageReaction
+    ConversationMessageReaction, ConversationNotificationStatus
 from foodsaving.groups import roles
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.invitations.models import Invitation
@@ -68,11 +68,11 @@ def make_conversation_broadcast(conversation, **kwargs):
             'updated_at': conversation.updated_at,
             'seen_up_to': None,
             'unread_message_count': 0,
-            'muted': False,
+            'notifications': ConversationNotificationStatus.ALL.value,
             'type': None,
             'target_id': None,
             'is_closed': False,
-            'is_participant': True,
+            'group': None,
         }
     }
     response['payload'].update(kwargs)
