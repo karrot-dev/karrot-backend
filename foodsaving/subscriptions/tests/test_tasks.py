@@ -126,6 +126,15 @@ class TestMessagePushNotificationTitles(TestCase):
         title = get_message_title(message, 'en')
         self.assertEqual(title, '{} / {}'.format(group.name, author.display_name))
 
+    def test_place_message_title(self):
+        author = UserFactory()
+        place = PlaceFactory()
+        conversation = Conversation.objects.get_or_create_for_target(place)
+        message = conversation.messages.create(author=author, content='bla')
+
+        title = get_message_title(message, 'en')
+        self.assertEqual(title, '{} / {}'.format(place.name, author.display_name))
+
     def test_reply_message_title(self):
         author = UserFactory()
         group = GroupFactory(members=[author])

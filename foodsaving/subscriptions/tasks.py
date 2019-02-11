@@ -48,6 +48,9 @@ def get_message_title(message, language):
     if type == 'group':
         return '{} / {}'.format(conversation.target.name, author_name)
 
+    if type == 'place':
+        return '{} / {}'.format(conversation.target.name, author_name)
+
     if type == 'pickup':
         pickup = conversation.target
         group_tz = pickup.place.group.timezone
