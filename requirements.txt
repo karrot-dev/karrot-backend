@@ -136,5 +136,5 @@ uritemplate==3.0.0        # via coreapi
 urllib3==1.23             # via requests, transifex-client
 wcwidth==0.1.7            # via prompt-toolkit
 webencodings==0.5.1       # via bleach, html5lib
-yapf==0.25.0
+yapf==0.26.0
 zope.interface==4.6.0     # via twisted
