@@ -153,22 +153,22 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
             thread = data['thread']
 
             if 'view' in self.context and self.context['view'].action == 'partial_update':
-                raise serializers.ValidationError(_('You cannot change the thread of a message'))
+                raise serializers.ValidationError('You cannot change the thread of a message')
 
             if 'conversation' in data:
                 conversation = data['conversation']
 
                 # the thread must be in the correct conversation
                 if thread.conversation.id != conversation.id:
-                    raise serializers.ValidationError(_('Thread is not in the same conversation'))
+                    raise serializers.ValidationError('Thread is not in the same conversation')
 
                 # only some types of messages can have threads
                 if conversation.type() not in ('group', 'place'):
-                    raise serializers.ValidationError(_('You can only reply to wall messages'))
+                    raise serializers.ValidationError('You can only reply to wall messages')
 
             # you cannot reply to replies
             if thread.is_thread_reply():
-                raise serializers.ValidationError(_('You cannot reply to replies'))
+                raise serializers.ValidationError('You cannot reply to replies')
 
         return data
 
