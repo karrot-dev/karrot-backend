@@ -107,7 +107,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
     def validate_place(self, place):
         if not place.group.is_editor(self.context['request'].user):
             if not place.group.is_member(self.context['request'].user):
-                raise PermissionDenied(_('You are not member of the place\'s group.'))
+                raise PermissionDenied('You are not member of the place\'s group.')
             raise PermissionDenied(_('You need to be a group editor'))
         return place
 
@@ -291,7 +291,7 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
         if not place.group.is_editor(self.context['request'].user):
             raise PermissionDenied(_('You need to be a group editor'))
         if not place.group.is_member(self.context['request'].user):
-            raise serializers.ValidationError(_('You are not member of the place\'s group.'))
+            raise serializers.ValidationError('You are not member of the place\'s group.')
         return place
 
     def validate_start_date(self, date):
@@ -378,7 +378,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         group = about.place.group
         if not group.is_member(user):
-            raise serializers.ValidationError(_('You are not member of the place\'s group.'))
+            raise serializers.ValidationError('You are not member of the place\'s group.')
         if about.is_upcoming():
             raise serializers.ValidationError(_('The pickup is not done yet'))
         if not about.is_collector(user):
