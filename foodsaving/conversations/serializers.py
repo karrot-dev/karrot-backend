@@ -227,7 +227,6 @@ class ConversationSerializer(serializers.ModelSerializer):
 
     def validate_notifications(self, notifications):
         participant = self.instance
-        print(participant, notifications, participant.conversation.is_private)
         if (participant and notifications == ConversationNotificationStatus.NONE.value
                 and participant.conversation.is_private):
             raise serializers.ValidationError('You cannot leave a private conversation')
