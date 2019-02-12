@@ -71,7 +71,6 @@ class OptionSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'type',
-            'message',
             'sum_score',
             'your_score',
         ]
