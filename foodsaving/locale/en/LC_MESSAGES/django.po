@@ -622,11 +622,6 @@ msgstr ""
 msgid "Must pass start value"
 msgstr ""
 
-#: foodsaving/pickups/serializers.py:109 foodsaving/pickups/serializers.py:294
-#: foodsaving/pickups/serializers.py:381
-msgid "You are not member of the place's group."
-msgstr ""
-
 #: foodsaving/pickups/serializers.py:116
 msgid "The date should be in the future."
 msgstr ""
