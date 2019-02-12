@@ -212,6 +212,9 @@ class Option(BaseModel):
 
 
 class Vote(BaseModel):
+    class Meta:
+        unique_together = ('user', 'option')
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='votes_given')
     option = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='votes')
     score = models.IntegerField()
