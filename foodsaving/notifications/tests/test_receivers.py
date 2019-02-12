@@ -254,7 +254,7 @@ class TestNotificationReceivers(TestCase):
         self.assertEqual(notifications.count(), 2)
         self.assertEqual(notifications[1].type, NotificationType.CONFLICT_RESOLUTION_CREATED_ABOUT_YOU.value)
         self.assertEqual(notifications[1].user, user2)
-        self.assertEqual(notifications[1].context, {'issue': issue.id, 'group': group.id, 'affected_user': user2.id})
+        self.assertEqual(notifications[1].context, {'issue': issue.id, 'group': group.id, 'user': user2.id})
         self.assertEqual(notifications[0].type, NotificationType.CONFLICT_RESOLUTION_CREATED.value)
         self.assertEqual(notifications[0].user, user3)
 
