@@ -195,8 +195,6 @@ class TestPlacesAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.post('/api/messages/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        # TODO Why doesn't it send out notifications?
-
 
 class TestPlaceChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):

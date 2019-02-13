@@ -2,12 +2,12 @@ from django.core import mail
 from django.db import IntegrityError
 from django.test import TestCase
 
-from foodsaving.issues.factories import IssueFactory
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import Conversation, ConversationMessage, ConversationMessageReaction, \
     ConversationThreadParticipant, ConversationParticipant
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupNotificationType
+from foodsaving.issues.factories import IssueFactory
 from foodsaving.pickups.factories import PickupDateFactory
 from foodsaving.places.factories import PlaceFactory
 from foodsaving.users.factories import UserFactory, VerifiedUserFactory
@@ -154,6 +154,32 @@ class ConversationThreadModelTests(TestCase):
         n = 5
         [self.create_reply() for _ in range(n)]
         self.assertEqual(self.thread.replies_count, n)
+
+
+class TestPlaceConversations(TestCase):
+    def setUp(self):
+        self.user = VerifiedUserFactory()
+        self.user2 = VerifiedUserFactory()
+        self.group = GroupFactory(members=[self.user, self.user2])
+        self.place = PlaceFactory(subscribers=[self.user, self.user2])
+        self.conversation = self.place.conversation
+        mail.outbox = []
+
+    def test_message_email_notifications(self):
+        message = self.conversation.messages.create(author=self.user, content='asdf')
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn(self.place.name, mail.outbox[0].subject)
+        self.assertIn(message.content, mail.outbox[0].body)
+
+    def test_reply_email_notifications(self):
+        message = self.conversation.messages.create(author=self.user, content='asdf')
+        mail.outbox = []
+        reply = self.conversation.messages.create(author=self.user2, thread=message, content='my reply')
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn(message.content, mail.outbox[0].subject)
+        self.assertIn(reply.content, mail.outbox[0].body)
 
 
 class TestPickupConversations(TestCase):

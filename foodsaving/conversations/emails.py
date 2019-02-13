@@ -20,10 +20,8 @@ def prepare_conversation_message_notification(user, messages):
     first_message = messages[0]
     type = first_message.conversation.type()
 
-    if type == 'group' and first_message.is_thread_reply():
-        return prepare_group_thread_message_notification(user, messages)
-    if type == 'place' and first_message.is_thread_reply():
-        return prepare_group_thread_message_notification(user, messages)
+    if type in ('group', 'place') and first_message.is_thread_reply():
+        return prepare_thread_message_notification(user, messages)
     if type == 'pickup':
         return prepare_pickup_conversation_message_notification(user, messages)
     if type == 'application':
@@ -35,7 +33,7 @@ def prepare_conversation_message_notification(user, messages):
     raise Exception('Cannot send message notification because conversation doesn\'t have a known type')
 
 
-def prepare_group_thread_message_notification(user, messages):
+def prepare_thread_message_notification(user, messages):
     first_message = messages[0]
     conversation = first_message.conversation
     group = conversation.find_group()

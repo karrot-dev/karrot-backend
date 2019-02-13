@@ -171,7 +171,7 @@ class Handlers:
         )
 
     def thread_message_notification(self):
-        return foodsaving.conversations.emails.prepare_group_thread_message_notification(
+        return foodsaving.conversations.emails.prepare_thread_message_notification(
             user=random_user(), messages=[random_reply()]
         )
 
