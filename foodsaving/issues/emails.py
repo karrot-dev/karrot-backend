@@ -1,7 +1,7 @@
 from config import settings
 from foodsaving.conversations.models import Conversation
 from foodsaving.utils.email_utils import prepare_email, formataddr
-from foodsaving.utils.frontend_urls import conflict_resolution_unsubscribe_url, conflict_resolution_url
+from foodsaving.utils.frontend_urls import conflict_resolution_unsubscribe_url, issue_url
 from foodsaving.webhooks.api import make_local_part
 
 
@@ -17,7 +17,7 @@ def prepare_new_conflict_resolution_email_to_affected_user(issue):
     reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
     from_email = formataddr((created_by.display_name, settings.DEFAULT_FROM_EMAIL))
 
-    issue_url = conflict_resolution_url(issue)
+    issue_url = issue_url(issue)
 
     return prepare_email(
         template='new_conflict_resolution_affected_user',
@@ -29,7 +29,7 @@ def prepare_new_conflict_resolution_email_to_affected_user(issue):
             'created_by': created_by,
             'topic': issue.topic_rendered(),
             'conversation_url': issue_url,
-            'conflict_resolution_url': issue_url,
+            'issue_url': issue_url,
             'expires_at': voting.expires_at,
         }
     )
@@ -48,7 +48,7 @@ def prepare_new_conflict_resolution_email(user, issue):
     from_email = formataddr((created_by.display_name, settings.DEFAULT_FROM_EMAIL))
 
     unsubscribe_url = conflict_resolution_unsubscribe_url(user, issue)
-    issue_url = conflict_resolution_url(issue)
+    issue_url = issue_url(issue)
 
     return prepare_email(
         template='new_conflict_resolution',
@@ -63,7 +63,7 @@ def prepare_new_conflict_resolution_email(user, issue):
             'topic': issue.topic_rendered(),
             'conversation_url': issue_url,
             'unsubscribe_url': unsubscribe_url,
-            'conflict_resolution_url': issue_url,
+            'issue_url': issue_url,
             'expires_at': voting.expires_at,
         }
     )
@@ -74,7 +74,7 @@ def prepare_conflict_resolution_continued_email(user, issue):
     voting = issue.latest_voting()
 
     unsubscribe_url = conflict_resolution_unsubscribe_url(user, issue)
-    issue_url = conflict_resolution_url(issue)
+    issue_url = issue_url(issue)
 
     return prepare_email(
         template='conflict_resolution_continued',
@@ -83,7 +83,7 @@ def prepare_conflict_resolution_continued_email(user, issue):
         context={
             'affected_user': affected_user,
             'unsubscribe_url': unsubscribe_url,
-            'conflict_resolution_url': issue_url,
+            'issue_url': issue_url,
             'expires_at': voting.expires_at,
         }
     )
@@ -93,14 +93,14 @@ def prepare_conflict_resolution_continued_email_to_affected_user(issue):
     voting = issue.latest_voting()
     user = issue.affected_user
 
-    issue_url = conflict_resolution_url(issue)
+    issue_url = issue_url(issue)
 
     return prepare_email(
         template='conflict_resolution_continued_affected_user',
         user=user,
         tz=issue.group.timezone,
         context={
-            'conflict_resolution_url': issue_url,
+            'issue_url': issue_url,
             'expires_at': voting.expires_at,
         }
     )
