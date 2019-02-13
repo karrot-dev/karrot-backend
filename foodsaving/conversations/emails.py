@@ -7,7 +7,7 @@ from config import settings
 from foodsaving.utils.email_utils import prepare_email, formataddr
 from foodsaving.utils.frontend_urls import (
     group_wall_url, conversation_unsubscribe_url, pickup_detail_url, user_detail_url, application_url, thread_url,
-    thread_unsubscribe_url, conflict_resolution_url, place_wall_url
+    thread_unsubscribe_url, issue_url, place_wall_url
 )
 from foodsaving.webhooks.api import make_local_part
 
@@ -300,7 +300,7 @@ def prepare_issue_message_notification(user, messages):
             context={
                 'messages': messages,
                 'conversation_name': conversation_name,
-                'conversation_url': conflict_resolution_url(issue),
+                'conversation_url': issue_url(issue),
                 'mute_url': unsubscribe_url,
             }
         )

@@ -71,7 +71,6 @@ class OptionSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'type',
-            'message',
             'sum_score',
             'your_score',
         ]
@@ -91,9 +90,8 @@ class OptionSerializer(serializers.ModelSerializer):
             except StopIteration:
                 return None
         else:
-            try:
-                vote = option.votes.get(user=self.context['request'].user)
-            except Vote.DoesNotExist:
+            vote = option.votes.filter(user=self.context['request'].user).first()
+            if vote is None:
                 return None
         return vote.score
 

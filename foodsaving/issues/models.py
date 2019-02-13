@@ -186,7 +186,6 @@ class OptionTypes(Enum):
 class Option(BaseModel):
     voting = models.ForeignKey(Voting, on_delete=models.CASCADE, related_name='options')
     type = models.TextField(choices=[(status.value, status.value) for status in OptionTypes])
-    message = models.TextField(null=True)
     sum_score = models.FloatField(null=True)
 
     def do_action(self):
@@ -201,10 +200,7 @@ class Option(BaseModel):
     def _further_discussion(self):
         new_voting = self.voting.issue.votings.create()
         for option in self.voting.options.all():
-            new_voting.options.create(
-                type=option.type,
-                message=option.message,
-            )
+            new_voting.options.create(type=option.type)
 
     def _remove_user(self):
         issue = self.voting.issue
@@ -216,6 +212,9 @@ class Option(BaseModel):
 
 
 class Vote(BaseModel):
+    class Meta:
+        unique_together = ('user', 'option')
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='votes_given')
     option = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='votes')
     score = models.IntegerField()

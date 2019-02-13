@@ -11,7 +11,6 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-02-01 21:24+0000\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
 "Last-Translator: Tomasz Ploch <tomasz.ploch@foodsharing.pl>, 2019\n"
 "Language-Team: Polish (https://www.transifex.com/yunity-1/teams/68631/pl/)\n"
@@ -29,8 +28,8 @@ msgstr "Musisz posiadać zweryfikowany adres e-mail"
 #: foodsaving/applications/api.py:36 foodsaving/groups/api.py:49
 #: foodsaving/invitations/serializers.py:28
 #: foodsaving/issues/serializers.py:143 foodsaving/pickups/permissions.py:67
-#: foodsaving/pickups/serializers.py:109 foodsaving/pickups/serializers.py:274
-#: foodsaving/stores/api.py:18 foodsaving/stores/serializers.py:73
+#: foodsaving/pickups/serializers.py:111 foodsaving/pickups/serializers.py:292
+#: foodsaving/places/api.py:18 foodsaving/places/serializers.py:73
 msgid "You need to be a group editor"
 msgstr "Musisz posiadać uprawnienia do edycji"
 
@@ -130,68 +129,69 @@ msgstr ""
 "href=\"%(conversation_url)s\">otwórz w %(site_name)s</a> lub <a "
 "href=\"%(mute_url)s\">wycisz konwersację</a>."
 
-#: foodsaving/conversations/api.py:61 foodsaving/conversations/api.py:378
-#: foodsaving/conversations/serializers.py:152
+#: foodsaving/conversations/api.py:62 foodsaving/conversations/api.py:227
+#: foodsaving/conversations/api.py:399
+#: foodsaving/conversations/serializers.py:146
 msgid "You are not in this conversation"
 msgstr "Nie ma Cię w tej konwersacji"
 
-#: foodsaving/conversations/api.py:83
+#: foodsaving/conversations/api.py:71
 msgid "You are not the author of this message"
 msgstr "Nie jesteś autorką/autorem tej wiadomości"
 
-#: foodsaving/conversations/api.py:92
+#: foodsaving/conversations/api.py:80
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
 msgstr ""
 "Nie możesz edytować wiadomości po %(days_number)s dniach od jej utworzenia"
 
-#: foodsaving/conversations/api.py:309
+#: foodsaving/conversations/api.py:326
 msgid "Must be first in thread"
 msgstr ""
 
-#: foodsaving/conversations/api.py:312
+#: foodsaving/conversations/api.py:329
 msgid "You are not a participant in this thread"
 msgstr "Nie uczestniczysz w tym wątku"
 
-#: foodsaving/conversations/emails.py:133
-#: foodsaving/conversations/emails.py:136 foodsaving/subscriptions/tasks.py:67
+#: foodsaving/conversations/emails.py:135
+#: foodsaving/conversations/emails.py:138 foodsaving/subscriptions/tasks.py:67
 #, python-format
 msgid "Pickup %(date)s"
 msgstr "Odbiór %(date)s"
 
-#: foodsaving/conversations/emails.py:202
+#: foodsaving/conversations/emails.py:206
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr "Nowa wiadomość w zgłoszeniu %(user_name)s do %(group_name)s"
 
-#: foodsaving/conversations/emails.py:207
+#: foodsaving/conversations/emails.py:211
 #, python-format
 msgid "New message in your application to %(group_name)s"
 msgstr "Nowa wiadomość w Twoim zgłoszeniu do %(group_name)s"
 
-#: foodsaving/conversations/emails.py:247
+#: foodsaving/conversations/emails.py:252
 #, python-format
 msgid "New message in conflict resolution in %(group_name)s"
 msgstr ""
 
-#: foodsaving/conversations/serializers.py:154
+#: foodsaving/conversations/serializers.py:148
 msgid "This conversation has been closed"
 msgstr ""
 
-#: foodsaving/conversations/serializers.py:162
+#: foodsaving/conversations/serializers.py:156
 msgid "You cannot change the thread of a message"
 msgstr "Nie możesz zmienić wątku wiadomości"
 
-#: foodsaving/conversations/serializers.py:169
+#: foodsaving/conversations/serializers.py:163
 msgid "Thread is not in the same conversation"
 msgstr "Wątek nie jest w tej samej rozmowie"
 
-#: foodsaving/conversations/serializers.py:173
+#: foodsaving/conversations/serializers.py:167
 msgid "You can only reply to Group messages"
 msgstr "Możesz odpowiadać na wiadomości grupowe"
 
-#: foodsaving/conversations/serializers.py:177
+#: foodsaving/conversations/serializers.py:171
 msgid "You cannot reply to replies"
 msgstr "Nie możesz odpowiadać na odpowiedzi"
 
@@ -467,7 +467,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "Na ten adres e-mail już wcześniej wysłano zaproszenie"
 
 #: foodsaving/invitations/serializers.py:26
-#: foodsaving/issues/serializers.py:141 foodsaving/stores/serializers.py:71
+#: foodsaving/issues/serializers.py:141 foodsaving/places/serializers.py:71
 msgid "You are not a member of this group."
 msgstr "Nie jesteś członkiem tej grupy."
 
@@ -633,7 +633,7 @@ msgstr "Nie ma już miejsc na ten odbiór."
 msgid "This feedback is given by another user."
 msgstr "Ten komentarz został dodany przez innego użytkownika."
 
-#: foodsaving/pickups/permissions.py:57 foodsaving/pickups/serializers.py:368
+#: foodsaving/pickups/permissions.py:57 foodsaving/pickups/serializers.py:388
 #, python-format
 msgid ""
 "You can't give feedback for pickups more than %(days_number)s days ago."
@@ -653,36 +653,31 @@ msgstr ""
 msgid "Must pass start value"
 msgstr ""
 
-#: foodsaving/pickups/serializers.py:107 foodsaving/pickups/serializers.py:276
-#: foodsaving/pickups/serializers.py:361
-msgid "You are not member of the store's group."
-msgstr "Nie jesteś członkiem grupy tego sklepu."
-
-#: foodsaving/pickups/serializers.py:114
+#: foodsaving/pickups/serializers.py:116
 msgid "The date should be in the future."
 msgstr "Data musi być w przyszłości."
 
-#: foodsaving/pickups/serializers.py:171
+#: foodsaving/pickups/serializers.py:173
 msgid "You can't move pickups that are part of a series."
 msgstr ""
 
-#: foodsaving/pickups/serializers.py:287
+#: foodsaving/pickups/serializers.py:305
 msgid "Invalid recurrence rule."
 msgstr "Nieprawidłowe zasady powtarzających się odbiorów."
 
-#: foodsaving/pickups/serializers.py:289
+#: foodsaving/pickups/serializers.py:307
 msgid "Only single recurrence rules are allowed."
 msgstr "Można zastosować tylko jedną zasadę powtarzających się odbiorów"
 
-#: foodsaving/pickups/serializers.py:363
+#: foodsaving/pickups/serializers.py:383
 msgid "The pickup is not done yet"
 msgstr "Jeszcze nie wykonano tego odbioru"
 
-#: foodsaving/pickups/serializers.py:365
+#: foodsaving/pickups/serializers.py:385
 msgid "You aren't assigned to the pickup."
 msgstr "Nie jesteś zapisana/-y na ten odbiór."
 
-#: foodsaving/pickups/serializers.py:382
+#: foodsaving/pickups/serializers.py:402
 msgid "Both comment and weight cannot be blank."
 msgstr ""
 "Pola komentarza i ilości uratowanego jedzenia nie mogą być jednocześnie "
@@ -733,11 +728,11 @@ msgid ""
 "                            <strong>Pickup notification</strong> emails for this group."
 msgstr ""
 
-#: foodsaving/stores/serializers.py:78
+#: foodsaving/places/serializers.py:78
 msgid "Set at least one week in advance"
 msgstr "Ustaw przynajmniej z tygodniowym wyprzedzeniem"
 
-#: foodsaving/stores/serializers.py:81
+#: foodsaving/places/serializers.py:81
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr ""

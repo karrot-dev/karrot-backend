@@ -78,20 +78,11 @@ def application_url(application):
     )
 
 
-def conflict_resolution_url(issue):
-    # TODO update url
-    return '{hostname}/#/group/{group_id}/conflict_resolutions/{issue_id}'.format(
+def issue_url(issue):
+    return '{hostname}/#/group/{group_id}/issues/{issue_id}'.format(
         hostname=settings.HOSTNAME,
         group_id=issue.group.id,
         issue_id=issue.id,
-    )
-
-
-def conflict_resolution_list_url(group):
-    # TODO update url
-    return '{hostname}/#/group/{group_id}/conflict_resolutions'.format(
-        hostname=settings.HOSTNAME,
-        group_id=group.id,
     )
 
 

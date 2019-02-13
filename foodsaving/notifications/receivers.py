@@ -261,12 +261,10 @@ def pickup_modified(sender, instance, **kwargs):
 # Issue
 def create_notification_about_issue(issue, user, type):
     return Notification.objects.create(
-        user=user,
-        type=type,
-        context={
+        user=user, type=type, context={
             'issue': issue.id,
             'group': issue.group.id,
-            'affected_user': issue.affected_user.id,
+            'user': issue.affected_user.id,
         }
     )
 
