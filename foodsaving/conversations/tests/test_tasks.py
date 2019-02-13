@@ -41,14 +41,14 @@ class TestBatchedConversationNotificationTask(TestCase):
         # and another three messages, to check if notified_up_to is updated
         mail.outbox = []
         with suppressed_notifications():
-            two = self.conversation.messages.create(author=self.author, content='two')
+            two = self.conversation.messages.create(author=self.author, content='second message')
             self.conversation.messages.create(author=self.author, content='three')
         self.conversation.conversationparticipant_set.filter(user=self.user).update(seen_up_to=two)
         recent_message = self.conversation.messages.create(author=self.author, content='four')
 
         self.assertEqual(len(mail.outbox), 1)
         user1_email = next(email for email in mail.outbox if email.to[0] == self.user.email)
-        self.assertNotIn('two', user1_email.body)
+        self.assertNotIn('second message', user1_email.body)
         self.assertIn('three', user1_email.body)
         self.assertIn('four', user1_email.body)
         self.assertIn(self.author.display_name, mail.outbox[0].from_email)
