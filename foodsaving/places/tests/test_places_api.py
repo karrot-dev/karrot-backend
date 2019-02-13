@@ -195,6 +195,18 @@ class TestPlacesAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.post('/api/messages/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    def test_unsubscribe(self):
+        self.place.placesubscription_set.create(user=self.member)
+
+        self.client.force_login(user=self.member)
+        response = self.client.delete('/api/places/{}/subscription/'.format(self.place.id))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.data)
+
+        # conversation participant also gets deleted
+        response = self.client.get('/api/places/{}/conversation/'.format(self.place.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertNotIn(self.member.id, response.data['participants'])
+
 
 class TestPlaceChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):
