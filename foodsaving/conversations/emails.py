@@ -117,6 +117,7 @@ def prepare_place_conversation_message_notification(user, message):
         template='conversation_message_notification',
         from_email=from_email,
         user=user,
+        tz=place.group.timezone,
         reply_to=[reply_to],
         unsubscribe_url=unsubscribe_url,
         context={
