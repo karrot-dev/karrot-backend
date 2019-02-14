@@ -112,6 +112,12 @@ def group_wall_url(group):
     return '{hostname}/#/group/{group_id}/wall'.format(hostname=settings.HOSTNAME, group_id=group.id)
 
 
+def place_wall_url(place):
+    return '{hostname}/#/group/{group_id}/place/{place_id}/wall'.format(
+        hostname=settings.HOSTNAME, group_id=place.group.id, place_id=place.id
+    )
+
+
 def applications_url(group):
     return '{hostname}/#/group/{group_id}/applications'.format(
         hostname=settings.HOSTNAME,

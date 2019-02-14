@@ -105,9 +105,9 @@ class PickupDateSerializer(serializers.ModelSerializer):
         return pickupdate
 
     def validate_place(self, place):
-        if not self.context['request'].user.groups.filter(place=place).exists():
-            raise PermissionDenied('You are not member of the place\'s group.')
         if not place.group.is_editor(self.context['request'].user):
+            if not place.group.is_member(self.context['request'].user):
+                raise PermissionDenied('You are not member of the place\'s group.')
             raise PermissionDenied(_('You need to be a group editor'))
         return place
 

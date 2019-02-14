@@ -6,7 +6,7 @@ from rest_framework.fields import DateTimeField
 from foodsaving.conversations.helpers import normalize_emoji_name
 from foodsaving.conversations.models import (
     ConversationMessage, ConversationParticipant, ConversationMessageReaction, ConversationThreadParticipant,
-    ConversationMeta, Conversation
+    ConversationMeta, ConversationNotificationStatus
 )
 
 
@@ -153,22 +153,22 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
             thread = data['thread']
 
             if 'view' in self.context and self.context['view'].action == 'partial_update':
-                raise serializers.ValidationError(_('You cannot change the thread of a message'))
+                raise serializers.ValidationError('You cannot change the thread of a message')
 
             if 'conversation' in data:
                 conversation = data['conversation']
 
                 # the thread must be in the correct conversation
                 if thread.conversation.id != conversation.id:
-                    raise serializers.ValidationError(_('Thread is not in the same conversation'))
+                    raise serializers.ValidationError('Thread is not in the same conversation')
 
                 # only some types of messages can have threads
-                if conversation.type() != 'group':
-                    raise serializers.ValidationError(_('You can only reply to Group messages'))
+                if conversation.type() not in ('group', 'place'):
+                    raise serializers.ValidationError('You can only reply to wall messages')
 
             # you cannot reply to replies
             if thread.is_thread_reply():
-                raise serializers.ValidationError(_('You cannot reply to replies'))
+                raise serializers.ValidationError('You cannot reply to replies')
 
         return data
 
@@ -183,22 +183,23 @@ class ConversationSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'participants',
+            'group',
             'updated_at',
             'type',
             'target_id',
             'is_closed',
             'seen_up_to',
             'unread_message_count',
-            'muted',
-            'is_participant',
+            'notifications',
         ]
 
     id = serializers.IntegerField(source='conversation.id', read_only=True)
     participants = serializers.PrimaryKeyRelatedField(source='conversation.participants', many=True, read_only=True)
+    group = serializers.PrimaryKeyRelatedField(source='conversation.group', read_only=True)
     type = serializers.CharField(source='conversation.type', read_only=True)
     target_id = serializers.IntegerField(source='conversation.target_id', read_only=True)
     is_closed = serializers.BooleanField(source='conversation.is_closed', read_only=True)
-    is_participant = serializers.ReadOnlyField(default=True)
+    notifications = serializers.ChoiceField(choices=[(c.value, c.value) for c in ConversationNotificationStatus])
 
     unread_message_count = serializers.SerializerMethodField()
     updated_at = serializers.SerializerMethodField()
@@ -224,24 +225,29 @@ class ConversationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Must refer to a message in the conversation')
         return message
 
+    def validate_notifications(self, notifications):
+        participant = self.instance
+        if (participant and notifications == ConversationNotificationStatus.NONE.value
+                and participant.conversation.is_private):
+            raise serializers.ValidationError('You cannot leave a private conversation')
+        return notifications
+
     def update(self, participant, validated_data):
+        notifications = validated_data.get('notifications', None)
+        if notifications == ConversationNotificationStatus.NONE.value:
+            if participant.id is not None:
+                # delete participant
+                participant.delete()
+            return participant
+        elif notifications == ConversationNotificationStatus.MUTED.value:
+            participant.muted = True
+        elif notifications == ConversationNotificationStatus.ALL.value:
+            participant.muted = False
+
         if 'seen_up_to' in validated_data:
             participant.seen_up_to = validated_data['seen_up_to']
-        if 'muted' in validated_data:
-            participant.muted = validated_data['muted']
         participant.save()
         return participant
-
-
-class ConversationInfoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Conversation
-        fields = ConversationSerializer.Meta.fields
-
-    seen_up_to = serializers.ReadOnlyField(default=None)
-    unread_message_count = serializers.ReadOnlyField(default=0)
-    muted = serializers.ReadOnlyField(default=True)
-    is_participant = serializers.ReadOnlyField(default=False)
 
 
 class ConversationMetaSerializer(serializers.ModelSerializer):

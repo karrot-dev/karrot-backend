@@ -50,10 +50,10 @@ class TestPickupdatesAPIFilter(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.member)
         response = self.get_results(self.url, {'group': self.group.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        place_ids = [_.id for _ in self.group.place.all()]
+        place_ids = [_.id for _ in self.group.places.all()]
         for _ in response.data:
             self.assertTrue(_['place'] in place_ids)
-        self.assertEqual(len(response.data), sum([place.pickup_dates.count() for place in self.group.place.all()]))
+        self.assertEqual(len(response.data), sum([place.pickup_dates.count() for place in self.group.places.all()]))
 
     def test_filter_by_series(self):
         self.client.force_login(user=self.member)

@@ -7,6 +7,7 @@ from django.db.models import ForeignKey, TextField, ManyToManyField, BooleanFiel
     DateTimeField
 from django.db.models.manager import BaseManager
 from django.utils import timezone
+from enum import Enum
 
 from foodsaving.base.base_models import BaseModel, UpdatedAtMixin
 from foodsaving.utils import markdown
@@ -77,9 +78,19 @@ class Conversation(BaseModel, UpdatedAtMixin):
         related_name='conversation_latest_message'
     )
 
+    def make_participant(self, **kwargs):
+        defaults = {
+            'updated_at': self.updated_at,
+        }
+        defaults.update(kwargs)
+        return ConversationParticipant(conversation=self, **defaults)
+
     def join(self, user, **kwargs):
-        if not self.conversationparticipant_set.filter(user=user).exists():
-            ConversationParticipant.objects.create(user=user, conversation=self, **kwargs)
+        participant = self.conversationparticipant_set.filter(user=user).first()
+        if participant is None:
+            participant = self.make_participant(user=user, **kwargs)
+            participant.save()
+        return participant
 
     def leave(self, user):
         self.conversationparticipant_set.filter(user=user).delete()
@@ -97,7 +108,7 @@ class Conversation(BaseModel, UpdatedAtMixin):
     def can_access(self, user):
         if self.conversationparticipant_set.filter(user=user).exists():
             return True
-        if self.is_group_public and self.group is not None and self.group.is_member(user):
+        if self.is_group_public and self.group.is_member(user):
             return True
         return False
 
@@ -120,16 +131,6 @@ class Conversation(BaseModel, UpdatedAtMixin):
             return None
         return self.target.group
 
-    def save(self, **kwargs):
-        # keep group reference updated, even when target might change
-        # NB: this does not work if target changes its group - should not happen!
-        if self.target_id is not None:
-            old = type(self).objects.get(pk=self.pk) if self.pk else None
-            if old is None or old.target_id != self.target_id or old.target_type_id != self.target_type_id:
-                self.group = self.target.group
-
-        super().save(**kwargs)
-
 
 class ConversationMeta(BaseModel):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -145,6 +146,12 @@ class ConversationParticipantQuerySet(QuerySet):
         unread_messages = Q(seen_up_to=None) | Q(conversation__messages__id__gt=F('seen_up_to'))
         filter = unread_messages & exclude_replies
         return self.annotate(unread_message_count=Count('conversation__messages', filter=filter, distinct=True))
+
+
+class ConversationNotificationStatus(Enum):
+    ALL = 'all'
+    MUTED = 'muted'
+    NONE = 'none'
 
 
 class ConversationParticipant(BaseModel, UpdatedAtMixin):
@@ -167,6 +174,15 @@ class ConversationParticipant(BaseModel, UpdatedAtMixin):
         related_name='conversationparticipants_notified_up_to',
     )
     muted = BooleanField(default=False)
+
+    @property
+    def notifications(self):
+        if self.id is None:
+            # participant does not exist in database
+            return ConversationNotificationStatus.NONE.value
+        if self.muted:
+            return ConversationNotificationStatus.MUTED.value
+        return ConversationNotificationStatus.ALL.value
 
     def unseen_and_unnotified_messages(self):
         messages = self.conversation.messages.exclude_replies()
@@ -207,10 +223,11 @@ class ConversationMessageQuerySet(QuerySet):
 
 class ConversationMessageManager(BaseManager.from_queryset(ConversationMessageQuerySet)):
     def create(self, **kwargs):
-        # make sure author is participant (to receive notifications)
-        conversation = kwargs.get('conversation')
-        author = kwargs.get('author')
-        conversation.conversationparticipant_set.get_or_create(user=author)
+        if 'thread' not in kwargs:
+            # make sure author is participant (to receive notifications)
+            conversation = kwargs.get('conversation')
+            author = kwargs.get('author')
+            conversation.conversationparticipant_set.get_or_create(user=author)
 
         obj = super().create(**kwargs)
         # clear cached value

@@ -1,16 +1,17 @@
 from django.db.models import Avg, Count, Q, Sum
 from django_filters import rest_framework as filters
 from django.utils.translation import ugettext_lazy as _
-from rest_framework import mixins, permissions
+from rest_framework import mixins, permissions, status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from foodsaving.conversations.api import RetrieveConversationMixin
 from foodsaving.pickups.models import PickupDate
-from foodsaving.places.models import Place as PlaceModel
-from foodsaving.places.serializers import PlaceSerializer, PlaceUpdateSerializer
+from foodsaving.places.models import Place as PlaceModel, PlaceSubscription
+from foodsaving.places.serializers import PlaceSerializer, PlaceUpdateSerializer, PlaceSubscriptionSerializer
 from foodsaving.utils.mixins import PartialUpdateModelMixin
 
 
@@ -29,6 +30,7 @@ class PlaceViewSet(
         PartialUpdateModelMixin,
         mixins.ListModelMixin,
         GenericViewSet,
+        RetrieveConversationMixin,
 ):
     """
     Places
@@ -72,3 +74,37 @@ class PlaceViewSet(
             'pickups_done': instance.pickups_done,
         }
         return Response(data)
+
+    @action(
+        detail=True,
+    )
+    def conversation(self, request, pk=None):
+        """Get conversation ID of this place"""
+        return self.retrieve_conversation(request, pk)
+
+    @action(
+        detail=True,
+        methods=['POST', 'DELETE'],
+        serializer_class=PlaceSubscriptionSerializer,
+    )
+    def subscription(self, request, pk):
+        self.check_permissions(request)
+        place = self.get_object()
+        self.check_object_permissions(request, place)
+
+        if request.method == 'POST':
+            serializer = self.get_serializer(data={'place': place.id})
+            serializer.is_valid(raise_exception=True)
+            subscription = serializer.save()
+
+            serializer = self.get_serializer(instance=subscription)
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+
+        if request.method == 'DELETE':
+            deleted_rows, _ = PlaceSubscription.objects.filter(place=place, user=self.request.user).delete()
+            deleted = deleted_rows > 0
+
+            return Response(
+                data={},
+                status=status.HTTP_204_NO_CONTENT if deleted else status.HTTP_404_NOT_FOUND,
+            )

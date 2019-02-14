@@ -11,7 +11,7 @@ from foodsaving.applications.factories import ApplicationFactory
 from foodsaving.issues.factories import IssueFactory
 from foodsaving.conversations.factories import ConversationFactory
 from foodsaving.conversations.models import ConversationParticipant, Conversation, ConversationMessage, \
-    ConversationMessageReaction, ConversationMeta
+    ConversationMessageReaction, ConversationMeta, ConversationNotificationStatus
 from foodsaving.groups.factories import GroupFactory
 from foodsaving.groups.models import GroupStatus
 from foodsaving.pickups.factories import PickupDateFactory
@@ -199,6 +199,16 @@ class TestConversationThreadsAPI(APITestCase):
         response = self.client.post('/api/messages/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['thread'], self.thread.id)
+
+    def test_reply_without_being_subscribed_to_conversation(self):
+        self.conversation.conversationparticipant_set.filter(user=self.user).delete()
+
+        self.client.force_login(user=self.user)
+        data = {'conversation': self.conversation.id, 'content': 'a nice message reply!', 'thread': self.thread.id}
+        response = self.client.post('/api/messages/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        self.assertFalse(self.conversation.conversationparticipant_set.filter(user=self.user).exists())
 
     def test_thread_reply_a_few_times(self):
         self.client.force_login(user=self.user)
@@ -478,10 +488,10 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
 
         self.client.force_login(user=self.user)
 
-        data = {'muted': True}
+        data = {'notifications': ConversationNotificationStatus.MUTED.value}
         response = self.client.patch('/api/conversations/{}/'.format(self.conversation.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['muted'], True)
+        self.assertEqual(response.data['notifications'], ConversationNotificationStatus.MUTED.value)
 
         participant.refresh_from_db()
         self.assertTrue(participant.muted)
@@ -494,10 +504,10 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
 
         self.client.force_login(user=self.user)
 
-        data = {'muted': False}
+        data = {'notifications': ConversationNotificationStatus.ALL.value}
         response = self.client.patch('/api/conversations/{}/'.format(self.conversation.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['muted'], False)
+        self.assertEqual(response.data['notifications'], ConversationNotificationStatus.ALL.value)
 
         participant.refresh_from_db()
         self.assertFalse(participant.muted)
@@ -843,3 +853,21 @@ class TestClosedConversation(APITestCase):
         self.client.force_login(user=self.user)
         response = self.client.post('/api/messages/', {'conversation': self.conversation.id, 'content': 'hello'})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+
+class TestPrivateConversationAPI(APITestCase):
+    def setUp(self):
+        self.user = VerifiedUserFactory()
+        self.user2 = VerifiedUserFactory()
+
+    def test_cannot_leave_private_conversation(self):
+        self.client.force_login(user=self.user)
+        private_conversation = Conversation.objects.get_or_create_for_two_users(self.user, self.user2)
+        response = self.client.patch(
+            '/api/conversations/{}/'.format(private_conversation.id), {
+                'notifications': ConversationNotificationStatus.NONE.value,
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['notifications'], ['You cannot leave a private conversation'])

@@ -6,7 +6,7 @@ from rest_framework.exceptions import PermissionDenied
 
 from foodsaving.history.models import History, HistoryTypus
 from foodsaving.utils.misc import find_changed
-from foodsaving.places.models import Place as PlaceModel, PlaceStatus
+from foodsaving.places.models import Place as PlaceModel, PlaceStatus, PlaceSubscription
 
 
 class PlaceHistorySerializer(serializers.ModelSerializer):
@@ -28,6 +28,7 @@ class PlaceSerializer(serializers.ModelSerializer):
             'longitude',
             'weeks_in_advance',
             'status',
+            'is_subscribed',
         ]
         extra_kwargs = {
             'name': {
@@ -45,6 +46,10 @@ class PlaceSerializer(serializers.ModelSerializer):
     status = serializers.ChoiceField(
         choices=[status.value for status in PlaceStatus], default=PlaceModel.DEFAULT_STATUS
     )
+    is_subscribed = serializers.SerializerMethodField()
+
+    def get_is_subscribed(self, place):
+        return place.placesubscription_set.filter(user=self.context['request'].user).exists()
 
     def save(self, **kwargs):
         return super().save(last_changed_by=self.context['request'].user)
@@ -116,3 +121,22 @@ class PlaceUpdateSerializer(PlaceSerializer):
             )
         place.group.refresh_active_status()
         return place
+
+
+class PlaceSubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlaceSubscription
+        fields = [
+            'place',
+        ]
+
+    def save(self, **kwargs):
+        return super().save(user=self.context['request'].user)
+
+    def validate_place(self, place):
+        if place.placesubscription_set.filter(user=self.context['request'].user).exists():
+            raise serializers.ValidationError(_('You are already subscribed to this place'))
+        return place
+
+    def create(self, validated_data):
+        return PlaceSubscription.objects.create(**validated_data)

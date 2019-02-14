@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db import models
 
 from foodsaving.base.base_models import BaseModel, LocationModel
+from foodsaving.conversations.models import ConversationMixin
 
 
 class PlaceStatus(Enum):
@@ -14,18 +15,23 @@ class PlaceStatus(Enum):
     ARCHIVED = 'archived'
 
 
-class Place(BaseModel, LocationModel):
+class Place(BaseModel, LocationModel, ConversationMixin):
     class Meta:
         unique_together = ('group', 'name')
 
     DEFAULT_STATUS = PlaceStatus.CREATED.value
 
-    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='place')
+    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='places')
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH)
     description = models.TextField(blank=True)
     weeks_in_advance = models.PositiveIntegerField(default=4)
     status = models.CharField(max_length=20, default=DEFAULT_STATUS)
 
+    subscribers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        through='PlaceSubscription',
+        related_name='places_subscribed',
+    )
     last_changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -37,3 +43,11 @@ class Place(BaseModel, LocationModel):
 
     def is_active(self):
         return self.status == 'active'
+
+
+class PlaceSubscription(BaseModel):
+    class Meta:
+        unique_together = ('place', 'user')
+
+    place = models.ForeignKey(Place, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

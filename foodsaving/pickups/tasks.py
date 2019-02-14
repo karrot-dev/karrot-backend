@@ -58,14 +58,6 @@ def fetch_pickup_notification_data_for_group(group):
         place__group=group,
     ).order_by('date')
 
-    tonight_empty = pickups.filter(**tonight, **empty)
-    tomorrow_empty = pickups.filter(**tomorrow, **empty)
-
-    has_empty_pickups = any([v.count() > 0 for v in [tonight_empty, tomorrow_empty]])
-
-    base_tonight_not_full = pickups.filter(**tonight, **not_full)
-    base_tomorrow_not_full = pickups.filter(**tomorrow, **not_full)
-
     users = group.members.filter(
         groupmembership__in=GroupMembership.objects.active().with_notification_type(
             GroupNotificationType.DAILY_PICKUP_NOTIFICATION
@@ -75,6 +67,14 @@ def fetch_pickup_notification_data_for_group(group):
     )
 
     for user in users:
+        subscribed_places_pickups = pickups.filter(place__placesubscription__user=user)
+
+        tonight_empty = subscribed_places_pickups.filter(**tonight, **empty)
+        tomorrow_empty = subscribed_places_pickups.filter(**tomorrow, **empty)
+        base_tonight_not_full = subscribed_places_pickups.filter(**tonight, **not_full)
+        base_tomorrow_not_full = subscribed_places_pickups.filter(**tomorrow, **not_full)
+
+        has_empty_pickups = any(v.count() > 0 for v in [tonight_empty, tomorrow_empty])
 
         user_pickups = PickupDate.objects.filter(
             place__group=group,
