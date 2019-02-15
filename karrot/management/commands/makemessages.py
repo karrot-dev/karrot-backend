@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 def remove_creation_date():
     print('removing creation date...')
-    with open('foodsaving/locale/en/LC_MESSAGES/django.po', 'r+') as f:
+    with open('karrot/locale/en/LC_MESSAGES/django.po', 'r+') as f:
         lines = f.readlines()
         f.seek(0)
         for line in lines:
@@ -19,7 +19,7 @@ class Command(BaseCommand):
         extract_cmd = ' '.join([
             'pybabel extract',
             '-F babel.cfg',
-            '-o foodsaving/locale/en/LC_MESSAGES/django.po',
+            '-o karrot/locale/en/LC_MESSAGES/django.po',
             '.',
         ])
         print(extract_cmd)

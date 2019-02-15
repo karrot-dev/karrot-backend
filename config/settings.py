@@ -79,7 +79,7 @@ INSTALLED_APPS = (
     'django.contrib.postgres',
 
     # Application
-    'foodsaving',
+    'karrot',
     'karrot.applications.ApplicationsConfig',
     'karrot.base.BaseConfig',
     'karrot.issues.IssuesConfig',

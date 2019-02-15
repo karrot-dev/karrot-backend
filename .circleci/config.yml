@@ -128,7 +128,7 @@ jobs:
             git branch --delete --force $BRANCH || true
             git checkout -b $BRANCH
             env/bin/tx pull -a --force --no-interactive
-            git add foodsaving/locale
+            git add karrot/locale
             git commit -m "[CI] update locales" || exit 0
             git push --force origin $BRANCH
             hub pull-request -m "[CI] Update locales" || true

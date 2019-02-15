@@ -7,8 +7,8 @@ args = [
     '-i',
     '-r',
     '-e',
-    'foodsaving/*/migrations',
-    'foodsaving',
+    'karrot/*/migrations',
+    'karrot',
     *sys.argv[1:],
 ]
 print(' '.join(args))

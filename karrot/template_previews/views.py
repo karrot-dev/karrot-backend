@@ -29,7 +29,7 @@ from karrot.users.factories import VerifiedUserFactory
 from karrot.users.models import User
 from karrot.utils.tests.fake import faker
 
-foodsaving_basedir = os.path.abspath(os.path.join(settings.BASE_DIR, 'foodsaving'))
+basedir = os.path.abspath(os.path.join(settings.BASE_DIR, 'karrot'))
 
 MockVerificationCode = namedtuple('VerificationCode', ['code'])
 
@@ -220,7 +220,7 @@ handlers = Handlers()
 
 
 def list_templates(request):
-    template_dirs = [s for s in get_app_template_dirs('templates') if re.match(r'.*/foodsaving/.*', s)]
+    template_dirs = [s for s in get_app_template_dirs('templates') if re.match(r'.*/karrot/.*', s)]
 
     template_names = set()
 
@@ -228,7 +228,7 @@ def list_templates(request):
 
     for directory in template_dirs:
         for directory, dirnames, filenames in os.walk(directory):
-            relative_dir = directory[len(foodsaving_basedir) + 1:]
+            relative_dir = directory[len(basedir) + 1:]
             for filename in filenames:
                 if re.match(r'.*\.jinja2$', filename) and not re.match(r'.*\.nopreview\.jinja2$', filename):
                     path = os.path.join(relative_dir, filename)
