@@ -41,7 +41,7 @@ if process_mjml:
 
     header("Removing old templates")
 
-    entries = glob.glob(join(base, 'foodsaving/*/templates/*.html.jinja2'))
+    entries = glob.glob(join(base, 'karrot/*/templates/*.html.jinja2'))
     for entry in entries:
         os.remove(entry)
     print('Removed {} entries'.format(len(entries)))

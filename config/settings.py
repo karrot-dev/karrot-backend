@@ -79,23 +79,23 @@ INSTALLED_APPS = (
     'django.contrib.postgres',
 
     # Application
-    'foodsaving',
-    'foodsaving.applications.ApplicationsConfig',
-    'foodsaving.base.BaseConfig',
-    'foodsaving.issues.IssuesConfig',
-    'foodsaving.userauth.UserAuthConfig',
-    'foodsaving.subscriptions.SubscriptionsConfig',
-    'foodsaving.users.UsersConfig',
-    'foodsaving.conversations.ConversationsConfig',
-    'foodsaving.history.HistoryConfig',
-    'foodsaving.groups.GroupsConfig',
-    'foodsaving.places.PlacesConfig',
-    'foodsaving.unsubscribe',
-    'foodsaving.pickups.PickupsConfig',
-    'foodsaving.invitations.InvitationsConfig',
-    'foodsaving.template_previews',
-    'foodsaving.webhooks',
-    'foodsaving.notifications.NotificationsConfig',
+    'karrot',
+    'karrot.applications.ApplicationsConfig',
+    'karrot.base.BaseConfig',
+    'karrot.issues.IssuesConfig',
+    'karrot.userauth.UserAuthConfig',
+    'karrot.subscriptions.SubscriptionsConfig',
+    'karrot.users.UsersConfig',
+    'karrot.conversations.ConversationsConfig',
+    'karrot.history.HistoryConfig',
+    'karrot.groups.GroupsConfig',
+    'karrot.places.PlacesConfig',
+    'karrot.unsubscribe',
+    'karrot.pickups.PickupsConfig',
+    'karrot.invitations.InvitationsConfig',
+    'karrot.template_previews',
+    'karrot.webhooks',
+    'karrot.notifications.NotificationsConfig',
 
     # Django packages
     'django_extensions',
@@ -118,7 +118,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ),
-    'EXCEPTION_HANDLER': 'foodsaving.utils.misc.custom_exception_handler',
+    'EXCEPTION_HANDLER': 'karrot.utils.misc.custom_exception_handler',
 }
 
 MIDDLEWARE = (
@@ -146,7 +146,7 @@ TEMPLATES = [
                 "jinja2.ext.i18n",
             ],
             "autoescape": True,
-            "environment": "foodsaving.utils.email_utils.jinja2_environment"
+            "environment": "karrot.utils.email_utils.jinja2_environment"
         }
     },
     {
@@ -255,7 +255,7 @@ CHANNEL_LAYERS = {
     },
 }
 
-ASGI_APPLICATION = 'foodsaving.subscriptions.routing.application'
+ASGI_APPLICATION = 'karrot.subscriptions.routing.application'
 
 # Default dummy settings, please override in local_settings.py
 DEFAULT_FROM_EMAIL = "testing@example.com"

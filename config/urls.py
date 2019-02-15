@@ -13,23 +13,23 @@ from django.views.static import serve
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 
-from foodsaving.applications.api import ApplicationViewSet
-from foodsaving.issues.api import IssuesViewSet
-from foodsaving.conversations.api import ConversationMessageViewSet, ConversationViewSet
-from foodsaving.groups.api import GroupViewSet, AgreementViewSet, GroupInfoViewSet
-from foodsaving.history.api import HistoryViewSet
-from foodsaving.invitations.api import InvitationsViewSet, InvitationAcceptViewSet
-from foodsaving.notifications.api import NotificationViewSet
-from foodsaving.pickups.api import PickupDateViewSet, PickupDateSeriesViewSet, FeedbackViewSet
-from foodsaving.places.api import PlaceViewSet
-from foodsaving.subscriptions.api import PushSubscriptionViewSet
-from foodsaving.template_previews import views as template_preview_views
-from foodsaving.unsubscribe.api import UnsubscribeView
-from foodsaving.userauth.api import AuthUserView, AuthView, LogoutView, \
+from karrot.applications.api import ApplicationViewSet
+from karrot.issues.api import IssuesViewSet
+from karrot.conversations.api import ConversationMessageViewSet, ConversationViewSet
+from karrot.groups.api import GroupViewSet, AgreementViewSet, GroupInfoViewSet
+from karrot.history.api import HistoryViewSet
+from karrot.invitations.api import InvitationsViewSet, InvitationAcceptViewSet
+from karrot.notifications.api import NotificationViewSet
+from karrot.pickups.api import PickupDateViewSet, PickupDateSeriesViewSet, FeedbackViewSet
+from karrot.places.api import PlaceViewSet
+from karrot.subscriptions.api import PushSubscriptionViewSet
+from karrot.template_previews import views as template_preview_views
+from karrot.unsubscribe.api import UnsubscribeView
+from karrot.userauth.api import AuthUserView, AuthView, LogoutView, \
     RequestResetPasswordView, ChangePasswordView, VerifyMailView, ResendMailVerificationCodeView, ResetPasswordView, \
     ChangeMailView, RequestDeleteUserView, FailedEmailDeliveryView
-from foodsaving.users.api import UserViewSet, UserInfoViewSet
-from foodsaving.webhooks.api import IncomingEmailView, EmailEventView
+from karrot.users.api import UserViewSet, UserInfoViewSet
+from karrot.webhooks.api import IncomingEmailView, EmailEventView
 from rest_framework_swagger.views import get_swagger_view
 
 router = DefaultRouter()

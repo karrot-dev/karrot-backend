@@ -1,0 +1,15 @@
+from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
+
+from karrot.history.models import History, HistoryTypus
+
+
+class HistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = History
+        fields = ['id', 'date', 'typus', 'group', 'place', 'users', 'payload']
+
+    typus = SerializerMethodField()
+
+    def get_typus(self, obj):
+        return HistoryTypus.name(obj.typus)
