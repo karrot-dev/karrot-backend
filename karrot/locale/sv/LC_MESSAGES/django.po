@@ -23,7 +23,7 @@ msgstr ""
 
 #: foodsaving/applications/api.py:27
 msgid "You need to have a verified email address"
-msgstr ""
+msgstr "Du behöver en verifierad mejladress"
 
 #: foodsaving/applications/api.py:36 foodsaving/groups/api.py:49
 #: foodsaving/invitations/serializers.py:28
