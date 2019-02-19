@@ -68,7 +68,7 @@ idna==2.8                 # via hyperlink, requests
 incremental==17.5.0       # via twisted
 influxdb==5.2.1
 ipython-genutils==0.2.0   # via traitlets
-ipython==7.2.0
+ipython==7.3.0
 itypes==1.1.0             # via coreapi
 jedi==0.13.2              # via ipython
 jinja2==2.10              # via coreschema, django-jinja, django-silk
