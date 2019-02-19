@@ -53,7 +53,7 @@ entrypoints==0.3          # via flake8
 execnet==1.5.0            # via pytest-xdist
 factory-boy==2.11.1
 faker==1.0.2              # via factory-boy
-flake8==3.7.5
+flake8==3.7.6
 freezegun==0.3.11
 furl==2.0.0
 gevent==1.4.0
