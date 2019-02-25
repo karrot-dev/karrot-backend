@@ -35,7 +35,7 @@ coverage==4.5.2           # via pytest-cov
 cssselect==1.0.3          # via talon
 daphne==2.2.5
 decorator==4.3.2          # via ipython, traitlets
-django-anymail==5.0
+django-anymail==6.0
 django-cors-headers==2.4.0
 django-crispy-forms==1.7.2
 django-dirtyfields==1.3.1
