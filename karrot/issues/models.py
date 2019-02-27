@@ -51,6 +51,7 @@ class Issue(BaseModel, ConversationMixin):
         default=IssueStatus.ONGOING.value,
         choices=[(status.value, status.value) for status in IssueStatus],
     )
+    status_changed_at = models.DateTimeField(null=True)
     type = models.TextField(
         default=IssueTypes.CONFLICT_RESOLUTION.value,
         choices=[(status.value, status.value) for status in IssueTypes],
@@ -65,15 +66,19 @@ class Issue(BaseModel, ConversationMixin):
         return False
 
     @property
-    def has_ended(self):
-        return self.status != IssueStatus.ONGOING.value
+    def ended_at(self):
+        if self.status == IssueStatus.ONGOING.value:
+            return None
+        return self.status_changed_at
 
     def decide(self):
         self.status = IssueStatus.DECIDED.value
+        self.status_changed_at = timezone.now()
         self.save()
 
     def cancel(self):
         self.status = IssueStatus.CANCELLED.value
+        self.status_changed_at = timezone.now()
         self.save()
 
     def save(self, **kwargs):

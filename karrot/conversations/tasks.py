@@ -121,9 +121,9 @@ def mark_conversations_as_closed():
     close_threshold = timezone.now() - relativedelta(days=settings.CONVERSATION_CLOSED_DAYS)
     for conversation in Conversation.objects.filter(
             is_closed=False,
-            latest_message__created_at__lt=close_threshold,
             target_id__isnull=False,
-    ):
-        if conversation.target.has_ended:
+    ).exclude(latest_message__created_at__gte=close_threshold):
+        ended_at = conversation.target.ended_at
+        if ended_at is not None and ended_at < close_threshold:
             conversation.is_closed = True
             conversation.save()

@@ -338,9 +338,9 @@ class ConversationMixin(object):
         return Conversation.objects.get_or_create_for_target(self)
 
     @property
-    def has_ended(self):
+    def ended_at(self):
         """Override this property if the conversation should be closed after the target has ended"""
-        return False
+        return None
 
     @property
     def conversation_is_group_public(self):

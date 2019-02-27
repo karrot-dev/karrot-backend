@@ -262,8 +262,10 @@ class PickupDate(BaseModel, ConversationMixin):
         return self.place.group
 
     @property
-    def has_ended(self):
-        return not self.is_upcoming()
+    def ended_at(self):
+        if self.is_upcoming():
+            return None
+        return self.date.end
 
     def __str__(self):
         return 'PickupDate {} - {}'.format(self.date.start, self.place)

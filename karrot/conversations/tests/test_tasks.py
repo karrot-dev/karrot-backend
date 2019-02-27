@@ -2,6 +2,7 @@ from dateutil.relativedelta import relativedelta
 from django.core import mail
 from django.test import TestCase
 from django.utils import timezone
+from freezegun import freeze_time
 from unittest.mock import patch
 
 from karrot.conversations import tasks
@@ -140,7 +141,7 @@ class TestConversationNotificationTask(TestCase):
 
 
 class TestMarkConversationClosedTask(TestCase):
-    def test_mark_conversation_as_closed(self):
+    def test_mark_issue_conversation_as_closed(self):
         long_time_ago = timezone.now() - relativedelta(days=30)
 
         # not cancelled -> should stay open
@@ -149,16 +150,18 @@ class TestMarkConversationClosedTask(TestCase):
         conversation.messages.create(content='hello', author=issue.created_by, created_at=long_time_ago)
 
         # cancelled but recently commented on -> should stay open
-        issue_ended_recently = IssueFactory()
-        issue_ended_recently.cancel()
+        with freeze_time(long_time_ago, tick=True):
+            issue_ended_recently = IssueFactory()
+            issue_ended_recently.cancel()
         conversation_ended_recently = issue_ended_recently.conversation
         conversation_ended_recently.messages.create(
             content='hello', author=issue_ended_recently.created_by, created_at=timezone.now()
         )
 
         # cancelled and not commented on -> should be closed
-        issue_ended = IssueFactory()
-        issue_ended.cancel()
+        with freeze_time(long_time_ago, tick=True):
+            issue_ended = IssueFactory()
+            issue_ended.cancel()
         conversation_ended = issue_ended.conversation
         conversation_ended.messages.create(content='hello', author=issue_ended.created_by, created_at=long_time_ago)
 
@@ -170,3 +173,21 @@ class TestMarkConversationClosedTask(TestCase):
 
         self.assertEqual(conversations.filter(is_closed=False).count(), 2)
         self.assertEqual(conversations.filter(is_closed=True).first(), conversation_ended)
+
+    def test_mark_empty_as_closed(self):
+        long_time_ago = timezone.now() - relativedelta(days=30)
+
+        # no messages and cancelled some time ago -> should be closed
+        with freeze_time(long_time_ago, tick=True):
+            issue_ended_long_ago = IssueFactory()
+            issue_ended_long_ago.cancel()
+
+        # no messages and cancelled recently -> should stay open
+        issue_ended_recently = IssueFactory()
+        issue_ended_recently.cancel()
+
+        mark_conversations_as_closed()
+
+        conversations = Conversation.objects.filter(target_type__model='issue')
+        self.assertEqual(conversations.filter(is_closed=True).first(), issue_ended_long_ago.conversation)
+        self.assertEqual(conversations.filter(is_closed=False).first(), issue_ended_recently.conversation)

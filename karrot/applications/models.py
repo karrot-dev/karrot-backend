@@ -38,8 +38,10 @@ class Application(BaseModel, ConversationMixin):
     )
 
     @property
-    def has_ended(self):
-        return self.status != ApplicationStatus.PENDING.value
+    def ended_at(self):
+        if self.status == ApplicationStatus.PENDING.value:
+            return None
+        return self.decided_at
 
     def questions_rendered(self, **kwargs):
         return markdown.render(self.questions, **kwargs)
