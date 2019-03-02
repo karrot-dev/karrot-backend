@@ -23,9 +23,7 @@ class IssueFactory(DjangoModelFactory):
     @post_generation
     def add_members(self, create, extracted, **kwargs):
         GroupMembership.objects.update_or_create(
-            {
-                'roles': [roles.GROUP_EDITOR]
-            },
+            {'roles': [roles.GROUP_EDITOR]},
             user=self.created_by,
             group=self.group,
         )
@@ -35,8 +33,15 @@ class IssueFactory(DjangoModelFactory):
 
 
 def vote_for(voting, user, type):
-    for option in voting.options.all():
-        option.votes.create(score=2 if option.type == type else -2, user=user)
+    vote_data = {
+        option.id: {
+            'score': 2 if option.type == type else -2,
+            'option': option,
+            'user': user
+        }
+        for option in voting.options.all()
+    }
+    voting.save_votes(user=user, vote_data=vote_data)
 
 
 def vote_for_further_discussion(**kwargs):

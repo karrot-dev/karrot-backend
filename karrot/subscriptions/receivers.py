@@ -23,8 +23,8 @@ from karrot.history.models import history_created
 from karrot.history.serializers import HistorySerializer
 from karrot.invitations.models import Invitation
 from karrot.invitations.serializers import InvitationSerializer
-from karrot.issues.models import Issue, Voting, Option, Vote
 from karrot.issues.serializers import IssueSerializer
+from karrot.issues.signals import issue_changed
 from karrot.notifications.models import Notification, NotificationMeta
 from karrot.notifications.serializers import NotificationSerializer, NotificationMetaSerializer
 from karrot.pickups.models import PickupDate, PickupDateSeries, Feedback, PickupDateCollector
@@ -426,28 +426,8 @@ def notification_meta_saved(sender, instance, **kwargs):
 
 
 # Issue
-def send_issue_updates(issue):
+@receiver(issue_changed)
+def send_issue_updates(sender, issue, **kwargs):
     for subscription in ChannelSubscription.objects.recent().filter(user__issueparticipant__issue=issue).distinct():
         payload = IssueSerializer(issue, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic='issues:issue', payload=payload)
-
-
-@receiver(post_save, sender=Issue)
-def issue_saved(sender, instance, **kwargs):
-    send_issue_updates(instance)
-
-
-@receiver(post_save, sender=Voting)
-def voting_saved(sender, instance, **kwargs):
-    send_issue_updates(instance.issue)
-
-
-@receiver(post_save, sender=Option)
-def option_saved(sender, instance, **kwargs):
-    send_issue_updates(instance.voting.issue)
-
-
-@receiver(pre_delete, sender=Vote)
-@receiver(post_save, sender=Vote)
-def vote_saved(sender, instance, **kwargs):
-    send_issue_updates(instance.option.voting.issue)

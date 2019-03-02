@@ -19,7 +19,7 @@ from karrot.conversations.models import ConversationMessage, \
 from karrot.groups import roles
 from karrot.groups.factories import GroupFactory
 from karrot.invitations.models import Invitation
-from karrot.issues.factories import IssueFactory
+from karrot.issues.factories import IssueFactory, vote_for_further_discussion
 from karrot.pickups.factories import FeedbackFactory, PickupDateFactory, \
     PickupDateSeriesFactory
 from karrot.pickups.models import PickupDate, to_range
@@ -759,15 +759,42 @@ class IssueReceiverTest(WSTestCase):
 
         client = self.connect_as(member)
         IssueFactory(group=group, affected_user=member2, created_by=member)
-        messages = client.messages_by_topic
 
+        messages = client.messages_by_topic
         self.assertIn('issues:issue', messages)
         self.assertIn('conversations:conversation', messages)
 
+        self.assertEqual(len(messages['issues:issue']), 1)
         # TODO make it create less messages
+        # self.assertEqual(len(messages['conversations:conversation']), 1, messages['conversations:conversation'])
         # self.assertEqual(len(client.messages), 2)
-        # self.assertEqual(len(messages['issues:issue']), 1)
-        # self.assertEqual(len(messages['conversations:conversation']), 1)
+
+    def test_vote(self):
+        member = VerifiedUserFactory()
+        member2 = VerifiedUserFactory()
+        group = GroupFactory(members=[member, member2])
+        issue = IssueFactory(group=group, affected_user=member2, created_by=member)
+
+        client = self.connect_as(member)
+        vote_for_further_discussion(voting=issue.latest_voting(), user=member)
+
+        messages = client.messages_by_topic
+        self.assertEqual(len(client.messages), 1)
+        self.assertEqual(len(messages['issues:issue']), 1)
+
+    def test_delete_vote(self):
+        member = VerifiedUserFactory()
+        member2 = VerifiedUserFactory()
+        group = GroupFactory(members=[member, member2])
+        issue = IssueFactory(group=group, affected_user=member2, created_by=member)
+        vote_for_further_discussion(voting=issue.latest_voting(), user=member)
+
+        client = self.connect_as(member)
+        issue.latest_voting().delete_votes(user=member)
+
+        messages = client.messages_by_topic
+        self.assertEqual(len(client.messages), 1)
+        self.assertEqual(len(messages['issues:issue']), 1)
 
 
 @patch('karrot.subscriptions.tasks.notify_subscribers')

@@ -4,7 +4,6 @@ from rest_framework.exceptions import PermissionDenied
 
 from django.utils.translation import ugettext as _
 
-from karrot.issues import stats
 from karrot.issues.models import Issue, Voting, Vote, Option
 
 
@@ -18,30 +17,13 @@ class VoteListSerializer(serializers.ListSerializer):
         return mapping
 
     def save(self, **kwargs):
-        return self.update(self.instance, self.validated_data)
+        return self.create(self.validated_data)
 
-    def update(self, instance, validated_data):
-        votes = {vote.option_id: vote for vote in instance}
-
-        created = []
-        existing = []
-        for option_id, data in validated_data.items():
-            vote = votes.get(option_id, None)
-            if vote is not None:
-                if vote.score == data['score']:
-                    existing.append(vote)
-                    continue
-                vote.delete()
-            data['user'] = self.context['request'].user
-            created.append(Vote.objects.create(**data))
-
-        voting = self.context['voting']
-        if len(votes) == 0:
-            stats.voted(voting.issue)
-        elif len(created) > 0:
-            stats.vote_changed(voting.issue)
-
-        return created + existing
+    def create(self, validated_data):
+        return self.context['voting'].save_votes(
+            user=self.context['request'].user,
+            vote_data=validated_data,
+        )
 
 
 class VoteSerializer(serializers.ModelSerializer):

@@ -8,10 +8,9 @@ from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import GenericViewSet
 
-from karrot.issues import stats
-from karrot.issues.models import Issue, Vote
-from karrot.issues.serializers import IssueSerializer, VoteSerializer
 from karrot.conversations.api import RetrieveConversationMixin
+from karrot.issues.models import Issue
+from karrot.issues.serializers import IssueSerializer, VoteSerializer
 
 
 class IsOngoing(BasePermission):
@@ -50,8 +49,10 @@ class IssuesViewSet(
         return super().get_throttles()
 
     def get_queryset(self):
-        return super().get_queryset().filter(participants=self.request.user
-                                             ).prefetch_for_serializer(user=self.request.user)
+        qs = super().get_queryset().filter(participants=self.request.user)
+        if self.action == 'list':
+            return qs.prefetch_for_serializer(user=self.request.user)
+        return qs
 
     @action(
         detail=True,
@@ -73,13 +74,11 @@ class IssuesViewSet(
         self.check_object_permissions(request, issue)
 
         voting = issue.latest_voting()
-        vote_qs = Vote.objects.filter(option__voting=voting, user=request.user)
 
         if request.method == 'POST':
-            instances = vote_qs.all()
             context = self.get_serializer_context()
             context['voting'] = voting
-            serializer = VoteSerializer(data=request.data, instance=instances, many=True, context=context)
+            serializer = VoteSerializer(data=request.data, many=True, context=context)
             serializer.is_valid(raise_exception=True)
             instances = serializer.save()
 
@@ -88,11 +87,7 @@ class IssuesViewSet(
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            deleted_rows, _ = vote_qs.delete()
-            deleted = deleted_rows > 0
-
-            if deleted:
-                stats.vote_deleted(voting.issue)
+            deleted = voting.delete_votes(user=request.user)
 
             return Response(
                 data={},

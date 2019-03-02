@@ -7,7 +7,7 @@ from django.utils import timezone
 from enum import Enum
 
 from karrot.base.base_models import BaseModel
-from karrot.issues import stats
+from karrot.issues import stats, signals
 from karrot.conversations.models import ConversationMixin
 from karrot.history.models import History, HistoryTypus
 from karrot.utils import markdown
@@ -80,6 +80,7 @@ class Issue(BaseModel, ConversationMixin):
         self.status = IssueStatus.CANCELLED.value
         self.status_changed_at = timezone.now()
         self.save()
+        signals.issue_changed.send(sender=self.__class__, issue=self)
 
     def save(self, **kwargs):
         created = self.pk is None
@@ -91,6 +92,7 @@ class Issue(BaseModel, ConversationMixin):
 
         if created:
             stats.issue_created(self)
+            signals.issue_changed.send(sender=self.__class__, issue=self)
 
     def latest_voting(self):
         return self.votings.latest('created_at')
@@ -165,6 +167,41 @@ class Voting(BaseModel):
         for option in options:
             self.options.create(**option)
 
+    def save_votes(self, user, vote_data):
+        votes = {vote.option_id: vote for vote in Vote.objects.filter(option__voting=self, user=user)}
+
+        created = []
+        existing = []
+        for option_id, data in vote_data.items():
+            vote = votes.get(option_id, None)
+            if vote is not None:
+                if vote.score == data['score']:
+                    existing.append(vote)
+                    continue
+                vote.delete()
+            data['user'] = user
+            created.append(Vote.objects.create(**data))
+
+        if len(votes) == 0:
+            stats.voted(self.issue)
+        elif len(created) > 0:
+            stats.vote_changed(self.issue)
+
+        if len(created) > 0:
+            signals.issue_changed.send(sender=self.__class__, issue=self.issue)
+
+        return created + existing
+
+    def delete_votes(self, user):
+        deleted_rows, _ = Vote.objects.filter(option__voting=self, user=user).delete()
+        deleted = deleted_rows > 0
+
+        if deleted:
+            stats.vote_deleted(self.issue)
+            signals.issue_changed.send(sender=self.__class__, issue=self.issue)
+
+        return deleted
+
     def calculate_results(self):
         options = list(self.options.annotate(_sum_score=Sum('votes__score')).order_by('_sum_score'))
         for option in options:
@@ -201,6 +238,8 @@ class Option(BaseModel):
             self._further_discussion()
         elif self.type == OptionTypes.REMOVE_USER.value:
             self._remove_user()
+
+        signals.issue_changed.send(sender=self.__class__, issue=self.voting.issue)
 
     def _further_discussion(self):
         new_voting = self.voting.issue.votings.create()
