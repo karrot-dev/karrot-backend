@@ -83,6 +83,7 @@ class VotingSerializer(serializers.ModelSerializer):
         model = Voting
         fields = [
             'id',
+            'created_at',
             'expires_at',
             'options',
             'accepted_option',
