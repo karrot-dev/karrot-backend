@@ -1,7 +1,8 @@
 from django.contrib.postgres.fields import DateTimeRangeField
-from django.db import connection, OperationalError
+from django.db.backends.signals import connection_created
 from django.db.models import Model, AutoField, Field, DateTimeField, TextField, FloatField
 from django.db.models.fields.related import RelatedField
+from django.dispatch import receiver
 from django.utils import timezone
 from psycopg2.extras import DateTimeTZRange, register_range
 
@@ -87,13 +88,6 @@ class CustomDateTimeRangeField(DateTimeRangeField):
     range_type = CustomDateTimeTZRange
 
 
-def register_custom_date_time_tz_range():
-    try:
-        connection.ensure_connection()
-        register_range('pg_catalog.tstzrange', CustomDateTimeTZRange, connection.connection, True)
-        connection.close()  # don't leave connection lying around as we might not actually be running the app now
-    except OperationalError:
-        print('Could not connect to postgres to register CustomDateTimeTZRange. Continuing.')
-
-
-register_custom_date_time_tz_range()
+@receiver(connection_created)
+def register_custom_date_time_tz_range(sender, connection, **kwargs):
+    register_range('pg_catalog.tstzrange', CustomDateTimeTZRange, connection.connection, True)
