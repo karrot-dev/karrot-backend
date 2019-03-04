@@ -25,7 +25,7 @@ class GroupFactory(DjangoModelFactory):
     description = LazyAttribute(lambda x: faker.sentence(nb_words=40))
     public_description = LazyAttribute(lambda x: faker.sentence(nb_words=20))
     application_questions = LazyAttribute(lambda x: faker.sentence(nb_words=20))
-
+    welcome_message = LazyAttribute(lambda x: faker.sentence(nb_words=30))
 
 class PlaygroundGroupFactory(GroupFactory):
     status = GroupStatus.PLAYGROUND.value

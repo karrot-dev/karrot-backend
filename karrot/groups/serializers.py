@@ -83,6 +83,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'id',
             'name',
             'description',
+            'welcome_message',
             'public_description',
             'application_questions',
             'application_questions_default',
@@ -112,6 +113,9 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'description': {
                 'trim_whitespace': False,
                 'max_length': settings.DESCRIPTION_MAX_LENGTH
+            },
+            'welcome_message': {
+                'trim_whitespace': False,
             },
         }
         read_only_fields = [

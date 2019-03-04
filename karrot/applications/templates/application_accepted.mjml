@@ -9,6 +9,7 @@
             <mj-column>
                 <mj-text>
                     <h1>{% trans group_name=group.name %}Your application to join {{ group_name }} was accepted{% endtrans %}</h1>
+                    <p> {% trans group_msg=group.welcome_message %} {{ group_msg }} {% endtrans %}</p>
                 </mj-text>
                 <mj-button href="{{ group_url }}">
                     {% trans group_name=group.name %}Visit {{ group_name }}{% endtrans %}

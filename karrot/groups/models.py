@@ -61,6 +61,7 @@ class Group(BaseModel, LocationModel, ConversationMixin):
 
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH, unique=True)
     description = models.TextField(blank=True)
+    welcome_message = models.TextField(blank=True)
     members = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         related_name='groups',
