@@ -220,13 +220,13 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         response = self.create_issue_via_API(affected_user=self.member)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
-    def test_cannot_create_issue_in_open_group(self):
+    def test_can_create_issue_in_open_group(self):
         member = VerifiedUserFactory()
         member2 = VerifiedUserFactory()
         open_group = GroupFactory(members=[member, member2], is_open=True)
         self.client.force_login(user=member)
         response = self.create_issue_via_API(group=open_group, affected_user=member2)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
     def test_cannot_create_issue_if_there_are_not_enough_active_editors(self):
         settings.CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION = 4
