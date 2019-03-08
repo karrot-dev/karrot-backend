@@ -122,8 +122,6 @@ class IssueSerializer(serializers.ModelSerializer):
             raise PermissionDenied(_('You are not a member of this group.'))
         if not group.is_editor(self.context['request'].user):
             raise PermissionDenied(_('You need to be a group editor'))
-        if group.is_open:
-            raise serializers.ValidationError('Cannot create conflict resolution in open group')
         if (group.groupmembership_set.active().editors().count() <
                 settings.CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION):
             raise serializers.ValidationError(
