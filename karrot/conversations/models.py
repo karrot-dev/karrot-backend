@@ -121,8 +121,6 @@ class Conversation(BaseModel, UpdatedAtMixin):
         type = str(self.target_type)
         if type == 'pickup date':
             return 'pickup'
-        if type == 'group application':
-            return 'application'
 
         return type
 

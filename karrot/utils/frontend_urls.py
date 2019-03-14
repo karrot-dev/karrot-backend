@@ -9,13 +9,20 @@ def conversation_url(conversation, user):
     type = conversation.type()
     if type == 'group':
         return group_wall_url(conversation.target)
+    elif type == 'place':
+        return place_wall_url(conversation.target)
     elif type == 'pickup':
         return pickup_detail_url(conversation.target)
     elif type == 'private':
         return user_detail_url(user)
     elif type == 'application':
         return application_url(conversation.target)
-    return None
+    elif type == 'issue':
+        return issue_chat_url(conversation.target)
+    elif type is None:
+        return None
+
+    raise Exception('conversation url with type {} is not defined'.format(type))
 
 
 def place_url(place):
@@ -84,6 +91,10 @@ def issue_url(issue):
         group_id=issue.group.id,
         issue_id=issue.id,
     )
+
+
+def issue_chat_url(issue):
+    return issue_url(issue) + '/chat'
 
 
 def user_detail_url(user):
