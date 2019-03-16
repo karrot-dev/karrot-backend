@@ -7,6 +7,7 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from karrot.conversations.models import ConversationNotificationStatus
 from karrot.issues.factories import IssueFactory, vote_for_remove_user, vote_for_no_change
 from karrot.issues.models import Vote, IssueStatus
 from karrot.issues.tasks import process_expired_votings
@@ -271,6 +272,22 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.newcomer)
         response = self.get_results('/api/issues/{}/conversation/'.format(issue.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
+
+    def test_cannot_leave_issue_conversation(self):
+        # Make sure that users don't leave the issue conversation, because the API doesn't let them in again
+        issue = self.create_issue()
+        self.client.force_login(user=self.member)
+        response = self.get_results('/api/issues/{}/conversation/'.format(issue.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        conversation = response.data
+        response = self.client.patch(
+            '/api/conversations/{}/'.format(conversation['id']), {
+                'notifications': ConversationNotificationStatus.NONE.value,
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['notifications'], ['You cannot leave a conversation that is not group public'])
 
     def test_cannot_vote_as_nonmember(self):
         issue = self.create_issue()

@@ -871,3 +871,21 @@ class TestPrivateConversationAPI(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['notifications'], ['You cannot leave a private conversation'])
+
+
+class TestIssueConversationAPI(APITestCase):
+    def setUp(self):
+        self.user = VerifiedUserFactory()
+        self.user2 = VerifiedUserFactory()
+
+    def test_cannot_leave_issue_conversation(self):
+        self.client.force_login(user=self.user)
+        private_conversation = Conversation.objects.get_or_create_for_two_users(self.user, self.user2)
+        response = self.client.patch(
+            '/api/conversations/{}/'.format(private_conversation.id), {
+                'notifications': ConversationNotificationStatus.NONE.value,
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['notifications'], ['You cannot leave a private conversation'])
