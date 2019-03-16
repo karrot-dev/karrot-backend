@@ -2,6 +2,7 @@ from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 from karrot.conversations.models import Conversation
+from karrot.groups.models import GroupMembership
 from karrot.places.models import Place, PlaceSubscription
 
 
@@ -41,3 +42,11 @@ def subscription_removed(sender, instance, **kwargs):
     conversation = Conversation.objects.get_for_target(subscription.place)
     if conversation:
         conversation.leave(subscription.user)
+
+
+@receiver(pre_delete, sender=GroupMembership)
+def group_member_removed(sender, instance, **kwargs):
+    membership = instance
+
+    for subscription in PlaceSubscription.objects.filter(place__group=membership.group, user=membership.user):
+        subscription.delete()
