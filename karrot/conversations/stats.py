@@ -4,14 +4,10 @@ from karrot.groups.stats import group_tags
 
 
 def conversation_tags(conversation):
-    tags = {}
-    target = conversation.target
     type = conversation.type()
+    group = conversation.group
 
-    if type == 'group':
-        tags = group_tags(target)
-    elif type == 'pickup':
-        tags = group_tags(target.place.group)
+    tags = group_tags(group) if group else {}
 
     if type is not None:
         tags['type'] = type
