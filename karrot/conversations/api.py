@@ -372,8 +372,8 @@ class ConversationMessageViewSet(
 
     def perform_create(self, serializer):
         message = serializer.save()
-        if message.conversation.type() == 'group':
-            group = message.conversation.target
+        group = message.conversation.group
+        if group:
             group.refresh_active_status()
 
 
