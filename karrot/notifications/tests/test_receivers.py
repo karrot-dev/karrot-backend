@@ -20,6 +20,16 @@ from karrot.users.factories import UserFactory
 
 
 class TestNotificationReceivers(TestCase):
+    def test_removes_notification_when_leaving_group(self):
+        user = UserFactory()
+        group = GroupFactory(members=[user])
+        Notification.objects.all().delete()
+        Notification.objects.create(user=user, type='foo', context={'group': group.id})
+
+        group.remove_member(user)
+
+        self.assertEqual(Notification.objects.count(), 0)
+
     def test_creates_user_became_editor(self):
         user = UserFactory()
         user1 = UserFactory()
@@ -279,10 +289,9 @@ class TestNotificationReceivers(TestCase):
             process_expired_votings()
 
         notifications = Notification.objects.order_by('type')
-        self.assertEqual(notifications.count(), 4)
+        self.assertEqual(notifications.count(), 3)
         self.assertEqual([n.type for n in notifications], [
             NotificationType.CONFLICT_RESOLUTION_DECIDED.value,
             NotificationType.CONFLICT_RESOLUTION_DECIDED.value,
-            NotificationType.CONFLICT_RESOLUTION_DECIDED_ABOUT_YOU.value,
             NotificationType.CONFLICT_RESOLUTION_YOU_WERE_REMOVED.value,
         ])

@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.postgres.fields.jsonb import KeyTextTransform
 from django.db.models import IntegerField, Q
 from django.db.models.functions import Cast
-from django.db.models.signals import post_save, pre_save, pre_delete
+from django.db.models.signals import post_save, pre_save, pre_delete, post_delete
 from django.dispatch import receiver
 from django.utils import timezone
 
@@ -179,6 +179,20 @@ def new_member(sender, instance, created, **kwargs):
                 'added_by': membership.added_by_id,
             },
         )
+
+
+@receiver(post_delete, sender=GroupMembership)
+def group_member_removed(sender, instance, **kwargs):
+    """Remove notification when leaving group"""
+    membership = instance
+
+    types_to_keep = [
+        NotificationType.CONFLICT_RESOLUTION_YOU_WERE_REMOVED.value,
+    ]
+
+    Notification.objects.filter(
+        user=membership.user, context__group=membership.group_id
+    ).exclude(type__in=types_to_keep).delete()
 
 
 @receiver(pre_delete, sender=Invitation)

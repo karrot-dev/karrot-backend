@@ -20,6 +20,7 @@ from karrot.groups import roles
 from karrot.groups.factories import GroupFactory
 from karrot.invitations.models import Invitation
 from karrot.issues.factories import IssueFactory, vote_for_further_discussion
+from karrot.notifications.models import Notification
 from karrot.pickups.factories import FeedbackFactory, PickupDateFactory, \
     PickupDateSeriesFactory
 from karrot.pickups.models import PickupDate, to_range
@@ -431,6 +432,8 @@ class GroupMembershipReceiverTests(WSTestCase):
         self.assertNotIn('memberships', response['payload'])
 
     def test_receive_group_leave_as_leaving_user(self):
+        # Clean up notifications from group setup, to prevent notification_deleted messages
+        Notification.objects.all().delete()
         client = self.connect_as(self.member)
 
         self.group.remove_member(self.member)
