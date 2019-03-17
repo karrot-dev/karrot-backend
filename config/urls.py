@@ -14,6 +14,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 
 from karrot.applications.api import ApplicationViewSet
+from karrot.community_feed.api import CommunityFeedViewSet
 from karrot.issues.api import IssuesViewSet
 from karrot.conversations.api import ConversationMessageViewSet, ConversationViewSet
 from karrot.groups.api import GroupViewSet, AgreementViewSet, GroupInfoViewSet
@@ -38,6 +39,7 @@ router.register('groups', GroupViewSet)
 router.register('groups-info', GroupInfoViewSet, basename='groupinfo')
 router.register('applications', ApplicationViewSet, basename='application')
 router.register('agreements', AgreementViewSet)
+router.register('community-feed', CommunityFeedViewSet, basename='community-feed')
 
 if not getattr(settings, 'DISABLE_ISSUES', False):
     # enable issues by default, except when explicitly disabled
