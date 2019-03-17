@@ -3,12 +3,16 @@
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2019.
 # 
+# Translators:
+# Rahul Shinde, 2019
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
+"Last-Translator: Rahul Shinde, 2019\n"
 "Language-Team: Marathi (https://www.transifex.com/yunity-1/teams/68631/mr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,7 +23,7 @@ msgstr ""
 
 #: foodsaving/applications/api.py:27
 msgid "You need to have a verified email address"
-msgstr ""
+msgstr "आपल्याकडे एक सत्यापित ईमेल पत्ता असणे आवश्यक आहे"
 
 #: foodsaving/applications/api.py:36 foodsaving/groups/api.py:49
 #: foodsaving/invitations/serializers.py:28
@@ -27,30 +31,30 @@ msgstr ""
 #: foodsaving/pickups/serializers.py:111 foodsaving/pickups/serializers.py:292
 #: foodsaving/places/api.py:18 foodsaving/places/serializers.py:73
 msgid "You need to be a group editor"
-msgstr ""
+msgstr "आपण एक गट संपादक असणे आवश्यक आहे"
 
 #: foodsaving/applications/api.py:44
 msgid "You need to be the applicant"
-msgstr ""
+msgstr "आपण अर्जदार असणे आवश्यक आहे"
 
 #: foodsaving/applications/serializers.py:36
 msgid "Application is already pending"
-msgstr ""
+msgstr "आपला अर्ज प्रलंबित आहे!"
 
 #: foodsaving/applications/serializers.py:41
 msgid "You are already member of the group"
-msgstr ""
+msgstr "आपण आधीच या गटाचे सदस्य आहात"
 
 #: foodsaving/applications/serializers.py:43
 msgid "You cannot apply to open groups"
-msgstr ""
+msgstr "आपण गट उघडण्यासाठी अर्ज करू शकत नाही"
 
 #: foodsaving/applications/templates/application_accepted.html.jinja2:6
 #: foodsaving/applications/templates/application_accepted.html.jinja2:217
 #: foodsaving/applications/templates/application_accepted.subject.jinja2:1
 #, python-format
 msgid "Your application to join %(group_name)s was accepted"
-msgstr ""
+msgstr "%(group_name)sमधे सामील होण्यासाठी आपला अर्ज स्वीकारला गेला"
 
 #: foodsaving/applications/templates/application_accepted.html.jinja2:230
 #: foodsaving/groups/templates/user_became_editor.html.jinja2:241
@@ -58,14 +62,14 @@ msgstr ""
 #: foodsaving/groups/templates/user_removal_from_group.html.jinja2:239
 #, python-format
 msgid "Visit %(group_name)s"
-msgstr ""
+msgstr "%(group_name)sला भेटा  "
 
 #: foodsaving/applications/templates/application_declined.html.jinja2:6
 #: foodsaving/applications/templates/application_declined.html.jinja2:217
 #: foodsaving/applications/templates/application_declined.subject.jinja2:1
 #, python-format
 msgid "Your application to join %(group_name)s was declined"
-msgstr ""
+msgstr "%(group_name)sमधे सामील होण्यासाठी आपला अर्ज स्वीकारला गेला नाही "
 
 #: foodsaving/applications/templates/new_application.html.jinja2:6
 #: foodsaving/applications/templates/new_application.html.jinja2:217
