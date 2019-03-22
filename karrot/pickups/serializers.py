@@ -75,6 +75,8 @@ class PickupDateSerializer(serializers.ModelSerializer):
             'id',
             'series',
             'collectors',
+            'has_duration',
+            'is_done',
         ]
 
     collectors = serializers.SerializerMethodField()
