@@ -190,9 +190,8 @@ class ChangeMailView(generics.GenericAPIView):
 
 
 class FailedEmailDeliveryPagination(CursorPagination):
-    # TODO: create an index on 'created_at' for increased speed
     page_size = 10
-    ordering = '-created_at'
+    ordering = '-id'
 
 
 class FailedEmailDeliveryView(generics.GenericAPIView):

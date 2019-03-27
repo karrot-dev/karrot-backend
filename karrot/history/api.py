@@ -9,9 +9,8 @@ from karrot.history.serializers import HistorySerializer
 
 
 class HistoryPagination(CursorPagination):
-    # TODO: create an index on 'date' for increased speed
     page_size = 10
-    ordering = '-date'
+    ordering = '-id'
 
 
 class HistoryViewSet(viewsets.ReadOnlyModelViewSet):

@@ -24,9 +24,8 @@ from karrot.utils.mixins import PartialUpdateModelMixin
 
 
 class FeedbackPagination(CursorPagination):
-    # TODO: create an index on 'created_at' for increased speed
     page_size = 10
-    ordering = '-created_at'
+    ordering = '-id'
 
 
 class FeedbackViewSet(

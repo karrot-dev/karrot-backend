@@ -10,9 +10,8 @@ from karrot.notifications.serializers import NotificationSerializer, Notificatio
 
 
 class NotificationPagination(CursorPagination):
-    # TODO: create an index on 'created_at' for increased speed
     page_size = 20
-    ordering = '-created_at'
+    ordering = '-id'
 
 
 class NotificationViewSet(GenericViewSet):
