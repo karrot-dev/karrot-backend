@@ -196,4 +196,4 @@ class TestMessagePushNotificationTitles(TestCase):
         message = conversation.messages.create(author=author, content='bla')
 
         title = get_message_title(message, 'en')
-        self.assertIn('💣', title)
+        self.assertIn('☹️', title)
