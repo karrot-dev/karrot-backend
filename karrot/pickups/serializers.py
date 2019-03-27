@@ -97,9 +97,7 @@ class PickupDateSerializer(serializers.ModelSerializer):
             group=pickupdate.place.group,
             place=pickupdate.place,
             pickup=pickupdate,
-            users=[
-                self.context['request'].user,
-            ],
+            users=[self.context['request'].user],
             payload=self.initial_data,
             after=PickupDateHistorySerializer(pickupdate).data,
         )
@@ -158,9 +156,7 @@ class PickupDateUpdateSerializer(PickupDateSerializer):
                     group=pickupdate.place.group,
                     place=pickupdate.place,
                     pickup=pickupdate,
-                    users=[
-                        self.context['request'].user,
-                    ],
+                    users=[self.context['request'].user],
                     payload={k: self.initial_data.get(k)
                              for k in changed_data.keys()},
                     before=before_data,
@@ -215,9 +211,7 @@ class PickupDateLeaveSerializer(serializers.ModelSerializer):
             typus=HistoryTypus.PICKUP_LEAVE,
             group=pickupdate.place.group,
             place=pickupdate.place,
-            users=[
-                user,
-            ],
+            users=[user],
             payload=PickupDateSerializer(instance=pickupdate).data,
         )
         pickupdate.place.group.refresh_active_status()
@@ -280,9 +274,7 @@ class PickupDateSeriesSerializer(serializers.ModelSerializer):
             group=series.place.group,
             place=series.place,
             series=series,
-            users=[
-                self.context['request'].user,
-            ],
+            users=[self.context['request'].user],
             payload=self.initial_data,
             after=PickupDateSeriesHistorySerializer(series).data,
         )
@@ -337,9 +329,7 @@ class PickupDateSeriesUpdateSerializer(PickupDateSeriesSerializer):
                 group=series.place.group,
                 place=series.place,
                 series=series,
-                users=[
-                    self.context['request'].user,
-                ],
+                users=[self.context['request'].user],
                 payload={k: self.initial_data.get(k)
                          for k in validated_data.keys()},
                 before=before_data,
