@@ -13,8 +13,8 @@
                     <p>{% trans %}The result of the last voting round is to continue discussion and start another round of voting.{% endtrans %}</p>
                     <p>{% trans expiry_date=expires_at|date %}The new voting round ends at {{ expiry_date }}.{% endtrans %}</p>
                 </mj-text>
-                <mj-button href="{{ conflict_resolution_case_url }}">
-                    {% trans %}View conflict resolution case{% endtrans %}
+                <mj-button href="{{ issue_url }}">
+                    {% trans %}View discussion{% endtrans %}
                 </mj-button>
                 <mj-divider/>
                 <mj-text font-size="13px" line-height="18px" color="#777">

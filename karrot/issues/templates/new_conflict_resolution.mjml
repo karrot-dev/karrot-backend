@@ -1,15 +1,15 @@
 <mjml>
     <mj-head>
         <mj-include path="../../base/templates/_base-head.mjml"/>
-        <mj-title>{% trans affected_user_name=affected_user.display_name %}A conflict resolution process was started about {{ affected_user_name }}{% endtrans %}</mj-title>
+        <mj-title>{% trans affected_user_name=affected_user.display_name %}A conflict resolution process was started with {{ affected_user_name }}{% endtrans %}</mj-title>
     </mj-head>
     <mj-body>
         <mj-include path="../../base/templates/_header.mjml"/>
         <mj-section background-color="#ffffff" padding="40px 0 40px 0">
             <mj-column>
                 <mj-text>
-                    <h1>{% trans affected_user_name=affected_user.display_name %}A conflict resolution process was started about {{ affected_user_name }}{% endtrans %}</h1>
-                    <div class="message">
+                    <h1>{% trans affected_user_name=affected_user.display_name %}A conflict resolution process was started with {{ affected_user_name }}{% endtrans %}</h1>
+                    <div class="message" style="padding-top: 10px; padding-bottom: 13px">
                         <a class="message-author" href="{{ user_url(created_by) }}">{{ created_by.display_name }}</a><br>
                         <div class="message-content">
                             {{ topic | safe }}
@@ -19,7 +19,7 @@
                     <p>{% trans %}You can discuss the topic and give your opinion in the voting.{% endtrans %}</p>
                     <p>{% trans expiry_date=expires_at|date %}This voting round ends at {{ expiry_date }}.{% endtrans %}</p>
                 </mj-text>
-                <mj-button href="{{ conflict_resolution_case_url }}">
+                <mj-button href="{{ issue_url }}">
                     {% trans %}View discussion{% endtrans %}
                 </mj-button>
                 <mj-divider/>

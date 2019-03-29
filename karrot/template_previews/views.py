@@ -136,11 +136,11 @@ class Handlers:
         member = application.group.members.first()
         return karrot.applications.emails.prepare_new_application_notification_email(member, application)
 
-    def new_conflict_resolution_issue(self):
+    def new_conflict_resolution(self):
         issue = random_issue()
         return karrot.issues.emails.prepare_new_conflict_resolution_email(issue.created_by, issue)
 
-    def new_conflict_resolution_issue_affected_user(self):
+    def new_conflict_resolution_affected_user(self):
         issue = random_issue()
         return karrot.issues.emails.prepare_new_conflict_resolution_email_to_affected_user(issue)
 
