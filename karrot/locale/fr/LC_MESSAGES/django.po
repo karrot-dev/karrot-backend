@@ -24,68 +24,68 @@ msgstr ""
 "Language: fr\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: foodsaving/applications/api.py:27
+#: karrot/applications/api.py:27
 msgid "You need to have a verified email address"
 msgstr "Ton adresse email doit être verifiée"
 
-#: foodsaving/applications/api.py:36 foodsaving/groups/api.py:49
-#: foodsaving/invitations/serializers.py:28
-#: foodsaving/issues/serializers.py:143 foodsaving/pickups/permissions.py:67
-#: foodsaving/pickups/serializers.py:111 foodsaving/pickups/serializers.py:292
-#: foodsaving/places/api.py:18 foodsaving/places/serializers.py:73
+#: karrot/applications/api.py:36 karrot/groups/api.py:49
+#: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:124
+#: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:111
+#: karrot/pickups/serializers.py:286 karrot/places/api.py:19
+#: karrot/places/serializers.py:78
 msgid "You need to be a group editor"
 msgstr "Tu dois être éditeur du groupe"
 
-#: foodsaving/applications/api.py:44
+#: karrot/applications/api.py:44
 msgid "You need to be the applicant"
 msgstr "Il faut que ce soit toi qui postule"
 
-#: foodsaving/applications/serializers.py:36
+#: karrot/applications/serializers.py:36
 msgid "Application is already pending"
 msgstr "Ta candidature est déjà en attente"
 
-#: foodsaving/applications/serializers.py:41
+#: karrot/applications/serializers.py:41
 msgid "You are already member of the group"
 msgstr "Tu es déjà membre de ce groupe"
 
-#: foodsaving/applications/serializers.py:43
+#: karrot/applications/serializers.py:43
 msgid "You cannot apply to open groups"
 msgstr "Tu ne peux pas postuler aux groupes ouverts"
 
-#: foodsaving/applications/templates/application_accepted.html.jinja2:6
-#: foodsaving/applications/templates/application_accepted.html.jinja2:217
-#: foodsaving/applications/templates/application_accepted.subject.jinja2:1
+#: karrot/applications/templates/application_accepted.html.jinja2:6
+#: karrot/applications/templates/application_accepted.html.jinja2:217
+#: karrot/applications/templates/application_accepted.subject.jinja2:1
 #, python-format
 msgid "Your application to join %(group_name)s was accepted"
 msgstr "Ta demande pour rejoindre %(group_name)s a été acceptée"
 
-#: foodsaving/applications/templates/application_accepted.html.jinja2:230
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:241
-#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:241
-#: foodsaving/groups/templates/user_removal_from_group.html.jinja2:239
+#: karrot/applications/templates/application_accepted.html.jinja2:231
+#: karrot/groups/templates/user_became_editor.html.jinja2:241
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:241
+#: karrot/groups/templates/user_removal_from_group.html.jinja2:239
 #, python-format
 msgid "Visit %(group_name)s"
 msgstr "Visiter%(group_name)s"
 
-#: foodsaving/applications/templates/application_declined.html.jinja2:6
-#: foodsaving/applications/templates/application_declined.html.jinja2:217
-#: foodsaving/applications/templates/application_declined.subject.jinja2:1
+#: karrot/applications/templates/application_declined.html.jinja2:6
+#: karrot/applications/templates/application_declined.html.jinja2:217
+#: karrot/applications/templates/application_declined.subject.jinja2:1
 #, python-format
 msgid "Your application to join %(group_name)s was declined"
 msgstr "Ta demande pour rejoindre %(group_name)s a été refusée"
 
-#: foodsaving/applications/templates/new_application.html.jinja2:6
-#: foodsaving/applications/templates/new_application.html.jinja2:217
-#: foodsaving/applications/templates/new_application.subject.jinja2:1
+#: karrot/applications/templates/new_application.html.jinja2:6
+#: karrot/applications/templates/new_application.html.jinja2:217
+#: karrot/applications/templates/new_application.subject.jinja2:1
 #, python-format
 msgid "%(user_name)s wants to join %(group_name)s"
 msgstr "%(user_name)s veux rejoindre %(group_name)s"
 
-#: foodsaving/applications/templates/new_application.html.jinja2:219
+#: karrot/applications/templates/new_application.html.jinja2:219
 msgid "Questions asked by your group"
 msgstr "Questions posées par ton groupe"
 
-#: foodsaving/applications/templates/new_application.html.jinja2:224
+#: karrot/applications/templates/new_application.html.jinja2:224
 #, python-format
 msgid ""
 "You can edit the questions for new applications on the <a "
@@ -94,16 +94,16 @@ msgstr ""
 "TU peux éditer les questions pour les nouvelles demandes d'ajout sur le <a "
 "href=\"%(group_edit_url)s\">la page d'édition du groupe</a>"
 
-#: foodsaving/applications/templates/new_application.html.jinja2:226
+#: karrot/applications/templates/new_application.html.jinja2:226
 #, python-format
 msgid "Answers from %(user_name)s"
 msgstr "Réponses de %(user_name)s"
 
-#: foodsaving/applications/templates/new_application.html.jinja2:243
+#: karrot/applications/templates/new_application.html.jinja2:243
 msgid "View applications"
 msgstr "Voir les demandes d'ajout"
 
-#: foodsaving/applications/templates/new_application.html.jinja2:279
+#: karrot/applications/templates/new_application.html.jinja2:279
 msgid ""
 "You are receiving this because you are subscribed to <strong>User "
 "application</strong> emails for this group."
@@ -111,18 +111,18 @@ msgstr ""
 "Tu a reçu ceci car tu es enregistré à <strong>demande d'ajout "
 "d'utilisateur</strong>mails pour ce groupe."
 
-#: foodsaving/applications/templates/new_application.html.jinja2:280
-#: foodsaving/groups/templates/group_summary.html.jinja2:324
-#: foodsaving/issues/templates/conflict_resolution_continued.html.jinja2:269
-#: foodsaving/issues/templates/new_conflict_resolution.html.jinja2:276
-#: foodsaving/pickups/templates/pickup_notification.html.jinja2:327
+#: karrot/applications/templates/new_application.html.jinja2:280
+#: karrot/groups/templates/group_summary.html.jinja2:324
+#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:269
+#: karrot/issues/templates/new_conflict_resolution.html.jinja2:276
+#: karrot/pickups/templates/pickup_notification.html.jinja2:327
 msgid "Click here to unsubscribe"
 msgstr "Clique ici pour te désabonner"
 
-#: foodsaving/applications/templates/new_application.html.jinja2:283
-#: foodsaving/conversations/templates/conversation_message_notification.html.jinja2:180
-#: foodsaving/issues/templates/new_conflict_resolution.html.jinja2:279
-#: foodsaving/issues/templates/new_conflict_resolution_affected_user.html.jinja2:275
+#: karrot/applications/templates/new_application.html.jinja2:283
+#: karrot/conversations/templates/conversation_message_notification.html.jinja2:180
+#: karrot/issues/templates/new_conflict_resolution.html.jinja2:279
+#: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:275
 #, python-format
 msgid ""
 "Reply to this email directly, <a href=\"%(conversation_url)s\">view it on "
@@ -132,17 +132,16 @@ msgstr ""
 "sur%(site_name)s</a>, ou <a href=\"%(mute_url)s\"> rend muet la conversation"
 " </a>."
 
-#: foodsaving/conversations/api.py:62 foodsaving/conversations/api.py:227
-#: foodsaving/conversations/api.py:399
-#: foodsaving/conversations/serializers.py:146
+#: karrot/conversations/api.py:61 karrot/conversations/api.py:223
+#: karrot/conversations/api.py:394 karrot/conversations/serializers.py:146
 msgid "You are not in this conversation"
 msgstr "Tu n'es pas dans cette conversation"
 
-#: foodsaving/conversations/api.py:71
+#: karrot/conversations/api.py:70
 msgid "You are not the author of this message"
 msgstr "Tu n'es pas l'auteur de ce message"
 
-#: foodsaving/conversations/api.py:80
+#: karrot/conversations/api.py:79
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
@@ -150,74 +149,58 @@ msgstr ""
 "Tu ne peux pas éditer un message plus de %(days_number)s jours après sa "
 "création."
 
-#: foodsaving/conversations/api.py:326
+#: karrot/conversations/api.py:322
 msgid "Must be first in thread"
 msgstr "Doit être le premier dans le fil de discussions"
 
-#: foodsaving/conversations/api.py:329
+#: karrot/conversations/api.py:325
 msgid "You are not a participant in this thread"
 msgstr "Tu n'es pas participant à ce fil de discussion."
 
-#: foodsaving/conversations/emails.py:135
-#: foodsaving/conversations/emails.py:138 foodsaving/subscriptions/tasks.py:67
+#: karrot/conversations/emails.py:165 karrot/conversations/emails.py:168
+#: karrot/subscriptions/tasks.py:70
 #, python-format
 msgid "Pickup %(date)s"
 msgstr "Récolte %(date)s"
 
-#: foodsaving/conversations/emails.py:206
+#: karrot/conversations/emails.py:236
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr ""
 "Nouveau message pour demande d'ajout de %(user_name)s pour %(group_name)s"
 
-#: foodsaving/conversations/emails.py:211
+#: karrot/conversations/emails.py:241
 #, python-format
 msgid "New message in your application to %(group_name)s"
 msgstr "Nouveau message au sujet de votre demande d'ajout à %(group_name)s"
 
-#: foodsaving/conversations/emails.py:252
+#: karrot/conversations/emails.py:282
 #, python-format
 msgid "New message in conflict resolution in %(group_name)s"
 msgstr ""
 "Nouveau message au sujet de la résolution de  conflit dans%(group_name)s"
 
-#: foodsaving/conversations/serializers.py:148
+#: karrot/conversations/serializers.py:148
 msgid "This conversation has been closed"
 msgstr "Cette conversation a été fermée"
 
-#: foodsaving/conversations/serializers.py:156
-msgid "You cannot change the thread of a message"
-msgstr "Tu ne peux changer le fil d'un message"
-
-#: foodsaving/conversations/serializers.py:163
-msgid "Thread is not in the same conversation"
-msgstr "Ce fil ne fait pas partie de la même conversation"
-
-#: foodsaving/conversations/serializers.py:167
-msgid "You can only reply to Group messages"
-msgstr "Tu ne peux répondre qu'aux messages de groupe"
-
-#: foodsaving/conversations/serializers.py:171
-msgid "You cannot reply to replies"
-msgstr "Tu ne peux pas répondre aux réponses"
-
-#: foodsaving/conversations/templates/conversation_message_notification.html.jinja2:179
+#: karrot/conversations/templates/conversation_message_notification.html.jinja2:179
 msgid ""
 "You are receiving this because you are subscribed to this conversation."
 msgstr "Tu reçois ceci car tu es enregistré sur cette conversation."
 
-#: foodsaving/conversations/templates/thread_message_notification.html.jinja2:156
+#: karrot/conversations/templates/thread_message_notification.html.jinja2:156
 msgid "In reply to:"
 msgstr "En réponse à : "
 
-#: foodsaving/conversations/templates/thread_message_notification.html.jinja2:193
+#: karrot/conversations/templates/thread_message_notification.html.jinja2:193
 msgid ""
 "You are receiving this because you are subscribed to replies in this "
 "conversation."
 msgstr ""
 "Tu reçois ceci car tu es enregistré aux réponses à cette conversation "
 
-#: foodsaving/conversations/templates/thread_message_notification.html.jinja2:194
+#: karrot/conversations/templates/thread_message_notification.html.jinja2:194
 #, python-format
 msgid ""
 "Reply to this email directly, <a href=\"%(thread_url)s\">view replies on "
@@ -227,43 +210,43 @@ msgstr ""
 "réponses sur%(site_name)s</a>, ou <a href=\"%(mute_url)s\">rend muette les "
 "réponses suivantes</a>."
 
-#: foodsaving/groups/api.py:28
+#: karrot/groups/api.py:28
 msgid "You are already a member."
 msgstr "Tu est déjà membre du groupe."
 
-#: foodsaving/groups/api.py:35
+#: karrot/groups/api.py:35
 msgid "You can only join open groups."
 msgstr "Tu peux rejoindre uniquement les groupes ouverts."
 
-#: foodsaving/groups/api.py:42
+#: karrot/groups/api.py:42
 msgid "You cannot give trust to yourself"
 msgstr "Tu ne peux pas donner ta confiance à toi-même"
 
-#: foodsaving/groups/api.py:183
+#: karrot/groups/api.py:183
 msgid "You already gave trust to this user"
 msgstr "Tu as déjà donné ta confiance à cette utilisateur "
 
-#: foodsaving/groups/serializers.py:25
+#: karrot/groups/serializers.py:25
 msgid "Unknown timezone"
 msgstr "Fuseau horaire inconnu"
 
-#: foodsaving/groups/serializers.py:33
+#: karrot/groups/serializers.py:33
 msgid "Playground"
 msgstr "Terrain de jeux"
 
-#: foodsaving/groups/serializers.py:124 foodsaving/groups/serializers.py:226
+#: karrot/groups/serializers.py:134 karrot/groups/serializers.py:230
 msgid "You cannot manage agreements"
 msgstr "Tu ne peux pas gérer les agréements"
 
-#: foodsaving/groups/serializers.py:126
+#: karrot/groups/serializers.py:136
 msgid "Agreement is not for this group"
 msgstr "L’agrément n'est pas pour ce groupe "
 
-#: foodsaving/groups/serializers.py:224
+#: karrot/groups/serializers.py:228
 msgid "You are not in this group"
 msgstr "Tu n'es pas dans ce groupe"
 
-#: foodsaving/groups/templates/default_application_questions.nopreview.jinja2:1
+#: karrot/groups/templates/default_application_questions.nopreview.jinja2:1
 msgid ""
 "Hey there! Before you can join our group we'd like to know a bit about you "
 "and your motivation. Please tell us how you got to know about us and what "
@@ -273,13 +256,13 @@ msgstr ""
 " en savoir un peux plus à propos de toi et de ta motivation. S'il te plaît "
 "dis nous comment tu nous as connuet ce que tu souhaiterai faire ici !"
 
-#: foodsaving/groups/templates/group_summary.html.jinja2:6
-#: foodsaving/groups/templates/group_summary.html.jinja2:217
+#: karrot/groups/templates/group_summary.html.jinja2:6
+#: karrot/groups/templates/group_summary.html.jinja2:217
 #, python-format
 msgid "%(group_name)s weekly summary"
 msgstr "%(group_name)s résumé hebdomadaire"
 
-#: foodsaving/groups/templates/group_summary.html.jinja2:219
+#: karrot/groups/templates/group_summary.html.jinja2:219
 msgid ""
 "Hope you are having a good weekend! Here's a summary of what happened in "
 "your group last week"
@@ -287,62 +270,62 @@ msgstr ""
 "J'espère que tu as passé un bon week-end ! Tu trouveras ici un résumé de ce "
 "qui s'est  passé dans ton groupe au cours de la dernière semaine"
 
-#: foodsaving/groups/templates/group_summary.html.jinja2:223
+#: karrot/groups/templates/group_summary.html.jinja2:223
 #, python-format
 msgid "%(pickups_done_count)s pickups were done"
 msgstr "%(pickups_done_count)s récoltes ont été effectuées"
 
-#: foodsaving/groups/templates/group_summary.html.jinja2:225
+#: karrot/groups/templates/group_summary.html.jinja2:225
 msgid "no pickups were done"
 msgstr "aucune récoltes n'ont été effectuées"
 
-#: foodsaving/groups/templates/group_summary.html.jinja2:229
+#: karrot/groups/templates/group_summary.html.jinja2:229
 #, python-format
 msgid "%(pickups_missed_count)s pickups were missed"
 msgstr "%(pickups_missed_count)srécoltes n'ont été manquées"
 
-#: foodsaving/groups/templates/group_summary.html.jinja2:232
+#: karrot/groups/templates/group_summary.html.jinja2:232
 msgid "no pickups were missed"
 msgstr "aucune récoltes n'ont été manqués"
 
-#: foodsaving/groups/templates/group_summary.html.jinja2:238
+#: karrot/groups/templates/group_summary.html.jinja2:238
 #, python-format
 msgid "%(new_user_count)s people joined the group"
 msgstr "%(new_user_count)s personne a rejoint le groupe"
 
-#: foodsaving/groups/templates/group_summary.html.jinja2:246
+#: karrot/groups/templates/group_summary.html.jinja2:246
 #, python-format
 msgid "%(feedbacks_count)s pickup feedbacks were given"
 msgstr ""
 "%(feedbacks_count)s retours d'informations sur les récoltes ont été donnés "
 
-#: foodsaving/groups/templates/group_summary.html.jinja2:248
+#: karrot/groups/templates/group_summary.html.jinja2:248
 msgid "no feedback was given"
 msgstr "aucun retour d'informations a été donné"
 
-#: foodsaving/groups/templates/group_summary.html.jinja2:252
+#: karrot/groups/templates/group_summary.html.jinja2:252
 #, python-format
 msgid "%(sent_messages_count)s messages were sent"
 msgstr "%(sent_messages_count)s messages ont été evoyés"
 
-#: foodsaving/groups/templates/group_summary.html.jinja2:254
+#: karrot/groups/templates/group_summary.html.jinja2:254
 msgid "no messages were sent"
 msgstr "aucun messages a été envoyés"
 
-#: foodsaving/groups/templates/group_summary.html.jinja2:261
+#: karrot/groups/templates/group_summary.html.jinja2:261
 msgid "Pickup feedback"
 msgstr "Retour d'information sur la récolte"
 
-#: foodsaving/groups/templates/group_summary.html.jinja2:269
+#: karrot/groups/templates/group_summary.html.jinja2:269
 #, python-format
 msgid "%(weight)s kg from <a href=\"%(store_url)s\">%(store_name)s</a>"
 msgstr "%(weight)s Kg de <a href=\"%(store_url)s\">%(store_name)s</a>"
 
-#: foodsaving/groups/templates/group_summary.html.jinja2:283
+#: karrot/groups/templates/group_summary.html.jinja2:283
 msgid "Here's what was said last week"
 msgstr "Tu trouveras ici ce qui a été dit la semaine dernière"
 
-#: foodsaving/groups/templates/group_summary.html.jinja2:323
+#: karrot/groups/templates/group_summary.html.jinja2:323
 msgid ""
 "You are receiving this because you are subscribed to <strong>Weekly "
 "summary</strong> emails for this group."
@@ -350,12 +333,12 @@ msgstr ""
 "Tu reçois ça car tu as souscrit à <strong>résumé hebdomadaire</strong>mails "
 "pour ce groupe."
 
-#: foodsaving/groups/templates/group_summary.subject.jinja2:1
+#: karrot/groups/templates/group_summary.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s updates for the week of %(day)s"
 msgstr "%(group_name)smises à jours pour la semaine du %(day)s"
 
-#: foodsaving/groups/templates/playground_public_description.nopreview.jinja2:1
+#: karrot/groups/templates/playground_public_description.nopreview.jinja2:1
 msgid ""
 "Welcome to **karrot**!\n"
 "\n"
@@ -369,14 +352,14 @@ msgstr ""
 "\n"
 "Toutes les notifications mails sont désactivées par défaut.  "
 
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:6
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:218
-#: foodsaving/groups/templates/user_became_editor.subject.jinja2:1
+#: karrot/groups/templates/user_became_editor.html.jinja2:6
+#: karrot/groups/templates/user_became_editor.html.jinja2:218
+#: karrot/groups/templates/user_became_editor.subject.jinja2:1
 #, python-format
 msgid "You gained editing permissions in %(group_name)s!"
 msgstr "Tu a obtenu les permissions d'éditer dans %(group_name)s!"
 
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:221
+#: karrot/groups/templates/user_became_editor.html.jinja2:221
 msgid ""
 "You've received enough trust from fellow group members to grant you "
 "<strong>editing permissions</strong>. For example, you can now modify your "
@@ -387,12 +370,12 @@ msgstr ""
 "maintenant modifier ton groupe, les magasins et les dates de récoltes, ou en"
 " créer de nouvelles. "
 
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:227
+#: karrot/groups/templates/user_became_editor.html.jinja2:227
 msgid "Use your power wisely!"
 msgstr "Utilise ton pouvoir à bon escient !"
 
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:277
-#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:277
+#: karrot/groups/templates/user_became_editor.html.jinja2:277
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:277
 #, python-format
 msgid ""
 "You are receiving this because you are a member of "
@@ -400,19 +383,19 @@ msgid ""
 msgstr ""
 "Tu as reçu ceci car tu es un membre de <strong>%(group_name)s</strong>."
 
-#: foodsaving/groups/templates/user_became_editor.html.jinja2:278
-#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:278
+#: karrot/groups/templates/user_became_editor.html.jinja2:278
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:278
 #, python-format
 msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
 msgstr ""
 "Tu peux quitter le groupe depuis le<a href=\"%(group_url)s\">page du "
 "groupe</a>."
 
-#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:218
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:218
 msgid "Hey, we're missing you!"
 msgstr "Salut, tu nous as manqué !"
 
-#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:221
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:221
 #, python-format
 msgid ""
 "It looks like you've not visited the\n"
@@ -423,7 +406,7 @@ msgstr ""
 "                           <a href=\"%(group_url)s\">%(group_name)s</a> groupe pendant plus de %(num_days_inactive)s\n"
 "                            jours."
 
-#: foodsaving/groups/templates/user_inactive_in_group.html.jinja2:226
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:226
 msgid ""
 "We've marked you as inactive, but you can reactivate by simply visiting the group\n"
 "                            again."
@@ -431,16 +414,16 @@ msgstr ""
 "Nous t'avons marqué ton profil comme inactif, mais tu peux le réactiver simplement en visitant le groupe\n"
 "à nouveau"
 
-#: foodsaving/groups/templates/user_inactive_in_group.subject.jinja2:1
+#: karrot/groups/templates/user_inactive_in_group.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s is missing you!"
 msgstr "Tu as manqué à %(group_name)s!"
 
-#: foodsaving/groups/templates/user_removal_from_group.html.jinja2:218
+#: karrot/groups/templates/user_removal_from_group.html.jinja2:218
 msgid "Hey, we're really missing you!"
 msgstr "Salut, tu nous a vraiment manqué !"
 
-#: foodsaving/groups/templates/user_removal_from_group.html.jinja2:221
+#: karrot/groups/templates/user_removal_from_group.html.jinja2:221
 #, python-format
 msgid ""
 "It's been %(num_months_inactive)s months since we noticed you were inactive in\n"
@@ -449,12 +432,12 @@ msgstr ""
 "ça fait depuis %(num_months_inactive)s mois que nous t'avons notifié que tu était inactif dans\n"
 "                              <a href=\"%(group_url)s\">%(group_name)s</a>."
 
-#: foodsaving/groups/templates/user_removal_from_group.html.jinja2:225
+#: karrot/groups/templates/user_removal_from_group.html.jinja2:225
 msgid "If you want to stay part of the group, just visit the group again!"
 msgstr ""
 "Si tu veux rester un membre du groupe, juste visite le groupe à nouveau !"
 
-#: foodsaving/groups/templates/user_removal_from_group.html.jinja2:253
+#: karrot/groups/templates/user_removal_from_group.html.jinja2:253
 #, python-format
 msgid ""
 "Otherwise we'll remove you from the group in %(num_removal_days)s\n"
@@ -463,7 +446,7 @@ msgstr ""
 "Sinon nous t'enlèverons du groupe dans %(num_removal_days)s\n"
 "                        jours."
 
-#: foodsaving/groups/templates/user_removal_from_group.html.jinja2:288
+#: karrot/groups/templates/user_removal_from_group.html.jinja2:288
 #, python-format
 msgid ""
 "You are receiving this because you are a member of <strong>%(group_name)s</strong>\n"
@@ -472,7 +455,7 @@ msgstr ""
 "Tu reçois ceci car tu es membre de <strong>%(group_name)s</strong>\n"
 "."
 
-#: foodsaving/groups/templates/user_removal_from_group.html.jinja2:290
+#: karrot/groups/templates/user_removal_from_group.html.jinja2:290
 #, python-format
 msgid ""
 "You can leave the group from the <a href=\"%(group_url)s\">group page</a>\n"
@@ -481,40 +464,40 @@ msgstr ""
 "Tu peux quitter le groupe depuis le <a href=\"%(group_url)s\">page du groupe</a>\n"
 "."
 
-#: foodsaving/groups/templates/user_removal_from_group.subject.jinja2:1
+#: karrot/groups/templates/user_removal_from_group.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s is really missing you!"
 msgstr "Tu as vraiment manqué à %(group_name)s !"
 
-#: foodsaving/invitations/serializers.py:20
+#: karrot/invitations/serializers.py:20
 msgid "An invitation has already been sent to this e-mail address"
 msgstr "Une invitation a déjà été envoyée à cette adresse e-mail"
 
-#: foodsaving/invitations/serializers.py:26
-#: foodsaving/issues/serializers.py:141 foodsaving/places/serializers.py:71
+#: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:122
+#: karrot/places/serializers.py:76
 msgid "You are not a member of this group."
 msgstr "Tu n'est pas membre de ce groupe."
 
-#: foodsaving/invitations/serializers.py:33
+#: karrot/invitations/serializers.py:33
 msgid "User is already member of group"
 msgstr "L'utilisateur est déjà membre du groupe."
 
-#: foodsaving/invitations/serializers.py:41
+#: karrot/invitations/serializers.py:41
 msgid "Email could not be sent"
 msgstr "Le mail pourrai ne pas être envoyé"
 
-#: foodsaving/invitations/templates/emailinvitation.html.jinja2:6
-#: foodsaving/invitations/templates/emailinvitation.subject.jinja2:1
+#: karrot/invitations/templates/emailinvitation.html.jinja2:6
+#: karrot/invitations/templates/emailinvitation.subject.jinja2:1
 #, python-format
 msgid "Invitation to join %(group_name)s"
 msgstr "Invitation de joinde %(group_name)s"
 
-#: foodsaving/invitations/templates/emailinvitation.html.jinja2:217
+#: karrot/invitations/templates/emailinvitation.html.jinja2:217
 #, python-format
 msgid "You're invited to join %(group_name)s!"
 msgstr "Tu es invité à rejoindre %(group_name)s !"
 
-#: foodsaving/invitations/templates/emailinvitation.html.jinja2:227
+#: karrot/invitations/templates/emailinvitation.html.jinja2:227
 #, python-format
 msgid ""
 "%(invited_by_name)s invited you to join the \"%(group_name)s\" community on "
@@ -523,32 +506,32 @@ msgstr ""
 "%(invited_by_name)s vous a invité à  rejoindre le \"%(group_name)s\" "
 "communauté de %(site_name)s! "
 
-#: foodsaving/invitations/templates/emailinvitation.html.jinja2:228
+#: karrot/invitations/templates/emailinvitation.html.jinja2:228
 msgid "If you'd like to join, please click the link below:"
 msgstr ""
 "Si tu souhaites le rejoindre, merci de cliquer sur le lien ci-dessous:"
 
-#: foodsaving/invitations/templates/emailinvitation.html.jinja2:241
+#: karrot/invitations/templates/emailinvitation.html.jinja2:241
 msgid "Follow the invitation"
 msgstr "Suivre l'invitation"
 
-#: foodsaving/issues/api.py:18
+#: karrot/issues/api.py:17
 msgid "Cannot only modify vote for ongoing issues"
 msgstr "Impossible de modifier uniquement le vote pour les problèmes en cours"
 
-#: foodsaving/issues/serializers.py:16
+#: karrot/issues/serializers.py:15
 msgid "You need to provide a score for all options"
 msgstr "Tu dois fournir un score pour toutes les options."
 
-#: foodsaving/issues/serializers.py:59
+#: karrot/issues/serializers.py:41
 msgid "Provided option is not part of this voting"
 msgstr "L'option suivante n'est pas disponible pour ce vote"
 
-#: foodsaving/issues/serializers.py:64
+#: karrot/issues/serializers.py:46
 msgid "Provided score is outside of allowed range"
 msgstr "Le score suivant est en dehors des valeurs permises"
 
-#: foodsaving/issues/serializers.py:149
+#: karrot/issues/serializers.py:128
 #, python-format
 msgid ""
 "You need at least %(count)s active trusted users in your group to start this"
@@ -557,29 +540,29 @@ msgstr ""
 "Tu dois avoir au moins %(count)s actif de membre de confiance  dans ton "
 "groupe pour démarrer cette procédure. "
 
-#: foodsaving/issues/serializers.py:161
+#: karrot/issues/serializers.py:140
 msgid "Topic cannot be empty"
 msgstr "Ce sujet ne peut pas être vide"
 
-#: foodsaving/issues/serializers.py:168
+#: karrot/issues/serializers.py:147
 msgid "Affected user is not part of that group"
 msgstr "L'utilisateur concerné n'est pas membre de ce groupe"
 
-#: foodsaving/issues/serializers.py:170
+#: karrot/issues/serializers.py:149
 msgid "A conflict resolution about that user has already been started"
 msgstr ""
 "Une résolution de conflit concernant cet utilisateur a déjà été démarrée"
 
-#: foodsaving/issues/templates/conflict_resolution_continued.html.jinja2:6
-#: foodsaving/issues/templates/conflict_resolution_continued.html.jinja2:217
-#: foodsaving/issues/templates/conflict_resolution_continued.subject.jinja2:1
+#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:6
+#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:217
+#: karrot/issues/templates/conflict_resolution_continued.subject.jinja2:1
 #, python-format
 msgid "Keep discussing about the conflict with %(affected_user_name)s"
 msgstr ""
 "Continues à discuter à propos de ce conflit avec%(affected_user_name)s "
 
-#: foodsaving/issues/templates/conflict_resolution_continued.html.jinja2:218
-#: foodsaving/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:218
+#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:218
+#: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:218
 msgid ""
 "The result of the last voting round is to continue discussion and start "
 "another round of voting."
@@ -587,19 +570,19 @@ msgstr ""
 "Le résultat du dernier tour de vote est de continuer la discussion et de "
 "démarrer un autre tour de vote."
 
-#: foodsaving/issues/templates/conflict_resolution_continued.html.jinja2:219
-#: foodsaving/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:219
+#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:219
+#: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:219
 #, python-format
 msgid "The new voting round ends at %(expiry_date)s."
 msgstr "La nouveau tour de vote se termine à %(expiry_date)s"
 
-#: foodsaving/issues/templates/conflict_resolution_continued.html.jinja2:232
-#: foodsaving/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:232
+#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:232
+#: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:232
 msgid "View conflict resolution case"
 msgstr "Regarder le cas de résolution de conflit"
 
-#: foodsaving/issues/templates/conflict_resolution_continued.html.jinja2:268
-#: foodsaving/issues/templates/new_conflict_resolution.html.jinja2:275
+#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:268
+#: karrot/issues/templates/new_conflict_resolution.html.jinja2:275
 msgid ""
 "You are receiving this because you are subscribed to <strong>Conflict "
 "Resolution</strong> emails for this group."
@@ -607,68 +590,66 @@ msgstr ""
 "Tu reçois ceci car tu as souscrit à <strong>résolution de "
 "conflit</strong>mails pour ce groupe."
 
-#: foodsaving/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:6
-#: foodsaving/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:217
-#: foodsaving/issues/templates/conflict_resolution_continued_affected_user.subject.jinja2:1
+#: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:6
+#: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:217
+#: karrot/issues/templates/conflict_resolution_continued_affected_user.subject.jinja2:1
 msgid "Keep discussing about the conflict with you"
 msgstr "Continue à discuter à propos du conflit avec vous"
 
-#: foodsaving/issues/templates/new_conflict_resolution.html.jinja2:6
-#: foodsaving/issues/templates/new_conflict_resolution.html.jinja2:217
-#: foodsaving/issues/templates/new_conflict_resolution.subject.jinja2:1
+#: karrot/issues/templates/new_conflict_resolution.html.jinja2:6
+#: karrot/issues/templates/new_conflict_resolution.html.jinja2:217
+#: karrot/issues/templates/new_conflict_resolution.subject.jinja2:1
 #, python-format
-msgid "A conflict resolution process was started about %(affected_user_name)s"
+msgid "A conflict resolution process was started with %(affected_user_name)s"
 msgstr ""
-"Une procédure de résolution de conflit a démarré à propos de "
-"%(affected_user_name)s "
 
-#: foodsaving/issues/templates/new_conflict_resolution.html.jinja2:225
-#: foodsaving/issues/templates/new_conflict_resolution_affected_user.html.jinja2:225
+#: karrot/issues/templates/new_conflict_resolution.html.jinja2:225
+#: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:225
 msgid "You can discuss the topic and give your opinion in the voting."
 msgstr "Tu peux discuter du sujet et donner ton opinion dans le vote."
 
-#: foodsaving/issues/templates/new_conflict_resolution.html.jinja2:226
-#: foodsaving/issues/templates/new_conflict_resolution_affected_user.html.jinja2:226
+#: karrot/issues/templates/new_conflict_resolution.html.jinja2:226
+#: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:226
 #, python-format
 msgid "This voting round ends at %(expiry_date)s."
 msgstr "Ce tour de vote se termine le %(expiry_date)s."
 
-#: foodsaving/issues/templates/new_conflict_resolution.html.jinja2:239
-#: foodsaving/issues/templates/new_conflict_resolution_affected_user.html.jinja2:239
+#: karrot/issues/templates/new_conflict_resolution.html.jinja2:239
+#: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:239
 msgid "View discussion"
 msgstr "Regarder la discussion"
 
-#: foodsaving/issues/templates/new_conflict_resolution_affected_user.html.jinja2:6
-#: foodsaving/issues/templates/new_conflict_resolution_affected_user.html.jinja2:217
-#: foodsaving/issues/templates/new_conflict_resolution_affected_user.subject.jinja2:1
-msgid "A conflict resolution process was started about you"
-msgstr "Une procédure de résolution de conflit à débuté à ton sujet"
+#: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:6
+#: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:217
+#: karrot/issues/templates/new_conflict_resolution_affected_user.subject.jinja2:1
+msgid "A conflict resolution process was started with you"
+msgstr ""
 
-#: foodsaving/pickups/permissions.py:7
+#: karrot/pickups/permissions.py:7
 msgid "The pickup date is in the past."
 msgstr "La date de récolte est dans le passé."
 
-#: foodsaving/pickups/permissions.py:18
+#: karrot/pickups/permissions.py:18
 msgid "You can only delete empty pickup dates."
 msgstr "Tu peux effacer des récoltes seulement s'ils sont vides."
 
-#: foodsaving/pickups/permissions.py:27
+#: karrot/pickups/permissions.py:27
 msgid "You have not joined this pickup date."
 msgstr "Tu n'as pas rejoint cette récolte."
 
-#: foodsaving/pickups/permissions.py:34
+#: karrot/pickups/permissions.py:34
 msgid "You have already joined this pickup date."
 msgstr "Tu as rejoint cette récolte déjà."
 
-#: foodsaving/pickups/permissions.py:41
+#: karrot/pickups/permissions.py:41
 msgid "Pickup date is already full."
 msgstr "Cette récolte est pleine."
 
-#: foodsaving/pickups/permissions.py:48
+#: karrot/pickups/permissions.py:48
 msgid "This feedback is given by another user."
 msgstr "Ce retour d'information a été donné par un autre utilisateur."
 
-#: foodsaving/pickups/permissions.py:57 foodsaving/pickups/serializers.py:388
+#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:380
 #, python-format
 msgid ""
 "You can't give feedback for pickups more than %(days_number)s days ago."
@@ -676,88 +657,88 @@ msgstr ""
 "Tu ne peux pas donner ton retour d'informations pour des récoltes ayant eu "
 "lieu il y a plus de %(days_number)sjours."
 
-#: foodsaving/pickups/serializers.py:31
+#: karrot/pickups/serializers.py:31
 msgid "Must be a list"
 msgstr "Doit être une liste"
 
-#: foodsaving/pickups/serializers.py:32
+#: karrot/pickups/serializers.py:32
 msgid "Must be a list with one or two values"
 msgstr "Doit être une liste avec une ou deux valeurs"
 
-#: foodsaving/pickups/serializers.py:33
+#: karrot/pickups/serializers.py:33
 msgid "Must pass start value"
 msgstr "Doit dépasser la valeur de départ"
 
-#: foodsaving/pickups/serializers.py:116
+#: karrot/pickups/serializers.py:116
 msgid "The date should be in the future."
 msgstr "La date doit être dans le futur."
 
-#: foodsaving/pickups/serializers.py:173
+#: karrot/pickups/serializers.py:171
 msgid "You can't move pickups that are part of a series."
 msgstr "Tu ne peux pas déplacer les récoltes qui font partie de séries."
 
-#: foodsaving/pickups/serializers.py:305
+#: karrot/pickups/serializers.py:299
 msgid "Invalid recurrence rule."
 msgstr "Règle de récurrence non valide."
 
-#: foodsaving/pickups/serializers.py:307
+#: karrot/pickups/serializers.py:301
 msgid "Only single recurrence rules are allowed."
 msgstr "Seulement des règles de recurrence individuelles sont permises."
 
-#: foodsaving/pickups/serializers.py:383
+#: karrot/pickups/serializers.py:375
 msgid "The pickup is not done yet"
 msgstr "La récolte n'est pas effectué actuellement"
 
-#: foodsaving/pickups/serializers.py:385
+#: karrot/pickups/serializers.py:377
 msgid "You aren't assigned to the pickup."
 msgstr "Tu n'es pas inscrit à la récolte"
 
-#: foodsaving/pickups/serializers.py:402
+#: karrot/pickups/serializers.py:394
 msgid "Both comment and weight cannot be blank."
 msgstr ""
 "Les commentaires et les poids ne peuvent être tous les deux vides à la fois."
 
-#: foodsaving/pickups/templates/pickup_notification.html.jinja2:6
-#: foodsaving/pickups/templates/pickup_notification.html.jinja2:239
-#: foodsaving/pickups/templates/pickup_notification.subject.jinja2:1
+#: karrot/pickups/templates/pickup_notification.html.jinja2:6
+#: karrot/pickups/templates/pickup_notification.html.jinja2:239
+#: karrot/pickups/templates/pickup_notification.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s upcoming pickups"
 msgstr "%(group_name)srécoltes à venir"
 
-#: foodsaving/pickups/templates/pickup_notification.html.jinja2:228
+#: karrot/pickups/templates/pickup_notification.html.jinja2:228
 #, python-format
 msgid "%(empty_collectors_count)s/%(max_collectors)s remaining"
 msgstr "%(empty_collectors_count)s/%(max_collectors)spour rappel"
 
-#: foodsaving/pickups/templates/pickup_notification.html.jinja2:243
+#: karrot/pickups/templates/pickup_notification.html.jinja2:243
 msgid "Tonight"
 msgstr "Ce soir"
 
-#: foodsaving/pickups/templates/pickup_notification.html.jinja2:247
+#: karrot/pickups/templates/pickup_notification.html.jinja2:247
 msgid "The day is not over, there are still pickups to be done!"
 msgstr ""
 "La journée n'es pas terminée, il y a toujours des récoltes à effectuer !"
 
-#: foodsaving/pickups/templates/pickup_notification.html.jinja2:250
-#: foodsaving/pickups/templates/pickup_notification.html.jinja2:278
+#: karrot/pickups/templates/pickup_notification.html.jinja2:250
+#: karrot/pickups/templates/pickup_notification.html.jinja2:278
 msgid "You are signed up for"
 msgstr "Vous vous êtes inscrit pour"
 
-#: foodsaving/pickups/templates/pickup_notification.html.jinja2:255
-#: foodsaving/pickups/templates/pickup_notification.html.jinja2:283
+#: karrot/pickups/templates/pickup_notification.html.jinja2:255
+#: karrot/pickups/templates/pickup_notification.html.jinja2:283
 msgid "No-one is yet signed up for"
 msgstr "Personne est pour le moment inscrit pour "
 
-#: foodsaving/pickups/templates/pickup_notification.html.jinja2:260
-#: foodsaving/pickups/templates/pickup_notification.html.jinja2:288
+#: karrot/pickups/templates/pickup_notification.html.jinja2:260
+#: karrot/pickups/templates/pickup_notification.html.jinja2:288
 msgid "There is still space available for"
 msgstr "Il y a toujours de l'espace disponible pour"
 
-#: foodsaving/pickups/templates/pickup_notification.html.jinja2:273
+#: karrot/pickups/templates/pickup_notification.html.jinja2:273
 msgid "Tomorrow"
 msgstr "Demain"
 
-#: foodsaving/pickups/templates/pickup_notification.html.jinja2:325
+#: karrot/pickups/templates/pickup_notification.html.jinja2:325
 msgid ""
 "You are receiving this because you are subscribed to\n"
 "                            <strong>Pickup notification</strong> emails for this group."
@@ -765,65 +746,65 @@ msgstr ""
 "Tu reçois ceci car tu es inscrit à\n"
 "                            <strong> notification récolte</strong> maisl pour ce groupe."
 
-#: foodsaving/places/serializers.py:78
+#: karrot/places/serializers.py:83
 msgid "Set at least one week in advance"
 msgstr "Une semaine en avance est minimum!"
 
-#: foodsaving/places/serializers.py:81
+#: karrot/places/serializers.py:86
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr "Ne paramètre pas plus de %(count)s semaines à l'avance"
 
-#: foodsaving/userauth/api.py:92 foodsaving/userauth/serializers.py:88
-#: foodsaving/userauth/serializers.py:133
-#: foodsaving/userauth/serializers.py:154
-#: foodsaving/userauth/serializers.py:183
-#: foodsaving/userauth/serializers.py:204
+#: karrot/places/serializers.py:138
+msgid "You are already subscribed to this place"
+msgstr ""
+
+#: karrot/userauth/api.py:92 karrot/userauth/serializers.py:88
+#: karrot/userauth/serializers.py:133 karrot/userauth/serializers.py:154
+#: karrot/userauth/serializers.py:183 karrot/userauth/serializers.py:204
 msgid "We could not send you an e-mail."
 msgstr "Nous n'avons pas pu vous envoyer de email."
 
-#: foodsaving/userauth/permissions.py:6
+#: karrot/userauth/permissions.py:6
 msgid "Mail is already verified."
 msgstr "Adresse mail est déjà verifiée."
 
-#: foodsaving/userauth/serializers.py:23
+#: karrot/userauth/serializers.py:23
 msgid "Unable to log in with provided credentials."
 msgstr ""
 "Impossible de se connecter avec les informations d'identification fournies."
 
-#: foodsaving/userauth/serializers.py:75
-#: foodsaving/userauth/serializers.py:170
+#: karrot/userauth/serializers.py:75 karrot/userauth/serializers.py:170
 msgid "Similar e-mail exists: "
 msgstr "Un email similaire existe:"
 
-#: foodsaving/userauth/serializers.py:111
+#: karrot/userauth/serializers.py:111
 msgid "Verification code is invalid"
 msgstr "Le code de vérification est valide"
 
-#: foodsaving/userauth/serializers.py:114
+#: karrot/userauth/serializers.py:114
 msgid "Verification code has expired"
 msgstr "Le code de vérification a expiré"
 
-#: foodsaving/userauth/serializers.py:147
-#: foodsaving/userauth/serializers.py:164
+#: karrot/userauth/serializers.py:147 karrot/userauth/serializers.py:164
 msgid "Wrong password"
 msgstr "Le mot de passe est erroné"
 
-#: foodsaving/userauth/serializers.py:196
+#: karrot/userauth/serializers.py:196
 msgid "Unknown e-mail address"
 msgstr "Adresse email inconnue"
 
-#: foodsaving/users/templates/accountdelete_request.html.jinja2:6
-#: foodsaving/users/templates/accountdelete_request.subject.jinja2:1
+#: karrot/users/templates/accountdelete_request.html.jinja2:6
+#: karrot/users/templates/accountdelete_request.subject.jinja2:1
 msgid "Request to delete your account"
 msgstr "Demande d'effacer ton compte"
 
-#: foodsaving/users/templates/accountdelete_request.html.jinja2:217
+#: karrot/users/templates/accountdelete_request.html.jinja2:217
 #, python-format
 msgid "You requested to delete your account on %(site_name)s!"
 msgstr "Tu as demandé à supprimer ton compte sur %(site_name)s !"
 
-#: foodsaving/users/templates/accountdelete_request.html.jinja2:227
+#: karrot/users/templates/accountdelete_request.html.jinja2:227
 msgid ""
 "We're sad to hear that you want to delete your account, could we have done "
 "anything better?"
@@ -831,31 +812,31 @@ msgstr ""
 "Nous sommes triste d'entendre que tu veux supprimer ton compte, pourrions "
 "nous faire quelque chose de mieux ?"
 
-#: foodsaving/users/templates/accountdelete_request.html.jinja2:228
+#: karrot/users/templates/accountdelete_request.html.jinja2:228
 msgid "Anyhow, you can finish the deletion by clicking the link below:"
 msgstr ""
 "Dans tous les cas, tu peux terminer la suppression en cliquant sur le lien "
 "ci-dessous :"
 
-#: foodsaving/users/templates/accountdelete_request.html.jinja2:241
+#: karrot/users/templates/accountdelete_request.html.jinja2:241
 msgid "Delete your account"
 msgstr "Supprimer ton compte"
 
-#: foodsaving/users/templates/accountdelete_request.html.jinja2:254
+#: karrot/users/templates/accountdelete_request.html.jinja2:254
 msgid "If you changed your mind, you can simply ignore this e-mail."
 msgstr "Si tu change d'avis, tu peux simplement ignorer cet email."
 
-#: foodsaving/users/templates/accountdelete_success.html.jinja2:6
-#: foodsaving/users/templates/accountdelete_success.subject.jinja2:1
+#: karrot/users/templates/accountdelete_success.html.jinja2:6
+#: karrot/users/templates/accountdelete_success.subject.jinja2:1
 msgid "Account successfully deleted"
 msgstr "Compte supprimé avec succès"
 
-#: foodsaving/users/templates/accountdelete_success.html.jinja2:217
+#: karrot/users/templates/accountdelete_success.html.jinja2:217
 #, python-format
 msgid "Your account on %(site_name)s was successfully deleted!"
 msgstr "Ton compte sur %(site_name)s a été supprimé avec succès !"
 
-#: foodsaving/users/templates/accountdelete_success.html.jinja2:227
+#: karrot/users/templates/accountdelete_success.html.jinja2:227
 msgid ""
 "We're still sad that you saw it necessary to delete your account, but we're "
 "happy to tell you that your request was met without any problems."
@@ -864,16 +845,16 @@ msgstr ""
 "supprimer ton compte, mais nous sommes heureux de te dire que ta demande a "
 "été effectuée sans aucun problème. "
 
-#: foodsaving/users/templates/accountdelete_success.html.jinja2:228
+#: karrot/users/templates/accountdelete_success.html.jinja2:228
 msgid "Goodbye!"
 msgstr "Au revoir !"
 
-#: foodsaving/users/templates/changemail_request.html.jinja2:6
-#: foodsaving/users/templates/signup.html.jinja2:6
+#: karrot/users/templates/changemail_request.html.jinja2:6
+#: karrot/users/templates/signup.html.jinja2:6
 msgid "Please verify your email"
 msgstr "Verifie ton email s'il te plaît"
 
-#: foodsaving/users/templates/changemail_request.html.jinja2:218
+#: karrot/users/templates/changemail_request.html.jinja2:218
 #, python-format
 msgid ""
 "You requested to change your email address from %(old_email)s to "
@@ -881,88 +862,88 @@ msgid ""
 msgstr ""
 "Tu as demandé à changer ton adresse mail %(old_email)s par %(new_email)s "
 
-#: foodsaving/users/templates/changemail_request.html.jinja2:231
-#: foodsaving/users/templates/signup.html.jinja2:227
+#: karrot/users/templates/changemail_request.html.jinja2:231
+#: karrot/users/templates/signup.html.jinja2:227
 msgid "Please click the following link to confirm your email:"
 msgstr "S'il te plaît clique sur le lien suivant pour confirmer ton email :"
 
-#: foodsaving/users/templates/changemail_request.html.jinja2:244
-#: foodsaving/users/templates/signup.html.jinja2:240
+#: karrot/users/templates/changemail_request.html.jinja2:244
+#: karrot/users/templates/signup.html.jinja2:240
 msgid "Verify your email address"
 msgstr "Verifie ton adresse mail"
 
-#: foodsaving/users/templates/changemail_request.html.jinja2:257
-#: foodsaving/users/templates/passwordreset_request.html.jinja2:254
+#: karrot/users/templates/changemail_request.html.jinja2:257
+#: karrot/users/templates/passwordreset_request.html.jinja2:254
 msgid ""
 "If you did not request this change, you can safely ignore this message."
 msgstr ""
 "Si tu n'a pas demandé ce changement, tu peux bien sûr ignorer ce message."
 
-#: foodsaving/users/templates/changemail_request.subject.jinja2:1
-#: foodsaving/users/templates/signup.subject.jinja2:1
+#: karrot/users/templates/changemail_request.subject.jinja2:1
+#: karrot/users/templates/signup.subject.jinja2:1
 msgid "Please verify your email address"
 msgstr "S'il te plaît vérifie ton adresse email"
 
-#: foodsaving/users/templates/changemail_success.html.jinja2:6
+#: karrot/users/templates/changemail_success.html.jinja2:6
 msgid "Your email address changed"
 msgstr "Ton adresse email a été modifée"
 
-#: foodsaving/users/templates/changemail_success.html.jinja2:217
+#: karrot/users/templates/changemail_success.html.jinja2:217
 #, python-format
 msgid "Your email address on %(site_name)s changed!"
 msgstr "Ton adresse email sur %(site_name)s a été modifiée !"
 
-#: foodsaving/users/templates/changemail_success.html.jinja2:227
+#: karrot/users/templates/changemail_success.html.jinja2:227
 #, python-format
 msgid "Your new email address is %(new_email)s."
 msgstr "Ta nouvelle adresse email est %(new_email)s."
 
-#: foodsaving/users/templates/changemail_success.subject.jinja2:1
+#: karrot/users/templates/changemail_success.subject.jinja2:1
 msgid "Your email address changed!"
 msgstr "Ton adresse email a été modifiée !"
 
-#: foodsaving/users/templates/passwordreset_request.html.jinja2:6
-#: foodsaving/users/templates/passwordreset_request.subject.jinja2:1
+#: karrot/users/templates/passwordreset_request.html.jinja2:6
+#: karrot/users/templates/passwordreset_request.subject.jinja2:1
 msgid "Request to reset your password"
 msgstr "Demande la réinitialisation de ton mot de passe"
 
-#: foodsaving/users/templates/passwordreset_request.html.jinja2:217
+#: karrot/users/templates/passwordreset_request.html.jinja2:217
 #, python-format
 msgid "You requested to reset your password for %(site_name)s"
 msgstr "Tu as demandé à réinitialiser ton mot de passe pour %(site_name)s"
 
-#: foodsaving/users/templates/passwordreset_request.html.jinja2:227
+#: karrot/users/templates/passwordreset_request.html.jinja2:227
 msgid "Did you forget your password? No problem!"
 msgstr "As tu oublié ton mot de passe ? Pas de problème !"
 
-#: foodsaving/users/templates/passwordreset_request.html.jinja2:228
+#: karrot/users/templates/passwordreset_request.html.jinja2:228
 msgid "Click this link to change it:"
 msgstr "Clique sur ce lien lien pour le modifier :"
 
-#: foodsaving/users/templates/passwordreset_request.html.jinja2:241
+#: karrot/users/templates/passwordreset_request.html.jinja2:241
 msgid "Change password"
 msgstr "Changer le mot de passe"
 
-#: foodsaving/users/templates/passwordreset_success.html.jinja2:6
-#: foodsaving/users/templates/passwordreset_success.subject.jinja2:1
+#: karrot/users/templates/passwordreset_success.html.jinja2:6
+#: karrot/users/templates/passwordreset_success.subject.jinja2:1
 msgid "New password set!"
 msgstr "Nouveau mot de passe créé!"
 
-#: foodsaving/users/templates/passwordreset_success.html.jinja2:217
+#: karrot/users/templates/passwordreset_success.html.jinja2:217
 #, python-format
 msgid "You set a new password for %(site_name)s"
 msgstr "Tu définis un nouveau mot de passe pour %(site_name)s"
 
-#: foodsaving/users/templates/passwordreset_success.html.jinja2:227
+#: karrot/users/templates/passwordreset_success.html.jinja2:227
 msgid "Your password has been successfully changed!"
 msgstr "Ton mot de passe a été changé!"
 
-#: foodsaving/users/templates/signup.html.jinja2:217
+#: karrot/users/templates/signup.html.jinja2:217
 #, python-format
 msgid "Thank you for signing up to %(site_name)s"
 msgstr "Merci pour ton inscription à%(site_name)s"
 
-#: foodsaving/users/templates/signup.html.jinja2:253
+#: karrot/users/templates/signup.html.jinja2:253
 msgid ""
 "You can safely ignore this message if it wasn't you who signed up at our "
 "service using this email address."
@@ -970,7 +951,7 @@ msgstr ""
 "Tu peux bien sûr ignorer ce message si ce n'est pas toi qui t'es abonné à "
 "notre service en utilisant cette adresse e-mail."
 
-#: foodsaving/utils/validators.py:8
+#: karrot/utils/validators.py:8
 #, python-format
 msgid "%(value)s is a reserved name"
 msgstr "%(value)sest un nom déjà utilisé"
