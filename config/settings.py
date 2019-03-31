@@ -280,6 +280,10 @@ HUEY = {
     'always_eager': True,
 }
 
+# If you have the email_reply_trimmer_service running, set this to 'http://localhost:4567/trim' (or similar)
+# https://github.com/yunity/email_reply_trimmer_service
+EMAIL_REPLY_TRIMMER_URL = None
+
 if 'USE_SILK' in os.environ:
     INSTALLED_APPS += ('silk', )
     MIDDLEWARE = ('silk.middleware.SilkyMiddleware', ) + MIDDLEWARE
