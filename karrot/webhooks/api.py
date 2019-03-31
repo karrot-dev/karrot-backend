@@ -1,14 +1,12 @@
 import binascii
 
-import requests
 from anymail.exceptions import AnymailAPIError
 from base64 import b64decode, b32decode, b32encode
-from email.utils import parseaddr
-from raven.contrib.django.raven_compat.models import client as sentry_client
-
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import signing
+from email.utils import parseaddr
+from raven.contrib.django.raven_compat.models import client as sentry_client
 from rest_framework import views, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
