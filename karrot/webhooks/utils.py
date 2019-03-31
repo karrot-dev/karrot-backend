@@ -3,6 +3,8 @@ import requests
 from django.conf import settings
 from talon import quotations
 
+from raven.contrib.django.raven_compat.models import client as sentry_client
+
 logger = logging.getLogger(__name__)
 
 
@@ -26,7 +28,8 @@ def trim_with_discourse(text):
             timeout=2,
         ).json()
     except requests.exceptions.ConnectionError:
-        logger.warning('email_reply_trimmer not accessible at ' + settings.EMAIL_REPLY_TRIMMER_URL + ', skipping.')
+        logger.warning('EMAIL_REPLY_TRIMMER_URL not accessible at ' + settings.EMAIL_REPLY_TRIMMER_URL + ', skipping.')
+        sentry_client.captureException()
         trimmed = text
     else:
         trimmed = response['trimmed']
