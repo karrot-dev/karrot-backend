@@ -16,139 +16,121 @@
     "editable": true,
     "gnetId": null,
     "graphTooltip": 0,
-    "id": 25,
-    "iteration": 1553447554276,
+    "id": 32,
+    "iteration": 1553789606319,
     "links": [],
     "panels": [
       {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
         "datasource": "$site",
-        "fill": 1,
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
         "gridPos": {
-          "h": 8,
-          "w": 12,
+          "h": 3,
+          "w": 4,
           "x": 0,
           "y": 0
         },
-        "id": 8,
-        "legend": {
-          "avg": false,
-          "current": false,
-          "max": false,
-          "min": false,
-          "show": true,
-          "total": false,
-          "values": false
-        },
-        "lines": true,
-        "linewidth": 1,
+        "id": 2,
+        "interval": null,
         "links": [],
-        "nullPointMode": "null",
-        "paceLength": 10,
-        "percentage": false,
-        "pointradius": 2,
-        "points": false,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "stack": false,
-        "steppedLine": false,
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
         "targets": [
           {
-            "alias": "group $tag_group",
             "groupBy": [
               {
                 "params": [
-                  "$interval"
+                  "$__interval"
                 ],
                 "type": "time"
               },
               {
                 "params": [
-                  "group"
-                ],
-                "type": "tag"
-              },
-              {
-                "params": [
-                  "previous"
+                  "null"
                 ],
                 "type": "fill"
               }
             ],
-            "hide": false,
-            "measurement": "karrot.group.applications",
+            "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT max(\"count_status_pending\") FROM \"karrot.group.applications\" WHERE (\"group_status\" = 'active') AND $timeFilter GROUP BY time($interval), \"group\" fill(previous)",
-            "rawQuery": false,
             "refId": "A",
             "resultFormat": "time_series",
             "select": [
               [
                 {
                   "params": [
-                    "count_status_pending"
+                    "issue_created"
                   ],
                   "type": "field"
                 },
                 {
                   "params": [],
-                  "type": "max"
+                  "type": "count"
                 }
               ]
             ],
-            "tags": [
-              {
-                "key": "group_status",
-                "operator": "=",
-                "value": "active"
-              }
-            ]
+            "tags": []
           }
         ],
-        "thresholds": [],
+        "thresholds": "",
         "timeFrom": null,
-        "timeRegions": [],
         "timeShift": null,
-        "title": "pending applications",
-        "tooltip": {
-          "shared": true,
-          "sort": 0,
-          "value_type": "individual"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
+        "title": "Issues created",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
           {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          },
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
+            "op": "=",
+            "text": "N/A",
+            "value": "null"
           }
         ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
+        "valueName": "total"
       },
       {
         "cacheTimeout": null,
@@ -160,7 +142,7 @@
           "#d44a3a"
         ],
         "datasource": "$site",
-        "format": "dtdurations",
+        "format": "none",
         "gauge": {
           "maxValue": 100,
           "minValue": 0,
@@ -170,9 +152,121 @@
         },
         "gridPos": {
           "h": 3,
-          "w": 5,
-          "x": 0,
-          "y": 8
+          "w": 4,
+          "x": 4,
+          "y": 0
+        },
+        "id": 3,
+        "interval": null,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "null"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.events",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "issue_vote"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "count"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": "",
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Votes",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "N/A",
+            "value": "null"
+          }
+        ],
+        "valueName": "total"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 4,
+          "x": 8,
+          "y": 0
         },
         "id": 4,
         "interval": null,
@@ -206,12 +300,25 @@
           "fillColor": "rgba(31, 118, 189, 0.18)",
           "full": false,
           "lineColor": "rgb(31, 120, 193)",
-          "show": false
+          "show": true
         },
         "tableColumn": "",
         "targets": [
           {
-            "groupBy": [],
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "null"
+                ],
+                "type": "fill"
+              }
+            ],
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
@@ -221,13 +328,13 @@
               [
                 {
                   "params": [
-                    "application_accepted_alive_seconds"
+                    "issue_vote_changed"
                   ],
                   "type": "field"
                 },
                 {
                   "params": [],
-                  "type": "mean"
+                  "type": "count"
                 }
               ]
             ],
@@ -235,7 +342,9 @@
           }
         ],
         "thresholds": "",
-        "title": "Accepted within (avg)",
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Votes changed",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -245,7 +354,7 @@
             "value": "null"
           }
         ],
-        "valueName": "current"
+        "valueName": "total"
       },
       {
         "cacheTimeout": null,
@@ -257,7 +366,7 @@
           "#d44a3a"
         ],
         "datasource": "$site",
-        "format": "dtdurations",
+        "format": "none",
         "gauge": {
           "maxValue": 100,
           "minValue": 0,
@@ -267,9 +376,9 @@
         },
         "gridPos": {
           "h": 3,
-          "w": 5,
-          "x": 5,
-          "y": 8
+          "w": 4,
+          "x": 12,
+          "y": 0
         },
         "id": 5,
         "interval": null,
@@ -303,12 +412,25 @@
           "fillColor": "rgba(31, 118, 189, 0.18)",
           "full": false,
           "lineColor": "rgb(31, 120, 193)",
-          "show": false
+          "show": true
         },
         "tableColumn": "",
         "targets": [
           {
-            "groupBy": [],
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "null"
+                ],
+                "type": "fill"
+              }
+            ],
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
@@ -318,13 +440,13 @@
               [
                 {
                   "params": [
-                    "application_declined_alive_seconds"
+                    "issue_vote_deleted"
                   ],
                   "type": "field"
                 },
                 {
                   "params": [],
-                  "type": "mean"
+                  "type": "count"
                 }
               ]
             ],
@@ -332,7 +454,9 @@
           }
         ],
         "thresholds": "",
-        "title": "Declined within (avg)",
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Votes deleted",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -342,104 +466,7 @@
             "value": "null"
           }
         ],
-        "valueName": "current"
-      },
-      {
-        "cacheTimeout": null,
-        "colorBackground": false,
-        "colorValue": false,
-        "colors": [
-          "#299c46",
-          "rgba(237, 129, 40, 0.89)",
-          "#d44a3a"
-        ],
-        "datasource": "$site",
-        "format": "dtdurations",
-        "gauge": {
-          "maxValue": 100,
-          "minValue": 0,
-          "show": false,
-          "thresholdLabels": false,
-          "thresholdMarkers": true
-        },
-        "gridPos": {
-          "h": 3,
-          "w": 5,
-          "x": 10,
-          "y": 8
-        },
-        "id": 6,
-        "interval": null,
-        "links": [],
-        "mappingType": 1,
-        "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
-        ],
-        "maxDataPoints": 100,
-        "nullPointMode": "connected",
-        "nullText": null,
-        "postfix": "",
-        "postfixFontSize": "50%",
-        "prefix": "",
-        "prefixFontSize": "50%",
-        "rangeMaps": [
-          {
-            "from": "null",
-            "text": "N/A",
-            "to": "null"
-          }
-        ],
-        "sparkline": {
-          "fillColor": "rgba(31, 118, 189, 0.18)",
-          "full": false,
-          "lineColor": "rgb(31, 120, 193)",
-          "show": false
-        },
-        "tableColumn": "",
-        "targets": [
-          {
-            "groupBy": [],
-            "measurement": "karrot.events",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "A",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "application_withdrawn_alive_seconds"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "mean"
-                }
-              ]
-            ],
-            "tags": []
-          }
-        ],
-        "thresholds": "",
-        "title": "Withdrawn within (avg)",
-        "type": "singlestat",
-        "valueFontSize": "80%",
-        "valueMaps": [
-          {
-            "op": "=",
-            "text": "N/A",
-            "value": "null"
-          }
-        ],
-        "valueName": "current"
+        "valueName": "total"
       },
       {
         "columns": [],
@@ -447,17 +474,17 @@
         "fontSize": "100%",
         "gridPos": {
           "h": 8,
-          "w": 9,
+          "w": 12,
           "x": 0,
-          "y": 11
+          "y": 3
         },
-        "id": 2,
+        "id": 9,
         "links": [],
         "pageSize": null,
         "scroll": true,
         "showHeader": true,
         "sort": {
-          "col": 6,
+          "col": 3,
           "desc": true
         },
         "styles": [
@@ -466,22 +493,6 @@
             "dateFormat": "YYYY-MM-DD HH:mm:ss",
             "pattern": "Time",
             "type": "hidden"
-          },
-          {
-            "alias": "",
-            "colorMode": null,
-            "colors": [
-              "rgba(245, 54, 54, 0.9)",
-              "rgba(237, 129, 40, 0.89)",
-              "rgba(50, 172, 45, 0.97)"
-            ],
-            "dateFormat": "YYYY-MM-DD HH:mm:ss",
-            "decimals": 2,
-            "mappingType": 1,
-            "pattern": "% decided",
-            "thresholds": [],
-            "type": "number",
-            "unit": "percentunit"
           },
           {
             "alias": "",
@@ -512,7 +523,7 @@
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT \"group\", \"new\", \"accepted\", \"declined\", \"withdrawn\", \"decided\" / \"new\" AS \"% decided\" FROM (\nSELECT \nsum(\"application_pending\") AS \"new\", \nsum(\"application_accepted\") AS \"accepted\", \nsum(\"application_declined\") AS \"declined\", \nsum(\"application_withdrawn\") AS \"withdrawn\",  \nsum(\"application_accepted\") + sum(\"application_declined\") + sum(\"application_withdrawn\") AS \"decided\"\nFROM \"karrot.events\" WHERE $timeFilter GROUP BY \"group\" fill(0)\n) fill(0)",
+            "query": "SELECT \nlast(\"count_ongoing\") AS \"ongoing\", \nlast(\"count_cancelled\") AS \"cancelled\", \nlast(\"count_decided\") AS \"decided\"\nFROM \"karrot.group.issues\" WHERE $timeFilter GROUP BY \"group\" fill(0)",
             "rawQuery": true,
             "refId": "A",
             "resultFormat": "table",
@@ -593,7 +604,7 @@
             "tags": []
           }
         ],
-        "title": "Group Application Stats",
+        "title": "Group Issue stats",
         "transform": "table",
         "type": "table"
       }
@@ -615,14 +626,14 @@
           "options": [],
           "query": "influxdb",
           "refresh": 1,
-          "regex": "",
+          "regex": "/karrot.*/",
           "skipUrlSync": false,
           "type": "datasource"
         }
       ]
     },
     "time": {
-      "from": "now-7d",
+      "from": "now-30d",
       "to": "now"
     },
     "timepicker": {
@@ -651,16 +662,16 @@
       ]
     },
     "timezone": "",
-    "title": "Group Applications",
-    "uid": "ydNQAo5ika",
-    "version": 6
+    "title": "Issues",
+    "uid": "L9quTFqmk",
+    "version": 5
   },
   "meta": {
     "canAdmin": false,
     "canEdit": false,
     "canSave": false,
     "canStar": true,
-    "created": "2018-09-26T18:26:20+02:00",
+    "created": "2019-03-18T16:44:35+01:00",
     "createdBy": "tiltec",
     "expires": "0001-01-01T00:00:00Z",
     "folderId": 0,
@@ -669,11 +680,11 @@
     "hasAcl": false,
     "isFolder": false,
     "provisioned": false,
-    "slug": "group-applications",
+    "slug": "issues",
     "type": "db",
-    "updated": "2019-03-24T18:27:14+01:00",
+    "updated": "2019-03-28T17:14:06+01:00",
     "updatedBy": "tiltec",
-    "url": "/d/ydNQAo5ika/group-applications",
-    "version": 6
+    "url": "/d/L9quTFqmk/issues",
+    "version": 5
   }
 }

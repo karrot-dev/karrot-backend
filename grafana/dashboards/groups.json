@@ -16,7 +16,8 @@
     "editable": true,
     "gnetId": null,
     "graphTooltip": 0,
-    "id": 2,
+    "id": 28,
+    "iteration": 1548780787884,
     "links": [],
     "panels": [
       {
@@ -24,18 +25,16 @@
         "bars": false,
         "dashLength": 10,
         "dashes": false,
-        "datasource": "karrot-prod",
-        "editable": true,
-        "error": false,
+        "datasource": "$site",
+        "description": "(users that have had some activity)",
         "fill": 1,
-        "grid": {},
         "gridPos": {
-          "h": 7,
-          "w": 24,
+          "h": 9,
+          "w": 12,
           "x": 0,
           "y": 0
         },
-        "id": 1,
+        "id": 2,
         "legend": {
           "avg": false,
           "current": false,
@@ -44,229 +43,6 @@
           "show": true,
           "total": false,
           "values": false
-        },
-        "lines": true,
-        "linewidth": 2,
-        "links": [],
-        "nullPointMode": "connected",
-        "percentage": false,
-        "pointradius": 5,
-        "points": false,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
-          {
-            "dsType": "influxdb",
-            "groupBy": [
-              {
-                "params": [
-                  "$interval"
-                ],
-                "type": "time"
-              }
-            ],
-            "measurement": "django_auth_user_count",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "A",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "value"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "last"
-                }
-              ]
-            ],
-            "tags": []
-          }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "User count",
-        "tooltip": {
-          "msResolution": true,
-          "shared": true,
-          "sort": 0,
-          "value_type": "cumulative"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-          {
-            "format": "none",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          },
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": false
-          }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
-      },
-      {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "editable": true,
-        "error": false,
-        "fill": 1,
-        "grid": {},
-        "gridPos": {
-          "h": 7,
-          "w": 24,
-          "x": 0,
-          "y": 7
-        },
-        "id": 2,
-        "interval": "",
-        "legend": {
-          "avg": true,
-          "current": false,
-          "max": true,
-          "min": true,
-          "show": true,
-          "total": false,
-          "values": true
-        },
-        "lines": true,
-        "linewidth": 2,
-        "links": [],
-        "nullPointMode": "connected",
-        "percentage": false,
-        "pointradius": 5,
-        "points": true,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
-          {
-            "dsType": "influxdb",
-            "groupBy": [
-              {
-                "params": [
-                  "1d"
-                ],
-                "type": "time"
-              }
-            ],
-            "hide": false,
-            "measurement": "django_auth_user_create",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "A",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "value"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "count"
-                }
-              ]
-            ],
-            "tags": []
-          }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "User signups",
-        "tooltip": {
-          "msResolution": true,
-          "shared": true,
-          "sort": 0,
-          "value_type": "cumulative"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          },
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
-      },
-      {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "fill": 1,
-        "gridPos": {
-          "h": 7,
-          "w": 24,
-          "x": 0,
-          "y": 14
-        },
-        "id": 4,
-        "legend": {
-          "avg": true,
-          "current": false,
-          "max": true,
-          "min": false,
-          "show": true,
-          "total": false,
-          "values": true
         },
         "lines": true,
         "linewidth": 1,
@@ -282,16 +58,29 @@
         "steppedLine": false,
         "targets": [
           {
-            "dsType": "influxdb",
+            "alias": "group $tag_group",
             "groupBy": [
               {
                 "params": [
-                  "1d"
+                  "$__interval"
                 ],
                 "type": "time"
+              },
+              {
+                "params": [
+                  "group"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "none"
+                ],
+                "type": "fill"
               }
             ],
-            "measurement": "django_auth_user_login",
+            "measurement": "karrot.group.members",
+            "orderByTime": "ASC",
             "policy": "default",
             "refId": "A",
             "resultFormat": "time_series",
@@ -299,27 +88,33 @@
               [
                 {
                   "params": [
-                    "value"
+                    "count_active_7d"
                   ],
                   "type": "field"
                 },
                 {
                   "params": [],
-                  "type": "count"
+                  "type": "mean"
                 }
               ]
             ],
-            "tags": []
+            "tags": [
+              {
+                "key": "count_active_7d",
+                "operator": ">",
+                "value": "0"
+              }
+            ]
           }
         ],
         "thresholds": [],
         "timeFrom": null,
         "timeRegions": [],
         "timeShift": null,
-        "title": "User Logins",
+        "title": "7d active users",
         "tooltip": {
           "shared": true,
-          "sort": 0,
+          "sort": 2,
           "value_type": "individual"
         },
         "type": "graph",
@@ -332,8 +127,9 @@
         },
         "yaxes": [
           {
+            "decimals": -1,
             "format": "short",
-            "label": null,
+            "label": "",
             "logBase": 1,
             "max": null,
             "min": null,
@@ -352,19 +148,285 @@
           "align": false,
           "alignLevel": null
         }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "$site",
+        "description": "(users that have done at least 1 pickup)",
+        "fill": 1,
+        "gridPos": {
+          "h": 9,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        },
+        "id": 3,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "percentage": false,
+        "pointradius": 5,
+        "points": true,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "alias": "group $tag_group",
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "group"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "none"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.group.members",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_pickup_active_7d"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "mean"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "count_pickup_active_7d",
+                "operator": ">",
+                "value": "0"
+              }
+            ]
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "7d pickup active users",
+        "tooltip": {
+          "shared": true,
+          "sort": 2,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "decimals": -1,
+            "format": "short",
+            "label": "",
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "columns": [],
+        "datasource": "$site",
+        "description": ".. and the ratio",
+        "fontSize": "100%",
+        "gridPos": {
+          "h": 9,
+          "w": 12,
+          "x": 0,
+          "y": 9
+        },
+        "id": 5,
+        "links": [],
+        "pageSize": null,
+        "scroll": true,
+        "showHeader": true,
+        "sort": {
+          "col": 4,
+          "desc": true
+        },
+        "styles": [
+          {
+            "alias": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "pattern": "Time",
+            "type": "hidden"
+          },
+          {
+            "alias": "",
+            "colorMode": null,
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "decimals": 2,
+            "pattern": "/.*/",
+            "thresholds": [],
+            "type": "number",
+            "unit": "short"
+          }
+        ],
+        "targets": [
+          {
+            "alias": "group $tag_group",
+            "groupBy": [
+              {
+                "params": [
+                  "group"
+                ],
+                "type": "tag"
+              }
+            ],
+            "measurement": "karrot.group.members",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT last(\"count_active_7d\") AS \"active\", last(\"count_pickup_active_7d\") AS \"pickup active\", last(\"count_pickup_active_7d\") / last(\"count_active_7d\") * 100 AS \"ratio\" FROM \"karrot.group.members\" WHERE $timeFilter GROUP BY \"group\"",
+            "rawQuery": true,
+            "refId": "A",
+            "resultFormat": "table",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_active_7d"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "last"
+                },
+                {
+                  "params": [
+                    "active"
+                  ],
+                  "type": "alias"
+                }
+              ],
+              [
+                {
+                  "params": [
+                    "count_pickup_active_7d"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "last"
+                },
+                {
+                  "params": [
+                    "pickup active"
+                  ],
+                  "type": "alias"
+                }
+              ],
+              [
+                {
+                  "params": [
+                    "count_pickup_active_7d / count_active_7d"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "last"
+                },
+                {
+                  "params": [
+                    "ratio"
+                  ],
+                  "type": "alias"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "title": "Active users and pickups",
+        "transform": "table",
+        "type": "table"
       }
     ],
-    "refresh": false,
     "schemaVersion": 16,
     "style": "dark",
-    "tags": [
-      "prod"
-    ],
+    "tags": [],
     "templating": {
-      "list": []
+      "list": [
+        {
+          "current": {
+            "tags": [],
+            "text": "karrot-dev",
+            "value": "karrot-dev"
+          },
+          "hide": 0,
+          "label": null,
+          "name": "site",
+          "options": [],
+          "query": "influxdb",
+          "refresh": 1,
+          "regex": "/karrot/",
+          "skipUrlSync": false,
+          "type": "datasource"
+        }
+      ]
     },
     "time": {
-      "from": "now-30d",
+      "from": "now-6h",
       "to": "now"
     },
     "timepicker": {
@@ -392,18 +454,18 @@
         "30d"
       ]
     },
-    "timezone": "utc",
-    "title": "User auth statistics",
-    "uid": "000000002",
-    "version": 8
+    "timezone": "",
+    "title": "Groups",
+    "uid": "s0bumlUmz",
+    "version": 6
   },
   "meta": {
     "canAdmin": false,
     "canEdit": false,
     "canSave": false,
     "canStar": true,
-    "created": "2016-12-14T17:33:08+01:00",
-    "createdBy": "tiltec",
+    "created": "2019-01-08T19:11:36+01:00",
+    "createdBy": "nicksellen",
     "expires": "0001-01-01T00:00:00Z",
     "folderId": 0,
     "folderTitle": "General",
@@ -411,11 +473,11 @@
     "hasAcl": false,
     "isFolder": false,
     "provisioned": false,
-    "slug": "user-auth-statistics",
+    "slug": "groups",
     "type": "db",
-    "updated": "2019-01-05T20:28:15+01:00",
-    "updatedBy": "tiltec",
-    "url": "/d/000000002/user-auth-statistics",
-    "version": 8
+    "updated": "2019-01-29T17:58:45+01:00",
+    "updatedBy": "nicksellen",
+    "url": "/d/s0bumlUmz/groups",
+    "version": 6
   }
 }

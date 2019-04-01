@@ -633,7 +633,7 @@
                     "type": "fill"
                   }
                 ],
-                "measurement": "karrot.group.places",
+                "measurement": "karrot.group.stores",
                 "orderByTime": "ASC",
                 "policy": "default",
                 "refId": "A",
@@ -742,7 +742,7 @@
             "thresholds": [],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Place co-operations",
+            "title": "Store co-operations",
             "tooltip": {
               "shared": true,
               "sort": 0,
