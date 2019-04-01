@@ -8,3 +8,10 @@ def incoming_email_rejected():
             'incoming_email_rejected': 1,
         },
     }])
+
+
+def incoming_email_trimmed(fields):
+    write_points([{
+        'measurement': 'karrot.incoming_email',
+        'fields': fields,
+    }])
