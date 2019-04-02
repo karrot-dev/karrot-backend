@@ -145,7 +145,7 @@ class TestMessagePushNotificationTitles(TestCase):
         )
 
         title = get_message_title(reply, 'en')
-        self.assertEqual(title, 'blablablabla... / {}'.format(author.display_name))
+        self.assertEqual(title, 'blablablabla… / {}'.format(author.display_name))
 
     def test_pickup_message_title(self):
         author = UserFactory()
