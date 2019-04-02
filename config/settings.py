@@ -277,7 +277,7 @@ INFLUXDB_USE_CELERY = False
 INFLUXDB_USE_THREADING = True
 
 HUEY = {
-    'always_eager': True,
+    'immediate': True,
 }
 
 # If you have the email_reply_trimmer_service running, set this to 'http://localhost:4567/trim' (or similar)
