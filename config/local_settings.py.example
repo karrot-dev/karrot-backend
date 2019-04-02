@@ -143,7 +143,6 @@ FCM_SERVER_KEY = 'your server key'
 #}
 
 #HUEY = {
-#    'always_eager': False,
 #    'connection': {
 #        'host': REDIS_HOST,
 #    },
