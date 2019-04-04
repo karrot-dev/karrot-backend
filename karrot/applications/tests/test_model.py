@@ -36,3 +36,9 @@ class TestApplicationConversationModel(APITestCase):
 
     def test_sets_group(self):
         self.assertEqual(self.conversation.group, self.group)
+
+    def test_withdraw_pending_application_when_user_joins_group(self):
+        self.group.add_member(self.applicant)
+
+        self.application.refresh_from_db()
+        self.assertEqual(self.application.status, ApplicationStatus.WITHDRAWN.value)

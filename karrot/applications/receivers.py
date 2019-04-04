@@ -34,13 +34,19 @@ def delete_application_conversation(sender, instance, **kwargs):
 
 @receiver(post_save, sender=GroupMembership)
 def group_member_added(sender, instance, created, **kwargs):
-    if created:
-        group = instance.group
-        user = instance.user
+    if not created:
+        return
 
-        for application in group.application_set.all():
-            conversation = Conversation.objects.get_for_target(application)
-            conversation.join(user)
+    group = instance.group
+    user = instance.user
+
+    for application in group.application_set.all():
+        conversation = Conversation.objects.get_for_target(application)
+        conversation.join(user)
+
+    # If users join the group by another way (e.g. invitations), withdraw their application
+    for application in group.application_set.filter(user=user, status=ApplicationStatus.PENDING.value):
+        application.withdraw()
 
 
 @receiver(pre_delete, sender=GroupMembership)
