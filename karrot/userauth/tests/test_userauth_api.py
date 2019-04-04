@@ -58,23 +58,6 @@ class TestUsersAPI(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_cannot_create_user_with_short_name(self):
-        data = {
-            **self.user_data,
-            'display_name': 'aa',
-        }
-        response = self.client.post(self.url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_cannot_create_user_with_reserved_name(self):
-        data = {
-            **self.user_data,
-            'display_name': 'Karrot',
-        }
-        response = self.client.post(self.url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['display_name'], ['Karrot is a reserved name'])
-
     def test_retrieve_user_forbidden(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -172,17 +155,15 @@ class TestUserDeleteAPI(APITestCase):
 
         # actions are disabled when user is deleted
         self.assertEqual(
-            self.client.post('/api/auth/',
-                             {
-                                 'email': self.user.email,
-                                 'password': self.user.display_name
-                             }).status_code, status.HTTP_400_BAD_REQUEST
+            self.client.post('/api/auth/', {
+                'email': self.user.email,
+                'password': self.user.display_name
+            }).status_code, status.HTTP_400_BAD_REQUEST
         )
         self.assertEqual(
-            self.client.post('/api/auth/password/reset/',
-                             {
-                                 'email': self.user.email
-                             }).status_code, status.HTTP_400_BAD_REQUEST
+            self.client.post('/api/auth/password/reset/', {
+                'email': self.user.email
+            }).status_code, status.HTTP_400_BAD_REQUEST
         )
 
     def test_deletion_fails_without_verification_code(self):
@@ -219,26 +200,42 @@ class TestCreateUserErrors(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.url = '/api/auth/user/'
+        self.user_data = {'email': 'fancy@example.com', 'password': faker.name(), 'display_name': faker.name()}
 
     def test_create_user_with_similar_cased_email_fails(self):
-        response = self.client.post(
-            self.url, {
-                'email': 'fancy@example.com',
-                'password': faker.name(),
-                'display_name': faker.name()
-            }
-        )
+        response = self.client.post(self.url, self.user_data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        response = self.client.post(
-            self.url, {
-                'email': 'Fancy@example.com',
-                'password': faker.name(),
-                'display_name': faker.name()
-            }
-        )
+        response = self.client.post(self.url, {**self.user_data, 'email': 'Fancy@example.com'})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(response.data['email'], ['Similar e-mail exists: fancy@example.com'])
+
+    def test_cannot_create_user_without_email(self):
+        response = self.client.post(self.url, {**self.user_data, 'email': ''}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        response = self.client.post(self.url, {**self.user_data, 'email': None}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        data = {**self.user_data}
+        del data['email']
+        response = self.client.post(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_cannot_create_user_with_seemingly_invalid_email(self):
+        response = self.client.post(self.url, {**self.user_data, 'email': 'asdf'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_cannot_create_user_with_short_name(self):
+        data = {**self.user_data, 'display_name': 'aa'}
+        response = self.client.post(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_cannot_create_user_with_reserved_name(self):
+        data = {**self.user_data, 'display_name': 'Karrot'}
+        response = self.client.post(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['display_name'], ['Karrot is a reserved name'])
 
 
 class TestUploadPhoto(APITestCase):
@@ -331,19 +328,17 @@ class TestSetCurrentGroup(APITestCase):
     def test_set_current_group_succeeds(self):
         self.client.force_login(user=self.user)
         self.assertEqual(
-            self.client.patch('/api/auth/user/',
-                              {
-                                  'current_group': self.group.id
-                              }).status_code, status.HTTP_200_OK
+            self.client.patch('/api/auth/user/', {
+                'current_group': self.group.id
+            }).status_code, status.HTTP_200_OK
         )
 
     def test_set_current_group_as_non_member_fails(self):
         self.client.force_login(user=self.user)
         self.assertEqual(
-            self.client.patch('/api/auth/user/',
-                              {
-                                  'current_group': self.unrelated_group.id
-                              }).status_code, status.HTTP_400_BAD_REQUEST
+            self.client.patch('/api/auth/user/', {
+                'current_group': self.unrelated_group.id
+            }).status_code, status.HTTP_400_BAD_REQUEST
         )
 
 
