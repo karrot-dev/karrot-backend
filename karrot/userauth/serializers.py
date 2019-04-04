@@ -67,6 +67,7 @@ class AuthUserSerializer(serializers.ModelSerializer):
             'email': {
                 'required': True,
                 'allow_blank': False,
+                'allow_null': False,
             },
         }
 

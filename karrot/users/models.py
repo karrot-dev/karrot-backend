@@ -74,7 +74,7 @@ class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
 class User(AbstractBaseUser, BaseModel, LocationModel):
     objects = UserManager()
 
-    email = EmailField(unique=True)
+    email = EmailField(unique=True, null=True)
     is_active = BooleanField(default=True)
     is_staff = BooleanField(default=False)
     is_superuser = BooleanField(default=False)
@@ -191,7 +191,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         success_email = prepare_accountdelete_success_email(self)
 
         self.description = ''
-        self.email = ''
+        self.email = None
         self.is_active = False
         self.is_staff = False
         self.mail_verified = False
