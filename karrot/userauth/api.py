@@ -28,7 +28,8 @@ class AuthView(generics.GenericAPIView):
         """ Log in """
         serializer = AuthLoginSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            return Response(data=AuthUserSerializer(request.user).data, status=status.HTTP_201_CREATED)
+            user_serializer = AuthUserSerializer(request.user, context={'request': request})
+            return Response(data=user_serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
