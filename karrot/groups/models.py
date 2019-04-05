@@ -17,6 +17,7 @@ from karrot.conversations.models import ConversationMixin
 from karrot.groups import roles
 from karrot.history.models import History, HistoryTypus
 from karrot.pickups.models import PickupDate
+from karrot.utils import markdown
 
 
 class GroupStatus(Enum):
@@ -183,6 +184,9 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         self.photo.delete_all_created_images()
         # Deletes Original Image
         self.photo.delete(save=False)
+
+    def welcome_message_rendered(self, **kwargs):
+        return markdown.render(self.welcome_message, **kwargs)
 
 
 class Agreement(BaseModel):
