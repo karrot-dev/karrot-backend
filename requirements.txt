@@ -19,8 +19,8 @@ automat==0.7.0            # via twisted
 autopep8==1.4.3
 babel==2.6.0
 backcall==0.1.0           # via ipython
-bleach-whitelist==0.0.9
 bleach==3.1.0
+bleach_whitelist==0.0.10
 cchardet==2.1.4           # via talon
 certifi==2019.3.9         # via requests
 cffi==1.12.2              # via argon2-cffi
