@@ -25,7 +25,7 @@ django-versatileimagefield
 html2text
 babel
 talon
-huey
+huey<2 # upgrading needs rewritten tests
 gevent
 bleach
 bleach_whitelist
