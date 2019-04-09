@@ -119,6 +119,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
             'author',
             'id',
             'created_at',
+            'edited_at',
             'received_via',
             'thread_meta',
         )
