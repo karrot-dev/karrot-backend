@@ -29,6 +29,7 @@ class PlaceSerializer(serializers.ModelSerializer):
             'weeks_in_advance',
             'status',
             'is_subscribed',
+            'subscribers',
         ]
         extra_kwargs = {
             'name': {
@@ -41,6 +42,7 @@ class PlaceSerializer(serializers.ModelSerializer):
         }
         read_only_fields = [
             'id',
+            'subscribers',
         ]
 
     status = serializers.ChoiceField(
