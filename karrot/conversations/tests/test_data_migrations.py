@@ -85,3 +85,36 @@ class TestConversationGroupMigration(TestMigrations):
         self.assertEqual(self.group_conversation.group, self.group)
         self.assertEqual(self.pickup_conversation.group, self.group)
         self.assertEqual(self.application_conversation.group, self.group)
+
+
+class TestConvertMessageReactions(TestMigrations):
+    migrate_from = [
+        ('conversations', '0030_set_is_group_public'),
+    ]
+    migrate_to = [
+        ('conversations', '0031_convert_message_reactions'),
+    ]
+
+    def setUpBeforeMigration(self, apps):
+        self.Reaction = Reaction = apps.get_model('conversations', 'ConversationMessageReaction')
+        User = apps.get_model('users', 'User')
+        Message = apps.get_model('conversations', 'ConversationMessage')
+        Conversation = apps.get_model('conversations', 'Conversation')
+
+        user = User.objects.create(email=faker.email())
+        conversation = Conversation.objects.create()
+        message = Message.objects.create(conversation=conversation, author=user)
+        self.reaction = Reaction.objects.create(message=message, user=user, name='laughing')
+        self.alias_reaction = Reaction.objects.create(message=message, user=user, name='boat')
+        self.duplicate_alias_reaction = Reaction.objects.create(message=message, user=user, name='satisfied')
+        self.unknown_reaction = Reaction.objects.create(message=message, user=user, name='flag_de')
+
+    def test_converts_message_reactions(self):
+        self.reaction.refresh_from_db()
+        self.alias_reaction.refresh_from_db()
+
+        self.assertEqual(self.reaction.name, 'laughing')
+        self.assertEqual(self.alias_reaction.name, 'sailboat')
+
+        # unknown reaction are deleted
+        self.assertEqual(self.Reaction.objects.count(), 2)

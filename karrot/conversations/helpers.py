@@ -1,16 +1,14 @@
-from pymdownx import twemoji_db
+from karrot.conversations import emoji_db
 
 
 def normalize_emoji_name(name: str) -> str:
     """Return a normalized name of emoji (important when the same emoji has multiple names)"""
 
-    formatted_name = ':' + name + ':'
-
-    if formatted_name in twemoji_db.emoji:
+    if name in emoji_db.emoji:
         return name
 
-    if formatted_name in twemoji_db.aliases:
-        return twemoji_db.aliases[formatted_name][1:-1]
+    if name in emoji_db.aliases:
+        return emoji_db.aliases[name]
 
     # when not found, raise error
     raise Exception('not found')
