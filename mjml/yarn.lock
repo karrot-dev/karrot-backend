@@ -1950,10 +1950,10 @@ node-pre-gyp@^0.10.0:
     semver "^5.3.0"
     tar "^4"
 
-node-watch@^0.6.1:
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/node-watch/-/node-watch-0.6.1.tgz#b9874111ce9f5841b1c7596120206c7b825be0e9"
-  integrity sha512-gwQiR7weFRV8mAtT0x0kXkZ18dfRLB45xH7q0hCOVQMLfLb2f1ZaSvR57q4/b/Vj6B0RwMNJYbvb69e1yM7qEA==
+node-watch@^0.6.2:
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/node-watch/-/node-watch-0.6.2.tgz#48fd517b527ec21ac4f5f981aad2a6ddebc0131c"
+  integrity sha512-qmb/2ehVk1DC4gZYox7JgWXNucKnVk7uQmcoSeRaC7kzXsT8VOPIe7mbrR9Vc2TpGggS2yGUcgC98A2fKE53AA==
 
 nopt@^4.0.1, nopt@~4.0.1:
   version "4.0.1"
