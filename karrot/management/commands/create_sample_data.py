@@ -341,7 +341,7 @@ class Command(BaseCommand):
 
         # trust some group members
         for g in groups:
-            two_users = User.objects.filter(groupmembership__group=g['id'])[:2]
+            two_users = User.objects.filter(groupmembership__group=g['id']).distinct()[:2]
             login_user(two_users[0].id)
             trust_user_in_group(two_users[1].id, g['id'])
             login_user(two_users[1].id)

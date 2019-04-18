@@ -5,7 +5,7 @@ from rest_framework.test import APITestCase
 from karrot.users.models import User
 
 
-class TestUpdatePickupDatesCommand(APITestCase):
+class TestCreateSampleData(APITestCase):
     def test_run_command(self):
         out = StringIO()
         call_command('create_sample_data', '--quick', stdout=out)
