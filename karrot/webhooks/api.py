@@ -89,9 +89,6 @@ class IncomingEmailView(views.APIView):
                 else:
                     conversation = Conversation.objects.get(id=conversation_id)
 
-                if not conversation.participants.filter(id=user.id).exists():
-                    raise Exception('User not in conversation')
-
                 # 3. extract the email reply text
                 # Try plain text first, most emails have that.
                 if 'text' in content:
@@ -132,6 +129,10 @@ class IncomingEmailView(views.APIView):
 
                 # 4. add reply to conversation
                 if conversation.is_closed:
+                    notify_about_rejected_email(user, reply_plain)
+                    continue
+
+                if not conversation.participants.filter(id=user.id).exists():
                     notify_about_rejected_email(user, reply_plain)
                     continue
 
