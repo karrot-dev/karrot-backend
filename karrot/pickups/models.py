@@ -7,6 +7,7 @@ from django.db import models
 from django.db import transaction
 from django.db.models import Count, Q, DurationField
 from django.utils import timezone
+from enum import Enum
 
 from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField
 from karrot.conversations.models import ConversationMixin
@@ -14,6 +15,11 @@ from karrot.history.models import History, HistoryTypus
 from karrot.pickups import stats
 from karrot.pickups.utils import match_pickups_with_dates, rrule_between_dates_in_local_time
 from karrot.places.models import PlaceStatus
+
+
+class PickupType(Enum):
+    PICKUP = 'pickup'
+    MEETING = 'meeting'
 
 
 class PickupDateSeriesQuerySet(models.QuerySet):
@@ -218,6 +224,12 @@ class PickupDate(BaseModel, ConversationMixin):
 
     class Meta:
         ordering = ['date']
+
+    type = models.CharField(
+        default=PickupType.PICKUP.value,
+        choices=[(status.value, status.value) for status in PickupType],
+        max_length=255,
+    )
 
     series = models.ForeignKey(
         'PickupDateSeries',

@@ -10,7 +10,7 @@ from karrot.conversations.api import RetrieveConversationMixin
 from karrot.history.models import History, HistoryTypus
 from karrot.pickups.filters import (PickupDatesFilter, PickupDateSeriesFilter, FeedbackFilter)
 from karrot.pickups.models import (
-    PickupDate as PickupDateModel, PickupDateSeries as PickupDateSeriesModel, Feedback as FeedbackModel
+    PickupDate as PickupDateModel, PickupDateSeries as PickupDateSeriesModel, Feedback as FeedbackModel, PickupType
 )
 from karrot.pickups.permissions import (
     IsUpcoming, HasNotJoinedPickupDate, HasJoinedPickupDate, IsEmptyPickupDate, IsNotFull, IsSameCollector,
@@ -18,7 +18,8 @@ from karrot.pickups.permissions import (
 )
 from karrot.pickups.serializers import (
     PickupDateSerializer, PickupDateSeriesSerializer, PickupDateJoinSerializer, PickupDateLeaveSerializer,
-    FeedbackSerializer, PickupDateUpdateSerializer, PickupDateSeriesUpdateSerializer, PickupDateSeriesHistorySerializer
+    FeedbackSerializer, PickupDateUpdateSerializer, PickupDateSeriesUpdateSerializer,
+    PickupDateSeriesHistorySerializer, MeetingSerializer
 )
 from karrot.utils.mixins import PartialUpdateModelMixin
 
@@ -138,7 +139,7 @@ class PickupDateViewSet(
     - `?date_min=<from_date>`&`date_max=<to_date>` - filter by date, can also either give either date_min or date_max
     """
     serializer_class = PickupDateSerializer
-    queryset = PickupDateModel.objects
+    queryset = PickupDateModel.objects.filter(type=PickupType.PICKUP.value)
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = PickupDatesFilter
     permission_classes = (IsAuthenticated, IsUpcoming, IsGroupEditor, IsEmptyPickupDate)
@@ -181,3 +182,8 @@ class PickupDateViewSet(
     def conversation(self, request, pk=None):
         """Get conversation ID of this pickup"""
         return self.retrieve_conversation(request, pk)
+
+
+class MeetingViewSet(PickupDateViewSet):
+    queryset = PickupDateModel.objects.filter(type=PickupType.MEETING.value)
+    serializer_class = MeetingSerializer

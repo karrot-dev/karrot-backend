@@ -13,7 +13,7 @@ from karrot.base.base_models import CustomDateTimeTZRange
 from karrot.history.models import History, HistoryTypus
 from karrot.pickups import stats
 from karrot.pickups.models import (
-    PickupDate as PickupDateModel, Feedback as FeedbackModel, PickupDateSeries as PickupDateSeriesModel
+    PickupDate as PickupDateModel, Feedback as FeedbackModel, PickupDateSeries as PickupDateSeriesModel, PickupType
 )
 from karrot.utils.misc import find_changed
 
@@ -54,7 +54,7 @@ class DateTimeRangeField(serializers.Field):
         return CustomDateTimeTZRange(lower, upper)
 
 
-class PickupDateSerializer(serializers.ModelSerializer):
+class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = PickupDateModel
         fields = [
@@ -65,11 +65,10 @@ class PickupDateSerializer(serializers.ModelSerializer):
             'max_collectors',
             'collectors',
             'description',
-            'feedback_due',
-            'feedback_given_by',
             'is_disabled',
             'has_duration',
             'is_done',
+            'type',
         ]
         read_only_fields = [
             'id',
@@ -80,7 +79,6 @@ class PickupDateSerializer(serializers.ModelSerializer):
         ]
 
     collectors = serializers.SerializerMethodField()
-    feedback_due = serializers.DateTimeField(read_only=True)
 
     date = DateTimeRangeField()
 
@@ -90,7 +88,32 @@ class PickupDateSerializer(serializers.ModelSerializer):
     def save(self, **kwargs):
         return super().save(last_changed_by=self.context['request'].user)
 
+    def validate_place(self, place):
+        if not place.group.is_editor(self.context['request'].user):
+            if not place.group.is_member(self.context['request'].user):
+                raise PermissionDenied('You are not member of the place\'s group.')
+            raise PermissionDenied(_('You need to be a group editor'))
+        return place
+
+    def validate_date(self, date):
+        if not date.start > timezone.now() + timedelta(minutes=10):
+            raise serializers.ValidationError(_('The date should be in the future.'))
+        return date
+
+
+class PickupDateSerializer(EventSerializer):
+    class Meta(EventSerializer.Meta):
+        fields = EventSerializer.Meta.fields + [
+            'feedback_due',
+            'feedback_given_by',
+        ]
+
+    feedback_due = serializers.DateTimeField(read_only=True)
+
+    date = DateTimeRangeField()
+
     def create(self, validated_data):
+        validated_data['type'] = PickupType.PICKUP.value
         pickupdate = super().create(validated_data)
         History.objects.create(
             typus=HistoryTypus.PICKUP_CREATE,
@@ -104,17 +127,24 @@ class PickupDateSerializer(serializers.ModelSerializer):
         pickupdate.place.group.refresh_active_status()
         return pickupdate
 
-    def validate_place(self, place):
-        if not place.group.is_editor(self.context['request'].user):
-            if not place.group.is_member(self.context['request'].user):
-                raise PermissionDenied('You are not member of the place\'s group.')
-            raise PermissionDenied(_('You need to be a group editor'))
-        return place
 
-    def validate_date(self, date):
-        if not date.start > timezone.now() + timedelta(minutes=10):
-            raise serializers.ValidationError(_('The date should be in the future.'))
-        return date
+class MeetingSerializer(EventSerializer):
+    Meta = EventSerializer.Meta
+
+    def create(self, validated_data):
+        validated_data['type'] = PickupType.MEETING.value
+        meeting = super().create(validated_data)
+        History.objects.create(
+            typus=HistoryTypus.MEETING_CREATE,
+            group=meeting.place.group,
+            place=meeting.place,
+            pickup=meeting,
+            users=[self.context['request'].user],
+            payload=self.initial_data,
+            after=PickupDateHistorySerializer(meeting).data,
+        )
+        meeting.place.group.refresh_active_status()
+        return meeting
 
 
 class PickupDateUpdateSerializer(PickupDateSerializer):
