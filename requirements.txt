@@ -14,7 +14,7 @@ async-timeout==3.0.1      # via aioredis, asgiref
 atomicwrites==1.3.0       # via pytest
 attrs==19.1.0             # via automat, pytest, twisted
 autobahn==19.3.3          # via daphne
-autoflake==1.2
+autoflake==1.3
 automat==0.7.0            # via twisted
 autopep8==1.4.3
 babel==2.6.0
