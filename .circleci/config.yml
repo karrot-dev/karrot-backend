@@ -106,6 +106,9 @@ jobs:
       - *setup-env
       - *save-env-cache
       - run:
+          name: install tx client
+          command: env/bin/pip install transifex-client
+      - run:
           name: install hub
           command: |
             wget https://github.com/github/hub/releases/download/v2.5.1/hub-linux-amd64-2.5.1.tgz
