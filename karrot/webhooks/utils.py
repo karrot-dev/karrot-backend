@@ -14,6 +14,10 @@ def trim_with_talon(text):
     return trimmed, len(trimmed.splitlines())
 
 
+def trim_html_with_talon(html):
+    return quotations.extract_from_html(html)
+
+
 def trim_with_discourse(text):
     if settings.EMAIL_REPLY_TRIMMER_URL is None:
         logger.info('EMAIL_REPLY_TRIMMER_URL not set, skipping.')

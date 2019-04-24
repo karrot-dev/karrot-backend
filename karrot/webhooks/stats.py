@@ -15,3 +15,10 @@ def incoming_email_trimmed(fields):
         'measurement': 'karrot.incoming_email',
         'fields': fields,
     }])
+
+
+def incoming_html_email_trimmed(fields):
+    write_points([{
+        'measurement': 'karrot.incoming_email_html',
+        'fields': fields,
+    }])
