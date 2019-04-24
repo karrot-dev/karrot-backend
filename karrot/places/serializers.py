@@ -22,6 +22,7 @@ class PlaceSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'description',
+            'public_description',
             'group',
             'address',
             'latitude',
@@ -36,6 +37,10 @@ class PlaceSerializer(serializers.ModelSerializer):
                 'min_length': 3,
             },
             'description': {
+                'trim_whitespace': False,
+                'max_length': settings.DESCRIPTION_MAX_LENGTH,
+            },
+            'public_description': {
                 'trim_whitespace': False,
                 'max_length': settings.DESCRIPTION_MAX_LENGTH,
             },
@@ -142,3 +147,17 @@ class PlaceSubscriptionSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return PlaceSubscription.objects.create(**validated_data)
+
+
+class PlaceInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlaceModel
+        fields = [
+            'id',
+            'name',
+            'public_description',
+            'group',
+            'address',
+            'latitude',
+            'longitude',
+        ]

@@ -26,6 +26,7 @@ class Place(BaseModel, LocationModel, ConversationMixin):
     description = models.TextField(blank=True)
     weeks_in_advance = models.PositiveIntegerField(default=4)
     status = models.CharField(max_length=20, default=DEFAULT_STATUS)
+    public_description = models.TextField(blank=True)
 
     subscribers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,

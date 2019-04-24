@@ -22,7 +22,7 @@ from karrot.history.api import HistoryViewSet
 from karrot.invitations.api import InvitationsViewSet, InvitationAcceptViewSet
 from karrot.notifications.api import NotificationViewSet
 from karrot.pickups.api import PickupDateViewSet, PickupDateSeriesViewSet, FeedbackViewSet
-from karrot.places.api import PlaceViewSet
+from karrot.places.api import PlaceViewSet, PlaceInfoViewSet
 from karrot.subscriptions.api import PushSubscriptionViewSet
 from karrot.template_previews import views as template_preview_views
 from karrot.unsubscribe.api import UnsubscribeView
@@ -66,6 +66,7 @@ router.register('subscriptions/push', PushSubscriptionViewSet)
 
 # Place endpoints
 router.register('places', PlaceViewSet)
+router.register('places-info', PlaceInfoViewSet)
 
 # History endpoints
 router.register('history', HistoryViewSet)

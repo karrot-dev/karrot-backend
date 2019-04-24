@@ -11,7 +11,8 @@ from rest_framework.viewsets import GenericViewSet
 from karrot.conversations.api import RetrieveConversationMixin
 from karrot.pickups.models import PickupDate
 from karrot.places.models import Place as PlaceModel, PlaceSubscription
-from karrot.places.serializers import PlaceSerializer, PlaceUpdateSerializer, PlaceSubscriptionSerializer
+from karrot.places.serializers import PlaceSerializer, PlaceUpdateSerializer, PlaceSubscriptionSerializer, \
+    PlaceInfoSerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
 
 
@@ -108,3 +109,12 @@ class PlaceViewSet(
                 data={},
                 status=status.HTTP_204_NO_CONTENT if deleted else status.HTTP_404_NOT_FOUND,
             )
+
+
+class PlaceInfoViewSet(
+        GenericViewSet,
+        mixins.RetrieveModelMixin,
+        mixins.ListModelMixin,
+):
+    serializer_class = PlaceInfoSerializer
+    queryset = PlaceModel.objects.exclude(public_description='')
