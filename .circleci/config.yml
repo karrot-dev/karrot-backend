@@ -72,13 +72,17 @@ jobs:
       - checkout
       - *restore-env-cache
       - run:
+          name: install transifex client
+          command: env/bin/pip install transifex-client
+      - run:
           name: push source messages to transifex
           command: |
             set -xe
             cp config/local_settings.py.ci config/local_settings.py
             (cd mjml && yarn && ./convert)
-            env/bin/python manage.py makemessages
-            env/bin/tx push -s --no-interactive
+            source env/bin/activate
+            python manage.py makemessages
+            tx push -s --no-interactive
 
   deploy-dev:
     <<: *defaults
