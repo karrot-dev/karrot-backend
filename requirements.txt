@@ -44,7 +44,7 @@ django-extensions==2.1.6
 django-filter==2.1.0
 django-jinja==2.4.1
 django-redis==4.10.0
-django-silk==3.0.1
+django-silk==3.0.2
 django-timezone-field==3.0
 django-versatileimagefield==1.10
 django[argon2]==2.2
@@ -57,7 +57,7 @@ flake8==3.7.7
 freezegun==0.3.11
 furl==2.0.0
 gevent==1.4.0
-gprof2dot==2016.10.13     # via django-silk
+gprof2dot==2017.9.19      # via django-silk
 greenlet==0.4.15          # via gevent
 hiredis==1.0.0
 html2text==2018.1.9
