@@ -32,7 +32,7 @@ msgstr "Du brauchst eine bestätigte E-Mail-Adresse."
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:124
 #: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:111
 #: karrot/pickups/serializers.py:286 karrot/places/api.py:19
-#: karrot/places/serializers.py:78
+#: karrot/places/serializers.py:80
 msgid "You need to be a group editor"
 msgstr "Du brauchst Bearbeitungsrechte für diese Gruppe."
 
@@ -59,7 +59,7 @@ msgstr "Du kannst dich bei offenen Gruppen nicht bewerben"
 msgid "Your application to join %(group_name)s was accepted"
 msgstr "Deine Bewerbung bei %(group_name)s wurde akzeptiert"
 
-#: karrot/applications/templates/application_accepted.html.jinja2:231
+#: karrot/applications/templates/application_accepted.html.jinja2:235
 #: karrot/groups/templates/user_became_editor.html.jinja2:241
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:241
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:239
@@ -134,7 +134,7 @@ msgstr ""
 "stummschalten</a>."
 
 #: karrot/conversations/api.py:61 karrot/conversations/api.py:223
-#: karrot/conversations/api.py:394 karrot/conversations/serializers.py:146
+#: karrot/conversations/api.py:394 karrot/conversations/serializers.py:147
 msgid "You are not in this conversation"
 msgstr "Du bist nicht Teil dieser Unterhaltung"
 
@@ -179,7 +179,7 @@ msgstr ""
 msgid "New message in conflict resolution in %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/serializers.py:148
+#: karrot/conversations/serializers.py:149
 msgid "This conversation has been closed"
 msgstr ""
 
@@ -452,7 +452,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "Eine Einladung wurde bereits an diese E-Mail-Adresse versendet"
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:122
-#: karrot/places/serializers.py:76
+#: karrot/places/serializers.py:78
 msgid "You are not a member of this group."
 msgstr "Du bist kein Mitglied dieser Gruppe."
 
@@ -549,7 +549,9 @@ msgstr ""
 
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:232
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:232
-msgid "View conflict resolution case"
+#: karrot/issues/templates/new_conflict_resolution.html.jinja2:239
+#: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:239
+msgid "View discussion"
 msgstr ""
 
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:268
@@ -581,11 +583,6 @@ msgstr ""
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:226
 #, python-format
 msgid "This voting round ends at %(expiry_date)s."
-msgstr ""
-
-#: karrot/issues/templates/new_conflict_resolution.html.jinja2:239
-#: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:239
-msgid "View discussion"
 msgstr ""
 
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:6
@@ -711,22 +708,22 @@ msgid ""
 "                            <strong>Pickup notification</strong> emails for this group."
 msgstr ""
 
-#: karrot/places/serializers.py:83
+#: karrot/places/serializers.py:85
 msgid "Set at least one week in advance"
 msgstr "Mindestens eine Woche im Voraus einstellen."
 
-#: karrot/places/serializers.py:86
+#: karrot/places/serializers.py:88
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr ""
 
-#: karrot/places/serializers.py:138
+#: karrot/places/serializers.py:140
 msgid "You are already subscribed to this place"
 msgstr ""
 
-#: karrot/userauth/api.py:92 karrot/userauth/serializers.py:88
-#: karrot/userauth/serializers.py:133 karrot/userauth/serializers.py:154
-#: karrot/userauth/serializers.py:183 karrot/userauth/serializers.py:204
+#: karrot/userauth/api.py:93 karrot/userauth/serializers.py:93
+#: karrot/userauth/serializers.py:138 karrot/userauth/serializers.py:159
+#: karrot/userauth/serializers.py:188 karrot/userauth/serializers.py:209
 msgid "We could not send you an e-mail."
 msgstr "Wir konnten dir keine E-Mail zusenden."
 
@@ -738,23 +735,23 @@ msgstr "Diese E-Mail-Adresse ist bereits bestätigt."
 msgid "Unable to log in with provided credentials."
 msgstr ""
 
-#: karrot/userauth/serializers.py:75 karrot/userauth/serializers.py:170
+#: karrot/userauth/serializers.py:80 karrot/userauth/serializers.py:175
 msgid "Similar e-mail exists: "
 msgstr "Ähnliche E-Mail-Adresse existiert bereits:"
 
-#: karrot/userauth/serializers.py:111
+#: karrot/userauth/serializers.py:116
 msgid "Verification code is invalid"
 msgstr "Code ist ungültig"
 
-#: karrot/userauth/serializers.py:114
+#: karrot/userauth/serializers.py:119
 msgid "Verification code has expired"
 msgstr "Code ist veraltet"
 
-#: karrot/userauth/serializers.py:147 karrot/userauth/serializers.py:164
+#: karrot/userauth/serializers.py:152 karrot/userauth/serializers.py:169
 msgid "Wrong password"
 msgstr "Falsches Passwort"
 
-#: karrot/userauth/serializers.py:196
+#: karrot/userauth/serializers.py:201
 msgid "Unknown e-mail address"
 msgstr "Unbekannte E-Mail-Adresse"
 
