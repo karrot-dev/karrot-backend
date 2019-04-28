@@ -21,31 +21,35 @@ from karrot.utils.tests.fake import faker
 
 
 class TestPlacesAPI(APITestCase, ExtractPaginationMixin):
-    def setUp(self):
-        self.url = '/api/places/'
+    @classmethod
+    def setUpTestData(cls):
+        cls.url = '/api/places/'
 
         # group with two members and one place
-        self.member = UserFactory()
-        self.member2 = UserFactory()
-        self.group = GroupFactory(members=[self.member, self.member2])
-        self.place = PlaceFactory(group=self.group)
-        self.place_url = self.url + str(self.place.id) + '/'
+        cls.member = UserFactory()
+        cls.member2 = UserFactory()
+        cls.group = GroupFactory(members=[cls.member, cls.member2])
+        cls.place = PlaceFactory(group=cls.group)
+        cls.place_url = cls.url + str(cls.place.id) + '/'
 
         # not a member
-        self.user = UserFactory()
+        cls.user = UserFactory()
 
         # another place for above group
-        self.place_data = {
+        cls.place_data = {
             'name': faker.name(),
             'description': faker.name(),
-            'group': self.group.id,
+            'group': cls.group.id,
             'address': faker.address(),
             'latitude': faker.latitude(),
             'longitude': faker.longitude()
         }
 
         # another group
-        self.different_group = GroupFactory(members=[self.member2])
+        cls.different_group = GroupFactory(members=[cls.member2])
+
+    def setUp(self):
+        self.group.refresh_from_db()
 
     def test_create_place(self):
         response = self.client.post(self.url, self.place_data, format='json')

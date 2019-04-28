@@ -27,25 +27,27 @@ def group_timezone_at(group, **kwargs):
 
 
 class TestPickupNotificationTask(APITestCase):
-    def setUp(self):
-        self.user = VerifiedUserFactory()
-        self.other_user = VerifiedUserFactory()
-        self.non_verified_user = UserFactory()
-        self.group = GroupFactory(members=[self.user, self.other_user, self.non_verified_user])
-        self.place = PlaceFactory(group=self.group, subscribers=[self.user, self.other_user, self.non_verified_user])
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = VerifiedUserFactory()
+        cls.other_user = VerifiedUserFactory()
+        cls.non_verified_user = UserFactory()
+        cls.group = GroupFactory(members=[cls.user, cls.other_user, cls.non_verified_user])
+        cls.place = PlaceFactory(group=cls.group, subscribers=[cls.user, cls.other_user, cls.non_verified_user])
 
-        self.declined_place = PlaceFactory(group=self.group, status=PlaceStatus.DECLINED.value)
+        cls.declined_place = PlaceFactory(group=cls.group, status=PlaceStatus.DECLINED.value)
 
         # unsubscribe other_user from notifications
-        GroupMembership.objects.filter(group=self.group, user=self.other_user).update(notification_types=[])
+        GroupMembership.objects.filter(group=cls.group, user=cls.other_user).update(notification_types=[])
 
         # add some random inactive users, to make sure we don't send to them
         inactive_users = [VerifiedUserFactory(language='en') for _ in list(range(randint(2, 5)))]
         for user in inactive_users:
-            membership = self.group.add_member(user)
+            membership = cls.group.add_member(user)
             membership.inactive_at = timezone.now()
             membership.save()
 
+    def setUp(self):
         mail.outbox = []
 
     def create_empty_pickup(self, delta, place=None):

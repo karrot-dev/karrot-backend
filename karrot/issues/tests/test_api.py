@@ -1,19 +1,19 @@
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
-from django.conf import settings
 from django.core import mail
+from django.test import override_settings
 from django.utils import timezone
 from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from karrot.conversations.models import ConversationNotificationStatus
-from karrot.issues.factories import IssueFactory, vote_for_remove_user, vote_for_no_change
-from karrot.issues.models import Vote, IssueStatus
-from karrot.issues.tasks import process_expired_votings
 from karrot.groups import roles
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupNotificationType
+from karrot.issues.factories import IssueFactory, vote_for_remove_user, vote_for_no_change
+from karrot.issues.models import Vote, IssueStatus
+from karrot.issues.tasks import process_expired_votings
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import VerifiedUserFactory
 
@@ -28,9 +28,9 @@ def make_vote_data(options, scores=None):
     return [{'option': get_id(o), 'score': s} for o, s in zip(options, scores)]
 
 
+@override_settings(CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION=1)
 class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):
-        settings.CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION = 1
         self.member = VerifiedUserFactory()
         self.affected_member = VerifiedUserFactory()
         self.group = GroupFactory(members=[self.member], newcomers=[self.affected_member])
@@ -147,15 +147,16 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(len(response.data), 3)
 
 
+@override_settings(CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION=1)
 class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
-    def setUp(self):
-        settings.CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION = 1
-        self.member = VerifiedUserFactory()
-        self.newcomer = VerifiedUserFactory()
-        self.affected_member = VerifiedUserFactory()
-        self.group = GroupFactory(
-            members=[self.member, self.affected_member],
-            newcomers=[self.newcomer],
+    @classmethod
+    def setUpTestData(cls):
+        cls.member = VerifiedUserFactory()
+        cls.newcomer = VerifiedUserFactory()
+        cls.affected_member = VerifiedUserFactory()
+        cls.group = GroupFactory(
+            members=[cls.member, cls.affected_member],
+            newcomers=[cls.newcomer],
         )
 
         # effectively disable throttling
@@ -229,8 +230,8 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         response = self.create_issue_via_API(group=open_group, affected_user=member2)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
+    @override_settings(CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION=4)
     def test_cannot_create_issue_if_there_are_not_enough_active_editors(self):
-        settings.CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION = 4
         self.client.force_login(user=self.member)
         response = self.create_issue_via_API()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)

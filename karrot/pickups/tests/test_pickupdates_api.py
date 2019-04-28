@@ -16,40 +16,44 @@ from karrot.users.factories import UserFactory
 
 
 class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
-    def setUp(self):
-        self.url = '/api/pickup-dates/'
+    @classmethod
+    def setUpTestData(cls):
+        cls.url = '/api/pickup-dates/'
 
         # pickup date for group with one member and one place
-        self.member = UserFactory()
-        self.second_member = UserFactory()
-        self.group = GroupFactory(members=[self.member, self.second_member])
-        self.place = PlaceFactory(group=self.group)
-        self.pickup = PickupDateFactory(place=self.place)
-        self.pickup_url = self.url + str(self.pickup.id) + '/'
-        self.join_url = self.pickup_url + 'add/'
-        self.leave_url = self.pickup_url + 'remove/'
-        self.conversation_url = self.pickup_url + 'conversation/'
+        cls.member = UserFactory()
+        cls.second_member = UserFactory()
+        cls.group = GroupFactory(members=[cls.member, cls.second_member])
+        cls.place = PlaceFactory(group=cls.group)
+        cls.pickup = PickupDateFactory(place=cls.place)
+        cls.pickup_url = cls.url + str(cls.pickup.id) + '/'
+        cls.join_url = cls.pickup_url + 'add/'
+        cls.leave_url = cls.pickup_url + 'remove/'
+        cls.conversation_url = cls.pickup_url + 'conversation/'
 
         # not a member of the group
-        self.user = UserFactory()
+        cls.user = UserFactory()
 
         # another pickup date for above place
-        self.pickup_data = {
+        cls.pickup_data = {
             'date': to_range(timezone.now() + relativedelta(days=2)).as_list(),
             'max_collectors': 5,
-            'place': self.place.id
+            'place': cls.place.id
         }
 
         # past pickup date
-        self.past_pickup_data = {
+        cls.past_pickup_data = {
             'date': to_range(timezone.now() - relativedelta(days=1)).as_list(),
             'max_collectors': 5,
-            'place': self.place.id
+            'place': cls.place.id
         }
-        self.past_pickup = PickupDateFactory(place=self.place, date=to_range(timezone.now() - relativedelta(days=1)))
-        self.past_pickup_url = self.url + str(self.past_pickup.id) + '/'
-        self.past_join_url = self.past_pickup_url + 'add/'
-        self.past_leave_url = self.past_pickup_url + 'remove/'
+        cls.past_pickup = PickupDateFactory(place=cls.place, date=to_range(timezone.now() - relativedelta(days=1)))
+        cls.past_pickup_url = cls.url + str(cls.past_pickup.id) + '/'
+        cls.past_join_url = cls.past_pickup_url + 'add/'
+        cls.past_leave_url = cls.past_pickup_url + 'remove/'
+
+    def setUp(self):
+        self.group.refresh_from_db()
 
     def test_create_pickup(self):
         response = self.client.post(self.url, self.pickup_data, format='json')

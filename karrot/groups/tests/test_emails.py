@@ -16,12 +16,13 @@ from karrot.users.factories import VerifiedUserFactory, UserFactory
 
 
 class TestGroupSummaryEmails(APITestCase):
-    def setUp(self):
-        self.group = GroupFactory()
+    @classmethod
+    def setUpTestData(cls):
+        cls.group = GroupFactory()
 
-        self.user_without_notifications = VerifiedUserFactory(language='en')
-        self.group.add_member(self.user_without_notifications)
-        m = GroupMembership.objects.get(group=self.group, user=self.user_without_notifications)
+        cls.user_without_notifications = VerifiedUserFactory(language='en')
+        cls.group.add_member(cls.user_without_notifications)
+        m = GroupMembership.objects.get(group=cls.group, user=cls.user_without_notifications)
         m.notification_types = []
         m.save()
 
@@ -30,11 +31,11 @@ class TestGroupSummaryEmails(APITestCase):
 
         unverified_users = [UserFactory(language='en') for _ in list(range(randint(2, 5)))]
         for user in unverified_users:
-            self.group.add_member(user)
+            cls.group.add_member(user)
 
         inactive_users = [VerifiedUserFactory(language='en') for _ in list(range(randint(2, 5)))]
         for user in inactive_users:
-            membership = self.group.add_member(user)
+            membership = cls.group.add_member(user)
             membership.inactive_at = timezone.now()
             membership.save()
 
