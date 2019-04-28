@@ -125,8 +125,7 @@ class TestHistoryAPIWithExistingPlace(APITestCase, ExtractPaginationMixin):
     def test_create_pickup(self):
         self.client.force_login(self.member)
         self.client.post(
-            '/api/pickup-dates/',
-            {
+            '/api/pickup-dates/', {
                 'date': to_range(timezone.now() + relativedelta(days=1)).as_list(),
                 'place': self.place.id
             },
@@ -138,8 +137,7 @@ class TestHistoryAPIWithExistingPlace(APITestCase, ExtractPaginationMixin):
     def test_create_series(self):
         self.client.force_login(self.member)
         self.client.post(
-            '/api/pickup-date-series/',
-            {
+            '/api/pickup-date-series/', {
                 'start_date': timezone.now(),
                 'rule': 'FREQ=WEEKLY',
                 'place': self.place.id
@@ -322,8 +320,16 @@ class TestHistoryAPIDateFiltering(APITestCase, ExtractPaginationMixin):
 
     def test_filter_by_date(self):
         self.client.force_login(self.member)
+
+        # change the group
         self.client.post('/api/groups/', {'name': 'xyzabc', 'timezone': 'Europe/Berlin'})
-        response = self.get_results(history_url, data={'date_max': timezone.now()})
+
+        # filter by date
+        now = timezone.now().isoformat()
+        response = self.get_results(history_url, data={'date_before': now})
         self.assertEqual(len(response.data), 1)
-        response = self.get_results(history_url, data={'date_min': timezone.now()})
+        response = self.get_results(history_url + '?date_before=' + now)
+        self.assertEqual(len(response.data), 1)
+        response = self.get_results(history_url, data={'date_after': now})
+        response = self.get_results(history_url, data={'date_after': now})
         self.assertEqual(len(response.data), 0)

@@ -21,13 +21,6 @@ class DateTimeRangeField(RangeField):
         super(DateTimeRangeField, self).__init__(fields, *args, **kwargs)
 
 
-class ISODateTimeFromToRangeFilter(filters.RangeFilter):
-    """
-    Filters a date time field for a date time range
-    """
-    field_class = DateTimeRangeField
-
-
 class ISODateTimeRangeFromToRangeFilter(filters.Filter):
     """
     Filters a date time *range* field for a date time range

@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters
 
-from karrot.base.filters import ISODateTimeFromToRangeFilter, ISODateTimeRangeFromToRangeFilter
+from karrot.base.filters import ISODateTimeRangeFromToRangeFilter
 from karrot.pickups.models import PickupDate, PickupDateSeries, Feedback
 
 
@@ -33,7 +33,7 @@ class FeedbackFilter(filters.FilterSet):
     place = filters.NumberFilter(field_name='about__place__id')
     about = filters.NumberFilter(field_name='about')
     given_by = filters.NumberFilter(field_name='given_by')
-    created_at = ISODateTimeFromToRangeFilter(field_name='created_at')
+    created_at = filters.IsoDateTimeFromToRangeFilter(field_name='created_at')
 
     class Meta:
         model = Feedback

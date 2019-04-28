@@ -1,6 +1,5 @@
 from django_filters import rest_framework as filters
 
-from karrot.base.filters import ISODateTimeFromToRangeFilter
 from karrot.history.models import HistoryTypus, History
 
 
@@ -10,7 +9,7 @@ def filter_history_typus(qs, field, value):
 
 class HistoryFilter(filters.FilterSet):
     typus = filters.ChoiceFilter(choices=HistoryTypus.items(), method=filter_history_typus)
-    date = ISODateTimeFromToRangeFilter(field_name='date')
+    date = filters.IsoDateTimeFromToRangeFilter(field_name='date')
 
     class Meta:
         model = History
