@@ -400,12 +400,10 @@ class Command(BaseCommand):
         leave_group(o.id)
 
         # Create user that is already preconfigured in frontend, and join a group
-        foo, _ = User.objects.get_or_create(
-            defaults={
-                'password': 'foofoo',
-                'display_name': 'Playground User'
-            }, email='foo@foo.com'
-        )
+        foo = User.objects.filter(email='foo@foo.com').first()
+        if foo is None:
+            foo = User.objects.create_user(email='foo@foo.com', password='foofoo', display_name='Playground User')
+
         login_user(foo.id)
         join_group(groups[0]['id'])
 
