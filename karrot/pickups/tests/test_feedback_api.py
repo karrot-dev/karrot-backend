@@ -14,69 +14,76 @@ from karrot.pickups.factories import PickupDateFactory, FeedbackFactory
 
 
 class FeedbackTest(APITestCase, ExtractPaginationMixin):
-    def setUp(self):
-        self.url = '/api/feedback/'
+    @classmethod
+    def setUpTestData(cls):
+        """ This method runs once before tests in this class """
+        cls.url = '/api/feedback/'
 
-        self.member = UserFactory()
-        self.collector = UserFactory()
-        self.collector2 = UserFactory()
-        self.collector3 = UserFactory()
-        self.evil_collector = UserFactory()
-        self.group = GroupFactory(
-            members=[self.member, self.collector, self.evil_collector, self.collector2, self.collector3]
+        cls.member = UserFactory()
+        cls.collector = UserFactory()
+        cls.collector2 = UserFactory()
+        cls.collector3 = UserFactory()
+        cls.evil_collector = UserFactory()
+        cls.group = GroupFactory(
+            members=[cls.member, cls.collector, cls.evil_collector, cls.collector2, cls.collector3]
         )
-        self.place = PlaceFactory(group=self.group)
-        self.pickup = PickupDateFactory(
-            place=self.place,
+        cls.place = PlaceFactory(group=cls.group)
+        cls.pickup = PickupDateFactory(
+            place=cls.place,
             date=to_range(timezone.now() + relativedelta(days=1)),
-            collectors=[self.collector, self.collector2, self.collector3],
+            collectors=[cls.collector, cls.collector2, cls.collector3],
         )
 
         # not a member of the group
-        self.user = UserFactory()
+        cls.user = UserFactory()
 
         # past pickup date
-        self.past_pickup = PickupDateFactory(
-            place=self.place,
+        cls.past_pickup = PickupDateFactory(
+            place=cls.place,
             date=to_range(timezone.now() - relativedelta(days=1)),
-            collectors=[self.collector, self.evil_collector, self.collector2, self.collector3],
+            collectors=[cls.collector, cls.evil_collector, cls.collector2, cls.collector3],
         )
 
         # old pickup date with feedback
-        self.old_pickup = PickupDateFactory(
-            place=self.place,
+        cls.old_pickup = PickupDateFactory(
+            place=cls.place,
             date=to_range(timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS + 2)),
             collectors=[
-                self.collector3,
+                cls.collector3,
             ]
         )
-        self.old_feedback = FeedbackFactory(about=self.old_pickup, given_by=self.collector3)
+        cls.old_feedback = FeedbackFactory(about=cls.old_pickup, given_by=cls.collector3)
 
         # create feedback for POST method
-        self.feedback_post = {'about': self.past_pickup.id, 'weight': 2, 'comment': 'asfjk'}
+        cls.feedback_post = {'about': cls.past_pickup.id, 'weight': 2, 'comment': 'asfjk'}
 
         # create feedback for POST method without weight and comment
-        self.feedback_without_weight_comment = {
-            'about': self.past_pickup.id,
+        cls.feedback_without_weight_comment = {
+            'about': cls.past_pickup.id,
         }
 
         # create feedback to future pickup
-        self.future_feedback_post = {'about': self.pickup.id, 'weight': 2, 'comment': 'asfjk'}
+        cls.future_feedback_post = {'about': cls.pickup.id, 'weight': 2, 'comment': 'asfjk'}
 
         # create feedback for an old pickup
-        self.feedback_for_old_pickup = {'about': self.old_pickup.id, 'weight': 5, 'comment': 'this is long ago'}
+        cls.feedback_for_old_pickup = {'about': cls.old_pickup.id, 'weight': 5, 'comment': 'this is long ago'}
 
         # create feedback for GET method
-        self.feedback_get = {'given_by': self.collector, 'about': self.past_pickup, 'weight': 2, 'comment': 'asfjk2'}
+        cls.feedback_get = {'given_by': cls.collector, 'about': cls.past_pickup, 'weight': 2, 'comment': 'asfjk2'}
 
-        self.feedback_get_2 = {'given_by': self.collector2, 'about': self.past_pickup, 'weight': 2, 'comment': 'asfjk'}
+        cls.feedback_get_2 = {'given_by': cls.collector2, 'about': cls.past_pickup, 'weight': 2, 'comment': 'asfjk'}
 
         # create 2 instances of feedback for GET method
-        self.feedback = Feedback.objects.create(**self.feedback_get)
-        Feedback.objects.create(**self.feedback_get_2)
+        cls.feedback = Feedback.objects.create(**cls.feedback_get)
+        Feedback.objects.create(**cls.feedback_get_2)
 
-        self.feedback_url = self.url + str(self.feedback.id) + '/'
-        self.old_feedback_url = self.url + str(self.old_feedback.id) + '/'
+        cls.feedback_url = cls.url + str(cls.feedback.id) + '/'
+        cls.old_feedback_url = cls.url + str(cls.old_feedback.id) + '/'
+
+    def setUp(self):
+        """ This method runs before each test. Refresh some data that gets modified in test cases. """
+        self.group.refresh_from_db()
+        self.feedback.refresh_from_db()
 
     def test_create_feedback_fails_as_non_user(self):
         """
