@@ -48,7 +48,6 @@ def group_member_added(sender, instance, created, **kwargs):
 
 @receiver(pre_delete, sender=GroupMembership)
 def group_member_removed(sender, instance, **kwargs):
-    """When a user is removed from a conversation we will notify them."""
     group = instance.group
     user = instance.user
     conversation = Conversation.objects.get_for_target(group)
@@ -93,4 +92,4 @@ def trust_given(sender, instance, created, **kwargs):
 def remove_trust(sender, instance, **kwargs):
     membership = instance
 
-    Trust.objects.filter(given_by=membership.user).delete()
+    Trust.objects.filter(given_by=membership.user, membership__group=membership.group).delete()

@@ -94,6 +94,18 @@ class TestTrustReceiver(TestCase):
 
         self.assertEqual(0, Trust.objects.filter(membership=membership).count())
 
+    def test_do_not_remove_trust_in_other_groups(self):
+        editor = UserFactory()
+        newcomer = UserFactory()
+        group = GroupFactory(members=[editor], newcomers=[newcomer])
+        membership = GroupMembership.objects.get(user=newcomer, group=group)
+        other_group = GroupFactory(members=[editor])
+        Trust.objects.create(membership=membership, given_by=editor)
+
+        other_group.remove_member(editor)
+
+        self.assertEqual(1, Trust.objects.filter(membership=membership).count())
+
 
 class TestTrustAPI(APITestCase):
     def setUp(self):

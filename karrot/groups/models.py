@@ -115,11 +115,7 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         return membership
 
     def remove_member(self, user):
-        History.objects.create(
-            typus=HistoryTypus.GROUP_LEAVE, group=self, users=[
-                user,
-            ]
-        )
+        History.objects.create(typus=HistoryTypus.GROUP_LEAVE, group=self, users=[user])
         GroupMembership.objects.filter(group=self, user=user).delete()
 
     def is_member(self, user):
