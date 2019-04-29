@@ -113,7 +113,7 @@ pytz==2019.1
 raven==6.10.0
 redis==3.2.1
 regex==2019.4.14          # via talon
-requests-mock==1.5.2
+requests-mock==1.6.0
 requests==2.21.0          # via coreapi, django-anymail, django-silk, influxdb, pyfcm, requests-mock, sparkpost
 scikit-learn==0.20.3      # via talon
 scipy==1.2.1              # via scikit-learn, talon
