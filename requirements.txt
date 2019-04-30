@@ -48,7 +48,7 @@ django-silk==3.0.2
 django-timezone-field==3.0
 django-versatileimagefield==1.10
 django[argon2]==2.2
-djangorestframework==3.9.2
+djangorestframework==3.9.3
 entrypoints==0.3          # via flake8
 execnet==1.6.0            # via pytest-xdist
 factory-boy==2.11.1
