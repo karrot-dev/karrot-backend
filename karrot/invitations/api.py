@@ -1,3 +1,5 @@
+from dateutil.relativedelta import relativedelta
+
 from django.utils import timezone
 from django_filters import rest_framework as filters
 from rest_framework import mixins
@@ -21,10 +23,8 @@ class NotInGroup(BasePermission):
 
 
 class CanResend(BasePermission):
-    from datetime import timedelta
-
     def has_object_permission(self, request, view, obj):
-        return timezone.now() >= obj.created_at + self.timedelta(hours=1)
+        return timezone.now() >= obj.created_at + relativedelta(hours=1)
 
 
 class InvitationsViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
@@ -58,7 +58,7 @@ class InvitationsViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mix
 
         instance.resend_invitation_email()
 
-        return Response(instance.created_at)
+        return Response()
 
 
 class InvitationAcceptViewSet(GenericViewSet):
