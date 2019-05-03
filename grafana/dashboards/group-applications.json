@@ -17,9 +17,139 @@
     "gnetId": null,
     "graphTooltip": 0,
     "id": 25,
-    "iteration": 1543436279869,
+    "iteration": 1553447554276,
     "links": [],
     "panels": [
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "$site",
+        "fill": 1,
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        },
+        "id": 8,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "paceLength": 10,
+        "percentage": false,
+        "pointradius": 2,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "alias": "group $tag_group",
+            "groupBy": [
+              {
+                "params": [
+                  "$interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "group"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "previous"
+                ],
+                "type": "fill"
+              }
+            ],
+            "hide": false,
+            "measurement": "karrot.group.applications",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT max(\"count_status_pending\") FROM \"karrot.group.applications\" WHERE (\"group_status\" = 'active') AND $timeFilter GROUP BY time($interval), \"group\" fill(previous)",
+            "rawQuery": false,
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_status_pending"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "max"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "pending applications",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
       {
         "cacheTimeout": null,
         "colorBackground": false,
@@ -42,7 +172,7 @@
           "h": 3,
           "w": 5,
           "x": 0,
-          "y": 0
+          "y": 8
         },
         "id": 4,
         "interval": null,
@@ -139,7 +269,7 @@
           "h": 3,
           "w": 5,
           "x": 5,
-          "y": 0
+          "y": 8
         },
         "id": 5,
         "interval": null,
@@ -236,7 +366,7 @@
           "h": 3,
           "w": 5,
           "x": 10,
-          "y": 0
+          "y": 8
         },
         "id": 6,
         "interval": null,
@@ -316,10 +446,10 @@
         "datasource": "$site",
         "fontSize": "100%",
         "gridPos": {
-          "h": 14,
-          "w": 10,
+          "h": 8,
+          "w": 9,
           "x": 0,
-          "y": 3
+          "y": 11
         },
         "id": 2,
         "links": [],
@@ -468,7 +598,7 @@
         "type": "table"
       }
     ],
-    "schemaVersion": 16,
+    "schemaVersion": 18,
     "style": "dark",
     "tags": [],
     "templating": {
@@ -523,7 +653,7 @@
     "timezone": "",
     "title": "Group Applications",
     "uid": "ydNQAo5ika",
-    "version": 5
+    "version": 6
   },
   "meta": {
     "canAdmin": false,
@@ -541,9 +671,9 @@
     "provisioned": false,
     "slug": "group-applications",
     "type": "db",
-    "updated": "2018-11-28T21:32:46+01:00",
+    "updated": "2019-03-24T18:27:14+01:00",
     "updatedBy": "tiltec",
     "url": "/d/ydNQAo5ika/group-applications",
-    "version": 5
+    "version": 6
   }
 }

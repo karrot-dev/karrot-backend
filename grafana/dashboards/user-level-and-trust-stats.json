@@ -17,7 +17,7 @@
     "gnetId": null,
     "graphTooltip": 0,
     "id": 20,
-    "iteration": 1544525541278,
+    "iteration": 1553677488226,
     "links": [],
     "panels": [
       {
@@ -114,7 +114,13 @@
                 }
               ]
             ],
-            "tags": []
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
           }
         ],
         "thresholds": "",
@@ -224,7 +230,13 @@
                 }
               ]
             ],
-            "tags": []
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
           }
         ],
         "thresholds": "",
@@ -245,19 +257,20 @@
         "datasource": "$site",
         "fontSize": "100%",
         "gridPos": {
-          "h": 6,
-          "w": 24,
+          "h": 7,
+          "w": 11,
           "x": 0,
           "y": 3
         },
-        "id": 8,
+        "hideTimeOverride": false,
+        "id": 13,
         "links": [],
         "pageSize": null,
         "scroll": true,
         "showHeader": true,
         "sort": {
-          "col": 5,
-          "desc": false
+          "col": 2,
+          "desc": true
         },
         "styles": [
           {
@@ -265,6 +278,137 @@
             "dateFormat": "YYYY-MM-DD HH:mm:ss",
             "pattern": "Time",
             "type": "hidden"
+          },
+          {
+            "alias": "",
+            "colorMode": null,
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "decimals": 0,
+            "pattern": "/.*/",
+            "thresholds": [],
+            "type": "number",
+            "unit": "short"
+          }
+        ],
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "group"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "0"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.events",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "table",
+            "select": [
+              [
+                {
+                  "params": [
+                    "member_became_editor"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                },
+                {
+                  "params": [
+                    "new editors"
+                  ],
+                  "type": "alias"
+                }
+              ],
+              [
+                {
+                  "params": [
+                    "trust_given"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                },
+                {
+                  "params": [
+                    "trust"
+                  ],
+                  "type": "alias"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
+          }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Group stats",
+        "transform": "table",
+        "type": "table"
+      },
+      {
+        "columns": [],
+        "datasource": "$site",
+        "fontSize": "100%",
+        "gridPos": {
+          "h": 7,
+          "w": 11,
+          "x": 0,
+          "y": 10
+        },
+        "id": 8,
+        "links": [],
+        "pageSize": null,
+        "scroll": true,
+        "showHeader": true,
+        "sort": {
+          "col": 2,
+          "desc": true
+        },
+        "styles": [
+          {
+            "alias": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "pattern": "Time",
+            "type": "hidden"
+          },
+          {
+            "alias": "",
+            "colorMode": null,
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "mappingType": 1,
+            "pattern": "percent editors",
+            "thresholds": [],
+            "type": "number",
+            "unit": "percentunit"
           },
           {
             "alias": "",
@@ -295,8 +439,8 @@
             "measurement": "karrot.group.members",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT sum(\"group_activity\") AS \"page impressions\", sum(\"pickup_joined\") AS \"pickups joined\", sum(\"pickup_done\") AS \"pickups done\", sum(\"pickup_missed\") AS \"pickups missed\", sum(\"feedback\") AS \"feedbacks given\", sum(\"message\") AS \"messages written\", sum(\"message_reaction\") AS \"message reactions\", sum(\"group_joined\") AS \"new members\" FROM \"karrot.events\" WHERE $timeFilter GROUP BY \"group\"",
-            "rawQuery": false,
+            "query": "SELECT \nlast(\"count_active_30d\") AS \"members\", \nlast(\"count_active_editors_30d\") AS \"editors\", \nlast(\"count_active_newcomers_30d\") AS \"newcomers\",\nlast(\"count_active_editors_30d\") / last(\"count_active_30d\") AS \"percent editors\"\nFROM \"karrot.group.members\" WHERE (\"group_status\" = 'active') AND $timeFilter GROUP BY \"group\"",
+            "rawQuery": true,
             "refId": "A",
             "resultFormat": "table",
             "select": [
@@ -356,42 +500,6 @@
               ]
             ],
             "tags": []
-          },
-          {
-            "groupBy": [
-              {
-                "params": [
-                  "group"
-                ],
-                "type": "tag"
-              }
-            ],
-            "measurement": "karrot.events",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "B",
-            "resultFormat": "table",
-            "select": [
-              [
-                {
-                  "params": [
-                    "member_became_editor"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "sum"
-                },
-                {
-                  "params": [
-                    "new editors"
-                  ],
-                  "type": "alias"
-                }
-              ]
-            ],
-            "tags": []
           }
         ],
         "title": "Active memberships in groups",
@@ -406,10 +514,137 @@
         "datasource": "$site",
         "fill": 1,
         "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 17
+        },
+        "id": 15,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "paceLength": 10,
+        "percentage": false,
+        "pointradius": 2,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "alias": "$tag_group",
+            "groupBy": [
+              {
+                "params": [
+                  "1d"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "group"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "null"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.events",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "trust_given"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "count"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Trust per day and group",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "$site",
+        "fill": 1,
+        "gridPos": {
           "h": 7,
           "w": 24,
           "x": 0,
-          "y": 9
+          "y": 25
         },
         "id": 11,
         "interval": "1h",
@@ -427,6 +662,7 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "connected",
+        "paceLength": 10,
         "percentage": false,
         "pointradius": 5,
         "points": false,
@@ -437,7 +673,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "alias": "group $tag_group",
+            "alias": "$tag_group",
             "dsType": "influxdb",
             "groupBy": [
               {
@@ -469,7 +705,7 @@
               [
                 {
                   "params": [
-                    "count_active_newcomers_7d"
+                    "count_active_newcomers_30d"
                   ],
                   "type": "field"
                 },
@@ -479,13 +715,20 @@
                 }
               ]
             ],
-            "tags": []
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
           }
         ],
         "thresholds": [],
         "timeFrom": null,
+        "timeRegions": [],
         "timeShift": null,
-        "title": "Active newcomers last week",
+        "title": "Active newcomers",
         "tooltip": {
           "shared": true,
           "sort": 2,
@@ -523,7 +766,7 @@
         }
       }
     ],
-    "schemaVersion": 16,
+    "schemaVersion": 18,
     "style": "dark",
     "tags": [],
     "templating": {
@@ -578,7 +821,7 @@
     "timezone": "",
     "title": "User level and trust stats",
     "uid": "ydNQAo5ik",
-    "version": 30
+    "version": 39
   },
   "meta": {
     "canAdmin": false,
@@ -596,9 +839,9 @@
     "provisioned": false,
     "slug": "user-level-and-trust-stats",
     "type": "db",
-    "updated": "2018-12-11T11:53:54+01:00",
+    "updated": "2019-03-27T10:21:51+01:00",
     "updatedBy": "tiltec",
     "url": "/d/ydNQAo5ik/user-level-and-trust-stats",
-    "version": 30
+    "version": 39
   }
 }

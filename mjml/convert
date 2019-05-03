@@ -8,7 +8,7 @@ const BASEDIR = path.resolve(path.join(__dirname, '..'));
 const watch = require('node-watch');
 const ws = require('ws');
 const http = require('http');
-const FOODSAVING_BASE = path.join(BASEDIR, 'foodsaving')
+const KARROT_BASE = path.join(BASEDIR, 'karrot')
 
 const websocketPort = 8001;
 
@@ -16,13 +16,13 @@ const listeners = [];
 
 if (process.argv.indexOf('--watch') !== -1) {
   compileAll();  
-  console.log('watching for changes to mjml files in', FOODSAVING_BASE);
-  watch(FOODSAVING_BASE, { recursive: true, filter: /\.mjml$/ }, (event, file) => {
+  console.log('watching for changes to mjml files in', KARROT_BASE);
+  watch(KARROT_BASE, { recursive: true, filter: /\.mjml$/ }, (event, file) => {
     // We could just compile the specific one but then would not handle when just partials change
     compileAll();
   });
 
-  watch(FOODSAVING_BASE, { recursive: true, filter: /\.jinja2$/ }, (event, file) => {    
+  watch(KARROT_BASE, { recursive: true, filter: /\.jinja2$/ }, (event, file) => {    
     console.log('jinja2 change', event, file);
     listeners.forEach(fn => fn());
   });
@@ -46,7 +46,7 @@ if (process.argv.indexOf('--watch') !== -1) {
 }
 
 function compileAll () {
-  find.file(/\/templates\/[^_][^\/]*\.mjml$/, FOODSAVING_BASE , files => {
+  find.file(/\/templates\/[^_][^\/]*\.mjml$/, KARROT_BASE , files => {
     files.forEach(compile);
   })
 }

@@ -72,13 +72,17 @@ jobs:
       - checkout
       - *restore-env-cache
       - run:
+          name: install transifex client
+          command: env/bin/pip install transifex-client
+      - run:
           name: push source messages to transifex
           command: |
             set -xe
             cp config/local_settings.py.ci config/local_settings.py
             (cd mjml && yarn && ./convert)
-            env/bin/python manage.py makemessages
-            env/bin/tx push -s --no-interactive
+            source env/bin/activate
+            python manage.py makemessages
+            tx push -s --no-interactive
 
   deploy-dev:
     <<: *defaults
@@ -106,6 +110,9 @@ jobs:
       - *setup-env
       - *save-env-cache
       - run:
+          name: install tx client
+          command: env/bin/pip install transifex-client
+      - run:
           name: install hub
           command: |
             wget https://github.com/github/hub/releases/download/v2.5.1/hub-linux-amd64-2.5.1.tgz
@@ -128,7 +135,7 @@ jobs:
             git branch --delete --force $BRANCH || true
             git checkout -b $BRANCH
             env/bin/tx pull -a --force --no-interactive
-            git add foodsaving/locale
+            git add karrot/locale
             git commit -m "[CI] update locales" || exit 0
             git push --force origin $BRANCH
             hub pull-request -m "[CI] Update locales" || true

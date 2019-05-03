@@ -17,7 +17,7 @@
     "gnetId": null,
     "graphTooltip": 1,
     "id": 19,
-    "iteration": 1544525873945,
+    "iteration": 1553963121369,
     "links": [],
     "panels": [
       {
@@ -55,125 +55,6 @@
           "h": 3,
           "w": 4,
           "x": 0,
-          "y": 1
-        },
-        "id": 51,
-        "interval": null,
-        "links": [],
-        "mappingType": 1,
-        "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
-        ],
-        "maxDataPoints": 100,
-        "nullPointMode": "connected",
-        "nullText": null,
-        "postfix": "",
-        "postfixFontSize": "50%",
-        "prefix": "",
-        "prefixFontSize": "50%",
-        "rangeMaps": [
-          {
-            "from": "null",
-            "text": "N/A",
-            "to": "null"
-          }
-        ],
-        "sparkline": {
-          "fillColor": "rgba(31, 118, 189, 0.18)",
-          "full": false,
-          "lineColor": "rgb(31, 120, 193)",
-          "show": true
-        },
-        "tableColumn": "",
-        "targets": [
-          {
-            "alias": "",
-            "groupBy": [
-              {
-                "params": [
-                  "$interval"
-                ],
-                "type": "time"
-              },
-              {
-                "params": [
-                  "previous"
-                ],
-                "type": "fill"
-              }
-            ],
-            "measurement": "karrot.group.stores",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
-            "rawQuery": false,
-            "refId": "A",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "count_status_active"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "last"
-                }
-              ]
-            ],
-            "tags": [
-              {
-                "key": "group_status",
-                "operator": "=",
-                "value": "active"
-              }
-            ]
-          }
-        ],
-        "thresholds": "",
-        "title": "Active store cooperations",
-        "type": "singlestat",
-        "valueFontSize": "80%",
-        "valueMaps": [
-          {
-            "op": "=",
-            "text": "0",
-            "value": "null"
-          }
-        ],
-        "valueName": "current"
-      },
-      {
-        "cacheTimeout": null,
-        "colorBackground": false,
-        "colorValue": false,
-        "colors": [
-          "#299c46",
-          "rgba(237, 129, 40, 0.89)",
-          "#d44a3a"
-        ],
-        "datasource": "$site",
-        "format": "none",
-        "gauge": {
-          "maxValue": 100,
-          "minValue": 0,
-          "show": false,
-          "thresholdLabels": false,
-          "thresholdMarkers": true
-        },
-        "gridPos": {
-          "h": 3,
-          "w": 4,
-          "x": 4,
           "y": 1
         },
         "id": 14,
@@ -274,6 +155,125 @@
       {
         "cacheTimeout": null,
         "colorBackground": false,
+        "colorValue": true,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 4,
+          "x": 4,
+          "y": 1
+        },
+        "id": 15,
+        "interval": null,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "alias": "",
+            "groupBy": [
+              {
+                "params": [
+                  "$interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "0"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.events",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
+            "rawQuery": false,
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "pickup_missed"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
+          }
+        ],
+        "thresholds": "",
+        "title": "Pickups missed",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "total"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
         "colorValue": false,
         "colors": [
           "#299c46",
@@ -294,6 +294,238 @@
           "w": 4,
           "x": 8,
           "y": 1
+        },
+        "id": 59,
+        "interval": null,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "alias": "",
+            "groupBy": [
+              {
+                "params": [
+                  "$interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "previous"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.users",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
+            "rawQuery": false,
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_pickup_active_7d"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "max"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": "",
+        "title": "Users that did a pickup in last 7d",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 4,
+          "x": 0,
+          "y": 4
+        },
+        "id": 51,
+        "interval": null,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "alias": "",
+            "groupBy": [
+              {
+                "params": [
+                  "$interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "previous"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.group.places",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
+            "rawQuery": false,
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_status_active"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "last"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
+          }
+        ],
+        "thresholds": "",
+        "title": "Active store cooperations",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 4,
+          "x": 4,
+          "y": 4
         },
         "id": 44,
         "interval": null,
@@ -393,28 +625,28 @@
       {
         "cacheTimeout": null,
         "colorBackground": false,
-        "colorValue": true,
+        "colorValue": false,
         "colors": [
           "#299c46",
           "rgba(237, 129, 40, 0.89)",
           "#d44a3a"
         ],
         "datasource": "$site",
-        "format": "none",
+        "format": "percent",
         "gauge": {
           "maxValue": 100,
           "minValue": 0,
-          "show": false,
+          "show": true,
           "thresholdLabels": false,
-          "thresholdMarkers": true
+          "thresholdMarkers": false
         },
         "gridPos": {
           "h": 3,
           "w": 4,
-          "x": 12,
-          "y": 1
+          "x": 8,
+          "y": 4
         },
-        "id": 15,
+        "id": 63,
         "interval": null,
         "links": [],
         "mappingType": 1,
@@ -461,43 +693,37 @@
               },
               {
                 "params": [
-                  "0"
+                  "previous"
                 ],
                 "type": "fill"
               }
             ],
-            "measurement": "karrot.events",
+            "measurement": "karrot.users",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
-            "rawQuery": false,
+            "query": "SELECT last(\"count_pickup_active_7d\") / last(\"count_active_7d\") * 100 FROM \"karrot.users\" WHERE $timeFilter GROUP BY time($interval) fill(previous)",
+            "rawQuery": true,
             "refId": "A",
             "resultFormat": "time_series",
             "select": [
               [
                 {
                   "params": [
-                    "pickup_missed"
+                    "count_pickup_active_7d"
                   ],
                   "type": "field"
                 },
                 {
                   "params": [],
-                  "type": "sum"
+                  "type": "max"
                 }
               ]
             ],
-            "tags": [
-              {
-                "key": "group_status",
-                "operator": "=",
-                "value": "active"
-              }
-            ]
+            "tags": []
           }
         ],
         "thresholds": "",
-        "title": "Pickups missed",
+        "title": "Active users that did a pickup (7d)",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -507,7 +733,7 @@
             "value": "null"
           }
         ],
-        "valueName": "total"
+        "valueName": "current"
       },
       {
         "collapsed": false,
@@ -515,7 +741,7 @@
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 4
+          "y": 7
         },
         "id": 29,
         "panels": [],
@@ -544,7 +770,7 @@
           "h": 3,
           "w": 3,
           "x": 0,
-          "y": 5
+          "y": 8
         },
         "id": 24,
         "interval": null,
@@ -641,7 +867,7 @@
           }
         ],
         "thresholds": "",
-        "title": "Wall messages",
+        "title": "Group messages",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -675,7 +901,7 @@
           "h": 3,
           "w": 3,
           "x": 3,
-          "y": 5
+          "y": 8
         },
         "id": 27,
         "interval": null,
@@ -766,7 +992,7 @@
           }
         ],
         "thresholds": "",
-        "title": "Replies",
+        "title": "Group replies",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -800,7 +1026,7 @@
           "h": 3,
           "w": 3,
           "x": 6,
-          "y": 5
+          "y": 8
         },
         "id": 26,
         "interval": null,
@@ -925,7 +1151,7 @@
           "h": 3,
           "w": 3,
           "x": 9,
-          "y": 5
+          "y": 8
         },
         "id": 54,
         "interval": null,
@@ -1044,7 +1270,7 @@
           "h": 3,
           "w": 3,
           "x": 12,
-          "y": 5
+          "y": 8
         },
         "id": 25,
         "interval": null,
@@ -1163,7 +1389,7 @@
           "h": 3,
           "w": 3,
           "x": 15,
-          "y": 5
+          "y": 8
         },
         "id": 48,
         "interval": null,
@@ -1267,12 +1493,262 @@
         "valueName": "total"
       },
       {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 0,
+          "y": 11
+        },
+        "id": 74,
+        "interval": null,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "alias": "",
+            "groupBy": [
+              {
+                "params": [
+                  "$interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "0"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.events",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
+            "rawQuery": false,
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "message"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "type",
+                "operator": "=",
+                "value": "place"
+              },
+              {
+                "condition": "AND",
+                "key": "is_reply",
+                "operator": "=",
+                "value": "False"
+              }
+            ]
+          }
+        ],
+        "thresholds": "",
+        "title": "Place messages",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "total"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 3,
+          "y": 11
+        },
+        "id": 75,
+        "interval": null,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "alias": "",
+            "groupBy": [
+              {
+                "params": [
+                  "$interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "0"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.events",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
+            "rawQuery": false,
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "message"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "type",
+                "operator": "=",
+                "value": "place"
+              },
+              {
+                "condition": "AND",
+                "key": "is_reply",
+                "operator": "=",
+                "value": "True"
+              }
+            ]
+          }
+        ],
+        "thresholds": "",
+        "title": "Place replies",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "total"
+      },
+      {
         "collapsed": false,
         "gridPos": {
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 8
+          "y": 14
         },
         "id": 35,
         "panels": [],
@@ -1301,7 +1777,7 @@
           "h": 3,
           "w": 3,
           "x": 0,
-          "y": 9
+          "y": 15
         },
         "id": 19,
         "interval": null,
@@ -1424,7 +1900,7 @@
           "h": 3,
           "w": 3,
           "x": 3,
-          "y": 9
+          "y": 15
         },
         "id": 36,
         "interval": null,
@@ -1541,7 +2017,7 @@
           "h": 3,
           "w": 3,
           "x": 6,
-          "y": 9
+          "y": 15
         },
         "id": 20,
         "interval": null,
@@ -1658,7 +2134,7 @@
           "h": 3,
           "w": 3,
           "x": 9,
-          "y": 9
+          "y": 15
         },
         "id": 45,
         "interval": null,
@@ -1775,7 +2251,7 @@
           "h": 3,
           "w": 5,
           "x": 12,
-          "y": 9
+          "y": 15
         },
         "id": 55,
         "interval": null,
@@ -1863,7 +2339,7 @@
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 12
+          "y": 18
         },
         "id": 38,
         "panels": [],
@@ -1892,7 +2368,7 @@
           "h": 3,
           "w": 3,
           "x": 0,
-          "y": 13
+          "y": 19
         },
         "id": 40,
         "interval": null,
@@ -2009,7 +2485,7 @@
           "h": 3,
           "w": 3,
           "x": 3,
-          "y": 13
+          "y": 19
         },
         "id": 42,
         "interval": null,
@@ -2119,7 +2595,7 @@
           "h": 3,
           "w": 3,
           "x": 6,
-          "y": 13
+          "y": 19
         },
         "id": 43,
         "interval": null,
@@ -2229,7 +2705,7 @@
           "h": 3,
           "w": 5,
           "x": 9,
-          "y": 13
+          "y": 19
         },
         "id": 41,
         "interval": null,
@@ -2339,7 +2815,7 @@
           "h": 3,
           "w": 3,
           "x": 14,
-          "y": 13
+          "y": 19
         },
         "id": 56,
         "interval": null,
@@ -2455,17 +2931,17 @@
         "gridPos": {
           "h": 3,
           "w": 3,
-          "x": 17,
-          "y": 13
+          "x": 0,
+          "y": 22
         },
-        "id": 57,
+        "id": 64,
         "interval": null,
         "links": [
           {
-            "dashUri": "db/user-profile-stats",
-            "dashboard": "User profile stats",
-            "title": "User profile stats",
-            "type": "dashboard"
+            "dashboard": "User profile",
+            "title": "User profile",
+            "type": "dashboard",
+            "url": "/d/7rEbhblik/user-profile"
           }
         ],
         "mappingType": 1,
@@ -2525,7 +3001,7 @@
               [
                 {
                   "params": [
-                    "active_count"
+                    "count_active_1d"
                   ],
                   "type": "field"
                 },
@@ -2539,7 +3015,1060 @@
           }
         ],
         "thresholds": "",
-        "title": "Active users",
+        "title": "Active users (1d)",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 3,
+          "y": 22
+        },
+        "id": 65,
+        "interval": null,
+        "links": [
+          {
+            "dashboard": "User profile",
+            "title": "User profile",
+            "type": "dashboard",
+            "url": "/d/7rEbhblik/user-profile"
+          }
+        ],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "previous"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.users",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_active_7d"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "max"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": "",
+        "title": "Active users (7d)",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 6,
+          "y": 22
+        },
+        "id": 66,
+        "interval": null,
+        "links": [
+          {
+            "dashboard": "User profile",
+            "title": "User profile",
+            "type": "dashboard",
+            "url": "/d/7rEbhblik/user-profile"
+          }
+        ],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "previous"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.users",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_active_30d"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "max"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": "",
+        "title": "Active users (30d)",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 9,
+          "y": 22
+        },
+        "id": 67,
+        "interval": null,
+        "links": [
+          {
+            "dashboard": "User profile",
+            "title": "User profile",
+            "type": "dashboard",
+            "url": "/d/7rEbhblik/user-profile"
+          }
+        ],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "previous"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.users",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_active_60d"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "max"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": "",
+        "title": "Active users (60d)",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 12,
+          "y": 22
+        },
+        "id": 68,
+        "interval": null,
+        "links": [
+          {
+            "dashboard": "User profile",
+            "title": "User profile",
+            "type": "dashboard",
+            "url": "/d/7rEbhblik/user-profile"
+          }
+        ],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "previous"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.users",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_active_90d"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "max"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": "",
+        "title": "Active users (90d)",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 0,
+          "y": 25
+        },
+        "id": 69,
+        "interval": null,
+        "links": [
+          {
+            "dashboard": "User profile",
+            "title": "User profile",
+            "type": "dashboard",
+            "url": "/d/7rEbhblik/user-profile"
+          }
+        ],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "previous"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.users",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_pickup_active_1d"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "max"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": "",
+        "title": "Pickup active users (1d)",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 3,
+          "y": 25
+        },
+        "id": 70,
+        "interval": null,
+        "links": [
+          {
+            "dashboard": "User profile",
+            "title": "User profile",
+            "type": "dashboard",
+            "url": "/d/7rEbhblik/user-profile"
+          }
+        ],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "previous"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.users",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_pickup_active_7d"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "max"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": "",
+        "title": "Pickup active users (7d)",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 6,
+          "y": 25
+        },
+        "id": 71,
+        "interval": null,
+        "links": [
+          {
+            "dashboard": "User profile",
+            "title": "User profile",
+            "type": "dashboard",
+            "url": "/d/7rEbhblik/user-profile"
+          }
+        ],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "previous"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.users",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_pickup_active_30d"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "max"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": "",
+        "title": "Pickup active users (30d)",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 9,
+          "y": 25
+        },
+        "id": 72,
+        "interval": null,
+        "links": [
+          {
+            "dashboard": "User profile",
+            "title": "User profile",
+            "type": "dashboard",
+            "url": "/d/7rEbhblik/user-profile"
+          }
+        ],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "previous"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.users",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_pickup_active_60d"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "max"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": "",
+        "title": "Pickup active users (60d)",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 12,
+          "y": 25
+        },
+        "id": 73,
+        "interval": null,
+        "links": [
+          {
+            "dashboard": "User profile",
+            "title": "User profile",
+            "type": "dashboard",
+            "url": "/d/7rEbhblik/user-profile"
+          }
+        ],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "previous"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.users",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_pickup_active_90d"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "max"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": "",
+        "title": "Pickup active users (90d)",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -2557,7 +4086,7 @@
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 16
+          "y": 28
         },
         "id": 33,
         "panels": [],
@@ -2586,7 +4115,7 @@
           "h": 3,
           "w": 4,
           "x": 0,
-          "y": 17
+          "y": 29
         },
         "id": 21,
         "interval": null,
@@ -2703,7 +4232,7 @@
           "h": 3,
           "w": 4,
           "x": 4,
-          "y": 17
+          "y": 29
         },
         "id": 22,
         "interval": null,
@@ -2826,7 +4355,7 @@
           "h": 3,
           "w": 4,
           "x": 8,
-          "y": 17
+          "y": 29
         },
         "id": 23,
         "interval": null,
@@ -2950,7 +4479,7 @@
           "h": 3,
           "w": 4,
           "x": 12,
-          "y": 17
+          "y": 29
         },
         "id": 58,
         "interval": null,
@@ -3067,7 +4596,7 @@
           "h": 3,
           "w": 3,
           "x": 0,
-          "y": 20
+          "y": 32
         },
         "id": 52,
         "interval": null,
@@ -3177,7 +4706,7 @@
           "h": 3,
           "w": 3,
           "x": 3,
-          "y": 20
+          "y": 32
         },
         "id": 53,
         "interval": null,
@@ -3268,6 +4797,116 @@
       {
         "cacheTimeout": null,
         "colorBackground": false,
+        "colorValue": true,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 6,
+          "y": 32
+        },
+        "id": 62,
+        "interval": null,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "sum",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "0"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.events",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "incoming_email_rejected"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": "-1,0",
+        "title": "Incoming emails rejected",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "total"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
         "colorValue": false,
         "colors": [
           "#299c46",
@@ -3288,8 +4927,8 @@
         "gridPos": {
           "h": 3,
           "w": 3,
-          "x": 6,
-          "y": 20
+          "x": 9,
+          "y": 32
         },
         "id": 47,
         "interval": null,
@@ -3400,7 +5039,7 @@
           "h": 3,
           "w": 3,
           "x": 0,
-          "y": 23
+          "y": 35
         },
         "id": 46,
         "interval": null,
@@ -3519,7 +5158,7 @@
           "h": 3,
           "w": 5,
           "x": 3,
-          "y": 23
+          "y": 35
         },
         "id": 50,
         "interval": null,
@@ -3657,7 +5296,7 @@
           "h": 3,
           "w": 5,
           "x": 8,
-          "y": 23
+          "y": 35
         },
         "id": 49,
         "interval": null,
@@ -3761,7 +5400,7 @@
           "h": 8,
           "w": 24,
           "x": 0,
-          "y": 26
+          "y": 38
         },
         "id": 10,
         "links": [],
@@ -3769,7 +5408,7 @@
         "scroll": true,
         "showHeader": true,
         "sort": {
-          "col": 2,
+          "col": 9,
           "desc": true
         },
         "styles": [
@@ -3964,7 +5603,13 @@
                 }
               ]
             ],
-            "tags": []
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
           }
         ],
         "title": "Group leaderboard",
@@ -3982,7 +5627,7 @@
           "h": 7,
           "w": 24,
           "x": 0,
-          "y": 34
+          "y": 46
         },
         "id": 2,
         "interval": "1h",
@@ -4000,6 +5645,7 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "connected",
+        "paceLength": 10,
         "percentage": false,
         "pointradius": 5,
         "points": false,
@@ -4063,6 +5709,7 @@
         ],
         "thresholds": [],
         "timeFrom": null,
+        "timeRegions": [],
         "timeShift": null,
         "title": "Active in last week (with >3 active users)",
         "tooltip": {
@@ -4109,7 +5756,7 @@
           "h": 17,
           "w": 12,
           "x": 0,
-          "y": 41
+          "y": 53
         },
         "id": 7,
         "links": [],
@@ -4206,7 +5853,7 @@
           "h": 17,
           "w": 12,
           "x": 12,
-          "y": 41
+          "y": 53
         },
         "id": 3,
         "links": [],
@@ -4394,7 +6041,7 @@
           "h": 7,
           "w": 8,
           "x": 0,
-          "y": 58
+          "y": 70
         },
         "id": 1,
         "interval": "4h",
@@ -4413,6 +6060,7 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null as zero",
+        "paceLength": 10,
         "percentage": false,
         "pointradius": 4,
         "points": false,
@@ -4525,6 +6173,7 @@
         ],
         "thresholds": [],
         "timeFrom": null,
+        "timeRegions": [],
         "timeShift": null,
         "title": "Pickups by group",
         "tooltip": {
@@ -4577,7 +6226,7 @@
           "h": 7,
           "w": 8,
           "x": 8,
-          "y": 58
+          "y": 70
         },
         "id": 9,
         "interval": "1d",
@@ -4596,6 +6245,7 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null as zero",
+        "paceLength": 10,
         "percentage": false,
         "pointradius": 4,
         "points": false,
@@ -4696,6 +6346,7 @@
         ],
         "thresholds": [],
         "timeFrom": null,
+        "timeRegions": [],
         "timeShift": null,
         "title": "Pickups",
         "tooltip": {
@@ -4743,7 +6394,7 @@
           "h": 7,
           "w": 8,
           "x": 16,
-          "y": 58
+          "y": 70
         },
         "id": 12,
         "links": [],
@@ -4858,7 +6509,7 @@
           "h": 7,
           "w": 24,
           "x": 0,
-          "y": 65
+          "y": 77
         },
         "id": 4,
         "interval": "",
@@ -4875,6 +6526,7 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null",
+        "paceLength": 10,
         "percentage": false,
         "pointradius": 5,
         "points": true,
@@ -4925,6 +6577,7 @@
         ],
         "thresholds": [],
         "timeFrom": null,
+        "timeRegions": [],
         "timeShift": null,
         "title": "Emails sent",
         "tooltip": {
@@ -4974,7 +6627,7 @@
           "h": 7,
           "w": 24,
           "x": 0,
-          "y": 72
+          "y": 84
         },
         "id": 5,
         "interval": "1h",
@@ -4993,6 +6646,7 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null",
+        "paceLength": 10,
         "percentage": false,
         "pointradius": 6,
         "points": false,
@@ -5146,6 +6800,7 @@
         ],
         "thresholds": [],
         "timeFrom": null,
+        "timeRegions": [],
         "timeShift": null,
         "title": "Pickup notification stats",
         "tooltip": {
@@ -5196,7 +6851,7 @@
           "h": 7,
           "w": 24,
           "x": 0,
-          "y": 79
+          "y": 91
         },
         "id": 8,
         "interval": "1h",
@@ -5215,6 +6870,7 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null",
+        "paceLength": 10,
         "percentage": false,
         "pointradius": 5,
         "points": false,
@@ -5385,6 +7041,7 @@
         ],
         "thresholds": [],
         "timeFrom": null,
+        "timeRegions": [],
         "timeShift": null,
         "title": "Group Summary notifications",
         "tooltip": {
@@ -5434,7 +7091,7 @@
           "h": 7,
           "w": 24,
           "x": 0,
-          "y": 86
+          "y": 98
         },
         "id": 6,
         "interval": "4h",
@@ -5451,6 +7108,7 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null",
+        "paceLength": 10,
         "percentage": false,
         "pointradius": 7,
         "points": true,
@@ -5461,12 +7119,12 @@
         "steppedLine": false,
         "targets": [
           {
-            "alias": "number of users",
+            "alias": "number of memberships",
             "dsType": "influxdb",
             "groupBy": [
               {
                 "params": [
-                  "$__interval"
+                  "1h"
                 ],
                 "type": "time"
               },
@@ -5507,6 +7165,7 @@
         ],
         "thresholds": [],
         "timeFrom": null,
+        "timeRegions": [],
         "timeShift": null,
         "title": "Users marked as inactive",
         "tooltip": {
@@ -5545,10 +7204,260 @@
           "align": false,
           "alignLevel": null
         }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "$site",
+        "fill": 1,
+        "gridPos": {
+          "h": 7,
+          "w": 24,
+          "x": 0,
+          "y": 105
+        },
+        "id": 60,
+        "interval": "4h",
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": false,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "paceLength": 10,
+        "percentage": false,
+        "pointradius": 7,
+        "points": true,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "alias": "number of memberships",
+            "dsType": "influxdb",
+            "groupBy": [
+              {
+                "params": [
+                  "1h"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "none"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.periodic",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_users_flagged_for_removal"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "name",
+                "operator": "=",
+                "value": "group__process_inactive_users"
+              }
+            ]
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Users marked for removal from groups",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "decimals": 0,
+            "format": "short",
+            "label": "",
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "$site",
+        "fill": 1,
+        "gridPos": {
+          "h": 7,
+          "w": 24,
+          "x": 0,
+          "y": 112
+        },
+        "id": 61,
+        "interval": "4h",
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": false,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "paceLength": 10,
+        "percentage": false,
+        "pointradius": 7,
+        "points": true,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "alias": "number of memberships",
+            "dsType": "influxdb",
+            "groupBy": [
+              {
+                "params": [
+                  "1h"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "none"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.periodic",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_users_removed"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "name",
+                "operator": "=",
+                "value": "group__process_inactive_users"
+              }
+            ]
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Users removed from groups",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "decimals": 0,
+            "format": "short",
+            "label": "",
+            "logBase": 1,
+            "max": null,
+            "min": "0",
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
       }
     ],
     "refresh": false,
-    "schemaVersion": 16,
+    "schemaVersion": 18,
     "style": "dark",
     "tags": [],
     "templating": {
@@ -5602,7 +7511,7 @@
     "timezone": "",
     "title": "Activity",
     "uid": "000000019",
-    "version": 61
+    "version": 87
   },
   "meta": {
     "canAdmin": false,
@@ -5620,9 +7529,9 @@
     "provisioned": false,
     "slug": "activity",
     "type": "db",
-    "updated": "2018-12-11T11:58:09+01:00",
+    "updated": "2019-03-30T17:28:14+01:00",
     "updatedBy": "tiltec",
     "url": "/d/000000019/activity",
-    "version": 61
+    "version": 87
   }
 }

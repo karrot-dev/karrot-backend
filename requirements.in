@@ -25,13 +25,13 @@ django-versatileimagefield
 html2text
 babel
 talon
-huey
+huey<2 # upgrading needs rewritten tests
 gevent
 bleach
 bleach_whitelist
 pymdown-extensions
-daphne
-channels
+daphne<2.3 # last version to support channels_redis 2.3.2
+channels<2.2 # last version to support channels_redis 2.3.2
 channels_redis==2.3.2 # last version to support python 3.5
 more-itertools
 
@@ -52,5 +52,5 @@ pathlib2>=2.2.0 # needed by pytest in python 3.5 env: https://github.com/pytest-
 freezegun
 logging_tree
 django-silk
-transifex-client
+# transifex-client # prevent pulling in urllib<1.24.1
 yapf

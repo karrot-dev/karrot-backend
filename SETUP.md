@@ -13,11 +13,11 @@ docker build -t backend .
 Run this container, including your most recent source code changes:
 
 ```sh
-docker run -d -p 8000:8000 -v $PWD/foodsaving:/karrot-backend/foodsaving backend
+docker run -d -p 8000:8000 -v $PWD/karrot:/karrot-backend/karrot backend
 ```
 
 Note 1: This assumes that your terminal's working directory is in the karrot-backend directory, i.e. the directory you cloned from Github.
-Note 2: Only changes you make in the "foodsaving" directory are included.
+Note 2: Only changes you make in the "karrot" directory are included.
 
 The test data are automatically created in the container. You can see log-in details after running this command:
 

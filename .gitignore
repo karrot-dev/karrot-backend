@@ -7,7 +7,7 @@ test-results
 .coverage
 
 # HTML emails are generated from mjml files
-foodsaving/*/templates/*.html.jinja2
+karrot/*/templates/*.html.jinja2
 
 # Project
 /config/local_settings.py
@@ -34,7 +34,7 @@ grafana/config.py
 /backup/*.db.enc
 
 # Static build of frontend (obtained via command)
-foodsaving/frontend/static/*
+karrot/frontend/static/*
 
 # Media files
 uploads

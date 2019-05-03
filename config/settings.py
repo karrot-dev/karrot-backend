@@ -45,7 +45,7 @@ NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP = 30
 NUMBER_OF_INACTIVE_MONTHS_UNTIL_REMOVAL_FROM_GROUP_NOTIFICATION = 6
 NUMBER_OF_DAYS_AFTER_REMOVAL_NOTIFICATION_WE_ACTUALLY_REMOVE_THEM = 7
 
-# Stores
+# Places
 STORE_MAX_WEEKS_IN_ADVANCE = 52
 
 # Pickups
@@ -79,23 +79,24 @@ INSTALLED_APPS = (
     'django.contrib.postgres',
 
     # Application
-    'foodsaving',
-    'foodsaving.applications.ApplicationsConfig',
-    'foodsaving.base.BaseConfig',
-    'foodsaving.issues.IssuesConfig',
-    'foodsaving.userauth.UserAuthConfig',
-    'foodsaving.subscriptions.SubscriptionsConfig',
-    'foodsaving.users.UsersConfig',
-    'foodsaving.conversations.ConversationsConfig',
-    'foodsaving.history.HistoryConfig',
-    'foodsaving.groups.GroupsConfig',
-    'foodsaving.stores.StoresConfig',
-    'foodsaving.unsubscribe',
-    'foodsaving.pickups.PickupsConfig',
-    'foodsaving.invitations.InvitationsConfig',
-    'foodsaving.template_previews',
-    'foodsaving.webhooks',
-    'foodsaving.notifications.NotificationsConfig',
+    'karrot',
+    'karrot.applications.ApplicationsConfig',
+    'karrot.base.BaseConfig',
+    'karrot.community_feed.CommunityFeedConfig',
+    'karrot.issues.IssuesConfig',
+    'karrot.userauth.UserAuthConfig',
+    'karrot.subscriptions.SubscriptionsConfig',
+    'karrot.users.UsersConfig',
+    'karrot.conversations.ConversationsConfig',
+    'karrot.history.HistoryConfig',
+    'karrot.groups.GroupsConfig',
+    'karrot.places.PlacesConfig',
+    'karrot.unsubscribe',
+    'karrot.pickups.PickupsConfig',
+    'karrot.invitations.InvitationsConfig',
+    'karrot.template_previews',
+    'karrot.webhooks',
+    'karrot.notifications.NotificationsConfig',
 
     # Django packages
     'django_extensions',
@@ -118,7 +119,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ),
-    'EXCEPTION_HANDLER': 'foodsaving.utils.misc.custom_exception_handler',
+    'EXCEPTION_HANDLER': 'karrot.utils.misc.custom_exception_handler',
 }
 
 MIDDLEWARE = (
@@ -146,7 +147,7 @@ TEMPLATES = [
                 "jinja2.ext.i18n",
             ],
             "autoescape": True,
-            "environment": "foodsaving.utils.email_utils.jinja2_environment"
+            "environment": "karrot.utils.email_utils.jinja2_environment"
         }
     },
     {
@@ -255,7 +256,7 @@ CHANNEL_LAYERS = {
     },
 }
 
-ASGI_APPLICATION = 'foodsaving.subscriptions.routing.application'
+ASGI_APPLICATION = 'karrot.subscriptions.routing.application'
 
 # Default dummy settings, please override in local_settings.py
 DEFAULT_FROM_EMAIL = "testing@example.com"
@@ -278,6 +279,10 @@ INFLUXDB_USE_THREADING = True
 HUEY = {
     'always_eager': True,
 }
+
+# If you have the email_reply_trimmer_service running, set this to 'http://localhost:4567/trim' (or similar)
+# https://github.com/yunity/email_reply_trimmer_service
+EMAIL_REPLY_TRIMMER_URL = None
 
 if 'USE_SILK' in os.environ:
     INSTALLED_APPS += ('silk', )
