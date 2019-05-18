@@ -259,4 +259,4 @@ class ConversationSerializer(serializers.ModelSerializer):
 class ConversationMetaSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConversationMeta
-        fields = ['marked_at']
+        fields = ['conversations_marked_at', 'threads_marked_at']
