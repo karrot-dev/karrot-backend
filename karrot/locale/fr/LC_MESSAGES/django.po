@@ -363,12 +363,8 @@ msgstr "Tu a obtenu les permissions d'éditer dans %(group_name)s!"
 msgid ""
 "You've received enough trust from fellow group members to grant you "
 "<strong>editing permissions</strong>. For example, you can now modify your "
-"group, stores and pickup dates, or create new ones."
+"group, places and pickup dates, or create new ones."
 msgstr ""
-"Tu as reçu suffisamment de confiance des membres du groupe pour "
-"t'accorder<strong> les permissions d'édition</strong>. Par exemple, tu peux "
-"maintenant modifier ton groupe, les magasins et les dates de récoltes, ou en"
-" créer de nouvelles. "
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:227
 msgid "Use your power wisely!"
