@@ -53,7 +53,8 @@ class TestConversationsAPI(APITestCase):
             [conversation2.id, self.conversation1.id, self.conversation2.id],
         )
         self.assertEqual(response.data['results']['meta'], {
-            'marked_at': None,
+            'conversations_marked_at': None,
+            'threads_marked_at': None,
         })
 
     def test_list_conversations_with_related_data_efficiently(self):
@@ -150,14 +151,14 @@ class TestConversationsAPI(APITestCase):
     def test_can_mark_all_as_seen(self):
         self.client.force_login(user=self.participant1)
 
-        response = self.client.post('/api/conversations/mark_all_seen/')
+        response = self.client.post('/api/conversations/mark_conversations_seen/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        time1 = parse(response.data['marked_at'])
+        time1 = parse(response.data['conversations_marked_at'])
         self.assertLess(time1, timezone.now())
 
         # time should naturally increase each time we mark
-        response = self.client.post('/api/conversations/mark_all_seen/')
-        time2 = parse(response.data['marked_at'])
+        response = self.client.post('/api/conversations/mark_conversations_seen/')
+        time2 = parse(response.data['conversations_marked_at'])
         self.assertLess(time1, time2)
 
 

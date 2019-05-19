@@ -132,7 +132,8 @@ class Conversation(BaseModel, UpdatedAtMixin):
 
 class ConversationMeta(BaseModel):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    marked_at = models.DateTimeField(null=True)
+    conversations_marked_at = models.DateTimeField(null=True)
+    threads_marked_at = models.DateTimeField(null=True)
 
 
 class ConversationParticipantQuerySet(QuerySet):
