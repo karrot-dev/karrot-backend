@@ -13,5 +13,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(copy_threads_marked_at_from_conversation, elidable=True)
+        migrations.RunPython(copy_threads_marked_at_from_conversation, migrations.RunPython.noop, elidable=True)
     ]
