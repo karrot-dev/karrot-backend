@@ -204,7 +204,8 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
     def mark_conversations_seen(self, request):
         """Trigger this endpoint to mark when the user has seen notifications about new messages in conversations"""
         self.check_permissions(request)
-        meta, _ = ConversationMeta.objects.update_or_create({'conversations_marked_at': timezone.now()}, user=request.user)
+        meta, _ = ConversationMeta.objects.update_or_create({'conversations_marked_at': timezone.now()},
+                                                            user=request.user)
         serializer = ConversationMetaSerializer(meta)
         return Response(serializer.data)
 

@@ -135,6 +135,7 @@ class ConversationMeta(BaseModel):
     conversations_marked_at = models.DateTimeField(null=True)
     threads_marked_at = models.DateTimeField(null=True)
 
+
 class ConversationParticipantQuerySet(QuerySet):
     def annotate_unread_message_count(self):
         exclude_replies = (
