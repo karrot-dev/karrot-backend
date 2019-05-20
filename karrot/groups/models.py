@@ -26,6 +26,11 @@ class GroupStatus(Enum):
     PLAYGROUND = 'playground'
 
 
+class GroupTheme(Enum):
+    FOODSAVING = 'foodsaving'
+    BIKEKITCHEN = 'bikekitchen'
+
+
 class GroupQuerySet(models.QuerySet):
     def user_is_editor(self, user):
         return self.filter(
@@ -75,6 +80,10 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         default=GroupStatus.ACTIVE.value,
         choices=[(status.value, status.value) for status in GroupStatus],
         max_length=100,
+    )
+    theme = models.TextField(
+        default=GroupTheme.FOODSAVING.value,
+        choices=[(theme.value, theme.value) for theme in GroupTheme],
     )
     sent_summary_up_to = DateTimeField(null=True)
     timezone = TimeZoneField(default='Europe/Berlin', null=True, blank=True)
