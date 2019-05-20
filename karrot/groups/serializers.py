@@ -95,6 +95,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'timezone',
             'active_agreement',
             'status',
+            'theme',
             'notification_types',
             'is_open',
             'trust_threshold_for_newcomer',
@@ -124,6 +125,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'memberships',
             'notification_types',
             'is_open',
+            'theme',
         ]
 
     def validate_active_agreement(self, active_agreement):
@@ -149,7 +151,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
     def update(self, group, validated_data):
         if group.is_playground():
             # Prevent editing of public fields
-            # Password shouldn't get changed and the others get overridden with a translation message
+            # Those fields get overridden with a translation message
             for field in ['name', 'public_description']:
                 if field in validated_data:
                     del validated_data[field]
@@ -279,6 +281,7 @@ class GroupPreviewSerializer(GroupBaseSerializer):
             'longitude',
             'members',
             'status',
+            'theme',
             'is_open',
             'photo_urls',
         ]
