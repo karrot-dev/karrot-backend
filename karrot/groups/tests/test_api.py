@@ -4,12 +4,11 @@ import os
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
 from unittest.mock import patch, call
 
 from karrot.groups import roles
-from karrot.groups.factories import GroupFactory, PlaygroundGroupFactory
+from karrot.groups.factories import GroupFactory
 from karrot.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
     GroupNotificationType, get_default_notification_types, Group
 from karrot.groups.stats import group_tags
@@ -61,8 +60,6 @@ class TestGroupsAPI(APITestCase):
         self.user = UserFactory()
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member], is_open=True)
-        self.group_with_password = GroupFactory(password='abc', is_open=True)
-        self.join_password_url = '/api/groups/{}/join/'.format(self.group_with_password.id)
         self.url = '/api/groups/'
         self.group_data = {
             'name': faker.name(),
@@ -167,11 +164,6 @@ class TestGroupsAPI(APITestCase):
         response = self.client.post('/api/groups/{}/join/'.format(self.group.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_join_group_with_password(self):
-        self.client.force_login(user=self.user)
-        response = self.client.post(self.join_password_url, {"password": "abc"})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
     def test_join_group_fails_if_not_logged_in(self):
         response = self.client.post('/api/groups/{}/join/'.format(self.group.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -262,20 +254,6 @@ class TestUploadGroupPhoto(APITestCase):
 
         self.assertEqual(History.objects.count(), 1)
         self.assertEqual(History.objects.first().typus, HistoryTypus.GROUP_DELETE_PHOTO)
-
-
-class TestPlaygroundGroupAPI(APITestCase):
-    def setUp(self):
-        self.member = UserFactory()
-        self.group = PlaygroundGroupFactory(members=[self.member], password='')
-
-    def test_change_password_has_no_effect(self):
-        self.client.force_login(user=self.member)
-        url = reverse('group-detail', kwargs={'pk': self.group.id})
-        response = self.client.patch(url, data={'public_description': 'buy our nice horse'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.group.refresh_from_db()
-        self.assertEqual(self.group.password, '')
 
 
 class TestGroupMembershipsAPI(APITestCase):

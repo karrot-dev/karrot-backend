@@ -69,7 +69,6 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         through='GroupMembership',
         through_fields=('group', 'user'),
     )
-    password = models.CharField(max_length=255, blank=True)  # TODO remove soon
     public_description = models.TextField(blank=True)
     application_questions = models.TextField(blank=True)
     status = models.CharField(
