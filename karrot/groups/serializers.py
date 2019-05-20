@@ -125,6 +125,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'memberships',
             'notification_types',
             'is_open',
+            'theme',
         ]
 
     def validate_active_agreement(self, active_agreement):
