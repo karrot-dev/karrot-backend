@@ -133,8 +133,8 @@ msgstr ""
 "besuchen</a> oder <a href=\"%(mute_url)s\">die Unterhaltung "
 "stummschalten</a>."
 
-#: karrot/conversations/api.py:61 karrot/conversations/api.py:223
-#: karrot/conversations/api.py:394 karrot/conversations/serializers.py:147
+#: karrot/conversations/api.py:61 karrot/conversations/api.py:232
+#: karrot/conversations/api.py:403 karrot/conversations/serializers.py:147
 msgid "You are not in this conversation"
 msgstr "Du bist nicht Teil dieser Unterhaltung"
 
@@ -150,11 +150,11 @@ msgstr ""
 "Du kannst eine Nachricht nicht mehr als %(days_number)s Tage nach ihrer "
 "Erstellung bearbeiten."
 
-#: karrot/conversations/api.py:322
+#: karrot/conversations/api.py:331
 msgid "Must be first in thread"
 msgstr ""
 
-#: karrot/conversations/api.py:325
+#: karrot/conversations/api.py:334
 msgid "You are not a participant in this thread"
 msgstr "Du bist nicht Teil dieses Threads"
 

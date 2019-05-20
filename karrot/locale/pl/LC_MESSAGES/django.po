@@ -129,8 +129,8 @@ msgstr ""
 "href=\"%(conversation_url)s\">otwórz w %(site_name)s</a> lub <a "
 "href=\"%(mute_url)s\">wycisz konwersację</a>."
 
-#: karrot/conversations/api.py:61 karrot/conversations/api.py:223
-#: karrot/conversations/api.py:394 karrot/conversations/serializers.py:147
+#: karrot/conversations/api.py:61 karrot/conversations/api.py:232
+#: karrot/conversations/api.py:403 karrot/conversations/serializers.py:147
 msgid "You are not in this conversation"
 msgstr "Nie ma Cię w tej konwersacji"
 
@@ -145,11 +145,11 @@ msgid ""
 msgstr ""
 "Nie możesz edytować wiadomości po %(days_number)s dniach od jej utworzenia"
 
-#: karrot/conversations/api.py:322
+#: karrot/conversations/api.py:331
 msgid "Must be first in thread"
 msgstr ""
 
-#: karrot/conversations/api.py:325
+#: karrot/conversations/api.py:334
 msgid "You are not a participant in this thread"
 msgstr "Nie uczestniczysz w tym wątku"
 
