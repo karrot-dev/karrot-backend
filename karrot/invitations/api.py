@@ -1,6 +1,7 @@
 from dateutil.relativedelta import relativedelta
 
 from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
 from django_filters import rest_framework as filters
 from rest_framework import mixins
 from rest_framework.decorators import action
@@ -23,6 +24,8 @@ class NotInGroup(BasePermission):
 
 
 class CanResend(BasePermission):
+    message = _('Invitation to this email address was sent recently, wait before resending')
+
     def has_object_permission(self, request, view, obj):
         return timezone.now() >= obj.created_at + relativedelta(hours=1)
 
