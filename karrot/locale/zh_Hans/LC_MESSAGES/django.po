@@ -220,15 +220,15 @@ msgstr "未知的時區"
 msgid "Playground"
 msgstr "遊樂區"
 
-#: karrot/groups/serializers.py:134 karrot/groups/serializers.py:230
+#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:232
 msgid "You cannot manage agreements"
 msgstr "你無法管理合約"
 
-#: karrot/groups/serializers.py:136
+#: karrot/groups/serializers.py:138
 msgid "Agreement is not for this group"
 msgstr "不是這個社團的合約"
 
-#: karrot/groups/serializers.py:228
+#: karrot/groups/serializers.py:230
 msgid "You are not in this group"
 msgstr "你並未在社團裡"
 
