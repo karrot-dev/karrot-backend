@@ -74,7 +74,7 @@ jedi==0.13.3              # via ipython
 jinja2==2.10.1            # via coreschema, django-jinja, django-silk
 logging-tree==1.8
 lxml==4.3.3               # via talon
-markdown==3.1
+markdown==3.1.1
 markupsafe==1.1.1         # via jinja2
 mccabe==0.6.1             # via flake8
 more-itertools==7.0.0
