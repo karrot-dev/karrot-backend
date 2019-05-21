@@ -217,15 +217,15 @@ msgstr "Nekonata horzono"
 msgid "Playground"
 msgstr ""
 
-#: karrot/groups/serializers.py:134 karrot/groups/serializers.py:230
+#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:232
 msgid "You cannot manage agreements"
 msgstr ""
 
-#: karrot/groups/serializers.py:136
+#: karrot/groups/serializers.py:138
 msgid "Agreement is not for this group"
 msgstr ""
 
-#: karrot/groups/serializers.py:228
+#: karrot/groups/serializers.py:230
 msgid "You are not in this group"
 msgstr ""
 
