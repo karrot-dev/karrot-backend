@@ -465,6 +465,11 @@ msgstr ""
 msgid "%(group_name)s is really missing you!"
 msgstr "Tu as vraiment manqué à %(group_name)s !"
 
+#: karrot/invitations/api.py:27
+msgid ""
+"Invitation to this email address was sent recently, wait before resending"
+msgstr ""
+
 #: karrot/invitations/serializers.py:20
 msgid "An invitation has already been sent to this e-mail address"
 msgstr "Une invitation a déjà été envoyée à cette adresse e-mail"
