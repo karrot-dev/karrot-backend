@@ -1,11 +1,15 @@
 import logging
 import requests
 from django.conf import settings
+import talon
 from talon import quotations
 
 from raven.contrib.django.raven_compat.models import client as sentry_client
 
 logger = logging.getLogger(__name__)
+
+# register talon xpath extensions, to avoid XPathEvalError
+talon.init()
 
 
 def trim_with_talon(text):
