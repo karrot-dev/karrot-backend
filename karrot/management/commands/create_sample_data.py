@@ -381,7 +381,7 @@ class Command(BaseCommand):
             u = login_user()
             p = PickupDate.objects.filter(
                 date__startswith__gte=timezone.now() + relativedelta(hours=1), place__group__members=u
-            ).first()
+            ).exclude(collectors=u).first()
             join_pickup(p.id)
 
             difference = timezone.now() - p.date.end + relativedelta(days=4)

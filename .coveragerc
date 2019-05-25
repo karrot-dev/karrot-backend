@@ -1,7 +1,7 @@
 [run]
-source = foodsaving
+source = karrot
 branch = true
-omit = foodsaving/resources/*, foodsaving/tests/*
+omit = karrot/resources/*, karrot/tests/*
 
 [report]
 precision = 2
