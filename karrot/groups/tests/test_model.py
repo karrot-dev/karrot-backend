@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from karrot.conversations.models import Conversation, ConversationParticipant
 from karrot.groups.factories import GroupFactory, PlaygroundGroupFactory
-from karrot.groups.models import Group, GroupMembership, get_default_notification_types
+from karrot.groups.models import Group, get_default_notification_types
 from karrot.pickups.factories import PickupDateFactory
 from karrot.pickups.models import to_range
 from karrot.places.factories import PlaceFactory
@@ -26,8 +26,8 @@ class TestGroupModel(TestCase):
 
     def test_notifications_on_by_default(self):
         user = UserFactory()
-        group = GroupFactory(members=[user])
-        membership = GroupMembership.objects.get(user=user, group=group)
+        group = GroupFactory()
+        membership = group.groupmembership_set.create(user=user)
         self.assertEqual(get_default_notification_types(), membership.notification_types)
         conversation = Conversation.objects.get_for_target(group)
         conversation_participant = ConversationParticipant.objects.get(conversation=conversation, user=user)
@@ -35,8 +35,8 @@ class TestGroupModel(TestCase):
 
     def test_no_notifications_by_default_in_playground(self):
         user = UserFactory()
-        group = PlaygroundGroupFactory(members=[user])
-        membership = GroupMembership.objects.get(user=user, group=group)
+        group = PlaygroundGroupFactory()
+        membership = group.groupmembership_set.create(user=user)
         self.assertEqual([], membership.notification_types)
         conversation = Conversation.objects.get_for_target(group)
         conversation_participant = ConversationParticipant.objects.get(conversation=conversation, user=user)

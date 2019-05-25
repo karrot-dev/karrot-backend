@@ -169,9 +169,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
             History.objects.create(
                 typus=HistoryTypus.GROUP_MODIFY,
                 group=group,
-                users=[
-                    user,
-                ],
+                users=[user],
                 payload={k: self.initial_data.get(k)
                          for k in changed_data.keys()},
                 before=before_data,
@@ -190,13 +188,16 @@ class GroupDetailSerializer(GroupBaseSerializer):
     def create(self, validated_data):
         user = self.context['request'].user
         group = GroupModel.objects.create(**validated_data)
-        GroupMembership.objects.create(group=group, user=user, roles=[roles.GROUP_EDITOR])
+
+        # create first member and make it receive application notifications
+        membership = GroupMembership.objects.create(group=group, user=user, roles=[roles.GROUP_EDITOR])
+        membership.add_notification_types([GroupNotificationType.NEW_APPLICATION])
+        membership.save()
+
         History.objects.create(
             typus=HistoryTypus.GROUP_CREATE,
             group=group,
-            users=[
-                user,
-            ],
+            users=[user],
             payload=self.initial_data,
             after=GroupHistorySerializer(group).data
         )

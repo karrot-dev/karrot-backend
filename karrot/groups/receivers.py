@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from karrot.conversations.models import Conversation
 from karrot.groups import roles, stats
 from karrot.groups.emails import prepare_user_became_editor_email
-from karrot.groups.models import Group, GroupMembership, Trust, GroupNotificationType
+from karrot.groups.models import Group, GroupMembership, Trust
 from karrot.history.models import History, HistoryTypus
 
 
@@ -68,6 +68,8 @@ def trust_given(sender, instance, created, **kwargs):
 
     if relevant_trust.count() >= trust_threshold and roles.GROUP_EDITOR not in membership.roles:
         membership.add_roles([roles.GROUP_EDITOR])
+        membership.save()
+
         History.objects.create(
             typus=HistoryTypus.MEMBER_BECAME_EDITOR,
             group=membership.group,
@@ -77,10 +79,6 @@ def trust_given(sender, instance, created, **kwargs):
             },
         )
 
-        # new editors should also get informed about new applications
-        # TODO: really? maybe ask them beforehand...
-        membership.add_notification_types([GroupNotificationType.NEW_APPLICATION])
-        membership.save()
         prepare_user_became_editor_email(user=membership.user, group=membership.group).send()
 
         stats.member_became_editor(membership.group)

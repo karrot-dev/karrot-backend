@@ -17,9 +17,8 @@ def application_saved(sender, instance, created, **kwargs):
 
         conversation = Conversation.objects.get_or_create_for_target(application)
         conversation.join(applicant)
-        for membership in group.groupmembership_set.all():
-            muted = GroupNotificationType.NEW_APPLICATION not in membership.notification_types
-            conversation.join(membership.user, muted=muted)
+        for membership in group.groupmembership_set.with_notification_type(GroupNotificationType.NEW_APPLICATION):
+            conversation.join(membership.user)
 
         notify_members_about_new_application(application)
 

@@ -7,7 +7,7 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
 
 from karrot.groups.factories import GroupFactory
-from karrot.groups.models import GroupMembership, Trust, GroupNotificationType
+from karrot.groups.models import GroupMembership, Trust
 from karrot.history.models import History, HistoryTypus
 from karrot.users.factories import UserFactory
 
@@ -63,7 +63,6 @@ class TestTrustReceiver(TestCase):
         Trust.objects.create(membership=membership, given_by=editor)
 
         self.assertTrue(group.is_editor(newcomer))
-        self.assertIn(GroupNotificationType.NEW_APPLICATION, membership.notification_types)
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn('You gained editing permissions', mail.outbox[0].subject)
 

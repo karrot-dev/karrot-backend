@@ -76,7 +76,11 @@ class TestGroupsAPI(APITestCase):
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertEqual(response.data['name'], data['name'])
-        self.assertEqual(GroupModel.objects.get(name=data['name']).description, data['description'])
+
+        new_group = GroupModel.objects.get(name=data['name'])
+        self.assertEqual(new_group.description, data['description'])
+        membership = new_group.groupmembership_set.get(user=self.user)
+        self.assertIn(GroupNotificationType.NEW_APPLICATION, membership.notification_types)
 
     def test_create_group_with_location(self):
         self.client.force_login(user=self.user)
@@ -323,8 +327,8 @@ class TestGroupMemberLastSeenAPI(APITestCase):
 class TestGroupNotificationTypes(APITestCase):
     def setUp(self):
         self.user = UserFactory()
-        self.group = GroupFactory(members=[self.user])
-        self.membership = GroupMembership.objects.get(group=self.group, user=self.user)
+        self.group = GroupFactory()
+        self.membership = self.group.groupmembership_set.create(user=self.user)
 
     def test_add_notification_type(self):
         self.client.force_login(user=self.user)
@@ -375,8 +379,7 @@ class TestAgreementsAPI(APITestCase):
     def test_can_create_agreement(self):
         self.client.force_login(user=self.agreement_manager)
         response = self.client.post(
-            '/api/agreements/',
-            {
+            '/api/agreements/', {
                 'title': faker.text(),
                 'content': faker.text(),
                 'group': self.group.id
@@ -387,8 +390,7 @@ class TestAgreementsAPI(APITestCase):
     def test_cannot_create_agreement_for_another_group(self):
         self.client.force_login(user=self.agreement_manager)
         response = self.client.post(
-            '/api/agreements/',
-            {
+            '/api/agreements/', {
                 'title': faker.text(),
                 'content': faker.text(),
                 'group': self.other_group.id
@@ -404,8 +406,7 @@ class TestAgreementsAPI(APITestCase):
     def test_normal_member_cannot_create_agreement(self):
         self.client.force_login(user=self.normal_member)
         response = self.client.post(
-            '/api/agreements/',
-            {
+            '/api/agreements/', {
                 'title': faker.name(),
                 'content': faker.text(),
                 'group': self.group.id
@@ -463,9 +464,7 @@ class TestAgreementsAPI(APITestCase):
         # using json.dumps as otherwise it sends an empty string, but we want it to send json value "null"
         response = self.client.patch(
             '/api/groups/{}/'.format(self.group.id),
-            json.dumps({
-                'active_agreement': None
-            }),
+            json.dumps({'active_agreement': None}),
             content_type='application/json'
         )
 
@@ -475,8 +474,7 @@ class TestAgreementsAPI(APITestCase):
     def test_cannot_set_group_agreement_if_for_wrong_group(self):
         self.client.force_login(user=self.agreement_manager)
         response = self.client.patch(
-            '/api/groups/{}/'.format(self.group.id),
-            {'active_agreement': self.other_agreement.id}
+            '/api/groups/{}/'.format(self.group.id), {'active_agreement': self.other_agreement.id}
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 

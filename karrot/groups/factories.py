@@ -1,7 +1,7 @@
 from factory import DjangoModelFactory, post_generation, LazyAttribute, Sequence
 
 from karrot.groups import roles
-from karrot.groups.models import Group as GroupModel, GroupStatus
+from karrot.groups.models import Group as GroupModel, GroupStatus, GroupNotificationType
 from karrot.utils.tests.fake import faker
 
 
@@ -13,7 +13,9 @@ class GroupFactory(DjangoModelFactory):
     def members(self, created, extracted, **kwargs):
         if created and extracted:
             for member in extracted:
-                self.groupmembership_set.create(user=member, roles=[roles.GROUP_EDITOR])
+                membership = self.groupmembership_set.create(user=member, roles=[roles.GROUP_EDITOR])
+                membership.add_notification_types([GroupNotificationType.NEW_APPLICATION])
+                membership.save()
 
     @post_generation
     def newcomers(self, created, extracted, **kwargs):
