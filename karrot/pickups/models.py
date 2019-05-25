@@ -306,6 +306,14 @@ class PickupDate(BaseModel, ConversationMixin):
             user=user,
         ).delete()
 
+    def save(self, *args, **kwargs):
+        if not self.has_duration:
+            # reset duration to default if pickup has no explicit duration
+            start = self.date.start
+            self.date = CustomDateTimeTZRange(start, start + default_duration)
+
+        super().save(*args, **kwargs)
+
 
 class PickupDateCollector(BaseModel):
     pickupdate = models.ForeignKey(

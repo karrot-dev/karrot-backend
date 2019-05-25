@@ -359,11 +359,24 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.patch(
             self.pickup_url, {
                 'date': [start, end],
+                'has_duration': True,
             }, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.pickup.refresh_from_db()
         self.assertEqual(self.pickup.date, CustomDateTimeTZRange(start, end))
+
+    def test_remove_duration_resets_end_date(self):
+        self.client.force_login(user=self.member)
+        start = timezone.now() + timedelta(hours=1)
+        end = timezone.now() + timedelta(hours=2)
+        response = self.client.patch(self.pickup_url, {'date': [start, end], 'has_duration': True}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        response = self.client.patch(self.pickup_url, {'has_duration': False}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+        self.pickup.refresh_from_db()
+        self.assertEqual(self.pickup.date, CustomDateTimeTZRange(start, start + timedelta(minutes=30)))
 
     def test_patch_start_date_only_uses_default_duration(self):
         self.client.force_login(user=self.member)

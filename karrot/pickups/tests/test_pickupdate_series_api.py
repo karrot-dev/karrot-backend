@@ -489,6 +489,21 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('You can\'t move pickups', response.data['date'][0])
 
+    def test_cannot_change_pickup_has_duration_in_a_series(self):
+        self.client.force_login(user=self.member)
+        pickup = self.series.pickup_dates.last()
+
+        response = self.client.patch(
+            '/api/pickup-dates/{}/'.format(pickup.id),
+            {'has_duration': True},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            'You cannot modify the duration of pickups that are part of a series', response.data['has_duration'][0]
+        )
+
 
 class TestPickupDateSeriesAPIAuth(APITestCase):
     """ Testing actions that are forbidden """

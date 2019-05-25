@@ -75,7 +75,6 @@ class PickupDateSerializer(serializers.ModelSerializer):
             'id',
             'series',
             'collectors',
-            'has_duration',
             'is_done',
         ]
 
@@ -170,6 +169,11 @@ class PickupDateUpdateSerializer(PickupDateSerializer):
         if self.instance.series is not None and abs((self.instance.date.start - date.start).total_seconds()) > 1:
             raise serializers.ValidationError(_('You can\'t move pickups that are part of a series.'))
         return super().validate_date(date)
+
+    def validate_has_duration(self, has_duration):
+        if self.instance.series is not None and has_duration != self.instance.has_duration:
+            raise serializers.ValidationError('You cannot modify the duration of pickups that are part of a series')
+        return has_duration
 
 
 class PickupDateJoinSerializer(serializers.ModelSerializer):
