@@ -57,7 +57,7 @@ jobs:
             (cd mjml && yarn)
             mjml/convert
             mkdir -p test-reports
-            env/bin/pytest -n 4 --cov=foodsaving --cov-report xml --junitxml=test-reports/junit.xml
+            env/bin/pytest -n 4 --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
             env/bin/flake8 ./
             env/bin/pip install codecov
             env/bin/codecov
