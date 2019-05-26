@@ -27,8 +27,8 @@ msgstr "你需要一個經過驗證的電郵地址"
 
 #: karrot/applications/api.py:36 karrot/groups/api.py:49
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:124
-#: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:111
-#: karrot/pickups/serializers.py:286 karrot/places/api.py:19
+#: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:110
+#: karrot/pickups/serializers.py:290 karrot/places/api.py:19
 #: karrot/places/serializers.py:80
 msgid "You need to be a group editor"
 msgstr "你必須擁有社團編輯權"
@@ -220,7 +220,7 @@ msgstr "未知的時區"
 msgid "Playground"
 msgstr "遊樂區"
 
-#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:232
+#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:233
 msgid "You cannot manage agreements"
 msgstr "你無法管理合約"
 
@@ -228,7 +228,7 @@ msgstr "你無法管理合約"
 msgid "Agreement is not for this group"
 msgstr "不是這個社團的合約"
 
-#: karrot/groups/serializers.py:230
+#: karrot/groups/serializers.py:231
 msgid "You are not in this group"
 msgstr "你並未在社團裡"
 
@@ -597,7 +597,7 @@ msgstr "開放食物領取日期已滿。"
 msgid "This feedback is given by another user."
 msgstr "此反映來自其他用戶"
 
-#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:380
+#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:384
 #, python-format
 msgid ""
 "You can't give feedback for pickups more than %(days_number)s days ago."
@@ -615,31 +615,31 @@ msgstr ""
 msgid "Must pass start value"
 msgstr ""
 
-#: karrot/pickups/serializers.py:116
+#: karrot/pickups/serializers.py:115
 msgid "The date should be in the future."
 msgstr "日期應該設定在未來。"
 
-#: karrot/pickups/serializers.py:171
+#: karrot/pickups/serializers.py:170
 msgid "You can't move pickups that are part of a series."
 msgstr ""
 
-#: karrot/pickups/serializers.py:299
+#: karrot/pickups/serializers.py:303
 msgid "Invalid recurrence rule."
 msgstr "無效的週期規則"
 
-#: karrot/pickups/serializers.py:301
+#: karrot/pickups/serializers.py:305
 msgid "Only single recurrence rules are allowed."
 msgstr "只允許一種週期規則"
 
-#: karrot/pickups/serializers.py:375
+#: karrot/pickups/serializers.py:379
 msgid "The pickup is not done yet"
 msgstr "食物領取任務未完成"
 
-#: karrot/pickups/serializers.py:377
+#: karrot/pickups/serializers.py:381
 msgid "You aren't assigned to the pickup."
 msgstr "你並未被分配到此領取任務"
 
-#: karrot/pickups/serializers.py:394
+#: karrot/pickups/serializers.py:398
 msgid "Both comment and weight cannot be blank."
 msgstr "意見回饋和重量兩欄都不能是空的"
 
