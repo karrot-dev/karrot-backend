@@ -8,6 +8,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.fields import DateTimeField, Field
 from rest_framework.validators import UniqueTogetherValidator
+from rest_framework_csv.renderers import CSVRenderer
 
 from karrot.base.base_models import CustomDateTimeTZRange
 from karrot.history.models import History, HistoryTypus
@@ -346,7 +347,15 @@ class PickupDateSeriesUpdateSerializer(PickupDateSeriesSerializer):
 class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = FeedbackModel
-        fields = ['id', 'weight', 'comment', 'about', 'given_by', 'created_at', 'is_editable']
+        fields = [
+            'id',
+            'weight',
+            'comment',
+            'about',
+            'given_by',
+            'created_at',
+            'is_editable',
+        ]
         read_only_fields = ['given_by', 'created_at']
         extra_kwargs = {'given_by': {'default': serializers.CurrentUserDefault()}}
         validators = [
@@ -398,3 +407,47 @@ class FeedbackSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(_('Both comment and weight cannot be blank.'))
         data['given_by'] = self.context['request'].user
         return data
+
+
+class FeedbackExportSerializer(FeedbackSerializer):
+    class Meta:
+        model = FeedbackModel
+        fields = [
+            'id',
+            'about_place',
+            'given_by',
+            'about',
+            'created_at',
+            'about_date',
+            'weight',
+            'comment',
+        ]
+
+    about_date = serializers.SerializerMethodField()
+    about_place = serializers.SerializerMethodField()
+    created_at = serializers.SerializerMethodField()
+
+    def get_about_date(self, feedback):
+        pickup = feedback.about
+        group = pickup.place.group
+
+        return pickup.date.start.astimezone(group.timezone).isoformat(timespec='seconds')
+
+    def get_about_place(self, feedback):
+        return feedback.about.place_id
+
+    def get_created_at(self, feedback):
+        pickup = feedback.about
+        group = pickup.place.group
+
+        return feedback.created_at.astimezone(group.timezone).isoformat(timespec='seconds')
+
+
+class FeedbackExportRenderer(CSVRenderer):
+    header = FeedbackExportSerializer.Meta.fields
+    labels = {
+        'about_place': 'place_id',
+        'about': 'pickup_id',
+        'given_by': 'user_id',
+        'about_date': 'date',
+    }
