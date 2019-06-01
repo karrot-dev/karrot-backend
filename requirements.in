@@ -8,6 +8,7 @@ django-redis
 django-jinja
 django-dirtyfields
 djangorestframework
+djangorestframework-csv
 hiredis
 markdown
 psycopg2-binary
