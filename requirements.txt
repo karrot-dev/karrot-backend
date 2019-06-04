@@ -47,7 +47,7 @@ django-redis==4.10.0
 django-silk==3.0.2
 django-timezone-field==3.0
 django-versatileimagefield==1.10
-django[argon2]==2.2.1
+django[argon2]==2.2.2
 djangorestframework==3.9.4
 entrypoints==0.3          # via flake8
 execnet==1.6.0            # via pytest-xdist
