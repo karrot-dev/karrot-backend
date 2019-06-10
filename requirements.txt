@@ -126,7 +126,7 @@ tblib==1.4.0
 text-unidecode==1.2       # via faker
 tld==0.9.3
 traitlets==4.3.2          # via ipython
-twisted==19.2.0           # via daphne
+twisted==19.2.1           # via daphne
 txaio==18.8.1             # via autobahn
 uritemplate==3.0.0        # via coreapi
 urllib3==1.24.2           # via requests
@@ -134,3 +134,5 @@ wcwidth==0.1.7            # via prompt-toolkit
 webencodings==0.5.1       # via bleach, html5lib
 yapf==0.27.0
 zope.interface==4.6.0     # via twisted
+
+#
