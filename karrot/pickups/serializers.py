@@ -431,7 +431,8 @@ class FeedbackExportSerializer(FeedbackSerializer):
         pickup = feedback.about
         group = pickup.place.group
 
-        return pickup.date.start.astimezone(group.timezone).isoformat(timespec='seconds')
+        # TODO rewrite to isoformat(timespec='seconds') once we are on Python 3.6+
+        return pickup.date.start.astimezone(group.timezone).isoformat()
 
     def get_about_place(self, feedback):
         return feedback.about.place_id
@@ -440,7 +441,8 @@ class FeedbackExportSerializer(FeedbackSerializer):
         pickup = feedback.about
         group = pickup.place.group
 
-        return feedback.created_at.astimezone(group.timezone).isoformat(timespec='seconds')
+        # TODO rewrite to isoformat(timespec='seconds') once we are on Python 3.6+
+        return feedback.created_at.astimezone(group.timezone).isoformat()
 
 
 class FeedbackExportRenderer(CSVRenderer):
