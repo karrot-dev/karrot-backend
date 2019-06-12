@@ -162,8 +162,7 @@ def send_reaction_update(sender, instance, **kwargs):
     topic = 'conversations:message'
 
     for subscription in ChannelSubscription.objects.recent() \
-            .filter(user__in=conversation.participants.all()) \
-            .exclude(user=reaction.user).distinct():
+            .filter(user__in=conversation.participants.all()).distinct():
         payload = ConversationMessageSerializer(message, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
