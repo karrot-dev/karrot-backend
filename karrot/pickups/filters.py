@@ -14,7 +14,7 @@ class PickupDateSeriesFilter(filters.FilterSet):
 
 class PickupDatesFilter(filters.FilterSet):
     place = filters.NumberFilter(field_name='place')
-    group = filters.NumberFilter(field_name='place__group__id')
+    group = filters.NumberFilter(field_name='place__group')
     date = ISODateTimeRangeFromToRangeFilter(field_name='date', lookup_expr='overlap')
     feedback_possible = filters.BooleanFilter(method='filter_feedback_possible')
 
@@ -29,8 +29,8 @@ class PickupDatesFilter(filters.FilterSet):
 
 
 class FeedbackFilter(filters.FilterSet):
-    group = filters.NumberFilter(field_name='about__place__group__id')
-    place = filters.NumberFilter(field_name='about__place__id')
+    group = filters.NumberFilter(field_name='about__place__group')
+    place = filters.NumberFilter(field_name='about__place')
     about = filters.NumberFilter(field_name='about')
     given_by = filters.NumberFilter(field_name='given_by')
     created_at = filters.IsoDateTimeFromToRangeFilter(field_name='created_at')

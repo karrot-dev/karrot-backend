@@ -4,6 +4,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from karrot.conversations.api import RetrieveConversationMixin
@@ -18,7 +19,8 @@ from karrot.pickups.permissions import (
 )
 from karrot.pickups.serializers import (
     PickupDateSerializer, PickupDateSeriesSerializer, PickupDateJoinSerializer, PickupDateLeaveSerializer,
-    FeedbackSerializer, PickupDateUpdateSerializer, PickupDateSeriesUpdateSerializer, PickupDateSeriesHistorySerializer
+    FeedbackSerializer, PickupDateUpdateSerializer, PickupDateSeriesUpdateSerializer,
+    PickupDateSeriesHistorySerializer, FeedbackExportSerializer, FeedbackExportRenderer
 )
 from karrot.utils.mixins import PartialUpdateModelMixin
 
@@ -69,6 +71,19 @@ class FeedbackViewSet(
             'feedback': serializer.data,
             'pickups': pickups_serializer.data,
         })
+
+    @action(
+        detail=False,
+        methods=['GET'],
+        renderer_classes=(FeedbackExportRenderer, ),
+        pagination_class=None,
+        serializer_class=FeedbackExportSerializer,
+    )
+    def export(self, request):
+        queryset = self.filter_queryset(self.get_queryset()
+                                        ).select_related('about', 'about__place', 'about__place__group')
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class PickupDateSeriesViewSet(

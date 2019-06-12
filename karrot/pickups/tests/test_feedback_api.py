@@ -224,6 +224,23 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.assertEqual(len(response.data['pickups']), len(pickup_ids))
         self.assertEqual(set(p['id'] for p in response.data['pickups']), pickup_ids)
 
+    def test_export_feedback(self):
+        self.client.force_login(user=self.member)
+        with self.assertNumQueries(2):
+            response = self.get_results(self.url + 'export/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+        feedback = response.data[0]
+
+        # converts dates into group timezone
+        self.assertFalse(feedback['created_at'].endswith('Z'))
+
+        # includes pickup date
+        self.assertFalse(feedback['about_date'].endswith('Z'))
+
+        # includes place id
+        self.assertIn('about_place', feedback)
+
     def test_list_feedback_works_as_collector(self):
         """
         Collector is allowed to see list of feedback
