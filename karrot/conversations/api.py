@@ -277,7 +277,7 @@ class ConversationMessageViewSet(
         if self.action in ('partial_update', 'thread'):
             return self.queryset
         qs = self.queryset \
-            .filter(conversation__in=Conversation.objects.with_access(self.request.user)) \
+            .with_conversation_access(self.request.user) \
             .annotate_replies_count() \
             .annotate_unread_replies_count_for(self.request.user)
 

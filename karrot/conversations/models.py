@@ -219,6 +219,14 @@ class ConversationMessageQuerySet(QuerySet):
             unread_replies_count=Count('thread_messages', filter=unread_replies_filter, distinct=True)
         )
 
+    def with_conversation_access(self, user):
+        # Note: this is needed if ConversationQuerySet.with_access is too slow
+        # should contain the same logic
+        return self.filter(
+            Q(conversation__participants=user) |
+            Q(conversation__group__groupmembership__user=user, conversation__is_group_public=True)
+        ).distinct()
+
 
 class ConversationMessageManager(BaseManager.from_queryset(ConversationMessageQuerySet)):
     def create(self, **kwargs):
