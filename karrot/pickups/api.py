@@ -80,8 +80,9 @@ class FeedbackViewSet(
         serializer_class=FeedbackExportSerializer,
     )
     def export(self, request):
-        queryset = self.filter_queryset(self.get_queryset()
-                                        ).select_related('about', 'about__place', 'about__place__group')
+        queryset = self.filter_queryset(self.get_queryset()) \
+            .select_related('about', 'about__place', 'about__place__group') \
+            .order_by('-about__date')
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
