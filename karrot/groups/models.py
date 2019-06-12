@@ -62,7 +62,7 @@ class GroupQuerySet(models.QuerySet):
         )
 
 
-class Group(BaseModel, LocationModel, ConversationMixin):
+class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
     objects = GroupQuerySet.as_manager()
 
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH, unique=True)

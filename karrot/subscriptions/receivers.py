@@ -220,6 +220,12 @@ def send_participant_left(sender, instance, **kwargs):
 @receiver(post_save, sender=Group)
 def send_group_updates(sender, instance, **kwargs):
     group = instance
+
+    # avoid websocket updates if the change isn't visible to users
+    dirty_fields = group.get_dirty_fields()
+    if len(dirty_fields) == 1 and 'last_active_at' in dirty_fields:
+        return
+
     detail_payload = GroupDetailSerializer(group).data
     for subscription in ChannelSubscription.objects.recent().filter(user__in=group.members.all()).distinct():
         send_in_channel(subscription.reply_channel, topic='groups:group_detail', payload=detail_payload)
