@@ -1,6 +1,7 @@
 from dateutil.relativedelta import relativedelta
 from django.test import TestCase
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
@@ -15,6 +16,9 @@ from karrot.webhooks.models import EmailEvent
 class TestUserStats(TestCase):
     def test_user_stats(self):
         self.maxDiff = None
+
+        # avoid test flakyness: remove leftover users from other tests
+        get_user_model().objects.all().delete()
 
         def update_member_activity(user, **kwargs):
             GroupMembership.objects.filter(user=user).update(lastseen_at=timezone.now() - relativedelta(**kwargs))
