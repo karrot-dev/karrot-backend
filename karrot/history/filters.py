@@ -3,14 +3,18 @@ from django_filters import rest_framework as filters
 from karrot.history.models import HistoryTypus, History
 
 
-def filter_history_typus(qs, field, value):
-    return qs.filter(**{field: getattr(HistoryTypus, value)})
+class HistoryTypusFilter(filters.MultipleChoiceFilter):
+    always_filter = False
+
+    def get_filter_predicate(self, v):
+        return {self.field_name: getattr(HistoryTypus, v)}
 
 
 class HistoryFilter(filters.FilterSet):
-    typus = filters.ChoiceFilter(choices=HistoryTypus.items(), method=filter_history_typus)
+    typus = HistoryTypusFilter(choices=HistoryTypus.items())
+    type = HistoryTypusFilter(choices=HistoryTypus.items(), field_name='typus')
     date = filters.IsoDateTimeFromToRangeFilter(field_name='date')
 
     class Meta:
         model = History
-        fields = ('group', 'place', 'users', 'typus', 'date', 'series', 'pickup')
+        fields = ('group', 'place', 'users', 'typus', 'type', 'date', 'series', 'pickup')

@@ -183,6 +183,7 @@ class PickupDateQuerySet(models.QuerySet):
                     typus=HistoryTypus.PICKUP_MISSED,
                     group=pickup.place.group,
                     place=pickup.place,
+                    pickup=pickup,
                     date=pickup.date.start,
                     payload=payload,
                 )
@@ -192,6 +193,7 @@ class PickupDateQuerySet(models.QuerySet):
                     typus=HistoryTypus.PICKUP_DONE,
                     group=pickup.place.group,
                     place=pickup.place,
+                    pickup=pickup,
                     users=pickup.collectors.all(),
                     date=pickup.date.start,
                     payload=payload,

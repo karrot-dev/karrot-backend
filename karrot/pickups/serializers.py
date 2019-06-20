@@ -192,6 +192,7 @@ class PickupDateJoinSerializer(serializers.ModelSerializer):
             typus=HistoryTypus.PICKUP_JOIN,
             group=pickupdate.place.group,
             place=pickupdate.place,
+            pickup=pickupdate,
             users=[
                 user,
             ],
@@ -216,6 +217,7 @@ class PickupDateLeaveSerializer(serializers.ModelSerializer):
             typus=HistoryTypus.PICKUP_LEAVE,
             group=pickupdate.place.group,
             place=pickupdate.place,
+            pickup=pickupdate,
             users=[user],
             payload=PickupDateSerializer(instance=pickupdate).data,
         )
