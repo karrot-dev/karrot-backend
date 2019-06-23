@@ -79,7 +79,7 @@ class FeedbackViewSet(
         pagination_class=None,
         serializer_class=FeedbackExportSerializer,
     )
-    def export(self, request):
+    def export(self, request, format=None):
         queryset = self.filter_queryset(self.get_queryset()) \
             .select_related('about', 'about__place', 'about__place__group') \
             .order_by('-about__date')
