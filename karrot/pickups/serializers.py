@@ -114,6 +114,9 @@ class PickupDateSerializer(serializers.ModelSerializer):
     def validate_date(self, date):
         if not date.start > timezone.now() + timedelta(minutes=10):
             raise serializers.ValidationError(_('The date should be in the future.'))
+        duration = date.end - date.start
+        if duration < timedelta(seconds=1):
+            raise serializers.ValidationError('Duration must be at least one second.')
         return date
 
 
