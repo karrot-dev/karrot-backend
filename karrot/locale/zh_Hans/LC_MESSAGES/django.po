@@ -28,7 +28,7 @@ msgstr "你需要一個經過驗證的電郵地址"
 #: karrot/applications/api.py:36 karrot/groups/api.py:49
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:124
 #: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:111
-#: karrot/pickups/serializers.py:291 karrot/places/api.py:19
+#: karrot/pickups/serializers.py:294 karrot/places/api.py:19
 #: karrot/places/serializers.py:80
 msgid "You need to be a group editor"
 msgstr "你必須擁有社團編輯權"
@@ -597,7 +597,7 @@ msgstr "開放食物領取日期已滿。"
 msgid "This feedback is given by another user."
 msgstr "此反映來自其他用戶"
 
-#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:393
+#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:396
 #, python-format
 msgid ""
 "You can't give feedback for pickups more than %(days_number)s days ago."
@@ -619,27 +619,27 @@ msgstr ""
 msgid "The date should be in the future."
 msgstr "日期應該設定在未來。"
 
-#: karrot/pickups/serializers.py:171
+#: karrot/pickups/serializers.py:174
 msgid "You can't move pickups that are part of a series."
 msgstr ""
 
-#: karrot/pickups/serializers.py:304
+#: karrot/pickups/serializers.py:307
 msgid "Invalid recurrence rule."
 msgstr "無效的週期規則"
 
-#: karrot/pickups/serializers.py:306
+#: karrot/pickups/serializers.py:309
 msgid "Only single recurrence rules are allowed."
 msgstr "只允許一種週期規則"
 
-#: karrot/pickups/serializers.py:388
+#: karrot/pickups/serializers.py:391
 msgid "The pickup is not done yet"
 msgstr "食物領取任務未完成"
 
-#: karrot/pickups/serializers.py:390
+#: karrot/pickups/serializers.py:393
 msgid "You aren't assigned to the pickup."
 msgstr "你並未被分配到此領取任務"
 
-#: karrot/pickups/serializers.py:407
+#: karrot/pickups/serializers.py:410
 msgid "Both comment and weight cannot be blank."
 msgstr "意見回饋和重量兩欄都不能是空的"
 
