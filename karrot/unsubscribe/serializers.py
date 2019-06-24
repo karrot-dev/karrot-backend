@@ -1,6 +1,7 @@
 from django.core.signing import BadSignature
 from rest_framework import serializers
 
+from karrot.unsubscribe import stats
 from karrot.unsubscribe.utils import parse_token, unsubscribe_from_conversation, unsubscribe_from_thread, \
     unsubscribe_from_all_conversations_in_group, unsubscribe_from_notification_type
 
@@ -45,5 +46,11 @@ class UnsubscribeSerializer(serializers.Serializer):
             if 'group' not in token_data:
                 raise serializers.ValidationError()
             unsubscribe_from_all_conversations_in_group(user, token_data['group'])
+
+        stats.unsubscribed(
+            group=token_data.get('group'),
+            choice=choice,
+            notification_type=token_data.get('notification_type'),
+        )
 
         return {}
