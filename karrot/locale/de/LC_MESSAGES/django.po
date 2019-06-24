@@ -31,7 +31,7 @@ msgstr "Du brauchst eine bestätigte E-Mail-Adresse."
 #: karrot/applications/api.py:36 karrot/groups/api.py:49
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:124
 #: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:111
-#: karrot/pickups/serializers.py:291 karrot/places/api.py:19
+#: karrot/pickups/serializers.py:294 karrot/places/api.py:19
 #: karrot/places/serializers.py:80
 msgid "You need to be a group editor"
 msgstr "Du brauchst Bearbeitungsrechte für diese Gruppe."
@@ -620,7 +620,7 @@ msgstr "Dieser Abholtermin ist bereits voll."
 msgid "This feedback is given by another user."
 msgstr "Diese Rückmeldung wurde von einem anderen Benutzer abgegeben."
 
-#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:393
+#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:396
 #, python-format
 msgid ""
 "You can't give feedback for pickups more than %(days_number)s days ago."
@@ -644,27 +644,27 @@ msgstr ""
 msgid "The date should be in the future."
 msgstr "Der Abholtermin muss in der Zukunft liegen."
 
-#: karrot/pickups/serializers.py:171
+#: karrot/pickups/serializers.py:174
 msgid "You can't move pickups that are part of a series."
 msgstr ""
 
-#: karrot/pickups/serializers.py:304
+#: karrot/pickups/serializers.py:307
 msgid "Invalid recurrence rule."
 msgstr "Ungültige Wiederholungsregel"
 
-#: karrot/pickups/serializers.py:306
+#: karrot/pickups/serializers.py:309
 msgid "Only single recurrence rules are allowed."
 msgstr "Nur einfache Wiederholungsregeln sind erlaubt."
 
-#: karrot/pickups/serializers.py:388
+#: karrot/pickups/serializers.py:391
 msgid "The pickup is not done yet"
 msgstr "Diese Abholung ist noch nicht erledigt."
 
-#: karrot/pickups/serializers.py:390
+#: karrot/pickups/serializers.py:393
 msgid "You aren't assigned to the pickup."
 msgstr "Du hast dich nicht für diese Abholung gemeldet."
 
-#: karrot/pickups/serializers.py:407
+#: karrot/pickups/serializers.py:410
 msgid "Both comment and weight cannot be blank."
 msgstr "Kommentar und Gewicht dürfen nicht beide leer sein."
 
