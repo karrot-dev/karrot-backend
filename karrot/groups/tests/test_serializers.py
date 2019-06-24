@@ -1,16 +1,21 @@
+from collections import namedtuple
+
 from django.test import TestCase
 
 from karrot.groups.factories import GroupFactory
 from karrot.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer
 from karrot.users.factories import UserFactory
 
+MockRequest = namedtuple('Request', ['user'])
+
 
 class TestGroupSerializer(TestCase):
     def setUp(self):
-        self.group = GroupFactory(members=[UserFactory() for _ in range(3)])
+        self.members = [UserFactory() for _ in range(3)]
+        self.group = GroupFactory(members=self.members)
 
     def test_detail(self):
-        serializer = GroupDetailSerializer(self.group)
+        serializer = GroupDetailSerializer(self.group, context={'request': MockRequest(user=self.members[0])})
         self.assertEqual(len(serializer.data.keys()), 24)
         self.assertEqual(serializer.data['id'], self.group.id)
         self.assertEqual(serializer.data['name'], self.group.name)
