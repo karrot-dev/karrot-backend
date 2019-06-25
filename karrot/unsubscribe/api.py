@@ -13,7 +13,7 @@ class TokenUnsubscribeView(views.APIView):
     def post(request, token):
         """
         Receive unauthenticated but signed unsubscribe requests
-        
+
         These are the things people can click in emails regardless of whether they are logged in
         """
         serializer = TokenUnsubscribeSerializer(data={'token': token, **request.data})
