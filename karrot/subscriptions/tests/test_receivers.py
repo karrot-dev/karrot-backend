@@ -461,7 +461,6 @@ class GroupMembershipReceiverTests(WSTestCase):
         self.assertEqual([m['topic'] for m in client.messages], [
             'notifications:notification',
             'groups:group_detail',
-            'groups:group_preview',
         ])
 
 
