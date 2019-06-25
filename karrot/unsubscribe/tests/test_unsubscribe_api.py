@@ -3,7 +3,6 @@ from rest_framework.test import APITestCase
 
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupNotificationType
-from karrot.places.factories import PlaceFactory
 from karrot.unsubscribe.utils import generate_token
 from karrot.users.factories import UserFactory
 
