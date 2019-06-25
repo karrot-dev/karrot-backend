@@ -8,13 +8,11 @@ from karrot.unsubscribe.utils import generate_token
 from karrot.users.factories import UserFactory
 
 
-class TestUnsubscribeAPI(APITestCase):
+class TestTokenUnsubscribeAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.url = '/api/unsubscribe/{}/'
-        self.user = UserFactory()
         self.group = GroupFactory(members=[self.user])
-        self.place = PlaceFactory(group=self.group)
         self.other_group = GroupFactory(members=[self.user])
 
     def test_unsubscribe_from_conversation(self):
@@ -79,3 +77,22 @@ class TestUnsubscribeAPI(APITestCase):
         token = generate_token(self.user, conversation=self.group.conversation)
         response = self.client.post(self.url.format(token), {'choice': 'group'}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
+
+class TestUnsubscribeAPI(APITestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.url = '/api/unsubscribe/'
+        self.group = GroupFactory(members=[self.user])
+
+    def test_unsubscribe_from_group(self):
+        self.client.force_login(self.user)
+        participant = self.group.conversation.conversationparticipant_set.filter(user=self.user)
+        self.assertFalse(participant.get().muted)
+        response = self.client.post(self.url, {'choice': 'group', 'group': self.group.id}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, {
+            'conversations': 1,
+            'threads': 0,
+        })
+        self.assertTrue(participant.get().muted)
