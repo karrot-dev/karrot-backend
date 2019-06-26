@@ -217,7 +217,7 @@ msgstr "अज्ञात समयक्षेत्र"
 msgid "Playground"
 msgstr ""
 
-#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:233
+#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:231
 msgid "You cannot manage agreements"
 msgstr "आप समझौतों का प्रबंधन नहीं कर सकते"
 
@@ -225,7 +225,7 @@ msgstr "आप समझौतों का प्रबंधन नहीं �
 msgid "Agreement is not for this group"
 msgstr "समझौता इस समूह के लिए नहीं है"
 
-#: karrot/groups/serializers.py:231
+#: karrot/groups/serializers.py:229
 msgid "You are not in this group"
 msgstr "आप इस समूह में नहीं हैं"
 

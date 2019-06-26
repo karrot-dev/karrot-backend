@@ -234,7 +234,7 @@ msgstr "Fuseau horaire inconnu"
 msgid "Playground"
 msgstr "Terrain de jeux"
 
-#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:233
+#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:231
 msgid "You cannot manage agreements"
 msgstr "Tu ne peux pas gérer les agréements"
 
@@ -242,7 +242,7 @@ msgstr "Tu ne peux pas gérer les agréements"
 msgid "Agreement is not for this group"
 msgstr "L’agrément n'est pas pour ce groupe "
 
-#: karrot/groups/serializers.py:231
+#: karrot/groups/serializers.py:229
 msgid "You are not in this group"
 msgstr "Tu n'es pas dans ce groupe"
 

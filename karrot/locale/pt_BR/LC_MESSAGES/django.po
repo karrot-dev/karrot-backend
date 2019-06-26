@@ -217,7 +217,7 @@ msgstr "Fuso horário desconhecido"
 msgid "Playground"
 msgstr "Parque de diversões"
 
-#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:233
+#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:231
 msgid "You cannot manage agreements"
 msgstr ""
 
@@ -225,7 +225,7 @@ msgstr ""
 msgid "Agreement is not for this group"
 msgstr ""
 
-#: karrot/groups/serializers.py:231
+#: karrot/groups/serializers.py:229
 msgid "You are not in this group"
 msgstr ""
 
