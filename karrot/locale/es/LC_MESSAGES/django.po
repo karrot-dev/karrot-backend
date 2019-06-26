@@ -218,7 +218,7 @@ msgstr "Zona horaria desconocida"
 msgid "Playground"
 msgstr ""
 
-#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:233
+#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:231
 msgid "You cannot manage agreements"
 msgstr "No puedes gestionar acuerdos"
 
@@ -226,7 +226,7 @@ msgstr "No puedes gestionar acuerdos"
 msgid "Agreement is not for this group"
 msgstr "El acuerdo no es para este grupo"
 
-#: karrot/groups/serializers.py:231
+#: karrot/groups/serializers.py:229
 msgid "You are not in this group"
 msgstr "No eres miembro de este grupo"
 

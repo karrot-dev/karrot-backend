@@ -233,7 +233,7 @@ msgstr "Unbekannte Zeitzone"
 msgid "Playground"
 msgstr "Spielplatz"
 
-#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:233
+#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:231
 msgid "You cannot manage agreements"
 msgstr "Du darfst die Vereinbarungen nicht ändern"
 
@@ -241,7 +241,7 @@ msgstr "Du darfst die Vereinbarungen nicht ändern"
 msgid "Agreement is not for this group"
 msgstr "Vereinbarung gehört nicht zu dieser Gruppe."
 
-#: karrot/groups/serializers.py:231
+#: karrot/groups/serializers.py:229
 msgid "You are not in this group"
 msgstr "Du bist nicht Mitglied dieser Gruppe."
 

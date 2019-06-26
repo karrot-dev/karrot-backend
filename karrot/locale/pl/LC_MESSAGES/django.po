@@ -229,7 +229,7 @@ msgstr "Nieznana strefa czasowa"
 msgid "Playground"
 msgstr "Piaskownica"
 
-#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:233
+#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:231
 msgid "You cannot manage agreements"
 msgstr "Nie możesz zarządzać umowami"
 
@@ -237,7 +237,7 @@ msgstr "Nie możesz zarządzać umowami"
 msgid "Agreement is not for this group"
 msgstr "Ta umowa nie jest dla tej grupy"
 
-#: karrot/groups/serializers.py:231
+#: karrot/groups/serializers.py:229
 msgid "You are not in this group"
 msgstr "Nie jesteś w tej grupie"
 
