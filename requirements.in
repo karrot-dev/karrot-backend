@@ -1,4 +1,4 @@
--e git+https://github.com/tiltec/django-influxdb-metrics@07f5701#egg=django-influxdb-metrics
+-e git+https://github.com/tiltec/django-influxdb-metrics@163730a#egg=django-influxdb-metrics
 -e git+https://github.com/tiltec/django-rest-swagger@7a9ef64#egg=django-rest-swagger
 -e git+https://github.com/tiltec/talon@master#egg=talon
 django[argon2]
