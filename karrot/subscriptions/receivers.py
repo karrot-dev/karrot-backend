@@ -6,6 +6,7 @@ from channels.exceptions import ChannelFull
 from channels.layers import get_channel_layer
 from django.conf import settings
 from django.contrib.auth import user_logged_out
+from django.contrib.auth.models import AnonymousUser
 from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
@@ -38,10 +39,11 @@ from karrot.subscriptions.models import ChannelSubscription
 from karrot.userauth.serializers import AuthUserSerializer
 from karrot.users.serializers import UserSerializer
 
-MockRequest = namedtuple('Request', ['user'])
 
+class MockRequest:
+    def __init__(self, user=None):
+        self.user = user or AnonymousUser()
 
-class AbsoluteURIBuildingRequest:
     def build_absolute_uri(self, path):
         return settings.HOSTNAME + path
 
@@ -396,7 +398,7 @@ def send_feedback_updates(sender, instance, **kwargs):
 def send_auth_user_updates(sender, instance, **kwargs):
     """Send full details to the user"""
     user = instance
-    payload = AuthUserSerializer(user, context={'request': AbsoluteURIBuildingRequest()}).data
+    payload = AuthUserSerializer(user, context={'request': MockRequest(user=user)}).data
     for subscription in ChannelSubscription.objects.recent().filter(user=user):
         send_in_channel(subscription.reply_channel, topic='auth:user', payload=payload)
 
@@ -411,7 +413,7 @@ def notify_logged_out_user(sender, user, **kwargs):
 def send_user_updates(sender, instance, **kwargs):
     """Send profile updates to everyone except the user"""
     user = instance
-    payload = UserSerializer(user, context={'request': AbsoluteURIBuildingRequest()}).data
+    payload = UserSerializer(user, context={'request': MockRequest()}).data
     user_groups = user.groups.values('id')
     for subscription in ChannelSubscription.objects.recent().filter(user__groups__in=user_groups).exclude(user=user
                                                                                                           ).distinct():
