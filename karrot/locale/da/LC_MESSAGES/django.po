@@ -28,7 +28,7 @@ msgstr ""
 #: karrot/applications/api.py:36 karrot/groups/api.py:49
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:124
 #: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:111
-#: karrot/pickups/serializers.py:291 karrot/places/api.py:19
+#: karrot/pickups/serializers.py:294 karrot/places/api.py:19
 #: karrot/places/serializers.py:80
 msgid "You need to be a group editor"
 msgstr ""
@@ -216,7 +216,7 @@ msgstr "Ukendt tidszone"
 msgid "Playground"
 msgstr ""
 
-#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:233
+#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:231
 msgid "You cannot manage agreements"
 msgstr ""
 
@@ -224,7 +224,7 @@ msgstr ""
 msgid "Agreement is not for this group"
 msgstr ""
 
-#: karrot/groups/serializers.py:231
+#: karrot/groups/serializers.py:229
 msgid "You are not in this group"
 msgstr ""
 
@@ -588,7 +588,7 @@ msgstr ""
 msgid "This feedback is given by another user."
 msgstr ""
 
-#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:393
+#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:396
 #, python-format
 msgid ""
 "You can't give feedback for pickups more than %(days_number)s days ago."
@@ -610,27 +610,27 @@ msgstr ""
 msgid "The date should be in the future."
 msgstr ""
 
-#: karrot/pickups/serializers.py:171
+#: karrot/pickups/serializers.py:174
 msgid "You can't move pickups that are part of a series."
 msgstr ""
 
-#: karrot/pickups/serializers.py:304
+#: karrot/pickups/serializers.py:307
 msgid "Invalid recurrence rule."
 msgstr ""
 
-#: karrot/pickups/serializers.py:306
+#: karrot/pickups/serializers.py:309
 msgid "Only single recurrence rules are allowed."
 msgstr ""
 
-#: karrot/pickups/serializers.py:388
+#: karrot/pickups/serializers.py:391
 msgid "The pickup is not done yet"
 msgstr ""
 
-#: karrot/pickups/serializers.py:390
+#: karrot/pickups/serializers.py:393
 msgid "You aren't assigned to the pickup."
 msgstr ""
 
-#: karrot/pickups/serializers.py:407
+#: karrot/pickups/serializers.py:410
 msgid "Both comment and weight cannot be blank."
 msgstr ""
 

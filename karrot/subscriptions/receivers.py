@@ -1,11 +1,11 @@
-from collections import namedtuple
-
 import json
+
 from asgiref.sync import async_to_sync
 from channels.exceptions import ChannelFull
 from channels.layers import get_channel_layer
 from django.conf import settings
 from django.contrib.auth import user_logged_out
+from django.contrib.auth.models import AnonymousUser
 from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
@@ -38,10 +38,11 @@ from karrot.subscriptions.models import ChannelSubscription
 from karrot.userauth.serializers import AuthUserSerializer
 from karrot.users.serializers import UserSerializer
 
-MockRequest = namedtuple('Request', ['user'])
 
+class MockRequest:
+    def __init__(self, user=None):
+        self.user = user or AnonymousUser()
 
-class AbsoluteURIBuildingRequest:
     def build_absolute_uri(self, path):
         return settings.HOSTNAME + path
 
@@ -217,6 +218,24 @@ def send_participant_left(sender, instance, **kwargs):
 
 
 # Group
+def send_group_detail(group, user=None):
+    qs = ChannelSubscription.objects.recent().distinct()
+    if user:
+        qs = qs.filter(user=user)
+    else:
+        qs = qs.filter(user__in=group.members.all())
+
+    for subscription in qs:
+        payload = GroupDetailSerializer(group, context={'request': MockRequest(user=subscription.user)}).data
+        send_in_channel(subscription.reply_channel, topic='groups:group_detail', payload=payload)
+
+
+def send_group_preview(group):
+    preview_payload = GroupPreviewSerializer(group).data
+    for subscription in ChannelSubscription.objects.recent():
+        send_in_channel(subscription.reply_channel, topic='groups:group_preview', payload=preview_payload)
+
+
 @receiver(post_save, sender=Group)
 def send_group_updates(sender, instance, **kwargs):
     group = instance
@@ -226,13 +245,8 @@ def send_group_updates(sender, instance, **kwargs):
     if len(dirty_fields) == 1 and 'last_active_at' in dirty_fields:
         return
 
-    detail_payload = GroupDetailSerializer(group).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=group.members.all()).distinct():
-        send_in_channel(subscription.reply_channel, topic='groups:group_detail', payload=detail_payload)
-
-    preview_payload = GroupPreviewSerializer(group).data
-    for subscription in ChannelSubscription.objects.recent():
-        send_in_channel(subscription.reply_channel, topic='groups:group_preview', payload=preview_payload)
+    send_group_detail(group)
+    send_group_preview(group)
 
 
 # GroupMembership
@@ -243,15 +257,22 @@ def send_group_membership_updates(sender, instance, created, **kwargs):
 
     dirty_fields = membership.get_dirty_fields()
 
-    # Send updates if the membership was created or the roles field changed
+    # Send updates if the membership was created or roles changed
     if created or 'roles' in dirty_fields.keys():
-        send_group_updates(sender, group)
+        send_group_detail(group)
+    elif 'notification_types' in dirty_fields.keys():
+        # notification types are only visible to one user
+        send_group_detail(group, user=membership.user)
+
+    if created:
+        send_group_preview(group)
 
 
 @receiver(post_delete, sender=GroupMembership)
 def send_group_member_left(sender, instance, **kwargs):
     group = instance.group
-    send_group_updates(sender, group)
+    send_group_detail(group)
+    send_group_preview(group)
 
 
 # Applications
@@ -376,7 +397,7 @@ def send_feedback_updates(sender, instance, **kwargs):
 def send_auth_user_updates(sender, instance, **kwargs):
     """Send full details to the user"""
     user = instance
-    payload = AuthUserSerializer(user, context={'request': AbsoluteURIBuildingRequest()}).data
+    payload = AuthUserSerializer(user, context={'request': MockRequest(user=user)}).data
     for subscription in ChannelSubscription.objects.recent().filter(user=user):
         send_in_channel(subscription.reply_channel, topic='auth:user', payload=payload)
 
@@ -391,7 +412,7 @@ def notify_logged_out_user(sender, user, **kwargs):
 def send_user_updates(sender, instance, **kwargs):
     """Send profile updates to everyone except the user"""
     user = instance
-    payload = UserSerializer(user, context={'request': AbsoluteURIBuildingRequest()}).data
+    payload = UserSerializer(user, context={'request': MockRequest()}).data
     user_groups = user.groups.values('id')
     for subscription in ChannelSubscription.objects.recent().filter(user__groups__in=user_groups).exclude(user=user
                                                                                                           ).distinct():

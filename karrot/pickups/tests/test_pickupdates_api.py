@@ -378,6 +378,12 @@ class TestPickupDatesAPI(APITestCase, ExtractPaginationMixin):
         self.pickup.refresh_from_db()
         self.assertEqual(self.pickup.date, CustomDateTimeTZRange(start, start + timedelta(minutes=30)))
 
+    def test_cannot_set_empty_duration(self):
+        self.client.force_login(user=self.member)
+        start = timezone.now() + timedelta(hours=1)
+        response = self.client.patch(self.pickup_url, {'date': [start, start], 'has_duration': True}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
     def test_patch_start_date_only_uses_default_duration(self):
         self.client.force_login(user=self.member)
         start = timezone.now() + timedelta(hours=1)

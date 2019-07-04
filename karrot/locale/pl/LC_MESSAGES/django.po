@@ -28,7 +28,7 @@ msgstr "Musisz posiadać zweryfikowany adres e-mail"
 #: karrot/applications/api.py:36 karrot/groups/api.py:49
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:124
 #: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:111
-#: karrot/pickups/serializers.py:291 karrot/places/api.py:19
+#: karrot/pickups/serializers.py:294 karrot/places/api.py:19
 #: karrot/places/serializers.py:80
 msgid "You need to be a group editor"
 msgstr "Musisz posiadać uprawnienia do edycji"
@@ -229,7 +229,7 @@ msgstr "Nieznana strefa czasowa"
 msgid "Playground"
 msgstr "Piaskownica"
 
-#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:233
+#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:231
 msgid "You cannot manage agreements"
 msgstr "Nie możesz zarządzać umowami"
 
@@ -237,7 +237,7 @@ msgstr "Nie możesz zarządzać umowami"
 msgid "Agreement is not for this group"
 msgstr "Ta umowa nie jest dla tej grupy"
 
-#: karrot/groups/serializers.py:231
+#: karrot/groups/serializers.py:229
 msgid "You are not in this group"
 msgstr "Nie jesteś w tej grupie"
 
@@ -615,7 +615,7 @@ msgstr "Nie ma już miejsc na ten odbiór."
 msgid "This feedback is given by another user."
 msgstr "Ten komentarz został dodany przez innego użytkownika."
 
-#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:393
+#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:396
 #, python-format
 msgid ""
 "You can't give feedback for pickups more than %(days_number)s days ago."
@@ -639,27 +639,27 @@ msgstr ""
 msgid "The date should be in the future."
 msgstr "Data musi być w przyszłości."
 
-#: karrot/pickups/serializers.py:171
+#: karrot/pickups/serializers.py:174
 msgid "You can't move pickups that are part of a series."
 msgstr ""
 
-#: karrot/pickups/serializers.py:304
+#: karrot/pickups/serializers.py:307
 msgid "Invalid recurrence rule."
 msgstr "Nieprawidłowe zasady powtarzających się odbiorów."
 
-#: karrot/pickups/serializers.py:306
+#: karrot/pickups/serializers.py:309
 msgid "Only single recurrence rules are allowed."
 msgstr "Można zastosować tylko jedną zasadę powtarzających się odbiorów"
 
-#: karrot/pickups/serializers.py:388
+#: karrot/pickups/serializers.py:391
 msgid "The pickup is not done yet"
 msgstr "Jeszcze nie wykonano tego odbioru"
 
-#: karrot/pickups/serializers.py:390
+#: karrot/pickups/serializers.py:393
 msgid "You aren't assigned to the pickup."
 msgstr "Nie jesteś zapisana/-y na ten odbiór."
 
-#: karrot/pickups/serializers.py:407
+#: karrot/pickups/serializers.py:410
 msgid "Both comment and weight cannot be blank."
 msgstr ""
 "Pola komentarza i ilości uratowanego jedzenia nie mogą być jednocześnie "

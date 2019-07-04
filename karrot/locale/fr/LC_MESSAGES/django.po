@@ -31,7 +31,7 @@ msgstr "Ton adresse email doit être verifiée"
 #: karrot/applications/api.py:36 karrot/groups/api.py:49
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:124
 #: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:111
-#: karrot/pickups/serializers.py:291 karrot/places/api.py:19
+#: karrot/pickups/serializers.py:294 karrot/places/api.py:19
 #: karrot/places/serializers.py:80
 msgid "You need to be a group editor"
 msgstr "Tu dois être éditeur du groupe"
@@ -234,7 +234,7 @@ msgstr "Fuseau horaire inconnu"
 msgid "Playground"
 msgstr "Terrain de jeux"
 
-#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:233
+#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:231
 msgid "You cannot manage agreements"
 msgstr "Tu ne peux pas gérer les agréements"
 
@@ -242,7 +242,7 @@ msgstr "Tu ne peux pas gérer les agréements"
 msgid "Agreement is not for this group"
 msgstr "L’agrément n'est pas pour ce groupe "
 
-#: karrot/groups/serializers.py:231
+#: karrot/groups/serializers.py:229
 msgid "You are not in this group"
 msgstr "Tu n'es pas dans ce groupe"
 
@@ -647,7 +647,7 @@ msgstr "Cette récolte est pleine."
 msgid "This feedback is given by another user."
 msgstr "Ce retour d'information a été donné par un autre utilisateur."
 
-#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:393
+#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:396
 #, python-format
 msgid ""
 "You can't give feedback for pickups more than %(days_number)s days ago."
@@ -671,27 +671,27 @@ msgstr "Doit dépasser la valeur de départ"
 msgid "The date should be in the future."
 msgstr "La date doit être dans le futur."
 
-#: karrot/pickups/serializers.py:171
+#: karrot/pickups/serializers.py:174
 msgid "You can't move pickups that are part of a series."
 msgstr "Tu ne peux pas déplacer les récoltes qui font partie de séries."
 
-#: karrot/pickups/serializers.py:304
+#: karrot/pickups/serializers.py:307
 msgid "Invalid recurrence rule."
 msgstr "Règle de récurrence non valide."
 
-#: karrot/pickups/serializers.py:306
+#: karrot/pickups/serializers.py:309
 msgid "Only single recurrence rules are allowed."
 msgstr "Seulement des règles de recurrence individuelles sont permises."
 
-#: karrot/pickups/serializers.py:388
+#: karrot/pickups/serializers.py:391
 msgid "The pickup is not done yet"
 msgstr "La récolte n'est pas effectué actuellement"
 
-#: karrot/pickups/serializers.py:390
+#: karrot/pickups/serializers.py:393
 msgid "You aren't assigned to the pickup."
 msgstr "Tu n'es pas inscrit à la récolte"
 
-#: karrot/pickups/serializers.py:407
+#: karrot/pickups/serializers.py:410
 msgid "Both comment and weight cannot be blank."
 msgstr ""
 "Les commentaires et les poids ne peuvent être tous les deux vides à la fois."
