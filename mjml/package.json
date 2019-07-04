@@ -4,9 +4,15 @@
   "dependencies": {
     "find": "^0.3.0",
     "mjml": "^4.4.0-beta.2",
-    "ws": "^7.0.1"
+    "ws": "^7.0.1",
+    "snyk": "^1.190.0"
   },
   "devDependencies": {
     "node-watch": "^0.6.2"
-  }
+  },
+  "scripts": {
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
+  },
+  "snyk": true
 }

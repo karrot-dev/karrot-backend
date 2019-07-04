@@ -1,0 +1,412 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.13.5
+ignore: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  SNYK-JS-LODASH-450202:
+    - mjml > mjml-head-preview > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-attributes > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-spacer > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-social > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-section > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-raw > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-navbar > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-image > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-hero > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-title > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-style > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-preview > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-font > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-breakpoint > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-table > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-group > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-divider > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-column > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-cli > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-carousel > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-button > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-body > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-accordion > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-text > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-body > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-button > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-carousel > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-cli > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-column > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-divider > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-group > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-attributes > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-breakpoint > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-font > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-preview > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-style > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-title > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-hero > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-image > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-navbar > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-raw > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-section > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-social > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-spacer > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-table > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-text > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-wrapper > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-wrapper > mjml-section > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-cli > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-migrate > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-cli > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-cli > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-accordion > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-style > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-divider > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-attributes > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-breakpoint > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-font > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-preview > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-style > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-title > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-column > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-image > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-navbar > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-raw > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-section > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-social > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-spacer > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-table > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-text > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-wrapper > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-cli > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-migrate > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-carousel > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-migrate > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-cli > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-button > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-body > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-accordion > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-body > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-button > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-carousel > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-cli > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-column > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-divider > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-group > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-attributes > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-breakpoint > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-font > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-wrapper > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-group > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-title > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-hero > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-image > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-navbar > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-raw > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-section > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-social > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-spacer > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-table > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-text > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-wrapper > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-accordion > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-cli > mjml-migrate > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-wrapper > mjml-section > mjml-core > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-accordion > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-body > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-button > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-carousel > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-cli > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-column > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-divider > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-group > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-attributes > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-breakpoint > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-font > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-preview > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-style > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-title > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-hero > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-image > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-navbar > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-raw > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-section > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-social > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-spacer > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-table > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-text > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-wrapper > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-hero > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-accordion > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-body > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-button > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-carousel > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-cli > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-column > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-divider > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-group > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-attributes > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-breakpoint > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-font > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-preview > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-style > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-wrapper > mjml-section > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-hero > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-image > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-navbar > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-raw > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-title > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-section > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-wrapper > mjml-section > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-wrapper > mjml-section > mjml-core > mjml-migrate > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-social > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-spacer > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-table > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-text > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-wrapper > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-cli > mjml-migrate > mjml-core > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-cli > mjml-migrate > mjml-core > mjml-validator > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-hero > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-wrapper > mjml-section > mjml-core > mjml-migrate > mjml-parser-xml > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-migrate > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-button > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-wrapper > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-text > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-table > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-spacer > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-social > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-section > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-carousel > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-raw > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-navbar > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-image > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-body > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-title > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-style > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-preview > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-font > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-breakpoint > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head-attributes > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-head > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-group > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-divider > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-column > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-cli > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-accordion > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-wrapper > mjml-section > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
+    - mjml > mjml-cli > mjml-migrate > mjml-core > juice > web-resource-inliner > async > lodash:
+        patched: '2019-07-04T08:39:47.857Z'
