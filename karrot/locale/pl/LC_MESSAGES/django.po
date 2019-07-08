@@ -217,7 +217,7 @@ msgstr "Możesz dołączyć jedynie do otwartych grup."
 msgid "You cannot give trust to yourself"
 msgstr "Nie możesz udzielić sobie zaufania"
 
-#: karrot/groups/api.py:183
+#: karrot/groups/api.py:189
 msgid "You already gave trust to this user"
 msgstr "Już zaufałaś/-eś temu użytkownikowi"
 

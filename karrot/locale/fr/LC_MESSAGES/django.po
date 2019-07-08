@@ -222,7 +222,7 @@ msgstr "Tu peux rejoindre uniquement les groupes ouverts."
 msgid "You cannot give trust to yourself"
 msgstr "Tu ne peux pas donner ta confiance à toi-même"
 
-#: karrot/groups/api.py:183
+#: karrot/groups/api.py:189
 msgid "You already gave trust to this user"
 msgstr "Tu as déjà donné ta confiance à cette utilisateur "
 
