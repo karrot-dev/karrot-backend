@@ -1,20 +1,20 @@
 defaults: &defaults
   working_directory: ~/repo
   docker:
-    - image: karrot/python:1.7
+    - image: karrot/python:2.0
 
 aliases:
   - &restore-env-cache
     restore_cache:
       keys:
-        - python-cache-{{ checksum "requirements.txt" }}
-        - python-cache-
+        - v2-python-cache-{{ checksum "requirements.txt" }}
+        - v2-python-cache-
 
   - &save-env-cache
     save_cache:
       paths:
         - env
-      key: python-cache-{{ checksum "requirements.txt" }}
+      key: v2-python-cache-{{ checksum "requirements.txt" }}
 
   - &setup-env
     run:
@@ -33,14 +33,14 @@ jobs:
   test:
     <<: *defaults
     docker:
-      - image: karrot/python:1.7
+      - image: karrot/python:1.8
         environment:
           PGHOST: 127.0.0.1
-      - image: circleci/postgres:9.6.2
+      - image: circleci/postgres:11
         environment:
           POSTGRES_USER: ubuntu
           POSTGRES_DB: fstool_e2etest
-      - image: redis:3.2.11
+      - image: redis:5.0.3
     steps:
       - checkout
 

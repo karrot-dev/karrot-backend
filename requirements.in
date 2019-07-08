@@ -31,9 +31,9 @@ gevent
 bleach
 bleach_whitelist
 pymdown-extensions
-daphne<2.3 # last version to support channels_redis 2.3.2
-channels<2.2 # last version to support channels_redis 2.3.2
-channels_redis==2.3.2 # last version to support python 3.5
+daphne
+channels
+channels_redis
 more-itertools
 
 # dev dependencies
@@ -49,8 +49,6 @@ pytest-asyncio
 pytest-django
 pytest-xdist
 pytest-cov
-async_generator # needed by pytest-asyncio in python 3.5
-pathlib2>=2.2.0 # needed by pytest in python 3.5 env: https://github.com/pytest-dev/pytest/commit/f25683354e95ea13801e4984873bbf3352b97ff1
 freezegun
 logging_tree
 django-silk

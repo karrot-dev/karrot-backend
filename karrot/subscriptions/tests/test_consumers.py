@@ -17,36 +17,30 @@ from karrot.users.factories import UserFactory
 
 AsyncUserFactory = database_sync_to_async(UserFactory)
 
-# These async fixtures only work for python 3.6+ (needs async yield)
-#
-# @pytest.fixture
-# async def communicator(request):
-#     communicator = WebsocketCommunicator(SyncWebsocketConsumer, '/')
-#     yield communicator
-#     await communicator.disconnect()
-#
-# @pytest.fixture
-# async def user():
-#     yield await AsyncUserFactory()
-#
-#
-# @pytest.fixture
-# async def token_communicator(user):  # noqa: F811
-#     token = Token.objects.create(user=user)
-#     encoded = b64encode(token.key.encode('ascii')).decode('ascii')
-#     token_communicator = WebsocketCommunicator(
-#         TokenAuthMiddleware(SyncWebsocketConsumer),
-#         '/',
-#         headers=[[
-#             b'sec-websocket-protocol',
-#             'karrot.token,karrot.token.value.{}'.format(encoded.rstrip('=')).encode('ascii'),
-#         ]],
-#     )
-#     yield token_communicator
-#     await token_communicator.disconnect()
-#
-# ... so have implemented async context managers instead
+@pytest.fixture
+async def communicator(request):
+    communicator = WebsocketCommunicator(SyncWebsocketConsumer, '/')
+    yield communicator
+    await communicator.disconnect()
 
+@pytest.fixture
+async def user():
+    yield await AsyncUserFactory()
+
+@pytest.fixture
+async def token_communicator(user):  # noqa: F811
+    token = Token.objects.create(user=user)
+    encoded = b64encode(token.key.encode('ascii')).decode('ascii')
+    token_communicator = WebsocketCommunicator(
+        TokenAuthMiddleware(SyncWebsocketConsumer),
+        '/',
+        headers=[[
+            b'sec-websocket-protocol',
+            'karrot.token,karrot.token.value.{}'.format(encoded.rstrip('=')).encode('ascii'),
+        ]],
+    )
+    yield token_communicator
+    await token_communicator.disconnect()
 
 class Communicator():
     async def __aenter__(self):
