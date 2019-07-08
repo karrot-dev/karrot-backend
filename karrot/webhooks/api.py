@@ -122,7 +122,7 @@ class IncomingEmailView(views.APIView):
                     reply_plain = generate_plaintext_from_html(reply_html)
 
                     stats.incoming_html_email_trimmed({
-                        'length_original': len(html_content.splitlines()),
+                        'length_original': len(html_content),
                         'length_html_talon': len(reply_html),
                         'length_plain_talon': len(reply_plain),
                     })
