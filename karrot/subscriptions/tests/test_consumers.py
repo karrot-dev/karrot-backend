@@ -17,6 +17,7 @@ from karrot.users.factories import UserFactory
 
 AsyncUserFactory = database_sync_to_async(UserFactory)
 
+
 class Communicator():
     async def __aenter__(self):
         self.communicator = WebsocketCommunicator(WebsocketConsumer, '/')
