@@ -200,7 +200,7 @@ msgstr ""
 msgid "You cannot give trust to yourself"
 msgstr ""
 
-#: karrot/groups/api.py:183
+#: karrot/groups/api.py:189
 msgid "You already gave trust to this user"
 msgstr ""
 

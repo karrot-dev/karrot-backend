@@ -209,7 +209,7 @@ msgstr "你只能加入公開社團"
 msgid "You cannot give trust to yourself"
 msgstr "你不能「信任」你自己"
 
-#: karrot/groups/api.py:183
+#: karrot/groups/api.py:189
 msgid "You already gave trust to this user"
 msgstr "你已經給予此名使用者「信任」"
 
