@@ -62,7 +62,11 @@ def send_in_channel(channel, topic, payload):
     try:
         channel_layer_send_sync(channel, message)
     except ChannelFull:
+        # TODO investigate this more
         # maybe this means the subscription is invalid now?
+        sentry_client.captureException()
+    except RuntimeError:
+        # TODO investigate this more (but let the code continue in the meantime...)
         sentry_client.captureException()
     else:
         stats.pushed_via_websocket(topic)
