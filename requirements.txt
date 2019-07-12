@@ -135,7 +135,7 @@ uritemplate==3.0.0        # via coreapi
 urllib3==1.25.3           # via requests
 wcwidth==0.1.7            # via prompt-toolkit, pytest
 webencodings==0.5.1       # via bleach, html5lib
-yapf==0.27.0
+yapf==0.28.0
 zipp==0.5.2               # via importlib-metadata
 zope.interface==4.6.0     # via twisted
 
