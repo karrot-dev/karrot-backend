@@ -1,3 +1,4 @@
+import os
 from base64 import b64encode
 from django.core import mail, signing
 
@@ -50,11 +51,29 @@ class TestEmailReplyAPI(APITestCase):
         self.assertEqual(self.conversation.messages.count(), 1)
         message = ConversationMessage.objects.first()
         self.assertEqual(message.received_via, 'email')
+        self.assertEqual('message body', message.content)
 
         incoming_email = IncomingEmail.objects.first()
         self.assertEqual(incoming_email.user, self.user)
         self.assertEqual(incoming_email.payload, relay_message)
         self.assertEqual(incoming_email.message, message)
+
+    @override_settings(SPARKPOST_RELAY_SECRET='test_key')
+    def test_receive_incoming_email_with_only_html(self):
+        relay_message = self.make_message()
+
+        with open(os.path.join(os.path.dirname(__file__), './ms_outlook_2010.html')) as f:
+            html_message = f.read()
+
+        del relay_message['content']
+        relay_message['content'] = {'html': html_message}
+        response = self.send_message(relay_message)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(self.conversation.messages.count(), 1)
+        message = ConversationMessage.objects.first()
+        self.assertEqual(message.received_via, 'email')
+        self.assertIn('Hi. I am fine.', message.content)
 
     @override_settings(SPARKPOST_RELAY_SECRET='test_key')
     def test_receive_incoming_email_with_casefolding(self):

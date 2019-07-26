@@ -16,7 +16,7 @@ from karrot.utils.email_utils import generate_plaintext_from_html
 from karrot.webhooks import stats
 from karrot.webhooks.emails import prepare_incoming_email_rejected_email
 from karrot.webhooks.models import EmailEvent, IncomingEmail
-from karrot.webhooks.utils import trim_with_talon, trim_with_discourse, trim_html_with_talon
+from karrot.webhooks.utils import trim_with_talon, trim_with_discourse
 
 
 def parse_local_part(part):
@@ -89,27 +89,10 @@ class IncomingEmailView(views.APIView):
                 else:
                     conversation = Conversation.objects.get(id=conversation_id)
 
-                # 3. extract the email reply text
-                # Try plain text first, most emails have that.
+                # 3. get email content as plain text
                 if 'text' in content:
-                    # Try out both talon and discourse email_reply_trimmer
-                    # Trimmers are conservative and sometimes keep more lines, leading to bloated replies.
-                    # We choose the trimmed reply that has fewer lines.
                     text_content = content['text']
-
-                    trimmed_talon, line_count_talon = trim_with_talon(text_content)
-                    trimmed_discourse, line_count_discourse = trim_with_discourse(text_content)
-
-                    reply_plain = trimmed_discourse if line_count_discourse <= line_count_talon else trimmed_talon
-
-                    stats.incoming_email_trimmed({
-                        'line_count_original': len(text_content.splitlines()),
-                        'line_count_talon': line_count_talon,
-                        'line_count_discourse': line_count_discourse,
-                    })
-
                 else:
-                    # Fall back to html
                     try:
                         html_content = content['html']
                     except KeyError:
@@ -118,16 +101,27 @@ class IncomingEmailView(views.APIView):
                         notify_about_rejected_email(user, 'Karrot could not find any reply text')
                         continue
 
-                    reply_html = trim_html_with_talon(html_content)
-                    reply_plain = generate_plaintext_from_html(reply_html)
+                    # let's just make HTML into plain text
+                    text_content = generate_plaintext_from_html(html_content)
 
-                    stats.incoming_html_email_trimmed({
-                        'length_original': len(html_content),
-                        'length_html_talon': len(reply_html),
-                        'length_plain_talon': len(reply_plain),
-                    })
+                # 4. extract email reply text
+                # Try out both talon and discourse email_reply_trimmer
+                # Trimmers are conservative and sometimes keep more lines, leading to bloated replies.
+                # We choose the trimmed reply that has fewer lines.
 
-                # 4. add reply to conversation
+                trimmed_talon, line_count_talon = trim_with_talon(text_content)
+                trimmed_discourse, line_count_discourse = trim_with_discourse(text_content)
+
+                reply_plain = trimmed_discourse if line_count_discourse <= line_count_talon else trimmed_talon
+
+                stats.incoming_email_trimmed({
+                    'line_count_original': len(text_content.splitlines()),
+                    'line_count_talon': line_count_talon,
+                    'line_count_discourse': line_count_discourse,
+                    'from_html': 1 if 'text' not in content else 0
+                })
+
+                # 5. add reply to conversation
                 if conversation.is_closed:
                     notify_about_rejected_email(user, reply_plain)
                     continue
