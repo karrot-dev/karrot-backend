@@ -118,8 +118,6 @@ class IncomingEmailView(views.APIView):
                         notify_about_rejected_email(user, 'Karrot could not find any reply text')
                         continue
 
-                    html_content = html_content.decode('utf8')
-
                     reply_html = trim_html_with_talon(html_content)
                     reply_plain = generate_plaintext_from_html(reply_html)
 
