@@ -114,7 +114,7 @@ pytest-xdist==1.29.0
 pytest==5.0.1             # via pytest-asyncio, pytest-cov, pytest-django, pytest-forked, pytest-xdist
 python-dateutil==2.8.0    # via django-silk, faker, freezegun, influxdb
 python-server-metrics==0.2.1
-pytz==2019.1
+pytz==2019.2
 raven==6.10.0
 redis==3.3.4
 regex==2019.6.8
