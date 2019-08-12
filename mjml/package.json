@@ -7,6 +7,6 @@
     "ws": "^7.1.1"
   },
   "devDependencies": {
-    "node-watch": "^0.6.2"
+    "node-watch": "^0.6.3"
   }
 }
