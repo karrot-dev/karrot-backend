@@ -1250,10 +1250,10 @@ no-case@^2.2.0:
   dependencies:
     lower-case "^1.1.1"
 
-node-watch@^0.6.2:
-  version "0.6.2"
-  resolved "https://registry.yarnpkg.com/node-watch/-/node-watch-0.6.2.tgz#48fd517b527ec21ac4f5f981aad2a6ddebc0131c"
-  integrity sha512-qmb/2ehVk1DC4gZYox7JgWXNucKnVk7uQmcoSeRaC7kzXsT8VOPIe7mbrR9Vc2TpGggS2yGUcgC98A2fKE53AA==
+node-watch@^0.6.3:
+  version "0.6.3"
+  resolved "https://registry.yarnpkg.com/node-watch/-/node-watch-0.6.3.tgz#9abf739ae0638435be6c0d1c99d4dc2e53df7317"
+  integrity sha512-InVPsg51EemnMVH3fvrrSVgqVBMlksZ/mK7ZDWx/NuWdNQi28wcVJX1/BP38alraPFXbRi9jZ35OfK4Ra7l8Bg==
 
 nopt@~4.0.1:
   version "4.0.1"
