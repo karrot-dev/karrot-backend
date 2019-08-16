@@ -128,7 +128,7 @@ tblib==1.4.0
 text-unidecode==1.2       # via faker
 tld==0.9.3
 traitlets==4.3.2          # via ipython
-twisted==19.2.1           # via daphne
+twisted==19.7.0           # via daphne
 txaio==18.8.1             # via autobahn
 unicodecsv==0.14.1        # via djangorestframework-csv
 uritemplate==3.0.0        # via coreapi
