@@ -73,7 +73,7 @@ importlib-metadata==0.18  # via pluggy, pytest
 incremental==17.5.0       # via twisted
 influxdb==5.2.2
 ipython-genutils==0.2.0   # via traitlets
-ipython==7.7.0
+ipython==7.8.0
 itypes==1.1.0             # via coreapi
 jedi==0.14.0              # via ipython
 jinja2==2.10.1            # via coreschema, django-jinja, django-silk
