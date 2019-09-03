@@ -16,6 +16,7 @@ from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupStatus
 from karrot.pickups.factories import PickupDateFactory
 from karrot.places.factories import PlaceFactory
+from karrot.tests.utils import execute_scheduled_tasks_immediately
 from karrot.users.factories import UserFactory, VerifiedUserFactory
 from karrot.webhooks.models import EmailEvent
 
@@ -52,10 +53,12 @@ class TestConversationsAPI(APITestCase):
             [conversation['id'] for conversation in response_conversations],
             [conversation2.id, self.conversation1.id, self.conversation2.id],
         )
-        self.assertEqual(response.data['results']['meta'], {
-            'conversations_marked_at': None,
-            'threads_marked_at': None,
-        })
+        self.assertEqual(
+            response.data['results']['meta'], {
+                'conversations_marked_at': None,
+                'threads_marked_at': None,
+            }
+        )
 
     def test_list_conversations_with_related_data_efficiently(self):
         user = UserFactory()
@@ -388,7 +391,8 @@ class TestConversationThreadsAPI(APITestCase):
 
     def test_send_reply_notifications(self):
         mail.outbox = []
-        self.create_reply(author=self.user2)
+        with execute_scheduled_tasks_immediately():
+            self.create_reply(author=self.user2)
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn(self.thread.content, mail.outbox[0].subject)
@@ -519,7 +523,8 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
         [self.group.add_member(u) for u in users]
 
         mail.outbox = []
-        ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
+        with execute_scheduled_tasks_immediately():
+            ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
 
         actual_recipients = set(m.to[0] for m in mail.outbox)
         expected_recipients = set(u.email for u in users)
@@ -549,7 +554,8 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
             )
 
         mail.outbox = []
-        ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
+        with execute_scheduled_tasks_immediately():
+            ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
         self.assertEqual(len(mail.outbox), 1)
 
     def test_exclude_unverified_addresses(self):
