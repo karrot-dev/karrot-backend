@@ -10,6 +10,7 @@ from karrot.groups.models import GroupNotificationType
 from karrot.issues.factories import IssueFactory
 from karrot.pickups.factories import PickupDateFactory
 from karrot.places.factories import PlaceFactory
+from karrot.tests.utils import execute_scheduled_tasks_immediately
 from karrot.users.factories import UserFactory, VerifiedUserFactory
 
 
@@ -166,16 +167,18 @@ class TestPlaceConversations(TestCase):
         mail.outbox = []
 
     def test_message_email_notifications(self):
-        message = self.conversation.messages.create(author=self.user, content='asdf')
+        with execute_scheduled_tasks_immediately():
+            message = self.conversation.messages.create(author=self.user, content='asdf')
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn(self.place.name, mail.outbox[0].subject)
         self.assertIn(message.content, mail.outbox[0].body)
 
     def test_reply_email_notifications(self):
-        message = self.conversation.messages.create(author=self.user, content='asdf')
-        mail.outbox = []
-        reply = self.conversation.messages.create(author=self.user2, thread=message, content='my reply')
+        with execute_scheduled_tasks_immediately():
+            message = self.conversation.messages.create(author=self.user, content='asdf')
+            mail.outbox = []
+            reply = self.conversation.messages.create(author=self.user2, thread=message, content='my reply')
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn(message.content, mail.outbox[0].subject)
@@ -195,7 +198,8 @@ class TestPickupConversations(TestCase):
         [self.pickup.add_collector(u) for u in users]
 
         mail.outbox = []
-        ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
+        with execute_scheduled_tasks_immediately():
+            ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
 
         actual_recipients = sorted(m.to[0] for m in mail.outbox)
         expected_recipients = sorted(u.email for u in users)
@@ -218,7 +222,8 @@ class TestIssueConversations(TestCase):
         mail.outbox = []
 
     def test_send_email_notifications(self):
-        ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
+        with execute_scheduled_tasks_immediately():
+            ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
 
         self.assertEqual(len(mail.outbox), 2)
 
@@ -236,7 +241,8 @@ class TestPrivateUserConversations(TestCase):
     def test_send_email_notifications(self):
         conversation = Conversation.objects.get_or_create_for_two_users(self.user, self.user2)
         mail.outbox = []
-        ConversationMessage.objects.create(author=self.user, conversation=conversation, content='asdf')
+        with execute_scheduled_tasks_immediately():
+            ConversationMessage.objects.create(author=self.user, conversation=conversation, content='asdf')
 
         self.assertEqual(len(mail.outbox), 1)
 

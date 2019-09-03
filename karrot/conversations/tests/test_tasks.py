@@ -10,6 +10,7 @@ from karrot.conversations.models import ConversationParticipant, ConversationThr
 from karrot.conversations.tasks import mark_conversations_as_closed
 from karrot.groups.factories import GroupFactory
 from karrot.issues.factories import IssueFactory
+from karrot.tests.utils import execute_scheduled_tasks_immediately
 from karrot.users.factories import VerifiedUserFactory, UserFactory
 
 
@@ -34,7 +35,8 @@ class TestBatchedConversationNotificationTask(TestCase):
         self.assertEqual(len(mail.outbox), 0)
 
     def test_does_notification_batching(self):
-        recent_message = self.conversation.messages.create(author=self.author, content='first reply')
+        with execute_scheduled_tasks_immediately():
+            recent_message = self.conversation.messages.create(author=self.author, content='first reply')
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn(recent_message.content, mail.outbox[0].body)
@@ -45,7 +47,8 @@ class TestBatchedConversationNotificationTask(TestCase):
             two = self.conversation.messages.create(author=self.author, content='second message')
             self.conversation.messages.create(author=self.author, content='three')
         self.conversation.conversationparticipant_set.filter(user=self.user).update(seen_up_to=two)
-        recent_message = self.conversation.messages.create(author=self.author, content='four')
+        with execute_scheduled_tasks_immediately():
+            recent_message = self.conversation.messages.create(author=self.author, content='four')
 
         self.assertEqual(len(mail.outbox), 1)
         user1_email = next(email for email in mail.outbox if email.to[0] == self.user.email)
@@ -72,14 +75,16 @@ class TestConversationNotificationTask(TestCase):
         self.group.add_member(inactive_user)
         self.group.groupmembership_set.filter(user=inactive_user).update(inactive_at=timezone.now())
         mail.outbox = []
-        self.group.conversation.messages.create(author=self.author, content='foo')
+        with execute_scheduled_tasks_immediately():
+            self.group.conversation.messages.create(author=self.author, content='foo')
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, [self.user.email])
 
     def test_notify_about_unseen_message(self):
         self.group.conversation.conversationparticipant_set.filter(user=self.user).update(seen_up_to=self.message)
-        self.group.conversation.messages.create(author=self.author, content='this should be sent')
+        with execute_scheduled_tasks_immediately():
+            self.group.conversation.messages.create(author=self.author, content='this should be sent')
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to[0], self.user.email)
@@ -99,7 +104,8 @@ class TestConversationNotificationTask(TestCase):
             self.group.conversation.messages.create(
                 author=self.user, thread=self.message, content='first thread reply'
             )
-        self.group.conversation.messages.create(author=self.author, content='conversation')
+        with execute_scheduled_tasks_immediately():
+            self.group.conversation.messages.create(author=self.author, content='conversation')
 
         self.assertNotIn('first thread reply', mail.outbox[0].body)
 
@@ -108,9 +114,10 @@ class TestConversationNotificationTask(TestCase):
             self.group.conversation.messages.create(
                 author=self.user, thread=self.message, content='first thread reply'
             )
-        recent_message = self.group.conversation.messages.create(
-            author=self.user, thread=self.message, content='second thread reply'
-        )
+        with execute_scheduled_tasks_immediately():
+            recent_message = self.group.conversation.messages.create(
+                author=self.user, thread=self.message, content='second thread reply'
+            )
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn('first thread reply', mail.outbox[0].body)
@@ -131,9 +138,14 @@ class TestConversationNotificationTask(TestCase):
         self.assertEqual(len(mail.outbox), 0)
 
     def test_exclude_already_notified_in_thread(self):
-        self.group.conversation.messages.create(author=self.user, thread=self.message, content='first thread reply')
-        mail.outbox = []
-        self.group.conversation.messages.create(author=self.user, thread=self.message, content='second thread reply')
+        with execute_scheduled_tasks_immediately():
+            self.group.conversation.messages.create(
+                author=self.user, thread=self.message, content='first thread reply'
+            )
+            mail.outbox = []
+            self.group.conversation.messages.create(
+                author=self.user, thread=self.message, content='second thread reply'
+            )
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn('second thread reply', mail.outbox[0].body)
