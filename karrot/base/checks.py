@@ -26,13 +26,15 @@ def deploy_settings_check(app_configs, **kwargs):
             'Missing ANYMAIL.POSTAL_API_KEY',
             hint='Needs a postal API key to send out e-mails',
         ))
-    if not settings.ANYMAIL.get('WEBHOOK_SECRET') or len(settings.ANYMAIL.get('WEBHOOK_SECRET')) < 5:
-        errors.append(
-            Error(
-                'Missing ANYMAIL.WEBHOOK_SECRET',
-                hint='Set it to a random string to secure the e-mail events webhook (for bounces etc)',
-            )
-        )
+
+    # Postal doesn't support webhook basic auth
+    # if not settings.ANYMAIL.get('WEBHOOK_SECRET') or len(settings.ANYMAIL.get('WEBHOOK_SECRET')) < 5:
+    #     errors.append(
+    #         Error(
+    #             'Missing ANYMAIL.WEBHOOK_SECRET',
+    #             hint='Set it to a random string to secure the e-mail events webhook (for bounces etc)',
+    #         )
+    #     )
     if len(settings.SITE_NAME) > 40:
         errors.append(
             Warning(
