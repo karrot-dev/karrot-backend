@@ -9,7 +9,7 @@ from karrot.utils.frontend_urls import (
     group_wall_url, conversation_unsubscribe_url, pickup_detail_url, user_detail_url, application_url, thread_url,
     thread_unsubscribe_url, issue_url, place_wall_url
 )
-from karrot.webhooks.api import make_local_part
+from karrot.webhooks.utils import make_local_part
 
 
 def author_names(messages):

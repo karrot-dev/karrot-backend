@@ -189,8 +189,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # don't send out email by default, override in local_settings.py
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-SPARKPOST_EMAIL_EVENTS = ["bounce", "spam_complaint", "out_of_band", "policy_rejection"]
-EMAIL_EVENTS_AVOID = ['bounce', 'out_of_band', 'policy_rejection']
+EMAIL_EVENTS_AVOID = [
+    'bounce', 'out_of_band', 'policy_rejection',  # native sparkpost events
+    'rejected', 'bounced',  # anymail tracking event types
+]
 
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.Argon2PasswordHasher',

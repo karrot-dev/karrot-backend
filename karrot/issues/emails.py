@@ -2,7 +2,7 @@ from config import settings
 from karrot.conversations.models import Conversation
 from karrot.utils.email_utils import prepare_email, formataddr
 from karrot.utils.frontend_urls import conflict_resolution_unsubscribe_url, issue_url
-from karrot.webhooks.api import make_local_part
+from karrot.webhooks.utils import make_local_part
 
 
 def prepare_new_conflict_resolution_email_to_affected_user(issue):

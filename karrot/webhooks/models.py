@@ -28,6 +28,7 @@ class EmailEvent(BaseModel):
     address = models.TextField()
     event = models.CharField(max_length=255)
     payload = JSONField()
+    version = models.IntegerField(default=1)
 
 
 class IncomingEmail(BaseModel):
@@ -35,3 +36,4 @@ class IncomingEmail(BaseModel):
     message = models.ForeignKey('conversations.ConversationMessage', on_delete=models.CASCADE)
 
     payload = JSONField()
+    version = models.IntegerField(default=1)

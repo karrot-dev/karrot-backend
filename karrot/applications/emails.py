@@ -3,7 +3,7 @@ from karrot.conversations.models import Conversation
 from karrot.utils.email_utils import prepare_email, formataddr
 from karrot.utils.frontend_urls import group_wall_url, application_url, \
     applications_url, group_edit_url, new_application_unsubscribe_url
-from karrot.webhooks.api import make_local_part
+from karrot.webhooks.utils import make_local_part
 
 
 def prepare_new_application_notification_email(user, application):
