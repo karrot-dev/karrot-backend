@@ -95,7 +95,7 @@ INSTALLED_APPS = (
     'karrot.pickups.PickupsConfig',
     'karrot.invitations.InvitationsConfig',
     'karrot.template_previews',
-    'karrot.webhooks',
+    'karrot.webhooks.WebhooksConfig',
     'karrot.notifications.NotificationsConfig',
 
     # Django packages
