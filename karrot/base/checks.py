@@ -21,12 +21,12 @@ def deploy_settings_check(app_configs, **kwargs):
                 obj=settings.DEFAULT_FROM_EMAIL
             )
         )
-    if not settings.ANYMAIL['POSTAL_API_KEY'] or len(settings.ANYMAIL['POSTAL_API_KEY']) < 10:
+    if not settings.ANYMAIL.get('POSTAL_API_KEY') or len(settings.ANYMAIL.get('POSTAL_API_KEY')) < 10:
         errors.append(Error(
             'Missing ANYMAIL.POSTAL_API_KEY',
             hint='Needs a postal API key to send out e-mails',
         ))
-    if not settings.ANYMAIL['WEBHOOK_SECRET'] or len(settings.ANYMAIL['WEBHOOK_SECRET']) < 5:
+    if not settings.ANYMAIL.get('WEBHOOK_SECRET') or len(settings.ANYMAIL.get('WEBHOOK_SECRET')) < 5:
         errors.append(
             Error(
                 'Missing ANYMAIL.WEBHOOK_SECRET',
