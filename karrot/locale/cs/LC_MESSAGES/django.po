@@ -3,12 +3,16 @@
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2019.
 # 
+# Translators:
+# trendspotter <j.podhorecky@volny.cz>, 2019
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
+"Last-Translator: trendspotter <j.podhorecky@volny.cz>, 2019\n"
 "Language-Team: Czech (https://www.transifex.com/yunity-1/teams/68631/cs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -121,7 +125,7 @@ msgstr ""
 #: karrot/conversations/api.py:61 karrot/conversations/api.py:232
 #: karrot/conversations/api.py:403 karrot/conversations/serializers.py:147
 msgid "You are not in this conversation"
-msgstr ""
+msgstr "Nejste v této konverzaci"
 
 #: karrot/conversations/api.py:70
 msgid "You are not the author of this message"
@@ -190,7 +194,7 @@ msgstr ""
 
 #: karrot/groups/api.py:28
 msgid "You are already a member."
-msgstr ""
+msgstr "Jste již členem."
 
 #: karrot/groups/api.py:35
 msgid "You can only join open groups."
@@ -206,7 +210,7 @@ msgstr ""
 
 #: karrot/groups/serializers.py:25
 msgid "Unknown timezone"
-msgstr ""
+msgstr "Neznámé časové pásmo"
 
 #: karrot/groups/serializers.py:33
 msgid "Playground"
@@ -214,15 +218,15 @@ msgstr ""
 
 #: karrot/groups/serializers.py:136 karrot/groups/serializers.py:231
 msgid "You cannot manage agreements"
-msgstr ""
+msgstr "Nemůžete spravovat dohody"
 
 #: karrot/groups/serializers.py:138
 msgid "Agreement is not for this group"
-msgstr ""
+msgstr "Dohoda není pro tuto skupinu"
 
 #: karrot/groups/serializers.py:229
 msgid "You are not in this group"
-msgstr ""
+msgstr "Nejste v této skupině"
 
 #: karrot/groups/templates/default_application_questions.nopreview.jinja2:1
 msgid ""
@@ -420,16 +424,16 @@ msgstr ""
 
 #: karrot/invitations/serializers.py:20
 msgid "An invitation has already been sent to this e-mail address"
-msgstr ""
+msgstr "Na tuto e-mailovou adresu již byla odeslána pozvánka"
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:122
 #: karrot/places/serializers.py:78
 msgid "You are not a member of this group."
-msgstr ""
+msgstr "Nejste členem této skupiny."
 
 #: karrot/invitations/serializers.py:33
 msgid "User is already member of group"
-msgstr ""
+msgstr "Uživatel je již členem skupiny"
 
 #: karrot/invitations/serializers.py:41
 msgid "Email could not be sent"
@@ -562,27 +566,27 @@ msgstr ""
 
 #: karrot/pickups/permissions.py:7
 msgid "The pickup date is in the past."
-msgstr ""
+msgstr "Datum vyzvednutí je v minulosti."
 
 #: karrot/pickups/permissions.py:18
 msgid "You can only delete empty pickup dates."
-msgstr ""
+msgstr "Smazat lze pouze prázdná data vyzvednutí."
 
 #: karrot/pickups/permissions.py:27
 msgid "You have not joined this pickup date."
-msgstr ""
+msgstr "Nepřipojili jste se k tomuto datu vyzvednutí."
 
 #: karrot/pickups/permissions.py:34
 msgid "You have already joined this pickup date."
-msgstr ""
+msgstr "K tomuto datu vyzvednutí jste se již připojili."
 
 #: karrot/pickups/permissions.py:41
 msgid "Pickup date is already full."
-msgstr ""
+msgstr "Datum vyzvednutí je již plné."
 
 #: karrot/pickups/permissions.py:48
 msgid "This feedback is given by another user."
-msgstr ""
+msgstr "Tuto zpětnou vazbu poskytuje jiný uživatel."
 
 #: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:396
 #, python-format
@@ -604,7 +608,7 @@ msgstr ""
 
 #: karrot/pickups/serializers.py:116
 msgid "The date should be in the future."
-msgstr ""
+msgstr "Datum by mělo být v budoucnosti."
 
 #: karrot/pickups/serializers.py:174
 msgid "You can't move pickups that are part of a series."
@@ -612,19 +616,19 @@ msgstr ""
 
 #: karrot/pickups/serializers.py:307
 msgid "Invalid recurrence rule."
-msgstr ""
+msgstr "Neplatné pravidlo opakování."
 
 #: karrot/pickups/serializers.py:309
 msgid "Only single recurrence rules are allowed."
-msgstr ""
+msgstr "Povolena jsou pouze pravidla jednoho opakování."
 
 #: karrot/pickups/serializers.py:391
 msgid "The pickup is not done yet"
-msgstr ""
+msgstr "Vyzvednutí ještě není dokončeno"
 
 #: karrot/pickups/serializers.py:393
 msgid "You aren't assigned to the pickup."
-msgstr ""
+msgstr "K vyzvednutí nejste přiřazeni."
 
 #: karrot/pickups/serializers.py:410
 msgid "Both comment and weight cannot be blank."
@@ -677,7 +681,7 @@ msgstr ""
 
 #: karrot/places/serializers.py:85
 msgid "Set at least one week in advance"
-msgstr ""
+msgstr "Nastavte alespoň týden předem"
 
 #: karrot/places/serializers.py:88
 #, python-format
@@ -692,11 +696,11 @@ msgstr ""
 #: karrot/userauth/serializers.py:138 karrot/userauth/serializers.py:159
 #: karrot/userauth/serializers.py:188 karrot/userauth/serializers.py:209
 msgid "We could not send you an e-mail."
-msgstr ""
+msgstr "Nemohli jsme vám poslat e-mail."
 
 #: karrot/userauth/permissions.py:6
 msgid "Mail is already verified."
-msgstr ""
+msgstr "E-mail je již ověřený."
 
 #: karrot/userauth/serializers.py:23
 msgid "Unable to log in with provided credentials."
@@ -704,15 +708,15 @@ msgstr ""
 
 #: karrot/userauth/serializers.py:80 karrot/userauth/serializers.py:175
 msgid "Similar e-mail exists: "
-msgstr ""
+msgstr "Podobný e-mail existuje:"
 
 #: karrot/userauth/serializers.py:116
 msgid "Verification code is invalid"
-msgstr ""
+msgstr "Ověřovací kód je neplatný"
 
 #: karrot/userauth/serializers.py:119
 msgid "Verification code has expired"
-msgstr ""
+msgstr "Platnost ověřovacího kódu vypršela"
 
 #: karrot/userauth/serializers.py:152 karrot/userauth/serializers.py:169
 msgid "Wrong password"
@@ -725,7 +729,7 @@ msgstr ""
 #: karrot/users/templates/accountdelete_request.html.jinja2:6
 #: karrot/users/templates/accountdelete_request.subject.jinja2:1
 msgid "Request to delete your account"
-msgstr ""
+msgstr "Žádost o smazání účtu"
 
 #: karrot/users/templates/accountdelete_request.html.jinja2:205
 #, python-format
@@ -846,7 +850,7 @@ msgstr ""
 #: karrot/users/templates/passwordreset_success.html.jinja2:6
 #: karrot/users/templates/passwordreset_success.subject.jinja2:1
 msgid "New password set!"
-msgstr ""
+msgstr "Nové heslo nastaveno."
 
 #: karrot/users/templates/passwordreset_success.html.jinja2:205
 #, python-format
