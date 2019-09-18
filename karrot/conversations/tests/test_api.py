@@ -537,7 +537,7 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
         bounce_user = VerifiedUserFactory()
         self.group.add_member(bounce_user)
         for _ in range(5):
-            EmailEvent.objects.create(address=bounce_user.email, event='bounce', payload={})
+            EmailEvent.objects.create(address=bounce_user.email, event='bounce', payload={}, version=1)
 
         mail.outbox = []
         ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
@@ -550,7 +550,7 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
         some_months_ago = timezone.now() - relativedelta(months=4)
         for _ in range(5):
             EmailEvent.objects.create(
-                created_at=some_months_ago, address=bounce_user.email, event='bounce', payload={}
+                created_at=some_months_ago, address=bounce_user.email, event='bounce', payload={}, version=1
             )
 
         mail.outbox = []

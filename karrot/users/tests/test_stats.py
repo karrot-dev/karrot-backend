@@ -49,7 +49,9 @@ class TestUserStats(TestCase):
         # one user with bounced email
         bounce_user = users[0]
         for _ in range(5):
-            EmailEvent.objects.create(created_at=timezone.now(), address=bounce_user.email, event='bounce', payload={})
+            EmailEvent.objects.create(
+                created_at=timezone.now(), address=bounce_user.email, event='bounce', payload={}, version=1
+            )
 
         # one user with location
         location_user = users[1]
