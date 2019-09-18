@@ -62,7 +62,7 @@ msgstr "Vaše žádost o připojení k %(group_name)s byla přijata"
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:226
 #, python-format
 msgid "Visit %(group_name)s"
-msgstr ""
+msgstr "Návštěva skupiny %(group_name)s"
 
 #: karrot/applications/templates/application_declined.html.jinja2:6
 #: karrot/applications/templates/application_declined.html.jinja2:205
@@ -88,11 +88,13 @@ msgid ""
 "You can edit the questions for new applications on the <a "
 "href=\"%(group_edit_url)s\">group edit page</a>."
 msgstr ""
+"Otázky pro nové žádosti  můžete upravit na <a "
+"href=\"%(group_edit_url)s\">stránce úprav skupiny</a>."
 
 #: karrot/applications/templates/new_application.html.jinja2:214
 #, python-format
 msgid "Answers from %(user_name)s"
-msgstr ""
+msgstr "Odpovědi od %(user_name)s"
 
 #: karrot/applications/templates/new_application.html.jinja2:230
 msgid "View applications"
@@ -103,6 +105,8 @@ msgid ""
 "You are receiving this because you are subscribed to <strong>User "
 "application</strong> emails for this group."
 msgstr ""
+"Toto jste obdrželi, protože jste přihlášeni k odběru e-mailů <strong>Žádosti"
+" uživatelů</strong> pro tuto skupinu."
 
 #: karrot/applications/templates/new_application.html.jinja2:266
 #: karrot/groups/templates/group_summary.html.jinja2:310
@@ -121,6 +125,9 @@ msgid ""
 "Reply to this email directly, <a href=\"%(conversation_url)s\">view it on "
 "%(site_name)s</a>, or <a href=\"%(mute_url)s\">mute the conversation</a>."
 msgstr ""
+"Odpovězte na tento e-mail přímo, <a href=\"%(conversation_url)s\">zobrazte "
+"jej na straně %(site_name)s</a>, nebo <a href=\"%(mute_url)s\">ignorujte "
+"konverzaci</a>."
 
 #: karrot/conversations/api.py:61 karrot/conversations/api.py:232
 #: karrot/conversations/api.py:403 karrot/conversations/serializers.py:147
@@ -165,7 +172,7 @@ msgstr "Nová zpráva ve vaší žádosti na %(group_name)s"
 #: karrot/conversations/emails.py:282
 #, python-format
 msgid "New message in conflict resolution in %(group_name)s"
-msgstr ""
+msgstr "Nová zpráva při řešení konfliktů ve skupině %(group_name)s"
 
 #: karrot/conversations/serializers.py:149
 msgid "This conversation has been closed"
@@ -194,6 +201,9 @@ msgid ""
 "Reply to this email directly, <a href=\"%(thread_url)s\">view replies on "
 "%(site_name)s</a>, or <a href=\"%(mute_url)s\">mute further replies</a>."
 msgstr ""
+"Odpovězte na tento e-mail přímo, <a href=\"%(thread_url)s\">zobrazte "
+"odpovědi na webu %(site_name)s</a>,  nebo <a href=\"%(mute_url)s\">ignorujte"
+" další odpovědi</a>."
 
 #: karrot/groups/api.py:28
 msgid "You are already a member."
@@ -245,7 +255,7 @@ msgstr ""
 #: karrot/groups/templates/group_summary.html.jinja2:205
 #, python-format
 msgid "%(group_name)s weekly summary"
-msgstr ""
+msgstr "Týdenní souhrn skupiny %(group_name)s"
 
 #: karrot/groups/templates/group_summary.html.jinja2:207
 msgid ""
@@ -258,7 +268,7 @@ msgstr ""
 #: karrot/groups/templates/group_summary.html.jinja2:211
 #, python-format
 msgid "%(pickups_done_count)s pickups were done"
-msgstr ""
+msgstr "Bylo provedeno %(pickups_done_count)s vyzvednutí"
 
 #: karrot/groups/templates/group_summary.html.jinja2:213
 msgid "no pickups were done"
@@ -267,7 +277,7 @@ msgstr "Nebyly provedeny žádné vyzvednutí"
 #: karrot/groups/templates/group_summary.html.jinja2:217
 #, python-format
 msgid "%(pickups_missed_count)s pickups were missed"
-msgstr ""
+msgstr "%(pickups_missed_count)s vyzvednutí bylo zmeškáno"
 
 #: karrot/groups/templates/group_summary.html.jinja2:220
 msgid "no pickups were missed"
@@ -276,12 +286,12 @@ msgstr "nebyly zmeškány žádné vyzvednutí"
 #: karrot/groups/templates/group_summary.html.jinja2:226
 #, python-format
 msgid "%(new_user_count)s people joined the group"
-msgstr ""
+msgstr "%(new_user_count)s lidí se připojilo ke skupině"
 
 #: karrot/groups/templates/group_summary.html.jinja2:234
 #, python-format
 msgid "%(feedbacks_count)s pickup feedbacks were given"
-msgstr ""
+msgstr "byly poskytnuty %(feedbacks_count)s zpětné vazby pro vyzvednutí"
 
 #: karrot/groups/templates/group_summary.html.jinja2:236
 msgid "no feedback was given"
@@ -290,7 +300,7 @@ msgstr "nebyla poskytnuta žádná zpětná vazba"
 #: karrot/groups/templates/group_summary.html.jinja2:240
 #, python-format
 msgid "%(sent_messages_count)s messages were sent"
-msgstr ""
+msgstr "Bylo zasláno %(sent_messages_count)s zpráv"
 
 #: karrot/groups/templates/group_summary.html.jinja2:242
 msgid "no messages were sent"
@@ -303,7 +313,7 @@ msgstr "Zpětná vazba vyzvednutí"
 #: karrot/groups/templates/group_summary.html.jinja2:257
 #, python-format
 msgid "%(weight)s kg from <a href=\"%(store_url)s\">%(store_name)s</a>"
-msgstr ""
+msgstr "%(weight)s kg z  <a href=\"%(store_url)s\">%(store_name)s</a>"
 
 #: karrot/groups/templates/group_summary.html.jinja2:271
 msgid "Here's what was said last week"
@@ -314,6 +324,8 @@ msgid ""
 "You are receiving this because you are subscribed to <strong>Weekly "
 "summary</strong> emails for this group."
 msgstr ""
+"Toto jste obdrželi, protože jste přihlášeni k odběru <strong>týdenních "
+"souhrnných</strong> e-mailů pro tuto skupinu."
 
 #: karrot/groups/templates/group_summary.subject.jinja2:1
 #, python-format
@@ -347,6 +359,9 @@ msgid ""
 "<strong>editing permissions</strong>. For example, you can now modify your "
 "group, places and pickup dates, or create new ones."
 msgstr ""
+"Od ostatních členů skupiny jste získali dostatečnou důvěru, a udělili vám "
+"<strong>oprávnění k úpravám</strong>. Nyní můžete například upravit svou "
+"skupinu, místa a data vyzvednutí nebo vytvořit nová."
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:215
 msgid "Use your power wisely!"
@@ -359,12 +374,14 @@ msgid ""
 "You are receiving this because you are a member of "
 "<strong>%(group_name)s</strong>."
 msgstr ""
+"Toto jste obdrželi, protože jste členem skupiny "
+"<strong>%(group_name)s</strong>."
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:264
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:264
 #, python-format
 msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
-msgstr ""
+msgstr "Skupinu můžete opustit ze <a href=\"%(group_url)s\">stránky skupiny</a>."
 
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:206
 msgid "Hey, we're missing you!"
@@ -377,6 +394,9 @@ msgid ""
 "                            <a href=\"%(group_url)s\">%(group_name)s</a> group for over %(num_days_inactive)s\n"
 "                            days."
 msgstr ""
+"Vypadá to, že jste nenavštívili\n"
+"skupinu <a href=\"%(group_url)s\">%(group_name)s</a>už více než %(num_days_inactive)s\n"
+"dnů."
 
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:214
 msgid ""
@@ -401,6 +421,8 @@ msgid ""
 "It's been %(num_months_inactive)s months since we noticed you were inactive in\n"
 "                            <a href=\"%(group_url)s\">%(group_name)s</a>."
 msgstr ""
+"Už jsou to %(num_months_inactive)s měsíce, co jsme si všimli, že jste neaktivní ve skupině <a href=\"%(group_url)s\">%(group_name)s</a>.\n"
+"."
 
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:213
 msgid "If you want to stay part of the group, just visit the group again!"
@@ -412,6 +434,8 @@ msgid ""
 "Otherwise we'll remove you from the group in %(num_removal_days)s\n"
 "                        days."
 msgstr ""
+"Jinak vás odstraníme ze skupiny do %(num_removal_days)s\n"
+"dnů."
 
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:272
 #, python-format
@@ -419,18 +443,20 @@ msgid ""
 "You are receiving this because you are a member of <strong>%(group_name)s</strong>\n"
 "                            ."
 msgstr ""
+"Toto jste obdrželi, protože jste členem skupiny "
+"<strong>%(group_name)s</strong>"
 
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:274
 #, python-format
 msgid ""
 "You can leave the group from the <a href=\"%(group_url)s\">group page</a>\n"
 "                            ."
-msgstr ""
+msgstr "Skupinu můžete opustit ze <a href=\"%(group_url)s\">stránky skupiny</a>"
 
 #: karrot/groups/templates/user_removal_from_group.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s is really missing you!"
-msgstr ""
+msgstr "Skupině  %(group_name)s opravdu chybíte!"
 
 #: karrot/invitations/api.py:27
 msgid ""
@@ -465,7 +491,7 @@ msgstr "Pozvánka k připojení %(group_name)s"
 #: karrot/invitations/templates/emailinvitation.html.jinja2:205
 #, python-format
 msgid "You're invited to join %(group_name)s!"
-msgstr ""
+msgstr "Jste pozván k připojení do skupiny %(group_name)s."
 
 #: karrot/invitations/templates/emailinvitation.html.jinja2:213
 #, python-format
@@ -473,6 +499,8 @@ msgid ""
 "%(invited_by_name)s invited you to join the \"%(group_name)s\" community on "
 "%(site_name)s!"
 msgstr ""
+"%(invited_by_name)s vás pozval k připojení do skupiny %(group_name)s na webu"
+" %(site_name)s."
 
 #: karrot/invitations/templates/emailinvitation.html.jinja2:214
 msgid "If you'd like to join, please click the link below:"
@@ -504,6 +532,8 @@ msgid ""
 "You need at least %(count)s active trusted users in your group to start this"
 " process."
 msgstr ""
+"K zahájení tohoto procesu potřebujete alespoň %(count)s aktivní důvěryhodné "
+"uživatele ve vaší skupině."
 
 #: karrot/issues/serializers.py:140
 msgid "Topic cannot be empty"
@@ -522,7 +552,7 @@ msgstr "Řešení konfliktů o tomto uživateli již bylo zahájeno"
 #: karrot/issues/templates/conflict_resolution_continued.subject.jinja2:1
 #, python-format
 msgid "Keep discussing about the conflict with %(affected_user_name)s"
-msgstr ""
+msgstr "Pokračujte v diskusi o konfliktu s %(affected_user_name)s"
 
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:206
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:206
@@ -537,7 +567,7 @@ msgstr ""
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:207
 #, python-format
 msgid "The new voting round ends at %(expiry_date)s."
-msgstr ""
+msgstr "Nové kolo hlasování končí %(expiry_date)s."
 
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:219
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:219
@@ -552,6 +582,8 @@ msgid ""
 "You are receiving this because you are subscribed to <strong>Conflict "
 "Resolution</strong> emails for this group."
 msgstr ""
+"Toto jste obdrželi, protože jste přihlášeni k odběru e-mailů pro "
+"<strong>řešení konfliktů</strong> pro tuto skupinu."
 
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:6
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:205
@@ -564,7 +596,7 @@ msgstr "Pokračujte v diskusi o konfliktu s vámi"
 #: karrot/issues/templates/new_conflict_resolution.subject.jinja2:1
 #, python-format
 msgid "A conflict resolution process was started with %(affected_user_name)s"
-msgstr ""
+msgstr "Byl zahájen proces řešení konfliktů  s %(affected_user_name)s"
 
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:213
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:213
@@ -575,13 +607,13 @@ msgstr "Můžete diskutovat o tématu a vyjádřit svůj názor při hlasování
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:214
 #, python-format
 msgid "This voting round ends at %(expiry_date)s."
-msgstr ""
+msgstr "Toto kolo hlasování končí v %(expiry_date)s."
 
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:6
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:205
 #: karrot/issues/templates/new_conflict_resolution_affected_user.subject.jinja2:1
 msgid "A conflict resolution process was started with you"
-msgstr ""
+msgstr "Byl s vámi zahájen proces řešení konfliktů"
 
 #: karrot/pickups/permissions.py:7
 msgid "The pickup date is in the past."
@@ -665,7 +697,7 @@ msgstr "%(group_name)s nadcházející vyzvednutí"
 #: karrot/pickups/templates/pickup_notification.html.jinja2:216
 #, python-format
 msgid "%(empty_collectors_count)s/%(max_collectors)s remaining"
-msgstr ""
+msgstr "Zbývá %(empty_collectors_count)s z celkem %(max_collectors)s"
 
 #: karrot/pickups/templates/pickup_notification.html.jinja2:231
 msgid "Tonight"
@@ -699,6 +731,8 @@ msgid ""
 "You are receiving this because you are subscribed to\n"
 "                            <strong>Pickup notification</strong> emails for this group."
 msgstr ""
+"Toto jste obdrželi, protože jste přihlášeni k odběru\n"
+"e-mailových <strong>upozornění o vyzvednutí</strong> pro tuto skupinu."
 
 #: karrot/places/serializers.py:85
 msgid "Set at least one week in advance"
@@ -755,7 +789,7 @@ msgstr "Žádost o smazání účtu"
 #: karrot/users/templates/accountdelete_request.html.jinja2:205
 #, python-format
 msgid "You requested to delete your account on %(site_name)s!"
-msgstr ""
+msgstr "Požádali jste o smazání účtu na %(site_name)s"
 
 #: karrot/users/templates/accountdelete_request.html.jinja2:213
 msgid ""
@@ -783,7 +817,7 @@ msgstr "Účet byl úspěšně smazán"
 #: karrot/users/templates/accountdelete_success.html.jinja2:205
 #, python-format
 msgid "Your account on %(site_name)s was successfully deleted!"
-msgstr ""
+msgstr "Váš účet na webu %(site_name)s byl úspěšně smazán."
 
 #: karrot/users/templates/accountdelete_success.html.jinja2:213
 msgid ""
@@ -808,6 +842,7 @@ msgid ""
 "You requested to change your email address from %(old_email)s to "
 "%(new_email)s"
 msgstr ""
+"Požádali jste o změnu vaší e-mailové adresy z %(old_email)s na %(new_email)s"
 
 #: karrot/users/templates/changemail_request.html.jinja2:217
 #: karrot/users/templates/signup.html.jinja2:213
@@ -838,12 +873,12 @@ msgstr "Vaše e-mailová adresa se změnila"
 #: karrot/users/templates/changemail_success.html.jinja2:205
 #, python-format
 msgid "Your email address on %(site_name)s changed!"
-msgstr ""
+msgstr "Vaše emailová adresa na webu %(site_name)s byla změněna!"
 
 #: karrot/users/templates/changemail_success.html.jinja2:213
 #, python-format
 msgid "Your new email address is %(new_email)s."
-msgstr ""
+msgstr "Vaše nová e-mailová adresa je %(new_email)s"
 
 #: karrot/users/templates/changemail_success.subject.jinja2:1
 msgid "Your email address changed!"
@@ -857,7 +892,7 @@ msgstr "Žádost o resetování hesla"
 #: karrot/users/templates/passwordreset_request.html.jinja2:205
 #, python-format
 msgid "You requested to reset your password for %(site_name)s"
-msgstr ""
+msgstr "Požádali jste o resetování hesla pro stranu %(site_name)s"
 
 #: karrot/users/templates/passwordreset_request.html.jinja2:213
 msgid "Did you forget your password? No problem!"
@@ -879,7 +914,7 @@ msgstr "Nové heslo nastaveno."
 #: karrot/users/templates/passwordreset_success.html.jinja2:205
 #, python-format
 msgid "You set a new password for %(site_name)s"
-msgstr ""
+msgstr "Nastavili jste nové heslo pro %(site_name)s"
 
 #: karrot/users/templates/passwordreset_success.html.jinja2:213
 msgid "Your password has been successfully changed!"
@@ -888,7 +923,7 @@ msgstr "Vaše heslo bylo úspěšně změněno!"
 #: karrot/users/templates/signup.html.jinja2:205
 #, python-format
 msgid "Thank you for signing up to %(site_name)s"
-msgstr ""
+msgstr "Děkujeme za přihlášení k webu %(site_name)s"
 
 #: karrot/users/templates/signup.html.jinja2:237
 msgid ""
