@@ -4,10 +4,10 @@
 #
 #    pip-compile requirements.in
 #
+-e git+https://github.com/tiltec/django-anymail@master#egg=django-anymail
 -e git+https://github.com/tiltec/django-influxdb-metrics@163730a#egg=django-influxdb-metrics
 -e git+https://github.com/tiltec/django-rest-swagger@7a9ef64#egg=django-rest-swagger
 -e git+https://github.com/tiltec/talon@master#egg=talon
--e git+https://github.com/tiltec/django-anymail@master#egg=django-anymail
 aioredis==1.2.0           # via channels-redis
 apipkg==1.5               # via execnet
 argon2-cffi==19.1.0       # via django
@@ -28,7 +28,7 @@ cchardet==2.1.4
 certifi==2019.6.16        # via requests
 cffi==1.12.3              # via argon2-cffi, cryptography
 channels-redis==2.4.0
-channels==2.2.0
+channels==2.3.0
 chardet==3.0.4            # via requests
 click==7.0                # via pip-tools
 constantly==15.1.0        # via twisted
