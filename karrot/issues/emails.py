@@ -31,7 +31,8 @@ def prepare_new_conflict_resolution_email_to_affected_user(issue):
             'conversation_url': this_issue_url,
             'issue_url': this_issue_url,
             'expires_at': voting.expires_at,
-        }
+        },
+        stats_category='new_conflict_resolution',
     )
 
 
@@ -65,7 +66,8 @@ def prepare_new_conflict_resolution_email(user, issue):
             'unsubscribe_url': unsubscribe_url,
             'issue_url': this_issue_url,
             'expires_at': voting.expires_at,
-        }
+        },
+        stats_category='new_conflict_resolution',
     )
 
 
@@ -85,7 +87,8 @@ def prepare_conflict_resolution_continued_email(user, issue):
             'unsubscribe_url': unsubscribe_url,
             'issue_url': this_issue_url,
             'expires_at': voting.expires_at,
-        }
+        },
+        stats_category='conflict_resolution_continued',
     )
 
 
@@ -102,5 +105,6 @@ def prepare_conflict_resolution_continued_email_to_affected_user(issue):
         context={
             'issue_url': this_issue_url,
             'expires_at': voting.expires_at,
-        }
+        },
+        stats_category='conflict_resolution_continued',
     )

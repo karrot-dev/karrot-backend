@@ -35,7 +35,8 @@ def prepare_new_application_notification_email(user, application):
             'new_application_unsubscribe_url': unsubscribe_url,
             'applications_url': applications_url(application.group),
             'group_edit_url': group_edit_url(application.group),
-        }
+        },
+        stats_category='new_application',
     )
 
 
@@ -47,7 +48,8 @@ def prepare_application_accepted_email(application):
         context={
             'group': application.group,
             'group_url': group_wall_url(application.group)
-        }
+        },
+        stats_category='application_accepted',
     )
 
 
@@ -59,4 +61,5 @@ def prepare_application_declined_email(application):
         context={
             'group': application.group,
         },
+        stats_category='application_declined',
     )

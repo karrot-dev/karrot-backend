@@ -65,7 +65,8 @@ def prepare_thread_message_notification(user, messages):
             'thread_message_content': thread.content_rendered(truncate_words=40),
             'thread_url': thread_url(thread),
             'mute_url': unsubscribe_url,
-        }
+        },
+        stats_category='thread_message',
     )
 
 
@@ -95,7 +96,8 @@ def prepare_group_conversation_message_notification(user, message):
             'conversation_name': conversation_name,
             'conversation_url': group_wall_url(group),
             'mute_url': unsubscribe_url,
-        }
+        },
+        stats_category='group_conversation_message',
     )
 
 
@@ -125,7 +127,8 @@ def prepare_place_conversation_message_notification(user, message):
             'conversation_name': conversation_name,
             'conversation_url': place_wall_url(place),
             'mute_url': unsubscribe_url,
-        }
+        },
+        stats_category='place_conversation_message',
     )
 
 
@@ -189,7 +192,8 @@ def prepare_pickup_conversation_message_notification(user, messages):
                     'conversation_name': conversation_name,
                     'conversation_url': pickup_detail_url(pickup),
                     'mute_url': unsubscribe_url,
-                }
+                },
+                stats_category='pickup_conversation_message',
             )
 
 
@@ -217,7 +221,8 @@ def prepare_private_user_conversation_message_notification(user, messages):
             'conversation_name': author.display_name,
             'conversation_url': user_detail_url(author),
             'mute_url': unsubscribe_url,
-        }
+        },
+        stats_category='private_conversation_message',
     )
 
 
@@ -262,7 +267,8 @@ def prepare_application_message_notification(user, messages):
                 'conversation_name': conversation_name,
                 'conversation_url': application_url(application),
                 'mute_url': unsubscribe_url,
-            }
+            },
+            stats_category='application_message',
         )
 
 
@@ -303,5 +309,6 @@ def prepare_issue_message_notification(user, messages):
                 'conversation_name': conversation_name,
                 'conversation_url': issue_url(issue),
                 'mute_url': unsubscribe_url,
-            }
+            },
+            stats_category='issue_message',
         )

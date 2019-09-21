@@ -85,6 +85,9 @@ class TestGroupStats(TestCase):
                     'count_total': 10,
                     'count_editors_total': 9,
                     'count_newcomers_total': 1,
+                    'count_active_30d_with_notification_type_weekly_summary': 7,
+                    'count_active_30d_with_notification_type_new_application': 7,
+                    'count_active_30d_with_notification_type_daily_pickup_notification': 7,
                 },
             }]
         )

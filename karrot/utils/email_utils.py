@@ -54,12 +54,16 @@ def generate_plaintext_from_html(html):
 
 
 class StatCollectingAnymailMessage(AnymailMessage):
+    def __init__(self, stats_category, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.stats_category = stats_category
+
     def send(self, *args, **kwargs):
         try:
             super(StatCollectingAnymailMessage, self).send(*args, **kwargs)
-            stats.email_sent(recipient_count=len(self.to))
+            stats.email_sent(recipient_count=len(self.to), category=self.stats_category)
         except Exception as exception:
-            stats.email_error(recipient_count=len(self.to))
+            stats.email_error(recipient_count=len(self.to), category=self.stats_category)
             raise exception
 
 
@@ -160,7 +164,7 @@ def prepare_email_content(template, context, tz, language='en'):
 
 
 def formataddr(pair, *args, **kwargs):
-    # Sparkpost has problems if from_email name contains more than 78 characters, so let's truncate it...
+    # Be nice and limit the length of 'from_email'
     name, email = pair
     name = Truncator(name).chars(num=75)
 
