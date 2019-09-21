@@ -16,27 +16,25 @@
     "editable": true,
     "gnetId": null,
     "graphTooltip": 0,
-    "id": 2,
-    "iteration": 1554466066007,
+    "id": 36,
+    "iteration": 1568028431319,
     "links": [],
     "panels": [
       {
         "aliasColors": {},
-        "bars": false,
+        "bars": true,
         "dashLength": 10,
         "dashes": false,
         "datasource": "$site",
-        "editable": true,
-        "error": false,
         "fill": 1,
-        "grid": {},
         "gridPos": {
-          "h": 7,
-          "w": 24,
+          "h": 8,
+          "w": 12,
           "x": 0,
           "y": 0
         },
-        "id": 1,
+        "id": 6,
+        "interval": "4h",
         "legend": {
           "avg": false,
           "current": false,
@@ -46,13 +44,14 @@
           "total": false,
           "values": false
         },
-        "lines": true,
-        "linewidth": 2,
+        "lines": false,
+        "linewidth": 1,
         "links": [],
-        "nullPointMode": "connected",
+        "nullPointMode": "null",
+        "options": {},
         "paceLength": 10,
         "percentage": false,
-        "pointradius": 5,
+        "pointradius": 7,
         "points": false,
         "renderer": "flot",
         "seriesOverrides": [],
@@ -61,16 +60,23 @@
         "steppedLine": false,
         "targets": [
           {
+            "alias": "number of memberships",
             "dsType": "influxdb",
             "groupBy": [
               {
                 "params": [
-                  "$interval"
+                  "1h"
                 ],
                 "type": "time"
+              },
+              {
+                "params": [
+                  "none"
+                ],
+                "type": "fill"
               }
             ],
-            "measurement": "django_auth_user_count",
+            "measurement": "karrot.periodic",
             "orderByTime": "ASC",
             "policy": "default",
             "refId": "A",
@@ -79,251 +85,30 @@
               [
                 {
                   "params": [
-                    "value"
+                    "count_users_flagged_inactive"
                   ],
                   "type": "field"
                 },
                 {
                   "params": [],
-                  "type": "last"
+                  "type": "sum"
                 }
               ]
             ],
-            "tags": []
-          }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "User count",
-        "tooltip": {
-          "msResolution": true,
-          "shared": true,
-          "sort": 0,
-          "value_type": "cumulative"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-          {
-            "format": "none",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          },
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": false
-          }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
-      },
-      {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": "$site",
-        "editable": true,
-        "error": false,
-        "fill": 1,
-        "grid": {},
-        "gridPos": {
-          "h": 7,
-          "w": 24,
-          "x": 0,
-          "y": 7
-        },
-        "id": 2,
-        "interval": "",
-        "legend": {
-          "avg": true,
-          "current": false,
-          "max": true,
-          "min": true,
-          "show": true,
-          "total": false,
-          "values": true
-        },
-        "lines": true,
-        "linewidth": 2,
-        "links": [],
-        "nullPointMode": "connected",
-        "paceLength": 10,
-        "percentage": false,
-        "pointradius": 5,
-        "points": true,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
-          {
-            "dsType": "influxdb",
-            "groupBy": [
+            "tags": [
               {
-                "params": [
-                  "1d"
-                ],
-                "type": "time"
+                "key": "name",
+                "operator": "=",
+                "value": "group__process_inactive_users"
               }
-            ],
-            "hide": false,
-            "measurement": "django_auth_user_create",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "A",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "value"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "count"
-                }
-              ]
-            ],
-            "tags": []
+            ]
           }
         ],
         "thresholds": [],
         "timeFrom": null,
         "timeRegions": [],
         "timeShift": null,
-        "title": "User signups",
-        "tooltip": {
-          "msResolution": true,
-          "shared": true,
-          "sort": 0,
-          "value_type": "cumulative"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          },
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
-      },
-      {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": "$site",
-        "fill": 1,
-        "gridPos": {
-          "h": 7,
-          "w": 24,
-          "x": 0,
-          "y": 14
-        },
-        "id": 4,
-        "legend": {
-          "avg": true,
-          "current": false,
-          "max": true,
-          "min": false,
-          "show": true,
-          "total": false,
-          "values": true
-        },
-        "lines": true,
-        "linewidth": 1,
-        "links": [],
-        "nullPointMode": "null",
-        "paceLength": 10,
-        "percentage": false,
-        "pointradius": 5,
-        "points": true,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
-          {
-            "dsType": "influxdb",
-            "groupBy": [
-              {
-                "params": [
-                  "1d"
-                ],
-                "type": "time"
-              }
-            ],
-            "measurement": "django_auth_user_login",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "A",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "value"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "count"
-                }
-              ]
-            ],
-            "tags": []
-          }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "User Logins",
+        "title": "Users marked as inactive",
         "tooltip": {
           "shared": true,
           "sort": 0,
@@ -339,11 +124,264 @@
         },
         "yaxes": [
           {
+            "decimals": 0,
+            "format": "short",
+            "label": "",
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
             "format": "short",
             "label": null,
             "logBase": 1,
             "max": null,
             "min": null,
+            "show": true
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "aliasColors": {},
+        "bars": true,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "$site",
+        "fill": 1,
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        },
+        "id": 4,
+        "interval": "4h",
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": false,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "options": {},
+        "paceLength": 10,
+        "percentage": false,
+        "pointradius": 7,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "alias": "number of memberships",
+            "dsType": "influxdb",
+            "groupBy": [
+              {
+                "params": [
+                  "1h"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "none"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.periodic",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_users_flagged_for_removal"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "name",
+                "operator": "=",
+                "value": "group__process_inactive_users"
+              }
+            ]
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Users marked for removal from groups",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "decimals": 0,
+            "format": "short",
+            "label": "",
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "aliasColors": {},
+        "bars": true,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "$site",
+        "fill": 1,
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 16
+        },
+        "id": 2,
+        "interval": "4h",
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": false,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "options": {},
+        "paceLength": 10,
+        "percentage": false,
+        "pointradius": 7,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "alias": "number of memberships",
+            "dsType": "influxdb",
+            "groupBy": [
+              {
+                "params": [
+                  "1h"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "none"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.periodic",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_users_removed"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "name",
+                "operator": "=",
+                "value": "group__process_inactive_users"
+              }
+            ]
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Users removed from groups",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "decimals": 0,
+            "format": "short",
+            "label": "",
+            "logBase": 1,
+            "max": null,
+            "min": "0",
             "show": true
           },
           {
@@ -361,12 +399,9 @@
         }
       }
     ],
-    "refresh": false,
     "schemaVersion": 18,
     "style": "dark",
-    "tags": [
-      "prod"
-    ],
+    "tags": [],
     "templating": {
       "list": [
         {
@@ -376,7 +411,9 @@
             "value": "karrot-prod"
           },
           "hide": 0,
+          "includeAll": false,
           "label": null,
+          "multi": false,
           "name": "site",
           "options": [],
           "query": "influxdb",
@@ -416,17 +453,17 @@
         "30d"
       ]
     },
-    "timezone": "utc",
-    "title": "User auth statistics",
-    "uid": "000000002",
-    "version": 9
+    "timezone": "",
+    "title": "User inactivity and removal",
+    "uid": "kZkNpw6mk",
+    "version": 4
   },
   "meta": {
     "canAdmin": false,
     "canEdit": false,
     "canSave": false,
     "canStar": true,
-    "created": "2016-12-14T17:33:08+01:00",
+    "created": "2019-04-05T13:43:48+02:00",
     "createdBy": "tiltec",
     "expires": "0001-01-01T00:00:00Z",
     "folderId": 0,
@@ -436,11 +473,11 @@
     "isFolder": false,
     "provisioned": false,
     "provisionedExternalId": "",
-    "slug": "user-auth-statistics",
+    "slug": "user-inactivity-and-removal",
     "type": "db",
-    "updated": "2019-04-05T14:08:12+02:00",
+    "updated": "2019-09-09T13:30:53+02:00",
     "updatedBy": "tiltec",
-    "url": "/d/000000002/user-auth-statistics",
-    "version": 9
+    "url": "/d/kZkNpw6mk/user-inactivity-and-removal",
+    "version": 4
   }
 }

@@ -17,7 +17,7 @@
     "gnetId": null,
     "graphTooltip": 0,
     "id": 20,
-    "iteration": 1553677488226,
+    "iteration": 1561919656077,
     "links": [],
     "panels": [
       {
@@ -61,6 +61,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -177,6 +178,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -265,6 +267,7 @@
         "hideTimeOverride": false,
         "id": 13,
         "links": [],
+        "options": {},
         "pageSize": null,
         "scroll": true,
         "showHeader": true,
@@ -380,6 +383,7 @@
         },
         "id": 8,
         "links": [],
+        "options": {},
         "pageSize": null,
         "scroll": true,
         "showHeader": true,
@@ -508,7 +512,7 @@
       },
       {
         "aliasColors": {},
-        "bars": false,
+        "bars": true,
         "dashLength": 10,
         "dashes": false,
         "datasource": "$site",
@@ -529,17 +533,19 @@
           "total": false,
           "values": false
         },
-        "lines": true,
+        "lines": false,
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null",
+        "options": {},
         "paceLength": 10,
         "percentage": false,
         "pointradius": 2,
         "points": false,
         "renderer": "flot",
         "seriesOverrides": [],
-        "stack": false,
+        "spaceLength": 10,
+        "stack": true,
         "steppedLine": false,
         "targets": [
           {
@@ -662,6 +668,7 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "connected",
+        "options": {},
         "paceLength": 10,
         "percentage": false,
         "pointradius": 5,
@@ -778,7 +785,9 @@
             "value": "karrot-prod"
           },
           "hide": 0,
+          "includeAll": false,
           "label": null,
+          "multi": false,
           "name": "site",
           "options": [],
           "query": "influxdb",
@@ -821,7 +830,7 @@
     "timezone": "",
     "title": "User level and trust stats",
     "uid": "ydNQAo5ik",
-    "version": 39
+    "version": 40
   },
   "meta": {
     "canAdmin": false,
@@ -837,11 +846,12 @@
     "hasAcl": false,
     "isFolder": false,
     "provisioned": false,
+    "provisionedExternalId": "",
     "slug": "user-level-and-trust-stats",
     "type": "db",
-    "updated": "2019-03-27T10:21:51+01:00",
+    "updated": "2019-06-30T20:43:31+02:00",
     "updatedBy": "tiltec",
     "url": "/d/ydNQAo5ik/user-level-and-trust-stats",
-    "version": 39
+    "version": 40
   }
 }

@@ -680,6 +680,7 @@
     "hasAcl": false,
     "isFolder": false,
     "provisioned": false,
+    "provisionedExternalId": "",
     "slug": "issues",
     "type": "db",
     "updated": "2019-03-28T17:14:06+01:00",

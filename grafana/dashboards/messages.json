@@ -16,8 +16,8 @@
     "editable": true,
     "gnetId": null,
     "graphTooltip": 0,
-    "id": 33,
-    "iteration": 1564129185407,
+    "id": 34,
+    "iteration": 1554463763273,
     "links": [],
     "panels": [
       {
@@ -25,19 +25,18 @@
         "datasource": "$site",
         "fontSize": "100%",
         "gridPos": {
-          "h": 10,
-          "w": 19,
+          "h": 8,
+          "w": 12,
           "x": 0,
           "y": 0
         },
         "id": 2,
         "links": [],
-        "options": {},
         "pageSize": null,
         "scroll": true,
         "showHeader": true,
         "sort": {
-          "col": 0,
+          "col": 3,
           "desc": true
         },
         "styles": [
@@ -45,7 +44,7 @@
             "alias": "Time",
             "dateFormat": "YYYY-MM-DD HH:mm:ss",
             "pattern": "Time",
-            "type": "date"
+            "type": "hidden"
           },
           {
             "alias": "",
@@ -55,17 +54,32 @@
               "rgba(237, 129, 40, 0.89)",
               "rgba(50, 172, 45, 0.97)"
             ],
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
             "decimals": 0,
-            "pattern": "/.*/",
+            "pattern": "messages",
             "thresholds": [],
             "type": "number",
-            "unit": "none"
+            "unit": "short"
           }
         ],
         "targets": [
           {
-            "groupBy": [],
-            "measurement": "karrot.incoming_email",
+            "dsType": "influxdb",
+            "groupBy": [
+              {
+                "params": [
+                  "group"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "type"
+                ],
+                "type": "tag"
+              }
+            ],
+            "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
             "refId": "A",
@@ -74,42 +88,44 @@
               [
                 {
                   "params": [
-                    "line_count_original"
+                    "message"
                   ],
                   "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                },
+                {
+                  "params": [
+                    "messages"
+                  ],
+                  "type": "alias"
                 }
               ],
               [
                 {
                   "params": [
-                    "line_count_talon"
+                    "message_reaction"
                   ],
                   "type": "field"
-                }
-              ],
-              [
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                },
                 {
                   "params": [
-                    "line_count_discourse"
+                    "reactions"
                   ],
-                  "type": "field"
-                }
-              ],
-              [
-                {
-                  "params": [
-                    "from_html"
-                  ],
-                  "type": "field"
+                  "type": "alias"
                 }
               ]
             ],
             "tags": []
           }
         ],
-        "timeFrom": null,
-        "timeShift": null,
-        "title": "Reply parser debug info",
+        "title": "Group messages",
         "transform": "table",
         "type": "table"
       }
@@ -126,21 +142,19 @@
             "value": "karrot-prod"
           },
           "hide": 0,
-          "includeAll": false,
           "label": null,
-          "multi": false,
           "name": "site",
           "options": [],
           "query": "influxdb",
           "refresh": 1,
-          "regex": "/karrot-.*/",
+          "regex": "/karrot.*/",
           "skipUrlSync": false,
           "type": "datasource"
         }
       ]
     },
     "time": {
-      "from": "now-30d",
+      "from": "now-7d",
       "to": "now"
     },
     "timepicker": {
@@ -169,16 +183,16 @@
       ]
     },
     "timezone": "",
-    "title": "Incoming emails",
-    "uid": "QpoAYo6mk",
-    "version": 7
+    "title": "Messages",
+    "uid": "dGYKcweiz",
+    "version": 2
   },
   "meta": {
     "canAdmin": false,
     "canEdit": false,
     "canSave": false,
     "canStar": true,
-    "created": "2019-04-01T18:55:49+02:00",
+    "created": "2019-04-05T13:28:19+02:00",
     "createdBy": "tiltec",
     "expires": "0001-01-01T00:00:00Z",
     "folderId": 0,
@@ -188,11 +202,11 @@
     "isFolder": false,
     "provisioned": false,
     "provisionedExternalId": "",
-    "slug": "incoming-emails",
+    "slug": "messages",
     "type": "db",
-    "updated": "2019-07-26T13:46:44+02:00",
+    "updated": "2019-04-05T13:29:41+02:00",
     "updatedBy": "tiltec",
-    "url": "/d/QpoAYo6mk/incoming-emails",
-    "version": 7
+    "url": "/d/dGYKcweiz/messages",
+    "version": 2
   }
 }

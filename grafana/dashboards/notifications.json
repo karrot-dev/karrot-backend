@@ -866,6 +866,7 @@
     "hasAcl": false,
     "isFolder": false,
     "provisioned": false,
+    "provisionedExternalId": "",
     "slug": "notifications",
     "type": "db",
     "updated": "2018-11-28T21:57:04+01:00",
