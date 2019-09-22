@@ -145,23 +145,23 @@ msgstr ""
 msgid "You are not a participant in this thread"
 msgstr ""
 
-#: karrot/conversations/emails.py:165 karrot/conversations/emails.py:168
+#: karrot/conversations/emails.py:168 karrot/conversations/emails.py:171
 #: karrot/subscriptions/tasks.py:70
 #, python-format
 msgid "Pickup %(date)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:236
+#: karrot/conversations/emails.py:241
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:241
+#: karrot/conversations/emails.py:246
 #, python-format
 msgid "New message in your application to %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:282
+#: karrot/conversations/emails.py:288
 #, python-format
 msgid "New message in conflict resolution in %(group_name)s"
 msgstr ""

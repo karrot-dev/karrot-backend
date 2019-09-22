@@ -152,23 +152,23 @@ msgstr "Ĝi devas unue esti en diskuto"
 msgid "You are not a participant in this thread"
 msgstr "Vi ne partoprenas en tiu ĉi diskuto"
 
-#: karrot/conversations/emails.py:165 karrot/conversations/emails.py:168
+#: karrot/conversations/emails.py:168 karrot/conversations/emails.py:171
 #: karrot/subscriptions/tasks.py:70
 #, python-format
 msgid "Pickup %(date)s"
 msgstr "Savado je %(date)s"
 
-#: karrot/conversations/emails.py:236
+#: karrot/conversations/emails.py:241
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr "Nova mesaĝo en kandidatiĝo de %(user_name)s al %(group_name)s"
 
-#: karrot/conversations/emails.py:241
+#: karrot/conversations/emails.py:246
 #, python-format
 msgid "New message in your application to %(group_name)s"
 msgstr "Nova mesaĝo en via kandidatiĝo al %(group_name)s"
 
-#: karrot/conversations/emails.py:282
+#: karrot/conversations/emails.py:288
 #, python-format
 msgid "New message in conflict resolution in %(group_name)s"
 msgstr "Nova mesaĝo pri problemsolvado en %(group_name)s"

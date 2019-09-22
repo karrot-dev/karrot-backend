@@ -157,24 +157,24 @@ msgstr "Doit être le premier dans le fil de discussions"
 msgid "You are not a participant in this thread"
 msgstr "Tu n'es pas participant à ce fil de discussion."
 
-#: karrot/conversations/emails.py:165 karrot/conversations/emails.py:168
+#: karrot/conversations/emails.py:168 karrot/conversations/emails.py:171
 #: karrot/subscriptions/tasks.py:70
 #, python-format
 msgid "Pickup %(date)s"
 msgstr "Récolte %(date)s"
 
-#: karrot/conversations/emails.py:236
+#: karrot/conversations/emails.py:241
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr ""
 "Nouveau message pour demande d'ajout de %(user_name)s pour %(group_name)s"
 
-#: karrot/conversations/emails.py:241
+#: karrot/conversations/emails.py:246
 #, python-format
 msgid "New message in your application to %(group_name)s"
 msgstr "Nouveau message au sujet de votre demande d'ajout à %(group_name)s"
 
-#: karrot/conversations/emails.py:282
+#: karrot/conversations/emails.py:288
 #, python-format
 msgid "New message in conflict resolution in %(group_name)s"
 msgstr ""
