@@ -59,7 +59,7 @@ factory-boy==2.12.0
 faker==2.0.1              # via factory-boy
 flake8==3.7.8
 freezegun==0.3.12
-furl==2.0.0
+furl==2.1.0
 gevent==1.4.0
 gprof2dot==2017.9.19      # via django-silk
 greenlet==0.4.15          # via gevent
