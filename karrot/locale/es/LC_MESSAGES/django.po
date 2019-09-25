@@ -345,7 +345,7 @@ msgid ""
 msgstr ""
 "Bienvenida a **karrot**!\n"
 "\n"
-"¡Entra, navega y investiga un poco! :Karrot: No te preocupes, no hay nada que se pueda romper aquí;)\n"
+"¡Entra, navega e investiga un poco! :Karrot: No te preocupes, no hay nada que se pueda romper aquí;)\n"
 "\n"
 "Todas las notificaciones por correo electrónico están desactivas por defecto."
 
