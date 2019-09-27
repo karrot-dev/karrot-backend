@@ -64,7 +64,7 @@ gevent==1.4.0
 gprof2dot==2017.9.19      # via django-silk
 greenlet==0.4.15          # via gevent
 hiredis==1.0.0
-html2text==2019.8.11
+html2text==2019.9.26
 html5lib==1.0.1
 huey==2.1.2
 hyperlink==19.0.0         # via twisted
