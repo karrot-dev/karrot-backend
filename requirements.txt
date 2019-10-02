@@ -50,7 +50,7 @@ django-redis==4.10.0
 django-silk==3.0.4
 django-timezone-field==3.0
 django-versatileimagefield==1.10
-django[argon2]==2.2.5
+django[argon2]==2.2.6
 djangorestframework-csv==2.1.0
 djangorestframework==3.10.3
 entrypoints==0.3          # via flake8
