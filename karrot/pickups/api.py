@@ -45,7 +45,7 @@ class FeedbackViewSet(
     - `?place` - filter by place id
     - `?group` - filter by group id
     - `?created_at_before` and `?created_at_after` - filter by creation date
-    
+
     export:
     Export Feedback as CSV
     """

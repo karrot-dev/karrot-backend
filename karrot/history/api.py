@@ -18,7 +18,7 @@ class HistoryPagination(CursorPagination):
 class HistoryViewSet(viewsets.ReadOnlyModelViewSet):
     """
     History of user actions
-    
+
     export:
     Export history as CSV
     """
