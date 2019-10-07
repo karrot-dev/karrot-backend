@@ -108,7 +108,7 @@ pyhamcrest==1.9.0         # via twisted
 pymdown-extensions==6.1
 pyparsing==2.4.2          # via packaging
 pytest-asyncio==0.10.0
-pytest-cov==2.7.1
+pytest-cov==2.8.1
 pytest-django==3.5.1
 pytest-forked==1.0.2      # via pytest-xdist
 pytest-xdist==1.30.0
@@ -140,4 +140,4 @@ zipp==0.6.0               # via importlib-metadata
 zope.interface==4.6.0     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==41.2.0        # via ipython, markdown, pyhamcrest, zope.interface
+# setuptools==41.4.0        # via ipython, markdown, pyhamcrest, zope.interface
