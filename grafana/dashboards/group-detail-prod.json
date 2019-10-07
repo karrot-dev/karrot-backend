@@ -1031,6 +1031,7 @@
     "hasAcl": false,
     "isFolder": false,
     "provisioned": false,
+    "provisionedExternalId": "",
     "slug": "group-detail-prod",
     "type": "db",
     "updated": "2018-03-13T21:46:37+01:00",

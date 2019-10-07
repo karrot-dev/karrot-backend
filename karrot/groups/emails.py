@@ -76,6 +76,7 @@ def prepare_group_summary_emails(group, context):
             },
             to=[member.email],
             language=member.language,
+            stats_category='group_summary',
         ) for member in members
     ]
 
@@ -106,6 +107,7 @@ def prepare_user_inactive_in_group_email(user, group):
             'group_url': group_wall_url(group),
             'num_days_inactive': settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP,
         },
+        stats_category='user_inactive_in_group',
     )
 
 
@@ -120,6 +122,7 @@ def prepare_user_removal_from_group_email(user, group):
             'num_months_inactive': settings.NUMBER_OF_INACTIVE_MONTHS_UNTIL_REMOVAL_FROM_GROUP_NOTIFICATION,
             'num_removal_days': settings.NUMBER_OF_DAYS_AFTER_REMOVAL_NOTIFICATION_WE_ACTUALLY_REMOVE_THEM,
         },
+        stats_category='user_removal_from_group',
     )
 
 
@@ -132,4 +135,5 @@ def prepare_user_became_editor_email(user, group):
             'group_name': group.name,
             'group_url': group_wall_url(group),
         },
+        stats_category='user_became_editor',
     )

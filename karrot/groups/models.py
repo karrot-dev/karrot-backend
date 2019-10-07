@@ -29,6 +29,7 @@ class GroupStatus(Enum):
 class GroupTheme(Enum):
     FOODSAVING = 'foodsaving'
     BIKEKITCHEN = 'bikekitchen'
+    GENERAL = 'general'
 
 
 class GroupQuerySet(models.QuerySet):

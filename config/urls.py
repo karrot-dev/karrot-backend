@@ -25,12 +25,11 @@ from karrot.pickups.api import PickupDateViewSet, PickupDateSeriesViewSet, Feedb
 from karrot.places.api import PlaceViewSet
 from karrot.subscriptions.api import PushSubscriptionViewSet
 from karrot.template_previews import views as template_preview_views
-from karrot.unsubscribe.api import UnsubscribeView
+from karrot.unsubscribe.api import TokenUnsubscribeView, UnsubscribeViewSet
 from karrot.userauth.api import AuthUserView, AuthView, LogoutView, \
     RequestResetPasswordView, ChangePasswordView, VerifyMailView, ResendMailVerificationCodeView, ResetPasswordView, \
     ChangeMailView, RequestDeleteUserView, FailedEmailDeliveryView
 from karrot.users.api import UserViewSet, UserInfoViewSet
-from karrot.webhooks.api import IncomingEmailView, EmailEventView
 from rest_framework_swagger.views import get_swagger_view
 
 router = DefaultRouter()
@@ -77,6 +76,8 @@ router.register('invitations', InvitationAcceptViewSet)
 # Feedback endpoints
 router.register('feedback', FeedbackViewSet)
 
+router.register('unsubscribe', UnsubscribeViewSet, basename='unsubscribe')
+
 urlpatterns = [
     path('api/auth/token/', obtain_auth_token),
     path('api/auth/logout/', LogoutView.as_view()),
@@ -89,15 +90,14 @@ urlpatterns = [
     path('api/auth/password/', ChangePasswordView.as_view()),
     path('api/auth/password/request_reset/', RequestResetPasswordView.as_view()),
     path('api/auth/password/reset/', ResetPasswordView.as_view()),
-    path('api/webhooks/incoming_email/', IncomingEmailView.as_view()),
-    path('api/webhooks/email_event/', EmailEventView.as_view()),
-    path('api/unsubscribe/<token>/', UnsubscribeView.as_view()),
+    path('api/unsubscribe/<token>/', TokenUnsubscribeView.as_view()),
     path('api/auth/', AuthView.as_view()),
     path('api/', include((router.urls))),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('admin/docs/', include('django.contrib.admindocs.urls')),
     path('admin/', admin.site.urls),
     path('docs/', get_swagger_view()),
+    path('api/anymail/', include('anymail.urls')),
 ]
 
 if settings.DEBUG:

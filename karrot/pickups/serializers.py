@@ -114,6 +114,9 @@ class PickupDateSerializer(serializers.ModelSerializer):
     def validate_date(self, date):
         if not date.start > timezone.now() + timedelta(minutes=10):
             raise serializers.ValidationError(_('The date should be in the future.'))
+        duration = date.end - date.start
+        if duration < timedelta(seconds=1):
+            raise serializers.ValidationError('Duration must be at least one second.')
         return date
 
 
@@ -433,8 +436,7 @@ class FeedbackExportSerializer(FeedbackSerializer):
         pickup = feedback.about
         group = pickup.place.group
 
-        # TODO rewrite to isoformat(timespec='seconds') once we are on Python 3.6+
-        return pickup.date.start.astimezone(group.timezone).isoformat()
+        return pickup.date.start.astimezone(group.timezone).isoformat(timespec='seconds')
 
     def get_about_place(self, feedback):
         return feedback.about.place_id
@@ -443,8 +445,7 @@ class FeedbackExportSerializer(FeedbackSerializer):
         pickup = feedback.about
         group = pickup.place.group
 
-        # TODO rewrite to isoformat(timespec='seconds') once we are on Python 3.6+
-        return feedback.created_at.astimezone(group.timezone).isoformat()
+        return feedback.created_at.astimezone(group.timezone).isoformat(timespec='seconds')
 
 
 class FeedbackExportRenderer(CSVRenderer):

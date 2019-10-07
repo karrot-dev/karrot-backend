@@ -14,4 +14,5 @@ def prepare_emailinvitation_email(invitation):
             'invited_by_name': invitation.invited_by.display_name,
         },
         to=invitation.email,
+        stats_category='invitation',
     )

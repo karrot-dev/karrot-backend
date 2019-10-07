@@ -110,6 +110,19 @@ class TestProcessFinishedPickupDates(TestCase):
         self.assertEqual(PickupDate.objects.count(), 1)
         self.assertEqual(History.objects.count(), 1)
 
+    def test_handle_zero_max_collectors_with_collectors_joined(self):
+        user = UserFactory()
+        self.pickup.group.add_member(user)
+        self.pickup.add_collector(user)
+        History.objects.all().delete()
+
+        self.pickup.max_collectors = 0
+        self.pickup.save()
+        PickupDate.objects.process_finished_pickup_dates()
+
+        self.assertEqual(PickupDate.objects.count(), 1)
+        self.assertEqual(History.objects.count(), 1)
+
     def test_do_not_process_disabled_pickups(self):
         self.pickup.is_disabled = True
         self.pickup.save()

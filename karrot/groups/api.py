@@ -85,11 +85,7 @@ class GroupViewSet(
     """
     Your groups: list, create, update
     """
-    queryset = GroupModel.objects.annotate_active_editors_count().annotate_yesterdays_member_count().prefetch_related(
-        'members',
-        'groupmembership_set',
-        'groupmembership_set__trusted_by',
-    )
+    queryset = GroupModel.objects
     filter_backends = (SearchFilter, filters.DjangoFilterBackend)
     filterset_class = GroupsFilter
     search_fields = ('name', 'public_description')
@@ -118,9 +114,19 @@ class GroupViewSet(
         return super().partial_update(request, *args, **kwargs)
 
     def get_queryset(self):
-        if self.action == 'join':
-            return self.queryset
-        return self.queryset.filter(members=self.request.user)
+        qs = self.queryset
+
+        if self.action != 'join':
+            qs = qs.filter(members=self.request.user)
+
+        if self.action in ('retrieve', 'list'):
+            qs = qs.annotate_active_editors_count().annotate_yesterdays_member_count().prefetch_related(
+                'members',
+                'groupmembership_set',
+                'groupmembership_set__trusted_by',
+            )
+
+        return qs
 
     @action(
         detail=True,

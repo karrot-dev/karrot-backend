@@ -1,11 +1,13 @@
 from django.core.signing import BadSignature
 from rest_framework import serializers
 
+from karrot.groups.models import Group
+from karrot.unsubscribe import stats
 from karrot.unsubscribe.utils import parse_token, unsubscribe_from_conversation, unsubscribe_from_thread, \
     unsubscribe_from_all_conversations_in_group, unsubscribe_from_notification_type
 
 
-class UnsubscribeSerializer(serializers.Serializer):
+class TokenUnsubscribeSerializer(serializers.Serializer):
     choice = serializers.ChoiceField(
         choices=['conversation', 'thread', 'notification_type', 'group'], default='conversation'
     )
@@ -46,4 +48,35 @@ class UnsubscribeSerializer(serializers.Serializer):
                 raise serializers.ValidationError()
             unsubscribe_from_all_conversations_in_group(user, token_data['group'])
 
+        stats.unsubscribed(
+            group=token_data.get('group'),
+            choice=choice,
+            notification_type=token_data.get('notification_type'),
+        )
+
         return {}
+
+
+class UnsubscribeSerializer(serializers.Serializer):
+    choice = serializers.ChoiceField(
+        choices=['group'],
+        required=True,
+    )
+    group = serializers.PrimaryKeyRelatedField(queryset=Group.objects.all())
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        choice = validated_data.get('choice')
+
+        if choice == 'group':
+            if 'group' not in validated_data:
+                raise serializers.ValidationError()
+            count = unsubscribe_from_all_conversations_in_group(user, validated_data['group'])
+            return count
+
+        return {}
+
+    def validate_group(self, group):
+        if not group.is_member(self.context['request'].user):
+            raise serializers.ValidationError('Not member of the given group')
+        return group

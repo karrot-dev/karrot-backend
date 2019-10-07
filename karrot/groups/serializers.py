@@ -142,8 +142,6 @@ class GroupDetailSerializer(GroupBaseSerializer):
         return {m.user_id: GroupMembershipInfoSerializer(m).data for m in group.groupmembership_set.all()}
 
     def get_notification_types(self, group):
-        if 'request' not in self.context:
-            return []
         user = self.context['request'].user
         membership = next(m for m in group.groupmembership_set.all() if m.user_id == user.id)
         return membership.notification_types

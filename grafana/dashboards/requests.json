@@ -17,7 +17,7 @@
     "gnetId": null,
     "graphTooltip": 0,
     "id": 3,
-    "iteration": 1553713241500,
+    "iteration": 1561985865331,
     "links": [],
     "panels": [
       {
@@ -47,6 +47,7 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null",
+        "options": {},
         "paceLength": 10,
         "percentage": false,
         "pointradius": 5,
@@ -157,6 +158,7 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null",
+        "options": {},
         "paceLength": 10,
         "percentage": false,
         "pointradius": 5,
@@ -275,6 +277,7 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null",
+        "options": {},
         "paceLength": 10,
         "percentage": false,
         "pointradius": 5,
@@ -442,6 +445,7 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null",
+        "options": {},
         "paceLength": 10,
         "percentage": false,
         "pointradius": 5,
@@ -606,6 +610,7 @@
         },
         "id": 10,
         "links": [],
+        "options": {},
         "pageSize": null,
         "repeat": null,
         "repeatDirection": "h",
@@ -642,7 +647,7 @@
             "groupBy": [
               {
                 "params": [
-                  "view"
+                  "view_name"
                 ],
                 "type": "tag"
               }
@@ -735,6 +740,7 @@
         },
         "id": 6,
         "links": [],
+        "options": {},
         "pageSize": 15,
         "scroll": false,
         "showHeader": true,
@@ -785,8 +791,8 @@
             "measurement": "django_request",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT \"value\" as \"response time\", \"full_path\", \"method\", \"referer\" FROM \"django_request\" WHERE $timeFilter ORDER BY time asc",
-            "rawQuery": false,
+            "query": "SELECT \"value\", \"url\" FROM \"django_request\" WHERE $timeFilter AND value > 500",
+            "rawQuery": true,
             "refId": "A",
             "resultFormat": "table",
             "select": [
@@ -794,6 +800,14 @@
                 {
                   "params": [
                     "value"
+                  ],
+                  "type": "field"
+                }
+              ],
+              [
+                {
+                  "params": [
+                    "url"
                   ],
                   "type": "field"
                 }
@@ -819,7 +833,9 @@
             "value": "karrot-prod"
           },
           "hide": 0,
+          "includeAll": false,
           "label": null,
+          "multi": false,
           "name": "site",
           "options": [],
           "query": "influxdb",
@@ -862,7 +878,7 @@
     "timezone": "utc",
     "title": "Requests",
     "uid": "000000003",
-    "version": 20
+    "version": 22
   },
   "meta": {
     "canAdmin": false,
@@ -878,11 +894,12 @@
     "hasAcl": false,
     "isFolder": false,
     "provisioned": false,
+    "provisionedExternalId": "",
     "slug": "requests",
     "type": "db",
-    "updated": "2019-03-27T21:25:35+01:00",
+    "updated": "2019-07-04T13:47:41+02:00",
     "updatedBy": "tiltec",
     "url": "/d/000000003/requests",
-    "version": 20
+    "version": 22
   }
 }

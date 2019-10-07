@@ -44,21 +44,23 @@ def parse_token(token):
 
 
 def unsubscribe_from_conversation(user, conversation):
-    ConversationParticipant.objects.filter(
+    p = ConversationParticipant.objects.filter(
         user=user,
         conversation=conversation,
-    ).update(
-        muted=True,
-    )
+    ).first()
+    if p:
+        p.muted = True
+        p.save()
 
 
 def unsubscribe_from_thread(user, thread):
-    ConversationThreadParticipant.objects.filter(
+    p = ConversationThreadParticipant.objects.filter(
         user=user,
         thread=thread,
-    ).update(
-        muted=True,
-    )
+    ).first()
+    if p:
+        p.muted = True
+        p.save()
 
 
 def unsubscribe_from_notification_type(user, group, notification_type):
@@ -72,35 +74,40 @@ def unsubscribe_from_all_conversations_in_group(user, group):
     unsubscribe from ALL conversations related to this group
     """
 
-    def is_related(conversation):
-        """
-        check if the conversation targets' related group is our intended group
-        """
-        return conversation.find_group() == group
-
-    # load all the users conversations
-    conversation_ids = [conversation.id for conversation in user.conversation_set.all() if is_related(conversation)]
+    # load related conversations
+    conversations = user.conversation_set.filter(group=group)
 
     # disable email notifications for all these conversations
-    ConversationParticipant.objects.filter(
-        user=user,
-        conversation_id__in=conversation_ids,
-    ).update(
-        muted=True,
-    )
+    conversation_count = 0
+    for p in ConversationParticipant.objects.filter(
+            user=user,
+            conversation__in=conversations,
+            muted=False,
+    ):
+        p.muted = True
+        p.save()
+        conversation_count += 1
 
     # ... and mute any threads
-    ConversationThreadParticipant.objects.filter(
-        user=user,
-        thread__conversation_id__in=conversation_ids,
-    ).update(
-        muted=True,
-    )
+    thread_count = 0
+    for p in ConversationThreadParticipant.objects.filter(
+            user=user,
+            thread__conversation__in=conversations,
+            muted=False,
+    ):
+        p.muted = True
+        p.save()
+        thread_count += 1
 
     # save them from these notifications too
-    GroupMembership.objects.filter(
+    membership = GroupMembership.objects.get(
         group=group,
         user=user,
-    ).update(
-        notification_types=[],
     )
+    membership.notification_types = []
+    membership.save()
+
+    return {
+        'conversations': conversation_count,
+        'threads': thread_count,
+    }

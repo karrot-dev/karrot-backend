@@ -1050,6 +1050,7 @@
     "hasAcl": false,
     "isFolder": false,
     "provisioned": false,
+    "provisionedExternalId": "",
     "slug": "yuca",
     "type": "db",
     "updated": "2018-12-11T11:57:07+01:00",
