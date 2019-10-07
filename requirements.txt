@@ -115,7 +115,7 @@ pytest-xdist==1.30.0
 pytest==5.1.2             # via pytest-asyncio, pytest-cov, pytest-django, pytest-forked, pytest-xdist
 python-dateutil==2.8.0    # via django-silk, faker, freezegun, influxdb
 python-server-metrics==0.2.1
-pytz==2019.2
+pytz==2019.3
 raven==6.10.0
 redis==3.3.8
 regex==2019.8.19
@@ -140,4 +140,4 @@ zipp==0.6.0               # via importlib-metadata
 zope.interface==4.6.0     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==41.2.0        # via ipython, markdown, pyhamcrest, zope.interface
+# setuptools==41.4.0        # via ipython, markdown, pyhamcrest, zope.interface
