@@ -33,8 +33,9 @@ The server is already running in Docker container.
 
 ### Install requirements
 
-- python3.5 or greater/virtualenv
-- postgresql >=9.4
+- python 3.7+
+- virtualenv
+- postgresql 11+
 - redis-server
 
 #### Arch Linux
@@ -142,7 +143,7 @@ You can run the server with `python manage.py runserver`.
 
 ## Migrations
 
-Sometimes you will need to create Django migrations. 
+Sometimes you will need to create Django migrations.
 
 ```
 source env/bin/activate
@@ -170,7 +171,7 @@ fsync = off
 ```
 
 ### Parallel testing
-Running the tests in parallel process can increase testing speed significantly. 
+Running the tests in parallel process can increase testing speed significantly.
 To execute the whole test suite on a CPU with 4 kernels, you may want to use:
 
 ```

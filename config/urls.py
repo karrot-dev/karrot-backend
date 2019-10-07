@@ -30,7 +30,6 @@ from karrot.userauth.api import AuthUserView, AuthView, LogoutView, \
     RequestResetPasswordView, ChangePasswordView, VerifyMailView, ResendMailVerificationCodeView, ResetPasswordView, \
     ChangeMailView, RequestDeleteUserView, FailedEmailDeliveryView
 from karrot.users.api import UserViewSet, UserInfoViewSet
-from karrot.webhooks.api import IncomingEmailView, EmailEventView
 from rest_framework_swagger.views import get_swagger_view
 
 router = DefaultRouter()
@@ -91,8 +90,6 @@ urlpatterns = [
     path('api/auth/password/', ChangePasswordView.as_view()),
     path('api/auth/password/request_reset/', RequestResetPasswordView.as_view()),
     path('api/auth/password/reset/', ResetPasswordView.as_view()),
-    path('api/webhooks/incoming_email/', IncomingEmailView.as_view()),
-    path('api/webhooks/email_event/', EmailEventView.as_view()),
     path('api/unsubscribe/<token>/', TokenUnsubscribeView.as_view()),
     path('api/auth/', AuthView.as_view()),
     path('api/', include((router.urls))),
@@ -100,6 +97,7 @@ urlpatterns = [
     path('admin/docs/', include('django.contrib.admindocs.urls')),
     path('admin/', admin.site.urls),
     path('docs/', get_swagger_view()),
+    path('api/anymail/', include('anymail.urls')),
 ]
 
 if settings.DEBUG:

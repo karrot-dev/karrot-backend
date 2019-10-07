@@ -473,6 +473,7 @@
     "hasAcl": false,
     "isFolder": false,
     "provisioned": false,
+    "provisionedExternalId": "",
     "slug": "groups",
     "type": "db",
     "updated": "2019-01-29T17:58:45+01:00",

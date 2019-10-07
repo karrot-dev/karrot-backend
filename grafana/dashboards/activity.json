@@ -17,7 +17,7 @@
     "gnetId": null,
     "graphTooltip": 1,
     "id": 19,
-    "iteration": 1553963121369,
+    "iteration": 1554801293788,
     "links": [],
     "panels": [
       {
@@ -59,7 +59,16 @@
         },
         "id": 14,
         "interval": null,
-        "links": [],
+        "links": [
+          {
+            "dashboard": "Pickups",
+            "includeVars": true,
+            "keepTime": true,
+            "title": "Pickups",
+            "type": "dashboard",
+            "url": "/d/y-HBcQ6mk/pickups"
+          }
+        ],
         "mappingType": 1,
         "mappingTypes": [
           {
@@ -774,7 +783,16 @@
         },
         "id": 24,
         "interval": null,
-        "links": [],
+        "links": [
+          {
+            "dashboard": "Messages",
+            "includeVars": true,
+            "keepTime": true,
+            "title": "Messages",
+            "type": "dashboard",
+            "url": "/d/dGYKcweiz/messages"
+          }
+        ],
         "mappingType": 1,
         "mappingTypes": [
           {
@@ -1752,7 +1770,7 @@
         },
         "id": 35,
         "panels": [],
-        "title": "Applications",
+        "title": "Applications & Invitations",
         "type": "row"
       },
       {
@@ -1832,12 +1850,12 @@
               },
               {
                 "params": [
-                  "previous"
+                  "0"
                 ],
                 "type": "fill"
               }
             ],
-            "measurement": "karrot.group.applications",
+            "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
             "refId": "A",
@@ -1846,13 +1864,13 @@
               [
                 {
                   "params": [
-                    "count_status_pending"
+                    "application_pending"
                   ],
                   "type": "field"
                 },
                 {
                   "params": [],
-                  "type": "max"
+                  "type": "sum"
                 }
               ]
             ],
@@ -1866,7 +1884,7 @@
           }
         ],
         "thresholds": "",
-        "title": "Pending applications",
+        "title": "Applications created",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -1876,7 +1894,7 @@
             "value": "null"
           }
         ],
-        "valueName": "current"
+        "valueName": "total"
       },
       {
         "cacheTimeout": null,
@@ -1979,11 +1997,17 @@
                 }
               ]
             ],
-            "tags": []
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
           }
         ],
         "thresholds": "",
-        "title": "Accepted applications",
+        "title": "Applications accepted",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -1998,7 +2022,7 @@
       {
         "cacheTimeout": null,
         "colorBackground": false,
-        "colorValue": true,
+        "colorValue": false,
         "colors": [
           "#299c46",
           "rgba(237, 129, 40, 0.89)",
@@ -2019,14 +2043,17 @@
           "x": 6,
           "y": 15
         },
-        "id": 20,
+        "id": 76,
         "interval": null,
         "links": [
           {
             "dashUri": "db/group-applications",
-            "dashboard": "Group Applications",
-            "title": "Group Applications",
-            "type": "dashboard"
+            "dashboard": "Invitations",
+            "includeVars": true,
+            "keepTime": true,
+            "title": "Invitations",
+            "type": "dashboard",
+            "url": "/d/Vz3_tZRZk/invitations"
           }
         ],
         "mappingType": 1,
@@ -2066,7 +2093,7 @@
             "groupBy": [
               {
                 "params": [
-                  "$interval"
+                  "$__interval"
                 ],
                 "type": "time"
               },
@@ -2086,7 +2113,7 @@
               [
                 {
                   "params": [
-                    "application_declined"
+                    "invitation_created"
                   ],
                   "type": "field"
                 },
@@ -2096,11 +2123,17 @@
                 }
               ]
             ],
-            "tags": []
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
           }
         ],
         "thresholds": "",
-        "title": "Declined applications",
+        "title": "Invitations sent",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -2136,14 +2169,17 @@
           "x": 9,
           "y": 15
         },
-        "id": 45,
+        "id": 77,
         "interval": null,
         "links": [
           {
             "dashUri": "db/group-applications",
-            "dashboard": "Group Applications",
-            "title": "Group Applications",
-            "type": "dashboard"
+            "dashboard": "Invitations",
+            "includeVars": true,
+            "keepTime": true,
+            "title": "Invitations",
+            "type": "dashboard",
+            "url": "/d/Vz3_tZRZk/invitations"
           }
         ],
         "mappingType": 1,
@@ -2183,7 +2219,7 @@
             "groupBy": [
               {
                 "params": [
-                  "$interval"
+                  "$__interval"
                 ],
                 "type": "time"
               },
@@ -2203,7 +2239,7 @@
               [
                 {
                   "params": [
-                    "application_withdrawn"
+                    "invitation_accepted"
                   ],
                   "type": "field"
                 },
@@ -2213,11 +2249,17 @@
                 }
               ]
             ],
-            "tags": []
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
           }
         ],
         "thresholds": "",
-        "title": "Withdrawn applications",
+        "title": "Invitations accepted",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -2228,110 +2270,6 @@
           }
         ],
         "valueName": "total"
-      },
-      {
-        "cacheTimeout": null,
-        "colorBackground": false,
-        "colorValue": false,
-        "colors": [
-          "#299c46",
-          "rgba(237, 129, 40, 0.89)",
-          "#d44a3a"
-        ],
-        "datasource": "$site",
-        "format": "dtdurations",
-        "gauge": {
-          "maxValue": 100,
-          "minValue": 0,
-          "show": false,
-          "thresholdLabels": false,
-          "thresholdMarkers": true
-        },
-        "gridPos": {
-          "h": 3,
-          "w": 5,
-          "x": 12,
-          "y": 15
-        },
-        "id": 55,
-        "interval": null,
-        "links": [
-          {
-            "dashUri": "db/group-applications",
-            "dashboard": "Group Applications",
-            "title": "Group Applications",
-            "type": "dashboard"
-          }
-        ],
-        "mappingType": 1,
-        "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
-        ],
-        "maxDataPoints": 100,
-        "nullPointMode": "connected",
-        "nullText": null,
-        "postfix": "",
-        "postfixFontSize": "50%",
-        "prefix": "",
-        "prefixFontSize": "50%",
-        "rangeMaps": [
-          {
-            "from": "null",
-            "text": "N/A",
-            "to": "null"
-          }
-        ],
-        "sparkline": {
-          "fillColor": "rgba(31, 118, 189, 0.18)",
-          "full": false,
-          "lineColor": "rgb(31, 120, 193)",
-          "show": false
-        },
-        "tableColumn": "",
-        "targets": [
-          {
-            "groupBy": [],
-            "measurement": "karrot.events",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "A",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "application_alive_seconds"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "mean"
-                }
-              ]
-            ],
-            "tags": []
-          }
-        ],
-        "thresholds": "",
-        "title": "Decided within (avg)",
-        "type": "singlestat",
-        "valueFontSize": "80%",
-        "valueMaps": [
-          {
-            "op": "=",
-            "text": "0",
-            "value": "null"
-          }
-        ],
-        "valueName": "current"
       },
       {
         "collapsed": false,
@@ -2703,13 +2641,22 @@
         },
         "gridPos": {
           "h": 3,
-          "w": 5,
+          "w": 3,
           "x": 9,
           "y": 19
         },
         "id": 41,
         "interval": null,
-        "links": [],
+        "links": [
+          {
+            "dashboard": "User inactivity and removal",
+            "includeVars": true,
+            "keepTime": true,
+            "title": "User inactivity and removal",
+            "type": "dashboard",
+            "url": "/d/kZkNpw6mk/user-inactivity-and-removal"
+          }
+        ],
         "mappingType": 1,
         "mappingTypes": [
           {
@@ -2781,7 +2728,7 @@
           }
         ],
         "thresholds": "",
-        "title": "Marked as inactive in groups",
+        "title": "Marked as inactive",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -2814,7 +2761,7 @@
         "gridPos": {
           "h": 3,
           "w": 3,
-          "x": 14,
+          "x": 12,
           "y": 19
         },
         "id": 56,
@@ -4600,7 +4547,16 @@
         },
         "id": 52,
         "interval": null,
-        "links": [],
+        "links": [
+          {
+            "dashboard": "Emails",
+            "includeVars": true,
+            "keepTime": true,
+            "title": "Emails",
+            "type": "dashboard",
+            "url": "/d/WIqFtQ6ik/emails"
+          }
+        ],
         "mappingType": 1,
         "mappingTypes": [
           {
@@ -5408,7 +5364,7 @@
         "scroll": true,
         "showHeader": true,
         "sort": {
-          "col": 9,
+          "col": 6,
           "desc": true
         },
         "styles": [
@@ -6029,1431 +5985,6 @@
         "title": "Group Activity",
         "transform": "table",
         "type": "table"
-      },
-      {
-        "aliasColors": {},
-        "bars": true,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": "$site",
-        "fill": 10,
-        "gridPos": {
-          "h": 7,
-          "w": 8,
-          "x": 0,
-          "y": 70
-        },
-        "id": 1,
-        "interval": "4h",
-        "legend": {
-          "avg": false,
-          "current": false,
-          "hideEmpty": true,
-          "hideZero": true,
-          "max": false,
-          "min": false,
-          "show": false,
-          "total": false,
-          "values": false
-        },
-        "lines": false,
-        "linewidth": 1,
-        "links": [],
-        "nullPointMode": "null as zero",
-        "paceLength": 10,
-        "percentage": false,
-        "pointradius": 4,
-        "points": false,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": true,
-        "steppedLine": false,
-        "targets": [
-          {
-            "alias": "group $tag_group $col",
-            "dsType": "influxdb",
-            "groupBy": [
-              {
-                "params": [
-                  "$__interval"
-                ],
-                "type": "time"
-              },
-              {
-                "params": [
-                  "group"
-                ],
-                "type": "tag"
-              },
-              {
-                "params": [
-                  "0"
-                ],
-                "type": "fill"
-              }
-            ],
-            "measurement": "karrot.events",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "A",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "pickup_done"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "sum"
-                },
-                {
-                  "params": [
-                    "pickup done"
-                  ],
-                  "type": "alias"
-                }
-              ]
-            ],
-            "tags": []
-          },
-          {
-            "alias": "group $tag_group $col",
-            "dsType": "influxdb",
-            "groupBy": [
-              {
-                "params": [
-                  "$__interval"
-                ],
-                "type": "time"
-              },
-              {
-                "params": [
-                  "group"
-                ],
-                "type": "tag"
-              },
-              {
-                "params": [
-                  "0"
-                ],
-                "type": "fill"
-              }
-            ],
-            "measurement": "karrot.events",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "B",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "pickup_missed"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "sum"
-                },
-                {
-                  "params": [
-                    "pickup missed"
-                  ],
-                  "type": "alias"
-                }
-              ]
-            ],
-            "tags": []
-          }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Pickups by group",
-        "tooltip": {
-          "shared": true,
-          "sort": 2,
-          "value_type": "individual"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-          {
-            "decimals": 0,
-            "format": "short",
-            "label": "Count",
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          },
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
-      },
-      {
-        "aliasColors": {
-          "pickup missed": "#e24d42"
-        },
-        "bars": true,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": "$site",
-        "fill": 10,
-        "gridPos": {
-          "h": 7,
-          "w": 8,
-          "x": 8,
-          "y": 70
-        },
-        "id": 9,
-        "interval": "1d",
-        "legend": {
-          "avg": false,
-          "current": false,
-          "hideEmpty": true,
-          "hideZero": true,
-          "max": false,
-          "min": false,
-          "show": true,
-          "total": false,
-          "values": false
-        },
-        "lines": false,
-        "linewidth": 1,
-        "links": [],
-        "nullPointMode": "null as zero",
-        "paceLength": 10,
-        "percentage": false,
-        "pointradius": 4,
-        "points": false,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": true,
-        "steppedLine": false,
-        "targets": [
-          {
-            "alias": "$col",
-            "dsType": "influxdb",
-            "groupBy": [
-              {
-                "params": [
-                  "$__interval"
-                ],
-                "type": "time"
-              },
-              {
-                "params": [
-                  "0"
-                ],
-                "type": "fill"
-              }
-            ],
-            "measurement": "karrot.events",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "A",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "pickup_done"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "sum"
-                },
-                {
-                  "params": [
-                    "pickup done"
-                  ],
-                  "type": "alias"
-                }
-              ]
-            ],
-            "tags": []
-          },
-          {
-            "alias": "$col",
-            "dsType": "influxdb",
-            "groupBy": [
-              {
-                "params": [
-                  "$__interval"
-                ],
-                "type": "time"
-              },
-              {
-                "params": [
-                  "0"
-                ],
-                "type": "fill"
-              }
-            ],
-            "measurement": "karrot.events",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "B",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "pickup_missed"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "sum"
-                },
-                {
-                  "params": [
-                    "pickup missed"
-                  ],
-                  "type": "alias"
-                }
-              ]
-            ],
-            "tags": []
-          }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Pickups",
-        "tooltip": {
-          "shared": true,
-          "sort": 2,
-          "value_type": "individual"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-          {
-            "decimals": 0,
-            "format": "short",
-            "label": "Count (stacked)",
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          },
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
-      },
-      {
-        "columns": [],
-        "datasource": "$site",
-        "fontSize": "100%",
-        "gridPos": {
-          "h": 7,
-          "w": 8,
-          "x": 16,
-          "y": 70
-        },
-        "id": 12,
-        "links": [],
-        "pageSize": null,
-        "scroll": true,
-        "showHeader": true,
-        "sort": {
-          "col": 2,
-          "desc": true
-        },
-        "styles": [
-          {
-            "alias": "Time",
-            "dateFormat": "YYYY-MM-DD HH:mm:ss",
-            "pattern": "Time",
-            "type": "hidden"
-          },
-          {
-            "alias": "",
-            "colorMode": null,
-            "colors": [
-              "rgba(245, 54, 54, 0.9)",
-              "rgba(237, 129, 40, 0.89)",
-              "rgba(50, 172, 45, 0.97)"
-            ],
-            "dateFormat": "YYYY-MM-DD HH:mm:ss",
-            "decimals": 0,
-            "pattern": "messages",
-            "thresholds": [],
-            "type": "number",
-            "unit": "short"
-          }
-        ],
-        "targets": [
-          {
-            "dsType": "influxdb",
-            "groupBy": [
-              {
-                "params": [
-                  "group"
-                ],
-                "type": "tag"
-              },
-              {
-                "params": [
-                  "type"
-                ],
-                "type": "tag"
-              }
-            ],
-            "measurement": "karrot.events",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "A",
-            "resultFormat": "table",
-            "select": [
-              [
-                {
-                  "params": [
-                    "message"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "sum"
-                },
-                {
-                  "params": [
-                    "messages"
-                  ],
-                  "type": "alias"
-                }
-              ],
-              [
-                {
-                  "params": [
-                    "message_reaction"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "sum"
-                },
-                {
-                  "params": [
-                    "reactions"
-                  ],
-                  "type": "alias"
-                }
-              ]
-            ],
-            "tags": []
-          }
-        ],
-        "title": "Group messages",
-        "transform": "table",
-        "type": "table"
-      },
-      {
-        "aliasColors": {
-          "group__record_group_stats": "rgba(126, 178, 109, 0.5)",
-          "group__send_summary_emails": "rgba(234, 184, 57, 0.47)"
-        },
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": "$site",
-        "fill": 1,
-        "gridPos": {
-          "h": 7,
-          "w": 24,
-          "x": 0,
-          "y": 77
-        },
-        "id": 4,
-        "interval": "",
-        "legend": {
-          "avg": false,
-          "current": false,
-          "max": false,
-          "min": false,
-          "show": true,
-          "total": false,
-          "values": false
-        },
-        "lines": false,
-        "linewidth": 1,
-        "links": [],
-        "nullPointMode": "null",
-        "paceLength": 10,
-        "percentage": false,
-        "pointradius": 5,
-        "points": true,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
-          {
-            "alias": "recipient count",
-            "dsType": "influxdb",
-            "groupBy": [
-              {
-                "params": [
-                  "$__interval"
-                ],
-                "type": "time"
-              },
-              {
-                "params": [
-                  "null"
-                ],
-                "type": "fill"
-              }
-            ],
-            "measurement": "karrot.email.sent",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "B",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "recipient_count"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "sum"
-                }
-              ]
-            ],
-            "tags": []
-          }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Emails sent",
-        "tooltip": {
-          "shared": false,
-          "sort": 0,
-          "value_type": "individual"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          },
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
-      },
-      {
-        "aliasColors": {},
-        "bars": true,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": "$site",
-        "fill": 1,
-        "gridPos": {
-          "h": 7,
-          "w": 24,
-          "x": 0,
-          "y": 84
-        },
-        "id": 5,
-        "interval": "1h",
-        "legend": {
-          "avg": false,
-          "current": false,
-          "hideEmpty": true,
-          "hideZero": true,
-          "max": false,
-          "min": false,
-          "show": false,
-          "total": false,
-          "values": false
-        },
-        "lines": false,
-        "linewidth": 1,
-        "links": [],
-        "nullPointMode": "null",
-        "paceLength": 10,
-        "percentage": false,
-        "pointradius": 6,
-        "points": false,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": true,
-        "steppedLine": false,
-        "targets": [
-          {
-            "alias": "$col [group=$tag_group]",
-            "dsType": "influxdb",
-            "groupBy": [
-              {
-                "params": [
-                  "$__interval"
-                ],
-                "type": "time"
-              },
-              {
-                "params": [
-                  "group"
-                ],
-                "type": "tag"
-              },
-              {
-                "params": [
-                  "null"
-                ],
-                "type": "fill"
-              }
-            ],
-            "hide": false,
-            "measurement": "karrot.email.pickup_notification",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "A",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "tomorrow_empty"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "mean"
-                },
-                {
-                  "params": [
-                    "tomorrow empty"
-                  ],
-                  "type": "alias"
-                }
-              ],
-              [
-                {
-                  "params": [
-                    "tomorrow_not_full"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "mean"
-                },
-                {
-                  "params": [
-                    "tomorrow not full"
-                  ],
-                  "type": "alias"
-                }
-              ],
-              [
-                {
-                  "params": [
-                    "tomorrow_user"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "mean"
-                },
-                {
-                  "params": [
-                    "tomorrow user"
-                  ],
-                  "type": "alias"
-                }
-              ],
-              [
-                {
-                  "params": [
-                    "tonight_empty"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "mean"
-                },
-                {
-                  "params": [
-                    "tonight empty"
-                  ],
-                  "type": "alias"
-                }
-              ],
-              [
-                {
-                  "params": [
-                    "tonight_not_full"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "mean"
-                },
-                {
-                  "params": [
-                    "tonight not full"
-                  ],
-                  "type": "alias"
-                }
-              ],
-              [
-                {
-                  "params": [
-                    "tonight_user"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "mean"
-                },
-                {
-                  "params": [
-                    "tonight user"
-                  ],
-                  "type": "alias"
-                }
-              ]
-            ],
-            "tags": []
-          }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Pickup notification stats",
-        "tooltip": {
-          "shared": true,
-          "sort": 2,
-          "value_type": "individual"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          },
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
-      },
-      {
-        "aliasColors": {},
-        "bars": true,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": "$site",
-        "description": "",
-        "fill": 1,
-        "gridPos": {
-          "h": 7,
-          "w": 24,
-          "x": 0,
-          "y": 91
-        },
-        "id": 8,
-        "interval": "1h",
-        "legend": {
-          "alignAsTable": false,
-          "avg": false,
-          "current": false,
-          "max": false,
-          "min": false,
-          "rightSide": false,
-          "show": false,
-          "total": false,
-          "values": false
-        },
-        "lines": false,
-        "linewidth": 1,
-        "links": [],
-        "nullPointMode": "null",
-        "paceLength": 10,
-        "percentage": false,
-        "pointradius": 5,
-        "points": false,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": true,
-        "steppedLine": false,
-        "targets": [
-          {
-            "alias": "group $tag_group $col",
-            "dsType": "influxdb",
-            "groupBy": [
-              {
-                "params": [
-                  "$__interval"
-                ],
-                "type": "time"
-              },
-              {
-                "params": [
-                  "group"
-                ],
-                "type": "tag"
-              },
-              {
-                "params": [
-                  "null"
-                ],
-                "type": "fill"
-              }
-            ],
-            "measurement": "karrot.email.group_summary",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "A",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "email_recipient_count"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "sum"
-                },
-                {
-                  "params": [
-                    "recipients"
-                  ],
-                  "type": "alias"
-                }
-              ],
-              [
-                {
-                  "params": [
-                    "feedback_count"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "sum"
-                },
-                {
-                  "params": [
-                    "feedback"
-                  ],
-                  "type": "alias"
-                }
-              ],
-              [
-                {
-                  "params": [
-                    "message_count"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "sum"
-                },
-                {
-                  "params": [
-                    "messages"
-                  ],
-                  "type": "alias"
-                }
-              ],
-              [
-                {
-                  "params": [
-                    "new_user_count"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "sum"
-                },
-                {
-                  "params": [
-                    "new users"
-                  ],
-                  "type": "alias"
-                }
-              ],
-              [
-                {
-                  "params": [
-                    "pickups_done_count"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "sum"
-                },
-                {
-                  "params": [
-                    "pickups done"
-                  ],
-                  "type": "alias"
-                }
-              ],
-              [
-                {
-                  "params": [
-                    "pickups_missed_count"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "sum"
-                },
-                {
-                  "params": [
-                    "pickups missed"
-                  ],
-                  "type": "alias"
-                }
-              ],
-              [
-                {
-                  "params": [
-                    "pickups_missed_count"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "sum"
-                },
-                {
-                  "params": [
-                    "pickups missed"
-                  ],
-                  "type": "alias"
-                }
-              ]
-            ],
-            "tags": []
-          }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Group Summary notifications",
-        "tooltip": {
-          "shared": true,
-          "sort": 2,
-          "value_type": "individual"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          },
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
-      },
-      {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": "$site",
-        "fill": 1,
-        "gridPos": {
-          "h": 7,
-          "w": 24,
-          "x": 0,
-          "y": 98
-        },
-        "id": 6,
-        "interval": "4h",
-        "legend": {
-          "avg": false,
-          "current": false,
-          "max": false,
-          "min": false,
-          "show": true,
-          "total": false,
-          "values": false
-        },
-        "lines": false,
-        "linewidth": 1,
-        "links": [],
-        "nullPointMode": "null",
-        "paceLength": 10,
-        "percentage": false,
-        "pointradius": 7,
-        "points": true,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
-          {
-            "alias": "number of memberships",
-            "dsType": "influxdb",
-            "groupBy": [
-              {
-                "params": [
-                  "1h"
-                ],
-                "type": "time"
-              },
-              {
-                "params": [
-                  "none"
-                ],
-                "type": "fill"
-              }
-            ],
-            "measurement": "karrot.periodic",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "A",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "count_users_flagged_inactive"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "sum"
-                }
-              ]
-            ],
-            "tags": [
-              {
-                "key": "name",
-                "operator": "=",
-                "value": "group__process_inactive_users"
-              }
-            ]
-          }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Users marked as inactive",
-        "tooltip": {
-          "shared": true,
-          "sort": 0,
-          "value_type": "individual"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-          {
-            "decimals": 0,
-            "format": "short",
-            "label": "",
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          },
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
-      },
-      {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": "$site",
-        "fill": 1,
-        "gridPos": {
-          "h": 7,
-          "w": 24,
-          "x": 0,
-          "y": 105
-        },
-        "id": 60,
-        "interval": "4h",
-        "legend": {
-          "avg": false,
-          "current": false,
-          "max": false,
-          "min": false,
-          "show": true,
-          "total": false,
-          "values": false
-        },
-        "lines": false,
-        "linewidth": 1,
-        "links": [],
-        "nullPointMode": "null",
-        "paceLength": 10,
-        "percentage": false,
-        "pointradius": 7,
-        "points": true,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
-          {
-            "alias": "number of memberships",
-            "dsType": "influxdb",
-            "groupBy": [
-              {
-                "params": [
-                  "1h"
-                ],
-                "type": "time"
-              },
-              {
-                "params": [
-                  "none"
-                ],
-                "type": "fill"
-              }
-            ],
-            "measurement": "karrot.periodic",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "A",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "count_users_flagged_for_removal"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "sum"
-                }
-              ]
-            ],
-            "tags": [
-              {
-                "key": "name",
-                "operator": "=",
-                "value": "group__process_inactive_users"
-              }
-            ]
-          }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Users marked for removal from groups",
-        "tooltip": {
-          "shared": true,
-          "sort": 0,
-          "value_type": "individual"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-          {
-            "decimals": 0,
-            "format": "short",
-            "label": "",
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          },
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
-      },
-      {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": "$site",
-        "fill": 1,
-        "gridPos": {
-          "h": 7,
-          "w": 24,
-          "x": 0,
-          "y": 112
-        },
-        "id": 61,
-        "interval": "4h",
-        "legend": {
-          "avg": false,
-          "current": false,
-          "max": false,
-          "min": false,
-          "show": true,
-          "total": false,
-          "values": false
-        },
-        "lines": false,
-        "linewidth": 1,
-        "links": [],
-        "nullPointMode": "null",
-        "paceLength": 10,
-        "percentage": false,
-        "pointradius": 7,
-        "points": true,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
-          {
-            "alias": "number of memberships",
-            "dsType": "influxdb",
-            "groupBy": [
-              {
-                "params": [
-                  "1h"
-                ],
-                "type": "time"
-              },
-              {
-                "params": [
-                  "none"
-                ],
-                "type": "fill"
-              }
-            ],
-            "measurement": "karrot.periodic",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "A",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "count_users_removed"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "sum"
-                }
-              ]
-            ],
-            "tags": [
-              {
-                "key": "name",
-                "operator": "=",
-                "value": "group__process_inactive_users"
-              }
-            ]
-          }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Users removed from groups",
-        "tooltip": {
-          "shared": true,
-          "sort": 0,
-          "value_type": "individual"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-          {
-            "decimals": 0,
-            "format": "short",
-            "label": "",
-            "logBase": 1,
-            "max": null,
-            "min": "0",
-            "show": true
-          },
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
       }
     ],
     "refresh": false,
@@ -7511,7 +6042,7 @@
     "timezone": "",
     "title": "Activity",
     "uid": "000000019",
-    "version": 87
+    "version": 102
   },
   "meta": {
     "canAdmin": false,
@@ -7527,11 +6058,12 @@
     "hasAcl": false,
     "isFolder": false,
     "provisioned": false,
+    "provisionedExternalId": "",
     "slug": "activity",
     "type": "db",
-    "updated": "2019-03-30T17:28:14+01:00",
+    "updated": "2019-04-09T11:22:04+02:00",
     "updatedBy": "tiltec",
     "url": "/d/000000019/activity",
-    "version": 87
+    "version": 102
   }
 }

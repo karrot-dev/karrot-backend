@@ -17,9 +17,136 @@
     "gnetId": null,
     "graphTooltip": 0,
     "id": 25,
-    "iteration": 1553447554276,
+    "iteration": 1568715810866,
     "links": [],
     "panels": [
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 0,
+          "y": 0
+        },
+        "id": 10,
+        "interval": null,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "options": {},
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "group"
+                ],
+                "type": "tag"
+              },
+              {
+                "params": [
+                  "previous"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.group.applications",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT sum(\"count\") FROM (SELECT last(\"count_status_pending\") as \"count\" FROM \"karrot.group.applications\" WHERE (\"group_status\" = 'active') AND $timeFilter GROUP BY \"group\" fill(previous))",
+            "rawQuery": true,
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_status_pending"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "last"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
+          }
+        ],
+        "thresholds": "",
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Pending applications",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
       {
         "aliasColors": {},
         "bars": false,
@@ -27,11 +154,12 @@
         "dashes": false,
         "datasource": "$site",
         "fill": 1,
+        "fillGradient": 0,
         "gridPos": {
           "h": 8,
           "w": 12,
           "x": 0,
-          "y": 0
+          "y": 3
         },
         "id": 8,
         "legend": {
@@ -47,12 +175,16 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null",
+        "options": {
+          "dataLinks": []
+        },
         "paceLength": 10,
         "percentage": false,
         "pointradius": 2,
         "points": false,
         "renderer": "flot",
         "seriesOverrides": [],
+        "spaceLength": 10,
         "stack": false,
         "steppedLine": false,
         "targets": [
@@ -61,7 +193,7 @@
             "groupBy": [
               {
                 "params": [
-                  "$interval"
+                  "$__interval"
                 ],
                 "type": "time"
               },
@@ -96,7 +228,7 @@
                 },
                 {
                   "params": [],
-                  "type": "max"
+                  "type": "last"
                 }
               ]
             ],
@@ -172,7 +304,7 @@
           "h": 3,
           "w": 5,
           "x": 0,
-          "y": 8
+          "y": 11
         },
         "id": 4,
         "interval": null,
@@ -191,6 +323,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -269,7 +402,7 @@
           "h": 3,
           "w": 5,
           "x": 5,
-          "y": 8
+          "y": 11
         },
         "id": 5,
         "interval": null,
@@ -288,6 +421,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -366,7 +500,7 @@
           "h": 3,
           "w": 5,
           "x": 10,
-          "y": 8
+          "y": 11
         },
         "id": 6,
         "interval": null,
@@ -385,6 +519,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -449,10 +584,11 @@
           "h": 8,
           "w": 9,
           "x": 0,
-          "y": 11
+          "y": 14
         },
         "id": 2,
         "links": [],
+        "options": {},
         "pageSize": null,
         "scroll": true,
         "showHeader": true,
@@ -598,7 +734,7 @@
         "type": "table"
       }
     ],
-    "schemaVersion": 18,
+    "schemaVersion": 19,
     "style": "dark",
     "tags": [],
     "templating": {
@@ -610,7 +746,9 @@
             "value": "karrot-prod"
           },
           "hide": 0,
+          "includeAll": false,
           "label": null,
+          "multi": false,
           "name": "site",
           "options": [],
           "query": "influxdb",
@@ -653,7 +791,7 @@
     "timezone": "",
     "title": "Group Applications",
     "uid": "ydNQAo5ika",
-    "version": 6
+    "version": 9
   },
   "meta": {
     "canAdmin": false,
@@ -669,11 +807,12 @@
     "hasAcl": false,
     "isFolder": false,
     "provisioned": false,
+    "provisionedExternalId": "",
     "slug": "group-applications",
     "type": "db",
-    "updated": "2019-03-24T18:27:14+01:00",
+    "updated": "2019-09-17T12:30:12+02:00",
     "updatedBy": "tiltec",
     "url": "/d/ydNQAo5ika/group-applications",
-    "version": 6
+    "version": 9
   }
 }

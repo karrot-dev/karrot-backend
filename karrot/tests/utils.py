@@ -1,7 +1,11 @@
+from contextlib import contextmanager
+
 from django.apps import apps
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 from django.test import TestCase
+from huey.signals import SIGNAL_SCHEDULED
+from huey.contrib.djhuey import signal, disconnect_signal
 
 
 # Mostly based on this nice persons article:
@@ -44,3 +48,14 @@ class ExtractPaginationMixin(object):
         if 'results' in response.data:
             response.data = response.data['results']
         return response
+
+
+@contextmanager
+def execute_scheduled_tasks_immediately():
+    @signal(SIGNAL_SCHEDULED)
+    def task_scheduled_handler(signal, task, exc=None):
+        task.execute()
+
+    yield
+
+    disconnect_signal(task_scheduled_handler)

@@ -1,6 +1,7 @@
 -e git+https://github.com/tiltec/django-influxdb-metrics@163730a#egg=django-influxdb-metrics
 -e git+https://github.com/tiltec/django-rest-swagger@7a9ef64#egg=django-rest-swagger
 -e git+https://github.com/tiltec/talon@master#egg=talon
+-e git+https://github.com/tiltec/django-anymail@master#egg=django-anymail
 django[argon2]
 django-cors-headers
 django-enumfield==1.6b3
@@ -17,8 +18,6 @@ redis
 pytz
 django-filter
 django-crispy-forms
-django-anymail
-sparkpost
 django-timezone-field
 raven
 furl
@@ -26,14 +25,14 @@ pyfcm
 django-versatileimagefield
 html2text
 babel
-huey<2 # upgrading needs rewritten tests
+huey
 gevent
 bleach
 bleach_whitelist
 pymdown-extensions
-daphne<2.3 # last version to support channels_redis 2.3.2
-channels<2.2 # last version to support channels_redis 2.3.2
-channels_redis==2.3.2 # last version to support python 3.5
+daphne
+channels
+channels_redis
 more-itertools
 
 # dev dependencies
@@ -49,8 +48,6 @@ pytest-asyncio
 pytest-django
 pytest-xdist
 pytest-cov
-async_generator # needed by pytest-asyncio in python 3.5
-pathlib2>=2.2.0 # needed by pytest in python 3.5 env: https://github.com/pytest-dev/pytest/commit/f25683354e95ea13801e4984873bbf3352b97ff1
 freezegun
 logging_tree
 django-silk

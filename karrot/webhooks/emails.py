@@ -5,6 +5,6 @@ def prepare_incoming_email_rejected_email(user, content):
     return prepare_email(
         template='incoming_email_rejected',
         user=user,
-        transactional=True,
         context={'content': content},
+        stats_category='incoming_email_rejected',
     )

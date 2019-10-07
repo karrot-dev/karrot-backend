@@ -38,7 +38,7 @@ def pickup_done(pickup):
         'pickup_done_slots_joined': collectors_count,
     }
 
-    if pickup.max_collectors is not None:
+    if pickup.max_collectors is not None and pickup.max_collectors > 0:
         fields.update({
             'pickup_done_slots_total': pickup.max_collectors,
             'pickup_done_slots_percentage': collectors_count / pickup.max_collectors,

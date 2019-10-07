@@ -17,7 +17,7 @@
     "gnetId": null,
     "graphTooltip": 0,
     "id": 33,
-    "iteration": 1554137750642,
+    "iteration": 1564129185407,
     "links": [],
     "panels": [
       {
@@ -25,13 +25,14 @@
         "datasource": "$site",
         "fontSize": "100%",
         "gridPos": {
-          "h": 8,
-          "w": 12,
+          "h": 10,
+          "w": 19,
           "x": 0,
           "y": 0
         },
         "id": 2,
         "links": [],
+        "options": {},
         "pageSize": null,
         "scroll": true,
         "showHeader": true,
@@ -93,6 +94,14 @@
                   ],
                   "type": "field"
                 }
+              ],
+              [
+                {
+                  "params": [
+                    "from_html"
+                  ],
+                  "type": "field"
+                }
               ]
             ],
             "tags": []
@@ -112,11 +121,14 @@
       "list": [
         {
           "current": {
-            "text": "karrot-dev",
-            "value": "karrot-dev"
+            "tags": [],
+            "text": "karrot-prod",
+            "value": "karrot-prod"
           },
           "hide": 0,
+          "includeAll": false,
           "label": null,
+          "multi": false,
           "name": "site",
           "options": [],
           "query": "influxdb",
@@ -128,7 +140,7 @@
       ]
     },
     "time": {
-      "from": "now-6h",
+      "from": "now-30d",
       "to": "now"
     },
     "timepicker": {
@@ -159,7 +171,7 @@
     "timezone": "",
     "title": "Incoming emails",
     "uid": "QpoAYo6mk",
-    "version": 2
+    "version": 7
   },
   "meta": {
     "canAdmin": false,
@@ -175,11 +187,12 @@
     "hasAcl": false,
     "isFolder": false,
     "provisioned": false,
+    "provisionedExternalId": "",
     "slug": "incoming-emails",
     "type": "db",
-    "updated": "2019-04-01T19:00:00+02:00",
+    "updated": "2019-07-26T13:46:44+02:00",
     "updatedBy": "tiltec",
     "url": "/d/QpoAYo6mk/incoming-emails",
-    "version": 2
+    "version": 7
   }
 }

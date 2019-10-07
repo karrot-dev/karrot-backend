@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from django.db.models import Count
 from django.utils import timezone
 from influxdb_metrics.loader import write_points
@@ -118,6 +120,15 @@ def get_group_members_stats(group):
             'count_pickup_active_newcomers_{}d'.format(n): pickup_active_memberships.newcomers().count(),
             'count_pickup_active_editors_{}d'.format(n): pickup_active_memberships.editors().count(),
         })
+
+    notification_type_count = defaultdict(int)
+    for membership in memberships.active_within(days=30):
+
+        for t in membership.notification_types:
+            notification_type_count[t] += 1
+
+    for t, count in notification_type_count.items():
+        fields.update({'count_active_30d_with_notification_type_{}'.format(t): count})
 
     return [{
         'measurement': 'karrot.group.members',

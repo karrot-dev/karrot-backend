@@ -591,10 +591,22 @@ class TestFailedEmailDeliveryAPI(APITestCase, ExtractPaginationMixin):
         response = self.get_results(self.url)
         self.assertEqual(response.data, [])
 
-    def test_get_failed_deliveries(self):
-        EmailEvent.objects.create(address=self.user.email, event='bounce', payload={'reason': 'my reason'})
+    def test_get_failed_deliveries_v1(self):
+        EmailEvent.objects.create(address=self.user.email, event='bounce', payload={'reason': 'my reason'}, version=1)
         self.client.force_login(user=self.user)
         response = self.get_results(self.url)
         self.assertEqual(response.data[0]['address'], self.user.email)
         self.assertEqual(response.data[0]['reason'], 'my reason')
         self.assertEqual(response.data[0]['event'], 'bounce')
+
+    def test_get_failed_deliveries_v2(self):
+        sub_payload = {'output': 'my reason', 'message': {'subject': 'something'}}
+        EmailEvent.objects.create(
+            address=self.user.email, event='bounced', payload={'payload': sub_payload}, version=2
+        )
+        self.client.force_login(user=self.user)
+        response = self.get_results(self.url)
+        self.assertEqual(response.data[0]['address'], self.user.email)
+        self.assertEqual(response.data[0]['reason'], 'my reason')
+        self.assertEqual(response.data[0]['event'], 'bounced')
+        self.assertEqual(response.data[0]['subject'], 'something')

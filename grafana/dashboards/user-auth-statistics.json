@@ -17,6 +17,7 @@
     "gnetId": null,
     "graphTooltip": 0,
     "id": 2,
+    "iteration": 1554466066007,
     "links": [],
     "panels": [
       {
@@ -24,7 +25,7 @@
         "bars": false,
         "dashLength": 10,
         "dashes": false,
-        "datasource": "karrot-prod",
+        "datasource": "$site",
         "editable": true,
         "error": false,
         "fill": 1,
@@ -49,6 +50,7 @@
         "linewidth": 2,
         "links": [],
         "nullPointMode": "connected",
+        "paceLength": 10,
         "percentage": false,
         "pointradius": 5,
         "points": false,
@@ -137,6 +139,7 @@
         "bars": false,
         "dashLength": 10,
         "dashes": false,
+        "datasource": "$site",
         "editable": true,
         "error": false,
         "fill": 1,
@@ -162,6 +165,7 @@
         "linewidth": 2,
         "links": [],
         "nullPointMode": "connected",
+        "paceLength": 10,
         "percentage": false,
         "pointradius": 5,
         "points": true,
@@ -251,6 +255,7 @@
         "bars": false,
         "dashLength": 10,
         "dashes": false,
+        "datasource": "$site",
         "fill": 1,
         "gridPos": {
           "h": 7,
@@ -272,6 +277,7 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null",
+        "paceLength": 10,
         "percentage": false,
         "pointradius": 5,
         "points": true,
@@ -292,6 +298,7 @@
               }
             ],
             "measurement": "django_auth_user_login",
+            "orderByTime": "ASC",
             "policy": "default",
             "refId": "A",
             "resultFormat": "time_series",
@@ -355,16 +362,33 @@
       }
     ],
     "refresh": false,
-    "schemaVersion": 16,
+    "schemaVersion": 18,
     "style": "dark",
     "tags": [
       "prod"
     ],
     "templating": {
-      "list": []
+      "list": [
+        {
+          "current": {
+            "tags": [],
+            "text": "karrot-prod",
+            "value": "karrot-prod"
+          },
+          "hide": 0,
+          "label": null,
+          "name": "site",
+          "options": [],
+          "query": "influxdb",
+          "refresh": 1,
+          "regex": "/karrot.*/",
+          "skipUrlSync": false,
+          "type": "datasource"
+        }
+      ]
     },
     "time": {
-      "from": "now-30d",
+      "from": "now-7d",
       "to": "now"
     },
     "timepicker": {
@@ -395,7 +419,7 @@
     "timezone": "utc",
     "title": "User auth statistics",
     "uid": "000000002",
-    "version": 8
+    "version": 9
   },
   "meta": {
     "canAdmin": false,
@@ -411,11 +435,12 @@
     "hasAcl": false,
     "isFolder": false,
     "provisioned": false,
+    "provisionedExternalId": "",
     "slug": "user-auth-statistics",
     "type": "db",
-    "updated": "2019-01-05T20:28:15+01:00",
+    "updated": "2019-04-05T14:08:12+02:00",
     "updatedBy": "tiltec",
     "url": "/d/000000002/user-auth-statistics",
-    "version": 8
+    "version": 9
   }
 }

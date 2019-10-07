@@ -5,12 +5,12 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from karrot.applications.factories import ApplicationFactory
+from karrot.applications.models import ApplicationStatus
 from karrot.conversations.models import Conversation
 from karrot.groups.factories import GroupFactory
-from karrot.applications.factories import ApplicationFactory
 from karrot.groups.models import GroupMembership, GroupNotificationType
-from karrot.applications.models import ApplicationStatus
-from karrot.tests.utils import ExtractPaginationMixin
+from karrot.tests.utils import ExtractPaginationMixin, execute_scheduled_tasks_immediately
 from karrot.users.factories import UserFactory, VerifiedUserFactory
 from karrot.users.serializers import UserSerializer
 from karrot.utils.tests.fake import faker
@@ -205,12 +205,13 @@ class TestApplicationConversation(APITestCase):
     def test_member_replies_in_conversation(self):
         self.client.force_login(user=self.member)
         chat_message = faker.sentence()
-        response = self.client.post(
-            '/api/messages/', {
-                'conversation': self.conversation.id,
-                'content': chat_message,
-            }
-        )
+        with execute_scheduled_tasks_immediately():
+            response = self.client.post(
+                '/api/messages/', {
+                    'conversation': self.conversation.id,
+                    'content': chat_message,
+                }
+            )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         notification = mail.outbox[0]
         self.assertEqual(notification.to[0], self.applicant.email)
@@ -223,12 +224,13 @@ class TestApplicationConversation(APITestCase):
         mail.outbox = []
         self.client.force_login(user=newcomer)
         chat_message = faker.sentence()
-        response = self.client.post(
-            '/api/messages/', {
-                'conversation': self.conversation.id,
-                'content': chat_message,
-            }
-        )
+        with execute_scheduled_tasks_immediately():
+            response = self.client.post(
+                '/api/messages/', {
+                    'conversation': self.conversation.id,
+                    'content': chat_message,
+                }
+            )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         notification = mail.outbox[0]
         self.assertIn('New message in', notification.subject)
@@ -237,12 +239,13 @@ class TestApplicationConversation(APITestCase):
     def test_applicant_replies_in_conversation(self):
         self.client.force_login(user=self.applicant)
         chat_message = faker.sentence()
-        response = self.client.post(
-            '/api/messages/', {
-                'conversation': self.conversation.id,
-                'content': chat_message,
-            }
-        )
+        with execute_scheduled_tasks_immediately():
+            response = self.client.post(
+                '/api/messages/', {
+                    'conversation': self.conversation.id,
+                    'content': chat_message,
+                }
+            )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         notification = mail.outbox[0]
         self.assertEqual(notification.to[0], self.member.email)

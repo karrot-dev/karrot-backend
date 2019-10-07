@@ -95,7 +95,7 @@ INSTALLED_APPS = (
     'karrot.pickups.PickupsConfig',
     'karrot.invitations.InvitationsConfig',
     'karrot.template_previews',
-    'karrot.webhooks',
+    'karrot.webhooks.WebhooksConfig',
     'karrot.notifications.NotificationsConfig',
 
     # Django packages
@@ -120,6 +120,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ),
     'EXCEPTION_HANDLER': 'karrot.utils.misc.custom_exception_handler',
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
 }
 
 MIDDLEWARE = (
@@ -188,8 +189,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # don't send out email by default, override in local_settings.py
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-SPARKPOST_EMAIL_EVENTS = ["bounce", "spam_complaint", "out_of_band", "policy_rejection"]
-EMAIL_EVENTS_AVOID = ['bounce', 'out_of_band', 'policy_rejection']
+EMAIL_EVENTS_AVOID = [
+    'bounce', 'out_of_band', 'policy_rejection',  # native sparkpost events
+    'rejected', 'bounced',  # anymail tracking event types
+]
 
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.Argon2PasswordHasher',
@@ -272,12 +275,12 @@ INFLUXDB_USER = ''
 INFLUXDB_PASSWORD = ''
 INFLUXDB_DATABASE = ''
 INFLUXDB_TAGS_HOST = ''
-INFLUXDB_TIMEOUT = 2
+INFLUXDB_TIMEOUT = 5
 INFLUXDB_USE_CELERY = False
 INFLUXDB_USE_THREADING = True
 
 HUEY = {
-    'always_eager': True,
+    'immediate': True,
 }
 
 # If you have the email_reply_trimmer_service running, set this to 'http://localhost:4567/trim' (or similar)

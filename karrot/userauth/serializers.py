@@ -214,12 +214,3 @@ class FailedEmailDeliverySerializer(serializers.ModelSerializer):
     class Meta:
         model = EmailEvent
         fields = ['created_at', 'address', 'event', 'reason', 'subject']
-
-    reason = serializers.SerializerMethodField()
-    subject = serializers.SerializerMethodField()
-
-    def get_reason(self, event):
-        return event.payload.get('reason')
-
-    def get_subject(self, event):
-        return event.payload.get('subject')
