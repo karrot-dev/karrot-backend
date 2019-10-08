@@ -40,6 +40,13 @@ def user_url(user):
     )
 
 
+def absolute_url(path):
+    return '{hostname}{path}'.format(
+        hostname=settings.HOSTNAME,
+        path=path,
+    )
+
+
 def pickup_detail_url(pickup):
     place = pickup.place
     group = place.group
