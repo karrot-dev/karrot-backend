@@ -12,7 +12,7 @@ def prepare_emailinvitation_email(invitation):
             'invite_url': invite_url(invitation),
             'email': invitation.email,
             'invited_by_name': invitation.invited_by.display_name,
-            'header_image': invitation.group.photo.url if invitation.group.photo else None,
+            'group': invitation.group,
         },
         to=invitation.email,
         stats_category='invitation',
