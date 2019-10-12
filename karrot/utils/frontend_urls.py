@@ -1,3 +1,5 @@
+import re
+
 from furl import furl
 
 from config import settings
@@ -41,6 +43,8 @@ def user_url(user):
 
 
 def absolute_url(path):
+    if re.match(r"https?:", path):
+        return path
     return '{hostname}{path}'.format(
         hostname=settings.HOSTNAME,
         path=path,
