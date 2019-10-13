@@ -106,7 +106,7 @@ msgid ""
 "application</strong> emails for this group."
 msgstr ""
 "Toto jste obdrželi, protože jste přihlášeni k odběru e-mailů <strong>Žádosti"
-" uživatelů</strong> pro tuto skupinu."
+" o připojení uživatelů</strong> k této skupině."
 
 #: karrot/applications/templates/new_application.html.jinja2:266
 #: karrot/groups/templates/group_summary.html.jinja2:310
@@ -162,12 +162,12 @@ msgstr "Vyzvednutí %(date)s"
 #: karrot/conversations/emails.py:241
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
-msgstr "Nová zpráva v žádosti od %(user_name)s do %(group_name)s"
+msgstr "Nová zpráva od %(user_name)s k žádosti o připojení do %(group_name)s"
 
 #: karrot/conversations/emails.py:246
 #, python-format
 msgid "New message in your application to %(group_name)s"
-msgstr "Nová zpráva ve vaší žádosti na %(group_name)s"
+msgstr "Nová zpráva k vaší žádosti o připojení k  %(group_name)s"
 
 #: karrot/conversations/emails.py:288
 #, python-format
@@ -351,7 +351,7 @@ msgstr ""
 #: karrot/groups/templates/user_became_editor.subject.jinja2:1
 #, python-format
 msgid "You gained editing permissions in %(group_name)s!"
-msgstr "Oprávnění k úpravám jste získali v %(group_name)s."
+msgstr "Oprávnění k úpravám jste získali ve skupině %(group_name)s."
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:209
 msgid ""
@@ -413,7 +413,7 @@ msgstr "%(group_name)s vám chybí. "
 
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:206
 msgid "Hey, we're really missing you!"
-msgstr "Hej, opravdu nám chybíš!"
+msgstr "Hej, chybíš nám tady!"
 
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:209
 #, python-format

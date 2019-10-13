@@ -1,9 +1,14 @@
+import os
+import pathlib
+from shutil import copyfile
+
 import pytz
 from django.test import TestCase
 from django.utils import timezone, translation
 
 import karrot.invitations.emails
 import karrot.users.emails
+import karrot.groups.emails
 from config import settings
 from karrot.groups.factories import GroupFactory
 from karrot.invitations.models import Invitation
@@ -73,6 +78,23 @@ class TestEmailUtils(TestCase):
         self.assertEqual(email.to[0], self.user.unverified_email)
         self.assertIn(settings.HOSTNAME, html)
         self.assertIn(verification_code.code, html)
+
+    def test_default_header_image(self):
+        email = karrot.groups.emails.prepare_user_inactive_in_group_email(self.user, self.group)
+        html, _ = email.alternatives[0]
+        self.assertIn(settings.DEFAULT_EMAIL_HEADER_IMAGE, html)
+
+    def test_custom_header_image(self):
+        pathlib.Path(settings.MEDIA_ROOT).mkdir(exist_ok=True)
+        copyfile(
+            os.path.join(os.path.dirname(__file__), './photo.jpg'), os.path.join(settings.MEDIA_ROOT, 'photo.jpg')
+        )
+        self.group.photo = 'photo.jpg'
+        self.group.save()
+
+        email = karrot.groups.emails.prepare_user_inactive_in_group_email(self.user, self.group)
+        html, _ = email.alternatives[0]
+        self.assertIn(self.group.photo.url, html)
 
 
 class TestHTMLToPlainText(TestCase):

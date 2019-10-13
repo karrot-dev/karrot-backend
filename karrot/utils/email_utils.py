@@ -13,7 +13,7 @@ from jinja2 import Environment
 
 from config import settings
 from karrot.utils import stats
-from karrot.utils.frontend_urls import place_url, user_url
+from karrot.utils.frontend_urls import place_url, user_url, absolute_url
 
 
 def date_filter(value):
@@ -39,6 +39,7 @@ def jinja2_environment(**options):
     env.filters['time'] = time_filter
     env.globals['place_url'] = place_url
     env.globals['user_url'] = user_url
+    env.globals['absolute_url'] = absolute_url
     return env
 
 
@@ -95,6 +96,12 @@ def prepare_email(
     if len(redefined_keys) > 0:
         raise Exception('email context should not redefine defaults: ' + ', '.join(redefined_keys))
     context.update(default_context)
+
+    if 'header_image' not in context:
+        if 'group' in context and context['group'].photo:
+            context['header_image'] = context['group'].photo.url
+        else:
+            context['header_image'] = settings.DEFAULT_EMAIL_HEADER_IMAGE
 
     if not to:
         if not user:
