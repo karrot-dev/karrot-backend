@@ -1,4 +1,7 @@
 import subprocess
+import sys
+from pathlib import Path
+
 from django.core.management.base import BaseCommand
 
 
@@ -16,12 +19,13 @@ def remove_creation_date():
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
+        bin = Path(sys.exec_prefix) / 'bin' / 'pybabel'
         extract_cmd = ' '.join([
-            'pybabel extract',
+            f'{bin} extract',
             '-F babel.cfg',
             '-o karrot/locale/en/LC_MESSAGES/django.po',
             '.',
         ])
         print(extract_cmd)
-        subprocess.run(extract_cmd, shell=True)
+        subprocess.run(extract_cmd, shell=True, check=True)
         remove_creation_date()

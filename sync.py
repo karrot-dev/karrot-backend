@@ -32,12 +32,12 @@ environ['PIP_EXISTS_ACTION'] = 'w'
 base = dirname(realpath(__file__))
 
 header("Installing python dependencies")
-subprocess.run(['pip-sync', 'requirements.txt'], env=environ)
+subprocess.run(['pip-sync', 'requirements.txt'], env=environ, check=True)
 
 if process_mjml:
 
     header("Installing node js dependencies")
-    subprocess.run(['yarn'], env=environ, cwd=join(base, 'mjml'))
+    subprocess.run(['yarn'], env=environ, cwd=join(base, 'mjml'), check=True)
 
     header("Removing old templates")
 
@@ -47,6 +47,6 @@ if process_mjml:
     print('Removed {} entries'.format(len(entries)))
 
     header("Generating new templates")
-    subprocess.run(['./mjml/convert'], env=environ)
+    subprocess.run(['./mjml/convert'], env=environ, check=True)
 
 header('All done ☺')

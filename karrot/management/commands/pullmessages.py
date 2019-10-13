@@ -7,4 +7,4 @@ class Command(BaseCommand):
         pull_cmd = 'tx pull -a --force'
 
         print(pull_cmd)
-        subprocess.run(pull_cmd, shell=True)
+        subprocess.run(pull_cmd, shell=True, check=True)
