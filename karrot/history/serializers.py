@@ -44,26 +44,25 @@ class HistoryExportSerializer(HistorySerializer):
     users = serializers.SerializerMethodField()
 
     def get_pickup_date(self, history):
+        # Try to get start date of pickup
         if history.payload is None:
             return
 
-        datestr = history.payload.get('date')
-        if datestr is None:
+        dates = history.payload.get('date')
+        if dates is None:
+            # It might be very old or about something else than a pickup
             return
+
+        date = parse_datetime(dates[0])
 
         group = history.group
 
-        # TODO rewrite old history entries
-        date = parse_datetime(datestr[0])
-
-        # TODO rewrite to isoformat(timespec='seconds') once we are on Python 3.6+
-        return date.astimezone(group.timezone).isoformat()
+        return date.astimezone(group.timezone).isoformat(timespec='seconds')
 
     def get_date(self, history):
         group = history.group
 
-        # TODO rewrite to isoformat(timespec='seconds') once we are on Python 3.6+
-        return history.date.astimezone(group.timezone).isoformat()
+        return history.date.astimezone(group.timezone).isoformat(timespec='seconds')
 
     def get_users(self, history):
         user_ids = [str(u.id) for u in history.users.all()]

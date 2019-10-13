@@ -42,7 +42,6 @@ BATCH_SIZE = 1000
 
 
 def migrate(apps, schema_editor):
-    # TODO pause websocket updates!
     History = apps.get_model('history', 'History')
     PickupDate = apps.get_model('pickups', 'PickupDate')
 
