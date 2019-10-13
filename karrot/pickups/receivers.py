@@ -28,18 +28,19 @@ def feedback_created(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=PickupDate)
-def pickup_created(**kwargs):
+def pickup_created(sender, instance, created, **kwargs):
     """Ensure every pickup has a conversation with the collectors in it."""
-    pickup = kwargs.get('instance')
-    if pickup.id is not None:
-        conversation = Conversation.objects.get_or_create_for_target(pickup)
-        conversation.sync_users(pickup.collectors.all())
+    pickup = instance
+    if not created:
+        return
+    conversation = Conversation.objects.get_or_create_for_target(pickup)
+    conversation.sync_users(pickup.collectors.all())
 
 
 @receiver(pre_delete, sender=PickupDate)
-def pickup_deleted(**kwargs):
+def pickup_deleted(sender, instance, **kwargs):
     """Delete the conversation when the pickup is deleted."""
-    pickup = kwargs.get('instance')
+    pickup = instance
     conversation = Conversation.objects.get_for_target(pickup)
     if conversation:
         conversation.delete()
