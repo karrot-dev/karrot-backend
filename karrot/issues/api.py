@@ -14,7 +14,7 @@ from karrot.issues.serializers import IssueSerializer, VoteSerializer
 
 
 class IsOngoing(BasePermission):
-    message = _('Cannot only modify vote for ongoing issues')
+    message = _('Can only modify vote for ongoing issues')
 
     def has_object_permission(self, request, view, obj):
         return obj.is_ongoing()
