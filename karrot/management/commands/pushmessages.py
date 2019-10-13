@@ -7,4 +7,4 @@ class Command(BaseCommand):
         push_cmd = 'tx push -s'
 
         print(push_cmd)
-        subprocess.run(push_cmd, shell=True)
+        subprocess.run(push_cmd, shell=True, check=True)
