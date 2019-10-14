@@ -92,7 +92,7 @@ pep562==1.0               # via pymdown-extensions
 pexpect==4.7.0            # via ipython
 pickleshare==0.7.5        # via ipython
 pillow==5.4.1             # via django-versatileimagefield
-pip-tools==4.1.0
+pip-tools==4.2.0
 pluggy==0.12.0            # via pytest
 prompt-toolkit==2.0.9     # via ipython
 psutil==5.6.3             # via python-server-metrics
