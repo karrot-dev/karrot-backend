@@ -78,7 +78,7 @@ def migrate(apps, schema_editor):
     for h in History.objects.filter(typus__in=(
             HistoryTypus.PICKUP_JOIN,
             HistoryTypus.PICKUP_LEAVE,
-    ), payload__date__0__isnull=True).none():
+    ), payload__date__0__isnull=True):
         if h.payload and 'date' in h.payload:
             date = parse_datetime(h.payload['date'])
             h.payload['date'] = [d.isoformat() for d in [date, date + timedelta(minutes=30)]]
