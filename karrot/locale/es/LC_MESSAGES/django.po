@@ -8,6 +8,7 @@
 # Unai Gaztelu <unai_gaztelu@hotmail.es>, 2019
 # Frido Hokkaido <kuerbiskernkotze@posteo.ee>, 2019
 # Carlos Pesquera Alonso <fydus@hotmail.com>, 2019
+# Tilmann Becker <tilmann.becker+github@gmail.com>, 2019
 # 
 #, fuzzy
 msgid ""
@@ -15,7 +16,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
-"Last-Translator: Carlos Pesquera Alonso <fydus@hotmail.com>, 2019\n"
+"Last-Translator: Tilmann Becker <tilmann.becker+github@gmail.com>, 2019\n"
 "Language-Team: Spanish (https://www.transifex.com/yunity-1/teams/68631/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -31,7 +32,7 @@ msgstr "Necesitas verificar tu dirección de correo electrónico"
 #: karrot/applications/api.py:36 karrot/groups/api.py:49
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:124
 #: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:111
-#: karrot/pickups/serializers.py:294 karrot/places/api.py:19
+#: karrot/pickups/serializers.py:296 karrot/places/api.py:19
 #: karrot/places/serializers.py:80
 msgid "You need to be a group editor"
 msgstr "Necesitas ser editora grupal"
@@ -516,7 +517,7 @@ msgid "Follow the invitation"
 msgstr "Sigue la invitación"
 
 #: karrot/issues/api.py:17
-msgid "Cannot only modify vote for ongoing issues"
+msgid "Can only modify vote for ongoing issues"
 msgstr "No puedes modificar la votación en conflictos en curso"
 
 #: karrot/issues/serializers.py:15
@@ -646,7 +647,7 @@ msgstr "Esta fecha de recogida está llena"
 msgid "This feedback is given by another user."
 msgstr "Este comentario es dado por otro usuario."
 
-#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:396
+#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:398
 #, python-format
 msgid ""
 "You can't give feedback for pickups more than %(days_number)s days ago."
@@ -674,23 +675,23 @@ msgstr "La fecha debería ser en el futuro"
 msgid "You can't move pickups that are part of a series."
 msgstr "No puedes mover recogidas que son parte de una serie."
 
-#: karrot/pickups/serializers.py:307
+#: karrot/pickups/serializers.py:309
 msgid "Invalid recurrence rule."
 msgstr "Regla de recurrencia inválida"
 
-#: karrot/pickups/serializers.py:309
+#: karrot/pickups/serializers.py:311
 msgid "Only single recurrence rules are allowed."
 msgstr "Solo se permiten reglas únicas de recurrencia."
 
-#: karrot/pickups/serializers.py:391
+#: karrot/pickups/serializers.py:393
 msgid "The pickup is not done yet"
 msgstr "La recogida aún no ha terminado"
 
-#: karrot/pickups/serializers.py:393
+#: karrot/pickups/serializers.py:395
 msgid "You aren't assigned to the pickup."
 msgstr "No estás asignado a la recogida."
 
-#: karrot/pickups/serializers.py:410
+#: karrot/pickups/serializers.py:412
 msgid "Both comment and weight cannot be blank."
 msgstr "Ambos comentarios y pesos no pueden estar en blanco."
 
