@@ -28,7 +28,7 @@ msgstr "Vi bezonas havi kontrolitan retadreson"
 #: karrot/applications/api.py:36 karrot/groups/api.py:49
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:124
 #: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:111
-#: karrot/pickups/serializers.py:294 karrot/places/api.py:19
+#: karrot/pickups/serializers.py:296 karrot/places/api.py:19
 #: karrot/places/serializers.py:80
 msgid "You need to be a group editor"
 msgstr "Vi bezonas esti grupa redaktoro"
@@ -505,8 +505,8 @@ msgid "Follow the invitation"
 msgstr "Sekvi la inviton"
 
 #: karrot/issues/api.py:17
-msgid "Cannot only modify vote for ongoing issues"
-msgstr "Oni nur povas modifi voĉdonojn de nunaj konfliktoj"
+msgid "Can only modify vote for ongoing issues"
+msgstr ""
 
 #: karrot/issues/serializers.py:15
 msgid "You need to provide a score for all options"
@@ -633,7 +633,7 @@ msgstr "Savaddaton jam plenas."
 msgid "This feedback is given by another user."
 msgstr "Alia uzanto jam komentis tion ĉi."
 
-#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:396
+#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:398
 #, python-format
 msgid ""
 "You can't give feedback for pickups more than %(days_number)s days ago."
@@ -659,23 +659,23 @@ msgstr "La dato devas okazi estontece."
 msgid "You can't move pickups that are part of a series."
 msgstr "Vi ne povas movi savadojn kiuj apartenas al serio."
 
-#: karrot/pickups/serializers.py:307
+#: karrot/pickups/serializers.py:309
 msgid "Invalid recurrence rule."
 msgstr "Nevalida rikura regulo"
 
-#: karrot/pickups/serializers.py:309
+#: karrot/pickups/serializers.py:311
 msgid "Only single recurrence rules are allowed."
 msgstr "Nur unuperiodaj reguloj estas permesitaj."
 
-#: karrot/pickups/serializers.py:391
+#: karrot/pickups/serializers.py:393
 msgid "The pickup is not done yet"
 msgstr "La savado ankoraŭ ne fariĝis"
 
-#: karrot/pickups/serializers.py:393
+#: karrot/pickups/serializers.py:395
 msgid "You aren't assigned to the pickup."
 msgstr "Vi ne estas aliĝita al savado"
 
-#: karrot/pickups/serializers.py:410
+#: karrot/pickups/serializers.py:412
 msgid "Both comment and weight cannot be blank."
 msgstr "Ambaŭ komento kaj pezo ne povas esti malplenaj."
 
