@@ -4,7 +4,7 @@
 -e git+https://github.com/tiltec/django-anymail@master#egg=django-anymail
 django[argon2]
 django-cors-headers
-django-enumfield==1.6b3
+django-enumfield==2.0b1
 django-extensions
 django-redis
 django-jinja
