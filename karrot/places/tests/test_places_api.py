@@ -281,7 +281,7 @@ class TestPlaceChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
 
 
 class TestPlaceStatisticsAPI(APITestCase):
-    def test_place_statistics(self):
+    def test_place_statistics_as_average(self):
         user = UserFactory()
         self.client.force_login(user=user)
         group = GroupFactory(members=[user])
@@ -304,6 +304,7 @@ class TestPlaceStatisticsAPI(APITestCase):
                 date=one_day_ago,
                 collectors=users,
                 is_done=True,
+                feedback_as_sum=False,
             ) for _ in range(3)
         ]
         feedback = [FeedbackFactory(about=choice(pickups), given_by=u) for u in users]

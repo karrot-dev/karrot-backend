@@ -1,4 +1,4 @@
-from django.db.models import Avg, Count, Q, Sum
+from django.db.models import Avg, Count, Q, Sum, Case, When, FloatField
 from django_filters import rest_framework as filters
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import mixins, permissions, status
@@ -66,8 +66,13 @@ class PlaceViewSet(
     @action(detail=True)
     def statistics(self, request, pk=None):
         instance = self.get_object()
-        weight = instance.pickup_dates.annotate(avg_weight=Avg('feedback__weight'))\
-            .aggregate(estimated_weight=Sum('avg_weight'))['estimated_weight']
+        weight = instance.pickup_dates.annotate(
+            feedback_weight=Case(
+                When(feedback_as_sum=True, then=Sum('feedback__weight')),
+                default=Avg('feedback__weight'),
+                output_field=FloatField()
+            )
+        ).aggregate(result_weight=Sum('feedback_weight'))['result_weight']
         data = {
             'feedback_count': instance.feedback_count,
             'feedback_weight': round(weight or 0),

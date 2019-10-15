@@ -259,6 +259,10 @@ class PickupDate(BaseModel, ConversationMixin):
 
     is_done = models.BooleanField(default=False)
 
+    # If this pickup has multiple feedback, should we take the sum or the average?
+    # Note that we need to tell the user if we change that default!
+    feedback_as_sum = models.BooleanField(default=True)
+
     @property
     def group(self):
         return self.place.group
