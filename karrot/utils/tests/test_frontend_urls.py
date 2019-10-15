@@ -1,9 +1,10 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from karrot.utils.frontend_urls import absolute_url
 
 
 class TestAbsoluteURL(TestCase):
+    @override_settings(HOSTNAME='https://localhost:8000')
     def test_path(self):
         self.assertEqual(absolute_url('/foo'), 'https://localhost:8000/foo')
 

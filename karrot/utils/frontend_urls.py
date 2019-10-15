@@ -1,8 +1,8 @@
 import re
 
+from django.conf import settings
 from furl import furl
 
-from config import settings
 from karrot.groups.models import GroupNotificationType
 from karrot.unsubscribe.utils import generate_token
 
