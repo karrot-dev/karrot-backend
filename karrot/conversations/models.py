@@ -224,7 +224,11 @@ class ConversationMessageQuerySet(models.QuerySet):
         return self.filter(
             Q(conversation__participants=user) |
             Q(conversation__group__groupmembership__user=user, conversation__is_group_public=True)
-        ).distinct()
+        ).annotate(
+            has_conversation_access=Value(True, output_field=models.BooleanField())
+            # This is not just an annotation, we use it because it results in a 'group by' clause
+            # It is much faster then the alternative 'distinct' modifier
+        )
 
 
 class ConversationMessageManager(BaseManager.from_queryset(ConversationMessageQuerySet)):
