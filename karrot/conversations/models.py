@@ -1,13 +1,13 @@
+from enum import Enum
+
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import ForeignKey, TextField, ManyToManyField, BooleanField, CharField, QuerySet, Count, F, Q, \
-    DateTimeField
+from django.db.models import Count, F, Q, Value
 from django.db.models.manager import BaseManager
 from django.utils import timezone
-from enum import Enum
 
 from karrot.base.base_models import BaseModel, UpdatedAtMixin
 from karrot.utils import markdown
@@ -52,13 +52,12 @@ class ConversationQuerySet(models.QuerySet):
 
 class Conversation(BaseModel, UpdatedAtMixin):
     """A conversation between one or more users."""
-
     class Meta:
         unique_together = ('target_type', 'target_id')
 
     objects = ConversationQuerySet.as_manager()
 
-    participants = ManyToManyField(settings.AUTH_USER_MODEL, through='ConversationParticipant')
+    participants = models.ManyToManyField(settings.AUTH_USER_MODEL, through='ConversationParticipant')
     is_private = models.BooleanField(default=False)
     is_closed = models.BooleanField(default=False)
 
@@ -136,7 +135,7 @@ class ConversationMeta(BaseModel):
     threads_marked_at = models.DateTimeField(null=True)
 
 
-class ConversationParticipantQuerySet(QuerySet):
+class ConversationParticipantQuerySet(models.QuerySet):
     def annotate_unread_message_count(self):
         exclude_replies = (
             Q(conversation__messages__thread_id=None) |
@@ -158,21 +157,21 @@ class ConversationParticipant(BaseModel, UpdatedAtMixin):
 
     objects = ConversationParticipantQuerySet.as_manager()
 
-    user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    conversation = ForeignKey(Conversation, on_delete=models.CASCADE)
-    seen_up_to = ForeignKey(
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE)
+    seen_up_to = models.ForeignKey(
         'ConversationMessage',
         null=True,
         on_delete=models.SET_NULL,
         related_name='conversationparticipants_seen_up_to',
     )
-    notified_up_to = ForeignKey(
+    notified_up_to = models.ForeignKey(
         'ConversationMessage',
         null=True,
         on_delete=models.SET_NULL,
         related_name='conversationparticipants_notified_up_to',
     )
-    muted = BooleanField(default=False)
+    muted = models.BooleanField(default=False)
 
     @property
     def notifications(self):
@@ -192,7 +191,7 @@ class ConversationParticipant(BaseModel, UpdatedAtMixin):
         return messages
 
 
-class ConversationMessageQuerySet(QuerySet):
+class ConversationMessageQuerySet(models.QuerySet):
     def exclude_replies(self):
         return self.filter(Q(thread_id=None) | Q(id=F('thread_id')))
 
@@ -248,13 +247,13 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 
     objects = ConversationMessageManager()
 
-    author = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    conversation = ForeignKey(Conversation, related_name='messages', on_delete=models.CASCADE)
-    thread = ForeignKey('self', related_name='thread_messages', null=True, on_delete=models.CASCADE)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    conversation = models.ForeignKey(Conversation, related_name='messages', on_delete=models.CASCADE)
+    thread = models.ForeignKey('self', related_name='thread_messages', null=True, on_delete=models.CASCADE)
 
-    content = TextField()
-    received_via = CharField(max_length=40, blank=True)
-    edited_at = DateTimeField(null=True)
+    content = models.TextField()
+    received_via = models.CharField(max_length=40, blank=True)
+    edited_at = models.DateTimeField(null=True)
 
     latest_message = models.ForeignKey(
         'self',
@@ -309,21 +308,21 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 
 
 class ConversationThreadParticipant(BaseModel, UpdatedAtMixin):
-    user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    thread = ForeignKey(ConversationMessage, related_name='participants', on_delete=models.CASCADE)
-    seen_up_to = ForeignKey(
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    thread = models.ForeignKey(ConversationMessage, related_name='participants', on_delete=models.CASCADE)
+    seen_up_to = models.ForeignKey(
         ConversationMessage,
         null=True,
         on_delete=models.SET_NULL,
         related_name='threadparticipants_seen_up_to',
     )
-    notified_up_to = ForeignKey(
+    notified_up_to = models.ForeignKey(
         ConversationMessage,
         null=True,
         on_delete=models.SET_NULL,
         related_name='threadparticipants_notified_up_to',
     )
-    muted = BooleanField(default=False)
+    muted = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ['user', 'thread']
@@ -365,10 +364,10 @@ class ConversationMixin(object):
 class ConversationMessageReaction(BaseModel):
     """Emoji reactions to messages."""
     # User who gave the reaction
-    user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    message = ForeignKey(ConversationMessage, related_name='reactions', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    message = models.ForeignKey(ConversationMessage, related_name='reactions', on_delete=models.CASCADE)
     # Name of the emoji
-    name = CharField(max_length=100)
+    name = models.CharField(max_length=100)
 
     class Meta:
         unique_together = ['user', 'name', 'message']
