@@ -34,6 +34,7 @@ daphne
 channels
 channels_redis
 more-itertools
+requests
 
 # dev dependencies
 pip-tools

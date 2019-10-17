@@ -120,7 +120,7 @@ raven==6.10.0
 redis==3.3.11
 regex==2019.8.19
 requests-mock==1.7.0
-requests==2.22.0          # via coreapi, django-silk, influxdb, pyfcm, requests-mock
+requests==2.22.0
 simplejson==3.16.0
 six==1.12.0               # via argon2-cffi, autobahn, automat, bleach, cryptography, django-extensions, djangorestframework-csv, faker, freezegun, furl, html5lib, influxdb, orderedmultidict, packaging, pip-tools, prompt-toolkit, pyhamcrest, pytest-xdist, python-dateutil, requests-mock, tld, traitlets, txaio
 sqlparse==0.3.0           # via django, django-silk

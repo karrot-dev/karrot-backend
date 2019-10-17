@@ -147,6 +147,13 @@ def applications_url(group):
     )
 
 
+def group_preview_url(group):
+    return '{hostname}/#/groupPreview/{group_id}'.format(
+        hostname=settings.HOSTNAME,
+        group_id=group.id,
+    )
+
+
 def group_edit_url(group):
     return '{hostname}/#/group/{group_id}/edit'.format(
         hostname=settings.HOSTNAME,

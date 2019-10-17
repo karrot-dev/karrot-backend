@@ -1,3 +1,7 @@
+import json
+
+import requests
+from django.conf import settings
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
@@ -6,6 +10,7 @@ from karrot.groups import roles, stats
 from karrot.groups.emails import prepare_user_became_editor_email
 from karrot.groups.models import Group, GroupMembership, Trust
 from karrot.history.models import History, HistoryTypus
+from karrot.utils import frontend_urls
 
 
 @receiver(post_save, sender=Group)
@@ -91,3 +96,25 @@ def remove_trust(sender, instance, **kwargs):
     membership = instance
 
     Trust.objects.filter(given_by=membership.user, membership__group=membership.group).delete()
+
+
+@receiver(post_save, sender=Group)
+def notify_slack_on_group_creation(sender, instance, created, **kwargs):
+    """Send notifications to admin slack"""
+    if not created:
+        return
+    group = instance
+    webhook_url = getattr(settings, 'ADMIN_SLACK_WEBHOOK', None)
+
+    if webhook_url is None:
+        return
+
+    group_url = frontend_urls.group_preview_url(group)
+
+    slack_data = {
+        'text': f':tada: A new group has been created on karrot.world! <{group_url}|Visit {group.name}>',
+        'username': settings.SITE_NAME,
+    }
+
+    response = requests.post(webhook_url, data=json.dumps(slack_data), headers={'Content-Type': 'application/json'})
+    response.raise_for_status()
