@@ -249,7 +249,9 @@ class TestApplicationConversation(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         notification = mail.outbox[0]
         self.assertEqual(notification.to[0], self.member.email)
-        self.assertIn('New message in', notification.subject)
+        self.assertIn(
+            f'New message in application of {self.applicant.display_name} to {self.group.name}', notification.subject
+        )
         self.assertIn(chat_message, notification.body)
 
 
