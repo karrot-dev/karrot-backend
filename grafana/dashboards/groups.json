@@ -17,7 +17,7 @@
     "gnetId": null,
     "graphTooltip": 0,
     "id": 28,
-    "iteration": 1548780787884,
+    "iteration": 1569233338017,
     "links": [],
     "panels": [
       {
@@ -28,6 +28,7 @@
         "datasource": "$site",
         "description": "(users that have had some activity)",
         "fill": 1,
+        "fillGradient": 0,
         "gridPos": {
           "h": 9,
           "w": 12,
@@ -48,6 +49,9 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null",
+        "options": {
+          "dataLinks": []
+        },
         "percentage": false,
         "pointradius": 5,
         "points": true,
@@ -157,6 +161,7 @@
         "datasource": "$site",
         "description": "(users that have done at least 1 pickup)",
         "fill": 1,
+        "fillGradient": 0,
         "gridPos": {
           "h": 9,
           "w": 12,
@@ -177,6 +182,9 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null",
+        "options": {
+          "dataLinks": []
+        },
         "percentage": false,
         "pointradius": 5,
         "points": true,
@@ -281,16 +289,177 @@
       {
         "columns": [],
         "datasource": "$site",
+        "description": "",
+        "fontSize": "100%",
+        "gridPos": {
+          "h": 6,
+          "w": 24,
+          "x": 0,
+          "y": 9
+        },
+        "id": 6,
+        "links": [],
+        "options": {},
+        "pageSize": null,
+        "scroll": true,
+        "showHeader": true,
+        "sort": {
+          "col": 6,
+          "desc": true
+        },
+        "styles": [
+          {
+            "alias": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "pattern": "Time",
+            "type": "hidden"
+          },
+          {
+            "alias": "",
+            "colorMode": null,
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "decimals": 0,
+            "pattern": "/.*/",
+            "thresholds": [],
+            "type": "number",
+            "unit": "short"
+          }
+        ],
+        "targets": [
+          {
+            "alias": "group $tag_group",
+            "groupBy": [
+              {
+                "params": [
+                  "group"
+                ],
+                "type": "tag"
+              }
+            ],
+            "measurement": "karrot.group.members",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT last(\"count_active_7d\") AS \"active\", last(\"count_pickup_active_7d\") AS \"pickup active\", last(\"count_pickup_active_7d\") / last(\"count_active_7d\") * 100 AS \"ratio\" FROM \"karrot.group.members\" WHERE $timeFilter GROUP BY \"group\"",
+            "rawQuery": false,
+            "refId": "A",
+            "resultFormat": "table",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_active_30d_with_notification_type_conflict_resolution"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "last"
+                },
+                {
+                  "params": [
+                    "conflict_resolution"
+                  ],
+                  "type": "alias"
+                }
+              ],
+              [
+                {
+                  "params": [
+                    "count_active_30d_with_notification_type_daily_pickup_notification"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "last"
+                },
+                {
+                  "params": [
+                    "pickup_notification"
+                  ],
+                  "type": "alias"
+                }
+              ],
+              [
+                {
+                  "params": [
+                    "count_active_30d_with_notification_type_new_application"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "last"
+                },
+                {
+                  "params": [
+                    "new_application"
+                  ],
+                  "type": "alias"
+                }
+              ],
+              [
+                {
+                  "params": [
+                    "count_active_30d_with_notification_type_weekly_summary"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "last"
+                },
+                {
+                  "params": [
+                    "weekly_summary"
+                  ],
+                  "type": "alias"
+                }
+              ],
+              [
+                {
+                  "params": [
+                    "count_active_30d"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "last"
+                },
+                {
+                  "params": [
+                    "active 30d"
+                  ],
+                  "type": "alias"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "title": "Active users with notification types",
+        "transform": "table",
+        "type": "table"
+      },
+      {
+        "columns": [],
+        "datasource": "$site",
         "description": ".. and the ratio",
         "fontSize": "100%",
         "gridPos": {
           "h": 9,
           "w": 12,
           "x": 0,
-          "y": 9
+          "y": 15
         },
         "id": 5,
         "links": [],
+        "options": {},
         "pageSize": null,
         "scroll": true,
         "showHeader": true,
@@ -402,7 +571,7 @@
         "type": "table"
       }
     ],
-    "schemaVersion": 16,
+    "schemaVersion": 19,
     "style": "dark",
     "tags": [],
     "templating": {
@@ -410,11 +579,13 @@
         {
           "current": {
             "tags": [],
-            "text": "karrot-dev",
-            "value": "karrot-dev"
+            "text": "karrot-prod",
+            "value": "karrot-prod"
           },
           "hide": 0,
+          "includeAll": false,
           "label": null,
+          "multi": false,
           "name": "site",
           "options": [],
           "query": "influxdb",
@@ -426,7 +597,7 @@
       ]
     },
     "time": {
-      "from": "now-6h",
+      "from": "now-7d",
       "to": "now"
     },
     "timepicker": {
@@ -457,7 +628,7 @@
     "timezone": "",
     "title": "Groups",
     "uid": "s0bumlUmz",
-    "version": 6
+    "version": 8
   },
   "meta": {
     "canAdmin": false,
@@ -476,9 +647,9 @@
     "provisionedExternalId": "",
     "slug": "groups",
     "type": "db",
-    "updated": "2019-01-29T17:58:45+01:00",
-    "updatedBy": "nicksellen",
+    "updated": "2019-09-23T12:23:03+02:00",
+    "updatedBy": "tiltec",
     "url": "/d/s0bumlUmz/groups",
-    "version": 6
+    "version": 8
   }
 }

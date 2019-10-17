@@ -17,7 +17,7 @@
     "gnetId": null,
     "graphTooltip": 0,
     "id": 2,
-    "iteration": 1554466066007,
+    "iteration": 1571337968815,
     "links": [],
     "panels": [
       {
@@ -29,6 +29,7 @@
         "editable": true,
         "error": false,
         "fill": 1,
+        "fillGradient": 0,
         "grid": {},
         "gridPos": {
           "h": 7,
@@ -50,6 +51,9 @@
         "linewidth": 2,
         "links": [],
         "nullPointMode": "connected",
+        "options": {
+          "dataLinks": []
+        },
         "paceLength": 10,
         "percentage": false,
         "pointradius": 5,
@@ -143,6 +147,7 @@
         "editable": true,
         "error": false,
         "fill": 1,
+        "fillGradient": 0,
         "grid": {},
         "gridPos": {
           "h": 7,
@@ -165,6 +170,9 @@
         "linewidth": 2,
         "links": [],
         "nullPointMode": "connected",
+        "options": {
+          "dataLinks": []
+        },
         "paceLength": 10,
         "percentage": false,
         "pointradius": 5,
@@ -257,6 +265,7 @@
         "dashes": false,
         "datasource": "$site",
         "fill": 1,
+        "fillGradient": 0,
         "gridPos": {
           "h": 7,
           "w": 24,
@@ -277,6 +286,9 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null",
+        "options": {
+          "dataLinks": []
+        },
         "paceLength": 10,
         "percentage": false,
         "pointradius": 5,
@@ -359,14 +371,127 @@
           "align": false,
           "alignLevel": null
         }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "$site",
+        "fill": 1,
+        "fillGradient": 0,
+        "gridPos": {
+          "h": 7,
+          "w": 24,
+          "x": 0,
+          "y": 21
+        },
+        "id": 5,
+        "legend": {
+          "avg": true,
+          "current": false,
+          "max": true,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": true
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "options": {
+          "dataLinks": []
+        },
+        "paceLength": 10,
+        "percentage": false,
+        "pointradius": 5,
+        "points": true,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "dsType": "influxdb",
+            "groupBy": [
+              {
+                "params": [
+                  "1d"
+                ],
+                "type": "time"
+              }
+            ],
+            "measurement": "django_auth_user_login_failed",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Failed login attempts",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "decimals": 0,
+            "format": "none",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
       }
     ],
     "refresh": false,
-    "schemaVersion": 18,
+    "schemaVersion": 20,
     "style": "dark",
-    "tags": [
-      "prod"
-    ],
+    "tags": [],
     "templating": {
       "list": [
         {
@@ -376,7 +501,9 @@
             "value": "karrot-prod"
           },
           "hide": 0,
+          "includeAll": false,
           "label": null,
+          "multi": false,
           "name": "site",
           "options": [],
           "query": "influxdb",
@@ -419,7 +546,7 @@
     "timezone": "utc",
     "title": "User auth statistics",
     "uid": "000000002",
-    "version": 9
+    "version": 11
   },
   "meta": {
     "canAdmin": false,
@@ -438,9 +565,9 @@
     "provisionedExternalId": "",
     "slug": "user-auth-statistics",
     "type": "db",
-    "updated": "2019-04-05T14:08:12+02:00",
+    "updated": "2019-10-17T20:48:40+02:00",
     "updatedBy": "tiltec",
     "url": "/d/000000002/user-auth-statistics",
-    "version": 9
+    "version": 11
   }
 }

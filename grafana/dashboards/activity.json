@@ -17,11 +17,12 @@
     "gnetId": null,
     "graphTooltip": 1,
     "id": 19,
-    "iteration": 1554801293788,
+    "iteration": 1571312622581,
     "links": [],
     "panels": [
       {
         "collapsed": false,
+        "datasource": null,
         "gridPos": {
           "h": 1,
           "w": 24,
@@ -61,12 +62,8 @@
         "interval": null,
         "links": [
           {
-            "dashboard": "Pickups",
-            "includeVars": true,
-            "keepTime": true,
             "title": "Pickups",
-            "type": "dashboard",
-            "url": "/d/y-HBcQ6mk/pickups"
+            "url": "/d/y-HBcQ6mk/pickups?$__url_time_range&$__all_variables"
           }
         ],
         "mappingType": 1,
@@ -83,6 +80,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -164,7 +162,7 @@
       {
         "cacheTimeout": null,
         "colorBackground": false,
-        "colorValue": true,
+        "colorValue": false,
         "colors": [
           "#299c46",
           "rgba(237, 129, 40, 0.89)",
@@ -202,6 +200,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -321,6 +320,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -434,6 +434,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -553,6 +554,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -672,6 +674,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -746,6 +749,7 @@
       },
       {
         "collapsed": false,
+        "datasource": null,
         "gridPos": {
           "h": 1,
           "w": 24,
@@ -785,12 +789,8 @@
         "interval": null,
         "links": [
           {
-            "dashboard": "Messages",
-            "includeVars": true,
-            "keepTime": true,
             "title": "Messages",
-            "type": "dashboard",
-            "url": "/d/dGYKcweiz/messages"
+            "url": "/d/dGYKcweiz/messages?$__url_time_range&$__all_variables"
           }
         ],
         "mappingType": 1,
@@ -807,6 +807,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -938,6 +939,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -1063,6 +1065,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -1188,6 +1191,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -1307,6 +1311,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -1426,6 +1431,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -1551,6 +1557,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -1676,6 +1683,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -1762,6 +1770,7 @@
       },
       {
         "collapsed": false,
+        "datasource": null,
         "gridPos": {
           "h": 1,
           "w": 24,
@@ -1801,10 +1810,8 @@
         "interval": null,
         "links": [
           {
-            "dashUri": "db/group-applications",
-            "dashboard": "Group Applications",
             "title": "Group Applications",
-            "type": "dashboard"
+            "url": "/dashboard/db/group-applications"
           }
         ],
         "mappingType": 1,
@@ -1821,6 +1828,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -1924,10 +1932,8 @@
         "interval": null,
         "links": [
           {
-            "dashUri": "db/group-applications",
-            "dashboard": "Group Applications",
             "title": "Group Applications",
-            "type": "dashboard"
+            "url": "/dashboard/db/group-applications"
           }
         ],
         "mappingType": 1,
@@ -1944,6 +1950,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -2047,13 +2054,8 @@
         "interval": null,
         "links": [
           {
-            "dashUri": "db/group-applications",
-            "dashboard": "Invitations",
-            "includeVars": true,
-            "keepTime": true,
             "title": "Invitations",
-            "type": "dashboard",
-            "url": "/d/Vz3_tZRZk/invitations"
+            "url": "/d/Vz3_tZRZk/invitations?$__url_time_range&$__all_variables"
           }
         ],
         "mappingType": 1,
@@ -2070,6 +2072,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -2173,13 +2176,8 @@
         "interval": null,
         "links": [
           {
-            "dashUri": "db/group-applications",
-            "dashboard": "Invitations",
-            "includeVars": true,
-            "keepTime": true,
             "title": "Invitations",
-            "type": "dashboard",
-            "url": "/d/Vz3_tZRZk/invitations"
+            "url": "/d/Vz3_tZRZk/invitations?$__url_time_range&$__all_variables"
           }
         ],
         "mappingType": 1,
@@ -2196,6 +2194,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -2273,6 +2272,7 @@
       },
       {
         "collapsed": false,
+        "datasource": null,
         "gridPos": {
           "h": 1,
           "w": 24,
@@ -2312,10 +2312,8 @@
         "interval": null,
         "links": [
           {
-            "dashUri": "db/user-auth-statistics",
-            "dashboard": "User auth statistics",
             "title": "User auth statistics",
-            "type": "dashboard"
+            "url": "/dashboard/db/user-auth-statistics"
           }
         ],
         "mappingType": 1,
@@ -2332,6 +2330,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -2442,6 +2441,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -2514,7 +2514,7 @@
       {
         "cacheTimeout": null,
         "colorBackground": false,
-        "colorValue": true,
+        "colorValue": false,
         "colors": [
           "#299c46",
           "rgba(237, 129, 40, 0.89)",
@@ -2552,6 +2552,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -2624,7 +2625,7 @@
       {
         "cacheTimeout": null,
         "colorBackground": false,
-        "colorValue": true,
+        "colorValue": false,
         "colors": [
           "#299c46",
           "rgba(237, 129, 40, 0.89)",
@@ -2649,12 +2650,8 @@
         "interval": null,
         "links": [
           {
-            "dashboard": "User inactivity and removal",
-            "includeVars": true,
-            "keepTime": true,
             "title": "User inactivity and removal",
-            "type": "dashboard",
-            "url": "/d/kZkNpw6mk/user-inactivity-and-removal"
+            "url": "/d/kZkNpw6mk/user-inactivity-and-removal?$__url_time_range&$__all_variables"
           }
         ],
         "mappingType": 1,
@@ -2671,6 +2668,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -2768,10 +2766,8 @@
         "interval": null,
         "links": [
           {
-            "dashUri": "db/user-level-and-trust-stats",
-            "dashboard": "User level and trust stats",
             "title": "User level and trust stats",
-            "type": "dashboard"
+            "url": "/dashboard/db/user-level-and-trust-stats"
           }
         ],
         "mappingType": 1,
@@ -2788,6 +2784,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -2885,9 +2882,7 @@
         "interval": null,
         "links": [
           {
-            "dashboard": "User profile",
             "title": "User profile",
-            "type": "dashboard",
             "url": "/d/7rEbhblik/user-profile"
           }
         ],
@@ -2905,6 +2900,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -3002,9 +2998,7 @@
         "interval": null,
         "links": [
           {
-            "dashboard": "User profile",
             "title": "User profile",
-            "type": "dashboard",
             "url": "/d/7rEbhblik/user-profile"
           }
         ],
@@ -3022,6 +3016,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -3119,9 +3114,7 @@
         "interval": null,
         "links": [
           {
-            "dashboard": "User profile",
             "title": "User profile",
-            "type": "dashboard",
             "url": "/d/7rEbhblik/user-profile"
           }
         ],
@@ -3139,6 +3132,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -3236,9 +3230,7 @@
         "interval": null,
         "links": [
           {
-            "dashboard": "User profile",
             "title": "User profile",
-            "type": "dashboard",
             "url": "/d/7rEbhblik/user-profile"
           }
         ],
@@ -3256,6 +3248,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -3353,9 +3346,7 @@
         "interval": null,
         "links": [
           {
-            "dashboard": "User profile",
             "title": "User profile",
-            "type": "dashboard",
             "url": "/d/7rEbhblik/user-profile"
           }
         ],
@@ -3373,6 +3364,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -3470,9 +3462,7 @@
         "interval": null,
         "links": [
           {
-            "dashboard": "User profile",
             "title": "User profile",
-            "type": "dashboard",
             "url": "/d/7rEbhblik/user-profile"
           }
         ],
@@ -3490,6 +3480,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -3587,9 +3578,7 @@
         "interval": null,
         "links": [
           {
-            "dashboard": "User profile",
             "title": "User profile",
-            "type": "dashboard",
             "url": "/d/7rEbhblik/user-profile"
           }
         ],
@@ -3607,6 +3596,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -3704,9 +3694,7 @@
         "interval": null,
         "links": [
           {
-            "dashboard": "User profile",
             "title": "User profile",
-            "type": "dashboard",
             "url": "/d/7rEbhblik/user-profile"
           }
         ],
@@ -3724,6 +3712,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -3821,9 +3810,7 @@
         "interval": null,
         "links": [
           {
-            "dashboard": "User profile",
             "title": "User profile",
-            "type": "dashboard",
             "url": "/d/7rEbhblik/user-profile"
           }
         ],
@@ -3841,6 +3828,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -3938,9 +3926,7 @@
         "interval": null,
         "links": [
           {
-            "dashboard": "User profile",
             "title": "User profile",
-            "type": "dashboard",
             "url": "/d/7rEbhblik/user-profile"
           }
         ],
@@ -3958,6 +3944,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -4029,6 +4016,7 @@
       },
       {
         "collapsed": false,
+        "datasource": null,
         "gridPos": {
           "h": 1,
           "w": 24,
@@ -4068,10 +4056,8 @@
         "interval": null,
         "links": [
           {
-            "dashUri": "db/push-messages",
-            "dashboard": "Push messages",
             "title": "Push messages",
-            "type": "dashboard"
+            "url": "/dashboard/db/push-messages"
           }
         ],
         "mappingType": 1,
@@ -4088,6 +4074,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -4105,7 +4092,7 @@
           "lineColor": "rgb(31, 120, 193)",
           "show": true
         },
-        "tableColumn": "sum",
+        "tableColumn": "",
         "targets": [
           {
             "groupBy": [
@@ -4185,10 +4172,8 @@
         "interval": null,
         "links": [
           {
-            "dashUri": "db/push-messages",
-            "dashboard": "Push messages",
             "title": "Push messages",
-            "type": "dashboard"
+            "url": "/dashboard/db/push-messages"
           }
         ],
         "mappingType": 1,
@@ -4205,6 +4190,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -4308,10 +4294,8 @@
         "interval": null,
         "links": [
           {
-            "dashUri": "db/push-messages",
-            "dashboard": "Push messages",
             "title": "Push messages",
-            "type": "dashboard"
+            "url": "/dashboard/db/push-messages"
           }
         ],
         "mappingType": 1,
@@ -4328,6 +4312,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -4432,10 +4417,8 @@
         "interval": null,
         "links": [
           {
-            "dashUri": "db/push-messages",
-            "dashboard": "Push messages",
             "title": "Push messages",
-            "type": "dashboard"
+            "url": "/dashboard/db/push-messages"
           }
         ],
         "mappingType": 1,
@@ -4452,6 +4435,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -4549,12 +4533,8 @@
         "interval": null,
         "links": [
           {
-            "dashboard": "Emails",
-            "includeVars": true,
-            "keepTime": true,
             "title": "Emails",
-            "type": "dashboard",
-            "url": "/d/WIqFtQ6ik/emails"
+            "url": "/d/WIqFtQ6ik/emails?$__url_time_range&$__all_variables"
           }
         ],
         "mappingType": 1,
@@ -4571,6 +4551,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -4588,7 +4569,7 @@
           "lineColor": "rgb(31, 120, 193)",
           "show": true
         },
-        "tableColumn": "sum",
+        "tableColumn": "",
         "targets": [
           {
             "groupBy": [
@@ -4681,6 +4662,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -4698,7 +4680,7 @@
           "lineColor": "rgb(31, 120, 193)",
           "show": true
         },
-        "tableColumn": "sum",
+        "tableColumn": "",
         "targets": [
           {
             "groupBy": [
@@ -4791,6 +4773,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -4903,6 +4886,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -5001,10 +4985,8 @@
         "interval": null,
         "links": [
           {
-            "dashUri": "db/requests",
-            "dashboard": "Requests",
             "title": "Requests",
-            "type": "dashboard"
+            "url": "/dashboard/db/requests"
           }
         ],
         "mappingType": 1,
@@ -5021,6 +5003,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -5133,6 +5116,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -5271,6 +5255,7 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
+        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -5360,6 +5345,7 @@
         },
         "id": 10,
         "links": [],
+        "options": {},
         "pageSize": null,
         "scroll": true,
         "showHeader": true,
@@ -5579,6 +5565,7 @@
         "dashes": false,
         "datasource": "$site",
         "fill": 1,
+        "fillGradient": 0,
         "gridPos": {
           "h": 7,
           "w": 24,
@@ -5601,6 +5588,9 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "connected",
+        "options": {
+          "dataLinks": []
+        },
         "paceLength": 10,
         "percentage": false,
         "pointradius": 5,
@@ -5716,6 +5706,7 @@
         },
         "id": 7,
         "links": [],
+        "options": {},
         "pageSize": null,
         "scroll": true,
         "showHeader": true,
@@ -5813,6 +5804,7 @@
         },
         "id": 3,
         "links": [],
+        "options": {},
         "pageSize": null,
         "scroll": true,
         "showHeader": true,
@@ -5988,7 +5980,7 @@
       }
     ],
     "refresh": false,
-    "schemaVersion": 18,
+    "schemaVersion": 20,
     "style": "dark",
     "tags": [],
     "templating": {
@@ -5999,7 +5991,9 @@
             "value": "karrot-prod"
           },
           "hide": 0,
+          "includeAll": false,
           "label": null,
+          "multi": false,
           "name": "site",
           "options": [],
           "query": "influxdb",
@@ -6042,7 +6036,7 @@
     "timezone": "",
     "title": "Activity",
     "uid": "000000019",
-    "version": 102
+    "version": 104
   },
   "meta": {
     "canAdmin": false,
@@ -6061,9 +6055,9 @@
     "provisionedExternalId": "",
     "slug": "activity",
     "type": "db",
-    "updated": "2019-04-09T11:22:04+02:00",
+    "updated": "2019-10-17T13:44:16+02:00",
     "updatedBy": "tiltec",
     "url": "/d/000000019/activity",
-    "version": 102
+    "version": 104
   }
 }

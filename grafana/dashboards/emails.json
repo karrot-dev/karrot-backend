@@ -17,7 +17,7 @@
     "gnetId": null,
     "graphTooltip": 0,
     "id": 37,
-    "iteration": 1554464757597,
+    "iteration": 1570988575982,
     "links": [],
     "panels": [
       {
@@ -30,6 +30,7 @@
         "dashes": false,
         "datasource": "$site",
         "fill": 1,
+        "fillGradient": 0,
         "gridPos": {
           "h": 8,
           "w": 12,
@@ -51,6 +52,9 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null",
+        "options": {
+          "dataLinks": []
+        },
         "paceLength": 10,
         "percentage": false,
         "pointradius": 5,
@@ -142,12 +146,95 @@
         }
       },
       {
+        "columns": [],
+        "datasource": "$site",
+        "fontSize": "100%",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        },
+        "id": 7,
+        "links": [],
+        "options": {},
+        "pageSize": null,
+        "scroll": true,
+        "showHeader": true,
+        "sort": {
+          "col": 2,
+          "desc": true
+        },
+        "styles": [
+          {
+            "alias": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "pattern": "Time",
+            "type": "hidden"
+          },
+          {
+            "alias": "",
+            "colorMode": null,
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "decimals": 0,
+            "pattern": "/.*/",
+            "thresholds": [],
+            "type": "number",
+            "unit": "none"
+          }
+        ],
+        "targets": [
+          {
+            "alias": "recipient count",
+            "dsType": "influxdb",
+            "groupBy": [
+              {
+                "params": [
+                  "category"
+                ],
+                "type": "tag"
+              }
+            ],
+            "measurement": "karrot.email.sent",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "B",
+            "resultFormat": "table",
+            "select": [
+              [
+                {
+                  "params": [
+                    "recipient_count"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Emails per category",
+        "transform": "table",
+        "type": "table"
+      },
+      {
         "aliasColors": {},
         "bars": true,
         "dashLength": 10,
         "dashes": false,
         "datasource": "$site",
         "fill": 1,
+        "fillGradient": 0,
         "gridPos": {
           "h": 8,
           "w": 12,
@@ -171,6 +258,9 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null",
+        "options": {
+          "dataLinks": []
+        },
         "paceLength": 10,
         "percentage": false,
         "pointradius": 6,
@@ -372,6 +462,7 @@
         "datasource": "$site",
         "description": "",
         "fill": 1,
+        "fillGradient": 0,
         "gridPos": {
           "h": 8,
           "w": 12,
@@ -395,6 +486,9 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null",
+        "options": {
+          "dataLinks": []
+        },
         "paceLength": 10,
         "percentage": false,
         "pointradius": 5,
@@ -606,7 +700,7 @@
         }
       }
     ],
-    "schemaVersion": 18,
+    "schemaVersion": 20,
     "style": "dark",
     "tags": [],
     "templating": {
@@ -618,7 +712,9 @@
             "value": "karrot-prod"
           },
           "hide": 0,
+          "includeAll": false,
           "label": null,
+          "multi": false,
           "name": "site",
           "options": [],
           "query": "influxdb",
@@ -661,7 +757,7 @@
     "timezone": "",
     "title": "Emails",
     "uid": "WIqFtQ6ik",
-    "version": 3
+    "version": 6
   },
   "meta": {
     "canAdmin": false,
@@ -680,9 +776,9 @@
     "provisionedExternalId": "",
     "slug": "emails",
     "type": "db",
-    "updated": "2019-04-05T13:48:14+02:00",
+    "updated": "2019-10-13T19:44:09+02:00",
     "updatedBy": "tiltec",
     "url": "/d/WIqFtQ6ik/emails",
-    "version": 3
+    "version": 6
   }
 }
