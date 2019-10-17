@@ -7,6 +7,7 @@ from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
+from karrot.userauth import stats
 from karrot.userauth.models import VerificationCode
 from karrot.userauth.permissions import MailIsNotVerified
 from karrot.userauth.serializers import AuthLoginSerializer, AuthUserSerializer, \
@@ -91,6 +92,7 @@ class RequestDeleteUserView(views.APIView):
             request.user.send_account_deletion_verification_code()
         except AnymailAPIError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={_('We could not send you an e-mail.')})
+        stats.account_deletion_requested()
         return Response(status=status.HTTP_204_NO_CONTENT, data={})
 
 

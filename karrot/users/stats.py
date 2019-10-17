@@ -1,5 +1,6 @@
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
+from django.db.models import Count
 from django.utils import timezone
 
 from karrot.groups.models import GroupMembership, GroupStatus
@@ -37,10 +38,8 @@ def get_users_stats():
         pickup_active_users = User.objects.filter(
             pickup_dates__in=PickupDate.objects.exclude_disabled().filter(
                 date__startswith__lt=now,
-                date__startswith__gte=now - relativedelta(days=n)
-            ).exclude(
-                place__group__status=GroupStatus.PLAYGROUND,
-            ),
+                date__startswith__gte=now - relativedelta(days=n),
+            ).exclude(place__group__status=GroupStatus.PLAYGROUND, ),
             deleted=False
         ).distinct()
         fields.update({
@@ -49,3 +48,13 @@ def get_users_stats():
         })
 
     return fields
+
+
+def get_user_language_stats():
+    User = get_user_model()
+
+    # These "active" users use the database inactive_at field (which means 30 days)
+    active_users = User.objects.filter(groupmembership__in=GroupMembership.objects.active(), deleted=False).distinct()
+    language_count = active_users.values('language').annotate(count=Count('language'))
+
+    return {item['language']: item['count'] for item in language_count}

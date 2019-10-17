@@ -5,6 +5,7 @@ from django.utils.translation import ugettext as _
 from rest_framework import serializers
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
+from karrot.userauth import stats
 from karrot.userauth.models import VerificationCode
 from karrot.utils.validators import prevent_reserved_names
 from karrot.webhooks.models import EmailEvent
@@ -113,9 +114,11 @@ class VerificationCodeSerializer(serializers.Serializer):
         try:
             matched_code = VerificationCode.objects.get(code=code, type=self.context['type'])
         except VerificationCode.DoesNotExist:
+            stats.verification_code_failed(reason='invalid')
             raise serializers.ValidationError(_('Verification code is invalid'))
 
         if matched_code.has_expired():
+            stats.verification_code_failed(reason='expired')
             raise serializers.ValidationError(_('Verification code has expired'))
 
         self.instance = matched_code.user
@@ -128,8 +131,10 @@ class VerificationCodeSerializer(serializers.Serializer):
             user.verify_mail()
         elif type == VerificationCode.PASSWORD_RESET:
             user.change_password(validated_data['new_password'])
+            stats.password_reset_successful()
         elif type == VerificationCode.ACCOUNT_DELETE:
             user.erase()
+            stats.account_deletion_successful()
 
     def update(self, user, validated_data):
         try:
@@ -157,6 +162,7 @@ class ChangePasswordSerializer(serializers.Serializer):
             user.change_password(validated_data['new_password'])
         except AnymailAPIError:
             raise serializers.ValidationError(_('We could not send you an e-mail.'))
+        stats.password_changed()
         return user
 
 
@@ -186,6 +192,7 @@ class ChangeMailSerializer(serializers.Serializer):
                 user.update_email(new_email)
             except AnymailAPIError:
                 raise serializers.ValidationError(_('We could not send you an e-mail.'))
+        stats.email_changed()
         return user
 
 
@@ -207,6 +214,7 @@ class RequestResetPasswordSerializer(serializers.Serializer):
             user.send_password_reset_verification_code()
         except AnymailAPIError:
             raise serializers.ValidationError(_('We could not send you an e-mail.'))
+        stats.password_reset_requested()
         return user
 
 
