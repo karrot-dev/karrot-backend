@@ -11,33 +11,40 @@ from karrot.pickups.models import PickupDate, PickupDateSeries
 from karrot.places.models import PlaceStatus
 from karrot.users.models import User
 from karrot.utils import stats_utils
+from karrot.utils.stats_utils import timer
 
 
 @db_periodic_task(crontab(minute='*'))  # every minute
 def process_finished_pickup_dates():
-    PickupDate.objects.process_finished_pickup_dates()
+    with timer() as t:
+        PickupDate.objects.process_finished_pickup_dates()
+    stats_utils.periodic_task('pickups__process_finished_pickup_dates', seconds=t.elapsed_seconds)
 
 
 @db_periodic_task(crontab(minute=0))  # every hour
 def update_pickups():
-    PickupDateSeries.objects.update_pickups()
+    with timer() as t:
+        PickupDateSeries.objects.update_pickups()
+    stats_utils.periodic_task('pickups__update_pickups', seconds=t.elapsed_seconds)
 
 
 @db_periodic_task(crontab(minute=0))  # we check every hour
 def daily_pickup_notifications():
-    stats_utils.periodic_task('pickups__daily_pickup_notifications')
 
-    for group in Group.objects.all():
-        with timezone.override(group.timezone):
-            if timezone.localtime().hour != 20:  # only at 8pm local time
-                continue
+    with timer() as t:
+        for group in Group.objects.all():
+            with timezone.override(group.timezone):
+                if timezone.localtime().hour != 20:  # only at 8pm local time
+                    continue
 
-            for data in fetch_pickup_notification_data_for_group(group):
-                prepare_pickup_notification_email(**data).send()
-                stats.pickup_notification_email(
-                    group=data['group'], **{k: v.count()
-                                            for k, v in data.items() if isinstance(v, QuerySet)}
-                )
+                for data in fetch_pickup_notification_data_for_group(group):
+                    prepare_pickup_notification_email(**data).send()
+                    stats.pickup_notification_email(
+                        group=data['group'], **{k: v.count()
+                                                for k, v in data.items() if isinstance(v, QuerySet)}
+                    )
+
+    stats_utils.periodic_task('pickups__daily_pickup_notifications', seconds=t.elapsed_seconds)
 
 
 def fetch_pickup_notification_data_for_group(group):

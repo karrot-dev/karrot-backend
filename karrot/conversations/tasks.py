@@ -14,6 +14,8 @@ from karrot.conversations.emails import (
 )
 from karrot.conversations.models import ConversationParticipant, ConversationThreadParticipant, Conversation
 from karrot.users.models import User
+from karrot.utils import stats_utils
+from karrot.utils.stats_utils import timer
 
 
 def get_participants_to_notify(message):
@@ -118,12 +120,15 @@ def notify_participants(message):
 
 @db_periodic_task(crontab(hour=3, minute=9))  # around 3am every day
 def mark_conversations_as_closed():
-    close_threshold = timezone.now() - relativedelta(days=settings.CONVERSATION_CLOSED_DAYS)
-    for conversation in Conversation.objects.filter(
-            is_closed=False,
-            target_id__isnull=False,
-    ).exclude(latest_message__created_at__gte=close_threshold):
-        ended_at = conversation.target.ended_at
-        if ended_at is not None and ended_at < close_threshold:
-            conversation.is_closed = True
-            conversation.save()
+    with timer() as t:
+        close_threshold = timezone.now() - relativedelta(days=settings.CONVERSATION_CLOSED_DAYS)
+        for conversation in Conversation.objects.filter(
+                is_closed=False,
+                target_id__isnull=False,
+        ).exclude(latest_message__created_at__gte=close_threshold):
+            ended_at = conversation.target.ended_at
+            if ended_at is not None and ended_at < close_threshold:
+                conversation.is_closed = True
+                conversation.save()
+
+    stats_utils.periodic_task('conversations__mark_conversations_as_closed', seconds=t.elapsed_seconds)

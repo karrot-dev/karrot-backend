@@ -10,21 +10,26 @@ from karrot.issues.emails import prepare_new_conflict_resolution_email, \
     prepare_conflict_resolution_continued_email_to_affected_user
 from karrot.issues.models import Voting, IssueStatus
 from karrot.groups.models import GroupNotificationType
+from karrot.utils import stats_utils
+from karrot.utils.stats_utils import timer
 
 
 @db_periodic_task(crontab(minute='*'))  # every minute
 def process_expired_votings():
-    for voting in Voting.objects.filter(
-            expires_at__lte=timezone.now(),
-            accepted_option__isnull=True,
-            issue__status=IssueStatus.ONGOING.value,
-    ):
-        # if nobody participated in the voting, cancel it!
-        # otherwise it would result in a tie and continue forever
-        if voting.participant_count() == 0:
-            voting.issue.cancel()
-            continue
-        voting.calculate_results()
+    with timer() as t:
+        for voting in Voting.objects.filter(
+                expires_at__lte=timezone.now(),
+                accepted_option__isnull=True,
+                issue__status=IssueStatus.ONGOING.value,
+        ):
+            # if nobody participated in the voting, cancel it!
+            # otherwise it would result in a tie and continue forever
+            if voting.participant_count() == 0:
+                voting.issue.cancel()
+                continue
+            voting.calculate_results()
+
+    stats_utils.periodic_task('issues__process_expired_votings', seconds=t.elapsed_seconds)
 
 
 def get_users_to_notify(issue):
