@@ -30,7 +30,7 @@ class HistoryViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = HistoryPagination
 
     def get_queryset(self):
-        return self.queryset.filter(group__members=self.request.user)
+        return self.queryset.filter(group__members=self.request.user).prefetch_related('users')
 
     @action(
         detail=False,
