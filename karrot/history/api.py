@@ -42,6 +42,7 @@ class HistoryViewSet(viewsets.ReadOnlyModelViewSet):
     def export(self, request):
         queryset = self.filter_queryset(self.get_queryset()) \
             .select_related('group') \
+            .prefetch_related('users') \
             .order_by('-date')
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
