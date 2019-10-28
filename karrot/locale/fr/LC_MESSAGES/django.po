@@ -38,7 +38,7 @@ msgstr "Tu dois être éditeur du groupe"
 
 #: karrot/applications/api.py:44
 msgid "You need to be the applicant"
-msgstr "Il faut que ce soit toi qui postule"
+msgstr "Il faut que ce soit toi qui postules"
 
 #: karrot/applications/serializers.py:36
 msgid "Application is already pending"
@@ -65,7 +65,7 @@ msgstr "Ta demande pour rejoindre %(group_name)s a été acceptée"
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:226
 #, python-format
 msgid "Visit %(group_name)s"
-msgstr "Visiter%(group_name)s"
+msgstr "Visiter %(group_name)s"
 
 #: karrot/applications/templates/application_declined.html.jinja2:6
 #: karrot/applications/templates/application_declined.html.jinja2:205
@@ -79,7 +79,7 @@ msgstr "Ta demande pour rejoindre %(group_name)s a été refusée"
 #: karrot/applications/templates/new_application.subject.jinja2:1
 #, python-format
 msgid "%(user_name)s wants to join %(group_name)s"
-msgstr "%(user_name)s veux rejoindre %(group_name)s"
+msgstr "%(user_name)s veut rejoindre %(group_name)s"
 
 #: karrot/applications/templates/new_application.html.jinja2:207
 msgid "Questions asked by your group"
@@ -109,7 +109,7 @@ msgid ""
 "application</strong> emails for this group."
 msgstr ""
 "Tu a reçu ceci car tu es enregistré à <strong>demande d'ajout "
-"d'utilisateur</strong>mails pour ce groupe."
+"d'utilisateur</strong> mails pour ce groupe."
 
 #: karrot/applications/templates/new_application.html.jinja2:266
 #: karrot/groups/templates/group_summary.html.jinja2:310
@@ -151,11 +151,11 @@ msgstr ""
 
 #: karrot/conversations/api.py:331
 msgid "Must be first in thread"
-msgstr "Doit être le premier dans le fil de discussions"
+msgstr "Doit être le premier dans le fil de discussion"
 
 #: karrot/conversations/api.py:334
 msgid "You are not a participant in this thread"
-msgstr "Tu n'es pas participant à ce fil de discussion."
+msgstr "Tu n'es pas participant à ce fil de discussion"
 
 #: karrot/conversations/emails.py:168 karrot/conversations/emails.py:171
 #: karrot/subscriptions/tasks.py:70
@@ -212,7 +212,7 @@ msgstr ""
 
 #: karrot/groups/api.py:28
 msgid "You are already a member."
-msgstr "Tu est déjà membre du groupe."
+msgstr "Tu es déjà membre du groupe."
 
 #: karrot/groups/api.py:35
 msgid "You can only join open groups."
@@ -224,7 +224,7 @@ msgstr "Tu ne peux pas donner ta confiance à toi-même"
 
 #: karrot/groups/api.py:189
 msgid "You already gave trust to this user"
-msgstr "Tu as déjà donné ta confiance à cette utilisateur "
+msgstr "Tu as déjà donné ta confiance à cet utilisateur"
 
 #: karrot/groups/serializers.py:25
 msgid "Unknown timezone"
@@ -240,7 +240,7 @@ msgstr "Tu ne peux pas gérer les agréements"
 
 #: karrot/groups/serializers.py:138
 msgid "Agreement is not for this group"
-msgstr "L’agrément n'est pas pour ce groupe "
+msgstr "L’agrément n'est pas pour ce groupe"
 
 #: karrot/groups/serializers.py:229
 msgid "You are not in this group"
@@ -282,16 +282,16 @@ msgstr "aucune récoltes n'ont été effectuées"
 #: karrot/groups/templates/group_summary.html.jinja2:217
 #, python-format
 msgid "%(pickups_missed_count)s pickups were missed"
-msgstr "%(pickups_missed_count)srécoltes n'ont été manquées"
+msgstr "%(pickups_missed_count)s récoltes ont été manquées"
 
 #: karrot/groups/templates/group_summary.html.jinja2:220
 msgid "no pickups were missed"
-msgstr "aucune récoltes n'ont été manqués"
+msgstr "aucune récolte n'a été manquée"
 
 #: karrot/groups/templates/group_summary.html.jinja2:226
 #, python-format
 msgid "%(new_user_count)s people joined the group"
-msgstr "%(new_user_count)s personne a rejoint le groupe"
+msgstr "%(new_user_count)s personnes ont rejoint le groupe"
 
 #: karrot/groups/templates/group_summary.html.jinja2:234
 #, python-format
@@ -301,7 +301,7 @@ msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:236
 msgid "no feedback was given"
-msgstr "aucun retour d'informations a été donné"
+msgstr "aucun retour d'information n'a été donné"
 
 #: karrot/groups/templates/group_summary.html.jinja2:240
 #, python-format
