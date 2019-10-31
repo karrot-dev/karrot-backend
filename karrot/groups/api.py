@@ -116,15 +116,15 @@ class GroupViewSet(
     def get_queryset(self):
         qs = self.queryset
 
-        if self.action != 'join':
-            qs = qs.filter(members=self.request.user)
-
         if self.action in ('retrieve', 'list'):
             qs = qs.annotate_active_editors_count().annotate_yesterdays_member_count().prefetch_related(
                 'members',
                 'groupmembership_set',
                 'groupmembership_set__trusted_by',
             )
+
+        if self.action != 'join':
+            qs = qs.filter(members=self.request.user)
 
         return qs
 
