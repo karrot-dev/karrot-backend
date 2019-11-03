@@ -92,6 +92,7 @@ INSTALLED_APPS = (
     'karrot.groups.GroupsConfig',
     'karrot.places.PlacesConfig',
     'karrot.unsubscribe',
+    'karrot.offers.OffersConfig',
     'karrot.pickups.PickupsConfig',
     'karrot.invitations.InvitationsConfig',
     'karrot.template_previews',

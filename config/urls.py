@@ -21,6 +21,7 @@ from karrot.groups.api import GroupViewSet, AgreementViewSet, GroupInfoViewSet
 from karrot.history.api import HistoryViewSet
 from karrot.invitations.api import InvitationsViewSet, InvitationAcceptViewSet
 from karrot.notifications.api import NotificationViewSet
+from karrot.offers.api import OfferViewSet
 from karrot.pickups.api import PickupDateViewSet, PickupDateSeriesViewSet, FeedbackViewSet
 from karrot.places.api import PlaceViewSet
 from karrot.subscriptions.api import PushSubscriptionViewSet
@@ -58,6 +59,9 @@ router.register('notifications', NotificationViewSet)
 
 # Subscription endpoints
 router.register('subscriptions/push', PushSubscriptionViewSet)
+
+# Offer endpoints
+router.register('offers', OfferViewSet)
 
 # Place endpoints
 router.register('places', PlaceViewSet)
