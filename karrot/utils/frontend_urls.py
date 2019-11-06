@@ -79,6 +79,15 @@ def new_application_unsubscribe_url(user, application):
     )
 
 
+def new_offer_unsubscribe_url(user, offer):
+    return unsubscribe_url(
+        user,
+        group=offer.group,
+        conversation=offer.conversation,
+        notification_type=GroupNotificationType.NEW_OFFER,
+    )
+
+
 def conflict_resolution_unsubscribe_url(user, issue):
     return unsubscribe_url(
         user,
@@ -93,6 +102,14 @@ def application_url(application):
         hostname=settings.HOSTNAME,
         group_id=application.group.id,
         application_id=application.id,
+    )
+
+
+def offer_url(offer):
+    return '{hostname}/#/group/{group_id}/offers/{offer_id}'.format(
+        hostname=settings.HOSTNAME,
+        group_id=offer.group.id,
+        offer_id=offer.id,
     )
 
 

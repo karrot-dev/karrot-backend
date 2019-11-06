@@ -1,0 +1,30 @@
+<mjml>
+    <mj-head>
+        <mj-include path="../../base/templates/_base-head.mjml"/>
+        <mj-title>{% trans %}{{ user_name }} created a new offer {{ offer_name }}{% endtrans %}</mj-title>
+    </mj-head>
+    <mj-body>
+        <mj-include path="../../base/templates/_header.mjml"/>
+        <mj-section background-color="#ffffff" padding="40px 0 40px 0">
+            <mj-column>
+                <mj-text>
+                    <h1>{% trans %}{{ user_name }} created a new offer {{ offer_name }}{% endtrans %}</h1>
+                    <div>
+                        {{ offer_description }}
+                    </div>
+                </mj-text>
+                <mj-divider/>
+                <mj-text font-size="13px" line-height="18px" color="#777">
+                    <p>
+                        {% trans %}You are receiving this because you are subscribed to <strong>New Offer</strong> emails for this group.{% endtrans %}
+                        <a href="{{ new_offer_unsubscribe_url }}">{% trans %}Click here to unsubscribe{% endtrans %}</a>.
+                    </p>
+                    <p>
+                        {% trans %}Reply to this email directly, <a href="{{ conversation_url }}">view it on {{ site_name }}</a>, or <a href="{{ mute_url }}">mute the conversation</a>.{% endtrans %}
+                    </p>
+                </mj-text>
+            </mj-column>
+        </mj-section>
+        <mj-include path="../../base/templates/_footer.mjml"/>
+    </mj-body>
+</mjml>
