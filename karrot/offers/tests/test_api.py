@@ -16,8 +16,9 @@ image_path = os.path.join(os.path.dirname(__file__), './photo.jpg')
 def encode_offer_data(data):
     post_data = {}
     for index, image in enumerate(data.get('images', [])):
-        image_file = image.pop('image')
-        post_data['images.{}.image'.format(index)] = image_file
+        image_file = image.pop('image', None)
+        if image_file:
+            post_data['images.{}.image'.format(index)] = image_file
     data_file = StringIO(json.dumps(data))
     setattr(data_file, 'content_type', 'application/json')
     post_data['document'] = data_file
@@ -78,3 +79,18 @@ class TestOffersAPI(APITestCase):
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(len(response.data['images']), 2)
+
+    def test_remove_image(self):
+        offer = OfferFactory(user=self.user, group=self.group, images=[image_path, image_path])
+        self.client.force_login(user=self.user)
+        data = {
+            'images': [{
+                'id': offer.images.first().id,
+                '_removed': True
+            }],
+        }
+        response = self.client.patch(
+            '/api/offers/{}/'.format(offer.id), encode_offer_data(data), format='multipart'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['images']), 1)
