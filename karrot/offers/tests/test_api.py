@@ -89,8 +89,22 @@ class TestOffersAPI(APITestCase):
                 '_removed': True
             }],
         }
-        response = self.client.patch(
-            '/api/offers/{}/'.format(offer.id), encode_offer_data(data), format='multipart'
-        )
+        response = self.client.patch('/api/offers/{}/'.format(offer.id), encode_offer_data(data), format='multipart')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['images']), 1)
+
+    def test_reposition_image(self):
+        offer = OfferFactory(user=self.user, group=self.group, images=[image_path, image_path])
+        self.client.force_login(user=self.user)
+        image_id = offer.images.first().id
+        new_position = 5
+        data = {
+            'images': [{
+                'id': image_id,
+                'position': new_position
+            }],
+        }
+        response = self.client.patch('/api/offers/{}/'.format(offer.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        by_id = {image['id']: image for image in response.data['images']}
+        self.assertEqual(by_id[image_id]['position'], new_position)
