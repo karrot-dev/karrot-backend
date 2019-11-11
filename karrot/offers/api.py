@@ -1,10 +1,12 @@
 import json
 
 import glom
+from django.utils.translation import ugettext_lazy as _
 from rest_framework import mixins
 from rest_framework.decorators import action
 from rest_framework.pagination import CursorPagination
 from rest_framework.parsers import MultiPartParser, JSONParser
+from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.viewsets import GenericViewSet
 
 from karrot.conversations.api import RetrieveConversationMixin
@@ -83,6 +85,17 @@ class JSONWithFilesMultiPartParser(MultiPartParser):
         return data
 
 
+class IsOfferUser(BasePermission):
+    """Is the user the owner of the offer they wish to update?"""
+
+    message = _('You are not the owner of this offer')
+
+    def has_object_permission(self, request, view, offer):
+        if view.action != 'partial_update':
+            return True
+        return request.user == offer.user
+
+
 class OfferViewSet(
         mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
@@ -94,6 +107,10 @@ class OfferViewSet(
     serializer_class = OfferSerializer
     queryset = Offer.objects
     pagination_class = OfferPagination
+    permission_classes = (
+        IsAuthenticated,
+        IsOfferUser,
+    )
     parser_classes = [JSONWithFilesMultiPartParser, JSONParser]
 
     def get_queryset(self):
@@ -103,5 +120,5 @@ class OfferViewSet(
         detail=True,
     )
     def conversation(self, request, pk=None):
-        """Get conversation ID of this application"""
+        """Get conversation ID of this offer"""
         return self.retrieve_conversation(request, pk)

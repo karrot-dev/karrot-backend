@@ -28,7 +28,8 @@ def encode_offer_data(data):
 class TestOffersAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
-        self.group = GroupFactory(members=[self.user])
+        self.another_user = UserFactory()
+        self.group = GroupFactory(members=[self.user, self.another_user])
 
     def test_fetch_offer(self):
         self.client.force_login(user=self.user)
@@ -63,6 +64,15 @@ class TestOffersAPI(APITestCase):
         response = self.client.patch('/api/offers/{}/'.format(offer.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data['name'], data['name'])
+
+    def test_update_offer_as_another_user(self):
+        offer = OfferFactory(user=self.user, group=self.group, images=[image_path])
+        self.client.force_login(user=self.another_user)
+        data = {
+            'name': faker.name(),
+        }
+        response = self.client.patch('/api/offers/{}/'.format(offer.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_add_image(self):
         offer = OfferFactory(user=self.user, group=self.group, images=[image_path])
