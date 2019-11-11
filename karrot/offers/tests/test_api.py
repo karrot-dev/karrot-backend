@@ -35,7 +35,7 @@ class TestOffersAPI(APITestCase):
         self.client.force_login(user=self.user)
         offer = OfferFactory(user=self.user, group=self.group)
         response = self.client.get('/api/offers/{}/'.format(offer.id))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data['name'], offer.name)
 
     def test_create_offer(self):
@@ -87,7 +87,7 @@ class TestOffersAPI(APITestCase):
             response = self.client.patch(
                 '/api/offers/{}/'.format(offer.id), encode_offer_data(data), format='multipart'
             )
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
             self.assertEqual(len(response.data['images']), 2)
 
     def test_remove_image(self):
@@ -100,8 +100,20 @@ class TestOffersAPI(APITestCase):
             }],
         }
         response = self.client.patch('/api/offers/{}/'.format(offer.id), encode_offer_data(data), format='multipart')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data['images']), 1)
+
+    def test_remove_all_images(self):
+        offer = OfferFactory(user=self.user, group=self.group, images=[image_path, image_path])
+        self.client.force_login(user=self.user)
+        data = {
+            'images': [{
+                'id': image.id,
+                '_removed': True,
+            } for image in offer.images.all()],
+        }
+        response = self.client.patch('/api/offers/{}/'.format(offer.id), encode_offer_data(data), format='multipart')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_reposition_image(self):
         offer = OfferFactory(user=self.user, group=self.group, images=[image_path, image_path])

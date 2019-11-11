@@ -38,7 +38,7 @@ class OfferImage(BaseModel):
     )
     image = VersatileImageField(
         'Offer Image',
-        upload_to='offer_photos',
+        upload_to='offer_images',
         null=False,
     )
     position = IntegerField(default=0)
