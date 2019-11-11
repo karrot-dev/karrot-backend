@@ -7,6 +7,7 @@
         <mj-include path="../../base/templates/_header.mjml"/>
         <mj-section background-color="#ffffff" padding="40px 0 40px 0">
             <mj-column>
+                <mj-image src="{{ absolute_url(offer_photo) }}"/>
                 <mj-text>
                     <h1>{% trans %}{{ user_name }} created a new offer {{ offer_name }}{% endtrans %}</h1>
                     <div>
