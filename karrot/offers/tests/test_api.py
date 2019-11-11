@@ -58,7 +58,7 @@ class TestOffersAPI(APITestCase):
         offer = OfferFactory(user=self.user, group=self.group, images=[image_path])
         self.client.force_login(user=self.user)
         data = {
-            'name': 'woo',
+            'name': faker.name(),
         }
         response = self.client.patch('/api/offers/{}/'.format(offer.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
