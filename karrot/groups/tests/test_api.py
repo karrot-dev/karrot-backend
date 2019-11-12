@@ -62,6 +62,13 @@ class TestGroupsInfoAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertEqual(response.url, group.photo.url)
 
+    def test_group_image_redirect_no_photo(self):
+        # NOT logged in (as it needs to work in emails)
+        photo_file = os.path.join(os.path.dirname(__file__), './photo.jpg')
+        group = GroupFactory(members=[self.member])
+        response = self.client.get('/api/groups-info/{}/photo/'.format(group.id))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
 
 class TestGroupsAPI(APITestCase):
     def setUp(self):

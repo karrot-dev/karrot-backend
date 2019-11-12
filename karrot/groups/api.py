@@ -1,5 +1,5 @@
 import pytz
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django_filters import rest_framework as filters
@@ -80,6 +80,8 @@ class GroupInfoViewSet(
     )
     def photo(self, request, pk=None):
         group = self.get_object()
+        if not group.photo:
+            raise Http404()
         return HttpResponseRedirect(redirect_to=group.photo.url)
 
 
