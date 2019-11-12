@@ -506,7 +506,7 @@ msgstr "Sekvi la inviton"
 
 #: karrot/issues/api.py:17
 msgid "Can only modify vote for ongoing issues"
-msgstr ""
+msgstr "Oni nur povas modifi voĉdonojn de nunaj konfliktoj"
 
 #: karrot/issues/serializers.py:15
 msgid "You need to provide a score for all options"
