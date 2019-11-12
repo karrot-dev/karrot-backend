@@ -7,8 +7,8 @@ from config import settings
 from karrot.utils.email_utils import prepare_email, formataddr
 from karrot.utils.frontend_urls import (
     group_wall_url, conversation_unsubscribe_url, pickup_detail_url, user_detail_url, application_url, thread_url,
-    thread_unsubscribe_url, issue_url, place_wall_url
-)
+    thread_unsubscribe_url, issue_url, place_wall_url,
+    offer_url)
 from karrot.webhooks.utils import make_local_part
 
 
@@ -28,6 +28,8 @@ def prepare_conversation_message_notification(user, messages):
         return prepare_application_message_notification(user, messages)
     if type == 'issue':
         return prepare_issue_message_notification(user, messages)
+    if type == 'offer':
+        return prepare_offer_message_notification(user, messages)
     if type == 'private':
         return prepare_private_user_conversation_message_notification(user, messages)
     raise Exception('Cannot send message notification because conversation doesn\'t have a known type')
@@ -311,4 +313,47 @@ def prepare_issue_message_notification(user, messages):
                 'mute_url': unsubscribe_url,
             },
             stats_category='issue_message',
+        )
+
+
+def prepare_offer_message_notification(user, messages):
+    first_message = messages[0]
+    conversation = first_message.conversation
+    author = first_message.author
+    reply_to_name = author.display_name
+    offer = conversation.target
+
+    language = user.language
+
+    if not translation.check_for_language(language):
+        language = 'en'
+
+    with translation.override(language):
+        conversation_name = _('New message for offer %(offer_name) in %(group_name)s') % {
+            'offer_name': offer.name,
+            'group_name': offer.group.name,
+        }
+
+        from_text = author_names(messages)
+
+        local_part = make_local_part(conversation, user)
+        reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
+        from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
+
+        unsubscribe_url = conversation_unsubscribe_url(user, group=offer.group, conversation=conversation)
+
+        return prepare_email(
+            template='conversation_message_notification',
+            from_email=from_email,
+            user=user,
+            tz=offer.group.timezone,
+            reply_to=[reply_to],
+            unsubscribe_url=unsubscribe_url,
+            context={
+                'messages': messages,
+                'conversation_name': conversation_name,
+                'conversation_url': offer_url(offer),
+                'mute_url': unsubscribe_url,
+            },
+            stats_category='offer_message',
         )
