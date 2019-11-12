@@ -47,12 +47,21 @@ def pickup_deleted(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=PickupDateCollector)
-@receiver(post_delete, sender=PickupDateCollector)
-def sync_pickup_collectors_conversation(sender, instance, **kwargs):
-    """Update conversation participants when collectors are added or removed."""
+def add_pickup_collector_to_conversation(sender, instance, **kwargs):
+    """Add collector to conversation when added."""
+    user = instance.user
     pickup = instance.pickupdate
     conversation = Conversation.objects.get_or_create_for_target(pickup)
-    conversation.sync_users(pickup.collectors.all())
+    conversation.join(user)
+
+
+@receiver(post_delete, sender=PickupDateCollector)
+def remove_pickup_collector_from_conversation(sender, instance, **kwargs):
+    """Remove collector from conversation when removed."""
+    user = instance.user
+    pickup = instance.pickupdate
+    conversation = Conversation.objects.get_or_create_for_target(pickup)
+    conversation.leave(user)
 
 
 @receiver(pre_save, sender=Place)

@@ -4,6 +4,7 @@ from rest_framework.fields import SerializerMethodField
 from rest_framework_csv.renderers import CSVRenderer
 
 from karrot.history.models import History, HistoryTypus
+from karrot.utils.date_utils import csv_datetime
 
 
 class HistorySerializer(serializers.ModelSerializer):
@@ -57,12 +58,12 @@ class HistoryExportSerializer(HistorySerializer):
 
         group = history.group
 
-        return date.astimezone(group.timezone).isoformat(timespec='seconds')
+        return csv_datetime(date.astimezone(group.timezone))
 
     def get_date(self, history):
         group = history.group
 
-        return history.date.astimezone(group.timezone).isoformat(timespec='seconds')
+        return csv_datetime(history.date.astimezone(group.timezone))
 
     def get_users(self, history):
         user_ids = [str(u.id) for u in history.users.all()]
