@@ -7,9 +7,11 @@ from django.utils.translation import ugettext_lazy as _
 from django_filters import rest_framework as filters
 from rest_framework import mixins
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import CursorPagination
 from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework.permissions import IsAuthenticated, BasePermission
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from karrot.conversations.api import RetrieveConversationMixin
@@ -94,8 +96,6 @@ class IsOfferUser(BasePermission):
     message = _('You are not the owner of this offer')
 
     def has_object_permission(self, request, view, offer):
-        if view.action != 'partial_update':
-            return True
         return request.user == offer.user
 
 
@@ -115,17 +115,22 @@ class OfferViewSet(
         'status',
     )
     pagination_class = OfferPagination
-    permission_classes = (
-        IsAuthenticated,
-        IsOfferUser,
-    )
     parser_classes = [JSONWithFilesMultiPartParser, JSONParser]
 
     def get_queryset(self):
         return self.queryset.filter(
             Q(group__members=self.request.user),
-            Q(user=self.request.user) | ~Q(status=OfferStatus.DISABLED.value),
+            Q(user=self.request.user) | ~Q(status=OfferStatus.ARCHIVED.value),
         ).distinct()
+
+    def get_permissions(self):
+        if self.action == 'image':
+            permission_classes = ()
+        elif self.action in ('list', 'retrieve'):
+            permission_classes = (IsAuthenticated, )
+        else:
+            permission_classes = (IsAuthenticated, IsOfferUser)
+        return [permission() for permission in permission_classes]
 
     @action(
         detail=True,
@@ -136,8 +141,35 @@ class OfferViewSet(
 
     @action(
         detail=True,
+        methods=['POST'],
+    )
+    def accept(self, request, pk=None):
+        self.check_permissions(request)
+        offer = self.get_object()
+        self.check_object_permissions(request, offer)
+        if offer.status != OfferStatus.ACTIVE.value:
+            raise ValidationError(_('You can only accept an active offer'))
+        offer.accept()
+        serializer = self.get_serializer(offer)
+        return Response(data=serializer.data)
+
+    @action(
+        detail=True,
+        methods=['POST'],
+    )
+    def archive(self, request, pk=None):
+        self.check_permissions(request)
+        offer = self.get_object()
+        self.check_object_permissions(request, offer)
+        if offer.status != OfferStatus.ACTIVE.value:
+            raise ValidationError(_('You can only archive an active offer'))
+        offer.archive()
+        serializer = self.get_serializer(offer)
+        return Response(data=serializer.data)
+
+    @action(
+        detail=True,
         methods=['GET'],
-        permission_classes=(),
     )
     def image(self, request, pk=None):
         image = OfferImage.objects.filter(offer=pk).first()

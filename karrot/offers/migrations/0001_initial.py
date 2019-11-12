@@ -24,7 +24,8 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(default=django.utils.timezone.now)),
                 ('name', models.CharField(max_length=80)),
                 ('description', models.TextField()),
-                ('status', models.CharField(choices=[('active', 'active'), ('accepted', 'accepted'), ('disabled', 'disabled')], default='active', max_length=100)),
+                ('status', models.CharField(choices=[('active', 'active'), ('accepted', 'accepted'), ('archived', 'archived')], default='active', max_length=100)),
+                ('status_changed_at', models.DateTimeField(default=django.utils.timezone.now)),
                 ('group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='groups.Group')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
@@ -37,7 +38,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('created_at', models.DateTimeField(default=django.utils.timezone.now)),
-                ('image', versatileimagefield.fields.VersatileImageField(upload_to='offer_photos', verbose_name='Offer Image')),
+                ('image', versatileimagefield.fields.VersatileImageField(upload_to='offer_images', verbose_name='Offer Image')),
                 ('offer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='images', to='offers.Offer')),
                 ('position', models.IntegerField(default=0)),
             ],

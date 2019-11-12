@@ -30,20 +30,19 @@ class TestOffersAPI(APITestCase):
         self.user = UserFactory()
         self.another_user = UserFactory()
         self.group = GroupFactory(members=[self.user, self.another_user])
+        self.offer = OfferFactory(user=self.user, group=self.group, images=[image_path])
 
     def test_offer_image_redirect(self):
         # NOT logged in (as it needs to work in emails)
-        offer = OfferFactory(user=self.user, group=self.group, images=[image_path])
-        response = self.client.get('/api/offers/{}/image/'.format(offer.id))
+        response = self.client.get('/api/offers/{}/image/'.format(self.offer.id))
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
-        self.assertEqual(response.url, offer.images.first().image.url)
+        self.assertEqual(response.url, self.offer.images.first().image.url)
 
     def test_fetch_offer(self):
         self.client.force_login(user=self.user)
-        offer = OfferFactory(user=self.user, group=self.group, images=[image_path])
-        response = self.client.get('/api/offers/{}/'.format(offer.id))
+        response = self.client.get('/api/offers/{}/'.format(self.offer.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data['name'], offer.name)
+        self.assertEqual(response.data['name'], self.offer.name)
 
     def test_create_offer(self):
         self.client.force_login(user=self.user)
@@ -62,82 +61,42 @@ class TestOffersAPI(APITestCase):
             self.assertEqual(response.data['name'], data['name'])
             self.assertTrue('full_size' in response.data['images'][0]['image_urls'])
 
-    def test_list_offers_by_group(self):
-        self.client.force_login(user=self.user)
-        another_group = GroupFactory(members=[self.user])  # user is part of this group
-        for _ in range(4):
-            OfferFactory(user=self.user, group=self.group, images=[image_path])
-        for _ in range(2):
-            OfferFactory(user=self.user, group=another_group, images=[image_path])
-
-        response = self.client.get('/api/offers/', {'group': self.group.id})
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['results']), 4)
-
-        response = self.client.get('/api/offers/', {'group': another_group.id})
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['results']), 2)
-
-    def test_list_offers_by_status(self):
-        self.client.force_login(user=self.user)
-        for _ in range(4):
-            OfferFactory(user=self.user, group=self.group, images=[image_path], status='active')
-        for _ in range(2):
-            OfferFactory(user=self.user, group=self.group, images=[image_path], status='accepted')
-        OfferFactory(user=self.user, group=self.group, images=[image_path], status='disabled')
-
-        response = self.client.get('/api/offers/', {'status': 'active'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['results']), 4)
-
-        response = self.client.get('/api/offers/', {'status': 'accepted'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['results']), 2)
-
-        response = self.client.get('/api/offers/', {'status': 'disabled'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['results']), 1)
-
-    def test_cannot_list_offers_for_another_group(self):
-        self.client.force_login(user=self.user)
-        another_group = GroupFactory()  # user is not part of this group
-        for _ in range(2):
-            OfferFactory(user=self.user, group=self.group, images=[image_path])
-        for _ in range(3):
-            OfferFactory(user=self.user, group=another_group, images=[image_path])
-
-        response = self.client.get('/api/offers/')
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['results']), 2)
-
-        response = self.client.get('/api/offers/', {'group': another_group.id})
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['results']), 0)
-
-    def test_cannot_list_another_users_disabled_offers(self):
-        for _ in range(2):
-            OfferFactory(user=self.user, group=self.group, images=[image_path], status='active')
-        for _ in range(3):
-            OfferFactory(user=self.user, group=self.group, images=[image_path], status='disabled')
-        self.client.force_login(user=self.another_user)
-        response = self.client.get('/api/offers/')
-        self.assertEqual(len(response.data['results']), 2)
-
-    def test_cannot_fetch_another_users_disabled_offer(self):
-        offer = OfferFactory(user=self.user, group=self.group, images=[image_path], status='disabled')
+    def test_cannot_fetch_another_users_archived_offer(self):
+        offer = OfferFactory(user=self.user, group=self.group, images=[image_path], status='archived')
         self.client.force_login(user=self.another_user)
         response = self.client.get('/api/offers/{}/'.format(offer.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
     def test_update_offer(self):
-        offer = OfferFactory(user=self.user, group=self.group, images=[image_path])
         self.client.force_login(user=self.user)
         data = {
             'name': faker.name(),
         }
-        response = self.client.patch('/api/offers/{}/'.format(offer.id), data, format='json')
+        response = self.client.patch('/api/offers/{}/'.format(self.offer.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data['name'], data['name'])
+
+    def test_mark_offer_accepted(self):
+        self.client.force_login(user=self.user)
+        response = self.client.post('/api/offers/{}/accept/'.format(self.offer.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data['status'], 'accepted')
+
+    def test_mark_offer_archived(self):
+        self.client.force_login(user=self.user)
+        response = self.client.post('/api/offers/{}/archive/'.format(self.offer.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data['status'], 'archived')
+
+    def test_mark_offer_accepted_as_another_user(self):
+        self.client.force_login(user=self.another_user)
+        response = self.client.post('/api/offers/{}/accept/'.format(self.offer.id))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+    def test_mark_offer_archived_as_another_user(self):
+        self.client.force_login(user=self.another_user)
+        response = self.client.post('/api/offers/{}/archive/'.format(self.offer.id))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_update_offer_as_another_user(self):
         offer = OfferFactory(user=self.user, group=self.group, images=[image_path])
@@ -204,3 +163,71 @@ class TestOffersAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         by_id = {image['id']: image for image in response.data['images']}
         self.assertEqual(by_id[image_id]['position'], new_position)
+
+
+class TestListOffersAPI(APITestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.another_user = UserFactory()
+        self.group = GroupFactory(members=[self.user, self.another_user])
+
+    def test_list_offers_by_group(self):
+        self.client.force_login(user=self.user)
+        another_group = GroupFactory(members=[self.user])  # user is part of this group
+        for _ in range(4):
+            OfferFactory(user=self.user, group=self.group, images=[image_path])
+        for _ in range(2):
+            OfferFactory(user=self.user, group=another_group, images=[image_path])
+
+        response = self.client.get('/api/offers/', {'group': self.group.id})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data['results']), 4)
+
+        response = self.client.get('/api/offers/', {'group': another_group.id})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data['results']), 2)
+
+    def test_list_offers_by_status(self):
+        self.client.force_login(user=self.user)
+        for _ in range(4):
+            OfferFactory(user=self.user, group=self.group, images=[image_path], status='active')
+        for _ in range(2):
+            OfferFactory(user=self.user, group=self.group, images=[image_path], status='accepted')
+        OfferFactory(user=self.user, group=self.group, images=[image_path], status='archived')
+
+        response = self.client.get('/api/offers/', {'status': 'active'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data['results']), 4)
+
+        response = self.client.get('/api/offers/', {'status': 'accepted'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data['results']), 2)
+
+        response = self.client.get('/api/offers/', {'status': 'archived'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data['results']), 1)
+
+    def test_cannot_list_offers_for_another_group(self):
+        self.client.force_login(user=self.user)
+        another_group = GroupFactory()  # user is not part of this group
+        for _ in range(2):
+            OfferFactory(user=self.user, group=self.group, images=[image_path])
+        for _ in range(3):
+            OfferFactory(user=self.user, group=another_group, images=[image_path])
+
+        response = self.client.get('/api/offers/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data['results']), 2)
+
+        response = self.client.get('/api/offers/', {'group': another_group.id})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data['results']), 0)
+
+    def test_cannot_list_another_users_archived_offers(self):
+        for _ in range(2):
+            OfferFactory(user=self.user, group=self.group, images=[image_path], status='active')
+        for _ in range(3):
+            OfferFactory(user=self.user, group=self.group, images=[image_path], status='archived')
+        self.client.force_login(user=self.another_user)
+        response = self.client.get('/api/offers/')
+        self.assertEqual(len(response.data['results']), 2)
