@@ -91,7 +91,7 @@ def new_offer_unsubscribe_url(user, offer):
 def group_photo_url(group):
     if not group or not group.photo:
         return None
-    return '{hostname}/api/groups/{group_id}/photo/'.format(
+    return '{hostname}/api/groups-info/{group_id}/photo/'.format(
         hostname=settings.HOSTNAME,
         group_id=group.id
     )

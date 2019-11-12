@@ -31,6 +31,13 @@ class TestOffersAPI(APITestCase):
         self.another_user = UserFactory()
         self.group = GroupFactory(members=[self.user, self.another_user])
 
+    def test_offer_image_redirect(self):
+        # NOT logged in (as it needs to work in emails)
+        offer = OfferFactory(user=self.user, group=self.group, images=[image_path])
+        response = self.client.get('/api/offers/{}/image/'.format(offer.id))
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response.url, offer.images.first().image.url)
+
     def test_fetch_offer(self):
         self.client.force_login(user=self.user)
         offer = OfferFactory(user=self.user, group=self.group, images=[image_path])

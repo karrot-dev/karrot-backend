@@ -74,6 +74,14 @@ class GroupInfoViewSet(
     search_fields = ('name', 'public_description')
     serializer_class = GroupPreviewSerializer
 
+    @action(
+        detail=True,
+        methods=['GET']
+    )
+    def photo(self, request, pk=None):
+        group = self.get_object()
+        return HttpResponseRedirect(redirect_to=group.photo.url)
+
 
 class GroupViewSet(
         mixins.CreateModelMixin,
@@ -128,15 +136,6 @@ class GroupViewSet(
             qs = qs.filter(members=self.request.user)
 
         return qs
-
-    @action(
-        detail=True,
-        methods=['GET'],
-        permission_classes=()
-    )
-    def photo(self, request, pk=None):
-        group = self.get_object()
-        return HttpResponseRedirect(redirect_to=group.photo.url)
 
     @action(
         detail=True,
