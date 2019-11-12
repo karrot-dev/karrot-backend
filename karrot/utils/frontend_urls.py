@@ -88,6 +88,33 @@ def new_offer_unsubscribe_url(user, offer):
     )
 
 
+def group_photo_url(group):
+    if not group or not group.photo:
+        return None
+    return '{hostname}/api/groups/{group_id}/photo/'.format(
+        hostname=settings.HOSTNAME,
+        group_id=group.id
+    )
+
+
+def karrot_logo_url():
+    return 'https://user-images.githubusercontent.com/31616/36565633-517373a4-1821-11e8-9948-5bf6887c667e.png'
+
+
+def group_photo_or_karrot_logo_url(group):
+    return group_photo_url(group) or karrot_logo_url()
+
+
+def offer_image_url(offer):
+    image = offer.images.first()
+    if not image:
+        return None
+    return '{hostname}/api/offers/{offer_id}/image/'.format(
+        hostname=settings.HOSTNAME,
+        offer_id=offer.id
+    )
+
+
 def conflict_resolution_unsubscribe_url(user, issue):
     return unsubscribe_url(
         user,

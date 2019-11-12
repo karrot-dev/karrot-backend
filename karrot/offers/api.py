@@ -1,6 +1,7 @@
 import json
 
 import glom
+from django.http import HttpResponseRedirect, Http404
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import mixins
 from rest_framework.decorators import action
@@ -122,3 +123,15 @@ class OfferViewSet(
     def conversation(self, request, pk=None):
         """Get conversation ID of this offer"""
         return self.retrieve_conversation(request, pk)
+
+    @action(
+        detail=True,
+        methods=['GET'],
+        permission_classes=()
+    )
+    def image(self, request, pk=None):
+        offer = self.get_object()
+        image = offer.images.first()
+        if not image:
+            raise Http404()
+        return HttpResponseRedirect(redirect_to=image.image.url)

@@ -1,4 +1,5 @@
 import pytz
+from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django_filters import rest_framework as filters
@@ -127,6 +128,15 @@ class GroupViewSet(
             qs = qs.filter(members=self.request.user)
 
         return qs
+
+    @action(
+        detail=True,
+        methods=['GET'],
+        permission_classes=()
+    )
+    def photo(self, request, pk=None):
+        group = self.get_object()
+        return HttpResponseRedirect(redirect_to=group.photo.url)
 
     @action(
         detail=True,

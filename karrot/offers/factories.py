@@ -1,3 +1,5 @@
+import os
+
 from django.core.files.uploadedfile import SimpleUploadedFile
 from factory import DjangoModelFactory, SubFactory, LazyAttribute, post_generation
 
@@ -22,5 +24,9 @@ class OfferFactory(DjangoModelFactory):
         if created and extracted:
             for index, image_path in enumerate(extracted):
                 with open(image_path, 'rb') as file:
-                    upload = SimpleUploadedFile(name='foo.jpg', content=file.read(), content_type='image/jpeg')
+                    upload = SimpleUploadedFile(
+                        name=os.path.basename(image_path),
+                        content=file.read(),
+                        content_type='image/jpeg',
+                    )
                     self.images.create(image=upload, position=index)

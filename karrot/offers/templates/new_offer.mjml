@@ -5,7 +5,7 @@
     </mj-head>
     <mj-body>
         <mj-include path="../../base/templates/_header.mjml"/>
-        <mj-section background-color="#ffffff" padding="40px 0 40px 0">
+        <mj-section background-color="#ffffff" padding="0 0 40px 0">
             <mj-column>
                 <mj-image src="{{ absolute_url(offer_photo) }}"/>
                 <mj-text>
@@ -14,6 +14,9 @@
                         {{ offer_description }}
                     </div>
                 </mj-text>
+                <mj-button href="{{ conversation_url }}">
+                    {% trans %}View offer{% endtrans %}
+                </mj-button>
                 <mj-divider/>
                 <mj-text font-size="13px" line-height="18px" color="#777">
                     <p>

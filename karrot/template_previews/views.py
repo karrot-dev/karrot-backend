@@ -97,9 +97,11 @@ def get_or_create_offer():
     if offer is None:
         user = VerifiedUserFactory()
         group = random_group()
-        offer = OfferFactory(group=group, user=user)
+        image_path = os.path.join(os.path.dirname(__file__), './offer.jpg')
+        offer = OfferFactory(group=group, user=user, images=[image_path])
 
     return offer
+
 
 class Handlers:
     def accountdelete_request(self):
