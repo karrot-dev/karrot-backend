@@ -90,7 +90,7 @@ class OfferSerializer(serializers.ModelSerializer):
                 add_image_count += 1
         resulting_image_count = existing_image_count + add_image_count - remove_image_count
         if resulting_image_count == 0:
-            raise serializers.ValidationError(_('Must have at least once image'))
+            raise serializers.ValidationError(_('Must have at least one image'))
         return images
 
     def validate_group(self, group):
