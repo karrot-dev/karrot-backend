@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.viewsets import GenericViewSet
 
 from karrot.conversations.api import RetrieveConversationMixin
-from karrot.offers.models import Offer
+from karrot.offers.models import Offer, OfferImage
 from karrot.offers.serializers import OfferSerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
 
@@ -127,11 +127,10 @@ class OfferViewSet(
     @action(
         detail=True,
         methods=['GET'],
-        permission_classes=()
+        permission_classes=(),
     )
     def image(self, request, pk=None):
-        offer = self.get_object()
-        image = offer.images.first()
+        image = OfferImage.objects.filter(offer=pk).first()
         if not image:
             raise Http404()
         return HttpResponseRedirect(redirect_to=image.image.url)
