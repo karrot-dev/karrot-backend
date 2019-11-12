@@ -98,6 +98,10 @@ def get_message_title(message, language):
             return '☹️ {}'.format(author_name)
         return '☹️ {} / {}'.format(issue.affected_user, author_name)
 
+    if type == 'offer':
+        offer = conversation.target
+        return '🎁️ {} / {}'.format(offer.name, author_name)
+
     return author_name
 
 
