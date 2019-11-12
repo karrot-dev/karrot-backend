@@ -15,7 +15,7 @@ from karrot.invitations.models import Invitation
 from karrot.userauth.models import VerificationCode
 from karrot.users.factories import UserFactory
 from karrot.utils.email_utils import time_filter, date_filter, generate_plaintext_from_html, prepare_email
-from karrot.utils.frontend_urls import group_photo_url
+from karrot.utils.frontend_urls import group_photo_url, karrot_logo_url
 
 
 class TestEmailUtils(TestCase):
@@ -83,7 +83,7 @@ class TestEmailUtils(TestCase):
     def test_default_header_image(self):
         email = karrot.groups.emails.prepare_user_inactive_in_group_email(self.user, self.group)
         html, _ = email.alternatives[0]
-        self.assertIn(settings.DEFAULT_EMAIL_HEADER_IMAGE, html)
+        self.assertIn(karrot_logo_url(), html)
 
     def test_custom_header_image(self):
         pathlib.Path(settings.MEDIA_ROOT).mkdir(exist_ok=True)

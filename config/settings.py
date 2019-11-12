@@ -304,7 +304,3 @@ except ImportError:
     raise Exception(
         "config/local_settings.py is missing! Copy the provided example file and adapt it to your own config."
     )
-
-
-DEFAULT_EMAIL_HEADER_IMAGE = \
-    'https://user-images.githubusercontent.com/31616/36565633-517373a4-1821-11e8-9948-5bf6887c667e.png'
