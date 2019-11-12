@@ -9,8 +9,6 @@ import versatileimagefield.fields
 
 class Migration(migrations.Migration):
 
-    replaces = [('offers', '0001_initial'), ('offers', '0002_auto_20191105_1735'), ('offers', '0003_auto_20191106_2043')]
-
     initial = True
 
     dependencies = [
