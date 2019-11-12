@@ -1,8 +1,10 @@
 import json
 
 import glom
+from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404
 from django.utils.translation import ugettext_lazy as _
+from django_filters import rest_framework as filters
 from rest_framework import mixins
 from rest_framework.decorators import action
 from rest_framework.pagination import CursorPagination
@@ -11,7 +13,7 @@ from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.viewsets import GenericViewSet
 
 from karrot.conversations.api import RetrieveConversationMixin
-from karrot.offers.models import Offer, OfferImage
+from karrot.offers.models import Offer, OfferImage, OfferStatus
 from karrot.offers.serializers import OfferSerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
 
@@ -107,6 +109,11 @@ class OfferViewSet(
 ):
     serializer_class = OfferSerializer
     queryset = Offer.objects
+    filter_backends = (filters.DjangoFilterBackend, )
+    filterset_fields = (
+        'group',
+        'status',
+    )
     pagination_class = OfferPagination
     permission_classes = (
         IsAuthenticated,
@@ -115,7 +122,10 @@ class OfferViewSet(
     parser_classes = [JSONWithFilesMultiPartParser, JSONParser]
 
     def get_queryset(self):
-        return self.queryset.filter(group__members=self.request.user).distinct()
+        return self.queryset.filter(
+            Q(group__members=self.request.user),
+            Q(user=self.request.user) | ~Q(status=OfferStatus.DISABLED.value),
+        ).distinct()
 
     @action(
         detail=True,
