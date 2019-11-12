@@ -1,7 +1,6 @@
 from itertools import groupby
 
 from babel.dates import format_date, format_time
-from django.contrib.auth import get_user_model
 from django.utils import timezone, translation
 from django.utils.text import Truncator
 from django.utils.translation import ugettext as _
@@ -139,8 +138,6 @@ def notify_new_offer_push_subscribers(offer):
 
     users = offer.group.members.filter(
         groupmembership__in=GroupMembership.objects.active().with_notification_type(GroupNotificationType.NEW_OFFER),
-    ).exclude(
-        id__in=get_user_model().objects.unverified_or_ignored(),
     )
 
     subscriptions = PushSubscription.objects.filter(
@@ -172,7 +169,7 @@ def notify_new_offer_push_subscribers_with_language(offer, subscriptions, langua
             'message_body': Truncator(offer.description).chars(num=1000),
             # this causes each notification for a given conversation to replace previous notifications
             # fancier would be to make the new notifications show a summary not just the latest message
-            'tag': 'conversation:{}'.format(offer.id),
+            'tag': 'offer:{}'.format(offer.id),
         },
     )
 

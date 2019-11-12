@@ -21,6 +21,8 @@ def conversation_url(conversation, user):
         return application_url(conversation.target)
     elif type == 'issue':
         return issue_chat_url(conversation.target)
+    elif type == 'offer':
+        return offer_url(conversation.target)
     elif type is None:
         return None
 
