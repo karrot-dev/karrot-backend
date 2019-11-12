@@ -15,7 +15,6 @@ def prepare_new_offer_notification_email(user, offer):
     reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
     from_email = formataddr((offer.user.display_name, settings.DEFAULT_FROM_EMAIL))
 
-    # TODO: wire up the unsubscribe logic whereever that happens
     unsubscribe_url = new_offer_unsubscribe_url(user, offer)
 
     return prepare_email(

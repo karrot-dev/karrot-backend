@@ -9,7 +9,6 @@ from karrot.offers.emails import prepare_new_offer_notification_email
 
 @db_task()
 def notify_members_about_new_offer(offer):
-    # TODO: make sure this NEW_OFFER notification type is settable/wired up/whatever
     users = offer.group.members.filter(
         groupmembership__in=GroupMembership.objects.active().with_notification_type(GroupNotificationType.NEW_OFFER),
     ).exclude(
