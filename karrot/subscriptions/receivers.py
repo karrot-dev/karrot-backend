@@ -389,12 +389,15 @@ def send_pickup_series_delete(sender, instance, **kwargs):
 
 # Offer
 @receiver(post_save, sender=Offer)
-def send_offer_updates(sender, instance, **kwargs):
+def send_offer_updates(sender, instance, created, **kwargs):
     offer = instance
     payload = OfferSerializer(offer).data
     for subscription in ChannelSubscription.objects.recent().filter(user__in=offer.group.members.all()
                                                                     ).distinct():
         send_in_channel(subscription.reply_channel, topic='offers:offer', payload=payload)
+
+    if created:
+        tasks.notify_new_offer_push_subscribers(offer)
 
 
 @receiver(pre_delete, sender=Offer)
