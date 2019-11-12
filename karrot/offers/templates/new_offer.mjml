@@ -9,7 +9,8 @@
             <mj-column>
                 <mj-image src="{{ absolute_url(offer_photo) }}"/>
                 <mj-text>
-                    <h1>{% trans %}{{ user_name }} created a new offer {{ offer_name }}{% endtrans %}</h1>
+                    <h1>{% trans %}{{ user_name }} created a new offer{% endtrans %}</h1>
+                    <h2>{{ offer_name }}</h2>
                     <div>
                         {{ offer_description }}
                     </div>
