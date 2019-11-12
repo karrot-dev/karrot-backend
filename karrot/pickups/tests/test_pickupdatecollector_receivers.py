@@ -11,7 +11,8 @@ class TestPickUpCollectorReceivers(APITestCase):
     def setUp(self):
         self.first_member = UserFactory()
         self.second_member = UserFactory()
-        self.group = GroupFactory(members=[self.first_member, self.second_member])
+        self.third_member = UserFactory()
+        self.group = GroupFactory(members=[self.first_member, self.second_member, self.third_member])
         self.place = PlaceFactory(group=self.group)
         self.pickup = PickupDateFactory(place=self.place, collectors=[self.first_member])
 
@@ -26,3 +27,15 @@ class TestPickUpCollectorReceivers(APITestCase):
         )
 
         self.assertTrue(new_participant.seen_up_to == self.pickup.conversation.latest_message)
+
+    def test_new_collector_does_not_remove_conversation_subscribers(self):
+        self.pickup.conversation.join(self.second_member)
+        self.assertIn(self.second_member, self.pickup.conversation.participants.all())
+        PickupDateCollector.objects.create(user=self.third_member, pickupdate=self.pickup)
+        self.assertIn(self.second_member, self.pickup.conversation.participants.all())
+
+    def test_collector_leaving_does_not_remove_conversation_subscribers(self):
+        self.pickup.conversation.join(self.second_member)
+        self.assertIn(self.second_member, self.pickup.conversation.participants.all())
+        PickupDateCollector.objects.filter(user=self.first_member, pickupdate=self.pickup).delete()
+        self.assertIn(self.second_member, self.pickup.conversation.participants.all())
