@@ -98,7 +98,7 @@ def group_photo_url(group):
 
 
 def karrot_logo_url():
-    return 'https://user-images.githubusercontent.com/31616/36565633-517373a4-1821-11e8-9948-5bf6887c667e.png'
+    return settings.KARROT_LOGO
 
 
 def group_photo_or_karrot_logo_url(group):
