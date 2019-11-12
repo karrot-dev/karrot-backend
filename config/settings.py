@@ -269,7 +269,7 @@ ASGI_APPLICATION = 'karrot.subscriptions.routing.application'
 # Default dummy settings, please override in local_settings.py
 DEFAULT_FROM_EMAIL = "testing@example.com"
 SPARKPOST_RELAY_DOMAIN = 'replies.karrot.localhost'
-HOSTNAME = 'https://localhost:8000'
+HOSTNAME = 'http://localhost:8000'
 SITE_NAME = 'karrot local development'
 MEDIA_ROOT = './uploads/'
 MEDIA_URL = '/media/'
