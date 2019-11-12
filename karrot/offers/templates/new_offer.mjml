@@ -14,7 +14,7 @@
                         {{ offer_description }}
                     </div>
                 </mj-text>
-                <mj-button href="{{ conversation_url }}">
+                <mj-button href="{{ offer_url }}">
                     {% trans %}View offer{% endtrans %}
                 </mj-button>
                 <mj-divider/>
@@ -24,7 +24,7 @@
                         <a href="{{ new_offer_unsubscribe_url }}">{% trans %}Click here to unsubscribe{% endtrans %}</a>.
                     </p>
                     <p>
-                        {% trans %}Reply to this email directly, <a href="{{ conversation_url }}">view it on {{ site_name }}</a>, or <a href="{{ mute_url }}">mute the conversation</a>.{% endtrans %}
+                        {% trans %}Reply to this email directly, <a href="{{ offer_url }}">view it on {{ site_name }}</a>, or <a href="{{ mute_url }}">mute the conversation</a>.{% endtrans %}
                     </p>
                 </mj-text>
             </mj-column>

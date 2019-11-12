@@ -31,7 +31,7 @@ def prepare_new_offer_notification_email(user, offer):
             'offer_name': offer.name,
             'offer_description': offer.description,
             'group': offer.group,
-            'conversation_url': offer_url(offer),
+            'offer_url': offer_url(offer),
             'mute_url': unsubscribe_url,
             'new_offer_unsubscribe_url': unsubscribe_url,
         },
