@@ -28,8 +28,8 @@ msgstr "Musíte mít ověřenou e-mailovou adresu"
 
 #: karrot/applications/api.py:36 karrot/groups/api.py:49
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:124
-#: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:111
-#: karrot/pickups/serializers.py:296 karrot/places/api.py:19
+#: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:112
+#: karrot/pickups/serializers.py:297 karrot/places/api.py:19
 #: karrot/places/serializers.py:80
 msgid "You need to be a group editor"
 msgstr "Musíte být editorem skupiny"
@@ -640,7 +640,7 @@ msgstr "Datum vyzvednutí je již plné."
 msgid "This feedback is given by another user."
 msgstr "Tuto zpětnou vazbu poskytuje jiný uživatel."
 
-#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:398
+#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:399
 #, python-format
 msgid ""
 "You can't give feedback for pickups more than %(days_number)s days ago."
@@ -648,43 +648,43 @@ msgstr ""
 "Nemůžete poskytnout zpětnou vazbu na vyzvednutí které bylo před více než "
 "%(days_number)s dny."
 
-#: karrot/pickups/serializers.py:32
+#: karrot/pickups/serializers.py:33
 msgid "Must be a list"
 msgstr "Musí to být seznam"
 
-#: karrot/pickups/serializers.py:33
+#: karrot/pickups/serializers.py:34
 msgid "Must be a list with one or two values"
 msgstr "Musí to být seznam s jednou nebo dvěma hodnotami"
 
-#: karrot/pickups/serializers.py:34
+#: karrot/pickups/serializers.py:35
 msgid "Must pass start value"
 msgstr "Musí předat počáteční hodnotu"
 
-#: karrot/pickups/serializers.py:116
+#: karrot/pickups/serializers.py:117
 msgid "The date should be in the future."
 msgstr "Datum by mělo být v budoucnosti."
 
-#: karrot/pickups/serializers.py:174
+#: karrot/pickups/serializers.py:175
 msgid "You can't move pickups that are part of a series."
 msgstr "Nemůžete přesouvat vyzvednutí, které jsou součástí série."
 
-#: karrot/pickups/serializers.py:309
+#: karrot/pickups/serializers.py:310
 msgid "Invalid recurrence rule."
 msgstr "Neplatné pravidlo opakování."
 
-#: karrot/pickups/serializers.py:311
+#: karrot/pickups/serializers.py:312
 msgid "Only single recurrence rules are allowed."
 msgstr "Povolena jsou pouze pravidla jednoho opakování."
 
-#: karrot/pickups/serializers.py:393
+#: karrot/pickups/serializers.py:394
 msgid "The pickup is not done yet"
 msgstr "Vyzvednutí ještě není dokončeno"
 
-#: karrot/pickups/serializers.py:395
+#: karrot/pickups/serializers.py:396
 msgid "You aren't assigned to the pickup."
 msgstr "K vyzvednutí nejste přiřazeni."
 
-#: karrot/pickups/serializers.py:412
+#: karrot/pickups/serializers.py:413
 msgid "Both comment and weight cannot be blank."
 msgstr "Komentář i váha nemohou být prázdné."
 
