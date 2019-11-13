@@ -61,6 +61,7 @@ VOTING_DURATION_DAYS = 7
 VOTING_DUE_SOON_HOURS = 12
 CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION = 4
 
+KARROT_LOGO = 'https://user-images.githubusercontent.com/31616/36565633-517373a4-1821-11e8-9948-5bf6887c667e.png'
 
 # Django configuration
 INSTALLED_APPS = (
@@ -92,6 +93,7 @@ INSTALLED_APPS = (
     'karrot.groups.GroupsConfig',
     'karrot.places.PlacesConfig',
     'karrot.unsubscribe',
+    'karrot.offers.OffersConfig',
     'karrot.pickups.PickupsConfig',
     'karrot.invitations.InvitationsConfig',
     'karrot.template_previews',
@@ -214,6 +216,10 @@ VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
     'group_logo': [
         ('full_size', 'url'),
         ('thumbnail', 'thumbnail__120x120'),
+    ],
+    'offer_image': [
+        ('full_size', 'url'),
+        ('thumbnail', 'thumbnail__120x120'),
     ]
 }
 
@@ -264,7 +270,7 @@ ASGI_APPLICATION = 'karrot.subscriptions.routing.application'
 # Default dummy settings, please override in local_settings.py
 DEFAULT_FROM_EMAIL = "testing@example.com"
 SPARKPOST_RELAY_DOMAIN = 'replies.karrot.localhost'
-HOSTNAME = 'https://localhost:8000'
+HOSTNAME = 'http://localhost:8000'
 SITE_NAME = 'karrot local development'
 MEDIA_ROOT = './uploads/'
 MEDIA_URL = '/media/'
@@ -299,7 +305,3 @@ except ImportError:
     raise Exception(
         "config/local_settings.py is missing! Copy the provided example file and adapt it to your own config."
     )
-
-
-DEFAULT_EMAIL_HEADER_IMAGE = \
-    'https://user-images.githubusercontent.com/31616/36565633-517373a4-1821-11e8-9948-5bf6887c667e.png'

@@ -1,11 +1,11 @@
 import json
 import os
+from unittest.mock import patch, call
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
-from unittest.mock import patch, call
 
 from karrot.groups import roles
 from karrot.groups.factories import GroupFactory
@@ -53,6 +53,20 @@ class TestGroupsInfoAPI(APITestCase):
         url = self.url + str(self.group.id) + '/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_group_image_redirect(self):
+        # NOT logged in (as it needs to work in emails)
+        photo_file = os.path.join(os.path.dirname(__file__), './photo.jpg')
+        group = GroupFactory(photo=photo_file, members=[self.member])
+        response = self.client.get('/api/groups-info/{}/photo/'.format(group.id))
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response.url, group.photo.url)
+
+    def test_group_image_redirect_no_photo(self):
+        # NOT logged in (as it needs to work in emails)
+        group = GroupFactory(members=[self.member])
+        response = self.client.get('/api/groups-info/{}/photo/'.format(group.id))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class TestGroupsAPI(APITestCase):

@@ -8,6 +8,7 @@ from furl import furl
 from huey.contrib.djhuey import db_task
 
 from karrot.applications.models import ApplicationStatus
+from karrot.groups.models import GroupMembership, GroupNotificationType
 from karrot.subscriptions.fcm import notify_subscribers
 from karrot.subscriptions.models import PushSubscription, PushSubscriptionPlatform
 from karrot.utils import frontend_urls
@@ -98,6 +99,10 @@ def get_message_title(message, language):
             return '☹️ {}'.format(author_name)
         return '☹️ {} / {}'.format(issue.affected_user, author_name)
 
+    if type == 'offer':
+        offer = conversation.target
+        return '🎁️ {} / {}'.format(offer.name, author_name)
+
     return author_name
 
 
@@ -115,14 +120,61 @@ def notify_message_push_subscribers_with_language(message, subscriptions, langua
     else:
         click_action = frontend_urls.conversation_url(conversation, message.author)
 
-    fcm_options = {
-        'message_title': message_title,
-        'message_body': Truncator(message.content).chars(num=1000),
-        # this causes each notification for a given conversation to replace previous notifications
-        # fancier would be to make the new notifications show a summary not just the latest message
-        'tag': 'conversation:{}'.format(conversation.id)
-    }
+    notify_subscribers_by_device(
+        subscriptions,
+        click_action=click_action,
+        fcm_options={
+            'message_title': message_title,
+            'message_body': Truncator(message.content).chars(num=1000),
+            # this causes each notification for a given conversation to replace previous notifications
+            # fancier would be to make the new notifications show a summary not just the latest message
+            'tag': 'conversation:{}'.format(conversation.id),
+        }
+    )
 
+
+@db_task()
+def notify_new_offer_push_subscribers(offer):
+
+    users = offer.group.members.filter(
+        groupmembership__in=GroupMembership.objects.active().with_notification_type(GroupNotificationType.NEW_OFFER),
+    )
+
+    subscriptions = PushSubscription.objects.filter(
+        user__in=users,
+    ).\
+        exclude(user=offer.user). \
+        select_related('user'). \
+        order_by('user__language'). \
+        distinct()
+
+    for (language, subscriptions) in groupby(subscriptions, key=lambda subscription: subscription.user.language):
+        subscriptions = list(subscriptions)
+        notify_new_offer_push_subscribers_with_language(offer, subscriptions, language)
+
+
+def notify_new_offer_push_subscribers_with_language(offer, subscriptions, language):
+    if not translation.check_for_language(language):
+        language = 'en'
+
+    with translation.override(language):
+        # TODO: make a nicer title... like "New offer..." blahblhablah
+        message_title = '🎁️ {} / {}'.format(offer.name, offer.user)
+
+    notify_subscribers_by_device(
+        subscriptions,
+        click_action=frontend_urls.offer_url(offer),
+        fcm_options={
+            'message_title': message_title,
+            'message_body': Truncator(offer.description).chars(num=1000),
+            # this causes each notification for a given conversation to replace previous notifications
+            # fancier would be to make the new notifications show a summary not just the latest message
+            'tag': 'offer:{}'.format(offer.id),
+        },
+    )
+
+
+def notify_subscribers_by_device(subscriptions, *, click_action, fcm_options):
     android_subscriptions = [s for s in subscriptions if s.platform == PushSubscriptionPlatform.ANDROID.value]
     web_subscriptions = [s for s in subscriptions if s.platform == PushSubscriptionPlatform.WEB.value]
 

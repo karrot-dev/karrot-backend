@@ -21,6 +21,8 @@ def conversation_url(conversation, user):
         return application_url(conversation.target)
     elif type == 'issue':
         return issue_chat_url(conversation.target)
+    elif type == 'offer':
+        return offer_url(conversation.target)
     elif type is None:
         return None
 
@@ -79,6 +81,42 @@ def new_application_unsubscribe_url(user, application):
     )
 
 
+def new_offer_unsubscribe_url(user, offer):
+    return unsubscribe_url(
+        user,
+        group=offer.group,
+        conversation=offer.conversation,
+        notification_type=GroupNotificationType.NEW_OFFER,
+    )
+
+
+def group_photo_url(group):
+    if not group or not group.photo:
+        return None
+    return '{hostname}/api/groups-info/{group_id}/photo/'.format(
+        hostname=settings.HOSTNAME,
+        group_id=group.id
+    )
+
+
+def karrot_logo_url():
+    return settings.KARROT_LOGO
+
+
+def group_photo_or_karrot_logo_url(group):
+    return group_photo_url(group) or karrot_logo_url()
+
+
+def offer_image_url(offer):
+    image = offer.images.first()
+    if not image:
+        return None
+    return '{hostname}/api/offers/{offer_id}/image/'.format(
+        hostname=settings.HOSTNAME,
+        offer_id=offer.id
+    )
+
+
 def conflict_resolution_unsubscribe_url(user, issue):
     return unsubscribe_url(
         user,
@@ -93,6 +131,14 @@ def application_url(application):
         hostname=settings.HOSTNAME,
         group_id=application.group.id,
         application_id=application.id,
+    )
+
+
+def offer_url(offer):
+    return '{hostname}/#/group/{group_id}/offers/{offer_id}'.format(
+        hostname=settings.HOSTNAME,
+        group_id=offer.group.id,
+        offer_id=offer.id,
     )
 
 

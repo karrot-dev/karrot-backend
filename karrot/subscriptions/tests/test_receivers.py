@@ -21,6 +21,7 @@ from karrot.groups.factories import GroupFactory
 from karrot.invitations.models import Invitation
 from karrot.issues.factories import IssueFactory, vote_for_further_discussion
 from karrot.notifications.models import Notification
+from karrot.offers.factories import OfferFactory
 from karrot.pickups.factories import FeedbackFactory, PickupDateFactory, \
     PickupDateSeriesFactory
 from karrot.pickups.models import PickupDate, to_range
@@ -642,6 +643,33 @@ class PickupDateSeriesReceiverTests(WSTestCase):
         response = self.client.messages_by_topic.get('pickups:series_deleted')[0]
         self.assertEqual(response['payload']['id'], id)
 
+        self.assertEqual(len(self.client.messages), 1)
+
+
+class OfferReceiverTests(WSTestCase):
+    def setUp(self):
+        super().setUp()
+        self.member = UserFactory()
+        self.group = GroupFactory(members=[self.member])
+        self.offer = OfferFactory(group=self.group, user=self.member)
+
+    def test_receive_offer_changes(self):
+        self.client = self.connect_as(self.member)
+
+        self.offer.name = faker.name()
+        self.offer.save()
+        response = self.client.messages_by_topic.get('offers:offer')[0]
+        self.assertEqual(response['payload']['name'], self.offer.name)
+        self.assertEqual(len(self.client.messages), 1)
+
+    def test_receiver_offer_deleted(self):
+        self.client = self.connect_as(self.member)
+
+        id = self.offer.id
+        self.offer.delete()
+
+        response = self.client.messages_by_topic.get('offers:offer_deleted')[0]
+        self.assertEqual(response['payload']['id'], id)
         self.assertEqual(len(self.client.messages), 1)
 
 

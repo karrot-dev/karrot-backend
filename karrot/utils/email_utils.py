@@ -13,7 +13,7 @@ from jinja2 import Environment
 
 from config import settings
 from karrot.utils import stats
-from karrot.utils.frontend_urls import place_url, user_url, absolute_url
+from karrot.utils.frontend_urls import place_url, user_url, absolute_url, group_photo_or_karrot_logo_url
 
 
 def date_filter(value):
@@ -98,10 +98,7 @@ def prepare_email(
     context.update(default_context)
 
     if 'header_image' not in context:
-        if 'group' in context and context['group'].photo:
-            context['header_image'] = context['group'].photo.url
-        else:
-            context['header_image'] = settings.DEFAULT_EMAIL_HEADER_IMAGE
+        context['header_image'] = group_photo_or_karrot_logo_url(context.get('group', None))
 
     if not to:
         if not user:

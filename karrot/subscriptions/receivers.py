@@ -29,6 +29,8 @@ from karrot.issues.serializers import IssueSerializer
 from karrot.issues.signals import issue_changed
 from karrot.notifications.models import Notification, NotificationMeta
 from karrot.notifications.serializers import NotificationSerializer, NotificationMetaSerializer
+from karrot.offers.models import Offer
+from karrot.offers.serializers import OfferSerializer
 from karrot.pickups.models import PickupDate, PickupDateSeries, Feedback, PickupDateCollector
 from karrot.pickups.serializers import PickupDateSerializer, PickupDateSeriesSerializer, FeedbackSerializer
 from karrot.places.models import Place, PlaceSubscription
@@ -384,6 +386,27 @@ def send_pickup_series_delete(sender, instance, **kwargs):
     for subscription in ChannelSubscription.objects.recent().filter(user__in=series.place.group.members.all()
                                                                     ).distinct():
         send_in_channel(subscription.reply_channel, topic='pickups:series_deleted', payload=payload)
+
+# Offer
+@receiver(post_save, sender=Offer)
+def send_offer_updates(sender, instance, created, **kwargs):
+    offer = instance
+    payload = OfferSerializer(offer).data
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=offer.group.members.all()
+                                                                    ).distinct():
+        send_in_channel(subscription.reply_channel, topic='offers:offer', payload=payload)
+
+    if created:
+        tasks.notify_new_offer_push_subscribers(offer)
+
+
+@receiver(pre_delete, sender=Offer)
+def send_offer_delete(sender, instance, **kwargs):
+    offer = instance
+    payload = OfferSerializer(offer).data
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=offer.group.members.all()
+                                                                    ).distinct():
+        send_in_channel(subscription.reply_channel, topic='offers:offer_deleted', payload=payload)
 
 
 # Feedback

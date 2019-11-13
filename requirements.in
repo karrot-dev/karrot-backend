@@ -35,6 +35,7 @@ channels
 channels_redis
 more-itertools
 requests
+glom
 
 # dev dependencies
 pip-tools

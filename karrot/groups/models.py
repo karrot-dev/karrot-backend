@@ -211,6 +211,7 @@ class GroupNotificationType(object):
     DAILY_PICKUP_NOTIFICATION = 'daily_pickup_notification'
     NEW_APPLICATION = 'new_application'
     CONFLICT_RESOLUTION = 'conflict_resolution'
+    NEW_OFFER = 'new_offer'
 
 
 def get_default_notification_types():

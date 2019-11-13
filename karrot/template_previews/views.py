@@ -23,6 +23,9 @@ from karrot.groups.emails import prepare_user_inactive_in_group_email, prepare_g
     prepare_group_summary_data, prepare_user_became_editor_email, prepare_user_removal_from_group_email
 from karrot.groups.models import Group
 from karrot.invitations.models import Invitation
+from karrot.offers.emails import prepare_new_offer_notification_email
+from karrot.offers.factories import OfferFactory
+from karrot.offers.models import Offer
 from karrot.pickups.emails import prepare_pickup_notification_email
 from karrot.pickups.models import PickupDate
 from karrot.users.factories import VerifiedUserFactory
@@ -86,6 +89,18 @@ def get_or_create_application():
         )
 
     return application
+
+
+def get_or_create_offer():
+    offer = Offer.objects.order_by('?').first()
+
+    if offer is None:
+        user = VerifiedUserFactory()
+        group = random_group()
+        image_path = os.path.join(os.path.dirname(__file__), './offer.jpg')
+        offer = OfferFactory(group=group, user=user, images=[image_path])
+
+    return offer
 
 
 class Handlers:
@@ -214,6 +229,9 @@ class Handlers:
 
     def user_removal_from_group(self):
         return prepare_user_removal_from_group_email(user=random_user(), group=random_group())
+
+    def new_offer(self):
+        return prepare_new_offer_notification_email(user=random_user(), offer=get_or_create_offer())
 
 
 handlers = Handlers()
