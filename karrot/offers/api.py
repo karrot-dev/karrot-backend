@@ -126,7 +126,7 @@ class OfferViewSet(
     def get_permissions(self):
         if self.action == 'image':
             permission_classes = ()
-        elif self.action in ('list', 'retrieve'):
+        elif self.action in ('list', 'retrieve', 'conversation'):
             permission_classes = (IsAuthenticated, )
         else:
             permission_classes = (IsAuthenticated, IsOfferUser)
