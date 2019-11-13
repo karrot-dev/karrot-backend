@@ -275,7 +275,7 @@ def prepare_offer_message_notification(user, messages):
             user,
             messages,
             group=offer.group,
-            conversation_name=_('New message for offer %(offer_name) in %(group_name)s') % {
+            conversation_name=_('New message for offer %(offer_name)s in %(group_name)s') % {
                 'offer_name': offer.name,
                 'group_name': offer.group.name,
             },
