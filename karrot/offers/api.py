@@ -120,7 +120,7 @@ class OfferViewSet(
     def get_queryset(self):
         return self.queryset.filter(
             Q(group__members=self.request.user),
-            Q(user=self.request.user) | ~Q(status=OfferStatus.ARCHIVED.value),
+            Q(user=self.request.user) | Q(status=OfferStatus.ACTIVE.value),
         ).distinct()
 
     def get_permissions(self):
