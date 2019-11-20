@@ -5,6 +5,7 @@ import os
 import glob
 import sys
 from os.path import dirname, realpath, join
+import pkgutil
 
 process_mjml = '--no-mjml' not in sys.argv[1:]
 
@@ -30,6 +31,10 @@ environ = os.environ.copy()
 environ['PIP_EXISTS_ACTION'] = 'w'
 
 base = dirname(realpath(__file__))
+
+if 'piptools' not in [m.name for m in pkgutil.iter_modules()]:
+  header("Installing pip-tools")
+  subprocess.run(['pip', 'install', 'pip-tools'], env=environ, check=True)
 
 header("Installing python dependencies")
 subprocess.run(['pip-sync', 'requirements.txt'], env=environ, check=True)
