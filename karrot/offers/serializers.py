@@ -3,6 +3,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
+from karrot.offers import stats
 from karrot.offers.models import Offer, OfferImage
 
 
@@ -63,6 +64,7 @@ class OfferSerializer(serializers.ModelSerializer):
         offer = Offer.objects.create(**validated_data)
         for image in images:
             OfferImage.objects.create(offer=offer, **image)
+        stats.offer_created(offer)
         return offer
 
     def update(self, instance, validated_data):
