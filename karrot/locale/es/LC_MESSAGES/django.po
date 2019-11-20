@@ -9,6 +9,7 @@
 # Frido Hokkaido <kuerbiskernkotze@posteo.ee>, 2019
 # Carlos Pesquera Alonso <fydus@hotmail.com>, 2019
 # Tilmann Becker <tilmann.becker+github@gmail.com>, 2019
+# Lea Nolte <lea.marie@gmx.net>, 2019
 # 
 #, fuzzy
 msgid ""
@@ -16,7 +17,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
-"Last-Translator: Tilmann Becker <tilmann.becker+github@gmail.com>, 2019\n"
+"Last-Translator: Lea Nolte <lea.marie@gmx.net>, 2019\n"
 "Language-Team: Spanish (https://www.transifex.com/yunity-1/teams/68631/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -631,19 +632,19 @@ msgstr "Un proceso de resolución de problemas contigo ha empezado"
 
 #: karrot/offers/api.py:96
 msgid "You are not the owner of this offer"
-msgstr ""
+msgstr "No eres el dueño de esta oferta"
 
 #: karrot/offers/api.py:151
 msgid "You can only accept an active offer"
-msgstr ""
+msgstr "Solo puedes aceptar a ofertas activas"
 
 #: karrot/offers/api.py:165
 msgid "You can only archive an active offer"
-msgstr ""
+msgstr "Solamente se pueden archivar ofertas activas"
 
 #: karrot/offers/serializers.py:94
 msgid "Must have at least one image"
-msgstr ""
+msgstr "Tiene que contener mínimo una imagen"
 
 #: karrot/offers/templates/new_offer.html.jinja2:6
 #: karrot/offers/templates/new_offer.subject.jinja2:1
@@ -665,6 +666,8 @@ msgid ""
 "You are receiving this because you are subscribed to <strong>New "
 "Offer</strong> emails for this group."
 msgstr ""
+"Estas recibiendo esto porque le sigues a <strong>nueva "
+"oferta</strong>correos electrónicos de este grupo"
 
 #: karrot/offers/templates/new_offer.html.jinja2:278
 #, python-format
