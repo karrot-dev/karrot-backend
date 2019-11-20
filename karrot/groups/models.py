@@ -101,6 +101,7 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
         upload_to='group_photos',
         null=True,
     )
+    features = ArrayField(TextField(), default=list)
 
     @property
     def group(self):
