@@ -158,8 +158,7 @@ def notify_new_offer_push_subscribers_with_language(offer, subscriptions, langua
         language = 'en'
 
     with translation.override(language):
-        # TODO: make a nicer title... like "New offer..." blahblhablah
-        message_title = '🎁️ {} / {}'.format(offer.name, offer.user)
+        message_title = '🎁️ {} / {}'.format(offer.name, offer.user.display_name)
 
     notify_subscribers_by_device(
         subscriptions,
