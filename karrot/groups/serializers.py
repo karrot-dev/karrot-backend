@@ -327,6 +327,7 @@ class GroupMembershipAddNotificationTypeSerializer(serializers.Serializer):
             GroupNotificationType.WEEKLY_SUMMARY,
             GroupNotificationType.DAILY_PICKUP_NOTIFICATION,
             GroupNotificationType.NEW_APPLICATION,
+            GroupNotificationType.NEW_OFFER,
             GroupNotificationType.CONFLICT_RESOLUTION,
         )],
         required=True,
