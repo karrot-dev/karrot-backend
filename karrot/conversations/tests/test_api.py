@@ -8,12 +8,13 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from karrot.applications.factories import ApplicationFactory
-from karrot.issues.factories import IssueFactory
 from karrot.conversations.factories import ConversationFactory
 from karrot.conversations.models import ConversationParticipant, Conversation, ConversationMessage, \
     ConversationMessageReaction, ConversationMeta, ConversationNotificationStatus
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupStatus
+from karrot.issues.factories import IssueFactory
+from karrot.offers.factories import OfferFactory
 from karrot.pickups.factories import PickupDateFactory
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import execute_scheduled_tasks_immediately
@@ -67,15 +68,16 @@ class TestConversationsAPI(APITestCase):
         pickup = PickupDateFactory(place=place)
         application = ApplicationFactory(user=UserFactory(), group=group)
         issue = IssueFactory(group=group)
+        offer = OfferFactory(group=group)
 
-        conversations = [t.conversation for t in (group, pickup, application, issue)]
+        conversations = [t.conversation for t in (group, pickup, application, issue, offer)]
         [c.sync_users([user]) for c in conversations]
         [c.messages.create(content='hey', author=user) for c in conversations]
 
         ConversationMeta.objects.get_or_create(user=user)
 
         self.client.force_login(user=user)
-        with self.assertNumQueries(13):
+        with self.assertNumQueries(15):
             response = self.client.get('/api/conversations/', {'group': group.id}, format='json')
         results = response.data['results']
 
@@ -83,6 +85,7 @@ class TestConversationsAPI(APITestCase):
         self.assertEqual(results['pickups'][0]['id'], pickup.id)
         self.assertEqual(results['applications'][0]['id'], application.id)
         self.assertEqual(results['issues'][0]['id'], issue.id)
+        self.assertEqual(results['offers'][0]['id'], offer.id)
 
     def test_list_only_unread_conversations(self):
         self.conversation1.messages.create(author=self.participant2, content='unread')

@@ -96,6 +96,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'active_agreement',
             'status',
             'theme',
+            'features',
             'notification_types',
             'is_open',
             'trust_threshold_for_newcomer',
@@ -126,6 +127,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'notification_types',
             'is_open',
             'theme',
+            'features',
         ]
 
     def validate_active_agreement(self, active_agreement):

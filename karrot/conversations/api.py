@@ -29,6 +29,8 @@ from karrot.conversations.serializers import (
 )
 from karrot.issues.models import Issue
 from karrot.issues.serializers import IssueSerializer
+from karrot.offers.models import Offer
+from karrot.offers.serializers import OfferSerializer
 from karrot.pickups.models import PickupDate
 from karrot.pickups.serializers import PickupDateSerializer
 from karrot.users.serializers import UserInfoSerializer
@@ -170,6 +172,12 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
             filter(id__in=[c.target_id for c in issue_conversations]). \
             prefetch_for_serializer(user=request.user)
 
+        offers_ct = ContentType.objects.get_for_model(Offer)
+        offer_conversations = [item for item in conversations if item.target_type == offers_ct]
+        offers = Offer.objects. \
+            filter(id__in=[c.target_id for c in offer_conversations]). \
+            prefetch_related('images')
+
         # Applicant does not have access to group member profiles, so we attach reduced user profiles
         my_applications = [a for a in applications if a.user == request.user]
 
@@ -186,6 +194,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
         pickups_serializer = PickupDateSerializer(pickups, many=True, context=context)
         application_serializer = ApplicationSerializer(applications, many=True, context=context)
         issue_serializer = IssueSerializer(issues, many=True, context=context)
+        offer_serializer = OfferSerializer(offers, many=True, context=context)
         user_serializer = UserInfoSerializer(users, many=True, context=context)
         meta, _ = ConversationMeta.objects.get_or_create(user=request.user)
         meta_serializer = ConversationMetaSerializer(meta, context=self.get_serializer_context())
@@ -196,6 +205,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
             'pickups': pickups_serializer.data,
             'applications': application_serializer.data,
             'issues': issue_serializer.data,
+            'offers': offer_serializer.data,
             'users_info': user_serializer.data,
             'meta': meta_serializer.data,
         })

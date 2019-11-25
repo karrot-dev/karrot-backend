@@ -15,6 +15,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from karrot.conversations.api import RetrieveConversationMixin
+from karrot.offers import stats
 from karrot.offers.models import Offer, OfferImage, OfferStatus
 from karrot.offers.serializers import OfferSerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
@@ -120,7 +121,7 @@ class OfferViewSet(
     def get_queryset(self):
         return self.queryset.filter(
             Q(group__members=self.request.user),
-            Q(user=self.request.user) | ~Q(status=OfferStatus.ARCHIVED.value),
+            Q(user=self.request.user) | Q(status=OfferStatus.ACTIVE.value),
         ).distinct()
 
     def get_permissions(self):
@@ -150,6 +151,7 @@ class OfferViewSet(
         if offer.status != OfferStatus.ACTIVE.value:
             raise ValidationError(_('You can only accept an active offer'))
         offer.accept()
+        stats.offer_accepted(offer)
         serializer = self.get_serializer(offer)
         return Response(data=serializer.data)
 
@@ -164,6 +166,7 @@ class OfferViewSet(
         if offer.status != OfferStatus.ACTIVE.value:
             raise ValidationError(_('You can only archive an active offer'))
         offer.archive()
+        stats.offer_archived(offer)
         serializer = self.get_serializer(offer)
         return Response(data=serializer.data)
 
