@@ -75,7 +75,7 @@ class TestConversationsAPI(APITestCase):
         ConversationMeta.objects.get_or_create(user=user)
 
         self.client.force_login(user=user)
-        with self.assertNumQueries(13):
+        with self.assertNumQueries(14):
             response = self.client.get('/api/conversations/', {'group': group.id}, format='json')
         results = response.data['results']
 
