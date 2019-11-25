@@ -8,7 +8,7 @@ class GroupNotificationType(object):
 def enable_new_offer_notifications(apps, schema_editor):
     GroupMembership = apps.get_model('groups', 'GroupMembership')
 
-    for membership in GroupMembership.objects.all():
+    for membership in GroupMembership.objects.exclude_playgrounds():
         if GroupNotificationType.NEW_OFFER not in membership.notification_types:
             membership.notification_types.append(GroupNotificationType.NEW_OFFER)
             membership.save()
