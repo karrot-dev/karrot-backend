@@ -123,26 +123,26 @@ msgid ""
 "%(site_name)s</a>, or <a href=\"%(mute_url)s\">mute the conversation</a>."
 msgstr ""
 
-#: karrot/conversations/api.py:61 karrot/conversations/api.py:232
-#: karrot/conversations/api.py:403 karrot/conversations/serializers.py:147
+#: karrot/conversations/api.py:63 karrot/conversations/api.py:242
+#: karrot/conversations/api.py:413 karrot/conversations/serializers.py:147
 msgid "You are not in this conversation"
 msgstr "તમે આ વાર્તાલાપમાં નથી"
 
-#: karrot/conversations/api.py:70
+#: karrot/conversations/api.py:72
 msgid "You are not the author of this message"
 msgstr ""
 
-#: karrot/conversations/api.py:79
+#: karrot/conversations/api.py:81
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
 msgstr ""
 
-#: karrot/conversations/api.py:331
+#: karrot/conversations/api.py:341
 msgid "Must be first in thread"
 msgstr ""
 
-#: karrot/conversations/api.py:334
+#: karrot/conversations/api.py:344
 msgid "You are not a participant in this thread"
 msgstr ""
 
@@ -222,15 +222,15 @@ msgstr "અજ્ઞાત ટાઇમઝોન"
 msgid "Playground"
 msgstr ""
 
-#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:231
+#: karrot/groups/serializers.py:138 karrot/groups/serializers.py:233
 msgid "You cannot manage agreements"
 msgstr "તમે કરારનું સંચાલન કરી શકતા નથી"
 
-#: karrot/groups/serializers.py:138
+#: karrot/groups/serializers.py:140
 msgid "Agreement is not for this group"
 msgstr "કરાર આ જૂથ માટે નથી"
 
-#: karrot/groups/serializers.py:229
+#: karrot/groups/serializers.py:231
 msgid "You are not in this group"
 msgstr "તમે આ જૂથમાં નથી"
 
@@ -433,7 +433,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "આ ઈ-મેલ સરનામા પર એક આમંત્રણ મોકલવામાં આવ્યું છે"
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:122
-#: karrot/offers/serializers.py:99 karrot/places/serializers.py:78
+#: karrot/offers/serializers.py:101 karrot/places/serializers.py:78
 msgid "You are not a member of this group."
 msgstr "તમે આ જૂથનો સભ્ય નથી"
 
@@ -570,19 +570,19 @@ msgstr ""
 msgid "A conflict resolution process was started with you"
 msgstr ""
 
-#: karrot/offers/api.py:96
+#: karrot/offers/api.py:97
 msgid "You are not the owner of this offer"
 msgstr ""
 
-#: karrot/offers/api.py:151
+#: karrot/offers/api.py:152
 msgid "You can only accept an active offer"
 msgstr ""
 
-#: karrot/offers/api.py:165
+#: karrot/offers/api.py:167
 msgid "You can only archive an active offer"
 msgstr ""
 
-#: karrot/offers/serializers.py:94
+#: karrot/offers/serializers.py:96
 msgid "Must have at least one image"
 msgstr ""
 

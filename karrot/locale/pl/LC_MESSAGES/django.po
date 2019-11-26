@@ -130,27 +130,27 @@ msgstr ""
 "href=\"%(conversation_url)s\">otwórz w %(site_name)s</a> lub <a "
 "href=\"%(mute_url)s\">wycisz konwersację</a>."
 
-#: karrot/conversations/api.py:61 karrot/conversations/api.py:232
-#: karrot/conversations/api.py:403 karrot/conversations/serializers.py:147
+#: karrot/conversations/api.py:63 karrot/conversations/api.py:242
+#: karrot/conversations/api.py:413 karrot/conversations/serializers.py:147
 msgid "You are not in this conversation"
 msgstr "Nie ma Cię w tej konwersacji"
 
-#: karrot/conversations/api.py:70
+#: karrot/conversations/api.py:72
 msgid "You are not the author of this message"
 msgstr "Nie jesteś autorką/autorem tej wiadomości"
 
-#: karrot/conversations/api.py:79
+#: karrot/conversations/api.py:81
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
 msgstr ""
 "Nie możesz edytować wiadomości po %(days_number)s dniach od jej utworzenia"
 
-#: karrot/conversations/api.py:331
+#: karrot/conversations/api.py:341
 msgid "Must be first in thread"
 msgstr ""
 
-#: karrot/conversations/api.py:334
+#: karrot/conversations/api.py:344
 msgid "You are not a participant in this thread"
 msgstr "Nie uczestniczysz w tym wątku"
 
@@ -235,15 +235,15 @@ msgstr "Nieznana strefa czasowa"
 msgid "Playground"
 msgstr "Piaskownica"
 
-#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:231
+#: karrot/groups/serializers.py:138 karrot/groups/serializers.py:233
 msgid "You cannot manage agreements"
 msgstr "Nie możesz zarządzać umowami"
 
-#: karrot/groups/serializers.py:138
+#: karrot/groups/serializers.py:140
 msgid "Agreement is not for this group"
 msgstr "Ta umowa nie jest dla tej grupy"
 
-#: karrot/groups/serializers.py:229
+#: karrot/groups/serializers.py:231
 msgid "You are not in this group"
 msgstr "Nie jesteś w tej grupie"
 
@@ -458,7 +458,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "Na ten adres e-mail już wcześniej wysłano zaproszenie"
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:122
-#: karrot/offers/serializers.py:99 karrot/places/serializers.py:78
+#: karrot/offers/serializers.py:101 karrot/places/serializers.py:78
 msgid "You are not a member of this group."
 msgstr "Nie jesteś członkiem tej grupy."
 
@@ -597,19 +597,19 @@ msgstr ""
 msgid "A conflict resolution process was started with you"
 msgstr ""
 
-#: karrot/offers/api.py:96
+#: karrot/offers/api.py:97
 msgid "You are not the owner of this offer"
 msgstr ""
 
-#: karrot/offers/api.py:151
+#: karrot/offers/api.py:152
 msgid "You can only accept an active offer"
 msgstr ""
 
-#: karrot/offers/api.py:165
+#: karrot/offers/api.py:167
 msgid "You can only archive an active offer"
 msgstr ""
 
-#: karrot/offers/serializers.py:94
+#: karrot/offers/serializers.py:96
 msgid "Must have at least one image"
 msgstr ""
 
