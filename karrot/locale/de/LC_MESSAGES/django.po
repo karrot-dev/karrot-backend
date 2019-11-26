@@ -135,16 +135,16 @@ msgstr ""
 "besuchen</a> oder <a href=\"%(mute_url)s\">die Unterhaltung "
 "stummschalten</a>."
 
-#: karrot/conversations/api.py:61 karrot/conversations/api.py:232
-#: karrot/conversations/api.py:403 karrot/conversations/serializers.py:147
+#: karrot/conversations/api.py:63 karrot/conversations/api.py:242
+#: karrot/conversations/api.py:413 karrot/conversations/serializers.py:147
 msgid "You are not in this conversation"
 msgstr "Du bist nicht Teil dieser Unterhaltung"
 
-#: karrot/conversations/api.py:70
+#: karrot/conversations/api.py:72
 msgid "You are not the author of this message"
 msgstr "Du bist nicht Autor dieser Nachricht"
 
-#: karrot/conversations/api.py:79
+#: karrot/conversations/api.py:81
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
@@ -152,11 +152,11 @@ msgstr ""
 "Du kannst eine Nachricht nicht mehr als %(days_number)s Tage nach ihrer "
 "Erstellung bearbeiten."
 
-#: karrot/conversations/api.py:331
+#: karrot/conversations/api.py:341
 msgid "Must be first in thread"
 msgstr "Muss erste Nachricht im Thread sein"
 
-#: karrot/conversations/api.py:334
+#: karrot/conversations/api.py:344
 msgid "You are not a participant in this thread"
 msgstr "Du bist nicht Teil dieses Threads"
 
@@ -240,15 +240,15 @@ msgstr "Unbekannte Zeitzone"
 msgid "Playground"
 msgstr "Spielplatz"
 
-#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:231
+#: karrot/groups/serializers.py:138 karrot/groups/serializers.py:233
 msgid "You cannot manage agreements"
 msgstr "Du darfst die Vereinbarungen nicht ändern"
 
-#: karrot/groups/serializers.py:138
+#: karrot/groups/serializers.py:140
 msgid "Agreement is not for this group"
 msgstr "Vereinbarung gehört nicht zu dieser Gruppe."
 
-#: karrot/groups/serializers.py:229
+#: karrot/groups/serializers.py:231
 msgid "You are not in this group"
 msgstr "Du bist nicht Mitglied dieser Gruppe."
 
@@ -483,7 +483,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "Eine Einladung wurde bereits an diese E-Mail-Adresse versendet"
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:122
-#: karrot/offers/serializers.py:99 karrot/places/serializers.py:78
+#: karrot/offers/serializers.py:101 karrot/places/serializers.py:78
 msgid "You are not a member of this group."
 msgstr "Du bist kein Mitglied dieser Gruppe."
 
@@ -631,19 +631,19 @@ msgstr "Diese Abstimmungsrunde endet am %(expiry_date)s."
 msgid "A conflict resolution process was started with you"
 msgstr "Ein Konfliktlösungsprozess mit dir wurde gestartet"
 
-#: karrot/offers/api.py:96
+#: karrot/offers/api.py:97
 msgid "You are not the owner of this offer"
 msgstr ""
 
-#: karrot/offers/api.py:151
+#: karrot/offers/api.py:152
 msgid "You can only accept an active offer"
 msgstr ""
 
-#: karrot/offers/api.py:165
+#: karrot/offers/api.py:167
 msgid "You can only archive an active offer"
 msgstr ""
 
-#: karrot/offers/serializers.py:94
+#: karrot/offers/serializers.py:96
 msgid "Must have at least one image"
 msgstr ""
 
