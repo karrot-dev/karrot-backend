@@ -94,7 +94,7 @@ pep562==1.0               # via pymdown-extensions
 pexpect==4.7.0            # via ipython
 pickleshare==0.7.5        # via ipython
 pillow==6.2.1             # via django-versatileimagefield
-pip-tools==4.2.0
+pip-tools==4.3.0
 pluggy==0.13.0            # via pytest
 prompt-toolkit==2.0.10    # via ipython
 psutil==5.6.5             # via python-server-metrics
@@ -147,4 +147,4 @@ zipp==0.6.0               # via importlib-metadata
 zope.interface==4.7.1     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==42.0.0        # via ipython, markdown, pyhamcrest, zope.interface
+# setuptools==42.0.1        # via ipython, markdown, pyhamcrest, zope.interface
