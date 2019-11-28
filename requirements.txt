@@ -75,7 +75,7 @@ importlib-metadata==0.23  # via pluggy, pytest
 incremental==17.5.0       # via twisted
 influxdb==5.2.3
 ipython-genutils==0.2.0   # via traitlets
-ipython==7.9.0
+ipython==7.10.0
 itypes==1.1.0             # via coreapi
 jedi==0.15.1              # via ipython
 jinja2==2.10.3            # via coreschema, django-jinja, django-silk
@@ -147,4 +147,4 @@ zipp==0.6.0               # via importlib-metadata
 zope.interface==4.7.1     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==42.0.0        # via ipython, markdown, pyhamcrest, zope.interface
+# setuptools
