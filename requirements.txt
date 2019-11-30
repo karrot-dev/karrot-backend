@@ -13,7 +13,6 @@ apipkg==1.5               # via execnet
 argon2-cffi==19.2.0       # via django
 asgiref==3.2.3            # via channels, channels-redis, daphne
 async-timeout==3.0.1      # via aioredis
-atomicwrites==1.3.0       # via pytest
 attrs==19.3.0             # via automat, glom, pytest, service-identity, twisted
 autobahn==19.11.1         # via daphne
 autoflake==1.3.1
@@ -24,8 +23,8 @@ backcall==0.1.0           # via ipython
 bleach-whitelist==0.0.10
 bleach==3.1.0
 boltons==19.3.0           # via face, glom
-cchardet==2.1.4
-certifi==2019.9.11        # via requests
+cchardet==2.1.5
+certifi==2019.11.28       # via requests
 cffi==1.13.2              # via argon2-cffi, cryptography
 channels-redis==2.4.1
 channels==2.3.1
@@ -57,13 +56,13 @@ entrypoints==0.3          # via flake8
 execnet==1.7.1            # via pytest-xdist
 face==19.1.2              # via glom
 factory-boy==2.12.0
-faker==2.0.3              # via factory-boy
+faker==2.0.4              # via factory-boy
 flake8==3.7.9
 freezegun==0.3.12
 furl==2.1.0
 gevent==1.4.0
 glom==19.10.0
-gprof2dot==2017.9.19      # via django-silk
+gprof2dot==2019.11.30     # via django-silk
 greenlet==0.4.15          # via gevent
 hiredis==1.0.1
 html2text==2019.9.26
@@ -71,20 +70,20 @@ html5lib==1.0.1
 huey==2.1.3
 hyperlink==19.0.0         # via twisted
 idna==2.8                 # via hyperlink, requests, twisted
-importlib-metadata==0.23  # via pluggy, pytest
+importlib-metadata==1.0.0  # via pluggy, pytest
 incremental==17.5.0       # via twisted
 influxdb==5.2.3
 ipython-genutils==0.2.0   # via traitlets
-ipython==7.9.0
+ipython==7.10.0
 itypes==1.1.0             # via coreapi
 jedi==0.15.1              # via ipython
 jinja2==2.10.3            # via coreschema, django-jinja, django-silk
 logging-tree==1.8
-lxml==4.4.1
+lxml==4.4.2
 markdown==3.1.1
 markupsafe==1.1.1         # via jinja2
 mccabe==0.6.1             # via flake8
-more-itertools==7.2.0
+more-itertools==8.0.0
 msgpack==0.6.2            # via channels-redis
 openapi-codec==1.3.2
 orderedmultidict==1.0.1   # via furl
@@ -94,10 +93,10 @@ pep562==1.0               # via pymdown-extensions
 pexpect==4.7.0            # via ipython
 pickleshare==0.7.5        # via ipython
 pillow==6.2.1             # via django-versatileimagefield
-pip-tools==4.2.0
-pluggy==0.13.0            # via pytest
-prompt-toolkit==2.0.10    # via ipython
-psutil==5.6.5             # via python-server-metrics
+pip-tools==4.3.0
+pluggy==0.13.1            # via pytest
+prompt-toolkit==3.0.2     # via ipython
+psutil==5.6.7             # via python-server-metrics
 psycopg2-binary==2.8.4
 ptyprocess==0.6.0         # via pexpect
 py==1.8.0                 # via pytest
@@ -107,7 +106,7 @@ pycodestyle==2.5.0        # via autopep8, flake8
 pycparser==2.19           # via cffi
 pyfcm==1.4.7
 pyflakes==2.1.1           # via autoflake, flake8
-pygments==2.4.2           # via django-silk, ipython
+pygments==2.5.2           # via django-silk, ipython
 pyhamcrest==1.9.0         # via twisted
 pymdown-extensions==6.2
 pyopenssl==19.1.0         # via twisted
@@ -117,7 +116,7 @@ pytest-cov==2.8.1
 pytest-django==3.7.0
 pytest-forked==1.1.3      # via pytest-xdist
 pytest-xdist==1.30.0
-pytest==5.2.2             # via pytest-asyncio, pytest-cov, pytest-django, pytest-forked, pytest-xdist
+pytest==5.3.1             # via pytest-asyncio, pytest-cov, pytest-django, pytest-forked, pytest-xdist
 python-dateutil==2.8.1    # via django-silk, faker, freezegun, influxdb
 python-magic==0.4.15      # via django-versatileimagefield
 python-server-metrics==0.2.1
@@ -128,12 +127,12 @@ regex==2019.11.1
 requests-mock==1.7.0
 requests==2.22.0
 service-identity==18.1.0  # via twisted
-simplejson==3.16.0
-six==1.13.0               # via argon2-cffi, autobahn, automat, bleach, cryptography, django-enumfield, django-extensions, djangorestframework-csv, faker, freezegun, furl, html5lib, influxdb, orderedmultidict, packaging, pip-tools, prompt-toolkit, pyhamcrest, pyopenssl, pytest-xdist, python-dateutil, requests-mock, tld, traitlets, txaio
+simplejson==3.17.0
+six==1.13.0               # via argon2-cffi, autobahn, automat, bleach, cryptography, django-enumfield, django-extensions, djangorestframework-csv, faker, freezegun, furl, html5lib, influxdb, orderedmultidict, packaging, pip-tools, pyhamcrest, pyopenssl, pytest-xdist, python-dateutil, requests-mock, tld, traitlets, txaio
 sqlparse==0.3.0           # via django, django-silk
 tblib==1.5.0
 text-unidecode==1.3       # via faker
-tld==0.9.7
+tld==0.10
 traitlets==4.3.3          # via ipython
 twisted[tls]==19.10.0     # via daphne
 txaio==18.8.1             # via autobahn
@@ -142,9 +141,9 @@ uritemplate==3.0.0        # via coreapi
 urllib3==1.25.7           # via requests
 wcwidth==0.1.7            # via prompt-toolkit, pytest
 webencodings==0.5.1       # via bleach, html5lib
-yapf==0.28.0
+yapf==0.29.0
 zipp==0.6.0               # via importlib-metadata
 zope.interface==4.7.1     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==42.0.0        # via ipython, markdown, pyhamcrest, zope.interface
+# setuptools
