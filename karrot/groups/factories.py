@@ -17,7 +17,10 @@ class GroupFactory(DjangoModelFactory):
         if created and extracted:
             for member in extracted:
                 membership = self.groupmembership_set.create(user=member, roles=[roles.GROUP_EDITOR])
-                membership.add_notification_types([GroupNotificationType.NEW_APPLICATION])
+                membership.add_notification_types([
+                    GroupNotificationType.NEW_APPLICATION,
+                    GroupNotificationType.NEW_OFFER,
+                ])
                 membership.save()
 
     @post_generation
