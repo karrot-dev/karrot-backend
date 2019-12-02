@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -13,4 +14,12 @@ def offer_saved(sender, instance, created, **kwargs):
         conversation = Conversation.objects.get_or_create_for_target(offer)
         conversation.join(offer.user)
 
-        notify_members_about_new_offer(offer)
+        def notify():
+            notify_members_about_new_offer(offer)
+
+        # offer saving is normally done in a transaction so as to include the images
+        # we only want to trigger the notification after this transaction is complete
+        if transaction.get_connection().in_atomic_block:
+            transaction.on_commit(notify)
+        else:
+            notify()
