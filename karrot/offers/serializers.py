@@ -62,7 +62,7 @@ class OfferSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         images = validated_data.pop('images')
-        # Save the offer and it's associated images in one transaction
+        # Save the offer and its associated images in one transaction
         # Allows us to trigger the notifications in the receiver only after all is saved
         with transaction.atomic():
             offer = Offer.objects.create(**validated_data)
