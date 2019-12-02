@@ -1,13 +1,14 @@
 import json
 import os
 from io import StringIO
+from unittest.mock import patch
 
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APITransactionTestCase
 
 from karrot.groups.factories import GroupFactory
 from karrot.offers.factories import OfferFactory
-from karrot.users.factories import UserFactory
+from karrot.users.factories import UserFactory, VerifiedUserFactory
 from karrot.utils.tests.fake import faker
 
 image_path = os.path.join(os.path.dirname(__file__), './photo.jpg')
@@ -163,6 +164,31 @@ class TestOffersAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         by_id = {image['id']: image for image in response.data['images']}
         self.assertEqual(by_id[image_id]['position'], new_position)
+
+
+@patch('karrot.offers.emails.prepare_email')
+class TestOffersTransactionAPI(APITransactionTestCase):
+    def setUp(self):
+        self.user = VerifiedUserFactory()
+        self.another_user = VerifiedUserFactory()
+        self.group = GroupFactory(members=[self.user, self.another_user])
+
+    def test_create_offer(self, prepare_email):
+        self.client.force_login(user=self.user)
+        with open(image_path, 'rb') as image_file:
+            data = {
+                'name': faker.name(),
+                'description': faker.text(),
+                'group': self.group.id,
+                'images': [{
+                    'position': 0,
+                    'image': image_file
+                }],
+            }
+            response = self.client.post('/api/offers/', data=encode_offer_data(data))
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+            args, kwargs = prepare_email.call_args
+            self.assertIsNotNone(kwargs['context']['offer_photo'])
 
 
 class TestListOffersAPI(APITestCase):

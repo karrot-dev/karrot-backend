@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
@@ -61,9 +62,12 @@ class OfferSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         images = validated_data.pop('images')
-        offer = Offer.objects.create(**validated_data)
-        for image in images:
-            OfferImage.objects.create(offer=offer, **image)
+        # Save the offer and its associated images in one transaction
+        # Allows us to trigger the notifications in the receiver only after all is saved
+        with transaction.atomic():
+            offer = Offer.objects.create(**validated_data)
+            for image in images:
+                OfferImage.objects.create(offer=offer, **image)
         stats.offer_created(offer)
         return offer
 

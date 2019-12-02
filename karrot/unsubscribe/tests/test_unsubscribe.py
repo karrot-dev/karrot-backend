@@ -89,6 +89,7 @@ class TestUnsubscribeFromAllConversationsInGroup(TestCase):
                 'weekly_summary',
                 'daily_pickup_notification',
                 'new_application',
+                'new_offer',
             ]
         )
         unsubscribe_from_all_conversations_in_group(self.user, self.group)
