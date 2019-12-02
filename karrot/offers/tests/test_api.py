@@ -187,7 +187,7 @@ class TestOffersTransactionAPI(APITransactionTestCase):
             }
             response = self.client.post('/api/offers/', data=encode_offer_data(data))
             self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
-            kwargs = prepare_email.call_args.kwargs
+            args, kwargs = prepare_email.call_args
             self.assertIsNotNone(kwargs['context']['offer_photo'])
 
 
