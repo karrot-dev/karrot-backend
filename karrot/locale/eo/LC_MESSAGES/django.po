@@ -470,7 +470,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "Invito jam sendita al tiu ĉi retadreso"
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:122
-#: karrot/offers/serializers.py:101 karrot/places/serializers.py:78
+#: karrot/offers/serializers.py:105 karrot/places/serializers.py:78
 msgid "You are not a member of this group."
 msgstr "Vi ne anas en ĉi tiu grupo"
 
@@ -627,7 +627,7 @@ msgstr ""
 msgid "You can only archive an active offer"
 msgstr ""
 
-#: karrot/offers/serializers.py:96
+#: karrot/offers/serializers.py:100
 msgid "Must have at least one image"
 msgstr ""
 
