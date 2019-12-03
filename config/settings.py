@@ -99,6 +99,7 @@ INSTALLED_APPS = (
     'karrot.template_previews',
     'karrot.webhooks.WebhooksConfig',
     'karrot.notifications.NotificationsConfig',
+    'karrot.stats',
 
     # Django packages
     'django_extensions',
