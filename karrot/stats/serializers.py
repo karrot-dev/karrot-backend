@@ -8,7 +8,10 @@ class StatsEntrySerializer(serializers.Serializer):
     first_load = serializers.BooleanField()
     logged_in = serializers.BooleanField()
     mobile = serializers.BooleanField()
-    route = serializers.CharField()
+    group = serializers.IntegerField(allow_null=True)
+    route_name = serializers.CharField()
+    route_path = serializers.CharField()
+    route_params = serializers.DictField(allow_empty=True)
     ms = serializers.IntegerField()
 
 

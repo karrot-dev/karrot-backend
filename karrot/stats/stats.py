@@ -2,13 +2,17 @@ from influxdb_metrics.loader import write_points
 
 
 def convert_stat(stat):
-    ms = stat.pop('ms')
+    tags = dict(stat)
+    ms = tags.pop('ms')
+    route_params = tags.pop('route_params')
+    for key, value in route_params.items():
+        tags['route_params__{}'.format(key)] = value
     return {
         'measurement': 'karrot.stats.frontend',
         'fields': {
             'ms': ms,
         },
-        'tags': stat,
+        'tags': tags,
     }
 
 

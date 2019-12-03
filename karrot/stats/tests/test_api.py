@@ -13,19 +13,31 @@ def generate_stats(n):
         'first_load': random.choice([True, False]),
         'logged_in': random.choice([True, False]),
         'mobile': random.choice([True, False]),
-        'route': faker.name(),
+        'group': random.choice([random.randint(1, 100), None]),
+        'route_name': faker.name(),
+        'route_path': faker.name(),
+        'route_params': {
+            'group_id': 3,
+        }
     } for n in range(n)]
 
 
 @patch('karrot.stats.stats.write_points')
 class TestStatsInfoAPI(APITestCase):
     def test_writing_a_point(self, write_points):
+        self.maxDiff = None
         stat = {
             'ms': 1000,
             'first_load': True,
             'logged_in': True,
             'mobile': False,
-            'route': 'group',
+            'group': 1,
+            'route_name': 'group',
+            'route_path': '/group',
+            'route_params': {
+                'group_id': 5,
+                'foo': 'bar',
+            }
         }
         response = self.client.post('/api/stats/', data={'stats': [stat]}, format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.data)
@@ -40,7 +52,11 @@ class TestStatsInfoAPI(APITestCase):
                 'first_load': True,
                 'logged_in': True,
                 'mobile': False,
-                'route': 'group',
+                'group': 1,
+                'route_name': 'group',
+                'route_path': '/group',
+                'route_params__group_id': 5,
+                'route_params__foo': 'bar',
             }
         }])
 
