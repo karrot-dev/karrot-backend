@@ -1,6 +1,6 @@
 from anymail.exceptions import AnymailAPIError
 from django.contrib.auth import logout, update_session_auth_hash
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.middleware.csrf import get_token as generate_csrf_token_for_frontend
 from rest_framework import status, generics, views
 from rest_framework.pagination import CursorPagination

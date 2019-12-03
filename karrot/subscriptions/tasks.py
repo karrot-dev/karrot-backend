@@ -3,7 +3,7 @@ from itertools import groupby
 from babel.dates import format_date, format_time
 from django.utils import timezone, translation
 from django.utils.text import Truncator
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from furl import furl
 from huey.contrib.djhuey import db_task
 

@@ -1,7 +1,7 @@
 import pytz
 from django.conf import settings
 from django.template.loader import render_to_string
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from versatileimagefield.serializers import VersatileImageFieldSerializer

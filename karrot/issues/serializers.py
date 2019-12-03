@@ -2,7 +2,7 @@ from django.conf import settings
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from karrot.issues.models import Issue, Voting, Vote, Option
 

@@ -3,7 +3,7 @@ import json
 import glom
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
 from rest_framework import mixins
 from rest_framework.decorators import action

@@ -1,5 +1,5 @@
 from django.db import transaction
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 from versatileimagefield.serializers import VersatileImageFieldSerializer

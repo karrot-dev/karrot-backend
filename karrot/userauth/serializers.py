@@ -1,7 +1,7 @@
 from anymail.exceptions import AnymailAPIError
 from django.conf import settings
 from django.contrib.auth import authenticate, login, get_user_model
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
