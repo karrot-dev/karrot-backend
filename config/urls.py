@@ -31,6 +31,7 @@ from karrot.userauth.api import AuthUserView, AuthView, LogoutView, \
     RequestResetPasswordView, ChangePasswordView, VerifyMailView, ResendMailVerificationCodeView, ResetPasswordView, \
     ChangeMailView, RequestDeleteUserView, FailedEmailDeliveryView
 from karrot.users.api import UserViewSet, UserInfoViewSet
+from karrot.stats.api import StatsView
 from rest_framework_swagger.views import get_swagger_view
 
 router = DefaultRouter()
@@ -92,6 +93,7 @@ urlpatterns = [
     path('api/auth/password/reset/', ResetPasswordView.as_view()),
     path('api/unsubscribe/<token>/', TokenUnsubscribeView.as_view()),
     path('api/auth/', AuthView.as_view()),
+    path('api/stats/', StatsView.as_view()),
     path('api/', include((router.urls))),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('admin/docs/', include('django.contrib.admindocs.urls')),
