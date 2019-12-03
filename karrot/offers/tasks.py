@@ -13,6 +13,8 @@ def notify_members_about_new_offer(offer):
         groupmembership__in=GroupMembership.objects.active().with_notification_type(GroupNotificationType.NEW_OFFER),
     ).exclude(
         id__in=get_user_model().objects.unverified_or_ignored(),
+    ).exclude(
+        id=offer.user.id
     )
 
     for user in users:
