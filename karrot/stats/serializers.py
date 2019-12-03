@@ -13,6 +13,7 @@ class StatsEntrySerializer(serializers.Serializer):
     route_path = serializers.CharField()
     route_params = serializers.DictField(allow_empty=True)
     ms = serializers.IntegerField()
+    ms_resources = serializers.IntegerField()
 
 
 class StatsSerializer(serializers.Serializer):

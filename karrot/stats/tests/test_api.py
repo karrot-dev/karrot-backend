@@ -10,6 +10,7 @@ from karrot.utils.tests.fake import faker
 def generate_stats(n):
     return [{
         'ms': random.randint(1, 3000),
+        'ms_resources': random.randint(1, 3000),
         'first_load': random.choice([True, False]),
         'logged_in': random.choice([True, False]),
         'mobile': random.choice([True, False]),
@@ -28,6 +29,7 @@ class TestStatsInfoAPI(APITestCase):
         self.maxDiff = None
         stat = {
             'ms': 1000,
+            'ms_resources': 5000,
             'first_load': True,
             'logged_in': True,
             'mobile': False,
@@ -47,6 +49,7 @@ class TestStatsInfoAPI(APITestCase):
             'measurement': 'karrot.stats.frontend',
             'fields': {
                 'ms': stat['ms'],
+                'ms_resources': stat['ms_resources'],
             },
             'tags': {
                 'first_load': True,
