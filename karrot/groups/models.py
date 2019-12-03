@@ -107,6 +107,10 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
     def group(self):
         return self
 
+    @property
+    def conversation_supports_threads(self):
+        return True
+
     def __str__(self):
         return 'Group {}'.format(self.name)
 

@@ -86,18 +86,27 @@ def notify_place_conversation_participants(message):
 
 @db_task()
 def notify_participants(message):
-    # send individual notification emails for group conversation message,
-    # because replies via email will go into a thread
-    if message.conversation.type() == 'group' and not message.is_thread_reply():
-        notify_group_conversation_participants(message)
-        return
+    conversation = message.conversation
 
-    if message.conversation.type() == 'place' and not message.is_thread_reply():
-        notify_place_conversation_participants(message)
-        return
+    # send individual notification emails for conversations that supports threads,
+    # as replies via email will go into a thread
+    if conversation.target and conversation.target.conversation_supports_threads and not message.is_thread_reply():
+        target_type = conversation.type()
+        if target_type == 'group':
+            notify_group_conversation_participants(message)
+            return
+
+        if target_type == 'place':
+            notify_place_conversation_participants(message)
+            return
+
+        raise Exception(
+            f'Conversation with target "{target_type}" supports threads,'
+            f' but no notification template has been configured.'
+        )
 
     # skip this notification if this is not the most recent message, allows us to batch messages
-    all_messages = message.conversation.messages
+    all_messages = conversation.messages
     if message.is_thread_reply():
         latest_message = all_messages.only_replies().latest('created_at')
     else:

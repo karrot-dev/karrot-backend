@@ -1,3 +1,5 @@
+from email.utils import parseaddr
+
 from django.core import mail
 from django.db import IntegrityError
 from django.test import TestCase
@@ -12,6 +14,7 @@ from karrot.pickups.factories import PickupDateFactory
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import execute_scheduled_tasks_immediately
 from karrot.users.factories import UserFactory, VerifiedUserFactory
+from karrot.webhooks.utils import parse_local_part
 
 
 class ConversationModelTests(TestCase):
@@ -282,6 +285,23 @@ class TestGroupConversation(TestCase):
         group = GroupFactory(members=[user])
         conversation = Conversation.objects.get_or_create_for_target(group)
         self.assertEqual(conversation.group, group)
+
+    def test_email_notification_reply_to_has_thread_id(self):
+        user = VerifiedUserFactory()
+        user2 = VerifiedUserFactory()
+        group = GroupFactory(members=[user, user2])
+        conversation = Conversation.objects.get_or_create_for_target(group)
+        mail.outbox = []
+
+        with execute_scheduled_tasks_immediately():
+            message = ConversationMessage.objects.create(author=user, conversation=conversation, content='asdf')
+
+        reply_to = parseaddr(mail.outbox[0].reply_to[0])[1]
+        local_part = reply_to.split('@')[0]
+        conversation_id, user_id, thread_id = parse_local_part(local_part)
+        self.assertEqual(conversation_id, conversation.id)
+        self.assertEqual(user_id, user2.id)
+        self.assertEqual(thread_id, message.id)
 
 
 class ReactionModelTests(TestCase):

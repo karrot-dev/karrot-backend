@@ -12,7 +12,6 @@ from karrot.conversations.models import (
 
 class EmojiField(serializers.Field):
     """Emoji field is normalized and validated here"""
-
     def to_representation(self, obj):
         return obj
 
@@ -164,7 +163,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError('Thread is not in the same conversation')
 
                 # only some types of messages can have threads
-                if conversation.type() not in ('group', 'place'):
+                if not (conversation.target and conversation.target.conversation_supports_threads):
                     raise serializers.ValidationError('You can only reply to wall messages')
 
             # you cannot reply to replies

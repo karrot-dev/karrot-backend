@@ -21,7 +21,7 @@ def prepare_conversation_message_notification(user, messages):
     first_message = messages[0]
     type = first_message.conversation.type()
 
-    if type in ('group', 'place') and first_message.is_thread_reply():
+    if first_message.is_thread_reply():
         return prepare_thread_message_notification(user, messages)
     if type == 'pickup':
         return prepare_pickup_conversation_message_notification(user, messages)
@@ -89,14 +89,14 @@ def language_for_user(user):
 
 
 def prepare_message_notification(
-        user,
-        messages,
-        *,
-        conversation_name,
-        conversation_url,
-        stats_category,
-        group=None,
-        reply_to_name=None,
+    user,
+    messages,
+    *,
+    conversation_name,
+    conversation_url,
+    stats_category,
+    group=None,
+    reply_to_name=None,
 ):
     first_message = messages[0]
     conversation = first_message.conversation
@@ -116,7 +116,10 @@ def prepare_message_notification(
     with translation.override(language_for_user(user)):
         from_text = author_names(messages)
 
-        local_part = make_local_part(conversation, user)
+        # If the conversation supports threads, replies should go into a thread, not the main conversation
+        thread = first_message if conversation.target and conversation.target.conversation_supports_threads else None
+
+        local_part = make_local_part(conversation, user, thread)
         reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
         from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 

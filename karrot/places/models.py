@@ -44,6 +44,10 @@ class Place(BaseModel, LocationModel, ConversationMixin):
     def is_active(self):
         return self.status == 'active'
 
+    @property
+    def conversation_supports_threads(self):
+        return True
+
 
 class PlaceSubscription(BaseModel):
     class Meta:

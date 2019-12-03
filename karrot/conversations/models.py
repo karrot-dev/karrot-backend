@@ -358,6 +358,11 @@ class ConversationMixin(object):
         return True
 
     @property
+    def conversation_supports_threads(self):
+        """Override this property if the conversation supports threaded replies"""
+        return False
+
+    @property
     def group(self):
         """Returns the group that the target belongs to
         Override this property if you have the group at another location
