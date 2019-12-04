@@ -1,6 +1,7 @@
 import json
 
 import glom
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404
 from django.utils.translation import gettext_lazy as _
@@ -119,10 +120,17 @@ class OfferViewSet(
     parser_classes = [JSONWithFilesMultiPartParser, JSONParser]
 
     def get_queryset(self):
-        return self.queryset.filter(
-            Q(group__members=self.request.user),
-            Q(user=self.request.user) | Q(status=OfferStatus.ACTIVE.value),
-        ).distinct()
+        qs = self.queryset.filter(group__members=self.request.user)
+        is_owner = Q(user=self.request.user)
+        is_active = Q(status=OfferStatus.ACTIVE.value)
+        if self.action in ('retrieve', 'conversation'):
+            # we let people who participated in the conversation retrieve the specific offer and conversation
+            ct = ContentType.objects.get_for_model(Offer)
+            ids = self.request.user.conversation_set.filter(target_type=ct).values_list('target_id', flat=True)
+            qs = qs.filter(is_owner | is_active | Q(id__in=ids))
+        else:
+            qs = qs.filter(is_owner | is_active)
+        return qs.distinct()
 
     def get_permissions(self):
         if self.action == 'image':

@@ -387,14 +387,16 @@ def send_pickup_series_delete(sender, instance, **kwargs):
                                                                     ).distinct():
         send_in_channel(subscription.reply_channel, topic='pickups:series_deleted', payload=payload)
 
+
 # Offer
 @receiver(post_save, sender=Offer)
 def send_offer_updates(sender, instance, created, **kwargs):
     offer = instance
     payload = OfferSerializer(offer).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=offer.group.members.all()
-                                                                    ).distinct():
-        if offer.status == OfferStatus.ACTIVE.value or offer.user == subscription.user:
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=offer.group.members.all()).distinct():
+        if offer.status == OfferStatus.ACTIVE.value or \
+           offer.user == subscription.user or \
+           subscription.user.conversation_set.filter(id=offer.conversation.id).exists():
             send_in_channel(subscription.reply_channel, topic='offers:offer', payload=payload)
         elif not created:
             # if the user cannot see it, it's deleted from their point of view!
@@ -408,8 +410,7 @@ def send_offer_updates(sender, instance, created, **kwargs):
 def send_offer_delete(sender, instance, **kwargs):
     offer = instance
     payload = OfferSerializer(offer).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=offer.group.members.all()
-                                                                    ).distinct():
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=offer.group.members.all()).distinct():
         send_in_channel(subscription.reply_channel, topic='offers:offer_deleted', payload=payload)
 
 
