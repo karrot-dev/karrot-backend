@@ -68,6 +68,13 @@ class TestOffersAPI(APITestCase):
         response = self.client.get('/api/offers/{}/'.format(offer.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
+    def test_can_fetch_other_users_archived_offer_if_in_the_conversation(self):
+        offer = OfferFactory(user=self.user, group=self.group, images=[image_path], status='archived')
+        offer.conversation.join(self.another_user)
+        self.client.force_login(user=self.another_user)
+        response = self.client.get('/api/offers/{}/'.format(offer.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
     def test_update_offer(self):
         self.client.force_login(user=self.user)
         data = {
