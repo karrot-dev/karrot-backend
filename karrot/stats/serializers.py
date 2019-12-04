@@ -15,7 +15,6 @@ class StatsEntrySerializer(serializers.Serializer):
     group = serializers.IntegerField(allow_null=True)
     route_name = serializers.CharField()
     route_path = serializers.CharField()
-    route_params = serializers.DictField(allow_empty=True)
 
     # device/build info
     mobile = serializers.BooleanField()
