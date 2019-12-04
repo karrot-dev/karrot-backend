@@ -5,6 +5,7 @@ def convert_stat(stat):
     tags = dict(stat)
     ms = tags.pop('ms')
     ms_resources = tags.pop('ms_resources')
+    route_path = tags.pop('route_path')
     route_params = tags.pop('route_params')
     for key, value in route_params.items():
         tags['route_params__{}'.format(key)] = value
@@ -13,6 +14,8 @@ def convert_stat(stat):
         'fields': {
             'ms': ms,
             'ms_resources': ms_resources,
+            # Put route_path as field to avoid hitting max-values-per-tag limit in influxdb
+            'route_path': route_path,
         },
         'tags': tags,
     }
