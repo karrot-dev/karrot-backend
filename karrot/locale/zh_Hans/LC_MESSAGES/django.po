@@ -126,7 +126,7 @@ msgstr ""
 "href=\"%(mute_url)s\">將對話靜音</a>"
 
 #: karrot/conversations/api.py:63 karrot/conversations/api.py:242
-#: karrot/conversations/api.py:413 karrot/conversations/serializers.py:147
+#: karrot/conversations/api.py:413 karrot/conversations/serializers.py:146
 msgid "You are not in this conversation"
 msgstr "你並未加入對話"
 
@@ -148,33 +148,33 @@ msgstr "必須是討論串中的第一個"
 msgid "You are not a participant in this thread"
 msgstr "你並未加入此討論串"
 
-#: karrot/conversations/emails.py:201 karrot/conversations/emails.py:204
+#: karrot/conversations/emails.py:204 karrot/conversations/emails.py:207
 #: karrot/subscriptions/tasks.py:71
 #, python-format
 msgid "Pickup %(date)s"
 msgstr "領取%(date)s"
 
-#: karrot/conversations/emails.py:237
+#: karrot/conversations/emails.py:240
 #, python-format
 msgid "New message in your application to %(group_name)s"
 msgstr "你的%(group_name)s申請的新訊息"
 
-#: karrot/conversations/emails.py:241
+#: karrot/conversations/emails.py:244
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr "%(user_name)s申請%(group_name)s的新訊息"
 
-#: karrot/conversations/emails.py:263
+#: karrot/conversations/emails.py:266
 #, python-format
 msgid "New message in conflict resolution in %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:278
+#: karrot/conversations/emails.py:281
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/serializers.py:149
+#: karrot/conversations/serializers.py:148
 msgid "This conversation has been closed"
 msgstr ""
 
