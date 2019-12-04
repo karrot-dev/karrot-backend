@@ -4,6 +4,7 @@ from anymail.exceptions import AnymailAPIError
 from dateutil.relativedelta import relativedelta
 from django.core import mail
 from django.utils import timezone
+from django.conf import settings
 from furl import furl
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -163,6 +164,15 @@ class TestInviteCreate(APITestCase):
         self.client.force_login(self.newcomer)
         response = self.client.post(base_url, {'email': 'please@join.com', 'group': self.group2.id})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_invite_with_different_invited_by_language(self):
+        self.member.language = 'fr'
+        self.member.save()
+        self.client.force_login(self.member)
+        response = self.client.post(base_url, {'email': 'please@join.com', 'group': self.group.id})
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        expected = f'[{settings.SITE_NAME}] Invitation de joinde {self.group.name}'
+        self.assertEqual(mail.outbox[-1].subject, expected)
 
 
 class TestInvitationAPI(APITestCase):
