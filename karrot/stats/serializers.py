@@ -5,15 +5,24 @@ MAX_STATS = 50
 
 
 class StatsEntrySerializer(serializers.Serializer):
+    # timings
+    ms = serializers.IntegerField()
+    ms_resources = serializers.IntegerField()
+
+    # app state
     first_load = serializers.BooleanField()
     logged_in = serializers.BooleanField()
-    mobile = serializers.BooleanField()
     group = serializers.IntegerField(allow_null=True)
     route_name = serializers.CharField()
     route_path = serializers.CharField()
     route_params = serializers.DictField(allow_empty=True)
-    ms = serializers.IntegerField()
-    ms_resources = serializers.IntegerField()
+
+    # device/build info
+    mobile = serializers.BooleanField()
+    app = serializers.BooleanField()
+    browser = serializers.CharField()
+    os = serializers.CharField()
+    dev = serializers.BooleanField()
 
 
 class StatsSerializer(serializers.Serializer):
