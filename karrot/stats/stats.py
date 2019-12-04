@@ -6,9 +6,6 @@ def convert_stat(stat):
     ms = tags.pop('ms')
     ms_resources = tags.pop('ms_resources')
     route_path = tags.pop('route_path')
-    route_params = tags.pop('route_params')
-    for key, value in route_params.items():
-        tags['route_params__{}'.format(key)] = value
     return {
         'measurement': 'karrot.stats.frontend',
         'fields': {

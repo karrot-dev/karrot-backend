@@ -21,9 +21,6 @@ def generate_stats(n):
         'group': random.choice([random.randint(1, 100), None]),
         'route_name': faker.name(),
         'route_path': faker.name(),
-        'route_params': {
-            'group_id': 3,
-        }
     } for n in range(n)]
 
 
@@ -71,8 +68,6 @@ class TestStatsInfoAPI(APITestCase):
                     'dev': False,
                     'group': 1,
                     'route_name': 'group',
-                    'route_params__group_id': 5,
-                    'route_params__foo': 'bar',
                 }
             }]
         )
