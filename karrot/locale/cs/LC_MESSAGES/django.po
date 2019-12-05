@@ -622,15 +622,15 @@ msgstr "Toto kolo hlasování končí v %(expiry_date)s."
 msgid "A conflict resolution process was started with you"
 msgstr "Byl s vámi zahájen proces řešení konfliktů"
 
-#: karrot/offers/api.py:97
+#: karrot/offers/api.py:98
 msgid "You are not the owner of this offer"
 msgstr ""
 
-#: karrot/offers/api.py:152
+#: karrot/offers/api.py:160
 msgid "You can only accept an active offer"
 msgstr ""
 
-#: karrot/offers/api.py:167
+#: karrot/offers/api.py:175
 msgid "You can only archive an active offer"
 msgstr ""
 
