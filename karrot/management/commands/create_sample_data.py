@@ -24,7 +24,7 @@ class Command(BaseCommand):
         parser.add_argument('--quick', action='store_true', dest='less_data')
 
     def handle(self, *args, **options):
-        faker.seed(int(time.time()))
+        faker.seed_instance(int(time.time()))
 
         def print(*args):
             self.stdout.write(' '.join([str(_) for _ in args]))
