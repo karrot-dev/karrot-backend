@@ -87,6 +87,21 @@ class TestConversationsAPI(APITestCase):
         self.assertEqual(results['issues'][0]['id'], issue.id)
         self.assertEqual(results['offers'][0]['id'], offer.id)
 
+    def test_retrieve_conversation_efficiently(self):
+        user = UserFactory()
+        group = GroupFactory(members=[user])
+        conversation = group.conversation
+        conversation.sync_users([user])
+        conversation.messages.create(content='hey', author=user)
+
+        ConversationMeta.objects.get_or_create(user=user)
+
+        self.client.force_login(user=user)
+        with self.assertNumQueries(3):
+            response = self.client.get('/api/conversations/{}/'.format(conversation.id), format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
     def test_list_only_unread_conversations(self):
         self.conversation1.messages.create(author=self.participant2, content='unread')
         self.client.force_login(user=self.participant1)

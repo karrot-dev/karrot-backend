@@ -116,7 +116,10 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
     filter_backends = (filters.DjangoFilterBackend, )
 
     def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
+        qs = self.queryset.filter(user=self.request.user)
+        if self.action == 'retrieve':
+            qs = qs.select_related('conversation', 'conversation__target_type').annotate_unread_message_count()
+        return qs
 
     def get_object(self):
         try:
@@ -397,7 +400,6 @@ class ConversationMessageViewSet(
 
 class RetrieveConversationMixin(object):
     """Retrieve a conversation instance."""
-
     def retrieve_conversation(self, request, *args, **kwargs):
         target = self.get_object()
         conversation = Conversation.objects. \
@@ -418,7 +420,6 @@ class RetrieveConversationMixin(object):
 
 class RetrievePrivateConversationMixin(object):
     """Retrieve a private user conversation instance."""
-
     def retrieve_private_conversation(self, request, *args, **kwargs):
         user2 = self.get_object()
         try:
