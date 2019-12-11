@@ -119,8 +119,8 @@ msgid ""
 "%(site_name)s</a>, or <a href=\"%(mute_url)s\">mute the conversation</a>."
 msgstr ""
 
-#: karrot/conversations/api.py:63 karrot/conversations/api.py:242
-#: karrot/conversations/api.py:413 karrot/conversations/serializers.py:146
+#: karrot/conversations/api.py:63 karrot/conversations/api.py:245
+#: karrot/conversations/api.py:415 karrot/conversations/serializers.py:146
 msgid "You are not in this conversation"
 msgstr ""
 
@@ -134,11 +134,11 @@ msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
 msgstr ""
 
-#: karrot/conversations/api.py:341
+#: karrot/conversations/api.py:344
 msgid "Must be first in thread"
 msgstr ""
 
-#: karrot/conversations/api.py:344
+#: karrot/conversations/api.py:347
 msgid "You are not a participant in this thread"
 msgstr ""
 

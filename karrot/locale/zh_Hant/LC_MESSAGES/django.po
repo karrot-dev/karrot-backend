@@ -126,8 +126,8 @@ msgstr ""
 "直接回覆這封郵件，<a href=\"%(conversation_url)s\">在%(site_name)s上檢視</a>, 或是<a "
 "href=\"%(mute_url)s\">將對話靜音</a>"
 
-#: karrot/conversations/api.py:63 karrot/conversations/api.py:242
-#: karrot/conversations/api.py:413 karrot/conversations/serializers.py:146
+#: karrot/conversations/api.py:63 karrot/conversations/api.py:245
+#: karrot/conversations/api.py:415 karrot/conversations/serializers.py:146
 msgid "You are not in this conversation"
 msgstr "你並未加入對話"
 
@@ -141,11 +141,11 @@ msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
 msgstr "在發出訊息%(days_number)s天後你就不能編輯了"
 
-#: karrot/conversations/api.py:341
+#: karrot/conversations/api.py:344
 msgid "Must be first in thread"
 msgstr "必須是討論串中的第一個"
 
-#: karrot/conversations/api.py:344
+#: karrot/conversations/api.py:347
 msgid "You are not a participant in this thread"
 msgstr "你並未加入此討論串"
 

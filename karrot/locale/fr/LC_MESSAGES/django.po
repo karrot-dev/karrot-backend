@@ -8,6 +8,7 @@
 # Lucas JARLAUD <lucas.jarlaud@gmail.com>, 2019
 # taistadam <real.j.tais@gmail.com>, 2019
 # Clément Chedmail <clement.chedmail@laposte.net>, 2019
+# Tilmann Becker <tilmann.becker+github@gmail.com>, 2019
 # 
 #, fuzzy
 msgid ""
@@ -15,7 +16,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
-"Last-Translator: Clément Chedmail <clement.chedmail@laposte.net>, 2019\n"
+"Last-Translator: Tilmann Becker <tilmann.becker+github@gmail.com>, 2019\n"
 "Language-Team: French (https://www.transifex.com/yunity-1/teams/68631/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -65,7 +66,7 @@ msgstr "Ta demande pour rejoindre %(group_name)s a été acceptée"
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:226
 #, python-format
 msgid "Visit %(group_name)s"
-msgstr "Visiter%(group_name)s"
+msgstr "Visiter %(group_name)s"
 
 #: karrot/applications/templates/application_declined.html.jinja2:6
 #: karrot/applications/templates/application_declined.html.jinja2:205
@@ -79,7 +80,7 @@ msgstr "Ta demande pour rejoindre %(group_name)s a été refusée"
 #: karrot/applications/templates/new_application.subject.jinja2:1
 #, python-format
 msgid "%(user_name)s wants to join %(group_name)s"
-msgstr "%(user_name)s veux rejoindre %(group_name)s"
+msgstr "%(user_name)s veut rejoindre %(group_name)s"
 
 #: karrot/applications/templates/new_application.html.jinja2:207
 msgid "Questions asked by your group"
@@ -109,7 +110,7 @@ msgid ""
 "application</strong> emails for this group."
 msgstr ""
 "Tu a reçu ceci car tu es enregistré à <strong>demande d'ajout "
-"d'utilisateur</strong>mails pour ce groupe."
+"d'utilisateur</strong> mails pour ce groupe."
 
 #: karrot/applications/templates/new_application.html.jinja2:266
 #: karrot/groups/templates/group_summary.html.jinja2:310
@@ -133,8 +134,8 @@ msgstr ""
 "sur%(site_name)s</a>, ou <a href=\"%(mute_url)s\"> rend muet la conversation"
 " </a>."
 
-#: karrot/conversations/api.py:63 karrot/conversations/api.py:242
-#: karrot/conversations/api.py:413 karrot/conversations/serializers.py:146
+#: karrot/conversations/api.py:63 karrot/conversations/api.py:245
+#: karrot/conversations/api.py:415 karrot/conversations/serializers.py:146
 msgid "You are not in this conversation"
 msgstr "Tu n'es pas dans cette conversation"
 
@@ -150,11 +151,11 @@ msgstr ""
 "Tu ne peux pas éditer un message plus de %(days_number)s jours après sa "
 "création."
 
-#: karrot/conversations/api.py:341
+#: karrot/conversations/api.py:344
 msgid "Must be first in thread"
 msgstr "Doit être le premier dans le fil de discussions"
 
-#: karrot/conversations/api.py:344
+#: karrot/conversations/api.py:347
 msgid "You are not a participant in this thread"
 msgstr "Tu n'es pas participant à ce fil de discussion."
 
@@ -288,16 +289,16 @@ msgstr "aucune récoltes n'ont été effectuées"
 #: karrot/groups/templates/group_summary.html.jinja2:217
 #, python-format
 msgid "%(pickups_missed_count)s pickups were missed"
-msgstr "%(pickups_missed_count)srécoltes n'ont été manquées"
+msgstr "%(pickups_missed_count)s récoltes ont été manquées"
 
 #: karrot/groups/templates/group_summary.html.jinja2:220
 msgid "no pickups were missed"
-msgstr "aucune récoltes n'ont été manqués"
+msgstr "aucune récolte n'a été manquée"
 
 #: karrot/groups/templates/group_summary.html.jinja2:226
 #, python-format
 msgid "%(new_user_count)s people joined the group"
-msgstr "%(new_user_count)s personne a rejoint le groupe"
+msgstr "%(new_user_count)s personnes ont rejoint le groupe"
 
 #: karrot/groups/templates/group_summary.html.jinja2:234
 #, python-format
@@ -307,7 +308,7 @@ msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:236
 msgid "no feedback was given"
-msgstr "aucun retour d'informations a été donné"
+msgstr "aucun retour d'information n'a été donné"
 
 #: karrot/groups/templates/group_summary.html.jinja2:240
 #, python-format

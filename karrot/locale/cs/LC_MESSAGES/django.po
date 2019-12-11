@@ -131,8 +131,8 @@ msgstr ""
 "jej na straně %(site_name)s</a>, nebo <a href=\"%(mute_url)s\">ignorujte "
 "konverzaci</a>."
 
-#: karrot/conversations/api.py:63 karrot/conversations/api.py:242
-#: karrot/conversations/api.py:413 karrot/conversations/serializers.py:146
+#: karrot/conversations/api.py:63 karrot/conversations/api.py:245
+#: karrot/conversations/api.py:415 karrot/conversations/serializers.py:146
 msgid "You are not in this conversation"
 msgstr "Nejste v této konverzaci"
 
@@ -147,11 +147,11 @@ msgid ""
 msgstr ""
 "Zprávu nelze upravovat déle než %(days_number)s dny po jejím vytvoření."
 
-#: karrot/conversations/api.py:341
+#: karrot/conversations/api.py:344
 msgid "Must be first in thread"
 msgstr "Musí být první v podprocesu"
 
-#: karrot/conversations/api.py:344
+#: karrot/conversations/api.py:347
 msgid "You are not a participant in this thread"
 msgstr "Nejste účastníkem tohoto vlákna"
 
