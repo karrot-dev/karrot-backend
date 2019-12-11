@@ -15,7 +15,6 @@ karrot/*/templates/*.html.jinja2
 /dump.rdb
 /db.sqlite3
 *.pid
-*.mo
 mjml/node_modules
 grafana/config.py
 

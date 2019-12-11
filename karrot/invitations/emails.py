@@ -16,4 +16,5 @@ def prepare_emailinvitation_email(invitation):
         },
         to=invitation.email,
         stats_category='invitation',
+        language=invitation.invited_by.language
     )
