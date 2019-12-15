@@ -151,6 +151,15 @@ class TestConversationNotificationTask(TestCase):
         self.assertIn('second thread reply', mail.outbox[0].body)
         self.assertNotIn('first thread reply', mail.outbox[0].body)
 
+    def test_exclude_participants_without_access(self):
+        self.group.remove_member(self.author)
+        with execute_scheduled_tasks_immediately():
+            self.group.conversation.messages.create(
+                author=self.user, thread=self.message, content='first thread reply'
+            )
+
+        self.assertEqual(len(mail.outbox), 0)
+
 
 class TestMarkConversationClosedTask(TestCase):
     def test_mark_issue_conversation_as_closed(self):

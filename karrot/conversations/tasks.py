@@ -1,7 +1,7 @@
 from anymail.exceptions import AnymailAPIError
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.db.models import Q
+from django.db.models import Q, F
 from django.utils import timezone
 from huey import crontab
 from huey.contrib.djhuey import db_task, db_periodic_task
@@ -23,6 +23,13 @@ def get_participants_to_notify(message):
         participants_to_notify = ConversationThreadParticipant.objects.filter(
             thread=message.thread,
             muted=False,
+        ).filter(
+            # Do not notify if thread participant doesn't have access to the conversation anymore
+            # (We don't remove thread participants after they left the group)
+            Q(thread__conversation__participants=F('user')) | Q(
+                thread__conversation__group__groupmembership__user=F('user'),
+                thread__conversation__is_group_public=True,
+            )
         )
     else:
         participants_to_notify = ConversationParticipant.objects.filter(
