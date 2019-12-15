@@ -295,7 +295,8 @@ class ConversationMessageViewSet(
             .annotate_unread_replies_count_for(self.request.user)
 
         if self.action == 'my_threads':
-            return qs
+            return qs.only_threads_with_user(self.request.user) \
+                .prefetch_related('participants', 'latest_message')
 
         if self.action == 'list':
             qs = qs.prefetch_related('reactions', 'participants')
@@ -317,11 +318,7 @@ class ConversationMessageViewSet(
         )
     )
     def my_threads(self, request):
-        queryset = self.get_queryset() \
-            .only_threads_with_user(request.user) \
-            .select_related('latest_message') \
-            .prefetch_related('participants')
-        queryset = self.filter_queryset(queryset)
+        queryset = self.filter_queryset(self.get_queryset())
         paginator = ThreadPagination()
 
         threads = list(paginator.paginate_queryset(queryset, request, view=self))

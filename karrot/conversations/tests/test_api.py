@@ -269,7 +269,7 @@ class TestConversationThreadsAPI(APITestCase):
         self.create_reply(thread=most_recent_thread)
 
         self.client.force_login(user=self.user)
-        with self.assertNumQueries(4):
+        with self.assertNumQueries(5):
             response = self.client.get('/api/messages/my_threads/', format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
