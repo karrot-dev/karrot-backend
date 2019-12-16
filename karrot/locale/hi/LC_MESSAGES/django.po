@@ -125,7 +125,7 @@ msgid ""
 msgstr ""
 
 #: karrot/conversations/api.py:63 karrot/conversations/api.py:245
-#: karrot/conversations/api.py:415 karrot/conversations/serializers.py:146
+#: karrot/conversations/api.py:412 karrot/conversations/serializers.py:146
 msgid "You are not in this conversation"
 msgstr "आप इस वार्तालाप में नहीं हैं |"
 
@@ -139,11 +139,11 @@ msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
 msgstr ""
 
-#: karrot/conversations/api.py:344
+#: karrot/conversations/api.py:341
 msgid "Must be first in thread"
 msgstr ""
 
-#: karrot/conversations/api.py:347
+#: karrot/conversations/api.py:344
 msgid "You are not a participant in this thread"
 msgstr ""
 

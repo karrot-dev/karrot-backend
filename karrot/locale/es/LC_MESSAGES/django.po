@@ -136,7 +136,7 @@ msgstr ""
 "conversación</a>."
 
 #: karrot/conversations/api.py:63 karrot/conversations/api.py:245
-#: karrot/conversations/api.py:415 karrot/conversations/serializers.py:146
+#: karrot/conversations/api.py:412 karrot/conversations/serializers.py:146
 msgid "You are not in this conversation"
 msgstr "No eres parte de esta conversación"
 
@@ -152,11 +152,11 @@ msgstr ""
 "No puedes editar este mensaje mas de %(days_number)sdías después de su "
 "creación."
 
-#: karrot/conversations/api.py:344
+#: karrot/conversations/api.py:341
 msgid "Must be first in thread"
 msgstr "Tiene que estar primero en un hilo"
 
-#: karrot/conversations/api.py:347
+#: karrot/conversations/api.py:344
 msgid "You are not a participant in this thread"
 msgstr "No participar en este hilo"
 
