@@ -45,7 +45,7 @@ django-enumfield==2.0
 django-extensions==2.2.5
 django-filter==2.2.0
 django-jinja==2.4.1
-django-redis==4.10.0
+django-redis==4.11.0
 django-silk==3.0.4
 django-timezone-field==4.0
 django-versatileimagefield==1.11
@@ -70,7 +70,6 @@ html5lib==1.0.1
 huey==2.1.3
 hyperlink==19.0.0         # via twisted
 idna==2.8                 # via hyperlink, requests, twisted
-importlib-metadata==1.2.0  # via pluggy, pytest
 incremental==17.5.0       # via twisted
 influxdb==5.2.3
 ipython-genutils==0.2.0   # via traitlets
@@ -142,7 +141,6 @@ urllib3==1.25.7           # via requests
 wcwidth==0.1.7            # via prompt-toolkit, pytest
 webencodings==0.5.1       # via bleach, html5lib
 yapf==0.29.0
-zipp==0.6.0               # via importlib-metadata
 zope.interface==4.7.1     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
