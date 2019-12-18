@@ -17,7 +17,7 @@
     "gnetId": null,
     "graphTooltip": 1,
     "id": 19,
-    "iteration": 1571312622581,
+    "iteration": 1575912359200,
     "links": [],
     "panels": [
       {
@@ -28,6 +28,347 @@
           "w": 24,
           "x": 0,
           "y": 0
+        },
+        "id": 80,
+        "panels": [],
+        "title": "Offers",
+        "type": "row"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 4,
+          "x": 0,
+          "y": 1
+        },
+        "id": 82,
+        "interval": null,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "options": {},
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true,
+          "ymax": null,
+          "ymin": null
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              }
+            ],
+            "measurement": "karrot.events",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "offer_created"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "count"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": "",
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "New offers",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "N/A",
+            "value": "null"
+          }
+        ],
+        "valueName": "total"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 4,
+          "x": 4,
+          "y": 1
+        },
+        "id": 84,
+        "interval": null,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "options": {},
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true,
+          "ymax": null,
+          "ymin": null
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              }
+            ],
+            "measurement": "karrot.events",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "offer_accepted"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "count"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": "",
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Offers accepted",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "total"
+      },
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 4,
+          "x": 8,
+          "y": 1
+        },
+        "id": 83,
+        "interval": null,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "options": {},
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true,
+          "ymax": null,
+          "ymin": null
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              }
+            ],
+            "measurement": "karrot.events",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "offer_archived"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "count"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": "",
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Offers archived",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "total"
+      },
+      {
+        "collapsed": false,
+        "datasource": null,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 4
         },
         "id": 31,
         "panels": [],
@@ -56,7 +397,7 @@
           "h": 3,
           "w": 4,
           "x": 0,
-          "y": 1
+          "y": 5
         },
         "id": 14,
         "interval": null,
@@ -181,7 +522,7 @@
           "h": 3,
           "w": 4,
           "x": 4,
-          "y": 1
+          "y": 5
         },
         "id": 15,
         "interval": null,
@@ -301,7 +642,7 @@
           "h": 3,
           "w": 4,
           "x": 8,
-          "y": 1
+          "y": 5
         },
         "id": 59,
         "interval": null,
@@ -415,7 +756,7 @@
           "h": 3,
           "w": 4,
           "x": 0,
-          "y": 4
+          "y": 8
         },
         "id": 51,
         "interval": null,
@@ -535,7 +876,7 @@
           "h": 3,
           "w": 4,
           "x": 4,
-          "y": 4
+          "y": 8
         },
         "id": 44,
         "interval": null,
@@ -655,7 +996,7 @@
           "h": 3,
           "w": 4,
           "x": 8,
-          "y": 4
+          "y": 8
         },
         "id": 63,
         "interval": null,
@@ -754,7 +1095,7 @@
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 7
+          "y": 11
         },
         "id": 29,
         "panels": [],
@@ -783,7 +1124,7 @@
           "h": 3,
           "w": 3,
           "x": 0,
-          "y": 8
+          "y": 12
         },
         "id": 24,
         "interval": null,
@@ -920,7 +1261,7 @@
           "h": 3,
           "w": 3,
           "x": 3,
-          "y": 8
+          "y": 12
         },
         "id": 27,
         "interval": null,
@@ -1046,7 +1387,7 @@
           "h": 3,
           "w": 3,
           "x": 6,
-          "y": 8
+          "y": 12
         },
         "id": 26,
         "interval": null,
@@ -1172,7 +1513,7 @@
           "h": 3,
           "w": 3,
           "x": 9,
-          "y": 8
+          "y": 12
         },
         "id": 54,
         "interval": null,
@@ -1292,7 +1633,7 @@
           "h": 3,
           "w": 3,
           "x": 12,
-          "y": 8
+          "y": 12
         },
         "id": 25,
         "interval": null,
@@ -1412,7 +1753,7 @@
           "h": 3,
           "w": 3,
           "x": 15,
-          "y": 8
+          "y": 12
         },
         "id": 48,
         "interval": null,
@@ -1538,7 +1879,7 @@
           "h": 3,
           "w": 3,
           "x": 0,
-          "y": 11
+          "y": 15
         },
         "id": 74,
         "interval": null,
@@ -1664,7 +2005,7 @@
           "h": 3,
           "w": 3,
           "x": 3,
-          "y": 11
+          "y": 15
         },
         "id": 75,
         "interval": null,
@@ -1769,13 +2110,133 @@
         "valueName": "total"
       },
       {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 6,
+          "y": 15
+        },
+        "id": 78,
+        "interval": null,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "options": {},
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "alias": "",
+            "groupBy": [
+              {
+                "params": [
+                  "$interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "0"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.events",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
+            "rawQuery": false,
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "message"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "type",
+                "operator": "=",
+                "value": "offer"
+              }
+            ]
+          }
+        ],
+        "thresholds": "",
+        "title": "Offer messages",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "total"
+      },
+      {
         "collapsed": false,
         "datasource": null,
         "gridPos": {
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 14
+          "y": 18
         },
         "id": 35,
         "panels": [],
@@ -1804,7 +2265,7 @@
           "h": 3,
           "w": 3,
           "x": 0,
-          "y": 15
+          "y": 19
         },
         "id": 19,
         "interval": null,
@@ -1926,7 +2387,7 @@
           "h": 3,
           "w": 3,
           "x": 3,
-          "y": 15
+          "y": 19
         },
         "id": 36,
         "interval": null,
@@ -2048,7 +2509,7 @@
           "h": 3,
           "w": 3,
           "x": 6,
-          "y": 15
+          "y": 19
         },
         "id": 76,
         "interval": null,
@@ -2170,7 +2631,7 @@
           "h": 3,
           "w": 3,
           "x": 9,
-          "y": 15
+          "y": 19
         },
         "id": 77,
         "interval": null,
@@ -2271,13 +2732,129 @@
         "valueName": "total"
       },
       {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 12,
+          "y": 19
+        },
+        "id": 68,
+        "interval": null,
+        "links": [
+          {
+            "title": "User profile",
+            "url": "/d/7rEbhblik/user-profile"
+          }
+        ],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "options": {},
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "previous"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.users",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_active_90d"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "max"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": "",
+        "title": "Active users (90d)",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "current"
+      },
+      {
         "collapsed": false,
         "datasource": null,
         "gridPos": {
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 18
+          "y": 22
         },
         "id": 38,
         "panels": [],
@@ -2306,7 +2883,7 @@
           "h": 3,
           "w": 3,
           "x": 0,
-          "y": 19
+          "y": 23
         },
         "id": 40,
         "interval": null,
@@ -2422,7 +2999,7 @@
           "h": 3,
           "w": 3,
           "x": 3,
-          "y": 19
+          "y": 23
         },
         "id": 42,
         "interval": null,
@@ -2533,7 +3110,7 @@
           "h": 3,
           "w": 3,
           "x": 6,
-          "y": 19
+          "y": 23
         },
         "id": 43,
         "interval": null,
@@ -2644,7 +3221,7 @@
           "h": 3,
           "w": 3,
           "x": 9,
-          "y": 19
+          "y": 23
         },
         "id": 41,
         "interval": null,
@@ -2760,7 +3337,7 @@
           "h": 3,
           "w": 3,
           "x": 12,
-          "y": 19
+          "y": 23
         },
         "id": 56,
         "interval": null,
@@ -2876,7 +3453,7 @@
           "h": 3,
           "w": 3,
           "x": 0,
-          "y": 22
+          "y": 26
         },
         "id": 64,
         "interval": null,
@@ -2992,7 +3569,7 @@
           "h": 3,
           "w": 3,
           "x": 3,
-          "y": 22
+          "y": 26
         },
         "id": 65,
         "interval": null,
@@ -3108,7 +3685,7 @@
           "h": 3,
           "w": 3,
           "x": 6,
-          "y": 22
+          "y": 26
         },
         "id": 66,
         "interval": null,
@@ -3224,7 +3801,7 @@
           "h": 3,
           "w": 3,
           "x": 9,
-          "y": 22
+          "y": 26
         },
         "id": 67,
         "interval": null,
@@ -3340,9 +3917,9 @@
           "h": 3,
           "w": 3,
           "x": 12,
-          "y": 22
+          "y": 26
         },
-        "id": 68,
+        "id": 73,
         "interval": null,
         "links": [
           {
@@ -3408,7 +3985,7 @@
               [
                 {
                   "params": [
-                    "count_active_90d"
+                    "count_pickup_active_90d"
                   ],
                   "type": "field"
                 },
@@ -3422,7 +3999,7 @@
           }
         ],
         "thresholds": "",
-        "title": "Active users (90d)",
+        "title": "Pickup active users (90d)",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -3456,7 +4033,7 @@
           "h": 3,
           "w": 3,
           "x": 0,
-          "y": 25
+          "y": 29
         },
         "id": 69,
         "interval": null,
@@ -3572,7 +4149,7 @@
           "h": 3,
           "w": 3,
           "x": 3,
-          "y": 25
+          "y": 29
         },
         "id": 70,
         "interval": null,
@@ -3688,7 +4265,7 @@
           "h": 3,
           "w": 3,
           "x": 6,
-          "y": 25
+          "y": 29
         },
         "id": 71,
         "interval": null,
@@ -3804,7 +4381,7 @@
           "h": 3,
           "w": 3,
           "x": 9,
-          "y": 25
+          "y": 29
         },
         "id": 72,
         "interval": null,
@@ -3899,129 +4476,13 @@
         "valueName": "current"
       },
       {
-        "cacheTimeout": null,
-        "colorBackground": false,
-        "colorValue": false,
-        "colors": [
-          "#299c46",
-          "rgba(237, 129, 40, 0.89)",
-          "#d44a3a"
-        ],
-        "datasource": "$site",
-        "format": "none",
-        "gauge": {
-          "maxValue": 100,
-          "minValue": 0,
-          "show": false,
-          "thresholdLabels": false,
-          "thresholdMarkers": true
-        },
-        "gridPos": {
-          "h": 3,
-          "w": 3,
-          "x": 12,
-          "y": 25
-        },
-        "id": 73,
-        "interval": null,
-        "links": [
-          {
-            "title": "User profile",
-            "url": "/d/7rEbhblik/user-profile"
-          }
-        ],
-        "mappingType": 1,
-        "mappingTypes": [
-          {
-            "name": "value to text",
-            "value": 1
-          },
-          {
-            "name": "range to text",
-            "value": 2
-          }
-        ],
-        "maxDataPoints": 100,
-        "nullPointMode": "connected",
-        "nullText": null,
-        "options": {},
-        "postfix": "",
-        "postfixFontSize": "50%",
-        "prefix": "",
-        "prefixFontSize": "50%",
-        "rangeMaps": [
-          {
-            "from": "null",
-            "text": "N/A",
-            "to": "null"
-          }
-        ],
-        "sparkline": {
-          "fillColor": "rgba(31, 118, 189, 0.18)",
-          "full": false,
-          "lineColor": "rgb(31, 120, 193)",
-          "show": true
-        },
-        "tableColumn": "",
-        "targets": [
-          {
-            "groupBy": [
-              {
-                "params": [
-                  "$__interval"
-                ],
-                "type": "time"
-              },
-              {
-                "params": [
-                  "previous"
-                ],
-                "type": "fill"
-              }
-            ],
-            "measurement": "karrot.users",
-            "orderByTime": "ASC",
-            "policy": "default",
-            "refId": "A",
-            "resultFormat": "time_series",
-            "select": [
-              [
-                {
-                  "params": [
-                    "count_pickup_active_90d"
-                  ],
-                  "type": "field"
-                },
-                {
-                  "params": [],
-                  "type": "max"
-                }
-              ]
-            ],
-            "tags": []
-          }
-        ],
-        "thresholds": "",
-        "title": "Pickup active users (90d)",
-        "type": "singlestat",
-        "valueFontSize": "80%",
-        "valueMaps": [
-          {
-            "op": "=",
-            "text": "0",
-            "value": "null"
-          }
-        ],
-        "valueName": "current"
-      },
-      {
         "collapsed": false,
         "datasource": null,
         "gridPos": {
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 28
+          "y": 32
         },
         "id": 33,
         "panels": [],
@@ -4050,7 +4511,7 @@
           "h": 3,
           "w": 4,
           "x": 0,
-          "y": 29
+          "y": 33
         },
         "id": 21,
         "interval": null,
@@ -4166,7 +4627,7 @@
           "h": 3,
           "w": 4,
           "x": 4,
-          "y": 29
+          "y": 33
         },
         "id": 22,
         "interval": null,
@@ -4288,7 +4749,7 @@
           "h": 3,
           "w": 4,
           "x": 8,
-          "y": 29
+          "y": 33
         },
         "id": 23,
         "interval": null,
@@ -4411,7 +4872,7 @@
           "h": 3,
           "w": 4,
           "x": 12,
-          "y": 29
+          "y": 33
         },
         "id": 58,
         "interval": null,
@@ -4527,7 +4988,7 @@
           "h": 3,
           "w": 3,
           "x": 0,
-          "y": 32
+          "y": 36
         },
         "id": 52,
         "interval": null,
@@ -4643,7 +5104,7 @@
           "h": 3,
           "w": 3,
           "x": 3,
-          "y": 32
+          "y": 36
         },
         "id": 53,
         "interval": null,
@@ -4754,7 +5215,7 @@
           "h": 3,
           "w": 3,
           "x": 6,
-          "y": 32
+          "y": 36
         },
         "id": 62,
         "interval": null,
@@ -4867,7 +5328,7 @@
           "h": 3,
           "w": 3,
           "x": 9,
-          "y": 32
+          "y": 36
         },
         "id": 47,
         "interval": null,
@@ -4979,7 +5440,7 @@
           "h": 3,
           "w": 3,
           "x": 0,
-          "y": 35
+          "y": 39
         },
         "id": 46,
         "interval": null,
@@ -5097,7 +5558,7 @@
           "h": 3,
           "w": 5,
           "x": 3,
-          "y": 35
+          "y": 39
         },
         "id": 50,
         "interval": null,
@@ -5236,7 +5697,7 @@
           "h": 3,
           "w": 5,
           "x": 8,
-          "y": 35
+          "y": 39
         },
         "id": 49,
         "interval": null,
@@ -5341,7 +5802,7 @@
           "h": 8,
           "w": 24,
           "x": 0,
-          "y": 38
+          "y": 42
         },
         "id": 10,
         "links": [],
@@ -5543,6 +6004,24 @@
                   ],
                   "type": "alias"
                 }
+              ],
+              [
+                {
+                  "params": [
+                    "offer_created"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                },
+                {
+                  "params": [
+                    "offers"
+                  ],
+                  "type": "alias"
+                }
               ]
             ],
             "tags": [
@@ -5570,8 +6049,9 @@
           "h": 7,
           "w": 24,
           "x": 0,
-          "y": 46
+          "y": 50
         },
+        "hiddenSeries": false,
         "id": 2,
         "interval": "1h",
         "legend": {
@@ -5702,7 +6182,7 @@
           "h": 17,
           "w": 12,
           "x": 0,
-          "y": 53
+          "y": 57
         },
         "id": 7,
         "links": [],
@@ -5800,7 +6280,7 @@
           "h": 17,
           "w": 12,
           "x": 12,
-          "y": 53
+          "y": 57
         },
         "id": 3,
         "links": [],
@@ -5980,7 +6460,7 @@
       }
     ],
     "refresh": false,
-    "schemaVersion": 20,
+    "schemaVersion": 21,
     "style": "dark",
     "tags": [],
     "templating": {
@@ -6036,7 +6516,7 @@
     "timezone": "",
     "title": "Activity",
     "uid": "000000019",
-    "version": 104
+    "version": 106
   },
   "meta": {
     "canAdmin": false,
@@ -6055,9 +6535,9 @@
     "provisionedExternalId": "",
     "slug": "activity",
     "type": "db",
-    "updated": "2019-10-17T13:44:16+02:00",
+    "updated": "2019-12-09T18:30:28+01:00",
     "updatedBy": "tiltec",
     "url": "/d/000000019/activity",
-    "version": 104
+    "version": 106
   }
 }

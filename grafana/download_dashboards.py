@@ -2,7 +2,7 @@
 """
 Downloads all Grafana dashboards from an organization for backup purposes, until we have generated dashboards
 
-1. Go to https://grafana.yunity.org/org/apikeys (change to your hostname) and generate a new API key
+1. Go to https://grafana.karrot.world/org/apikeys (change to your hostname) and generate a new API key
 2. Copy config.py.example to config.py and add your API key
 3. Run "python download_dashboards.py"
 4. Optional: Remove unused dashboards

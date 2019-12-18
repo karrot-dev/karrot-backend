@@ -1023,7 +1023,7 @@
     "canSave": false,
     "canStar": true,
     "created": "2018-03-12T13:30:39+01:00",
-    "createdBy": "nicksellen",
+    "createdBy": "Anonymous",
     "expires": "0001-01-01T00:00:00Z",
     "folderId": 0,
     "folderTitle": "General",
@@ -1035,7 +1035,7 @@
     "slug": "group-detail-prod",
     "type": "db",
     "updated": "2018-03-13T21:46:37+01:00",
-    "updatedBy": "nicksellen",
+    "updatedBy": "Anonymous",
     "url": "/d/000000012/group-detail-prod",
     "version": 8
   }
