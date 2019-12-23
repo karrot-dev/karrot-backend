@@ -213,14 +213,17 @@ VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
     'user_profile': [
         ('full_size', 'url'),
         ('thumbnail', 'thumbnail__120x120'),
+        ('600', 'thumbnail__600x600'),
     ],
     'group_logo': [
         ('full_size', 'url'),
         ('thumbnail', 'thumbnail__120x120'),
+        ('200', 'thumbnail__200x200'),
+        ('600', 'thumbnail__600x600'),
     ],
     'offer_image': [
         ('full_size', 'url'),
-        ('thumbnail', 'thumbnail__120x120'),
+        ('600', 'thumbnail__600x600'),
     ]
 }
 
