@@ -51,7 +51,10 @@ class PlaceSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
 
     def get_is_subscribed(self, place):
-        return place.placesubscription_set.filter(user=self.context['request'].user).exists()
+        v = getattr(place, 'is_subscribed', None)
+        if v is None:
+            v = place.placesubscription_set.filter(user=self.context['request'].user).exists()
+        return v
 
     def save(self, **kwargs):
         return super().save(last_changed_by=self.context['request'].user)

@@ -1,4 +1,4 @@
-from django.db.models import Avg, Count, Q, Sum, Case, When, FloatField
+from django.db.models import Avg, Count, Q, Sum, Case, When, FloatField, BooleanField
 from django_filters import rest_framework as filters
 from django.utils.translation import gettext_lazy as _
 from rest_framework import mixins, permissions, status
@@ -48,6 +48,8 @@ class PlaceViewSet(
 
     def get_queryset(self):
         qs = self.queryset.filter(group__members=self.request.user)
+        if self.action == 'list':
+            qs = qs.prefetch_related('subscribers').annotate_is_subscribed(self.request.user)
         if self.action == 'statistics':
             return qs.annotate(
                 feedback_count=Count('pickup_dates__feedback', distinct=True),
