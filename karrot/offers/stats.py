@@ -17,16 +17,6 @@ def offer_created(offer):
     }])
 
 
-def offer_accepted(offer):
-    write_points([{
-        'measurement': 'karrot.events',
-        'tags': offer_tags(offer),
-        'fields': {
-            'offer_accepted': 1
-        },
-    }])
-
-
 def offer_archived(offer):
     write_points([{
         'measurement': 'karrot.events',

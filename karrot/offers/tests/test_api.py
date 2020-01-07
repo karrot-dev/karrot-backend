@@ -84,22 +84,11 @@ class TestOffersAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data['name'], data['name'])
 
-    def test_mark_offer_accepted(self):
-        self.client.force_login(user=self.user)
-        response = self.client.post('/api/offers/{}/accept/'.format(self.offer.id))
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data['status'], 'accepted')
-
     def test_mark_offer_archived(self):
         self.client.force_login(user=self.user)
         response = self.client.post('/api/offers/{}/archive/'.format(self.offer.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data['status'], 'archived')
-
-    def test_mark_offer_accepted_as_another_user(self):
-        self.client.force_login(user=self.another_user)
-        response = self.client.post('/api/offers/{}/accept/'.format(self.offer.id))
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_mark_offer_archived_as_another_user(self):
         self.client.force_login(user=self.another_user)
@@ -225,20 +214,15 @@ class TestListOffersAPI(APITestCase):
         for _ in range(4):
             OfferFactory(user=self.user, group=self.group, images=[image_path], status='active')
         for _ in range(2):
-            OfferFactory(user=self.user, group=self.group, images=[image_path], status='accepted')
-        OfferFactory(user=self.user, group=self.group, images=[image_path], status='archived')
+            OfferFactory(user=self.user, group=self.group, images=[image_path], status='archived')
 
         response = self.client.get('/api/offers/', {'status': 'active'})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data['results']), 4)
 
-        response = self.client.get('/api/offers/', {'status': 'accepted'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['results']), 2)
-
         response = self.client.get('/api/offers/', {'status': 'archived'})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['results']), 1)
+        self.assertEqual(len(response.data['results']), 2)
 
     def test_cannot_list_offers_for_another_group(self):
         self.client.force_login(user=self.user)
