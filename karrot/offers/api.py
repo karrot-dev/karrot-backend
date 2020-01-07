@@ -152,21 +152,6 @@ class OfferViewSet(
         detail=True,
         methods=['POST'],
     )
-    def accept(self, request, pk=None):
-        self.check_permissions(request)
-        offer = self.get_object()
-        self.check_object_permissions(request, offer)
-        if offer.status != OfferStatus.ACTIVE.value:
-            raise ValidationError(_('You can only accept an active offer'))
-        offer.accept()
-        stats.offer_accepted(offer)
-        serializer = self.get_serializer(offer)
-        return Response(data=serializer.data)
-
-    @action(
-        detail=True,
-        methods=['POST'],
-    )
     def archive(self, request, pk=None):
         self.check_permissions(request)
         offer = self.get_object()

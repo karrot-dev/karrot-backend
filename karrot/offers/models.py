@@ -12,7 +12,6 @@ from karrot.conversations.models import ConversationMixin
 
 class OfferStatus(Enum):
     ACTIVE = 'active'
-    ACCEPTED = 'accepted'
     ARCHIVED = 'archived'
 
 
@@ -33,11 +32,6 @@ class Offer(BaseModel, ConversationMixin):
         if self.status == OfferStatus.ACTIVE.value:
             return None
         return self.status_changed_at
-
-    def accept(self):
-        self.status = OfferStatus.ACCEPTED.value
-        self.status_changed_at = timezone.now()
-        self.save()
 
     def archive(self):
         self.status = OfferStatus.ARCHIVED.value
