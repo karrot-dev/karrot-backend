@@ -1,7 +1,7 @@
 # Translations template for PROJECT.
-# Copyright (C) 2019 ORGANIZATION
+# Copyright (C) 2020 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2019.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
 # 
 # Translators:
 # Sara Brunacci <brunaccisara@gmail.com>, 2019
@@ -577,10 +577,6 @@ msgid "You are not the owner of this offer"
 msgstr ""
 
 #: karrot/offers/api.py:160
-msgid "You can only accept an active offer"
-msgstr ""
-
-#: karrot/offers/api.py:175
 msgid "You can only archive an active offer"
 msgstr ""
 
