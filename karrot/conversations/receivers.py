@@ -13,14 +13,14 @@ from karrot.conversations.models import (
 @receiver(pre_save, sender=ConversationMessage)
 def create_thread_participant(sender, instance, **kwargs):
     message = instance
-    thread = message.thread
 
     if message.is_thread_reply():
+        thread = message.thread
         if not thread.thread_id:
             # initialize thread
             thread.participants.create(user=thread.author)
             ConversationMessage.objects.filter(id=thread.id).update(thread=thread)
-            del thread.thread_id  # will be refreshed on next access
+            thread.thread_id = thread.id
 
         if message.author != thread.author and not thread.participants.filter(user=message.author).exists():
             thread.participants.create(user=message.author)

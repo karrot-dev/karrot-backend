@@ -117,8 +117,8 @@ class Conversation(BaseModel, UpdatedAtMixin):
         if self.target_type_id is None:
             return None
 
-        type = str(self.target_type)
-        if type == 'pickup date':
+        type = str(self.target_type.model)
+        if type == 'pickupdate':
             return 'pickup'
 
         return type

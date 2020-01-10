@@ -1,5 +1,5 @@
 from django.core.management import call_command
-from django.utils.six import StringIO
+from io import StringIO
 from rest_framework.test import APITestCase
 
 from karrot.users.models import User
