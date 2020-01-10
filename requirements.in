@@ -60,3 +60,4 @@ logging_tree
 django-silk
 # transifex-client # disabled to prevent pulling in urllib<1.24.1
 yapf
+importlib-metadata # for py3.7 compat
