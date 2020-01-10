@@ -1,6 +1,6 @@
-from django.db.models import Avg, Count, Q, Sum, Case, When, FloatField, BooleanField
-from django_filters import rest_framework as filters
+from django.db.models import Avg, Count, Q, Sum, Case, When, FloatField
 from django.utils.translation import gettext_lazy as _
+from django_filters import rest_framework as filters
 from rest_framework import mixins, permissions, status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
