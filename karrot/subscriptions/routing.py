@@ -25,8 +25,8 @@ def AllowedHostsAndFileOriginValidator(application):
 application = ProtocolTypeRouter({
     'websocket':
     AllowedHostsAndFileOriginValidator(
-        TokenAuthMiddleware(
-            AuthMiddlewareStack(
+        AuthMiddlewareStack(
+            TokenAuthMiddleware(
                 WebsocketConsumer,
             ),
         ),

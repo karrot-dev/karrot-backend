@@ -30,7 +30,7 @@ class Communicator():
 class TokenCommunicator():
     async def __aenter__(self):
         user = await AsyncUserFactory()
-        token = Token.objects.create(user=user)
+        token = await database_sync_to_async(Token.objects.create)(user=user)
         encoded = b64encode(token.key.encode('ascii')).decode('ascii')
         self.communicator = WebsocketCommunicator(
             TokenAuthMiddleware(WebsocketConsumer),
@@ -43,6 +43,16 @@ class TokenCommunicator():
         await self.communicator.disconnect()
 
 
+@database_sync_to_async
+def get_subscription_count(**kwargs):
+    return ChannelSubscription.objects.filter(**kwargs).count()
+
+
+@database_sync_to_async
+def get_subscription(**kwargs):
+    return list(ChannelSubscription.objects.filter(**kwargs))
+
+
 @pytest.mark.asyncio
 @pytest.mark.django_db
 class TestConsumer:
@@ -50,23 +60,22 @@ class TestConsumer:
         async with Communicator() as communicator:
             user = await AsyncUserFactory()
             communicator.scope['user'] = user
-            assert ChannelSubscription.objects.filter(user=user).count() == 0
+            assert (await get_subscription_count(user=user)) == 0
             await communicator.connect()
-            assert ChannelSubscription.objects.filter(user=user).count() == 1, 'Did not add subscription'
+            assert (await get_subscription_count(user=user)) == 1, 'Did not add subscription'
 
     async def test_accepts_anonymous_connections(self):
         async with Communicator() as communicator:
-            qs = ChannelSubscription.objects
-            original_count = qs.count()
+            original_count = await get_subscription_count()
             await communicator.connect()
-            assert qs.count() == original_count
+            assert (await get_subscription_count()) == original_count
 
     async def test_saves_reply_channel(self):
         async with Communicator() as communicator:
             user = await AsyncUserFactory()
             communicator.scope['user'] = user
             await communicator.connect()
-            subscription = ChannelSubscription.objects.filter(user=user).first()
+            subscription = (await get_subscription(user=user))[0]
             assert subscription.reply_channel is not None
             await get_channel_layer().send(
                 subscription.reply_channel, {
@@ -92,7 +101,7 @@ class TestConsumer:
             await communicator.send_json_to({'message': 'hey'})
             await asyncio.sleep(0.1)
 
-            subscription = ChannelSubscription.objects.filter(user=user).first()
+            subscription = (await get_subscription(user=user))[0]
             difference = subscription.lastseen_at - the_past
             assert difference.total_seconds() > 1000
 
@@ -104,12 +113,12 @@ class TestConsumer:
 
             await communicator.send_json_to({'type': 'away'})
             await asyncio.sleep(0.1)
-            subscription = ChannelSubscription.objects.get(user=user)
+            subscription = (await get_subscription(user=user))[0]
             assert subscription.away_at is not None
 
             await communicator.send_json_to({'type': 'back'})
             await asyncio.sleep(0.1)
-            subscription.refresh_from_db()
+            await database_sync_to_async(subscription.refresh_from_db)()
             assert subscription.away_at is None
 
     async def test_removes_subscription(self):
@@ -117,10 +126,10 @@ class TestConsumer:
             user = await AsyncUserFactory()
             communicator.scope['user'] = user
             await communicator.connect()
-            assert ChannelSubscription.objects.filter(user=user).count() == 1, 'Did not add subscription'
+            assert (await get_subscription_count(user=user)) == 1, 'Did not add subscription'
 
             await communicator.disconnect()
-            assert ChannelSubscription.objects.filter(user=user).count() == 0, 'Did not remove subscription'
+            assert (await get_subscription_count(user=user)) == 0, 'Did not remove subscription'
 
 
 @pytest.mark.asyncio
@@ -128,8 +137,9 @@ class TestConsumer:
 class TestTokenAuth:
     async def test_user_is_added_to_scope(self):
         async with TokenCommunicator() as (communicator, user):
-            await communicator.connect()
-            assert communicator.scope['user'] == user
+            connected, subprotocol = await communicator.connect()
+            assert connected
+            assert (await get_subscription_count(user=user)) == 1, 'Did not login'
 
 
 @pytest.mark.asyncio

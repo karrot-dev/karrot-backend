@@ -1,5 +1,9 @@
 from base64 import b64decode
+
+from channels.auth import UserLazyObject
+from channels.db import database_sync_to_async
 from channels.generic.websocket import JsonWebsocketConsumer
+from channels.middleware import BaseMiddleware
 from django.utils import timezone
 from rest_framework.authentication import TokenAuthentication
 
@@ -20,23 +24,23 @@ def get_auth_token_from_subprotocols(subprotocols):
     return None
 
 
-class TokenAuthMiddleware:
+class TokenAuthMiddleware(BaseMiddleware):
     """
     Middleware which populates scope["user"] from a auth token provided as websocket protocol header
     Used by the cordova app
+
+    scope['user'] is usually provided by AuthMiddleware, we just override it if we find a token.
     """
-
-    def __init__(self, inner):
-        self.inner = inner
-
-    def __call__(self, scope):
+    def populate_scope(self, scope):
         if 'user' not in scope:
-            token = get_auth_token_from_subprotocols(scope.get('subprotocols', []))
-            if token:
-                user, _ = token_auth.authenticate_credentials(token)
-                if user:
-                    scope['user'] = user
-        return self.inner(scope)
+            scope['user'] = UserLazyObject()
+
+    async def resolve_scope(self, scope):
+        token = get_auth_token_from_subprotocols(scope.get('subprotocols', []))
+        if token:
+            user, _ = await database_sync_to_async(token_auth.authenticate_credentials)(token)
+            if user:
+                scope['user']._wrapped = user
 
 
 class WebsocketConsumer(JsonWebsocketConsumer):
