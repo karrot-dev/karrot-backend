@@ -13,7 +13,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.7.0\n"
+"Generated-By: Babel 2.8.0\n"
 "Language: nl\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
@@ -25,7 +25,7 @@ msgstr ""
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:124
 #: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:112
 #: karrot/pickups/serializers.py:297 karrot/places/api.py:19
-#: karrot/places/serializers.py:80
+#: karrot/places/serializers.py:83
 msgid "You need to be a group editor"
 msgstr ""
 
@@ -429,7 +429,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr ""
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:122
-#: karrot/offers/serializers.py:105 karrot/places/serializers.py:78
+#: karrot/offers/serializers.py:105 karrot/places/serializers.py:81
 msgid "You are not a member of this group."
 msgstr ""
 
@@ -721,16 +721,16 @@ msgid ""
 "                            <strong>Pickup notification</strong> emails for this group."
 msgstr ""
 
-#: karrot/places/serializers.py:85
+#: karrot/places/serializers.py:88
 msgid "Set at least one week in advance"
 msgstr ""
 
-#: karrot/places/serializers.py:88
+#: karrot/places/serializers.py:91
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr ""
 
-#: karrot/places/serializers.py:140
+#: karrot/places/serializers.py:143
 msgid "You are already subscribed to this place"
 msgstr ""
 
