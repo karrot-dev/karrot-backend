@@ -7,9 +7,9 @@
 # Yashvi Shah <yashvi4100@gmail.com>, 2018
 # Unai Gaztelu <unai_gaztelu@hotmail.es>, 2019
 # Frido Hokkaido <kuerbiskernkotze@posteo.ee>, 2019
-# Carlos Pesquera Alonso <fydus@hotmail.com>, 2019
 # Tilmann Becker <tilmann.becker+github@gmail.com>, 2019
 # Lea Nolte <lea.marie@gmx.net>, 2019
+# Carlos Pesquera Alonso <fydus@hotmail.com>, 2020
 # 
 #, fuzzy
 msgid ""
@@ -17,7 +17,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
-"Last-Translator: Lea Nolte <lea.marie@gmx.net>, 2019\n"
+"Last-Translator: Carlos Pesquera Alonso <fydus@hotmail.com>, 2020\n"
 "Language-Team: Spanish (https://www.transifex.com/yunity-1/teams/68631/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -184,7 +184,7 @@ msgstr "Nuevo mensaje de resolución de problemas en %(group_name)s"
 #: karrot/conversations/emails.py:281
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
-msgstr ""
+msgstr "Nuevo mensaje de la oferta %(offer_name)s en %(group_name)s"
 
 #: karrot/conversations/serializers.py:148
 msgid "This conversation has been closed"
@@ -646,16 +646,16 @@ msgstr "Tiene que contener mínimo una imagen"
 #: karrot/offers/templates/new_offer.subject.jinja2:1
 #, python-format
 msgid "%(user_name)s created a new offer %(offer_name)s"
-msgstr ""
+msgstr "%(user_name)s ha creado una nueva oferta %(offer_name)s"
 
 #: karrot/offers/templates/new_offer.html.jinja2:223
 #, python-format
 msgid "%(user_name)s created a new offer"
-msgstr ""
+msgstr "%(user_name)s ha creado una nueva oferta"
 
 #: karrot/offers/templates/new_offer.html.jinja2:239
 msgid "View offer"
-msgstr ""
+msgstr "Ver oferta"
 
 #: karrot/offers/templates/new_offer.html.jinja2:274
 msgid ""
@@ -671,6 +671,8 @@ msgid ""
 "Reply to this email directly, <a href=\"%(offer_url)s\">view it on "
 "%(site_name)s</a>, or <a href=\"%(mute_url)s\">mute the conversation</a>."
 msgstr ""
+"Responder a este correo directamente, <a href=\"%(offer_url)s\">verlo en "
+"%(site_name)s</a>, o <a href=\"%(mute_url)s\">silenciar la conversación</a>."
 
 #: karrot/pickups/permissions.py:7
 msgid "The pickup date is in the past."
