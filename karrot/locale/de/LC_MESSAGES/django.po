@@ -7,8 +7,8 @@
 # Bodhi Neiser <Bodhin@gmx.net>, 2017
 # Foo Bar <transifex@endlevel.de>, 2019
 # Peter-Alexander Pöltl <pa78@gmx.at>, 2019
-# Sandro Eiler <sandro.eiler@posteo.de>, 2019
 # Tilmann Becker <tilmann.becker+github@gmail.com>, 2019
+# Sandro Eiler <sandro.eiler@posteo.de>, 2020
 # 
 #, fuzzy
 msgid ""
@@ -16,7 +16,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
-"Last-Translator: Tilmann Becker <tilmann.becker+github@gmail.com>, 2019\n"
+"Last-Translator: Sandro Eiler <sandro.eiler@posteo.de>, 2020\n"
 "Language-Team: German (https://www.transifex.com/yunity-1/teams/68631/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -184,7 +184,7 @@ msgstr "Neue Nachricht bei Konfliktlösung in %(group_name)s"
 #: karrot/conversations/emails.py:281
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
-msgstr ""
+msgstr "Neue Nachricht für Angebot %(offer_name)s in %(group_name)s"
 
 #: karrot/conversations/serializers.py:148
 msgid "This conversation has been closed"
@@ -633,36 +633,38 @@ msgstr "Ein Konfliktlösungsprozess mit dir wurde gestartet"
 
 #: karrot/offers/api.py:98
 msgid "You are not the owner of this offer"
-msgstr ""
+msgstr "Du bist nicht der Eigentümer dieses Angebots"
 
 #: karrot/offers/api.py:160
 msgid "You can only archive an active offer"
-msgstr ""
+msgstr "Nur aktive Angebote können archiviert werden."
 
 #: karrot/offers/serializers.py:100
 msgid "Must have at least one image"
-msgstr ""
+msgstr "Muss mindestens ein Bild haben"
 
 #: karrot/offers/templates/new_offer.html.jinja2:6
 #: karrot/offers/templates/new_offer.subject.jinja2:1
 #, python-format
 msgid "%(user_name)s created a new offer %(offer_name)s"
-msgstr ""
+msgstr "%(user_name)shat eine neues Angebot %(offer_name)s erstellt"
 
 #: karrot/offers/templates/new_offer.html.jinja2:223
 #, python-format
 msgid "%(user_name)s created a new offer"
-msgstr ""
+msgstr "%(user_name)shat ein neues Angebot erstellt"
 
 #: karrot/offers/templates/new_offer.html.jinja2:239
 msgid "View offer"
-msgstr ""
+msgstr "Angebot ansehen"
 
 #: karrot/offers/templates/new_offer.html.jinja2:274
 msgid ""
 "You are receiving this because you are subscribed to <strong>New "
 "Offer</strong> emails for this group."
 msgstr ""
+"Du erhältst dies, weil du <strong>Neue Angebote</strong> von dieser Gruppe "
+"abonniert hast."
 
 #: karrot/offers/templates/new_offer.html.jinja2:278
 #, python-format
@@ -670,6 +672,9 @@ msgid ""
 "Reply to this email directly, <a href=\"%(offer_url)s\">view it on "
 "%(site_name)s</a>, or <a href=\"%(mute_url)s\">mute the conversation</a>."
 msgstr ""
+"Antworte direkt auf diese Email, <a href=\"%(offer_url)s\">betrachte sie auf"
+" %(site_name)s</a>, oder <a href=\"%(mute_url)s\">schalte die Unterhaltung "
+"stumm</a>."
 
 #: karrot/pickups/permissions.py:7
 msgid "The pickup date is in the past."
