@@ -22,6 +22,7 @@ from karrot.pickups.serializers import (
     FeedbackSerializer, PickupDateUpdateSerializer, PickupDateSeriesUpdateSerializer,
     PickupDateSeriesHistorySerializer, FeedbackExportSerializer, FeedbackExportRenderer
 )
+from karrot.places.models import PlaceStatus
 from karrot.utils.mixins import PartialUpdateModelMixin
 
 
@@ -164,7 +165,7 @@ class PickupDateViewSet(
     pagination_class = PickupDatePagination
 
     def get_queryset(self):
-        qs = self.queryset.filter(place__group__members=self.request.user, place__status='active')
+        qs = self.queryset.filter(place__group__members=self.request.user, place__status=PlaceStatus.ACTIVE.value)
         if self.action == 'list':
             # because we have collectors field in the serializer
             # only prefetch on read_only actions, otherwise there are caching problems when collectors get added

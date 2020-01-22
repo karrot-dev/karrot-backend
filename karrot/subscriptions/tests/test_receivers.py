@@ -149,7 +149,8 @@ class ConversationReceiverTests(WSTestCase):
         message = ConversationMessage.objects.create(conversation=conversation, content='yay', author=author)
 
         # hopefully they receive it!
-        self.assertEqual(len(client.messages), 2, client.messages)
+        self.assertEqual(len(client.messages_by_topic['conversations:conversation']), 1, client.messages)
+        self.assertEqual(len(client.messages_by_topic['conversations:message']), 1, client.messages)
         response = client.messages[0]
         parse_dates(response)
         self.assertEqual(response, make_conversation_message_broadcast(message))
@@ -228,9 +229,7 @@ class ConversationReceiverTests(WSTestCase):
 
         conversation.leave(leaving_user)
 
-        response = client.messages[0]
-
-        self.assertEqual(response['topic'], 'conversations:conversation')
+        response = client.messages_by_topic['conversations:conversation'][0]
         self.assertEqual(response['payload']['participants'], [user.id])
 
 
@@ -244,9 +243,11 @@ class ConversationThreadReceiverTests(WSTestCase):
         thread = conversation.messages.create(author=user, content='yay')
 
         # login and connect
+        print('connect')
         client = self.connect_as(user)
         author_client = self.connect_as(author)
 
+        print('create another reply')
         reply = ConversationMessage.objects.create(
             conversation=conversation,
             thread=thread,
@@ -254,8 +255,24 @@ class ConversationThreadReceiverTests(WSTestCase):
             author=author,
         )
 
+        client_messages = client.messages_by_topic
+
+        # updated status
+        self.assertEqual(
+            client_messages['status'][0], {
+                'topic': 'status',
+                'payload': {
+                    'unseen_thread_count': 1,
+                    'unseen_conversation_count': 0,
+                    'has_unread_conversations_or_threads': True,
+                    'groups': {},
+                    'places': {},
+                }
+            }
+        )
+
         # user receive message
-        response = client.messages[0]
+        response = client_messages['conversations:message'][0]
         parse_dates(response)
         self.assertEqual(response, make_conversation_message_broadcast(
             reply,
@@ -263,7 +280,7 @@ class ConversationThreadReceiverTests(WSTestCase):
         ))
 
         # and they should get an updated thread object
-        response = client.messages[1]
+        response = client_messages['conversations:message'][1]
         parse_dates(response)
         self.assertEqual(
             response,
@@ -448,7 +465,9 @@ class GroupMembershipReceiverTests(WSTestCase):
         self.assertEqual([m['topic'] for m in client.messages], [
             'history:history',
             'conversations:leave',
+            'status',
             'conversations:conversation',
+            'status',
             'groups:group_preview',
         ])
 
@@ -464,6 +483,7 @@ class GroupMembershipReceiverTests(WSTestCase):
 
         self.assertEqual([m['topic'] for m in client.messages], [
             'notifications:notification',
+            'status',
             'groups:group_detail',
         ])
 
@@ -715,7 +735,10 @@ class FeedbackReceiverTests(WSTestCase):
         response = self.client.messages_by_topic.get('feedback:feedback')[0]
         self.assertEqual(response['payload']['weight'], feedback.weight)
 
-        self.assertEqual(len(self.client.messages), 1)
+        self.assertEqual([m['topic'] for m in self.client.messages], [
+            'feedback:feedback',
+            'status',
+        ], self.client.messages)
 
 
 class FinishedPickupReceiverTest(WSTestCase):
@@ -733,13 +756,16 @@ class FinishedPickupReceiverTest(WSTestCase):
         self.client = self.connect_as(self.member)
         PickupDate.objects.process_finished_pickup_dates()
 
-        history_response = next(m for m in self.client.messages if m['topic'] == 'history:history')
-        self.assertEqual(history_response['payload']['typus'], 'PICKUP_DONE')
+        messages_by_topic = self.client.messages_by_topic
 
-        history_response = next(m for m in self.client.messages if m['topic'] == 'notifications:notification')
-        self.assertEqual(history_response['payload']['type'], 'feedback_possible')
+        response = messages_by_topic['history:history'][0]
+        self.assertEqual(response['payload']['typus'], 'PICKUP_DONE')
 
-        self.assertEqual(len(self.client.messages), 2, self.client.messages)
+        response = messages_by_topic['notifications:notification'][0]
+        self.assertEqual(response['payload']['type'], 'feedback_possible')
+
+        self.assertEqual(len(self.client.messages), 4, self.client.messages)
+        self.assertEqual(len(messages_by_topic['status']), 2)
 
 
 class UserReceiverTest(WSTestCase):

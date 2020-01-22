@@ -1,13 +1,15 @@
+from datetime import datetime
+
 from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
+from pytz import utc
 
 from karrot.conversations import tasks, stats
 from karrot.conversations.models import (
-    ConversationParticipant,
-    ConversationMessage,
-    ConversationMessageReaction,
-    ConversationThreadParticipant,
+    ConversationParticipant, ConversationMessage, ConversationMessageReaction, ConversationThreadParticipant,
+    ConversationMeta
 )
+from karrot.users.models import User
 
 
 @receiver(pre_save, sender=ConversationMessage)
@@ -96,3 +98,19 @@ def set_conversation_updated_at_on_create(sender, instance, created, **kwargs):
 def set_conversation_updated_at_on_delete(sender, instance, **kwargs):
     participant = instance
     participant.conversation.save()
+
+
+@receiver(post_save, sender=User)
+def make_conversation_meta(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    user = instance
+    min_date = datetime.min.replace(tzinfo=utc)
+    ConversationMeta.objects.get_or_create(
+        {
+            'conversations_marked_at': min_date,
+            'threads_marked_at': min_date,
+        },
+        user=user,
+    )

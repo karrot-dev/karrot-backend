@@ -56,8 +56,8 @@ class TestConversationsAPI(APITestCase):
         )
         self.assertEqual(
             response.data['results']['meta'], {
-                'conversations_marked_at': None,
-                'threads_marked_at': None,
+                'conversations_marked_at': '0001-01-01T00:00:00Z',
+                'threads_marked_at': '0001-01-01T00:00:00Z',
             }
         )
 
@@ -73,8 +73,6 @@ class TestConversationsAPI(APITestCase):
         conversations = [t.conversation for t in (group, pickup, application, issue, offer)]
         [c.sync_users([user]) for c in conversations]
         [c.messages.create(content='hey', author=user) for c in conversations]
-
-        ConversationMeta.objects.get_or_create(user=user)
 
         self.client.force_login(user=user)
         with self.assertNumQueries(15):
@@ -93,8 +91,6 @@ class TestConversationsAPI(APITestCase):
         conversation = group.conversation
         conversation.sync_users([user])
         conversation.messages.create(content='hey', author=user)
-
-        ConversationMeta.objects.get_or_create(user=user)
 
         self.client.force_login(user=user)
         with self.assertNumQueries(3):

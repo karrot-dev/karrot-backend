@@ -1,6 +1,7 @@
 from enum import Enum
 
 from dateutil.relativedelta import relativedelta
+from dirtyfields import DirtyFieldsMixin
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -131,8 +132,8 @@ class Conversation(BaseModel, UpdatedAtMixin):
 
 class ConversationMeta(BaseModel):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    conversations_marked_at = models.DateTimeField(null=True)
-    threads_marked_at = models.DateTimeField(null=True)
+    conversations_marked_at = models.DateTimeField()
+    threads_marked_at = models.DateTimeField()
 
 
 class ConversationParticipantQuerySet(models.QuerySet):
@@ -152,7 +153,7 @@ class ConversationNotificationStatus(Enum):
     NONE = 'none'
 
 
-class ConversationParticipant(BaseModel, UpdatedAtMixin):
+class ConversationParticipant(BaseModel, UpdatedAtMixin, DirtyFieldsMixin):
     """The join table between Conversation and User."""
     class Meta:
         unique_together = (('user', 'conversation'), )
@@ -212,6 +213,7 @@ class ConversationMessageQuerySet(models.QuerySet):
         )
 
     def annotate_unread_replies_count_for(self, user):
+        # see also ConversationThreadParticipantQuerySet.annotate_unread_replies_count
         unread_replies_filter = Q(
             participants__user=user,
         ) & ~Q(thread_messages__id=F('thread_id')  # replies have id != thread_id
@@ -313,7 +315,22 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
         self._replies_count = value
 
 
-class ConversationThreadParticipant(BaseModel, UpdatedAtMixin):
+class ConversationThreadParticipantQuerySet(models.QuerySet):
+    def annotate_unread_replies_count(self):
+        # see also ConversationMessageQuerySet.annotate_unread_replies_count_for
+        unread_replies_filter = (
+            ~Q(thread__thread_messages__id=F('thread_id')) &
+            (Q(seen_up_to=None) | Q(thread__thread_messages__id__gt=F('seen_up_to')))
+        )
+
+        return self.annotate(
+            unread_replies_count=Count('thread__thread_messages', filter=unread_replies_filter, distinct=True)
+        )
+
+
+class ConversationThreadParticipant(BaseModel, UpdatedAtMixin, DirtyFieldsMixin):
+    objects = ConversationThreadParticipantQuerySet.as_manager()
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     thread = models.ForeignKey(ConversationMessage, related_name='participants', on_delete=models.CASCADE)
     seen_up_to = models.ForeignKey(
