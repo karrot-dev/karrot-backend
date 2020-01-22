@@ -558,7 +558,7 @@ def conversation_thread_saved(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=ConversationMeta)
-def conversation_meta_saved(sender, instance, **kwargs):
+def conversation_meta_saved_again(sender, instance, **kwargs):
     # user opened the latest messages menu
 
     print('conversation_meta_saved')

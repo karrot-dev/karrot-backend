@@ -11,9 +11,9 @@ from karrot.places.models import PlaceStatus
 def unseen_notification_count(user):
     return Notification.objects \
         .filter(
-        user=user,
-        created_at__gt=F('user__notificationmeta__marked_at')
-    ) \
+            user=user,
+            created_at__gt=F('user__notificationmeta__marked_at')
+        ) \
         .count()
 
 

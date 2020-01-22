@@ -10,7 +10,7 @@ from rest_framework.test import APITestCase
 from karrot.applications.factories import ApplicationFactory
 from karrot.conversations.factories import ConversationFactory
 from karrot.conversations.models import ConversationParticipant, Conversation, ConversationMessage, \
-    ConversationMessageReaction, ConversationMeta, ConversationNotificationStatus
+    ConversationMessageReaction, ConversationNotificationStatus
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupStatus
 from karrot.issues.factories import IssueFactory
