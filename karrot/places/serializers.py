@@ -5,8 +5,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
 from karrot.history.models import History, HistoryTypus
-from karrot.utils.misc import find_changed
 from karrot.places.models import Place as PlaceModel, PlaceStatus, PlaceSubscription
+from karrot.utils.misc import find_changed
 
 
 class PlaceHistorySerializer(serializers.ModelSerializer):
@@ -51,10 +51,7 @@ class PlaceSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
 
     def get_is_subscribed(self, place):
-        v = getattr(place, 'is_subscribed', None)
-        if v is None:
-            v = place.placesubscription_set.filter(user=self.context['request'].user).exists()
-        return v
+        return any(u == self.context['request'].user for u in place.subscribers.all())
 
     def save(self, **kwargs):
         return super().save(last_changed_by=self.context['request'].user)

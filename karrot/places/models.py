@@ -2,7 +2,6 @@ from enum import Enum
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Case, When
 
 from karrot.base.base_models import BaseModel, LocationModel
 from karrot.conversations.models import ConversationMixin
@@ -16,20 +15,7 @@ class PlaceStatus(Enum):
     ARCHIVED = 'archived'
 
 
-class PlaceQuerySet(models.QuerySet):
-    def annotate_is_subscribed(self, user):
-        return self.annotate(
-            is_subscribed=Case(
-                When(placesubscription__user=user, then=True),
-                default=False,
-                output_field=models.BooleanField(),
-            )
-        )
-
-
 class Place(BaseModel, LocationModel, ConversationMixin):
-    objects = PlaceQuerySet.as_manager()
-
     class Meta:
         unique_together = ('group', 'name')
 

@@ -185,6 +185,10 @@ class TestPlacesAPI(APITestCase, ExtractPaginationMixin):
 
     def test_subscribe_and_get_conversation(self):
         self.client.force_login(user=self.member)
+        response = self.client.get('/api/places/{}/'.format(self.place.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertFalse(response.data['is_subscribed'])
+
         response = self.client.post('/api/places/{}/subscription/'.format(self.place.id))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 

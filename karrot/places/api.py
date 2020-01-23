@@ -49,7 +49,7 @@ class PlaceViewSet(
     def get_queryset(self):
         qs = self.queryset.filter(group__members=self.request.user)
         if self.action == 'list':
-            qs = qs.prefetch_related('subscribers').annotate_is_subscribed(self.request.user)
+            qs = qs.prefetch_related('subscribers')
         if self.action == 'statistics':
             return qs.annotate(
                 feedback_count=Count('pickup_dates__feedback', distinct=True),
