@@ -34,7 +34,7 @@ msgstr "Ton adresse email doit être verifiée"
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:124
 #: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:112
 #: karrot/pickups/serializers.py:297 karrot/places/api.py:19
-#: karrot/places/serializers.py:83
+#: karrot/places/serializers.py:80
 msgid "You need to be a group editor"
 msgstr "Tu dois être éditeur du groupe"
 
@@ -483,7 +483,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "Une invitation a déjà été envoyée à cette adresse e-mail"
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:122
-#: karrot/offers/serializers.py:105 karrot/places/serializers.py:81
+#: karrot/offers/serializers.py:105 karrot/places/serializers.py:78
 msgid "You are not a member of this group."
 msgstr "Tu n'est pas membre de ce groupe."
 
@@ -792,16 +792,16 @@ msgstr ""
 "Tu reçois ceci car tu es inscrit à\n"
 "                            <strong> notification récolte</strong> maisl pour ce groupe."
 
-#: karrot/places/serializers.py:88
+#: karrot/places/serializers.py:85
 msgid "Set at least one week in advance"
 msgstr "Une semaine en avance est minimum!"
 
-#: karrot/places/serializers.py:91
+#: karrot/places/serializers.py:88
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr "Ne paramètre pas plus de %(count)s semaines à l'avance"
 
-#: karrot/places/serializers.py:143
+#: karrot/places/serializers.py:140
 msgid "You are already subscribed to this place"
 msgstr ""
 
