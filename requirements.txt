@@ -78,7 +78,7 @@ ipython==7.11.1
 itypes==1.1.0             # via coreapi
 jedi==0.15.2              # via ipython
 jinja2==2.10.3            # via coreschema, django-silk
-logging-tree==1.8
+logging_tree==1.8.1
 lxml==4.4.2
 markdown==3.1.1
 markupsafe==1.1.1         # via jinja2
