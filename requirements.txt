@@ -22,7 +22,7 @@ autopep8==1.5
 babel==2.8.0
 backcall==0.1.0           # via ipython
 bleach-whitelist==0.0.10
-bleach==3.1.0
+bleach==3.1.1
 boltons==20.0.0           # via face, glom
 cchardet==2.1.5
 certifi==2019.11.28       # via requests
