@@ -154,6 +154,8 @@ class ConversationNotificationStatus(Enum):
 
 class ConversationParticipant(BaseModel, UpdatedAtMixin):
     """The join table between Conversation and User."""
+    class Meta:
+        unique_together = (('user', 'conversation'), )
 
     objects = ConversationParticipantQuerySet.as_manager()
 

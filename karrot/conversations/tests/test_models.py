@@ -79,6 +79,12 @@ class ConversationModelTests(TestCase):
         self.assertIsNotNone(conversation)
         self.assertEqual(target.conversation, conversation)
 
+    def test_single_participant_per_conversation_and_user(self):
+        user = UserFactory()
+        conversation = ConversationFactory(participants=[user])
+        with self.assertRaises(IntegrityError):
+            ConversationParticipant.objects.create(conversation=conversation, user=user)
+
 
 class ConversationThreadModelTests(TestCase):
     def setUp(self):
