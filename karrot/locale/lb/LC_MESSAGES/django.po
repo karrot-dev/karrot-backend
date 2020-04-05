@@ -3,12 +3,16 @@
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2020.
 # 
+# Translators:
+# Daniel Waxweiler, 2020
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
+"Last-Translator: Daniel Waxweiler, 2020\n"
 "Language-Team: Luxembourgish (https://www.transifex.com/yunity-1/teams/68631/lb/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,7 +23,7 @@ msgstr ""
 
 #: karrot/applications/api.py:27
 msgid "You need to have a verified email address"
-msgstr ""
+msgstr "Du muss eng verifizéiert E-Mail-Adress hunn"
 
 #: karrot/applications/api.py:36 karrot/groups/api.py:50
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:124
@@ -31,19 +35,19 @@ msgstr ""
 
 #: karrot/applications/api.py:44
 msgid "You need to be the applicant"
-msgstr ""
+msgstr "Du muss de Bewerber sinn"
 
 #: karrot/applications/serializers.py:36
 msgid "Application is already pending"
-msgstr ""
+msgstr "D'Bewerbung leeft grad schonn"
 
 #: karrot/applications/serializers.py:41
 msgid "You are already member of the group"
-msgstr ""
+msgstr "Du bass scho Member vun der Grupp"
 
 #: karrot/applications/serializers.py:43
 msgid "You cannot apply to open groups"
-msgstr ""
+msgstr "Du kanns dech net fir oppe Gruppe bewerben"
 
 #: karrot/applications/templates/application_accepted.html.jinja2:6
 #: karrot/applications/templates/application_accepted.html.jinja2:205
@@ -58,7 +62,7 @@ msgstr ""
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:226
 #, python-format
 msgid "Visit %(group_name)s"
-msgstr ""
+msgstr "Besich %(group_name)s"
 
 #: karrot/applications/templates/application_declined.html.jinja2:6
 #: karrot/applications/templates/application_declined.html.jinja2:205
@@ -88,11 +92,11 @@ msgstr ""
 #: karrot/applications/templates/new_application.html.jinja2:214
 #, python-format
 msgid "Answers from %(user_name)s"
-msgstr ""
+msgstr "Äntwerte vun %(user_name)s"
 
 #: karrot/applications/templates/new_application.html.jinja2:230
 msgid "View applications"
-msgstr ""
+msgstr "Bewerbunge kucken"
 
 #: karrot/applications/templates/new_application.html.jinja2:265
 msgid ""
@@ -179,7 +183,7 @@ msgstr ""
 
 #: karrot/conversations/templates/thread_message_notification.html.jinja2:142
 msgid "In reply to:"
-msgstr ""
+msgstr "Als Äntwert op:"
 
 #: karrot/conversations/templates/thread_message_notification.html.jinja2:177
 msgid ""
@@ -212,11 +216,11 @@ msgstr ""
 
 #: karrot/groups/serializers.py:25
 msgid "Unknown timezone"
-msgstr ""
+msgstr "Onbekannten Zäitzon"
 
 #: karrot/groups/serializers.py:33
 msgid "Playground"
-msgstr ""
+msgstr "Spillplaz"
 
 #: karrot/groups/serializers.py:138 karrot/groups/serializers.py:233
 msgid "You cannot manage agreements"
@@ -297,7 +301,7 @@ msgstr ""
 #: karrot/groups/templates/group_summary.html.jinja2:257
 #, python-format
 msgid "%(weight)s kg from <a href=\"%(store_url)s\">%(store_name)s</a>"
-msgstr ""
+msgstr "%(weight)s kg vun <a href=\"%(store_url)s\">%(store_name)s</a>"
 
 #: karrot/groups/templates/group_summary.html.jinja2:271
 msgid "Here's what was said last week"
@@ -690,7 +694,7 @@ msgstr ""
 
 #: karrot/pickups/templates/pickup_notification.html.jinja2:231
 msgid "Tonight"
-msgstr ""
+msgstr "Haut den Owend"
 
 #: karrot/pickups/templates/pickup_notification.html.jinja2:235
 msgid "The day is not over, there are still pickups to be done!"
@@ -713,7 +717,7 @@ msgstr ""
 
 #: karrot/pickups/templates/pickup_notification.html.jinja2:261
 msgid "Tomorrow"
-msgstr ""
+msgstr "Muer"
 
 #: karrot/pickups/templates/pickup_notification.html.jinja2:311
 msgid ""
@@ -887,7 +891,7 @@ msgstr ""
 
 #: karrot/users/templates/passwordreset_request.html.jinja2:226
 msgid "Change password"
-msgstr ""
+msgstr "Passwuert änneren"
 
 #: karrot/users/templates/passwordreset_success.html.jinja2:6
 #: karrot/users/templates/passwordreset_success.subject.jinja2:1
