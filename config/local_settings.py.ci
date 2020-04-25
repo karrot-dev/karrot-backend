@@ -1,7 +1,7 @@
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'fstool_e2etest',
+        'NAME': 'karrot_test',
         'TEST': {
             'NAME': 'will_be_created'
         },

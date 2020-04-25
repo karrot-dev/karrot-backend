@@ -39,7 +39,8 @@ jobs:
       - image: circleci/postgres:11
         environment:
           POSTGRES_USER: ubuntu
-          POSTGRES_DB: fstool_e2etest
+          POSTGRES_DB: karrot_test
+          POSTGRES_HOST_AUTH_METHOD: trust
       - image: redis:5.0.3
     steps:
       - checkout
