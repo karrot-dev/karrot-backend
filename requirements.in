@@ -2,7 +2,6 @@
 -e git+https://github.com/tiltec/django-influxdb-metrics@163730a#egg=django-influxdb-metrics
 -e git+https://github.com/tiltec/django-rest-swagger@d15dd9a#egg=django-rest-swagger
 -e git+https://github.com/tiltec/talon@80886cd#egg=talon
--e git+https://github.com/tiltec/django-jinja@d25d07c#egg=django-jinja
 
 # This includes a patch to use anymail with postal
 -e git+https://github.com/tiltec/django-anymail@189395d#egg=django-anymail
@@ -16,6 +15,7 @@ django-redis
 django-dirtyfields
 djangorestframework
 djangorestframework-csv
+django-jinja
 hiredis
 markdown
 psycopg2-binary
