@@ -4,7 +4,7 @@
   "dependencies": {
     "find": "^0.3.0",
     "mjml": "^4.5.1",
-    "ws": "^7.2.1"
+    "ws": "^7.2.5"
   },
   "devDependencies": {
     "node-watch": "^0.6.3"
