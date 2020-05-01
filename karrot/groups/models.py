@@ -58,11 +58,11 @@ class GroupManager(models.Manager):
     def create(self, *args, **kwargs):
         try:
             theme = kwargs.get('theme', settings.GROUP_THEME_DEFAULT.value)
-        except ValueError:
+        except AttributeError:
             theme = None
         try:
             status = kwargs.get('status', settings.GROUP_STATUS_DEFAULT.value)
-        except ValueError:
+        except AttributeError:
             status = None
         return super(GroupManager, self).create(*args, theme=theme, status=status, **kwargs)
 
