@@ -58,8 +58,7 @@ class GroupQuerySet(models.QuerySet):
 from karrot.groups import managers
 
 class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
-    # objects = GroupQuerySet.as_manager()
-    objects = managers.GroupManager()
+    objects = managers.GroupManager.from_queryset(GroupQuerySet)()
 
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH, unique=True)
     description = models.TextField(blank=True)
