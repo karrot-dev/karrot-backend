@@ -57,16 +57,14 @@ class GroupQuerySet(models.QuerySet):
 class GroupManager(models.Manager):
     def create(self, *args, **kwargs):
         try:
-            if 'theme' not in kwargs:
-                kwargs['theme'] = settings.GROUP_THEME_DEFAULT.value
+            theme = kwargs.get('theme', settings.GROUP_THEME_DEFAULT.value)
         except ValueError:
-            pass
+            theme = None
         try:
-            if 'status' not in kwargs:
-                kwargs['status'] = settings.GROUP_STATUS_DEFAULT.value
+            status = kwargs.get('status', settings.GROUP_STATUS_DEFAULT.value)
         except ValueError:
-            pass
-        return super(GroupManager, self).create(*args, **kwargs)
+            status = None
+        return super(GroupManager, self).create(*args, theme=theme, status=status, **kwargs)
 
 
 class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
