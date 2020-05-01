@@ -54,11 +54,23 @@ class GroupQuerySet(models.QuerySet):
             )
         )
 
-# to avoid circular imports, managers has to be imported after GroupQuerySet
-from karrot.groups import managers
+class GroupManager(models.Manager):
+    def create(self, *args, **kwargs):
+        try:
+            if 'theme' not in kwargs:
+                kwargs['theme'] = settings.GROUP_THEME_DEFAULT.value
+        except ValueError:
+            pass
+        try:
+            if 'status' not in kwargs:
+                kwargs['status'] = settings.GROUP_STATUS_DEFAULT.value
+        except ValueError:
+            pass
+        return super(GroupManager, self).create(*args, **kwargs)
+
 
 class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
-    objects = managers.GroupManager.from_queryset(GroupQuerySet)()
+    objects = GroupManager.from_queryset(GroupQuerySet)()
 
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH, unique=True)
     description = models.TextField(blank=True)
@@ -72,13 +84,13 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
     public_description = models.TextField(blank=True)
     application_questions = models.TextField(blank=True)
     status = models.CharField(
-        # default can be overwritten by local_settings.py (c.f. groups/manager.py)
+        # default can be overwritten by local_settings.py GroupManager
         default=themes.GroupStatus.ACTIVE,
         choices=[(status.value, status.value) for status in themes.GroupStatus],
         max_length=100,
     )
     theme = models.TextField(
-        # default can be overwritten by local_settings.py (c.f. groups/manager.py)
+        # default can be overwritten by local_settings.py GroupManager
         default=themes.GroupTheme.FOODSAVING,
         choices=[(theme.value, theme.value) for theme in themes.GroupTheme],
     )
