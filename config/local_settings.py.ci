@@ -13,3 +13,10 @@ FCM_SERVER_KEY = 'cifcmserverkey'
 
 SECRET_KEY = 'c*#4=n$s4!*gdgq3nora#a$*xznctg-6=4_edeg9^dsxk&=p=$'
 DEBUG = True
+
+# Groups
+# Set the default theme for new groups: GENERAL, FOODSAVING, BIKEKITCHEN
+GROUP_THEME_DEFAULT = grouptypes.GroupTheme.GENERAL
+# Set the default status for new groups, ACTIVE, PLAYGROUND, INACTIVE
+GROUP_STATUS_DEFAULT = grouptypes.GroupStatus.ACTIVE
+
