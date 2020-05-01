@@ -17,7 +17,7 @@ from karrot.conversations.models import ConversationMixin
 from karrot.history.models import History, HistoryTypus
 from karrot.pickups.models import PickupDate
 from karrot.utils import markdown
-from karrot.groups import roles, grouptypes
+from karrot.groups import roles, themes
 
 class GroupStatus(Enum):
     ACTIVE = 'active'
@@ -72,13 +72,15 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
     public_description = models.TextField(blank=True)
     application_questions = models.TextField(blank=True)
     status = models.CharField(
-        default=settings.GROUP_STATUS_DEFAULT.value,
-        choices=[(status.value, status.value) for status in grouptypes.GroupStatus],
+        # default can be overwritten by local_settings.py (c.f. groups/manager.py)
+        default=themes.GroupStatus.ACTIVE,
+        choices=[(status.value, status.value) for status in themes.GroupStatus],
         max_length=100,
     )
     theme = models.TextField(
-        default=settings.GROUP_THEME_DEFAULT.value,
-        choices=[(theme.value, theme.value) for theme in grouptypes.GroupTheme],
+        # default can be overwritten by local_settings.py (c.f. groups/manager.py)
+        default=themes.GroupTheme.FOODSAVING,
+        choices=[(theme.value, theme.value) for theme in themes.GroupTheme],
     )
     sent_summary_up_to = DateTimeField(null=True)
     timezone = TimeZoneField(default='Europe/Berlin', null=True, blank=True)
