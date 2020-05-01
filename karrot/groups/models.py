@@ -14,23 +14,15 @@ from versatileimagefield.fields import VersatileImageField
 
 from karrot.base.base_models import BaseModel, LocationModel
 from karrot.conversations.models import ConversationMixin
-from karrot.groups import roles
 from karrot.history.models import History, HistoryTypus
 from karrot.pickups.models import PickupDate
 from karrot.utils import markdown
-
+from karrot.groups import roles, grouptypes
 
 class GroupStatus(Enum):
     ACTIVE = 'active'
     INACTIVE = 'inactive'
     PLAYGROUND = 'playground'
-
-
-class GroupTheme(Enum):
-    FOODSAVING = 'foodsaving'
-    BIKEKITCHEN = 'bikekitchen'
-    GENERAL = 'general'
-
 
 class GroupQuerySet(models.QuerySet):
     def user_is_editor(self, user):
@@ -62,9 +54,12 @@ class GroupQuerySet(models.QuerySet):
             )
         )
 
+# to avoid circular imports, managers has to be imported after GroupQuerySet
+from karrot.groups import managers
 
 class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
-    objects = GroupQuerySet.as_manager()
+    # objects = GroupQuerySet.as_manager()
+    objects = managers.GroupManager()
 
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH, unique=True)
     description = models.TextField(blank=True)
@@ -78,13 +73,13 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
     public_description = models.TextField(blank=True)
     application_questions = models.TextField(blank=True)
     status = models.CharField(
-        default=GroupStatus.ACTIVE.value,
-        choices=[(status.value, status.value) for status in GroupStatus],
+        default=settings.GROUP_STATUS_DEFAULT.value,
+        choices=[(status.value, status.value) for status in grouptypes.GroupStatus],
         max_length=100,
     )
     theme = models.TextField(
-        default=GroupTheme.FOODSAVING.value,
-        choices=[(theme.value, theme.value) for theme in GroupTheme],
+        default=settings.GROUP_THEME_DEFAULT.value,
+        choices=[(theme.value, theme.value) for theme in grouptypes.GroupTheme],
     )
     sent_summary_up_to = DateTimeField(null=True)
     timezone = TimeZoneField(default='Europe/Berlin', null=True, blank=True)

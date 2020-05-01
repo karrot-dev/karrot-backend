@@ -1,4 +1,5 @@
 import os
+from karrot.groups import grouptypes
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -23,6 +24,12 @@ DEBUG = True
 # Uploaded files location, e.g. user photos
 MEDIA_ROOT = './uploads/'
 MEDIA_URL = '/media/'
+
+# Groups
+# Set the default theme for new groups: GENERAL, FOODSAVING, BIKEKITCHEN
+GROUP_THEME_DEFAULT = grouptypes.GroupTheme.GENERAL
+# Set the default status for new groups, ACTIVE, PLAYGROUND, INACTIVE
+GROUP_STATUS_DEFAULT = grouptypes.GroupStatus.ACTIVE
 
 ######
 # Mail configuration
