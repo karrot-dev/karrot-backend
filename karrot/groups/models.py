@@ -19,10 +19,12 @@ from karrot.pickups.models import PickupDate
 from karrot.utils import markdown
 from karrot.groups import roles, themes
 
+
 class GroupStatus(Enum):
     ACTIVE = 'active'
     INACTIVE = 'inactive'
     PLAYGROUND = 'playground'
+
 
 class GroupQuerySet(models.QuerySet):
     def user_is_editor(self, user):
@@ -53,6 +55,7 @@ class GroupQuerySet(models.QuerySet):
                 )
             )
         )
+
 
 class GroupManager(models.Manager):
     def create(self, *args, **kwargs):
