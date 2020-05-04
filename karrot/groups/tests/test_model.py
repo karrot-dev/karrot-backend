@@ -2,16 +2,17 @@ from datetime import timedelta
 
 from django.db import DataError
 from django.db import IntegrityError
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from karrot.conversations.models import Conversation, ConversationParticipant
 from karrot.groups.factories import GroupFactory, PlaygroundGroupFactory
-from karrot.groups.models import Group, get_default_notification_types
+from karrot.groups.models import Group, GroupManager, get_default_notification_types
 from karrot.pickups.factories import PickupDateFactory
 from karrot.pickups.models import to_range
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory
+from karrot.groups import themes
 
 
 class TestGroupModel(TestCase):
@@ -81,3 +82,50 @@ class TestGroupMembershipModel(TestCase):
         )
         memberships = self.group.groupmembership_set.pickup_active_within(days=7)
         self.assertEqual(memberships.count(), 0)
+
+
+class TestGroupManager(TestCase):
+
+    # test if setting a default status and theme via settings works
+
+    # set each setting individually
+    @override_settings(GROUP_THEME_DEFAULT=themes.GroupTheme.FOODSAVING)
+    def test_create_group_theme_default_foodsaving(self):
+        this_object = Group.objects.create()
+        self.assertEqual(themes.GroupTheme.FOODSAVING.value, this_object.theme)
+
+    @override_settings(GROUP_THEME_DEFAULT=themes.GroupTheme.GENERAL)
+    def test_create_group_theme_default_general(self):
+        this_object = Group.objects.create()
+        self.assertEqual(themes.GroupTheme.GENERAL.value, this_object.theme)
+
+    @override_settings(GROUP_THEME_DEFAULT=themes.GroupTheme.BIKEKITCHEN)
+    def test_create_group_theme_default_bikekitchen(self):
+        this_object = Group.objects.create()
+        self.assertEqual(themes.GroupTheme.BIKEKITCHEN.value, this_object.theme)
+
+    @override_settings(GROUP_STATUS_DEFAULT=themes.GroupStatus.ACTIVE)
+    def test_create_group_status_default_foodsaving(self):
+        this_object = Group.objects.create()
+        self.assertEqual(themes.GroupStatus.ACTIVE.value, this_object.status)
+
+    @override_settings(GROUP_STATUS_DEFAULT=themes.GroupStatus.PLAYGROUND)
+    def test_create_group_status_default_general(self):
+        this_object = Group.objects.create()
+        self.assertEqual(themes.GroupStatus.PLAYGROUND.value, this_object.status)
+
+    @override_settings(GROUP_STATUS_DEFAULT=themes.GroupStatus.INACTIVE)
+    def test_create_group_status_default_bikekitchen(self):
+        this_object = Group.objects.create()
+        self.assertEqual(themes.GroupStatus.INACTIVE.value, this_object.status)
+
+    # check if setting both at the same time works
+    @override_settings(GROUP_THEME_DEFAULT=themes.GroupTheme.BIKEKITCHEN)
+    @override_settings(GROUP_STATUS_DEFAULT=themes.GroupStatus.INACTIVE)
+    def test_create_group_theme_default_bikekitchen_inactive(self):
+        this_object = Group.objects.create()
+        self.assertEqual(themes.GroupTheme.BIKEKITCHEN.value, this_object.theme)
+        self.assertEqual(themes.GroupStatus.INACTIVE.value, this_object.status)
+
+
+
