@@ -11,8 +11,10 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+from karrot.groups import themes
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 # Karrot constants
 
@@ -43,6 +45,9 @@ NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP = 30
 # For removing inactive users from groups
 NUMBER_OF_INACTIVE_MONTHS_UNTIL_REMOVAL_FROM_GROUP_NOTIFICATION = 6
 NUMBER_OF_DAYS_AFTER_REMOVAL_NOTIFICATION_WE_ACTUALLY_REMOVE_THEM = 7
+# set group theme and status
+GROUP_THEME_DEFAULT = themes.GroupTheme.FOODSAVING
+GROUP_STATUS_DEFAULT = themes.GroupStatus.ACTIVE
 
 # Places
 STORE_MAX_WEEKS_IN_ADVANCE = 52

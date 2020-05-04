@@ -59,14 +59,8 @@ class GroupQuerySet(models.QuerySet):
 
 class GroupManager(models.Manager):
     def create(self, *args, **kwargs):
-        try:
-            kwargs['theme'] = kwargs.get('theme', settings.GROUP_THEME_DEFAULT.value)
-        except AttributeError:
-            pass
-        try:
-            kwargs['status'] = kwargs.get('status', settings.GROUP_STATUS_DEFAULT.value)
-        except AttributeError:
-            pass
+        kwargs['theme'] = kwargs.get('theme', settings.GROUP_THEME_DEFAULT.value)
+        kwargs['status'] = kwargs.get('status', settings.GROUP_STATUS_DEFAULT.value)
         return super(GroupManager, self).create(*args, **kwargs)
 
 
@@ -86,13 +80,13 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
     application_questions = models.TextField(blank=True)
     status = models.CharField(
         # default can be overwritten by local_settings.py GroupManager
-        default=themes.GroupStatus.ACTIVE.value,
+        default=settings.GROUP_STATUS_DEFAULT.value,
         choices=[(status.value, status.value) for status in themes.GroupStatus],
         max_length=100,
     )
     theme = models.TextField(
         # default can be overwritten by local_settings.py GroupManager
-        default=themes.GroupTheme.FOODSAVING.value,
+        default=settings.GROUP_THEME_DEFAULT.value,
         choices=[(theme.value, theme.value) for theme in themes.GroupTheme],
     )
     sent_summary_up_to = DateTimeField(null=True)
