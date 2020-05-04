@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import TextField, DateTimeField, QuerySet, Count, Q, F
+from django.db.models.manager import BaseManager
 from django.template.loader import render_to_string
 from django.utils import timezone as tz, timezone
 from timezone_field import TimeZoneField
@@ -57,7 +58,9 @@ class GroupQuerySet(models.QuerySet):
         )
 
 
-class GroupManager(models.Manager):
+class GroupManager(BaseManager.from_queryset(GroupQuerySet)):
+    use_in_migrations = True
+
     def create(self, *args, **kwargs):
         kwargs['theme'] = kwargs.get('theme', settings.GROUP_THEME_DEFAULT.value)
         kwargs['status'] = kwargs.get('status', settings.GROUP_STATUS_DEFAULT.value)
@@ -65,7 +68,7 @@ class GroupManager(models.Manager):
 
 
 class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
-    objects = GroupManager.from_queryset(GroupQuerySet)()
+    objects = GroupManager()
 
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH, unique=True)
     description = models.TextField(blank=True)
