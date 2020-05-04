@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from karrot.conversations.models import Conversation, ConversationParticipant
 from karrot.groups.factories import GroupFactory, PlaygroundGroupFactory
-from karrot.groups.models import Group, GroupManager, get_default_notification_types
+from karrot.groups.models import Group, get_default_notification_types
 from karrot.pickups.factories import PickupDateFactory
 from karrot.pickups.models import to_range
 from karrot.places.factories import PlaceFactory
