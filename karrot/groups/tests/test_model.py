@@ -2,12 +2,13 @@ from datetime import timedelta
 
 from django.db import DataError
 from django.db import IntegrityError
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from karrot.conversations.models import Conversation, ConversationParticipant
 from karrot.groups.factories import GroupFactory, PlaygroundGroupFactory
 from karrot.groups.models import Group, get_default_notification_types
+from karrot.groups.themes import GroupTheme
 from karrot.pickups.factories import PickupDateFactory
 from karrot.pickups.models import to_range
 from karrot.places.factories import PlaceFactory
@@ -45,6 +46,11 @@ class TestGroupModel(TestCase):
     def test_uses_default_application_questions_if_not_specified(self):
         group = GroupFactory(application_questions='')
         self.assertIn('Hey there', group.get_application_questions_or_default())
+
+    @override_settings(GROUP_THEME_DEFAULT=GroupTheme.GENERAL)
+    def test_override_default_theme(self):
+        group = GroupFactory()
+        self.assertEqual(group.theme, GroupTheme.GENERAL.value)
 
 
 class TestGroupMembershipModel(TestCase):

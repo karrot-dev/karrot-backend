@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
+from karrot.groups.themes import GroupTheme
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -47,6 +49,9 @@ NUMBER_OF_DAYS_AFTER_REMOVAL_NOTIFICATION_WE_ACTUALLY_REMOVE_THEM = 7
 
 # Places
 STORE_MAX_WEEKS_IN_ADVANCE = 52
+
+# Groups
+GROUP_THEME_DEFAULT = GroupTheme.FOODSAVING
 
 # Pickups
 FEEDBACK_POSSIBLE_DAYS = 30

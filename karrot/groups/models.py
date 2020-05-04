@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import TextField, DateTimeField, QuerySet, Count, Q, F
+from django.db.models.manager import BaseManager
 from django.template.loader import render_to_string
 from django.utils import timezone as tz, timezone
 from timezone_field import TimeZoneField
@@ -15,6 +16,7 @@ from versatileimagefield.fields import VersatileImageField
 from karrot.base.base_models import BaseModel, LocationModel
 from karrot.conversations.models import ConversationMixin
 from karrot.groups import roles
+from karrot.groups.themes import GroupTheme
 from karrot.history.models import History, HistoryTypus
 from karrot.pickups.models import PickupDate
 from karrot.utils import markdown
@@ -24,12 +26,6 @@ class GroupStatus(Enum):
     ACTIVE = 'active'
     INACTIVE = 'inactive'
     PLAYGROUND = 'playground'
-
-
-class GroupTheme(Enum):
-    FOODSAVING = 'foodsaving'
-    BIKEKITCHEN = 'bikekitchen'
-    GENERAL = 'general'
 
 
 class GroupQuerySet(models.QuerySet):
@@ -63,8 +59,14 @@ class GroupQuerySet(models.QuerySet):
         )
 
 
+class GroupManager(BaseManager.from_queryset(GroupQuerySet)):
+    def create(self, *args, **kwargs):
+        kwargs['theme'] = kwargs.get('theme', settings.GROUP_THEME_DEFAULT.value)
+        return super().create(*args, **kwargs)
+
+
 class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
-    objects = GroupQuerySet.as_manager()
+    objects = GroupManager()
 
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH, unique=True)
     description = models.TextField(blank=True)
@@ -82,10 +84,7 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
         choices=[(status.value, status.value) for status in GroupStatus],
         max_length=100,
     )
-    theme = models.TextField(
-        default=GroupTheme.FOODSAVING.value,
-        choices=[(theme.value, theme.value) for theme in GroupTheme],
-    )
+    theme = models.TextField(choices=[(theme.value, theme.value) for theme in GroupTheme])
     sent_summary_up_to = DateTimeField(null=True)
     timezone = TimeZoneField(default='Europe/Berlin', null=True, blank=True)
     active_agreement = models.OneToOneField(
