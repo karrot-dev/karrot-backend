@@ -6,9 +6,3 @@ class GroupTheme(Enum):
     BIKEKITCHEN = 'bikekitchen'
     GENERAL = 'general'
 
-
-class GroupStatus(Enum):
-    ACTIVE = 'active'
-    INACTIVE = 'inactive'
-    PLAYGROUND = 'playground'
-

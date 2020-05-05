@@ -104,28 +104,5 @@ class TestGroupManager(TestCase):
         group = GroupFactory()
         self.assertEqual(themes.GroupTheme.BIKEKITCHEN.value, group.theme)
 
-    @override_settings(GROUP_STATUS_DEFAULT=themes.GroupStatus.ACTIVE)
-    def test_create_group_status_default_foodsaving(self):
-        group = GroupFactory()
-        self.assertEqual(themes.GroupStatus.ACTIVE.value, group.status)
-
-    @override_settings(GROUP_STATUS_DEFAULT=themes.GroupStatus.PLAYGROUND)
-    def test_create_group_status_default_general(self):
-        group = GroupFactory()
-        self.assertEqual(themes.GroupStatus.PLAYGROUND.value, group.status)
-
-    @override_settings(GROUP_STATUS_DEFAULT=themes.GroupStatus.INACTIVE)
-    def test_create_group_status_default_bikekitchen(self):
-        group = GroupFactory()
-        self.assertEqual(themes.GroupStatus.INACTIVE.value, group.status)
-
-    # check if setting both at the same time works
-    @override_settings(GROUP_THEME_DEFAULT=themes.GroupTheme.BIKEKITCHEN)
-    @override_settings(GROUP_STATUS_DEFAULT=themes.GroupStatus.INACTIVE)
-    def test_create_group_theme_default_bikekitchen_inactive(self):
-        group = GroupFactory()
-        self.assertEqual(themes.GroupTheme.BIKEKITCHEN.value, group.theme)
-        self.assertEqual(themes.GroupStatus.INACTIVE.value, group.status)
-
 
 

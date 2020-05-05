@@ -63,7 +63,6 @@ class GroupManager(BaseManager.from_queryset(GroupQuerySet)):
 
     def create(self, *args, **kwargs):
         kwargs['theme'] = kwargs.get('theme', settings.GROUP_THEME_DEFAULT.value)
-        kwargs['status'] = kwargs.get('status', settings.GROUP_STATUS_DEFAULT.value)
         return super(GroupManager, self).create(*args, **kwargs)
 
 
@@ -82,8 +81,8 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
     public_description = models.TextField(blank=True)
     application_questions = models.TextField(blank=True)
     status = models.CharField(
-        # default is set by GroupManager
-        choices=[(status.value, status.value) for status in themes.GroupStatus],
+        default=GroupStatus.ACTIVE.value,
+        choices=[(status.value, status.value) for status in GroupStatus],
         max_length=100,
     )
     theme = models.TextField(

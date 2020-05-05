@@ -26,12 +26,9 @@ MEDIA_ROOT = './uploads/'
 MEDIA_URL = '/media/'
 
 # Groups
-# set default group theme and status
+# set default group theme
 ## theme: GENERAL, FOODSAVING, BIKEKITCHEN
 GROUP_THEME_DEFAULT = themes.GroupTheme.FOODSAVING
-## status: ACTIVE, PLAYGROUND, INACTIVE
-GROUP_STATUS_DEFAULT = themes.GroupStatus.ACTIVE
-
 
 
 ######
