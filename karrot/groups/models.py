@@ -82,14 +82,12 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
     public_description = models.TextField(blank=True)
     application_questions = models.TextField(blank=True)
     status = models.CharField(
-        # default can be overwritten by local_settings.py GroupManager
-        default=settings.GROUP_STATUS_DEFAULT.value,
+        # default is set by GroupManager
         choices=[(status.value, status.value) for status in themes.GroupStatus],
         max_length=100,
     )
     theme = models.TextField(
-        # default can be overwritten by local_settings.py GroupManager
-        default=settings.GROUP_THEME_DEFAULT.value,
+        # default is set by GroupManager
         choices=[(theme.value, theme.value) for theme in themes.GroupTheme],
     )
     sent_summary_up_to = DateTimeField(null=True)
