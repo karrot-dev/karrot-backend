@@ -91,41 +91,41 @@ class TestGroupManager(TestCase):
     # set each setting individually
     @override_settings(GROUP_THEME_DEFAULT=themes.GroupTheme.FOODSAVING)
     def test_create_group_theme_default_foodsaving(self):
-        this_object = Group.objects.create()
-        self.assertEqual(themes.GroupTheme.FOODSAVING.value, this_object.theme)
+        group = GroupFactory()
+        self.assertEqual(themes.GroupTheme.FOODSAVING.value, group.theme)
 
     @override_settings(GROUP_THEME_DEFAULT=themes.GroupTheme.GENERAL)
     def test_create_group_theme_default_general(self):
-        this_object = Group.objects.create()
-        self.assertEqual(themes.GroupTheme.GENERAL.value, this_object.theme)
+        group = GroupFactory()
+        self.assertEqual(themes.GroupTheme.GENERAL.value, group.theme)
 
     @override_settings(GROUP_THEME_DEFAULT=themes.GroupTheme.BIKEKITCHEN)
     def test_create_group_theme_default_bikekitchen(self):
-        this_object = Group.objects.create()
-        self.assertEqual(themes.GroupTheme.BIKEKITCHEN.value, this_object.theme)
+        group = GroupFactory()
+        self.assertEqual(themes.GroupTheme.BIKEKITCHEN.value, group.theme)
 
     @override_settings(GROUP_STATUS_DEFAULT=themes.GroupStatus.ACTIVE)
     def test_create_group_status_default_foodsaving(self):
-        this_object = Group.objects.create()
-        self.assertEqual(themes.GroupStatus.ACTIVE.value, this_object.status)
+        group = GroupFactory()
+        self.assertEqual(themes.GroupStatus.ACTIVE.value, group.status)
 
     @override_settings(GROUP_STATUS_DEFAULT=themes.GroupStatus.PLAYGROUND)
     def test_create_group_status_default_general(self):
-        this_object = Group.objects.create()
-        self.assertEqual(themes.GroupStatus.PLAYGROUND.value, this_object.status)
+        group = GroupFactory()
+        self.assertEqual(themes.GroupStatus.PLAYGROUND.value, group.status)
 
     @override_settings(GROUP_STATUS_DEFAULT=themes.GroupStatus.INACTIVE)
     def test_create_group_status_default_bikekitchen(self):
-        this_object = Group.objects.create()
-        self.assertEqual(themes.GroupStatus.INACTIVE.value, this_object.status)
+        group = GroupFactory()
+        self.assertEqual(themes.GroupStatus.INACTIVE.value, group.status)
 
     # check if setting both at the same time works
     @override_settings(GROUP_THEME_DEFAULT=themes.GroupTheme.BIKEKITCHEN)
     @override_settings(GROUP_STATUS_DEFAULT=themes.GroupStatus.INACTIVE)
     def test_create_group_theme_default_bikekitchen_inactive(self):
-        this_object = Group.objects.create()
-        self.assertEqual(themes.GroupTheme.BIKEKITCHEN.value, this_object.theme)
-        self.assertEqual(themes.GroupStatus.INACTIVE.value, this_object.status)
+        group = GroupFactory()
+        self.assertEqual(themes.GroupTheme.BIKEKITCHEN.value, group.theme)
+        self.assertEqual(themes.GroupStatus.INACTIVE.value, group.status)
 
 
 

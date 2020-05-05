@@ -75,7 +75,7 @@ using dot-syntax:
 docker-compose exec backend ./manage.py test karrot.groups.tests.test_model.TestGroupManager
 ```
 
-Tipp: To speed up test development, ``pprint`` might be useful to you.
+Hint: To speed up test development, ``pprint`` might be useful to you.
 
 
 ## Email template viewer
