@@ -92,7 +92,7 @@ parso==0.7.0              # via jedi
 pexpect==4.8.0            # via ipython
 pickleshare==0.7.5        # via ipython
 pillow==7.1.1             # via django-versatileimagefield
-pip-tools==5.0.0          # via -r requirements.in
+pip-tools==5.1.2          # via -r requirements.in
 pluggy==0.13.1            # via pytest
 prompt-toolkit==3.0.5     # via ipython
 psutil==5.7.0             # via python-server-metrics
