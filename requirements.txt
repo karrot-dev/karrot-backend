@@ -121,7 +121,7 @@ python-magic==0.4.15      # via django-versatileimagefield
 python-server-metrics==0.2.1  # via django-influxdb-metrics
 pytz==2020.1              # via -r requirements.in, babel, django, django-dirtyfields, django-silk, django-timezone-field, influxdb
 raven==6.10.0             # via -r requirements.in
-redis==3.4.1              # via -r requirements.in, django-redis
+redis==3.5.0              # via -r requirements.in, django-redis
 regex==2020.4.4           # via talon
 requests-mock==1.7.0      # via -r requirements.in
 requests==2.23.0          # via -r requirements.in, coreapi, django-anymail, django-silk, influxdb, pyfcm, requests-mock
