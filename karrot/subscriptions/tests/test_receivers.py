@@ -26,7 +26,6 @@ from karrot.pickups.factories import FeedbackFactory, PickupDateFactory, \
     PickupDateSeriesFactory
 from karrot.pickups.models import PickupDate, to_range
 from karrot.places.factories import PlaceFactory
-from karrot.status.helpers import unread_conversations
 from karrot.subscriptions.models import ChannelSubscription, \
     PushSubscription, PushSubscriptionPlatform
 from karrot.users.factories import UserFactory, VerifiedUserFactory
