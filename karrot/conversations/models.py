@@ -153,7 +153,7 @@ class ConversationNotificationStatus(Enum):
     NONE = 'none'
 
 
-class ConversationParticipant(BaseModel, UpdatedAtMixin, DirtyFieldsMixin):
+class ConversationParticipant(BaseModel, UpdatedAtMixin):
     """The join table between Conversation and User."""
     class Meta:
         unique_together = (('user', 'conversation'), )

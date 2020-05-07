@@ -18,17 +18,9 @@ class StatusView(views.APIView):
         applications = pending_applications(request.user)
         feedback_possible = get_feedback_possible(request.user)
 
-        group_mock = {
-            'upcoming_pickup_count': {
-                'joined': 0,  # TODO
-                'others': 0,  # TODO
-            },
-        }
-
         groups = defaultdict(dict)
         for group_id, conversation_data in conversations['groups'].items():
             groups[group_id] = {
-                **group_mock,
                 **conversation_data,
             }
 

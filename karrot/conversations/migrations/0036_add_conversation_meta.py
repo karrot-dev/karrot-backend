@@ -19,7 +19,7 @@ def migrate(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('conversations', '0034_conversationmeta_threads'),
+        ('conversations', '0035_auto_20200405_1938'),
     ]
 
     operations = [migrations.RunPython(migrate, migrations.RunPython.noop, elidable=True)]
