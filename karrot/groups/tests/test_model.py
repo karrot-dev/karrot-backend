@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django.db import DataError
 from django.db import IntegrityError
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from karrot.conversations.models import Conversation, ConversationParticipant
@@ -12,6 +12,7 @@ from karrot.pickups.factories import PickupDateFactory
 from karrot.pickups.models import to_range
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory
+from karrot.groups import themes
 
 
 class TestGroupModel(TestCase):
@@ -81,3 +82,27 @@ class TestGroupMembershipModel(TestCase):
         )
         memberships = self.group.groupmembership_set.pickup_active_within(days=7)
         self.assertEqual(memberships.count(), 0)
+
+
+class TestGroupManager(TestCase):
+
+    # test if setting a default status and theme via settings works
+
+    # set each setting individually
+    @override_settings(GROUP_THEME_DEFAULT=themes.GroupTheme.FOODSAVING)
+    def test_create_group_theme_default_foodsaving(self):
+        group = GroupFactory()
+        self.assertEqual(themes.GroupTheme.FOODSAVING.value, group.theme)
+
+    @override_settings(GROUP_THEME_DEFAULT=themes.GroupTheme.GENERAL)
+    def test_create_group_theme_default_general(self):
+        group = GroupFactory()
+        self.assertEqual(themes.GroupTheme.GENERAL.value, group.theme)
+
+    @override_settings(GROUP_THEME_DEFAULT=themes.GroupTheme.BIKEKITCHEN)
+    def test_create_group_theme_default_bikekitchen(self):
+        group = GroupFactory()
+        self.assertEqual(themes.GroupTheme.BIKEKITCHEN.value, group.theme)
+
+
+

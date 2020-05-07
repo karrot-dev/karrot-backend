@@ -1,4 +1,5 @@
 import os
+from karrot.groups import themes
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -23,6 +24,12 @@ DEBUG = True
 # Uploaded files location, e.g. user photos
 MEDIA_ROOT = './uploads/'
 MEDIA_URL = '/media/'
+
+# Groups
+# set default group theme
+## theme: GENERAL, FOODSAVING, BIKEKITCHEN
+GROUP_THEME_DEFAULT = themes.GroupTheme.FOODSAVING
+
 
 ######
 # Mail configuration

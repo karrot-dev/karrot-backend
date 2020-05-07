@@ -56,13 +56,27 @@ docker-compose exec backend ./manage.py migrate
 
 If you spend too much time typing those long commands, consider creating your own [bash aliases](https://askubuntu.com/questions/17536/how-do-i-create-a-permanent-bash-alias).
 
-## Parallel testing
-Running the tests in parallel process can increase testing speed significantly. 
-To execute the whole test suite on a CPU with 4 kernels, you may want to use:
+
+## Speed up testing
+
+*Parallel testing:* Running the tests in parallel process can increase testing
+speed significantly. To execute the whole test suite on a CPU with 4 kernels,
+you may want to use:
 
 ```
 docker-compose exec backend ./manage.py test --parallel 4
 ```
+
+*Run tests selectively:* If you want to run only a single test, let's say
+`TestGroupManager` in `karrot/groups/tests/test_model.py`, you can do so by
+using dot-syntax:
+
+```
+docker-compose exec backend ./manage.py test karrot.groups.tests.test_model.TestGroupManager
+```
+
+Hint: To speed up test development, ``pprint`` might be useful to you.
+
 
 ## Email template viewer
 
