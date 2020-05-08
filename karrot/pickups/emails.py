@@ -1,5 +1,5 @@
 from karrot.utils.email_utils import prepare_email
-from karrot.utils.frontend_urls import weekly_summary_unsubscribe_url
+from karrot.utils.frontend_urls import pickup_notification_unsubscribe_url
 
 
 def prepare_pickup_notification_email(
@@ -29,7 +29,7 @@ def prepare_pickup_notification_email(
         ]
     ])
 
-    unsubscribe_url = weekly_summary_unsubscribe_url(user, group)
+    unsubscribe_url = pickup_notification_unsubscribe_url(user, group)
 
     return prepare_email(
         template='pickup_notification',
