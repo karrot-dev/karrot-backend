@@ -106,6 +106,8 @@ def make_conversation_meta(sender, instance, created, **kwargs):
         return
 
     user = instance
+    # This is equivalent of not setting marked_at, by choosing a the earliest date possible
+    # (but it has to be timezone-aware, otherwise there will be comparison errors)
     min_date = datetime.min.replace(tzinfo=utc)
     ConversationMeta.objects.get_or_create(
         {

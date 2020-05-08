@@ -12,9 +12,11 @@ from karrot.applications.serializers import ApplicationSerializer
 from karrot.community_feed.models import CommunityFeedMeta
 from karrot.community_feed.serializers import CommunityFeedMetaSerializer
 from karrot.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction, \
-    ConversationThreadParticipant, ConversationMeta, Conversation
+    ConversationThreadParticipant, ConversationMeta
 from karrot.conversations.serializers import ConversationMessageSerializer, ConversationSerializer, \
     ConversationMetaSerializer
+from karrot.conversations.signals import thread_marked_seen, new_conversation_message, new_thread_message, \
+    conversation_marked_seen
 from karrot.groups.models import Group, Trust, GroupMembership
 from karrot.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer
 from karrot.history.models import history_created
@@ -469,14 +471,16 @@ def community_feed_meta_saved(sender, instance, **kwargs):
 
 
 # Status
-def send_conversation_status_update(subscriptions, conversation=None):
+def send_conversation_status_update(subscriptions, changed_conversation=None):
     for user, subscriptions in groupby(sorted(list(subscriptions), key=lambda x: x.user.id), key=lambda x: x.user):
         payload = unread_conversations(user)
 
-        if conversation:
-            # Make sure we set unread_wall_message_count to 0 if there are no unread messages for that conversation
-            target_id = conversation.target_id
-            t = conversation.type()
+        if changed_conversation:
+            # We know that something about this conversation has been changed
+            # It might be all messages are read and we need to tell the client this
+            # Hence, set unread_wall_message_count to 0 if there are no unread messages for that conversation
+            target_id = changed_conversation.target_id
+            t = changed_conversation.type()
             if t == 'group' and target_id not in payload['groups']:
                 payload['groups'][target_id] = {'unread_wall_message_count': 0}
             elif t == 'place' and target_id not in payload['places']:
@@ -486,30 +490,18 @@ def send_conversation_status_update(subscriptions, conversation=None):
             send_in_channel(subscription.reply_channel, topic='status', payload=payload)
 
 
-@receiver(post_save, sender=Conversation)
-def conversation_saved(sender, instance, **kwargs):
-    # latest_message changed -> a new message has been sent!
-    conversation = instance
-    if conversation.latest_message_id is None:
-        return
-    # TODO don't send if latest_message did not change
-
+@receiver(new_conversation_message)
+def new_conversation_message_to_status(sender, message, **kwargs):
+    conversation = message.conversation
     send_conversation_status_update(
         ChannelSubscription.objects.recent().filter(user__in=conversation.participants.all()
                                                     ).exclude(user=conversation.latest_message.author).distinct(),
-        conversation,
     )
 
 
-@receiver(post_save, sender=ConversationMessage)
-def conversation_thread_saved(sender, instance, **kwargs):
-    thread = instance
-    if thread.latest_message_id is None:
-        # not a thread or latest message not changed
-        return
-    # TODO don't send if latest_message hasn't changed
-
-    # latest_message changed -> a new reply has been sent!
+@receiver(new_thread_message)
+def new_thread_message_to_status(sender, message, **kwargs):
+    thread = message.thread
     send_conversation_status_update(
         ChannelSubscription.objects.recent().filter(user__in=thread.conversation.participants.all()
                                                     ).exclude(user=thread.latest_message.author).distinct(),
@@ -517,33 +509,23 @@ def conversation_thread_saved(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=ConversationMeta)
-def conversation_meta_saved_again(sender, instance, **kwargs):
+def conversation_participant_saved(sender, instance, **kwargs):
     # user opened the latest messages menu
     meta = instance
     send_conversation_status_update(ChannelSubscription.objects.recent().filter(user=meta.user))
 
 
-@receiver(post_save, sender=ConversationParticipant)
-def conversation_participant_saved(sender, instance, **kwargs):
-    # user marked a message as read
-    participant = instance
-
-    # TODO don't send if seen_up_to did not change
-
+@receiver(conversation_marked_seen)
+def conversation_marked_seen_to_status(sender, participant, **kwargs):
     conversation = participant.conversation
     send_conversation_status_update(
         ChannelSubscription.objects.recent().filter(user=participant.user).distinct(),
-        conversation,
+        changed_conversation=conversation,
     )
 
 
-@receiver(post_save, sender=ConversationThreadParticipant)
-def conversation_thread_participant_saved(sender, instance, **kwargs):
-    # user marked a message as read
-    participant = instance
-    if 'seen_up_to' not in participant.get_dirty_fields():
-        return
-
+@receiver(thread_marked_seen)
+def conversation_thread_marked_to_status(sender, participant, **kwargs):
     send_conversation_status_update(ChannelSubscription.objects.recent().filter(user=participant.user).distinct())
 
 
@@ -551,9 +533,10 @@ def conversation_thread_participant_saved(sender, instance, **kwargs):
 def conversation_participant_deleted(sender, instance, **kwargs):
     # user unsubscribed from the conversation
     participant = instance
+
     send_conversation_status_update(
         ChannelSubscription.objects.recent().filter(user=participant.user),
-        participant.conversation,
+        changed_conversation=participant.conversation,
     )
 
 
@@ -589,9 +572,10 @@ def application_saved(sender, instance, **kwargs):
 def pickup_date_saved(sender, instance, **kwargs):
     pickup = instance
 
-    if pickup.is_done is False or 'is_done' not in pickup.get_dirty_fields():
-        # Pickup is not done or was already marked as done before
+    if pickup.is_done is False:
+        # Pickup is not done
         return
+    # TODO don't send if 'is_done' did not change
 
     for user, subscriptions in groupby(sorted(list(
             ChannelSubscription.objects.recent().filter(user__in=pickup.collectors.all())), key=lambda x: x.user.id),

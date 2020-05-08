@@ -1,7 +1,7 @@
-import dateutil
 from datetime import timedelta
+
+import dateutil
 from dateutil.relativedelta import relativedelta
-from dirtyfields import DirtyFieldsMixin
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
@@ -216,7 +216,7 @@ def to_range(date, **kwargs):
     return CustomDateTimeTZRange(date, date + duration)
 
 
-class PickupDate(BaseModel, ConversationMixin, DirtyFieldsMixin):
+class PickupDate(BaseModel, ConversationMixin):
     objects = PickupDateQuerySet.as_manager()
 
     class Meta:

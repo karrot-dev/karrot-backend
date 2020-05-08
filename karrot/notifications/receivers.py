@@ -358,4 +358,6 @@ def make_notification_meta(sender, instance, created, **kwargs):
         return
 
     user = instance
+    # This is equivalent of not setting marked_at, by choosing a the earliest date possible
+    # (but it has to be timezone-aware, otherwise there will be comparison errors)
     NotificationMeta.objects.get_or_create({'marked_at': datetime.min.replace(tzinfo=utc)}, user=user)
