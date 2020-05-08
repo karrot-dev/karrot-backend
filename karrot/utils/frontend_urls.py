@@ -64,8 +64,8 @@ def pickup_detail_url(pickup):
     )
 
 
-def weekly_summary_unsubscribe_url(user, group):
-    return unsubscribe_url(user, group, notification_type=GroupNotificationType.WEEKLY_SUMMARY)
+def pickup_notification_unsubscribe_url(user, group):
+    return unsubscribe_url(user, group, notification_type=GroupNotificationType.DAILY_PICKUP_NOTIFICATION)
 
 
 def group_summary_unsubscribe_url(user, group):
