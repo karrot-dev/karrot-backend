@@ -88,6 +88,7 @@ class TestUnsubscribeFromAllConversationsInGroup(TestCase):
             membership.get().notification_types, [
                 'weekly_summary',
                 'daily_pickup_notification',
+                'conflict_resolution',
                 'new_application',
                 'new_offer',
             ]

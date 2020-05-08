@@ -225,6 +225,7 @@ def get_default_notification_types():
     return [
         GroupNotificationType.WEEKLY_SUMMARY,
         GroupNotificationType.DAILY_PICKUP_NOTIFICATION,
+        GroupNotificationType.CONFLICT_RESOLUTION,
     ]
 
 
