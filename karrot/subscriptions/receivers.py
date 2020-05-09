@@ -540,17 +540,27 @@ def conversation_participant_deleted(sender, instance, **kwargs):
     )
 
 
-@receiver(post_save, sender=Notification)
-@receiver(post_delete, sender=Notification)
-def notification_changed(sender, instance, **kwargs):
-    notification = instance
-    count = unseen_notification_count(notification.user)
-    for subscription in ChannelSubscription.objects.recent().filter(user=notification.user):
+def send_notification_status_update(user):
+    count = unseen_notification_count(user)
+    for subscription in ChannelSubscription.objects.recent().filter(user=user):
         send_in_channel(
             subscription.reply_channel, topic='status', payload={
                 'unseen_notification_count': count,
             }
         )
+
+
+@receiver(post_save, sender=Notification)
+@receiver(post_delete, sender=Notification)
+def notification_changed(sender, instance, **kwargs):
+    notification = instance
+    send_notification_status_update(user=notification.user)
+
+
+@receiver(post_save, sender=NotificationMeta)
+def notification_meta_to_status(sender, instance, **kwargs):
+    notification_meta = instance
+    send_notification_status_update(user=notification_meta.user)
 
 
 @receiver(post_save, sender=Application)

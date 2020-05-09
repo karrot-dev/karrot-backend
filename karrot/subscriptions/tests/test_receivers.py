@@ -590,11 +590,20 @@ class ApplicationReceiverTests(WSTestCase):
 
         messages = client.messages_by_topic['status']
         self.assertEqual(len(messages), 2, messages)
-
         # We told the user that we have 1 pending application
         self.assertEqual(messages[0]['payload'], {'groups': {self.group.id: {'pending_application_count': 1}}})
         # "There is an application for your group!"
         self.assertEqual(messages[1]['payload'], {'unseen_notification_count': 1})
+
+        client.reset_messages()
+        # mark notification as read
+        meta = self.member.notificationmeta
+        meta.marked_at = timezone.now()
+        meta.save()
+
+        messages = client.messages_by_topic['status']
+        self.assertEqual(len(messages), 1, messages)
+        self.assertEqual(messages[0]['payload'], {'unseen_notification_count': 0})
 
     def test_member_receives_application_update(self):
         application = ApplicationFactory(user=self.user, group=self.group)
