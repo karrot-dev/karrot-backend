@@ -1,6 +1,5 @@
 from collections import defaultdict
 
-from django.utils import timezone
 from rest_framework import views, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -41,7 +40,6 @@ class StatusView(views.APIView):
             'unseen_thread_count': conversations['unseen_thread_count'],
             'has_unread_conversations_or_threads': conversations['has_unread_conversations_or_threads'],
             'unseen_notification_count': unseen_notification_count(request.user),
-            'community_feed_meta': timezone.now(),  # TODO
             'groups': groups,
             'places': places,
         }
