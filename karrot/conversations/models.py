@@ -196,7 +196,6 @@ class ConversationParticipant(BaseModel, UpdatedAtMixin):
 
     def save(self, **kwargs):
         old = type(self).objects.get(pk=self.pk) if self.pk else None
-        print('ConversationParticipant.save', self, self.seen_up_to)
         seen_up_to_changed = False
         if old is not None and old.seen_up_to != self.seen_up_to:
             seen_up_to_changed = True
