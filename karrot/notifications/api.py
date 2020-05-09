@@ -32,7 +32,7 @@ class NotificationViewSet(GenericViewSet):
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True)
 
-        meta, _ = NotificationMeta.objects.get_or_create(user=request.user)
+        meta = NotificationMeta.objects.get(user=request.user)
         meta_serializer = NotificationMetaSerializer(meta, context=self.get_serializer_context())
 
         return self.get_paginated_response({

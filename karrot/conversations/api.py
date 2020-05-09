@@ -199,7 +199,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
         issue_serializer = IssueSerializer(issues, many=True, context=context)
         offer_serializer = OfferSerializer(offers, many=True, context=context)
         user_serializer = UserInfoSerializer(users, many=True, context=context)
-        meta, _ = ConversationMeta.objects.get_or_create(user=request.user)
+        meta = ConversationMeta.objects.get(user=request.user)
         meta_serializer = ConversationMetaSerializer(meta, context=self.get_serializer_context())
 
         return self.get_paginated_response({

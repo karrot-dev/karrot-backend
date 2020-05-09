@@ -10,6 +10,8 @@ from django.db.models.manager import BaseManager
 from django.utils import timezone
 
 from karrot.base.base_models import BaseModel, UpdatedAtMixin
+from karrot.conversations.signals import new_conversation_message, new_thread_message, conversation_marked_seen, \
+    thread_marked_seen
 from karrot.utils import markdown
 
 
@@ -131,8 +133,8 @@ class Conversation(BaseModel, UpdatedAtMixin):
 
 class ConversationMeta(BaseModel):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    conversations_marked_at = models.DateTimeField(null=True)
-    threads_marked_at = models.DateTimeField(null=True)
+    conversations_marked_at = models.DateTimeField()
+    threads_marked_at = models.DateTimeField()
 
 
 class ConversationParticipantQuerySet(models.QuerySet):
@@ -192,6 +194,21 @@ class ConversationParticipant(BaseModel, UpdatedAtMixin):
             messages = messages.filter(id__gt=self.notified_up_to_id)
         return messages
 
+    def save(self, **kwargs):
+        old = type(self).objects.get(pk=self.pk) if self.pk else None
+        seen_up_to_changed = False
+        if old is not None and old.seen_up_to != self.seen_up_to:
+            seen_up_to_changed = True
+
+        super().save(**kwargs)
+
+        if seen_up_to_changed:
+            # We use a custom signal here because the receiver needs to know whether seen_up_to changed
+            # Django's post_save signal doesn't provide this.
+            # A pre_save signal would be called too early for our purposes.
+            # Actually, it might be better to not use signals at all and call the logic from Model.save directly.
+            conversation_marked_seen.send(sender=self.__class__, participant=self)
+
 
 class ConversationMessageQuerySet(models.QuerySet):
     def exclude_replies(self):
@@ -212,6 +229,7 @@ class ConversationMessageQuerySet(models.QuerySet):
         )
 
     def annotate_unread_replies_count_for(self, user):
+        # see also ConversationThreadParticipantQuerySet.annotate_unread_replies_count
         unread_replies_filter = Q(
             participants__user=user,
         ) & ~Q(thread_messages__id=F('thread_id')  # replies have id != thread_id
@@ -283,11 +301,13 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
                 thread = self.thread
                 thread.latest_message = self
                 thread.save()
+                new_thread_message.send(sender=self.__class__, message=self)
             else:
                 # update conversation
                 conversation = self.conversation
                 conversation.latest_message = self
                 conversation.save()
+                new_conversation_message.send(sender=self.__class__, message=self)
 
     def content_rendered(self, **kwargs):
         return markdown.render(self.content, **kwargs)
@@ -313,7 +333,22 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
         self._replies_count = value
 
 
+class ConversationThreadParticipantQuerySet(models.QuerySet):
+    def annotate_unread_replies_count(self):
+        # see also ConversationMessageQuerySet.annotate_unread_replies_count_for
+        unread_replies_filter = (
+            ~Q(thread__thread_messages__id=F('thread_id')) &
+            (Q(seen_up_to=None) | Q(thread__thread_messages__id__gt=F('seen_up_to')))
+        )
+
+        return self.annotate(
+            unread_replies_count=Count('thread__thread_messages', filter=unread_replies_filter, distinct=True)
+        )
+
+
 class ConversationThreadParticipant(BaseModel, UpdatedAtMixin):
+    objects = ConversationThreadParticipantQuerySet.as_manager()
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     thread = models.ForeignKey(ConversationMessage, related_name='participants', on_delete=models.CASCADE)
     seen_up_to = models.ForeignKey(
@@ -340,6 +375,21 @@ class ConversationThreadParticipant(BaseModel, UpdatedAtMixin):
         if self.notified_up_to_id is not None:
             messages = messages.filter(id__gt=self.notified_up_to_id)
         return messages
+
+    def save(self, **kwargs):
+        old = type(self).objects.get(pk=self.pk) if self.pk else None
+        seen_up_to_changed = False
+        if old is not None and old.seen_up_to != self.seen_up_to:
+            seen_up_to_changed = True
+
+        super().save(**kwargs)
+
+        if seen_up_to_changed:
+            # We use a custom signal here because the receiver needs to know whether seen_up_to changed
+            # Django's post_save signal doesn't provide this.
+            # A pre_save signal would be called too early for our purposes.
+            # Actually, it might be better to not use signals at all and call the logic from Model.save directly.
+            thread_marked_seen.send(sender=self.__class__, participant=self)
 
 
 class ConversationMixin(object):

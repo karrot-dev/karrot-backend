@@ -149,13 +149,26 @@ class ConversationReceiverTests(WSTestCase):
         message = ConversationMessage.objects.create(conversation=conversation, content='yay', author=author)
 
         # hopefully they receive it!
-        self.assertEqual(len(client.messages), 2, client.messages)
-        response = client.messages[0]
+        ws_messages = client.messages_by_topic
+        self.assertEqual(len(ws_messages['conversations:conversation']), 1, ws_messages['conversations:conversation'])
+        self.assertEqual(len(ws_messages['conversations:message']), 1, ws_messages['conversations:message'])
+        self.assertEqual(len(ws_messages['status']), 1, ws_messages['status'])
+        self.assertEqual(
+            ws_messages['status'][0]['payload'], {
+                'unseen_conversation_count': 1,
+                'unseen_thread_count': 0,
+                'has_unread_conversations_or_threads': True,
+                'groups': {},
+                'places': {},
+            }
+        )
+
+        response = ws_messages['conversations:message'][0]
         parse_dates(response)
         self.assertEqual(response, make_conversation_message_broadcast(message))
 
         # and they should get an updated conversation object
-        response = client.messages[1]
+        response = ws_messages['conversations:conversation'][0]
         parse_dates(response)
         del response['payload']['participants']
         self.assertEqual(
@@ -185,27 +198,37 @@ class ConversationReceiverTests(WSTestCase):
 
     def tests_receive_message_on_leave(self):
         user = UserFactory()
-
+        author = UserFactory()
         # join a conversation
-        conversation = ConversationFactory(participants=[
-            user,
-        ])
+        conversation = ConversationFactory(participants=[user, author])
+        # write a message
+        ConversationMessage.objects.create(conversation=conversation, content='yay', author=author)
 
         # login and connect
         client = self.connect_as(user)
 
         conversation.leave(user)
+        messages = client.messages_by_topic
+        self.assertEqual(len(messages['conversations:leave']), 1, messages['conversations:leave'])
+        self.assertEqual(messages['conversations:leave'][0]['payload'], {'id': conversation.id})
 
-        self.assertEqual(client.messages[0], {'topic': 'conversations:leave', 'payload': {'id': conversation.id}})
+        self.assertEqual(len(messages['status']), 1, messages['status'])
+        self.assertEqual(
+            messages['status'][0]['payload'], {
+                'unseen_thread_count': 0,
+                'unseen_conversation_count': 0,
+                'has_unread_conversations_or_threads': False,
+                'groups': {},
+                'places': {},
+            }
+        )
 
     def test_other_participants_receive_update_on_join(self):
         user = UserFactory()
         joining_user = UserFactory()
 
         # join a conversation
-        conversation = ConversationFactory(participants=[
-            user,
-        ])
+        conversation = ConversationFactory(participants=[user])
         # login and connect
         client = self.connect_as(user)
 
@@ -228,23 +251,43 @@ class ConversationReceiverTests(WSTestCase):
 
         conversation.leave(leaving_user)
 
-        response = client.messages[0]
-
-        self.assertEqual(response['topic'], 'conversations:conversation')
+        response = client.messages_by_topic['conversations:conversation'][0]
         self.assertEqual(response['payload']['participants'], [user.id])
+
+    def test_conversation_marked_as_seen(self):
+        user, author = [UserFactory() for _ in range(2)]
+        conversation = ConversationFactory(participants=[user, author])
+        message = ConversationMessage.objects.create(conversation=conversation, content='yay', author=author)
+        participant = conversation.conversationparticipant_set.get(user=user)
+        client = self.connect_as(user)
+
+        participant.seen_up_to = message
+        participant.save()
+
+        messages = client.messages_by_topic
+        self.assertEqual(len(messages['status']), 1, messages['status'])
+        self.assertEqual(
+            messages['status'][0]['payload'], {
+                'unseen_thread_count': 0,
+                'unseen_conversation_count': 0,
+                'has_unread_conversations_or_threads': False,
+                'groups': {},
+                'places': {},
+            }
+        )
 
 
 class ConversationThreadReceiverTests(WSTestCase):
     def test_receives_messages(self):
         self.maxDiff = None
-        user = UserFactory()
-        author = UserFactory()
+        op_user = UserFactory()  # op: original post
+        author = UserFactory()  # this user will reply to op
 
-        conversation = ConversationFactory(participants=[user, author])
-        thread = conversation.messages.create(author=user, content='yay')
+        conversation = ConversationFactory(participants=[op_user, author])
+        thread = conversation.messages.create(author=op_user, content='yay')
 
         # login and connect
-        client = self.connect_as(user)
+        op_client = self.connect_as(op_user)
         author_client = self.connect_as(author)
 
         reply = ConversationMessage.objects.create(
@@ -254,8 +297,22 @@ class ConversationThreadReceiverTests(WSTestCase):
             author=author,
         )
 
+        op_messages = op_client.messages_by_topic
+
+        # updated status
+        self.assertEqual(len(op_messages['status']), 1, op_messages['status'])
+        self.assertEqual(
+            op_messages['status'][0]['payload'], {
+                'unseen_thread_count': 1,
+                'unseen_conversation_count': 0,
+                'has_unread_conversations_or_threads': True,
+                'groups': {},
+                'places': {},
+            }
+        )
+
         # user receive message
-        response = client.messages[0]
+        response = op_messages['conversations:message'][0]
         parse_dates(response)
         self.assertEqual(response, make_conversation_message_broadcast(
             reply,
@@ -263,7 +320,7 @@ class ConversationThreadReceiverTests(WSTestCase):
         ))
 
         # and they should get an updated thread object
-        response = client.messages[1]
+        response = op_messages['conversations:message'][1]
         parse_dates(response)
         self.assertEqual(
             response,
@@ -272,7 +329,7 @@ class ConversationThreadReceiverTests(WSTestCase):
                 thread_meta={
                     'is_participant': True,
                     'muted': False,
-                    'participants': [user.id, author.id],
+                    'participants': [op_user.id, author.id],
                     'reply_count': 1,
                     'seen_up_to': None,
                     'unread_reply_count': 1
@@ -300,13 +357,41 @@ class ConversationThreadReceiverTests(WSTestCase):
                 thread_meta={
                     'is_participant': True,
                     'muted': False,
-                    'participants': [user.id, author.id],
+                    'participants': [op_user.id, author.id],
                     'reply_count': 1,
                     'seen_up_to': reply.id,
                     'unread_reply_count': 0,
                 },
                 updated_at=response['payload']['updated_at'],  # TODO fix test
             )
+        )
+
+    def test_thread_marked_as_seen(self):
+        author, op_author = [UserFactory() for _ in range(2)]
+        conversation = ConversationFactory(participants=[author, op_author])
+        thread = ConversationMessage.objects.create(conversation=conversation, content='yay', author=op_author)
+        reply = ConversationMessage.objects.create(
+            conversation=conversation,
+            thread=thread,
+            content='really yay?',
+            author=author,
+        )
+        participant = thread.participants.get(user=op_author)
+        client = self.connect_as(op_author)
+
+        participant.seen_up_to = reply
+        participant.save()
+
+        messages = client.messages_by_topic
+        self.assertEqual(len(messages['status']), 1, messages['status'])
+        self.assertEqual(
+            messages['status'][0]['payload'], {
+                'unseen_thread_count': 0,
+                'unseen_conversation_count': 0,
+                'has_unread_conversations_or_threads': False,
+                'groups': {},
+                'places': {},
+            }
         )
 
 
@@ -372,34 +457,34 @@ class GroupReceiverTests(WSTestCase):
         self.group = GroupFactory(members=[self.member])
 
     def test_receive_group_changes(self):
-        self.client = self.connect_as(self.member)
+        client = self.connect_as(self.member)
 
         name = faker.name()
         self.group.name = name
         self.group.save()
 
-        response = self.client.messages_by_topic.get('groups:group_detail')[0]
+        response = client.messages_by_topic.get('groups:group_detail')[0]
         self.assertEqual(response['payload']['name'], name)
         self.assertTrue('description' in response['payload'])
 
-        response = self.client.messages_by_topic.get('groups:group_preview')[0]
+        response = client.messages_by_topic.get('groups:group_preview')[0]
         self.assertEqual(response['payload']['name'], name)
         self.assertTrue('description' not in response['payload'])
 
-        self.assertEqual(len(self.client.messages), 2)
+        self.assertEqual(len(client.messages), 2)
 
     def test_receive_group_changes_as_nonmember(self):
-        self.client = self.connect_as(self.user)
+        client = self.connect_as(self.user)
 
         name = faker.name()
         self.group.name = name
         self.group.save()
 
-        response = self.client.messages_by_topic.get('groups:group_preview')[0]
+        response = client.messages_by_topic.get('groups:group_preview')[0]
         self.assertEqual(response['payload']['name'], name)
         self.assertTrue('description' not in response['payload'])
 
-        self.assertEqual(len(self.client.messages), 1)
+        self.assertEqual(len(client.messages), 1)
 
 
 class GroupMembershipReceiverTests(WSTestCase):
@@ -449,8 +534,25 @@ class GroupMembershipReceiverTests(WSTestCase):
             'history:history',
             'conversations:leave',
             'conversations:conversation',
+            'status',
             'groups:group_preview',
         ])
+
+        status_messages = client.messages_by_topic['status']
+        self.assertEqual(len(status_messages), 1, status_messages)
+        self.assertEqual(
+            status_messages[0]['payload'], {
+                'unseen_conversation_count': 0,
+                'unseen_thread_count': 0,
+                'has_unread_conversations_or_threads': False,
+                'groups': {
+                    self.group.id: {
+                        'unread_wall_message_count': 0
+                    }
+                },
+                'places': {},
+            }
+        )
 
     def test_receive_group_roles_update(self):
         membership = self.group.add_member(self.user)
@@ -464,6 +566,7 @@ class GroupMembershipReceiverTests(WSTestCase):
 
         self.assertEqual([m['topic'] for m in client.messages], [
             'notifications:notification',
+            'status',
             'groups:group_detail',
         ])
 
@@ -474,45 +577,72 @@ class ApplicationReceiverTests(WSTestCase):
         self.member = UserFactory()
         self.user = UserFactory()
         self.group = GroupFactory(members=[self.member])
-
-    def application_update_messages(self):
-        return [r for r in self.client.messages if r['topic'] == 'applications:update']
+        Notification.objects.all().delete()
 
     def test_member_receives_application_create(self):
-        self.client = self.connect_as(self.member)
+        client = self.connect_as(self.member)
 
         application = ApplicationFactory(user=self.user, group=self.group)
 
-        messages = self.application_update_messages()
+        messages = client.messages_by_topic['applications:update']
         self.assertEqual(len(messages), 1)
-        response = messages[0]
-        self.assertEqual(response['payload']['id'], application.id)
+        self.assertEqual(messages[0]['payload']['id'], application.id)
+
+        messages = client.messages_by_topic['status']
+        self.assertEqual(len(messages), 2, messages)
+        # We told the user that we have 1 pending application
+        self.assertEqual(messages[0]['payload'], {'groups': {self.group.id: {'pending_application_count': 1}}})
+        # "There is an application for your group!"
+        self.assertEqual(messages[1]['payload'], {'unseen_notification_count': 1})
+
+        client.reset_messages()
+        # mark notification as read
+        meta = self.member.notificationmeta
+        meta.marked_at = timezone.now()
+        meta.save()
+
+        messages = client.messages_by_topic['status']
+        self.assertEqual(len(messages), 1, messages)
+        self.assertEqual(messages[0]['payload'], {'unseen_notification_count': 0})
 
     def test_member_receives_application_update(self):
         application = ApplicationFactory(user=self.user, group=self.group)
 
-        self.client = self.connect_as(self.member)
+        client = self.connect_as(self.member)
 
         application.status = 'accepted'
         application.save()
 
-        messages = self.application_update_messages()
+        messages = client.messages_by_topic['applications:update']
         self.assertEqual(len(messages), 1)
         response = messages[0]
         self.assertEqual(response['payload']['id'], application.id)
+
+        messages = client.messages_by_topic['status']
+        self.assertEqual(len(messages), 2, messages)
+        # No pending applications
+        self.assertEqual(messages[1]['payload'], {'groups': {self.group.id: {'pending_application_count': 0}}})
+        # Notification gets deleted because application has been accepted
+        self.assertEqual(messages[0]['payload'], {'unseen_notification_count': 0})
 
     def test_applicant_receives_application_update(self):
         application = ApplicationFactory(user=self.user, group=self.group)
+        Notification.objects.all().delete()
 
-        self.client = self.connect_as(self.user)
+        client = self.connect_as(self.user)
 
         application.status = 'accepted'
         application.save()
 
-        messages = self.application_update_messages()
+        messages = client.messages_by_topic['applications:update']
         self.assertEqual(len(messages), 1)
         response = messages[0]
         self.assertEqual(response['payload']['id'], application.id)
+
+        messages = client.messages_by_topic['status']
+        self.assertEqual(len(messages), 1, messages)
+        # "Your application has been accepted"
+        self.assertEqual(messages[0]['payload'], {'unseen_notification_count': 1})
 
 
 class InvitationReceiverTests(WSTestCase):
@@ -522,25 +652,25 @@ class InvitationReceiverTests(WSTestCase):
         self.group = GroupFactory(members=[self.member])
 
     def test_receive_invitation_updates(self):
-        self.client = self.connect_as(self.member)
+        client = self.connect_as(self.member)
 
         invitation = Invitation.objects.create(email='bla@bla.com', group=self.group, invited_by=self.member)
 
-        response = self.client.messages_by_topic.get('invitations:invitation')[0]
+        response = client.messages_by_topic.get('invitations:invitation')[0]
         self.assertEqual(response['payload']['email'], invitation.email)
 
-        self.assertEqual(len(self.client.messages), 1)
+        self.assertEqual(len(client.messages), 1)
 
     def test_receive_invitation_accept(self):
         invitation = Invitation.objects.create(email='bla@bla.com', group=self.group, invited_by=self.member)
         user = UserFactory()
 
-        self.client = self.connect_as(self.member)
+        client = self.connect_as(self.member)
 
         id = invitation.id
         invitation.accept(user)
 
-        response = next(r for r in self.client.messages if r['topic'] == 'invitations:invitation_accept')
+        response = next(r for r in client.messages if r['topic'] == 'invitations:invitation_accept')
         self.assertEqual(response['payload']['id'], id)
 
 
@@ -552,16 +682,16 @@ class PlaceReceiverTests(WSTestCase):
         self.place = PlaceFactory(group=self.group)
 
     def test_receive_place_changes(self):
-        self.client = self.connect_as(self.member)
+        client = self.connect_as(self.member)
 
         name = faker.name()
         self.place.name = name
         self.place.save()
 
-        response = self.client.messages_by_topic.get('places:place')[0]
+        response = client.messages_by_topic.get('places:place')[0]
         self.assertEqual(response['payload']['name'], name)
 
-        self.assertEqual(len(self.client.messages), 1)
+        self.assertEqual(len(client.messages), 1)
 
 
 class PickupDateReceiverTests(WSTestCase):
@@ -573,45 +703,59 @@ class PickupDateReceiverTests(WSTestCase):
         self.pickup = PickupDateFactory(place=self.place)
 
     def test_receive_pickup_changes(self):
-        self.client = self.connect_as(self.member)
+        client = self.connect_as(self.member)
 
         # change property
         date = to_range(faker.future_datetime(end_date='+30d', tzinfo=timezone.utc))
         self.pickup.date = date
         self.pickup.save()
 
-        response = self.client.messages_by_topic.get('pickups:pickupdate')[0]
+        response = client.messages_by_topic.get('pickups:pickupdate')[0]
         self.assertEqual(parse(response['payload']['date'][0]), date.start)
 
         # join
-        self.client = self.connect_as(self.member)
+        client = self.connect_as(self.member)
         self.pickup.add_collector(self.member)
 
-        response = self.client.messages_by_topic.get('pickups:pickupdate')[0]
+        response = client.messages_by_topic.get('pickups:pickupdate')[0]
         self.assertEqual(response['payload']['collectors'], [self.member.id])
 
-        response = self.client.messages_by_topic.get('conversations:conversation')[0]
+        response = client.messages_by_topic.get('conversations:conversation')[0]
         self.assertEqual(response['payload']['participants'], [self.member.id])
 
         # leave
-        self.client = self.connect_as(self.member)
+        client = self.connect_as(self.member)
         self.pickup.remove_collector(self.member)
 
-        response = self.client.messages_by_topic.get('pickups:pickupdate')[0]
+        response = client.messages_by_topic.get('pickups:pickupdate')[0]
         self.assertEqual(response['payload']['collectors'], [])
 
-        self.assertIn('conversations:leave', self.client.messages_by_topic.keys())
+        self.assertIn('conversations:leave', client.messages_by_topic.keys())
+
+    def test_mark_as_done(self):
+        self.pickup.add_collector(self.member)
+        Notification.objects.all().delete()
+        client = self.connect_as(self.member)
+        self.pickup.is_done = True
+        self.pickup.save()
+
+        messages = client.messages_by_topic
+        self.assertEqual(len(messages['status']), 2, messages['status'])
+        self.assertEqual(messages['status'][0]['payload'], {'unseen_notification_count': 1})
+        self.assertEqual(messages['status'][1]['payload'], {'groups': {self.group.id: {'feedback_possible_count': 1}}})
+        self.assertEqual(len(messages['notifications:notification']), 1, messages['notifications:notification'])
+        self.assertEqual(messages['notifications:notification'][0]['payload']['type'], 'feedback_possible')
 
     def test_receive_pickup_delete(self):
-        self.client = self.connect_as(self.member)
+        client = self.connect_as(self.member)
 
         pickup_id = self.pickup.id
         self.pickup.delete()
 
-        response = self.client.messages_by_topic.get('pickups:pickupdate_deleted')[0]
+        response = client.messages_by_topic.get('pickups:pickupdate_deleted')[0]
         self.assertEqual(response['payload']['id'], pickup_id)
 
-        self.assertEqual(len(self.client.messages), 1)
+        self.assertEqual(len(client.messages), 1)
 
 
 class PickupDateSeriesReceiverTests(WSTestCase):
@@ -626,27 +770,27 @@ class PickupDateSeriesReceiverTests(WSTestCase):
         self.series = PickupDateSeriesFactory(place=self.place, start_date=timezone.now() + relativedelta(months=2))
 
     def test_receive_series_changes(self):
-        self.client = self.connect_as(self.member)
+        client = self.connect_as(self.member)
 
         date = faker.future_datetime(end_date='+30d', tzinfo=timezone.utc) + relativedelta(months=2)
         self.series.start_date = date
         self.series.save()
 
-        response = self.client.messages_by_topic.get('pickups:series')[0]
+        response = client.messages_by_topic.get('pickups:series')[0]
         self.assertEqual(parse(response['payload']['start_date']), date)
 
-        self.assertEqual(len(self.client.messages), 1)
+        self.assertEqual(len(client.messages), 1)
 
     def test_receive_series_delete(self):
-        self.client = self.connect_as(self.member)
+        client = self.connect_as(self.member)
 
         id = self.series.id
         self.series.delete()
 
-        response = self.client.messages_by_topic.get('pickups:series_deleted')[0]
+        response = client.messages_by_topic.get('pickups:series_deleted')[0]
         self.assertEqual(response['payload']['id'], id)
 
-        self.assertEqual(len(self.client.messages), 1)
+        self.assertEqual(len(client.messages), 1)
 
 
 class OfferReceiverTests(WSTestCase):
@@ -658,45 +802,45 @@ class OfferReceiverTests(WSTestCase):
         self.offer = OfferFactory(group=self.group, user=self.member)
 
     def test_receive_offer_changes(self):
-        self.client = self.connect_as(self.member)
+        client = self.connect_as(self.member)
 
         self.offer.name = faker.name()
         self.offer.save()
-        response = self.client.messages_by_topic.get('offers:offer')[0]
+        response = client.messages_by_topic.get('offers:offer')[0]
         self.assertEqual(response['payload']['name'], self.offer.name)
-        self.assertEqual(len(self.client.messages), 1)
+        self.assertEqual(len(client.messages), 1)
 
     def test_receiver_offer_deleted(self):
-        self.client = self.connect_as(self.member)
+        client = self.connect_as(self.member)
 
         id = self.offer.id
         self.offer.delete()
 
-        response = self.client.messages_by_topic.get('offers:offer_deleted')[0]
+        response = client.messages_by_topic.get('offers:offer_deleted')[0]
         self.assertEqual(response['payload']['id'], id)
-        self.assertEqual(len(self.client.messages), 1)
+        self.assertEqual(len(client.messages), 1)
 
     def test_receiver_offer_deleted_for_other_user_when_archived(self):
-        self.client = self.connect_as(self.other_member)
+        client = self.connect_as(self.other_member)
 
         id = self.offer.id
         self.offer.archive()
 
-        response = self.client.messages_by_topic.get('offers:offer_deleted')[0]
+        response = client.messages_by_topic.get('offers:offer_deleted')[0]
         self.assertEqual(response['payload']['id'], id)
-        self.assertEqual(len(self.client.messages), 1)
+        self.assertEqual(len(client.messages), 1)
 
     def test_receiver_offer_updated_for_other_user_when_archived_if_in_conversation(self):
-        self.client = self.connect_as(self.other_member)
+        client = self.connect_as(self.other_member)
         self.offer.conversation.join(self.other_member)
-        self.client.reset_messages()  # otherwise we have various conversation related messages
+        client.reset_messages()  # otherwise we have various conversation related messages
 
         id = self.offer.id
         self.offer.archive()
 
-        response = self.client.messages_by_topic.get('offers:offer')[0]
+        response = client.messages_by_topic.get('offers:offer')[0]
         self.assertEqual(response['payload']['id'], id)
-        self.assertEqual(len(self.client.messages), 1)
+        self.assertEqual(len(client.messages), 1)
 
 
 class FeedbackReceiverTests(WSTestCase):
@@ -708,14 +852,26 @@ class FeedbackReceiverTests(WSTestCase):
         self.pickup = PickupDateFactory(place=self.place)
 
     def test_receive_feedback_changes(self):
-        self.client = self.connect_as(self.member)
+        client = self.connect_as(self.member)
 
         feedback = FeedbackFactory(given_by=self.member, about=self.pickup)
 
-        response = self.client.messages_by_topic.get('feedback:feedback')[0]
+        response = client.messages_by_topic.get('feedback:feedback')[0]
         self.assertEqual(response['payload']['weight'], feedback.weight)
 
-        self.assertEqual(len(self.client.messages), 1)
+        self.assertEqual([m['topic'] for m in client.messages], [
+            'feedback:feedback',
+            'status',
+        ], client.messages)
+
+        self.assertEqual(
+            client.messages_by_topic['status'][0]['payload'],
+            {'groups': {
+                self.group.id: {
+                    'feedback_possible_count': 0
+                }
+            }}
+        )
 
 
 class FinishedPickupReceiverTest(WSTestCase):
@@ -730,16 +886,25 @@ class FinishedPickupReceiverTest(WSTestCase):
         self.pickup.date = to_range(timezone.now() - relativedelta(days=1))
         self.pickup.save()
 
-        self.client = self.connect_as(self.member)
+        Notification.objects.all().delete()
+
+        client = self.connect_as(self.member)
         PickupDate.objects.process_finished_pickup_dates()
 
-        history_response = next(m for m in self.client.messages if m['topic'] == 'history:history')
-        self.assertEqual(history_response['payload']['typus'], 'PICKUP_DONE')
+        messages_by_topic = client.messages_by_topic
 
-        history_response = next(m for m in self.client.messages if m['topic'] == 'notifications:notification')
-        self.assertEqual(history_response['payload']['type'], 'feedback_possible')
+        response = messages_by_topic['history:history'][0]
+        self.assertEqual(response['payload']['typus'], 'PICKUP_DONE')
 
-        self.assertEqual(len(self.client.messages), 2, self.client.messages)
+        response = messages_by_topic['notifications:notification'][0]
+        self.assertEqual(response['payload']['type'], 'feedback_possible')
+
+        status_messages = messages_by_topic['status']
+        self.assertEqual(len(status_messages), 2)
+        self.assertEqual(status_messages[0]['payload'], {'unseen_notification_count': 1})
+        self.assertEqual(status_messages[1]['payload'], {'groups': {self.group.id: {'feedback_possible_count': 1}}})
+
+        self.assertEqual(len(client.messages), 4, client.messages)
 
 
 class UserReceiverTest(WSTestCase):
@@ -759,52 +924,52 @@ class UserReceiverTest(WSTestCase):
         self.other_member.save()
 
     def test_receive_own_user_changes(self):
-        self.client = self.connect_as(self.member)
+        client = self.connect_as(self.member)
 
         name = faker.name()
         self.member.display_name = name
         self.member.save()
 
-        response = self.client.messages_by_topic.get('auth:user')[0]
+        response = client.messages_by_topic.get('auth:user')[0]
         self.assertEqual(response['payload']['display_name'], name)
         self.assertTrue('current_group' in response['payload'])
         self.assertTrue(response['payload']['photo_urls']['full_size'].startswith(settings.HOSTNAME))
 
-        self.assertEqual(len(self.client.messages), 1)
+        self.assertEqual(len(client.messages), 1)
 
     def test_receive_changes_of_other_user(self):
-        self.client = self.connect_as(self.member)
+        client = self.connect_as(self.member)
 
         name = faker.name()
         self.other_member.display_name = name
         self.other_member.save()
 
-        response = self.client.messages_by_topic.get('users:user')[0]
+        response = client.messages_by_topic.get('users:user')[0]
         self.assertEqual(response['payload']['display_name'], name)
         self.assertTrue('current_group' not in response['payload'])
         self.assertTrue(response['payload']['photo_urls']['full_size'].startswith(settings.HOSTNAME))
 
-        self.assertEqual(len(self.client.messages), 1)
+        self.assertEqual(len(client.messages), 1)
 
     def test_do_not_send_too_many_updates(self):
         [GroupFactory(members=[self.member, self.other_member]) for _ in range(3)]
 
-        self.client = self.connect_as(self.member)
+        client = self.connect_as(self.member)
 
         name = faker.name()
         self.other_member.display_name = name
         self.other_member.save()
 
-        self.assertEqual(len(self.client.messages), 1)
-        self.assertIn('users:user', self.client.messages_by_topic.keys())
+        self.assertEqual(len(client.messages), 1)
+        self.assertIn('users:user', client.messages_by_topic.keys())
 
     def test_unrelated_user_receives_no_changes(self):
-        self.client = self.connect_as(self.unrelated_user)
+        client = self.connect_as(self.unrelated_user)
 
         self.member.display_name = faker.name()
         self.member.save()
 
-        self.assertEqual(len(self.client.messages), 0)
+        self.assertEqual(len(client.messages), 0)
 
 
 class IssueReceiverTest(WSTestCase):

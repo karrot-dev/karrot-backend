@@ -81,4 +81,4 @@ class Notification(BaseModel):
 
 class NotificationMeta(BaseModel):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    marked_at = models.DateTimeField(null=True)
+    marked_at = models.DateTimeField()

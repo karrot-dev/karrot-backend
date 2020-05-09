@@ -28,9 +28,7 @@ class TestNotificationsAPI(APITestCase, ExtractPaginationMixin):
         response = self.get_results(notification_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['notifications']), 1)
-        self.assertEqual(response.data['meta'], {
-            'marked_at': None,
-        })
+        self.assertEqual(response.data['meta'], {'marked_at': '0001-01-01T00:00:00Z'})
 
     def test_list_with_already_marked(self):
         self.create_any_notification()

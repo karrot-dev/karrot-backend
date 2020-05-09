@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields.jsonb import KeyTextTransform
@@ -6,15 +8,17 @@ from django.db.models.functions import Cast
 from django.db.models.signals import post_save, pre_save, pre_delete, post_delete
 from django.dispatch import receiver
 from django.utils import timezone
+from pytz import utc
 
 from karrot.applications.models import Application, ApplicationStatus
 from karrot.issues.models import Issue, Voting, OptionTypes
-from karrot.notifications.models import Notification, NotificationType
+from karrot.notifications.models import Notification, NotificationType, NotificationMeta
 from karrot.groups.models import GroupMembership
 from karrot.groups.roles import GROUP_EDITOR
 from karrot.invitations.models import Invitation
 from karrot.pickups.models import PickupDate, PickupDateCollector
 from karrot.places.models import Place
+from karrot.users.models import User
 
 
 @receiver(pre_save, sender=GroupMembership)
@@ -346,3 +350,14 @@ def conflict_resolution_issue_decided(sender, instance, **kwargs):
                 'group': issue.group.id,
             }
         )
+
+
+@receiver(post_save, sender=User)
+def make_notification_meta(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    user = instance
+    # This is equivalent of not setting marked_at, by choosing a the earliest date possible
+    # (but it has to be timezone-aware, otherwise there will be comparison errors)
+    NotificationMeta.objects.get_or_create({'marked_at': datetime.min.replace(tzinfo=utc)}, user=user)

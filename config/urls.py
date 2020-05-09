@@ -24,6 +24,7 @@ from karrot.notifications.api import NotificationViewSet
 from karrot.offers.api import OfferViewSet
 from karrot.pickups.api import PickupDateViewSet, PickupDateSeriesViewSet, FeedbackViewSet
 from karrot.places.api import PlaceViewSet
+from karrot.status.api import StatusView
 from karrot.subscriptions.api import PushSubscriptionViewSet
 from karrot.template_previews import views as template_preview_views
 from karrot.unsubscribe.api import TokenUnsubscribeView, UnsubscribeViewSet
@@ -94,6 +95,7 @@ urlpatterns = [
     path('api/unsubscribe/<token>/', TokenUnsubscribeView.as_view()),
     path('api/auth/', AuthView.as_view()),
     path('api/stats/', StatsView.as_view()),
+    path('api/status/', StatusView.as_view()),
     path('api/', include((router.urls))),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('admin/docs/', include('django.contrib.admindocs.urls')),

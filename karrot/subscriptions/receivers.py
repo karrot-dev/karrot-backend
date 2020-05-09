@@ -1,15 +1,11 @@
-import json
+from collections import defaultdict
+from itertools import groupby
 
-from asgiref.sync import async_to_sync
-from channels.exceptions import ChannelFull
-from channels.layers import get_channel_layer
 from django.conf import settings
 from django.contrib.auth import user_logged_out
-from django.contrib.auth.models import AnonymousUser
 from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
-from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from karrot.applications.models import Application
 from karrot.applications.serializers import ApplicationSerializer
@@ -19,6 +15,8 @@ from karrot.conversations.models import ConversationParticipant, ConversationMes
     ConversationThreadParticipant, ConversationMeta
 from karrot.conversations.serializers import ConversationMessageSerializer, ConversationSerializer, \
     ConversationMetaSerializer
+from karrot.conversations.signals import thread_marked_seen, new_conversation_message, new_thread_message, \
+    conversation_marked_seen
 from karrot.groups.models import Group, Trust, GroupMembership
 from karrot.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer
 from karrot.history.models import history_created
@@ -35,43 +33,13 @@ from karrot.pickups.models import PickupDate, PickupDateSeries, Feedback, Pickup
 from karrot.pickups.serializers import PickupDateSerializer, PickupDateSeriesSerializer, FeedbackSerializer
 from karrot.places.models import Place, PlaceSubscription
 from karrot.places.serializers import PlaceSerializer
-from karrot.subscriptions import stats, tasks
+from karrot.status.helpers import unseen_notification_count, unread_conversations, pending_applications, \
+    get_feedback_possible
+from karrot.subscriptions import tasks
 from karrot.subscriptions.models import ChannelSubscription
+from karrot.subscriptions.utils import send_in_channel, MockRequest
 from karrot.userauth.serializers import AuthUserSerializer
 from karrot.users.serializers import UserSerializer
-
-
-class MockRequest:
-    def __init__(self, user=None):
-        self.user = user or AnonymousUser()
-
-    def build_absolute_uri(self, path):
-        return settings.HOSTNAME + path
-
-
-channel_layer = get_channel_layer()
-channel_layer_send_sync = async_to_sync(channel_layer.send)
-
-
-def send_in_channel(channel, topic, payload):
-    message = {
-        'type': 'message.send',
-        'text': json.dumps({
-            'topic': topic,
-            'payload': payload,
-        }),
-    }
-    try:
-        channel_layer_send_sync(channel, message)
-    except ChannelFull:
-        # TODO investigate this more
-        # maybe this means the subscription is invalid now?
-        sentry_client.captureException()
-    except RuntimeError:
-        # TODO investigate this more (but let the code continue in the meantime...)
-        sentry_client.captureException()
-    else:
-        stats.pushed_via_websocket(topic)
 
 
 @receiver(post_save, sender=ConversationMessage)
@@ -500,3 +468,151 @@ def community_feed_meta_saved(sender, instance, **kwargs):
     payload = CommunityFeedMetaSerializer(meta).data
     for subscription in ChannelSubscription.objects.recent().filter(user=meta.user):
         send_in_channel(subscription.reply_channel, topic='community_feed:meta', payload=payload)
+
+
+# Status
+def send_conversation_status_update(subscriptions, changed_conversation=None):
+    for user, subscriptions in groupby(sorted(list(subscriptions), key=lambda x: x.user.id), key=lambda x: x.user):
+        payload = unread_conversations(user)
+
+        if changed_conversation:
+            # We know that something about this conversation has been changed
+            # It might be all messages are read and we need to tell the client this
+            # Hence, set unread_wall_message_count to 0 if there are no unread messages for that conversation
+            target_id = changed_conversation.target_id
+            t = changed_conversation.type()
+            if t == 'group' and target_id not in payload['groups']:
+                payload['groups'][target_id] = {'unread_wall_message_count': 0}
+            elif t == 'place' and target_id not in payload['places']:
+                payload['places'][target_id] = {'unread_wall_message_count': 0}
+
+        for subscription in subscriptions:
+            send_in_channel(subscription.reply_channel, topic='status', payload=payload)
+
+
+@receiver(new_conversation_message)
+def new_conversation_message_to_status(sender, message, **kwargs):
+    conversation = message.conversation
+    send_conversation_status_update(
+        ChannelSubscription.objects.recent().filter(user__in=conversation.participants.all()
+                                                    ).exclude(user=conversation.latest_message.author).distinct(),
+    )
+
+
+@receiver(new_thread_message)
+def new_thread_message_to_status(sender, message, **kwargs):
+    thread = message.thread
+    send_conversation_status_update(
+        ChannelSubscription.objects.recent().filter(user__in=thread.conversation.participants.all()
+                                                    ).exclude(user=thread.latest_message.author).distinct(),
+    )
+
+
+@receiver(post_save, sender=ConversationMeta)
+def conversation_participant_saved(sender, instance, **kwargs):
+    # user opened the latest messages menu
+    meta = instance
+    send_conversation_status_update(ChannelSubscription.objects.recent().filter(user=meta.user))
+
+
+@receiver(conversation_marked_seen)
+def conversation_marked_seen_to_status(sender, participant, **kwargs):
+    conversation = participant.conversation
+    send_conversation_status_update(
+        ChannelSubscription.objects.recent().filter(user=participant.user).distinct(),
+        changed_conversation=conversation,
+    )
+
+
+@receiver(thread_marked_seen)
+def conversation_thread_marked_to_status(sender, participant, **kwargs):
+    send_conversation_status_update(ChannelSubscription.objects.recent().filter(user=participant.user).distinct())
+
+
+@receiver(post_delete, sender=ConversationParticipant)
+def conversation_participant_deleted(sender, instance, **kwargs):
+    # user unsubscribed from the conversation
+    participant = instance
+
+    send_conversation_status_update(
+        ChannelSubscription.objects.recent().filter(user=participant.user),
+        changed_conversation=participant.conversation,
+    )
+
+
+def send_notification_status_update(user):
+    count = unseen_notification_count(user)
+    for subscription in ChannelSubscription.objects.recent().filter(user=user):
+        send_in_channel(
+            subscription.reply_channel, topic='status', payload={
+                'unseen_notification_count': count,
+            }
+        )
+
+
+@receiver(post_save, sender=Notification)
+@receiver(post_delete, sender=Notification)
+def notification_changed(sender, instance, **kwargs):
+    notification = instance
+    send_notification_status_update(user=notification.user)
+
+
+@receiver(post_save, sender=NotificationMeta)
+def notification_meta_to_status(sender, instance, **kwargs):
+    notification_meta = instance
+    send_notification_status_update(user=notification_meta.user)
+
+
+@receiver(post_save, sender=Application)
+def application_saved(sender, instance, **kwargs):
+    application = instance
+    for user, subscriptions in groupby(sorted(list(
+            ChannelSubscription.objects.recent().filter(user__in=application.group.members.all())),
+                                              key=lambda x: x.user.id), key=lambda x: x.user):
+
+        groups = defaultdict(dict)
+        for group_id, count in pending_applications(user):
+            groups[group_id]['pending_application_count'] = count
+
+        for subscription in subscriptions:
+            send_in_channel(subscription.reply_channel, topic='status', payload={'groups': groups})
+
+
+@receiver(post_save, sender=PickupDate)
+def pickup_date_saved(sender, instance, **kwargs):
+    pickup = instance
+
+    if pickup.is_done is False:
+        # Pickup is not done
+        return
+    # TODO don't send if 'is_done' did not change
+
+    for user, subscriptions in groupby(sorted(list(
+            ChannelSubscription.objects.recent().filter(user__in=pickup.collectors.all())), key=lambda x: x.user.id),
+                                       key=lambda x: x.user):
+
+        groups = defaultdict(dict)
+        for group_id, count in get_feedback_possible(user):
+            groups[group_id]['feedback_possible_count'] = count
+
+        for subscription in subscriptions:
+            send_in_channel(subscription.reply_channel, topic='status', payload={'groups': groups})
+
+
+@receiver(post_save, sender=Feedback)
+def feedback_saved(sender, instance, created, **kwargs):
+    feedback = instance
+
+    if not created:
+        return
+
+    user = feedback.given_by
+
+    groups = defaultdict(dict)
+    for group_id, count in get_feedback_possible(user):
+        groups[group_id]['feedback_possible_count'] = count
+
+    payload = {'groups': groups}
+
+    for subscription in ChannelSubscription.objects.recent().filter(user=user):
+        send_in_channel(subscription.reply_channel, topic='status', payload=payload)
