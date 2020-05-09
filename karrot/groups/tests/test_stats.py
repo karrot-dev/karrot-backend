@@ -89,6 +89,7 @@ class TestGroupStats(TestCase):
                     'count_active_30d_with_notification_type_new_application': 7,
                     'count_active_30d_with_notification_type_new_offer': 7,
                     'count_active_30d_with_notification_type_daily_pickup_notification': 7,
+                    'count_active_30d_with_notification_type_conflict_resolution': 7,
                 },
             }]
         )
