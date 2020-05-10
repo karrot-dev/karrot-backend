@@ -28,6 +28,20 @@ aliases:
         env/bin/pip install --upgrade pip-tools
         PIP_EXISTS_ACTION=w env/bin/pip-sync requirements*.txt
 
+  - &install-hub
+    run:
+      name: install hub
+      command: |
+        wget https://github.com/github/hub/releases/download/v2.5.1/hub-linux-amd64-2.5.1.tgz
+        tar -xf hub-linux-amd64-2.5.1.tgz
+        ./hub-linux-amd64-2.5.1/install
+        rm hub-linux-amd64-2.5.1.tgz
+
+  - *add-token-to-remote
+    run:
+      name: set git remote to include token
+      command: git remote set-url origin https://${GITHUB_TOKEN}@github.com/yunity/karrot-backend.git
+
 version: 2
 jobs:
   test:
@@ -113,17 +127,8 @@ jobs:
       - run:
           name: install tx client
           command: env/bin/pip install transifex-client
-      - run:
-          name: install hub
-          command: |
-            wget https://github.com/github/hub/releases/download/v2.5.1/hub-linux-amd64-2.5.1.tgz
-            tar -xf hub-linux-amd64-2.5.1.tgz
-            ./hub-linux-amd64-2.5.1/install
-            rm hub-linux-amd64-2.5.1.tgz
-            rm -r hub-linux-amd64-2.5.1
-      - run:
-          name: set git remote to include token
-          command: git remote set-url origin https://${GITHUB_TOKEN}@github.com/yunity/karrot-backend.git
+      - *install-hub
+      - *add-token-to-remote
       - run:
           name: update locales and make pull request
           environment:
@@ -140,6 +145,45 @@ jobs:
             git commit -m "[CI] update locales" || exit 0
             git push --force origin $BRANCH
             hub pull-request -m "[CI] Update locales" || true
+
+  update-dependencies:
+    <<: *defaults
+    steps:
+      - checkout
+      - *restore-env-cache
+      - *setup-env
+      - *install-hub
+      - *add-token-to-remote
+      - run:
+          name: update dependencies and make pull request
+          environment:
+            BRANCH: circleci-update-dependencies
+          command: |
+            set -xe
+            git config credential.helper 'cache --timeout=120'
+            git config user.email "ci@foodsaving.world"
+            git config user.name "CircleCI"
+            git branch --delete --force $BRANCH || true
+            git switch -c $BRANCH
+            pip-compile --upgrade
+            git add requirements.txt
+            pushd mjml
+            yarn upgrade --latest
+            ./convert
+            git add package.json yarn.lock
+            popd
+            git commit -m "[CI] update dependencies" || exit 0
+            git push --force origin $BRANCH
+            hub pull-request -m "[CI] Update dependencies" -F - <<EOL || true
+            [CI] update dependencies
+
+            Good morning, I found some fresh dependencies for you!
+
+            This Pull Request contains updates done by \`pip-compile --upgrade\` and
+            in \`mjml\`, \`yarn upgrade --latest\`.
+
+            Please check the changes before merging and consider trying out the branch locally to verify if it works.
+            EOL
 
 workflows:
   version: 2
@@ -174,6 +218,7 @@ workflows:
                 - production
           requires:
             - test
+
   update-locales-cronjob:
     triggers:
       - schedule:
@@ -183,3 +228,13 @@ workflows:
               only: master
     jobs:
       - update-locales
+
+  update-dependencies-cronjob:
+    triggers:
+      - schedule:
+          cron: "0 2 * * *"
+          filters:
+            branches:
+              only: master
+    jobs:
+      - update-dependencies
