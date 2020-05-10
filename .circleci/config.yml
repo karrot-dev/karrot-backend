@@ -37,7 +37,7 @@ aliases:
         ./hub-linux-amd64-2.5.1/install
         rm hub-linux-amd64-2.5.1.tgz
 
-  - *add-token-to-remote
+  - &add-token-to-remote
     run:
       name: set git remote to include token
       command: git remote set-url origin https://${GITHUB_TOKEN}@github.com/yunity/karrot-backend.git
