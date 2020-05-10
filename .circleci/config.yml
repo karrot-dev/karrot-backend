@@ -158,7 +158,6 @@ jobs:
             git add requirements.txt
             pushd mjml
             yarn upgrade --latest
-            ./convert
             git add package.json yarn.lock
             popd
             git commit -m "[CI] update dependencies" || exit 0
