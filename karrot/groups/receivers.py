@@ -99,22 +99,21 @@ def remove_trust(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=Group)
-def notify_slack_on_group_creation(sender, instance, created, **kwargs):
-    """Send notifications to admin slack"""
+def notify_chat_on_group_creation(sender, instance, created, **kwargs):
+    """Send notifications to admin chat"""
     if not created:
         return
     group = instance
-    webhook_url = getattr(settings, 'ADMIN_SLACK_WEBHOOK', None)
+    webhook_url = getattr(settings, 'ADMIN_ROCKETCHAT_WEBHOOK', None)
 
     if webhook_url is None:
         return
 
     group_url = frontend_urls.group_preview_url(group)
 
-    slack_data = {
-        'text': f':tada: A new group has been created on karrot.world! <{group_url}|Visit {group.name}>',
-        'username': settings.SITE_NAME,
+    message_data = {
+        'text': f':tada: A new group has been created on karrot.world! [Visit {group.name}]({group_url})',
     }
 
-    response = requests.post(webhook_url, data=json.dumps(slack_data), headers={'Content-Type': 'application/json'})
+    response = requests.post(webhook_url, data=json.dumps(message_data), headers={'Content-Type': 'application/json'})
     response.raise_for_status()
