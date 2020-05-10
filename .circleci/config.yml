@@ -177,7 +177,35 @@ workflows:
   version: 2
   all-the-things:
     jobs:
-      - update-dependencies
+      - test
+      - push-locale-messages:
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - test
+      - deploy-dev:
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - test
+      - deploy-karrot-world:
+          filters:
+            branches:
+              only:
+                - production
+          requires:
+            - test
+      - deploy-foodsharing-taiwan:
+          filters:
+            branches:
+              only:
+                - production
+          requires:
+            - test
 
   update-locales-cronjob:
     triggers:
@@ -188,3 +216,13 @@ workflows:
               only: master
     jobs:
       - update-locales
+
+  update-dependencies-cronjob:
+    triggers:
+      - schedule:
+          cron: "0 2 * * *"
+          filters:
+            branches:
+              only: master
+    jobs:
+      - update-dependencies
