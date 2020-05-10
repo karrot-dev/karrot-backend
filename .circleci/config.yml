@@ -164,7 +164,7 @@ jobs:
             git config user.email "ci@foodsaving.world"
             git config user.name "CircleCI"
             git branch --delete --force $BRANCH || true
-            git switch -c $BRANCH
+            git checkout -b $BRANCH
             pip-compile --upgrade
             git add requirements.txt
             pushd mjml
