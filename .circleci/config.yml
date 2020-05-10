@@ -28,15 +28,6 @@ aliases:
         env/bin/pip install --upgrade pip-tools
         PIP_EXISTS_ACTION=w env/bin/pip-sync requirements*.txt
 
-  - &install-hub
-    run:
-      name: install hub
-      command: |
-        wget https://github.com/github/hub/releases/download/v2.5.1/hub-linux-amd64-2.5.1.tgz
-        tar -xf hub-linux-amd64-2.5.1.tgz
-        ./hub-linux-amd64-2.5.1/install
-        rm hub-linux-amd64-2.5.1.tgz
-
   - &add-token-to-remote
     run:
       name: set git remote to include token
@@ -127,7 +118,6 @@ jobs:
       - run:
           name: install tx client
           command: env/bin/pip install transifex-client
-      - *install-hub
       - *add-token-to-remote
       - run:
           name: update locales and make pull request
@@ -152,7 +142,6 @@ jobs:
       - checkout
       - *restore-env-cache
       - *setup-env
-      - *install-hub
       - *add-token-to-remote
       - run:
           name: update dependencies and make pull request
