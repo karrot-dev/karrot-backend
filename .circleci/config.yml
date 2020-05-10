@@ -1,7 +1,7 @@
 defaults: &defaults
   working_directory: ~/repo
   docker:
-    - image: karrot/python:2.0
+    - image: karrot/python:2.3
 
 aliases:
   - &restore-env-cache
@@ -47,7 +47,7 @@ jobs:
   test:
     <<: *defaults
     docker:
-      - image: karrot/python:2.0
+      - image: karrot/python:2.3
         environment:
           PGHOST: 127.0.0.1
       - image: circleci/postgres:11
