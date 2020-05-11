@@ -70,7 +70,7 @@ html5lib==1.0.1           # via talon
 huey==2.2.0               # via -r requirements.in
 hyperlink==19.0.0         # via twisted
 idna==2.9                 # via hyperlink, requests, twisted
-importlib-metadata==1.6.0  # via -r requirements.in
+importlib-metadata==1.6.0  # via -r requirements.in, markdown, pluggy, pytest
 incremental==17.5.0       # via twisted
 influxdb==5.3.0           # via django-influxdb-metrics
 ipython-genutils==0.2.0   # via traitlets
