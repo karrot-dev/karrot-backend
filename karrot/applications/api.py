@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import GenericViewSet
 
-from karrot.applications.models import Application
+from karrot.applications.models import Application, ApplicationStatus
 from karrot.applications.serializers import ApplicationSerializer
 from karrot.conversations.api import RetrieveConversationMixin
 
@@ -48,6 +48,14 @@ class IsApplicant(permissions.BasePermission):
         return application.user == request.user
 
 
+class IsPending(permissions.BasePermission):
+    message = _('Application is not pending anymore')
+
+    def has_object_permission(self, request, view, obj):
+        application = obj
+        return application.status == ApplicationStatus.PENDING.value
+
+
 class ApplicationViewSet(
         mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
@@ -76,7 +84,7 @@ class ApplicationViewSet(
     @action(
         detail=True,
         methods=['POST'],
-        permission_classes=(IsAuthenticated, IsGroupEditor),
+        permission_classes=(IsAuthenticated, IsGroupEditor, IsPending),
     )
     def accept(self, request, pk=None):
         self.check_permissions(request)
@@ -90,7 +98,7 @@ class ApplicationViewSet(
     @action(
         detail=True,
         methods=['POST'],
-        permission_classes=(IsAuthenticated, IsGroupEditor),
+        permission_classes=(IsAuthenticated, IsGroupEditor, IsPending),
     )
     def decline(self, request, pk=None):
         self.check_permissions(request)
@@ -104,7 +112,7 @@ class ApplicationViewSet(
     @action(
         detail=True,
         methods=['POST'],
-        permission_classes=(IsAuthenticated, IsApplicant),
+        permission_classes=(IsAuthenticated, IsApplicant, IsPending),
     )
     def withdraw(self, request, pk=None):
         self.check_permissions(request)

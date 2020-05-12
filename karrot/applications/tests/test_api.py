@@ -321,6 +321,13 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
             user=self.applicant,
         ).added_by, self.member)
 
+    def test_cannot_accept_application_twice(self):
+        self.client.force_login(user=self.member)
+        response = self.client.post('/api/applications/{}/accept/'.format(self.application.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.post('/api/applications/{}/accept/'.format(self.application.id))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_newcomer_cannot_accept_application(self):
         self.client.force_login(user=self.newcomer)
         response = self.client.post('/api/applications/{}/accept/'.format(self.application.id))
@@ -343,6 +350,13 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
         self.assertEqual(notification.to[0], self.applicant.email)
         self.assertIn('was declined', notification.subject)
 
+    def test_cannot_decline_application_twice(self):
+        self.client.force_login(user=self.member)
+        response = self.client.post('/api/applications/{}/decline/'.format(self.application.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.post('/api/applications/{}/decline/'.format(self.application.id))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_newcomer_cannot_decline_application(self):
         self.client.force_login(user=self.newcomer)
         response = self.client.post('/api/applications/{}/decline/'.format(self.application.id))
@@ -362,6 +376,13 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
             group=self.group,
             user=self.applicant,
         ).exists())
+
+    def test_cannot_withdraw_application_twice(self):
+        self.client.force_login(user=self.applicant)
+        response = self.client.post('/api/applications/{}/withdraw/'.format(self.application.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.post('/api/applications/{}/withdraw/'.format(self.application.id))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_group_member_cannot_withdraw_application(self):
         self.client.force_login(user=self.member)
