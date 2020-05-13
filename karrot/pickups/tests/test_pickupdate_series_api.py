@@ -31,7 +31,6 @@ class TestPickupDateSeriesCreationAPI(APITestCase, ExtractPaginationMixin):
     """
     This is an integration test for the pickup-date-series API
     """
-
     def setUp(self):
         self.maxDiff = None
         self.member = UserFactory()
@@ -150,7 +149,6 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
     """
     This is an integration test for the pickup-date-series API with pre-created series
     """
-
     def setUp(self):
         self.now = timezone.now()
         self.member = UserFactory()
@@ -266,17 +264,23 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.member)
         # change rule
         url = '/api/pickup-date-series/{}/'.format(self.series.id)
-        rule = rrulestr(self.series.rule, dtstart=self.now) \
-            .replace(until=self.now + relativedelta(days=8))
-        response = self.client.patch(url, {'rule': str(rule)})
+        rule = 'FREQ=WEEKLY;UNTIL={}'.format((self.now + relativedelta(days=8)).strftime('%Y%m%dT%H%M%S'))
+        response = self.client.patch(url, {'rule': rule})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data['rule'], str(rule))
+        self.assertEqual(response.data['rule'], rule)
 
         # compare resulting pickups
         url = '/api/pickup-dates/'
         response = self.get_results(url, {'series': self.series.id, 'date_min': self.now})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 2, response.data)
+
+    def test_set_end_date_with_timezone(self):
+        self.client.force_login(user=self.member)
+        url = '/api/pickup-date-series/{}/'.format(self.series.id)
+        rule = 'FREQ=WEEKLY;UNTIL={}+0100'.format((self.now + relativedelta(days=8)).strftime('%Y%m%dT%H%M%S'))
+        response = self.client.patch(url, {'rule': rule})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_set_end_date_with_users_have_joined_pickup(self):
         self.client.force_login(user=self.member)
@@ -507,7 +511,6 @@ class TestPickupDateSeriesChangeAPI(APITestCase, ExtractPaginationMixin):
 
 class TestPickupDateSeriesAPIAuth(APITestCase):
     """ Testing actions that are forbidden """
-
     def setUp(self):
         self.url = '/api/pickup-date-series/'
         self.series = PickupDateSeriesFactory()

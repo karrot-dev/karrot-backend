@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-import dateutil
+from dateutil.rrule import rrulestr
 from more_itertools import peekable
 
 
@@ -50,16 +50,22 @@ def match_pickups_with_dates(pickups, new_dates):
 
 
 def rrule_between_dates_in_local_time(rule, dtstart, tz, period_start, period_duration):
+    rule = rrulestr(rule)
+
     # using local time zone to avoid daylight saving time errors
     period_start_local = period_start.astimezone(tz).replace(tzinfo=None)
     dtstart_local = dtstart.astimezone(tz).replace(tzinfo=None)
 
-    dates = dateutil.rrule.rrulestr(
-        rule,
-    ).replace(
+    until = None
+    # UNTIL needs to be in local time zone as well
+    if rule._until is not None:
+        until = rule._until.astimezone(tz).replace(tzinfo=None)
+
+    rule = rule.replace(
         dtstart=dtstart_local,
+        until=until,
     ).between(
         period_start_local,
         period_start_local + period_duration,
     )
-    return [tz.localize(d) for d in dates]
+    return [tz.localize(date) for date in rule]

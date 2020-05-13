@@ -1,7 +1,7 @@
 from datetime import timedelta
 
-import dateutil
 from dateutil.relativedelta import relativedelta
+from dateutil.rrule import rrulestr
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
@@ -116,7 +116,7 @@ class PickupDateSeries(BaseModel):
                     pickup.save()
 
     def delete(self, **kwargs):
-        self.rule = str(dateutil.rrule.rrulestr(self.rule).replace(dtstart=self.start_date, until=timezone.now()))
+        self.rule = str(rrulestr(self.rule).replace(dtstart=self.start_date, until=timezone.now()))
         self.update_pickups()
         return super().delete()
 
