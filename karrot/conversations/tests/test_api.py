@@ -454,7 +454,7 @@ class TestConversationsSeenUpToAPI(APITestCase):
         self.participant.seen_up_to = message
         self.participant.save()
 
-        response = self.client.get('/api/conversations/'.format(self.conversation.id), format='json')
+        response = self.client.get('/api/conversations/', format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['results']['conversations'][0]['seen_up_to'], message.id)
 

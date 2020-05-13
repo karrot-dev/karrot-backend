@@ -52,7 +52,7 @@ class TestMessagePushNotifications(TestCase):
 
     def test_groups_by_language(self, notify):
         author = UserFactory()
-        users = [UserFactory(language=l) for l in ('de', 'de', 'en', 'fr')]
+        users = [UserFactory(language=language) for language in ('de', 'de', 'en', 'fr')]
         group = GroupFactory(members=[author, *users])
         conversation = Conversation.objects.get_or_create_for_target(group)
         message = conversation.messages.create(author=author, content='bla')
