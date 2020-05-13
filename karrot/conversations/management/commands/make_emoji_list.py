@@ -26,18 +26,18 @@ def with_colons(n):
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        def get_shortest(l):
-            shortest_len = min(len(t[0]) for t in l)
-            return next(t for t in l if len(t[0]) == shortest_len)
+        def get_shortest(entries):
+            shortest_len = min(len(t[0]) for t in entries)
+            return next(t for t in entries if len(t[0]) == shortest_len)
 
         emoji = {}
         aliases = {}
 
-        def choose(chosen, l):
+        def choose(chosen, entries):
             chosen_name, chosen_unicode = chosen
             emoji[chosen_name] = chosen_unicode
             our_aliases = {}
-            for name, unicode in l:
+            for name, unicode in entries:
                 if name == chosen_name:
                     continue
                 our_aliases[name] = chosen_name

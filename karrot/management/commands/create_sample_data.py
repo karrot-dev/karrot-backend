@@ -134,7 +134,7 @@ class Command(BaseCommand):
             return
 
         def apply_to_group(group):
-            response = c.post('/api/applications/'.format(group), {
+            response = c.post('/api/applications/', {
                 'answers': faker.text(),
                 'group': group,
             })
