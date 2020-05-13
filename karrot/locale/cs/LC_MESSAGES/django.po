@@ -38,6 +38,10 @@ msgstr "Musíte být editorem skupiny"
 msgid "You need to be the applicant"
 msgstr "Musíte být žadatelem"
 
+#: karrot/applications/api.py:52
+msgid "Application is not pending anymore"
+msgstr ""
+
 #: karrot/applications/serializers.py:36
 msgid "Application is already pending"
 msgstr "Žádost již čeká"
