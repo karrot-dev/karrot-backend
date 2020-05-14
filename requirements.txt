@@ -121,7 +121,7 @@ python-server-metrics==0.2.1  # via django-influxdb-metrics
 pytz==2020.1              # via -r requirements.in, babel, django, django-dirtyfields, django-silk, django-timezone-field, influxdb
 raven==6.10.0             # via -r requirements.in
 redis==3.5.1              # via -r requirements.in, django-redis
-regex==2020.5.7           # via talon
+regex==2020.5.13          # via talon
 requests-mock==1.8.0      # via -r requirements.in
 requests==2.23.0          # via -r requirements.in, coreapi, django-anymail, django-silk, influxdb, pyfcm, requests-mock
 service-identity==18.1.0  # via twisted
