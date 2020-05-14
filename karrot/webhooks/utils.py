@@ -41,7 +41,7 @@ def trim_with_discourse(text):
             },
             timeout=2,
         ).json()
-    except requests.exceptions.ConnectionError:
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
         logger.warning('EMAIL_REPLY_TRIMMER_URL not accessible at ' + settings.EMAIL_REPLY_TRIMMER_URL + ', skipping.')
         sentry_client.captureException()
         trimmed = text
