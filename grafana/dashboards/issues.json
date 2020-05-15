@@ -3,6 +3,7 @@
     "annotations": {
       "list": [
         {
+          "$$hashKey": "object:286",
           "builtIn": 1,
           "datasource": "-- Grafana --",
           "enable": true,
@@ -17,7 +18,7 @@
     "gnetId": null,
     "graphTooltip": 0,
     "id": 32,
-    "iteration": 1553789606319,
+    "iteration": 1588940184110,
     "links": [],
     "panels": [
       {
@@ -484,18 +485,22 @@
         "scroll": true,
         "showHeader": true,
         "sort": {
-          "col": 3,
+          "col": 4,
           "desc": true
         },
         "styles": [
           {
+            "$$hashKey": "object:355",
             "alias": "Time",
+            "align": "auto",
             "dateFormat": "YYYY-MM-DD HH:mm:ss",
             "pattern": "Time",
             "type": "hidden"
           },
           {
+            "$$hashKey": "object:356",
             "alias": "",
+            "align": "auto",
             "colorMode": null,
             "colors": [
               "rgba(245, 54, 54, 0.9)",
@@ -523,7 +528,7 @@
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT \nlast(\"count_ongoing\") AS \"ongoing\", \nlast(\"count_cancelled\") AS \"cancelled\", \nlast(\"count_decided\") AS \"decided\"\nFROM \"karrot.group.issues\" WHERE $timeFilter GROUP BY \"group\" fill(0)",
+            "query": "SELECT \nlast(\"count_ongoing\") AS \"ongoing\", \nlast(\"count_cancelled\") AS \"cancelled\", \nlast(\"count_decided\") AS \"decided\"\nFROM \"karrot.group.issues\" WHERE $timeFilter AND (\"count_ongoing\" > 0 OR \"count_decided\" > 0 OR \"count_cancelled\" > 0) GROUP BY \"group\" fill(0)",
             "rawQuery": true,
             "refId": "A",
             "resultFormat": "table",
@@ -607,9 +612,147 @@
         "title": "Group Issue stats",
         "transform": "table",
         "type": "table"
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "$site",
+        "fill": 1,
+        "fillGradient": 5,
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 3
+        },
+        "hiddenSeries": false,
+        "id": 10,
+        "legend": {
+          "avg": false,
+          "current": true,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": true
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "options": {
+          "dataLinks": []
+        },
+        "percentage": false,
+        "pointradius": 2,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": true,
+        "targets": [
+          {
+            "alias": "group $tag_group",
+            "dsType": "influxdb",
+            "groupBy": [
+              {
+                "params": [
+                  "$interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "group"
+                ],
+                "type": "tag"
+              }
+            ],
+            "measurement": "karrot.group.issues",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT \"count_total\"\nFROM \"karrot.group.issues\" WHERE $timeFilter AND (\"count_ongoing\" > 0 OR \"count_decided\" > 0 OR \"count_cancelled\" > 0) GROUP BY \"group\" fill(0)",
+            "rawQuery": false,
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "count_total"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "last"
+                },
+                {
+                  "params": [
+                    "total"
+                  ],
+                  "type": "alias"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "count_total",
+                "operator": ">",
+                "value": "0"
+              }
+            ]
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Total issues per group",
+        "tooltip": {
+          "shared": true,
+          "sort": 2,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "$$hashKey": "object:808",
+            "decimals": 0,
+            "format": "none",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "$$hashKey": "object:809",
+            "format": "none",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": false
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
       }
     ],
-    "schemaVersion": 18,
+    "schemaVersion": 22,
     "style": "dark",
     "tags": [],
     "templating": {
@@ -621,7 +764,9 @@
             "value": "karrot-prod"
           },
           "hide": 0,
+          "includeAll": false,
           "label": null,
+          "multi": false,
           "name": "site",
           "options": [],
           "query": "influxdb",
@@ -664,7 +809,10 @@
     "timezone": "",
     "title": "Issues",
     "uid": "L9quTFqmk",
-    "version": 5
+    "variables": {
+      "list": []
+    },
+    "version": 7
   },
   "meta": {
     "canAdmin": false,
@@ -683,9 +831,9 @@
     "provisionedExternalId": "",
     "slug": "issues",
     "type": "db",
-    "updated": "2019-03-28T17:14:06+01:00",
+    "updated": "2020-05-08T14:42:08+02:00",
     "updatedBy": "tiltec",
     "url": "/d/L9quTFqmk/issues",
-    "version": 5
+    "version": 7
   }
 }

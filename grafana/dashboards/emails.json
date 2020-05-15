@@ -3,6 +3,7 @@
     "annotations": {
       "list": [
         {
+          "$$hashKey": "object:938",
           "builtIn": 1,
           "datasource": "-- Grafana --",
           "enable": true,
@@ -17,9 +18,23 @@
     "gnetId": null,
     "graphTooltip": 0,
     "id": 37,
-    "iteration": 1570988575982,
+    "iteration": 1589287893328,
     "links": [],
     "panels": [
+      {
+        "collapsed": false,
+        "datasource": null,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "id": 9,
+        "panels": [],
+        "title": "Sent",
+        "type": "row"
+      },
       {
         "aliasColors": {
           "group__record_group_stats": "rgba(126, 178, 109, 0.5)",
@@ -35,8 +50,9 @@
           "h": 8,
           "w": 12,
           "x": 0,
-          "y": 0
+          "y": 1
         },
+        "hiddenSeries": false,
         "id": 6,
         "interval": "",
         "legend": {
@@ -153,11 +169,10 @@
           "h": 8,
           "w": 12,
           "x": 12,
-          "y": 0
+          "y": 1
         },
         "id": 7,
         "links": [],
-        "options": {},
         "pageSize": null,
         "scroll": true,
         "showHeader": true,
@@ -168,12 +183,14 @@
         "styles": [
           {
             "alias": "Time",
+            "align": "auto",
             "dateFormat": "YYYY-MM-DD HH:mm:ss",
             "pattern": "Time",
             "type": "hidden"
           },
           {
             "alias": "",
+            "align": "auto",
             "colorMode": null,
             "colors": [
               "rgba(245, 54, 54, 0.9)",
@@ -239,8 +256,9 @@
           "h": 8,
           "w": 12,
           "x": 0,
-          "y": 8
+          "y": 9
         },
+        "hiddenSeries": false,
         "id": 4,
         "interval": "1h",
         "legend": {
@@ -467,8 +485,9 @@
           "h": 8,
           "w": 12,
           "x": 0,
-          "y": 16
+          "y": 17
         },
+        "hiddenSeries": false,
         "id": 2,
         "interval": "1h",
         "legend": {
@@ -698,9 +717,237 @@
           "align": false,
           "alignLevel": null
         }
+      },
+      {
+        "collapsed": false,
+        "datasource": null,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 25
+        },
+        "id": 11,
+        "panels": [],
+        "title": "Errors",
+        "type": "row"
+      },
+      {
+        "aliasColors": {
+          "group__record_group_stats": "rgba(126, 178, 109, 0.5)",
+          "group__send_summary_emails": "rgba(234, 184, 57, 0.47)",
+          "recipient count": "red"
+        },
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "$site",
+        "fill": 1,
+        "fillGradient": 0,
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 26
+        },
+        "hiddenSeries": false,
+        "id": 12,
+        "interval": "",
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": false,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "options": {
+          "dataLinks": []
+        },
+        "paceLength": 10,
+        "percentage": false,
+        "pointradius": 5,
+        "points": true,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "alias": "recipient count",
+            "dsType": "influxdb",
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "null"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.email.error",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "B",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "recipient_count"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Errors",
+        "tooltip": {
+          "shared": false,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "$$hashKey": "object:1122",
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "$$hashKey": "object:1123",
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "columns": [],
+        "datasource": "$site",
+        "fontSize": "100%",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 26
+        },
+        "id": 13,
+        "links": [],
+        "pageSize": null,
+        "scroll": true,
+        "showHeader": true,
+        "sort": {
+          "col": 2,
+          "desc": true
+        },
+        "styles": [
+          {
+            "$$hashKey": "object:1328",
+            "alias": "Time",
+            "align": "auto",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "pattern": "Time",
+            "type": "hidden"
+          },
+          {
+            "$$hashKey": "object:1329",
+            "alias": "",
+            "align": "auto",
+            "colorMode": null,
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "decimals": 0,
+            "pattern": "/.*/",
+            "thresholds": [],
+            "type": "number",
+            "unit": "none"
+          }
+        ],
+        "targets": [
+          {
+            "alias": "recipient count",
+            "dsType": "influxdb",
+            "groupBy": [
+              {
+                "params": [
+                  "category"
+                ],
+                "type": "tag"
+              }
+            ],
+            "measurement": "karrot.email.error",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "B",
+            "resultFormat": "table",
+            "select": [
+              [
+                {
+                  "params": [
+                    "recipient_count"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                }
+              ]
+            ],
+            "tags": []
+          }
+        ],
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Errors per category",
+        "transform": "table",
+        "type": "table"
       }
     ],
-    "schemaVersion": 20,
+    "schemaVersion": 22,
     "style": "dark",
     "tags": [],
     "templating": {
@@ -757,7 +1004,10 @@
     "timezone": "",
     "title": "Emails",
     "uid": "WIqFtQ6ik",
-    "version": 6
+    "variables": {
+      "list": []
+    },
+    "version": 7
   },
   "meta": {
     "canAdmin": false,
@@ -776,9 +1026,9 @@
     "provisionedExternalId": "",
     "slug": "emails",
     "type": "db",
-    "updated": "2019-10-13T19:44:09+02:00",
+    "updated": "2020-05-12T14:55:04+02:00",
     "updatedBy": "tiltec",
     "url": "/d/WIqFtQ6ik/emails",
-    "version": 6
+    "version": 7
   }
 }

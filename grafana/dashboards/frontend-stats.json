@@ -17,7 +17,7 @@
     "gnetId": null,
     "graphTooltip": 0,
     "id": 50,
-    "iteration": 1576366720131,
+    "iteration": 1579472358302,
     "links": [],
     "panels": [
       {
@@ -569,10 +569,135 @@
         "fill": 1,
         "fillGradient": 0,
         "gridPos": {
-          "h": 9,
+          "h": 8,
           "w": 24,
           "x": 0,
           "y": 3
+        },
+        "hiddenSeries": false,
+        "id": 18,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": true,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 3,
+        "nullPointMode": "connected",
+        "options": {
+          "dataLinks": []
+        },
+        "percentage": false,
+        "pointradius": 2,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "alias": "mobile $tag_mobile",
+            "groupBy": [
+              {
+                "params": [
+                  "24h"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "mobile"
+                ],
+                "type": "tag"
+              }
+            ],
+            "measurement": "karrot.stats.frontend",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "ms"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "median"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "dev",
+                "operator": "=",
+                "value": "False"
+              }
+            ]
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "median load",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "format": "ms",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "$site",
+        "fill": 1,
+        "fillGradient": 0,
+        "gridPos": {
+          "h": 9,
+          "w": 24,
+          "x": 0,
+          "y": 11
         },
         "hiddenSeries": false,
         "id": 2,
@@ -777,7 +902,7 @@
           "h": 9,
           "w": 24,
           "x": 0,
-          "y": 12
+          "y": 20
         },
         "hiddenSeries": false,
         "id": 16,
@@ -984,7 +1109,7 @@
           "h": 7,
           "w": 6,
           "x": 0,
-          "y": 21
+          "y": 29
         },
         "id": 12,
         "interval": null,
@@ -1062,7 +1187,7 @@
           "h": 7,
           "w": 6,
           "x": 6,
-          "y": 21
+          "y": 29
         },
         "id": 13,
         "interval": null,
@@ -1140,7 +1265,7 @@
           "h": 7,
           "w": 6,
           "x": 12,
-          "y": 21
+          "y": 29
         },
         "id": 14,
         "interval": null,
@@ -1218,7 +1343,7 @@
           "h": 7,
           "w": 6,
           "x": 18,
-          "y": 21
+          "y": 29
         },
         "id": 15,
         "interval": null,
@@ -1291,7 +1416,7 @@
           "h": 14,
           "w": 12,
           "x": 0,
-          "y": 28
+          "y": 36
         },
         "id": 9,
         "options": {},
@@ -1404,7 +1529,7 @@
           "h": 14,
           "w": 12,
           "x": 12,
-          "y": 28
+          "y": 36
         },
         "id": 10,
         "interval": "",
@@ -1518,7 +1643,7 @@
         "type": "table"
       }
     ],
-    "refresh": "",
+    "refresh": false,
     "schemaVersion": 21,
     "style": "dark",
     "tags": [],
@@ -1565,7 +1690,7 @@
     "timezone": "",
     "title": "frontend stats",
     "uid": "AyeDdv-Wz",
-    "version": 36
+    "version": 40
   },
   "meta": {
     "canAdmin": false,
@@ -1584,9 +1709,9 @@
     "provisionedExternalId": "",
     "slug": "frontend-stats",
     "type": "db",
-    "updated": "2019-12-15T00:55:05+01:00",
-    "updatedBy": "tiltec",
+    "updated": "2020-01-19T23:19:53+01:00",
+    "updatedBy": "nicksellen",
     "url": "/d/AyeDdv-Wz/frontend-stats",
-    "version": 36
+    "version": 40
   }
 }

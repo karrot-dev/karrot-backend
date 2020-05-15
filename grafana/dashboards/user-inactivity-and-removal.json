@@ -3,6 +3,7 @@
     "annotations": {
       "list": [
         {
+          "$$hashKey": "object:758",
           "builtIn": 1,
           "datasource": "-- Grafana --",
           "enable": true,
@@ -17,7 +18,7 @@
     "gnetId": null,
     "graphTooltip": 0,
     "id": 36,
-    "iteration": 1568028431319,
+    "iteration": 1589208875753,
     "links": [],
     "panels": [
       {
@@ -27,12 +28,14 @@
         "dashes": false,
         "datasource": "$site",
         "fill": 1,
+        "fillGradient": 0,
         "gridPos": {
           "h": 8,
           "w": 12,
           "x": 0,
           "y": 0
         },
+        "hiddenSeries": false,
         "id": 6,
         "interval": "4h",
         "legend": {
@@ -48,7 +51,9 @@
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null",
-        "options": {},
+        "options": {
+          "dataLinks": []
+        },
         "paceLength": 10,
         "percentage": false,
         "pointradius": 7,
@@ -153,12 +158,14 @@
         "dashes": false,
         "datasource": "$site",
         "fill": 1,
+        "fillGradient": 0,
         "gridPos": {
           "h": 8,
           "w": 12,
           "x": 0,
           "y": 8
         },
+        "hiddenSeries": false,
         "id": 4,
         "interval": "4h",
         "legend": {
@@ -167,14 +174,16 @@
           "max": false,
           "min": false,
           "show": true,
-          "total": false,
-          "values": false
+          "total": true,
+          "values": true
         },
         "lines": false,
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null",
-        "options": {},
+        "options": {
+          "dataLinks": []
+        },
         "paceLength": 10,
         "percentage": false,
         "pointradius": 7,
@@ -250,6 +259,7 @@
         },
         "yaxes": [
           {
+            "$$hashKey": "object:855",
             "decimals": 0,
             "format": "short",
             "label": "",
@@ -259,6 +269,7 @@
             "show": true
           },
           {
+            "$$hashKey": "object:856",
             "format": "short",
             "label": null,
             "logBase": 1,
@@ -279,12 +290,14 @@
         "dashes": false,
         "datasource": "$site",
         "fill": 1,
+        "fillGradient": 0,
         "gridPos": {
           "h": 8,
           "w": 12,
           "x": 0,
           "y": 16
         },
+        "hiddenSeries": false,
         "id": 2,
         "interval": "4h",
         "legend": {
@@ -293,14 +306,16 @@
           "max": false,
           "min": false,
           "show": true,
-          "total": false,
-          "values": false
+          "total": true,
+          "values": true
         },
         "lines": false,
         "linewidth": 1,
         "links": [],
         "nullPointMode": "null",
-        "options": {},
+        "options": {
+          "dataLinks": []
+        },
         "paceLength": 10,
         "percentage": false,
         "pointradius": 7,
@@ -376,6 +391,7 @@
         },
         "yaxes": [
           {
+            "$$hashKey": "object:963",
             "decimals": 0,
             "format": "short",
             "label": "",
@@ -385,6 +401,7 @@
             "show": true
           },
           {
+            "$$hashKey": "object:964",
             "format": "short",
             "label": null,
             "logBase": 1,
@@ -399,7 +416,7 @@
         }
       }
     ],
-    "schemaVersion": 18,
+    "schemaVersion": 22,
     "style": "dark",
     "tags": [],
     "templating": {
@@ -456,7 +473,10 @@
     "timezone": "",
     "title": "User inactivity and removal",
     "uid": "kZkNpw6mk",
-    "version": 4
+    "variables": {
+      "list": []
+    },
+    "version": 5
   },
   "meta": {
     "canAdmin": false,
@@ -475,9 +495,9 @@
     "provisionedExternalId": "",
     "slug": "user-inactivity-and-removal",
     "type": "db",
-    "updated": "2019-09-09T13:30:53+02:00",
+    "updated": "2020-05-11T16:57:04+02:00",
     "updatedBy": "tiltec",
     "url": "/d/kZkNpw6mk/user-inactivity-and-removal",
-    "version": 4
+    "version": 5
   }
 }
