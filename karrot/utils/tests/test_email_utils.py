@@ -1,8 +1,10 @@
 import os
 import pathlib
 from shutil import copyfile
+from unittest.mock import patch
 
 import pytz
+from anymail.exceptions import AnymailAPIError
 from django.test import TestCase
 from django.utils import timezone, translation
 
@@ -14,7 +16,8 @@ from karrot.groups.factories import GroupFactory
 from karrot.invitations.models import Invitation
 from karrot.userauth.models import VerificationCode
 from karrot.users.factories import UserFactory
-from karrot.utils.email_utils import time_filter, date_filter, generate_plaintext_from_html, prepare_email
+from karrot.utils.email_utils import time_filter, date_filter, generate_plaintext_from_html, prepare_email, \
+    CustomAnymailMessage
 from karrot.utils.frontend_urls import group_photo_url, karrot_logo_url
 
 
@@ -96,6 +99,30 @@ class TestEmailUtils(TestCase):
         email = karrot.groups.emails.prepare_user_inactive_in_group_email(self.user, self.group)
         html, _ = email.alternatives[0]
         self.assertIn(group_photo_url(self.group), html)
+
+
+@patch('karrot.utils.email_utils.AnymailMessage.send')
+class TestRetry(TestCase):
+    def test_retry_send_on_error(self, mock_send):
+        mock_send.side_effect = AnymailAPIError()
+        with self.assertRaises(AnymailAPIError):
+            CustomAnymailMessage(subject='Hi', body='test', to=['test@example.com'], stats_category='test').send()
+
+        self.assertEqual(mock_send.call_count, 3)
+
+    def test_success_at_second_try(self, mock_send):
+        tried = False
+
+        def side_effect(*args):
+            nonlocal tried
+            if not tried:
+                tried = True
+                raise AnymailAPIError()
+
+        mock_send.side_effect = side_effect
+
+        CustomAnymailMessage(subject='Hi', body='test', to=['test@example.com'], stats_category='test').send()
+        self.assertEqual(mock_send.call_count, 2)
 
 
 class TestHTMLToPlainText(TestCase):
