@@ -1,20 +1,23 @@
 import bleach
 import markdown
-import pymdownx
-import pymdownx.emoji
-import pymdownx.superfences
 from bleach_whitelist.bleach_whitelist import markdown_attrs, markdown_tags
 from django.utils.text import Truncator
+from markdown.extensions.nl2br import Nl2BrExtension
+from pymdownx.emoji import EmojiExtension, twemoji
+from pymdownx.magiclink import MagiclinkExtension
+from pymdownx.superfences import SuperFencesCodeExtension
+from pymdownx.tilde import DeleteSubExtension
 
 
 def render(text, truncate_words=None):
     html = markdown.markdown(
         text,
         extensions=[
-            pymdownx.emoji.EmojiExtension(emoji_index=pymdownx.emoji.twemoji),
-            'pymdownx.superfences',
-            'pymdownx.magiclink',
-            'markdown.extensions.nl2br',
+            EmojiExtension(emoji_index=twemoji),
+            SuperFencesCodeExtension(),
+            MagiclinkExtension(),
+            DeleteSubExtension(subscript=False),
+            Nl2BrExtension(),
         ]
     )
     markdown_attrs['img'].append('class')
