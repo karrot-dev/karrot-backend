@@ -1,6 +1,7 @@
 from email.utils import formataddr as real_formataddr
 
 import html2text
+from anymail.exceptions import AnymailAPIError
 from anymail.message import AnymailMessage
 from babel.dates import format_date, format_time
 from django.template import TemplateDoesNotExist
@@ -54,18 +55,30 @@ def generate_plaintext_from_html(html):
     return h.handle(html)
 
 
-class StatCollectingAnymailMessage(AnymailMessage):
+class CustomAnymailMessage(AnymailMessage):
     def __init__(self, stats_category, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.stats_category = stats_category
 
     def send(self, *args, **kwargs):
         try:
-            super(StatCollectingAnymailMessage, self).send(*args, **kwargs)
+            self._send_or_retry(*args, **kwargs)
             stats.email_sent(recipient_count=len(self.to), category=self.stats_category)
         except Exception as exception:
             stats.email_error(recipient_count=len(self.to), category=self.stats_category)
             raise exception
+
+    def _send_or_retry(self, *args, **kwargs):
+        attempts_left = 3
+        while True:
+            attempts_left -= 1
+            try:
+                return super().send(*args, **kwargs)
+            except AnymailAPIError:
+                if attempts_left == 0:
+                    # all retries exhausted, let's forward the exception
+                    raise
+                stats.email_retry(recipient_count=len(self.to), category=self.stats_category)
 
 
 def prepare_email(
@@ -131,7 +144,7 @@ def prepare_email(
         **kwargs,
     }
 
-    email = StatCollectingAnymailMessage(**message_kwargs)
+    email = CustomAnymailMessage(**message_kwargs)
 
     if html_content:
         email.attach_alternative(html_content, 'text/html')
