@@ -162,7 +162,7 @@ jobs:
             popd
             git commit -m "[CI] update dependencies" || exit 0
             git push --force origin $BRANCH
-            hub pull-request -F - \<<EOL || true
+            hub pull-request -F - <<EOL || true
             [CI] update dependencies
 
             Good morning, I found some fresh dependencies for you!
