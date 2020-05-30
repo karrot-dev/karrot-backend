@@ -223,4 +223,4 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         return self.is_superuser
 
     def failed_email_deliveries(self):
-        return EmailEvent.objects.for_user(self)
+        return EmailEvent.objects.failed_for_user(self)

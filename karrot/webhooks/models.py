@@ -1,3 +1,4 @@
+from anymail.signals import EventType
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 
@@ -6,8 +7,8 @@ from karrot.base.base_models import BaseModel
 
 
 class EmailEventQuerySet(models.QuerySet):
-    def for_user(self, user):
-        return self.filter(address=user.email)
+    def failed_for_user(self, user):
+        return self.filter(address=user.email, event__in=[EventType.BOUNCED, EventType.FAILED, EventType.REJECTED])
 
 
 class EmailEvent(BaseModel):
