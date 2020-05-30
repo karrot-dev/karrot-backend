@@ -36,7 +36,7 @@ def get_users_to_notify(issue):
     return issue.participants.filter(
         groupmembership__notification_types__contains=[GroupNotificationType.CONFLICT_RESOLUTION],
         groupmembership__inactive_at__isnull=True,
-    ).exclude(id__in=get_user_model().objects.unverified_or_ignored()).distinct()
+    ).exclude(id__in=get_user_model().objects.unverified()).distinct()
 
 
 def send_or_report_error(email):

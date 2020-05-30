@@ -64,7 +64,7 @@ def prepare_group_summary_emails(group, context):
     members = group.members.filter(
         groupmembership__in=GroupMembership.objects.active().
         with_notification_type(GroupNotificationType.WEEKLY_SUMMARY)
-    ).exclude(groupmembership__user__in=get_user_model().objects.unverified_or_ignored())
+    ).exclude(groupmembership__user__in=get_user_model().objects.unverified())
 
     return [
         prepare_email(

@@ -70,7 +70,7 @@ def fetch_pickup_notification_data_for_group(group):
             GroupNotificationType.DAILY_PICKUP_NOTIFICATION
         ),
     ).exclude(
-        groupmembership__user__in=User.objects.unverified_or_ignored(),
+        groupmembership__user__in=User.objects.unverified(),
     )
 
     for user in users:

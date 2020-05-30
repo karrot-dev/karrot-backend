@@ -52,7 +52,7 @@ class TestGroupSummaryEmails(APITestCase):
         expected_members = self.group.members.filter(
             groupmembership__in=GroupMembership.objects.active().
             with_notification_type(GroupNotificationType.WEEKLY_SUMMARY)
-        ).exclude(groupmembership__user__in=get_user_model().objects.unverified_or_ignored())
+        ).exclude(groupmembership__user__in=get_user_model().objects.unverified())
 
         self.assertEqual(
             sorted([email.to[0] for email in emails]), sorted([member.email for member in expected_members])
@@ -83,7 +83,7 @@ class TestGroupSummaryEmails(APITestCase):
         expected_members = self.group.members.filter(
             groupmembership__in=GroupMembership.objects.active().
             with_notification_type(GroupNotificationType.WEEKLY_SUMMARY)
-        ).exclude(groupmembership__user__in=get_user_model().objects.unverified_or_ignored())
+        ).exclude(groupmembership__user__in=get_user_model().objects.unverified())
 
         self.assertEqual(sorted(to), sorted([member.email for member in expected_members]))
 
@@ -103,7 +103,7 @@ class TestGroupSummaryEmails(APITestCase):
         expected_members = self.group.members.filter(
             groupmembership__in=GroupMembership.objects.active().
             with_notification_type(GroupNotificationType.WEEKLY_SUMMARY)
-        ).exclude(groupmembership__user__in=get_user_model().objects.unverified_or_ignored())
+        ).exclude(groupmembership__user__in=get_user_model().objects.unverified())
 
         self.assertEqual(
             sorted([email.to[0] for email in emails]), sorted([member.email for member in expected_members])
