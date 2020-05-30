@@ -73,7 +73,7 @@ importlib-metadata==1.6.0  # via -r requirements.in, flake8, markdown, pluggy, p
 incremental==17.5.0       # via twisted
 influxdb==5.3.0           # via django-influxdb-metrics
 ipython-genutils==0.2.0   # via traitlets
-ipython==7.14.0           # via -r requirements.in
+ipython==7.15.0           # via -r requirements.in
 itypes==1.2.0             # via coreapi
 jedi==0.17.0              # via ipython
 jinja2==2.11.2            # via coreschema, django-jinja, django-silk
