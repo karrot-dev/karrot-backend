@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import transaction, models
-from django.db.models import EmailField, BooleanField, TextField, CharField, DateTimeField, ForeignKey, Q
+from django.db.models import EmailField, BooleanField, TextField, CharField, DateTimeField, ForeignKey
 from django.dispatch import Signal
 from django.utils import timezone
 from versatileimagefield.fields import VersatileImageField
@@ -24,8 +24,8 @@ class UserQuerySet(models.QuerySet):
     def filter_by_similar_email(self, email):
         return self.filter(email__iexact=email)
 
-    def unverified_or_ignored(self):
-        return self.filter(Q(mail_verified=False) | Q(email__in=EmailEvent.objects.ignored_addresses()))
+    def unverified(self):
+        return self.filter(mail_verified=False)
 
     def active(self):
         return self.filter(deleted=False, is_active=True)
@@ -223,4 +223,4 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         return self.is_superuser
 
     def failed_email_deliveries(self):
-        return EmailEvent.objects.for_user(self)
+        return EmailEvent.objects.failed_for_user(self)

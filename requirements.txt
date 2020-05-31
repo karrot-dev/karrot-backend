@@ -4,7 +4,7 @@
 #
 #    pip-compile
 #
--e git+https://github.com/tiltec/django-anymail@189395d#egg=django-anymail  # via -r requirements.in
+-e git+https://github.com/tiltec/django-anymail@37a0ea7#egg=django-anymail  # via -r requirements.in
 -e git+https://github.com/tiltec/django-influxdb-metrics@163730a#egg=django-influxdb-metrics  # via -r requirements.in
 -e git+https://github.com/tiltec/django-rest-swagger@d15dd9a#egg=django-rest-swagger  # via -r requirements.in
 -e git+https://github.com/tiltec/talon@80886cd#egg=talon  # via -r requirements.in

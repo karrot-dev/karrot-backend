@@ -1,7 +1,6 @@
 from datetime import timedelta
 
 from dateutil.parser import parse
-from dateutil.relativedelta import relativedelta
 from django.core import mail
 from django.utils import timezone
 from rest_framework import status
@@ -19,7 +18,6 @@ from karrot.pickups.factories import PickupDateFactory
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import execute_scheduled_tasks_immediately
 from karrot.users.factories import UserFactory, VerifiedUserFactory
-from karrot.webhooks.models import EmailEvent
 
 
 class TestConversationsAPI(APITestCase):
@@ -546,31 +544,6 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
         self.assertEqual(actual_recipients, expected_recipients)
 
         self.assertEqual(len(mail.outbox), 3)
-
-    def test_exclude_bounced_addresses(self):
-        bounce_user = VerifiedUserFactory()
-        self.group.add_member(bounce_user)
-        for _ in range(5):
-            EmailEvent.objects.create(address=bounce_user.email, event='bounce', payload={}, version=1)
-
-        mail.outbox = []
-        ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
-        self.assertEqual(len(mail.outbox), 0)
-
-    def test_not_exclude_bounced_addresses_if_too_old(self):
-        bounce_user = VerifiedUserFactory()
-        self.group.add_member(bounce_user)
-
-        some_months_ago = timezone.now() - relativedelta(months=4)
-        for _ in range(5):
-            EmailEvent.objects.create(
-                created_at=some_months_ago, address=bounce_user.email, event='bounce', payload={}, version=1
-            )
-
-        mail.outbox = []
-        with execute_scheduled_tasks_immediately():
-            ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
-        self.assertEqual(len(mail.outbox), 1)
 
     def test_exclude_unverified_addresses(self):
         user = UserFactory()  # not verified

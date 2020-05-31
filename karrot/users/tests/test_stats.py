@@ -1,7 +1,7 @@
 from dateutil.relativedelta import relativedelta
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
-from django.contrib.auth import get_user_model
 
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
@@ -10,7 +10,6 @@ from karrot.pickups.models import to_range
 from karrot.places.factories import PlaceFactory
 from karrot.users import stats
 from karrot.users.factories import UserFactory, VerifiedUserFactory
-from karrot.webhooks.models import EmailEvent
 
 
 class TestUserStats(TestCase):
@@ -45,13 +44,6 @@ class TestUserStats(TestCase):
         deleted_user = UserFactory()
         deleted_user.deleted = True
         deleted_user.save()
-
-        # one user with bounced email
-        bounce_user = users[0]
-        for _ in range(5):
-            EmailEvent.objects.create(
-                created_at=timezone.now(), address=bounce_user.email, event='bounce', payload={}, version=1
-            )
 
         # one user with location
         location_user = users[1]
@@ -96,7 +88,6 @@ class TestUserStats(TestCase):
             points, {
                 'active_count': 9,
                 'active_unverified_count': 1,
-                'active_ignored_email_count': 1,
                 'active_with_location_count': 1,
                 'active_with_mobile_number_count': 1,
                 'active_with_description_count': 4,

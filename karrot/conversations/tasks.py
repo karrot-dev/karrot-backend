@@ -47,7 +47,7 @@ def get_participants_to_notify(message):
     return participants_to_notify.exclude(
         user=message.author,
     ).exclude(
-        user__in=User.objects.unverified_or_ignored(),
+        user__in=User.objects.unverified(),
     ).exclude(
         seen_up_to__id__gte=message.id,
     ).exclude(

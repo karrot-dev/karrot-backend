@@ -5,7 +5,6 @@ from django.utils import timezone
 
 from karrot.groups.models import GroupMembership, GroupStatus
 from karrot.pickups.models import PickupDate
-from karrot.webhooks.models import EmailEvent
 
 
 def get_users_stats():
@@ -19,7 +18,6 @@ def get_users_stats():
     fields = {
         'active_count': active_users_count,
         'active_unverified_count': active_users.filter(mail_verified=False).count(),
-        'active_ignored_email_count': active_users.filter(email__in=EmailEvent.objects.ignored_addresses()).count(),
         'active_with_location_count': active_users.exclude(latitude=None).exclude(longitude=None).count(),
         'active_with_mobile_number_count': active_users.exclude(mobile_number='').count(),
         'active_with_description_count': active_users.exclude(description='').count(),

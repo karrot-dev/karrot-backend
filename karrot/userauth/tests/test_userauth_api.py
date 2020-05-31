@@ -3,6 +3,7 @@ from datetime import timedelta
 from unittest.mock import MagicMock
 
 from anymail.exceptions import AnymailAPIError
+from anymail.signals import EventType
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import auth
@@ -592,12 +593,14 @@ class TestFailedEmailDeliveryAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.data, [])
 
     def test_get_failed_deliveries_v1(self):
-        EmailEvent.objects.create(address=self.user.email, event='bounce', payload={'reason': 'my reason'}, version=1)
+        EmailEvent.objects.create(
+            address=self.user.email, event=EventType.BOUNCED, payload={'reason': 'my reason'}, version=1
+        )
         self.client.force_login(user=self.user)
         response = self.get_results(self.url)
         self.assertEqual(response.data[0]['address'], self.user.email)
         self.assertEqual(response.data[0]['reason'], 'my reason')
-        self.assertEqual(response.data[0]['event'], 'bounce')
+        self.assertEqual(response.data[0]['event'], EventType.BOUNCED)
 
     def test_get_failed_deliveries_v2(self):
         sub_payload = {'output': 'my reason', 'message': {'subject': 'something'}}
