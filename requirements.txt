@@ -120,7 +120,7 @@ python-magic==0.4.18      # via django-versatileimagefield
 python-server-metrics==0.2.1  # via django-influxdb-metrics
 pytz==2020.1              # via -r requirements.in, babel, django, django-dirtyfields, django-silk, django-timezone-field, influxdb
 raven==6.10.0             # via -r requirements.in
-redis==3.5.2              # via -r requirements.in, django-redis
+redis==3.5.3              # via -r requirements.in, django-redis
 regex==2020.5.14          # via talon
 requests-mock==1.8.0      # via -r requirements.in
 requests==2.23.0          # via -r requirements.in, coreapi, django-anymail, django-silk, influxdb, pyfcm, requests-mock
@@ -138,7 +138,7 @@ txaio==20.4.1             # via autobahn
 unicodecsv==0.14.1        # via djangorestframework-csv
 uritemplate==3.0.1        # via coreapi
 urllib3==1.25.9           # via requests
-wcwidth==0.1.9            # via prompt-toolkit, pytest
+wcwidth==0.2.2            # via prompt-toolkit, pytest
 webencodings==0.5.1       # via bleach, html5lib
 yapf==0.30.0              # via -r requirements.in
 zipp==3.1.0               # via importlib-metadata
