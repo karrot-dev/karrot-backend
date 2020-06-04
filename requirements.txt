@@ -49,7 +49,7 @@ django-redis==4.12.1      # via -r requirements.in
 django-silk==4.0.1        # via -r requirements.in
 django-timezone-field==4.0  # via -r requirements.in
 django-versatileimagefield==2.0  # via -r requirements.in
-django[argon2]==3.0.6     # via -r requirements.in, channels, django-anymail, django-cors-headers, django-dirtyfields, django-filter, django-influxdb-metrics, django-jinja, django-redis, django-rest-swagger, django-silk, django-timezone-field, djangorestframework
+django[argon2]==3.0.7     # via -r requirements.in, channels, django-anymail, django-cors-headers, django-dirtyfields, django-filter, django-influxdb-metrics, django-jinja, django-redis, django-rest-swagger, django-silk, django-timezone-field, djangorestframework
 djangorestframework-csv==2.1.0  # via -r requirements.in
 djangorestframework==3.11.0  # via -r requirements.in, django-rest-swagger, djangorestframework-csv
 execnet==1.7.1            # via pytest-xdist
