@@ -104,7 +104,7 @@ def notify_chat_on_group_creation(sender, instance, created, **kwargs):
     if not created:
         return
     group = instance
-    webhook_url = getattr(settings, 'ADMIN_ROCKETCHAT_WEBHOOK', None)
+    webhook_url = getattr(settings, 'ADMIN_CHAT_WEBHOOK', None)
 
     if webhook_url is None:
         return
@@ -112,7 +112,7 @@ def notify_chat_on_group_creation(sender, instance, created, **kwargs):
     group_url = frontend_urls.group_preview_url(group)
 
     message_data = {
-        'text': f':tada: A new group has been created on karrot.world! [Visit {group.name}]({group_url})',
+        'text': f':tada: A new group has been created on **{settings.SITE_NAME}**! [Visit {group.name}]({group_url})',
     }
 
     response = requests.post(webhook_url, data=json.dumps(message_data), headers={'Content-Type': 'application/json'})
