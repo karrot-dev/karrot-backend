@@ -24,7 +24,7 @@ bleach-whitelist==0.0.10  # via -r requirements.in
 bleach==3.1.5             # via -r requirements.in
 boltons==20.1.0           # via face, glom
 cchardet==2.1.6           # via talon
-certifi==2020.4.5.1       # via requests
+certifi==2020.4.5.2       # via requests
 cffi==1.14.0              # via argon2-cffi, cryptography
 channels-redis==2.4.2     # via -r requirements.in
 channels==2.4.0           # via -r requirements.in, channels-redis
@@ -56,7 +56,7 @@ execnet==1.7.1            # via pytest-xdist
 face==20.1.1              # via glom
 factory-boy==2.12.0       # via -r requirements.in
 faker==4.1.0              # via factory-boy
-flake8==3.8.2             # via -r requirements.in
+flake8==3.8.3             # via -r requirements.in
 freezegun==0.3.15         # via -r requirements.in
 furl==2.1.0               # via -r requirements.in
 gevent==20.6.0            # via -r requirements.in
@@ -121,7 +121,7 @@ python-server-metrics==0.2.1  # via django-influxdb-metrics
 pytz==2020.1              # via -r requirements.in, babel, django, django-dirtyfields, django-silk, django-timezone-field, influxdb
 raven==6.10.0             # via -r requirements.in
 redis==3.5.3              # via -r requirements.in, django-redis
-regex==2020.6.7           # via talon
+regex==2020.6.8           # via talon
 requests-mock==1.8.0      # via -r requirements.in
 requests==2.23.0          # via -r requirements.in, coreapi, django-anymail, django-silk, influxdb, pyfcm, requests-mock
 service-identity==18.1.0  # via twisted
@@ -138,7 +138,7 @@ txaio==20.4.1             # via autobahn
 unicodecsv==0.14.1        # via djangorestframework-csv
 uritemplate==3.0.1        # via coreapi
 urllib3==1.25.9           # via requests
-wcwidth==0.2.3            # via prompt-toolkit, pytest
+wcwidth==0.2.4            # via prompt-toolkit, pytest
 webencodings==0.5.1       # via bleach, html5lib
 yapf==0.30.0              # via -r requirements.in
 zipp==3.1.0               # via importlib-metadata
