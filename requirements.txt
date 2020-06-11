@@ -59,7 +59,7 @@ faker==4.1.0              # via factory-boy
 flake8==3.8.3             # via -r requirements.in
 freezegun==0.3.15         # via -r requirements.in
 furl==2.1.0               # via -r requirements.in
-gevent==20.6.0            # via -r requirements.in
+gevent==20.6.1            # via -r requirements.in
 glom==20.5.0              # via -r requirements.in
 gprof2dot==2019.11.30     # via django-silk
 greenlet==0.4.16          # via gevent
