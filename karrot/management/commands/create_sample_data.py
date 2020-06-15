@@ -402,7 +402,9 @@ class Command(BaseCommand):
         # Create user that is already preconfigured in frontend, and join a group
         foo = User.objects.filter(email='foo@foo.com').first()
         if foo is None:
-            foo = User.objects.create_superuser(email='foo@foo.com', password='foofoo', display_name='Playground User')
+            foo = User.objects.create_user(
+                email='foo@foo.com', password='foofoo', display_name='Playground User', is_staff=True
+            )
 
         login_user(foo.id)
         join_group(groups[0]['id'])
