@@ -9,8 +9,14 @@ def migrate(apps, schema_editor):
     NotificationMeta = apps.get_model('notifications', 'NotificationMeta')
     User = apps.get_model('users', 'User')
 
+    min_date = datetime.min.replace(tzinfo=utc)
+
     for user in User.objects.filter(notificationmeta__isnull=True):
-        NotificationMeta.objects.create(user=user, marked_at=datetime.min.replace(tzinfo=utc))
+        NotificationMeta.objects.create(user=user, marked_at=min_date)
+
+    for meta in NotificationMeta.objects.filter(marked_at__isnull=True):
+        meta.marked_at = min_date
+        meta.save()
 
 
 class Migration(migrations.Migration):

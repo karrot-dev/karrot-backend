@@ -14,6 +14,14 @@ def migrate(apps, schema_editor):
     for user in User.objects.filter(conversationmeta__isnull=True):
         ConversationMeta.objects.create(user=user, conversations_marked_at=min_date, threads_marked_at=min_date)
 
+    for meta in ConversationMeta.objects.filter(conversations_marked_at__isnull=True):
+        meta.conversations_marked_at = min_date
+        meta.save()
+
+    for meta in ConversationMeta.objects.filter(threads_marked_at__isnull=True):
+        meta.threads_marked_at = min_date
+        meta.save()
+
 
 class Migration(migrations.Migration):
 
