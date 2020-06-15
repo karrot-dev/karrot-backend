@@ -3,27 +3,27 @@
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/2.0/topics/http/urls/
 """
-import os
 from django.conf import settings
-from django.conf.urls import url
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import path, re_path, include
 from django.views.static import serve
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
+from rest_framework_swagger.views import get_swagger_view
 
 from karrot.applications.api import ApplicationViewSet
 from karrot.community_feed.api import CommunityFeedViewSet
-from karrot.issues.api import IssuesViewSet
 from karrot.conversations.api import ConversationMessageViewSet, ConversationViewSet
 from karrot.groups.api import GroupViewSet, AgreementViewSet, GroupInfoViewSet
 from karrot.history.api import HistoryViewSet
 from karrot.invitations.api import InvitationsViewSet, InvitationAcceptViewSet
+from karrot.issues.api import IssuesViewSet
 from karrot.notifications.api import NotificationViewSet
 from karrot.offers.api import OfferViewSet
 from karrot.pickups.api import PickupDateViewSet, PickupDateSeriesViewSet, FeedbackViewSet
 from karrot.places.api import PlaceViewSet
+from karrot.stats.api import StatsView
 from karrot.status.api import StatusView
 from karrot.subscriptions.api import PushSubscriptionViewSet
 from karrot.template_previews import views as template_preview_views
@@ -32,8 +32,6 @@ from karrot.userauth.api import AuthUserView, AuthView, LogoutView, \
     RequestResetPasswordView, ChangePasswordView, VerifyMailView, ResendMailVerificationCodeView, ResetPasswordView, \
     ChangeMailView, RequestDeleteUserView, FailedEmailDeliveryView
 from karrot.users.api import UserViewSet, UserInfoViewSet
-from karrot.stats.api import StatsView
-from rest_framework_swagger.views import get_swagger_view
 
 router = DefaultRouter()
 
@@ -102,6 +100,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('docs/', get_swagger_view()),
     path('api/anymail/', include('anymail.urls')),
+    re_path(r'^silk/', include('silk.urls', namespace='silk'))
 ]
 
 if settings.DEBUG:
@@ -116,6 +115,3 @@ if settings.DEBUG:
         path('_templates', template_preview_views.list_templates),
         path('_templates/show', template_preview_views.show_template),
     ]
-
-if 'USE_SILK' in os.environ:
-    urlpatterns += [url(r'^silk/', include('silk.urls', namespace='silk'))]

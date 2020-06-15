@@ -117,6 +117,7 @@ INSTALLED_APPS = (
     'django_jinja',
     'versatileimagefield',
     'huey.contrib.djhuey',
+    'silk',
 )
 
 REST_FRAMEWORK = {
@@ -131,6 +132,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = (
+    'silk.middleware.SilkyMiddleware',
     'influxdb_metrics.middleware.InfluxDBRequestMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -226,6 +228,14 @@ VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
     ]
 }
 
+# Silk profiler configuration
+# User must login
+SILKY_AUTHENTICATION = True
+# User must have is_staff = True
+SILKY_AUTHORISATION = True
+# for now, log only requests that have recording enabled
+SILKY_INTERCEPT_FUNC = lambda request: 'silky_record_requests' in request.COOKIES  # noqa: E731
+
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
 
@@ -295,10 +305,6 @@ HUEY = {
 # If you have the email_reply_trimmer_service running, set this to 'http://localhost:4567/trim' (or similar)
 # https://github.com/yunity/email_reply_trimmer_service
 EMAIL_REPLY_TRIMMER_URL = None
-
-if 'USE_SILK' in os.environ:
-    INSTALLED_APPS += ('silk', )
-    MIDDLEWARE = ('silk.middleware.SilkyMiddleware', ) + MIDDLEWARE
 
 # NB: Keep this as the last line, and keep
 # local_settings.py out of version control
