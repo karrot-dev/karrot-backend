@@ -5,7 +5,6 @@ The `urlpatterns` list routes URLs to views. For more information please see:
 """
 import os
 from django.conf import settings
-from django.conf.urls import url
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import path, re_path, include
@@ -102,6 +101,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('docs/', get_swagger_view()),
     path('api/anymail/', include('anymail.urls')),
+    re_path(r'^silk/', include('silk.urls', namespace='silk'))
 ]
 
 if settings.DEBUG:
@@ -116,6 +116,3 @@ if settings.DEBUG:
         path('_templates', template_preview_views.list_templates),
         path('_templates/show', template_preview_views.show_template),
     ]
-
-if 'USE_SILK' in os.environ:
-    urlpatterns += [url(r'^silk/', include('silk.urls', namespace='silk'))]
