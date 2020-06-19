@@ -85,10 +85,9 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     unverified_email = EmailField(null=True)
     mobile_number = CharField(max_length=255, blank=True)
 
-    deleted = BooleanField(default=False)
+    deleted = BooleanField()
     deleted_at = DateTimeField(default=None, null=True)
     current_group = ForeignKey('groups.Group', blank=True, null=True, on_delete=models.SET_NULL)
-    xyz = BooleanField(default=False)
 
     photo = VersatileImageField(
         'Photo',
