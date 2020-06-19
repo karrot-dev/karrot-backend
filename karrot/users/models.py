@@ -88,6 +88,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     deleted = BooleanField(default=False)
     deleted_at = DateTimeField(default=None, null=True)
     current_group = ForeignKey('groups.Group', blank=True, null=True, on_delete=models.SET_NULL)
+    xyz = BooleanField(default=False)
 
     photo = VersatileImageField(
         'Photo',
