@@ -38,8 +38,8 @@ jobs:
   test:
     <<: *defaults
     environment:
-        LC_ALL: C.UTF-8
-        LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
     docker:
       - image: karrot/python:2.3
         environment:
@@ -56,27 +56,30 @@ jobs:
       - *setup-env
       - *save-env-cache
       - run:
-            name: flake8
-            command: env/bin/flake8 ./
-      - run:
-            name: no missing migrations?
-            command: |
-                env/bin/python manage.py makemigrations
-                git status
-                [[ -n "$(git status --porcelain)" ]]
-      - run:
-          name: run tests
+          name: setup
           command: |
             cp config/local_settings.py.ci config/local_settings.py
             (cd mjml && yarn)
             mjml/convert
+      - run:
+          name: flake8
+          command: env/bin/flake8 ./
+      - run:
+          name: no missing migrations?
+          command: |
+            env/bin/python manage.py makemigrations
+            git status
+            [[ -n "$(git status --porcelain)" ]]
+      - run:
+          name: run tests
+          command: |
             mkdir -p test-reports
             env/bin/pytest -n 4 --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
       - run:
-            name: upload coverage
-            command: |
-                env/bin/pip install codecov
-                env/bin/codecov
+          name: upload coverage
+          command: |
+            env/bin/pip install codecov
+            env/bin/codecov
       - store_test_results:
           path: test-reports
       - store_artifacts:
