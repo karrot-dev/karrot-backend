@@ -29,7 +29,7 @@ def unread_conversations(user):
     participants = list(
         ConversationParticipant.objects.filter(user=user).annotate_unread_message_count().filter(
             unread_message_count__gt=0
-        ).select_related('conversation').annotate(
+        ).select_related('conversation', 'conversation__target_type').annotate(
             is_unseen=Case(
                 When(
                     conversation__latest_message__created_at__gt=F('user__conversationmeta__conversations_marked_at'),
