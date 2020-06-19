@@ -66,9 +66,7 @@ jobs:
           command: env/bin/flake8 ./
       - run:
           name: no missing migrations?
-          command: |
-            env/bin/python manage.py makemigrations
-            [[ "$(git status --porcelain)" ]] && exit 1
+          command: env/bin/python manage.py makemigrations --dry-run --check --no-input
       - run:
           name: run tests
           command: |
