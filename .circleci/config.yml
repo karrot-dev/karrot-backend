@@ -56,14 +56,6 @@ jobs:
       - *setup-env
       - *save-env-cache
       - run:
-          name: run tests
-          command: |
-            cp config/local_settings.py.ci config/local_settings.py
-            (cd mjml && yarn)
-            mjml/convert
-            mkdir -p test-reports
-            env/bin/pytest -n 4 --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
-      - run:
             name: flake8
             command: env/bin/flake8 ./
       - run:
@@ -72,6 +64,14 @@ jobs:
                 env/bin/python manage.py makemigrations
                 git status
                 [[ -n "$(git status --porcelain)" ]]
+      - run:
+          name: run tests
+          command: |
+            cp config/local_settings.py.ci config/local_settings.py
+            (cd mjml && yarn)
+            mjml/convert
+            mkdir -p test-reports
+            env/bin/pytest -n 4 --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
       - run:
             name: upload coverage
             command: |
