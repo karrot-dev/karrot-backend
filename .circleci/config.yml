@@ -68,8 +68,7 @@ jobs:
           name: no missing migrations?
           command: |
             env/bin/python manage.py makemigrations
-            git status
-            [[ -n "$(git status --porcelain)" ]]
+            [[ "$(git status --porcelain)" ]] && exit 1
       - run:
           name: run tests
           command: |
