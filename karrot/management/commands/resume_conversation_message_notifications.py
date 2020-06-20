@@ -10,7 +10,6 @@ class Command(BaseCommand):
     Run this after redis was cleared or huey crashed.
     It'll make sure that outstanding email notifications about conversation messages will get sent.
     """
-
     def handle(self, *args, **options):
         # get all latest messages
         messages = ConversationMessage.objects.exclude(

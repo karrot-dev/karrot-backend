@@ -59,7 +59,6 @@ class GroupQuerySet(models.QuerySet):
 
 
 class GroupManager(BaseManager.from_queryset(GroupQuerySet)):
-
     def create(self, *args, **kwargs):
         kwargs['theme'] = kwargs.get('theme', settings.GROUP_THEME_DEFAULT.value)
         return super(GroupManager, self).create(*args, **kwargs)

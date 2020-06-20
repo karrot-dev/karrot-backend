@@ -32,7 +32,6 @@ class PushSubscriptionPlatform(Enum):
 
 class PushSubscription(BaseModel):
     """A subscription to receive messages over an FCM push channel."""
-
     class Meta:
         unique_together = ('user', 'token')
 

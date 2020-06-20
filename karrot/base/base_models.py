@@ -61,7 +61,6 @@ class CustomDateTimeTZRange(DateTimeTZRange):
     """
     Similar to psycopg2.extras.DateTimeTZRange but with extra helpers
     """
-
     @property
     def start(self):
         return self.lower

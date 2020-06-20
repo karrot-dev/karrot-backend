@@ -6,6 +6,5 @@ class Command(BaseCommand):
     """
     prints the configuration of the python logging module, useful for setting up/debugging loggers.
     """
-
     def handle(self, *args, **options):
         printout()

@@ -93,10 +93,7 @@ def new_offer_unsubscribe_url(user, offer):
 def group_photo_url(group):
     if not group or not group.photo:
         return None
-    return '{hostname}/api/groups-info/{group_id}/photo/'.format(
-        hostname=settings.HOSTNAME,
-        group_id=group.id
-    )
+    return '{hostname}/api/groups-info/{group_id}/photo/'.format(hostname=settings.HOSTNAME, group_id=group.id)
 
 
 def karrot_logo_url():
@@ -111,10 +108,7 @@ def offer_image_url(offer):
     image = offer.images.first()
     if not image:
         return None
-    return '{hostname}/api/offers/{offer_id}/image/'.format(
-        hostname=settings.HOSTNAME,
-        offer_id=offer.id
-    )
+    return '{hostname}/api/offers/{offer_id}/image/'.format(hostname=settings.HOSTNAME, offer_id=offer.id)
 
 
 def conflict_resolution_unsubscribe_url(user, issue):

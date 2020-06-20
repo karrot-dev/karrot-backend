@@ -103,6 +103,3 @@ class TestGroupManager(TestCase):
     def test_create_group_theme_default_bikekitchen(self):
         group = GroupFactory()
         self.assertEqual(themes.GroupTheme.BIKEKITCHEN.value, group.theme)
-
-
-

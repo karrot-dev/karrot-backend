@@ -3,16 +3,16 @@ from karrot.utils.frontend_urls import pickup_notification_unsubscribe_url
 
 
 def prepare_pickup_notification_email(
-        user,
-        group,
-        tonight_date,
-        tomorrow_date,
-        tonight_user=None,
-        tonight_empty=None,
-        tonight_not_full=None,
-        tomorrow_user=None,
-        tomorrow_empty=None,
-        tomorrow_not_full=None,
+    user,
+    group,
+    tonight_date,
+    tomorrow_date,
+    tonight_user=None,
+    tonight_empty=None,
+    tonight_not_full=None,
+    tomorrow_user=None,
+    tomorrow_empty=None,
+    tomorrow_not_full=None,
 ):
     has_pickups_tonight = any([
         items is not None and len(items) > 0 for items in [

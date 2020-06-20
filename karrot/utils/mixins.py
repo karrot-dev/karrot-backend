@@ -6,7 +6,6 @@ class PartialUpdateModelMixin(object):
     Update a model instance.
     Only allow PATCH, no PUT
     """
-
     def perform_update(self, serializer):
         serializer.save()
 

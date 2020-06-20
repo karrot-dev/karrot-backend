@@ -82,13 +82,13 @@ class CustomAnymailMessage(AnymailMessage):
 
 
 def prepare_email(
-        template,
-        user=None,
-        context=None,
-        to=None,
-        language=None,
-        unsubscribe_url=None,
-        **kwargs,
+    template,
+    user=None,
+    context=None,
+    to=None,
+    language=None,
+    unsubscribe_url=None,
+    **kwargs,
 ):
     context = dict(context) if context else {}
     tz = kwargs.pop('tz', timezone.utc)

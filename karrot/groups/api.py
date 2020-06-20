@@ -76,7 +76,7 @@ class GroupInfoViewSet(
 
     @action(
         detail=True,
-        methods=['GET']
+        methods=['GET'],
     )
     def photo(self, request, pk=None):
         group = self.get_object()
