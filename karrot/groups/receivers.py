@@ -71,7 +71,10 @@ def trust_given(sender, instance, created, **kwargs):
     relevant_trust = Trust.objects.filter(membership=membership)
     trust_threshold = membership.group.trust_threshold_for_newcomer()
 
-    if relevant_trust.count() >= trust_threshold and roles.GROUP_EDITOR not in membership.roles:
+    if (
+        relevant_trust.count() >= trust_threshold
+        and roles.GROUP_EDITOR not in membership.roles
+    ):
         membership.add_roles([roles.GROUP_EDITOR])
         membership.save()
 
@@ -79,12 +82,12 @@ def trust_given(sender, instance, created, **kwargs):
             typus=HistoryTypus.MEMBER_BECAME_EDITOR,
             group=membership.group,
             users=[membership.user],
-            payload={
-                'threshold': trust_threshold,
-            },
+            payload={"threshold": trust_threshold,},
         )
 
-        prepare_user_became_editor_email(user=membership.user, group=membership.group).send()
+        prepare_user_became_editor_email(
+            user=membership.user, group=membership.group
+        ).send()
 
         stats.member_became_editor(membership.group)
 
@@ -95,7 +98,9 @@ def trust_given(sender, instance, created, **kwargs):
 def remove_trust(sender, instance, **kwargs):
     membership = instance
 
-    Trust.objects.filter(given_by=membership.user, membership__group=membership.group).delete()
+    Trust.objects.filter(
+        given_by=membership.user, membership__group=membership.group
+    ).delete()
 
 
 @receiver(post_save, sender=Group)
@@ -104,7 +109,7 @@ def notify_chat_on_group_creation(sender, instance, created, **kwargs):
     if not created:
         return
     group = instance
-    webhook_url = getattr(settings, 'ADMIN_CHAT_WEBHOOK', None)
+    webhook_url = getattr(settings, "ADMIN_CHAT_WEBHOOK", None)
 
     if webhook_url is None:
         return
@@ -112,8 +117,12 @@ def notify_chat_on_group_creation(sender, instance, created, **kwargs):
     group_url = frontend_urls.group_preview_url(group)
 
     message_data = {
-        'text': f':tada: A new group has been created on **{settings.SITE_NAME}**! [Visit {group.name}]({group_url})',
+        "text": f":tada: A new group has been created on **{settings.SITE_NAME}**! [Visit {group.name}]({group_url})",
     }
 
-    response = requests.post(webhook_url, data=json.dumps(message_data), headers={'Content-Type': 'application/json'})
+    response = requests.post(
+        webhook_url,
+        data=json.dumps(message_data),
+        headers={"Content-Type": "application/json"},
+    )
     response.raise_for_status()

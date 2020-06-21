@@ -8,7 +8,7 @@ from karrot.users.factories import UserFactory
 
 class TestPlacesAPIFilter(APITestCase):
     def setUp(self):
-        self.url = '/api/users/'
+        self.url = "/api/users/"
 
         self.user = UserFactory()
         self.user2 = UserFactory()
@@ -18,7 +18,7 @@ class TestPlacesAPIFilter(APITestCase):
 
     def test_search_display_name(self):
         self.client.force_login(user=self.user2)
-        response = self.client.get(self.url, {'search': self.user.display_name})
+        response = self.client.get(self.url, {"search": self.user.display_name})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]['display_name'], self.user.display_name)
+        self.assertEqual(response.data[0]["display_name"], self.user.display_name)

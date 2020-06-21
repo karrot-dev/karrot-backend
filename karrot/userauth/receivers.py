@@ -6,4 +6,4 @@ from karrot.userauth import stats
 
 @receiver(user_login_failed)
 def failed_login(sender, credentials, **kwargs):
-    stats.login_failed(email=credentials.get('email'))
+    stats.login_failed(email=credentials.get("email"))

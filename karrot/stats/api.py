@@ -8,7 +8,7 @@ from karrot.stats.serializers import StatsSerializer
 
 
 class StatsThrottle(UserRateThrottle):
-    rate = '60/minute'
+    rate = "60/minute"
 
 
 class StatsView(views.APIView):
@@ -17,9 +17,9 @@ class StatsView(views.APIView):
 
     @staticmethod
     def post(request, **kwargs):
-        serializer = StatsSerializer(data=request.data, context={'request': request})
+        serializer = StatsSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
-            stats.received_stats(serializer.data['stats'])
+            stats.received_stats(serializer.data["stats"])
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)

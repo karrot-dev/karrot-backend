@@ -9,7 +9,12 @@ from karrot.conversations.models import ConversationMessage, Conversation
 from karrot.utils.email_utils import generate_plaintext_from_html
 from karrot.webhooks import stats
 from karrot.webhooks.models import EmailEvent, IncomingEmail
-from karrot.webhooks.utils import parse_local_part, notify_about_rejected_email, trim_with_talon, trim_with_discourse
+from karrot.webhooks.utils import (
+    parse_local_part,
+    notify_about_rejected_email,
+    trim_with_talon,
+    trim_with_discourse,
+)
 
 
 @receiver(tracking)
@@ -17,10 +22,10 @@ def tracking_received(sender, event, esp_name, **kwargs):
     EmailEvent.objects.update_or_create(
         id=event.event_id,
         defaults={
-            'address': event.recipient,
-            'event': event.event_type,
-            'payload': event.esp_event,
-            'version': 2,
+            "address": event.recipient,
+            "event": event.event_type,
+            "payload": event.esp_event,
+            "version": 2,
         },
     )
 
@@ -54,7 +59,7 @@ def inbound_received(sender, event, esp_name, **kwargs):
         text_content = generate_plaintext_from_html(html_content)
     else:
         # Inform the user if we couldn't find any content
-        notify_about_rejected_email(user, 'Karrot could not find any reply text')
+        notify_about_rejected_email(user, "Karrot could not find any reply text")
         return
 
     # extract email reply text
@@ -65,14 +70,18 @@ def inbound_received(sender, event, esp_name, **kwargs):
     trimmed_talon, line_count_talon = trim_with_talon(text_content)
     trimmed_discourse, line_count_discourse = trim_with_discourse(text_content)
 
-    reply_plain = trimmed_discourse if line_count_discourse <= line_count_talon else trimmed_talon
+    reply_plain = (
+        trimmed_discourse if line_count_discourse <= line_count_talon else trimmed_talon
+    )
 
-    stats.incoming_email_trimmed({
-        'line_count_original': len(text_content.splitlines()),
-        'line_count_talon': line_count_talon,
-        'line_count_discourse': line_count_discourse,
-        'from_html': 1 if incoming_message.text is None else 0
-    })
+    stats.incoming_email_trimmed(
+        {
+            "line_count_original": len(text_content.splitlines()),
+            "line_count_talon": line_count_talon,
+            "line_count_discourse": line_count_discourse,
+            "from_html": 1 if incoming_message.text is None else 0,
+        }
+    )
 
     # add reply to conversation
     if conversation.is_closed:
@@ -88,12 +97,12 @@ def inbound_received(sender, event, esp_name, **kwargs):
         conversation=conversation,
         thread=thread,
         content=reply_plain,
-        received_via='email',
+        received_via="email",
     )
 
     incoming_message_serialized = dict(incoming_message)
-    incoming_message_serialized['text'] = incoming_message.text
-    incoming_message_serialized['html'] = incoming_message.html
+    incoming_message_serialized["text"] = incoming_message.text
+    incoming_message_serialized["html"] = incoming_message.html
     IncomingEmail.objects.create(
         user=user,
         message=created_message,

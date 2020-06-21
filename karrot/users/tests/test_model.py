@@ -17,10 +17,10 @@ class TestUserModel(TestCase):
         self.user = UserFactory()
         self.group = GroupFactory(members=[self.user])
         self.exampleuser = {
-            'display_name': 'bla',
-            'email': 'user@example.com',
-            'password': 'notsafe',
-            'current_group': self.group,
+            "display_name": "bla",
+            "email": "user@example.com",
+            "password": "notsafe",
+            "current_group": self.group,
         }
 
     def test_create_fails_if_email_is_not_unique(self):
@@ -31,7 +31,7 @@ class TestUserModel(TestCase):
     def test_create_fails_if_name_too_long(self):
         with self.assertRaises(DataError):
             too_long = self.exampleuser
-            too_long['display_name'] = 'a' * 81
+            too_long["display_name"] = "a" * 81
             get_user_model().objects.create_user(**too_long)
 
     def test_user_representation(self):
@@ -39,17 +39,19 @@ class TestUserModel(TestCase):
         self.assertTrue(self.user.display_name in r)
 
     def test_create_fails_if_default_language_is_not_set(self):
-        default_language = get_user_model().objects.create_user(**self.exampleuser).language
-        self.assertEqual(default_language, 'en')
+        default_language = (
+            get_user_model().objects.create_user(**self.exampleuser).language
+        )
+        self.assertEqual(default_language, "en")
 
     def test_create_superuser(self):
         email = faker.email()
-        get_user_model().objects.create_superuser(email, 'letmein')
+        get_user_model().objects.create_superuser(email, "letmein")
         self.assertEqual(get_user_model().objects.filter(email=email).count(), 1)
 
     def test_create_user_without_specify_email(self):
-        with self.assertRaisesMessage(ValueError, 'The email field must be set'):
-            get_user_model().objects.create_user(None, 'foo')
+        with self.assertRaisesMessage(ValueError, "The email field must be set"):
+            get_user_model().objects.create_user(None, "foo")
 
     def test_get_short_name(self):
         user = UserFactory()
@@ -57,17 +59,25 @@ class TestUserModel(TestCase):
 
     def test_superusers_have_all_perms(self):
         email = faker.email()
-        superuser = get_user_model().objects.create_superuser(email, 'foo')
-        self.assertTrue(superuser.has_perm('eating horses'))
-        self.assertTrue(superuser.has_perm('eating this specific horse', 'I am a kind and gentle horse'))
-        self.assertTrue(superuser.has_module_perms('lunar'))
+        superuser = get_user_model().objects.create_superuser(email, "foo")
+        self.assertTrue(superuser.has_perm("eating horses"))
+        self.assertTrue(
+            superuser.has_perm(
+                "eating this specific horse", "I am a kind and gentle horse"
+            )
+        )
+        self.assertTrue(superuser.has_module_perms("lunar"))
 
     def test_normal_users_have_no_perms(self):
         email = faker.email()
-        user = get_user_model().objects.create_user(email, 'foo', display_name='I am normal')
-        self.assertFalse(user.has_perm('eating horses'))
-        self.assertFalse(user.has_perm('eating this specific horse', 'I am a kind and gentle horse'))
-        self.assertFalse(user.has_module_perms('lunar'))
+        user = get_user_model().objects.create_user(
+            email, "foo", display_name="I am normal"
+        )
+        self.assertFalse(user.has_perm("eating horses"))
+        self.assertFalse(
+            user.has_perm("eating this specific horse", "I am a kind and gentle horse")
+        )
+        self.assertFalse(user.has_module_perms("lunar"))
 
 
 class TestSendMail(TestCase):
@@ -82,5 +92,9 @@ class TestSendMail(TestCase):
 
     def test_send_to_fake_email(self):
         with self.assertRaises(AnymailAPIError):
-            get_user_model().objects.create_user(email='shabab@test.com', password='123', display_name='lalala')
-        self.assertEqual(get_user_model().objects.filter(email='shabab@test.com').count(), 0)
+            get_user_model().objects.create_user(
+                email="shabab@test.com", password="123", display_name="lalala"
+            )
+        self.assertEqual(
+            get_user_model().objects.filter(email="shabab@test.com").count(), 0
+        )

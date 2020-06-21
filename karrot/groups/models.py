@@ -22,9 +22,9 @@ from karrot.groups import roles, themes
 
 
 class GroupStatus(Enum):
-    ACTIVE = 'active'
-    INACTIVE = 'inactive'
-    PLAYGROUND = 'playground'
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    PLAYGROUND = "playground"
 
 
 class GroupQuerySet(models.QuerySet):
@@ -37,11 +37,11 @@ class GroupQuerySet(models.QuerySet):
     def annotate_active_editors_count(self):
         return self.annotate(
             _active_editors_count=Count(
-                'groupmembership',
+                "groupmembership",
                 filter=Q(
                     groupmembership__roles__contains=[roles.GROUP_EDITOR],
                     groupmembership__inactive_at__isnull=True,
-                )
+                ),
             )
         )
 
@@ -49,18 +49,18 @@ class GroupQuerySet(models.QuerySet):
         one_day_ago = timezone.now() - relativedelta(days=1)
         return self.annotate(
             _yesterdays_member_count=Count(
-                'groupmembership',
+                "groupmembership",
                 filter=Q(
                     groupmembership__created_at__lte=one_day_ago,
                     groupmembership__inactive_at__isnull=True,
-                )
+                ),
             )
         )
 
 
 class GroupManager(BaseManager.from_queryset(GroupQuerySet)):
     def create(self, *args, **kwargs):
-        kwargs['theme'] = kwargs.get('theme', settings.GROUP_THEME_DEFAULT.value)
+        kwargs["theme"] = kwargs.get("theme", settings.GROUP_THEME_DEFAULT.value)
         return super(GroupManager, self).create(*args, **kwargs)
 
 
@@ -72,9 +72,9 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
     welcome_message = models.TextField(blank=True)
     members = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
-        related_name='groups',
-        through='GroupMembership',
-        through_fields=('group', 'user'),
+        related_name="groups",
+        through="GroupMembership",
+        through_fields=("group", "user"),
     )
     public_description = models.TextField(blank=True)
     application_questions = models.TextField(blank=True)
@@ -88,20 +88,16 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
         choices=[(theme.value, theme.value) for theme in themes.GroupTheme],
     )
     sent_summary_up_to = DateTimeField(null=True)
-    timezone = TimeZoneField(default='Europe/Berlin', null=True, blank=True)
+    timezone = TimeZoneField(default="Europe/Berlin", null=True, blank=True)
     active_agreement = models.OneToOneField(
-        'groups.Agreement',
-        related_name='active_group',
+        "groups.Agreement",
+        related_name="active_group",
         null=True,
         on_delete=models.SET_NULL,
     )
     last_active_at = DateTimeField(default=tz.now)
     is_open = models.BooleanField(default=False)
-    photo = VersatileImageField(
-        'Group Photo',
-        upload_to='group_photos',
-        null=True,
-    )
+    photo = VersatileImageField("Group Photo", upload_to="group_photos", null=True,)
     features = ArrayField(TextField(), default=list)
 
     @property
@@ -113,13 +109,11 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
         return True
 
     def __str__(self):
-        return 'Group {}'.format(self.name)
+        return "Group {}".format(self.name)
 
     def add_member(self, user, added_by=None, history_payload=None):
         membership = GroupMembership.objects.create(
-            group=self,
-            user=user,
-            added_by=added_by,
+            group=self, user=user, added_by=added_by,
         )
         History.objects.create(
             typus=HistoryTypus.GROUP_JOIN,
@@ -134,15 +128,21 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
         GroupMembership.objects.filter(group=self, user=user).delete()
 
     def is_member(self, user):
-        return not user.is_anonymous and GroupMembership.objects.filter(group=self, user=user).exists()
+        return (
+            not user.is_anonymous
+            and GroupMembership.objects.filter(group=self, user=user).exists()
+        )
 
     def is_editor(self, user):
         return self.is_member_with_role(user, roles.GROUP_EDITOR)
 
     def is_member_with_role(self, user, role_name):
-        return not user.is_anonymous and GroupMembership.objects.filter(
-            group=self, user=user, roles__contains=[role_name]
-        ).exists()
+        return (
+            not user.is_anonymous
+            and GroupMembership.objects.filter(
+                group=self, user=user, roles__contains=[role_name]
+            ).exists()
+        )
 
     def is_playground(self):
         return self.status == GroupStatus.PLAYGROUND.value
@@ -152,10 +152,10 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
             user,
             added_by=invited_by,
             history_payload={
-                'invited_by': invited_by.id,
-                'invited_at': invited_at.isoformat(),
-                'invited_via': 'e-mail'
-            }
+                "invited_by": invited_by.id,
+                "invited_at": invited_at.isoformat(),
+                "invited_via": "e-mail",
+            },
         )
 
     def refresh_active_status(self):
@@ -165,25 +165,33 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
         self.save()
 
     def has_recent_activity(self):
-        return self.last_active_at >= tz.now() - timedelta(days=settings.NUMBER_OF_DAYS_UNTIL_GROUP_INACTIVE)
+        return self.last_active_at >= tz.now() - timedelta(
+            days=settings.NUMBER_OF_DAYS_UNTIL_GROUP_INACTIVE
+        )
 
     def get_application_questions_or_default(self):
         return self.application_questions or self.application_questions_default()
 
     def application_questions_default(self):
-        return render_to_string('default_application_questions.nopreview.jinja2')
+        return render_to_string("default_application_questions.nopreview.jinja2")
 
     def trust_threshold_for_newcomer(self):
-        count = getattr(self, '_yesterdays_member_count', None)
+        count = getattr(self, "_yesterdays_member_count", None)
         if count is None:
             one_day_ago = timezone.now() - relativedelta(days=1)
-            count = self.groupmembership_set.active().filter(created_at__lte=one_day_ago).count()
+            count = (
+                self.groupmembership_set.active()
+                .filter(created_at__lte=one_day_ago)
+                .count()
+            )
         dynamic_threshold = max(1, count // 2)
-        trust_threshold = min(settings.GROUP_EDITOR_TRUST_MAX_THRESHOLD, dynamic_threshold)
+        trust_threshold = min(
+            settings.GROUP_EDITOR_TRUST_MAX_THRESHOLD, dynamic_threshold
+        )
         return trust_threshold
 
     def active_editors_count(self):
-        count = getattr(self, '_active_editors_count', None)
+        count = getattr(self, "_active_editors_count", None)
         if count is None:
             count = self.groupmembership_set.active().editors().count()
         return count
@@ -204,7 +212,9 @@ class Agreement(BaseModel):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     title = TextField()
     content = TextField()
-    users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='agreements', through='UserAgreement')
+    users = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="agreements", through="UserAgreement"
+    )
 
 
 class UserAgreement(BaseModel):
@@ -213,11 +223,11 @@ class UserAgreement(BaseModel):
 
 
 class GroupNotificationType(object):
-    WEEKLY_SUMMARY = 'weekly_summary'
-    DAILY_PICKUP_NOTIFICATION = 'daily_pickup_notification'
-    NEW_APPLICATION = 'new_application'
-    CONFLICT_RESOLUTION = 'conflict_resolution'
-    NEW_OFFER = 'new_offer'
+    WEEKLY_SUMMARY = "weekly_summary"
+    DAILY_PICKUP_NOTIFICATION = "daily_pickup_notification"
+    NEW_APPLICATION = "new_application"
+    CONFLICT_RESOLUTION = "conflict_resolution"
+    NEW_OFFER = "new_offer"
 
 
 def get_default_notification_types():
@@ -252,7 +262,7 @@ class GroupMembershipQuerySet(QuerySet):
                 date__startswith__lt=now,
                 date__startswith__gte=now - relativedelta(**kwargs),
             ),
-            user__pickup_dates__place__group=F('group'),
+            user__pickup_dates__place__group=F("group"),
         ).distinct()
 
     def editors(self):
@@ -268,21 +278,17 @@ class GroupMembershipQuerySet(QuerySet):
 class GroupMembership(BaseModel, DirtyFieldsMixin):
     objects = GroupMembershipQuerySet.as_manager()
 
-    group = models.ForeignKey(
-        Group,
-        on_delete=models.CASCADE,
-    )
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-    )
+    group = models.ForeignKey(Group, on_delete=models.CASCADE,)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,)
     added_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='groupmembership_added',
+        related_name="groupmembership_added",
     )
-    trusted_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='membership', through='Trust')
+    trusted_by = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="membership", through="Trust"
+    )
     roles = ArrayField(TextField(), default=list)
     lastseen_at = DateTimeField(default=tz.now)
     inactive_at = DateTimeField(null=True)
@@ -290,8 +296,8 @@ class GroupMembership(BaseModel, DirtyFieldsMixin):
     removal_notification_at = DateTimeField(null=True)
 
     class Meta:
-        db_table = 'groups_group_members'
-        unique_together = (('group', 'user'), )
+        db_table = "groups_group_members"
+        unique_together = (("group", "user"),)
 
     def add_roles(self, roles):
         for role in roles:
@@ -315,8 +321,10 @@ class GroupMembership(BaseModel, DirtyFieldsMixin):
 
 
 class Trust(BaseModel):
-    membership = models.ForeignKey('groups.GroupMembership', on_delete=models.CASCADE)
-    given_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='trust_given')
+    membership = models.ForeignKey("groups.GroupMembership", on_delete=models.CASCADE)
+    given_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="trust_given"
+    )
 
     class Meta:
-        unique_together = (('membership', 'given_by'), )
+        unique_together = (("membership", "given_by"),)

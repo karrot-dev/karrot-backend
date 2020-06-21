@@ -9,54 +9,48 @@ from karrot.unsubscribe.utils import generate_token
 
 def conversation_url(conversation, user):
     type = conversation.type()
-    if type == 'group':
+    if type == "group":
         return group_wall_url(conversation.target)
-    elif type == 'place':
+    elif type == "place":
         return place_wall_url(conversation.target)
-    elif type == 'pickup':
+    elif type == "pickup":
         return pickup_detail_url(conversation.target)
-    elif type == 'private':
+    elif type == "private":
         return user_detail_url(user)
-    elif type == 'application':
+    elif type == "application":
         return application_url(conversation.target)
-    elif type == 'issue':
+    elif type == "issue":
         return issue_chat_url(conversation.target)
-    elif type == 'offer':
+    elif type == "offer":
         return offer_url(conversation.target)
     elif type is None:
         return None
 
-    raise Exception('conversation url with type {} is not defined'.format(type))
+    raise Exception("conversation url with type {} is not defined".format(type))
 
 
 def place_url(place):
-    return '{hostname}/#/group/{group_id}/place/{place_id}/pickups'.format(
-        hostname=settings.HOSTNAME,
-        group_id=place.group.id,
-        place_id=place.id,
+    return "{hostname}/#/group/{group_id}/place/{place_id}/pickups".format(
+        hostname=settings.HOSTNAME, group_id=place.group.id, place_id=place.id,
     )
 
 
 def user_url(user):
-    return '{hostname}/#/user/{user_id}/'.format(
-        hostname=settings.HOSTNAME,
-        user_id=user.id,
+    return "{hostname}/#/user/{user_id}/".format(
+        hostname=settings.HOSTNAME, user_id=user.id,
     )
 
 
 def absolute_url(path):
     if re.match(r"https?:", path):
         return path
-    return '{hostname}{path}'.format(
-        hostname=settings.HOSTNAME,
-        path=path,
-    )
+    return "{hostname}{path}".format(hostname=settings.HOSTNAME, path=path,)
 
 
 def pickup_detail_url(pickup):
     place = pickup.place
     group = place.group
-    return '{hostname}/#/group/{group_id}/place/{place_id}/pickups/{pickup_id}/detail'.format(
+    return "{hostname}/#/group/{group_id}/place/{place_id}/pickups/{pickup_id}/detail".format(
         hostname=settings.HOSTNAME,
         group_id=group.id,
         place_id=place.id,
@@ -65,11 +59,15 @@ def pickup_detail_url(pickup):
 
 
 def pickup_notification_unsubscribe_url(user, group):
-    return unsubscribe_url(user, group, notification_type=GroupNotificationType.DAILY_PICKUP_NOTIFICATION)
+    return unsubscribe_url(
+        user, group, notification_type=GroupNotificationType.DAILY_PICKUP_NOTIFICATION
+    )
 
 
 def group_summary_unsubscribe_url(user, group):
-    return unsubscribe_url(user, group, notification_type=GroupNotificationType.WEEKLY_SUMMARY)
+    return unsubscribe_url(
+        user, group, notification_type=GroupNotificationType.WEEKLY_SUMMARY
+    )
 
 
 def new_application_unsubscribe_url(user, application):
@@ -93,7 +91,9 @@ def new_offer_unsubscribe_url(user, offer):
 def group_photo_url(group):
     if not group or not group.photo:
         return None
-    return '{hostname}/api/groups-info/{group_id}/photo/'.format(hostname=settings.HOSTNAME, group_id=group.id)
+    return "{hostname}/api/groups-info/{group_id}/photo/".format(
+        hostname=settings.HOSTNAME, group_id=group.id
+    )
 
 
 def karrot_logo_url():
@@ -108,7 +108,9 @@ def offer_image_url(offer):
     image = offer.images.first()
     if not image:
         return None
-    return '{hostname}/api/offers/{offer_id}/image/'.format(hostname=settings.HOSTNAME, offer_id=offer.id)
+    return "{hostname}/api/offers/{offer_id}/image/".format(
+        hostname=settings.HOSTNAME, offer_id=offer.id
+    )
 
 
 def conflict_resolution_unsubscribe_url(user, issue):
@@ -121,7 +123,7 @@ def conflict_resolution_unsubscribe_url(user, issue):
 
 
 def application_url(application):
-    return '{hostname}/#/group/{group_id}/applications/{application_id}'.format(
+    return "{hostname}/#/group/{group_id}/applications/{application_id}".format(
         hostname=settings.HOSTNAME,
         group_id=application.group.id,
         application_id=application.id,
@@ -129,29 +131,24 @@ def application_url(application):
 
 
 def offer_url(offer):
-    return '{hostname}/#/group/{group_id}/offers/{offer_id}'.format(
-        hostname=settings.HOSTNAME,
-        group_id=offer.group.id,
-        offer_id=offer.id,
+    return "{hostname}/#/group/{group_id}/offers/{offer_id}".format(
+        hostname=settings.HOSTNAME, group_id=offer.group.id, offer_id=offer.id,
     )
 
 
 def issue_url(issue):
-    return '{hostname}/#/group/{group_id}/issues/{issue_id}'.format(
-        hostname=settings.HOSTNAME,
-        group_id=issue.group.id,
-        issue_id=issue.id,
+    return "{hostname}/#/group/{group_id}/issues/{issue_id}".format(
+        hostname=settings.HOSTNAME, group_id=issue.group.id, issue_id=issue.id,
     )
 
 
 def issue_chat_url(issue):
-    return issue_url(issue) + '/chat'
+    return issue_url(issue) + "/chat"
 
 
 def user_detail_url(user):
-    return '{hostname}/#/user/{user_id}/detail'.format(
-        hostname=settings.HOSTNAME,
-        user_id=user.id,
+    return "{hostname}/#/user/{user_id}/detail".format(
+        hostname=settings.HOSTNAME, user_id=user.id,
     )
 
 
@@ -159,7 +156,7 @@ def thread_url(thread):
     """
     Assumes that thread.conversation.target is a group
     """
-    return '{hostname}/#/group/{group_id}/message/{message_id}/replies'.format(
+    return "{hostname}/#/group/{group_id}/message/{message_id}/replies".format(
         hostname=settings.HOSTNAME,
         group_id=thread.conversation.target_id,
         message_id=thread.id,
@@ -171,33 +168,32 @@ def thread_unsubscribe_url(user, group, thread):
 
 
 def group_wall_url(group):
-    return '{hostname}/#/group/{group_id}/wall'.format(hostname=settings.HOSTNAME, group_id=group.id)
+    return "{hostname}/#/group/{group_id}/wall".format(
+        hostname=settings.HOSTNAME, group_id=group.id
+    )
 
 
 def place_wall_url(place):
-    return '{hostname}/#/group/{group_id}/place/{place_id}/wall'.format(
+    return "{hostname}/#/group/{group_id}/place/{place_id}/wall".format(
         hostname=settings.HOSTNAME, group_id=place.group.id, place_id=place.id
     )
 
 
 def applications_url(group):
-    return '{hostname}/#/group/{group_id}/applications'.format(
-        hostname=settings.HOSTNAME,
-        group_id=group.id,
+    return "{hostname}/#/group/{group_id}/applications".format(
+        hostname=settings.HOSTNAME, group_id=group.id,
     )
 
 
 def group_preview_url(group):
-    return '{hostname}/#/groupPreview/{group_id}'.format(
-        hostname=settings.HOSTNAME,
-        group_id=group.id,
+    return "{hostname}/#/groupPreview/{group_id}".format(
+        hostname=settings.HOSTNAME, group_id=group.id,
     )
 
 
 def group_edit_url(group):
-    return '{hostname}/#/group/{group_id}/edit'.format(
-        hostname=settings.HOSTNAME,
-        group_id=group.id,
+    return "{hostname}/#/group/{group_id}/edit".format(
+        hostname=settings.HOSTNAME, group_id=group.id,
     )
 
 
@@ -205,8 +201,10 @@ def conversation_unsubscribe_url(user, conversation, group=None):
     return unsubscribe_url(user, group=group, conversation=conversation)
 
 
-def unsubscribe_url(user, group=None, conversation=None, thread=None, notification_type=None):
-    return '{hostname}/#/unsubscribe/{token}'.format(
+def unsubscribe_url(
+    user, group=None, conversation=None, thread=None, notification_type=None
+):
+    return "{hostname}/#/unsubscribe/{token}".format(
         hostname=settings.HOSTNAME,
         token=generate_token(
             user,
@@ -219,29 +217,34 @@ def unsubscribe_url(user, group=None, conversation=None, thread=None, notificati
 
 
 def group_settings_url(group):
-    return '{hostname}/#/group/{group_id}/settings'.format(
-        hostname=settings.HOSTNAME,
-        group_id=group.id,
+    return "{hostname}/#/group/{group_id}/settings".format(
+        hostname=settings.HOSTNAME, group_id=group.id,
     )
 
 
 def invite_url(invitation):
-    invite_url = furl('{hostname}/#/signup'.format(hostname=settings.HOSTNAME))
-    invite_url.fragment.args = {'invite': invitation.token, 'email': invitation.email}
+    invite_url = furl("{hostname}/#/signup".format(hostname=settings.HOSTNAME))
+    invite_url.fragment.args = {"invite": invitation.token, "email": invitation.email}
     return invite_url
 
 
 def user_delete_url(code):
-    return '{hostname}/#/delete-user?code={code}'.format(hostname=settings.HOSTNAME, code=code)
+    return "{hostname}/#/delete-user?code={code}".format(
+        hostname=settings.HOSTNAME, code=code
+    )
 
 
 def user_emailverification_url(code):
-    return '{hostname}/#/email/verify?code={code}'.format(hostname=settings.HOSTNAME, code=code)
+    return "{hostname}/#/email/verify?code={code}".format(
+        hostname=settings.HOSTNAME, code=code
+    )
 
 
 def user_passwordreset_url(code):
-    return '{hostname}/#/password/reset?code={code}'.format(hostname=settings.HOSTNAME, code=code)
+    return "{hostname}/#/password/reset?code={code}".format(
+        hostname=settings.HOSTNAME, code=code
+    )
 
 
 def logo_url():
-    return '{hostname}/statics/carrot_logo.png'.format(hostname=settings.HOSTNAME, )
+    return "{hostname}/statics/carrot_logo.png".format(hostname=settings.HOSTNAME,)

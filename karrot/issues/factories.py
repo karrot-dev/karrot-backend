@@ -1,5 +1,11 @@
 from dateutil.relativedelta import relativedelta
-from factory import DjangoModelFactory, CREATE_STRATEGY, SubFactory, LazyAttribute, post_generation
+from factory import (
+    DjangoModelFactory,
+    CREATE_STRATEGY,
+    SubFactory,
+    LazyAttribute,
+    post_generation,
+)
 from freezegun import freeze_time
 
 from karrot.groups.models import GroupMembership
@@ -23,9 +29,7 @@ class IssueFactory(DjangoModelFactory):
     @post_generation
     def add_members(self, create, extracted, **kwargs):
         GroupMembership.objects.update_or_create(
-            {'roles': [roles.GROUP_EDITOR]},
-            user=self.created_by,
-            group=self.group,
+            {"roles": [roles.GROUP_EDITOR]}, user=self.created_by, group=self.group,
         )
         self.group.groupmembership_set.get_or_create(user=self.affected_user)
         self.issueparticipant_set.get_or_create(user=self.created_by)
@@ -35,9 +39,9 @@ class IssueFactory(DjangoModelFactory):
 def vote_for(voting, user, type):
     vote_data = {
         option.id: {
-            'score': 2 if option.type == type else -2,
-            'option': option,
-            'user': user
+            "score": 2 if option.type == type else -2,
+            "option": option,
+            "user": user,
         }
         for option in voting.options.all()
     }

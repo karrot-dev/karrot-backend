@@ -14,13 +14,18 @@ from jinja2 import Environment
 
 from config import settings
 from karrot.utils import stats
-from karrot.utils.frontend_urls import place_url, user_url, absolute_url, group_photo_or_karrot_logo_url
+from karrot.utils.frontend_urls import (
+    place_url,
+    user_url,
+    absolute_url,
+    group_photo_or_karrot_logo_url,
+)
 
 
 def date_filter(value):
     return format_date(
         value.astimezone(get_current_timezone()),
-        format='full',
+        format="full",
         locale=to_locale(get_language()),
     )
 
@@ -28,7 +33,7 @@ def date_filter(value):
 def time_filter(value):
     return format_time(
         value,
-        format='short',
+        format="short",
         locale=to_locale(get_language()),
         tzinfo=get_current_timezone(),
     )
@@ -36,11 +41,11 @@ def time_filter(value):
 
 def jinja2_environment(**options):
     env = Environment(**options)
-    env.filters['date'] = date_filter
-    env.filters['time'] = time_filter
-    env.globals['place_url'] = place_url
-    env.globals['user_url'] = user_url
-    env.globals['absolute_url'] = absolute_url
+    env.filters["date"] = date_filter
+    env.filters["time"] = time_filter
+    env.globals["place_url"] = place_url
+    env.globals["user_url"] = user_url
+    env.globals["absolute_url"] = absolute_url
     return env
 
 
@@ -65,7 +70,9 @@ class CustomAnymailMessage(AnymailMessage):
             self._send_or_retry(*args, **kwargs)
             stats.email_sent(recipient_count=len(self.to), category=self.stats_category)
         except Exception as exception:
-            stats.email_error(recipient_count=len(self.to), category=self.stats_category)
+            stats.email_error(
+                recipient_count=len(self.to), category=self.stats_category
+            )
             raise exception
 
     def _send_or_retry(self, *args, **kwargs):
@@ -78,7 +85,9 @@ class CustomAnymailMessage(AnymailMessage):
                 if attempts_left == 0:
                     # all retries exhausted, let's forward the exception
                     raise
-                stats.email_retry(recipient_count=len(self.to), category=self.stats_category)
+                stats.email_retry(
+                    recipient_count=len(self.to), category=self.stats_category
+                )
 
 
 def prepare_email(
@@ -91,31 +100,36 @@ def prepare_email(
     **kwargs,
 ):
     context = dict(context) if context else {}
-    tz = kwargs.pop('tz', timezone.utc)
+    tz = kwargs.pop("tz", timezone.utc)
 
     default_context = {
-        'site_name': settings.SITE_NAME,
-        'hostname': settings.HOSTNAME,
+        "site_name": settings.SITE_NAME,
+        "hostname": settings.HOSTNAME,
     }
 
     if user:
-        default_context.update({
-            'user': user,
-            'user_display_name': user.get_full_name(),
-        })
+        default_context.update(
+            {"user": user, "user_display_name": user.get_full_name(),}
+        )
 
     # Merge context, but fail if a default key was redefined
     redefined_keys = set(default_context.keys()).intersection(context.keys())
     if len(redefined_keys) > 0:
-        raise Exception('email context should not redefine defaults: ' + ', '.join(redefined_keys))
+        raise Exception(
+            "email context should not redefine defaults: " + ", ".join(redefined_keys)
+        )
     context.update(default_context)
 
-    if 'header_image' not in context:
-        context['header_image'] = group_photo_or_karrot_logo_url(context.get('group', None))
+    if "header_image" not in context:
+        context["header_image"] = group_photo_or_karrot_logo_url(
+            context.get("group", None)
+        )
 
     if not to:
         if not user:
-            raise Exception('Do not know who to send the email to, no "user" or "to" field')
+            raise Exception(
+                'Do not know who to send the email to, no "user" or "to" field'
+            )
         to = [user.email]
 
     if isinstance(to, str):
@@ -124,58 +138,64 @@ def prepare_email(
     if user and not language:
         language = user.language
 
-    subject, text_content, html_content = prepare_email_content(template, context, tz, language)
+    subject, text_content, html_content = prepare_email_content(
+        template, context, tz, language
+    )
 
     from_email = formataddr((settings.SITE_NAME, settings.DEFAULT_FROM_EMAIL))
 
     headers = {}
 
     if unsubscribe_url:
-        headers.update({
-            'List-Unsubscribe': '<{}>'.format(unsubscribe_url),
-        })
+        headers.update(
+            {"List-Unsubscribe": "<{}>".format(unsubscribe_url),}
+        )
 
     message_kwargs = {
-        'subject': subject,
-        'body': text_content,
-        'to': to,
-        'from_email': from_email,
-        'headers': headers,
+        "subject": subject,
+        "body": text_content,
+        "to": to,
+        "from_email": from_email,
+        "headers": headers,
         **kwargs,
     }
 
     email = CustomAnymailMessage(**message_kwargs)
 
     if html_content:
-        email.attach_alternative(html_content, 'text/html')
+        email.attach_alternative(html_content, "text/html")
 
     return email
 
 
-def prepare_email_content(template, context, tz, language='en'):
+def prepare_email_content(template, context, tz, language="en"):
     if not translation.check_for_language(language):
-        language = 'en'
+        language = "en"
 
     with timezone.override(tz), translation.override(language):
 
         html_content = None
 
         try:
-            html_template = get_template('{}.html.jinja2'.format(template))
+            html_template = get_template("{}.html.jinja2".format(template))
             html_content = html_template.render(context)
         except TemplateDoesNotExist:
             pass
 
         try:
-            text_template = get_template('{}.text.jinja2'.format(template))
+            text_template = get_template("{}.text.jinja2".format(template))
             text_content = text_template.render(context)
         except TemplateDoesNotExist:
             if html_content:
                 text_content = generate_plaintext_from_html(html_content)
             else:
-                raise Exception('Nothing to use for text content, no text or html templates available.')
+                raise Exception(
+                    "Nothing to use for text content, no text or html templates available."
+                )
 
-        subject = render_to_string('{}.subject.jinja2'.format(template), context).replace('\n', '')
+        subject = render_to_string(
+            "{}.subject.jinja2".format(template), context
+        ).replace("\n", "")
 
         return subject, text_content, html_content
 

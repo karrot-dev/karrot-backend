@@ -17,16 +17,16 @@ class OfferFactory(DjangoModelFactory):
     user = SubFactory(UserFactory)
     name = LazyAttribute(lambda x: faker.sentence(nb_words=4))
     description = LazyAttribute(lambda x: faker.name())
-    status = 'active'
+    status = "active"
 
     @post_generation
     def images(self, created, extracted, **kwargs):
         if created and extracted:
             for index, image_path in enumerate(extracted):
-                with open(image_path, 'rb') as file:
+                with open(image_path, "rb") as file:
                     upload = SimpleUploadedFile(
                         name=os.path.basename(image_path),
                         content=file.read(),
-                        content_type='image/jpeg',
+                        content_type="image/jpeg",
                     )
                     self.images.create(image=upload, position=index)

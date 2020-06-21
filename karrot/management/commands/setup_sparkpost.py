@@ -7,7 +7,7 @@ from rest_framework import status
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        parser.add_argument('--quiet', action='store_true', dest='quiet')
+        parser.add_argument("--quiet", action="store_true", dest="quiet")
 
     errors = []
 
@@ -16,18 +16,18 @@ class Command(BaseCommand):
             try:
                 json = response.json()
             except:  # noqa
-                json = ''
+                json = ""
             print(response.request.method, response.request.url)
             print(response.status_code, json)
             print()
 
     def setup_event_webhook(self, s):
-        response = s.get('https://api.sparkpost.com/api/v1/webhooks')
+        response = s.get("https://api.sparkpost.com/api/v1/webhooks")
         self.log_response(response)
         if not status.is_success(response.status_code):
             self.errors.append(
-                'Failed to get existing event webhooks.' +
-                'Check if your subaccount API key has permission to Read/Write Event Webhooks.'
+                "Failed to get existing event webhooks."
+                + "Check if your subaccount API key has permission to Read/Write Event Webhooks."
             )
 
         webhooks = response.json()
@@ -37,96 +37,110 @@ class Command(BaseCommand):
             "auth_type": "basic",
             "auth_credentials": {
                 "username": "xxx",
-                "password": settings.SPARKPOST_WEBHOOK_SECRET
+                "password": settings.SPARKPOST_WEBHOOK_SECRET,
             },
             "events": settings.SPARKPOST_EMAIL_EVENTS,
         }
         existing_event_webhook = None
-        for w in webhooks['results']:
-            if w['target'] == event_webhook_data['target']:
+        for w in webhooks["results"]:
+            if w["target"] == event_webhook_data["target"]:
                 existing_event_webhook = w
 
         if existing_event_webhook is None:
             print(
-                'WARNING: creating a new event webhook for {}. '
-                'Please check on sparkpost.com if there are unused ones.'.format(event_webhook_data['target'])
+                "WARNING: creating a new event webhook for {}. "
+                "Please check on sparkpost.com if there are unused ones.".format(
+                    event_webhook_data["target"]
+                )
             )
-            response = s.post('https://api.sparkpost.com/api/v1/webhooks', json=event_webhook_data)
+            response = s.post(
+                "https://api.sparkpost.com/api/v1/webhooks", json=event_webhook_data
+            )
             self.log_response(response)
             if not status.is_success(response.status_code):
-                self.errors.append('Failed to create new event webhook')
+                self.errors.append("Failed to create new event webhook")
         else:
             response = s.put(
-                'https://api.sparkpost.com/api/v1/webhooks/' + existing_event_webhook['id'], json=event_webhook_data
+                "https://api.sparkpost.com/api/v1/webhooks/"
+                + existing_event_webhook["id"],
+                json=event_webhook_data,
             )
             self.log_response(response)
             if not status.is_success(response.status_code):
-                self.errors.append('Failed to update existing event webhook')
+                self.errors.append("Failed to update existing event webhook")
 
     def setup_relay_webhook(self, s):
         # create inbound domain with best effort, ignore failures
         response = s.post(
-            'https://api.sparkpost.com/api/v1/inbound-domains', json={'domain': settings.SPARKPOST_RELAY_DOMAIN}
+            "https://api.sparkpost.com/api/v1/inbound-domains",
+            json={"domain": settings.SPARKPOST_RELAY_DOMAIN},
         )
         self.log_response(response)
 
-        response = s.get('https://api.sparkpost.com/api/v1/relay-webhooks')
+        response = s.get("https://api.sparkpost.com/api/v1/relay-webhooks")
         self.log_response(response)
         if not status.is_success(response.status_code):
             self.errors.append(
-                'Failed to get existing relay webhooks.' +
-                'Check if your main account API key has permission to Read/Write Relay Webhooks.'
+                "Failed to get existing relay webhooks."
+                + "Check if your main account API key has permission to Read/Write Relay Webhooks."
             )
 
         relay_webhooks = response.json()
         existing_relay = None
-        for w in relay_webhooks['results']:
-            if w['match']['domain'] == settings.SPARKPOST_RELAY_DOMAIN:
+        for w in relay_webhooks["results"]:
+            if w["match"]["domain"] == settings.SPARKPOST_RELAY_DOMAIN:
                 existing_relay = w
 
         relay_webhook_data = {
-            "name": settings.SPARKPOST_RELAY_DOMAIN + ' relay',
+            "name": settings.SPARKPOST_RELAY_DOMAIN + " relay",
             "target": settings.HOSTNAME + "/api/webhooks/incoming_email/",
             "auth_token": settings.SPARKPOST_RELAY_SECRET,
-            "match": {
-                "domain": settings.SPARKPOST_RELAY_DOMAIN
-            }
+            "match": {"domain": settings.SPARKPOST_RELAY_DOMAIN},
         }
         if existing_relay is None:
             print(
-                'WARNING: creating a new relay webhook for {}. '
-                'Please check on sparkpost.com if there are unused ones.'.format(settings.SPARKPOST_RELAY_DOMAIN)
+                "WARNING: creating a new relay webhook for {}. "
+                "Please check on sparkpost.com if there are unused ones.".format(
+                    settings.SPARKPOST_RELAY_DOMAIN
+                )
             )
-            response = s.post('https://api.sparkpost.com/api/v1/relay-webhooks', json=relay_webhook_data)
+            response = s.post(
+                "https://api.sparkpost.com/api/v1/relay-webhooks",
+                json=relay_webhook_data,
+            )
             self.log_response(response)
             if not status.is_success(response.status_code):
-                self.errors.append('Failed to create new relay webhook')
+                self.errors.append("Failed to create new relay webhook")
         else:
             response = s.put(
-                'https://api.sparkpost.com/api/v1/relay-webhooks/' + existing_relay['id'], json=relay_webhook_data
+                "https://api.sparkpost.com/api/v1/relay-webhooks/"
+                + existing_relay["id"],
+                json=relay_webhook_data,
             )
             self.log_response(response)
             if not status.is_success(response.status_code):
                 if response.status_code == 409:
-                    print('409: Failed to update existing relay webhook')
-                    print('Ignoring - Sparkpost gets confused when updating for existing domain.')
+                    print("409: Failed to update existing relay webhook")
+                    print(
+                        "Ignoring - Sparkpost gets confused when updating for existing domain."
+                    )
                     return
-                self.errors.append('Failed to update existing relay webhook')
+                self.errors.append("Failed to update existing relay webhook")
 
     def handle(self, *args, **options):
         s = requests.Session()
-        self.quiet = options['quiet']
+        self.quiet = options["quiet"]
 
         # use subaccounts for sending emails and receiving email events
-        s.headers.update({'Authorization': settings.ANYMAIL['SPARKPOST_API_KEY']})
+        s.headers.update({"Authorization": settings.ANYMAIL["SPARKPOST_API_KEY"]})
         self.setup_event_webhook(s)
 
         # use main account for setting up relay
-        s.headers.update({'Authorization': settings.SPARKPOST_ACCOUNT_KEY})
+        s.headers.update({"Authorization": settings.SPARKPOST_ACCOUNT_KEY})
         self.setup_relay_webhook(s)
 
         if len(self.errors) > 0:
-            print('errors:')
+            print("errors:")
             for e in self.errors:
                 print(e)
             sys.exit(1)

@@ -17,6 +17,7 @@ class ChannelSubscriptionQuerySet(models.QuerySet):
 
 class ChannelSubscription(BaseModel):
     """A subscription to receive messages over a django channel."""
+
     objects = ChannelSubscriptionQuerySet.as_manager()
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -26,19 +27,22 @@ class ChannelSubscription(BaseModel):
 
 
 class PushSubscriptionPlatform(Enum):
-    ANDROID = 'android'
-    WEB = 'web'
+    ANDROID = "android"
+    WEB = "web"
 
 
 class PushSubscription(BaseModel):
     """A subscription to receive messages over an FCM push channel."""
+
     class Meta:
-        unique_together = ('user', 'token')
+        unique_together = ("user", "token")
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     token = models.TextField()  # FCM device registration token
     platform = models.CharField(
         default=PushSubscriptionPlatform.ANDROID.value,
-        choices=[(platform.value, platform.value) for platform in PushSubscriptionPlatform],
+        choices=[
+            (platform.value, platform.value) for platform in PushSubscriptionPlatform
+        ],
         max_length=100,
     )

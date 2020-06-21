@@ -29,5 +29,5 @@ class StatsSerializer(serializers.Serializer):
 
     def validate_stats(self, stats):
         if len(stats) > MAX_STATS:
-            raise ValidationError('You can only send up to {}'.format(MAX_STATS))
+            raise ValidationError("You can only send up to {}".format(MAX_STATS))
         return stats

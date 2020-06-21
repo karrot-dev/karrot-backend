@@ -11,12 +11,24 @@ from karrot.applications.models import Application
 from karrot.applications.serializers import ApplicationSerializer
 from karrot.community_feed.models import CommunityFeedMeta
 from karrot.community_feed.serializers import CommunityFeedMetaSerializer
-from karrot.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction, \
-    ConversationThreadParticipant, ConversationMeta
-from karrot.conversations.serializers import ConversationMessageSerializer, ConversationSerializer, \
-    ConversationMetaSerializer
-from karrot.conversations.signals import thread_marked_seen, new_conversation_message, new_thread_message, \
-    conversation_marked_seen
+from karrot.conversations.models import (
+    ConversationParticipant,
+    ConversationMessage,
+    ConversationMessageReaction,
+    ConversationThreadParticipant,
+    ConversationMeta,
+)
+from karrot.conversations.serializers import (
+    ConversationMessageSerializer,
+    ConversationSerializer,
+    ConversationMetaSerializer,
+)
+from karrot.conversations.signals import (
+    thread_marked_seen,
+    new_conversation_message,
+    new_thread_message,
+    conversation_marked_seen,
+)
 from karrot.groups.models import Group, Trust, GroupMembership
 from karrot.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer
 from karrot.history.models import history_created
@@ -26,15 +38,31 @@ from karrot.invitations.serializers import InvitationSerializer
 from karrot.issues.serializers import IssueSerializer
 from karrot.issues.signals import issue_changed
 from karrot.notifications.models import Notification, NotificationMeta
-from karrot.notifications.serializers import NotificationSerializer, NotificationMetaSerializer
+from karrot.notifications.serializers import (
+    NotificationSerializer,
+    NotificationMetaSerializer,
+)
 from karrot.offers.models import Offer, OfferStatus
 from karrot.offers.serializers import OfferSerializer
-from karrot.pickups.models import PickupDate, PickupDateSeries, Feedback, PickupDateCollector
-from karrot.pickups.serializers import PickupDateSerializer, PickupDateSeriesSerializer, FeedbackSerializer
+from karrot.pickups.models import (
+    PickupDate,
+    PickupDateSeries,
+    Feedback,
+    PickupDateCollector,
+)
+from karrot.pickups.serializers import (
+    PickupDateSerializer,
+    PickupDateSeriesSerializer,
+    FeedbackSerializer,
+)
 from karrot.places.models import Place, PlaceSubscription
 from karrot.places.serializers import PlaceSerializer
-from karrot.status.helpers import unseen_notification_count, unread_conversations, pending_applications, \
-    get_feedback_possible
+from karrot.status.helpers import (
+    unseen_notification_count,
+    unread_conversations,
+    pending_applications,
+    get_feedback_possible,
+)
 from karrot.subscriptions import tasks
 from karrot.subscriptions.models import ChannelSubscription
 from karrot.subscriptions.utils import send_in_channel, MockRequest
@@ -48,19 +76,26 @@ def send_messages(sender, instance, created, **kwargs):
     message = instance
     conversation = message.conversation
 
-    topic = 'conversations:message'
+    topic = "conversations:message"
 
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=conversation.participants.all()
-                                                                    ).distinct():
+    for subscription in (
+        ChannelSubscription.objects.recent()
+        .filter(user__in=conversation.participants.all())
+        .distinct()
+    ):
 
-        payload = ConversationMessageSerializer(message, context={'request': MockRequest(user=subscription.user)}).data
+        payload = ConversationMessageSerializer(
+            message, context={"request": MockRequest(user=subscription.user)}
+        ).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
-        if created and message.is_thread_reply() and subscription.user != message.author:
+        if (
+            created
+            and message.is_thread_reply()
+            and subscription.user != message.author
+        ):
             payload = ConversationMessageSerializer(
-                message.thread, context={
-                    'request': MockRequest(user=subscription.user)
-                }
+                message.thread, context={"request": MockRequest(user=subscription.user)}
             ).data
             send_in_channel(subscription.reply_channel, topic, payload)
 
@@ -74,17 +109,24 @@ def send_messages(sender, instance, created, **kwargs):
     # (important for unread_message_count)
     # Exclude the author because their seen_up_to status gets updated,
     # so they will receive the `send_conversation_update` message
-    topic = 'conversations:conversation'
+    topic = "conversations:conversation"
 
     # Can be skipped for thread replies, as they don't alter the conversations object
     if message.is_thread_reply():
         return
 
-    for subscription in ChannelSubscription.objects.recent()\
-            .filter(user__in=conversation.participants.all())\
-            .exclude(user=message.author).distinct():
-        participant = conversation.conversationparticipant_set.get(user=subscription.user)
-        payload = ConversationSerializer(participant, context={'request': MockRequest(user=subscription.user)}).data
+    for subscription in (
+        ChannelSubscription.objects.recent()
+        .filter(user__in=conversation.participants.all())
+        .exclude(user=message.author)
+        .distinct()
+    ):
+        participant = conversation.conversationparticipant_set.get(
+            user=subscription.user
+        )
+        payload = ConversationSerializer(
+            participant, context={"request": MockRequest(user=subscription.user)}
+        ).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
 
@@ -94,8 +136,10 @@ def send_conversation_update(sender, instance, **kwargs):
     # (important for seen_up_to and unread_message_count)
     participant = instance
 
-    topic = 'conversations:conversation'
-    payload = ConversationSerializer(participant, context={'request': MockRequest(user=participant.user)}).data
+    topic = "conversations:conversation"
+    payload = ConversationSerializer(
+        participant, context={"request": MockRequest(user=participant.user)}
+    ).data
 
     for subscription in ChannelSubscription.objects.recent().filter(user=instance.user):
         send_in_channel(subscription.reply_channel, topic, payload)
@@ -106,7 +150,9 @@ def conversation_meta_saved(sender, instance, **kwargs):
     meta = instance
     payload = ConversationMetaSerializer(meta).data
     for subscription in ChannelSubscription.objects.recent().filter(user=meta.user):
-        send_in_channel(subscription.reply_channel, topic='conversations:meta', payload=payload)
+        send_in_channel(
+            subscription.reply_channel, topic="conversations:meta", payload=payload
+        )
 
 
 @receiver(post_save, sender=ConversationThreadParticipant)
@@ -120,8 +166,10 @@ def send_thread_update(sender, instance, created, **kwargs):
 
     thread = instance.thread
 
-    topic = 'conversations:message'
-    payload = ConversationMessageSerializer(thread, context={'request': MockRequest(user=instance.user)}).data
+    topic = "conversations:message"
+    payload = ConversationMessageSerializer(
+        thread, context={"request": MockRequest(user=instance.user)}
+    ).data
 
     for subscription in ChannelSubscription.objects.recent().filter(user=instance.user):
         send_in_channel(subscription.reply_channel, topic, payload)
@@ -134,11 +182,16 @@ def send_reaction_update(sender, instance, **kwargs):
     message = reaction.message
     conversation = message.conversation
 
-    topic = 'conversations:message'
+    topic = "conversations:message"
 
-    for subscription in ChannelSubscription.objects.recent() \
-            .filter(user__in=conversation.participants.all()).distinct():
-        payload = ConversationMessageSerializer(message, context={'request': MockRequest(user=subscription.user)}).data
+    for subscription in (
+        ChannelSubscription.objects.recent()
+        .filter(user__in=conversation.participants.all())
+        .distinct()
+    ):
+        payload = ConversationMessageSerializer(
+            message, context={"request": MockRequest(user=subscription.user)}
+        ).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
 
@@ -150,13 +203,20 @@ def send_participant_joined(sender, instance, created, **kwargs):
 
     conversation = instance.conversation
 
-    topic = 'conversations:conversation'
+    topic = "conversations:conversation"
 
-    for subscription in ChannelSubscription.objects.recent() \
-            .filter(user__in=conversation.participants.all()) \
-            .exclude(user=instance.user).distinct():
-        participant = conversation.conversationparticipant_set.get(user=subscription.user)
-        payload = ConversationSerializer(participant, context={'request': MockRequest(user=subscription.user)}).data
+    for subscription in (
+        ChannelSubscription.objects.recent()
+        .filter(user__in=conversation.participants.all())
+        .exclude(user=instance.user)
+        .distinct()
+    ):
+        participant = conversation.conversationparticipant_set.get(
+            user=subscription.user
+        )
+        payload = ConversationSerializer(
+            participant, context={"request": MockRequest(user=subscription.user)}
+        ).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
 
@@ -167,7 +227,11 @@ def remove_participant(sender, instance, **kwargs):
     user = instance.user
     conversation = instance.conversation
     for subscription in ChannelSubscription.objects.recent().filter(user=user):
-        send_in_channel(subscription.reply_channel, topic='conversations:leave', payload={'id': conversation.id})
+        send_in_channel(
+            subscription.reply_channel,
+            topic="conversations:leave",
+            payload={"id": conversation.id},
+        )
 
 
 @receiver(post_delete, sender=ConversationParticipant)
@@ -175,19 +239,28 @@ def send_participant_left(sender, instance, **kwargs):
     """Notify conversation participants when someone leaves"""
     conversation = instance.conversation
 
-    topic = 'conversations:conversation'
+    topic = "conversations:conversation"
 
     # TODO send to all group participants if it's a group_public conversation?
 
-    for subscription in ChannelSubscription.objects.recent() \
-            .filter(user__in=conversation.participants.all()).distinct():
-        participant = conversation.conversationparticipant_set.get(user=subscription.user)
-        payload = ConversationSerializer(participant, context={'request': MockRequest(user=subscription.user)}).data
+    for subscription in (
+        ChannelSubscription.objects.recent()
+        .filter(user__in=conversation.participants.all())
+        .distinct()
+    ):
+        participant = conversation.conversationparticipant_set.get(
+            user=subscription.user
+        )
+        payload = ConversationSerializer(
+            participant, context={"request": MockRequest(user=subscription.user)}
+        ).data
         send_in_channel(subscription.reply_channel, topic, payload)
 
     participant = conversation.make_participant()
     payload = ConversationSerializer(participant).data
-    for subscription in ChannelSubscription.objects.recent().filter(user=instance.user).distinct():
+    for subscription in (
+        ChannelSubscription.objects.recent().filter(user=instance.user).distinct()
+    ):
         send_in_channel(subscription.reply_channel, topic, payload)
 
 
@@ -200,14 +273,22 @@ def send_group_detail(group, user=None):
         qs = qs.filter(user__in=group.members.all())
 
     for subscription in qs:
-        payload = GroupDetailSerializer(group, context={'request': MockRequest(user=subscription.user)}).data
-        send_in_channel(subscription.reply_channel, topic='groups:group_detail', payload=payload)
+        payload = GroupDetailSerializer(
+            group, context={"request": MockRequest(user=subscription.user)}
+        ).data
+        send_in_channel(
+            subscription.reply_channel, topic="groups:group_detail", payload=payload
+        )
 
 
 def send_group_preview(group):
     preview_payload = GroupPreviewSerializer(group).data
     for subscription in ChannelSubscription.objects.recent():
-        send_in_channel(subscription.reply_channel, topic='groups:group_preview', payload=preview_payload)
+        send_in_channel(
+            subscription.reply_channel,
+            topic="groups:group_preview",
+            payload=preview_payload,
+        )
 
 
 @receiver(post_save, sender=Group)
@@ -216,7 +297,7 @@ def send_group_updates(sender, instance, **kwargs):
 
     # avoid websocket updates if the change isn't visible to users
     dirty_fields = group.get_dirty_fields()
-    if len(dirty_fields) == 1 and 'last_active_at' in dirty_fields:
+    if len(dirty_fields) == 1 and "last_active_at" in dirty_fields:
         return
 
     send_group_detail(group)
@@ -232,9 +313,9 @@ def send_group_membership_updates(sender, instance, created, **kwargs):
     dirty_fields = membership.get_dirty_fields()
 
     # Send updates if the membership was created or roles changed
-    if created or 'roles' in dirty_fields.keys():
+    if created or "roles" in dirty_fields.keys():
         send_group_detail(group)
-    elif 'notification_types' in dirty_fields.keys():
+    elif "notification_types" in dirty_fields.keys():
         # notification types are only visible to one user
         send_group_detail(group, user=membership.user)
 
@@ -257,7 +338,9 @@ def send_application_updates(sender, instance, **kwargs):
     payload = ApplicationSerializer(application).data
     q = Q(user__in=group.members.all()) | Q(user=application.user)
     for subscription in ChannelSubscription.objects.recent().filter(q).distinct():
-        send_in_channel(subscription.reply_channel, topic='applications:update', payload=payload)
+        send_in_channel(
+            subscription.reply_channel, topic="applications:update", payload=payload
+        )
 
 
 # Trust
@@ -271,27 +354,47 @@ def send_trust_updates(sender, instance, **kwargs):
 def send_invitation_updates(sender, instance, **kwargs):
     invitation = instance
     payload = InvitationSerializer(invitation).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=invitation.group.members.all()
-                                                                    ).distinct():
-        send_in_channel(subscription.reply_channel, topic='invitations:invitation', payload=payload)
+    for subscription in (
+        ChannelSubscription.objects.recent()
+        .filter(user__in=invitation.group.members.all())
+        .distinct()
+    ):
+        send_in_channel(
+            subscription.reply_channel, topic="invitations:invitation", payload=payload
+        )
 
 
 @receiver(pre_delete, sender=Invitation)
 def send_invitation_accept(sender, instance, **kwargs):
     invitation = instance
     payload = InvitationSerializer(invitation).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=invitation.group.members.all()
-                                                                    ).distinct():
-        send_in_channel(subscription.reply_channel, topic='invitations:invitation_accept', payload=payload)
+    for subscription in (
+        ChannelSubscription.objects.recent()
+        .filter(user__in=invitation.group.members.all())
+        .distinct()
+    ):
+        send_in_channel(
+            subscription.reply_channel,
+            topic="invitations:invitation_accept",
+            payload=payload,
+        )
 
 
 # Place
 @receiver(post_save, sender=Place)
 def send_place_updates(sender, instance, **kwargs):
     place = instance
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=place.group.members.all()).distinct():
-        payload = PlaceSerializer(place, context={'request': MockRequest(user=subscription.user)}).data
-        send_in_channel(subscription.reply_channel, topic='places:place', payload=payload)
+    for subscription in (
+        ChannelSubscription.objects.recent()
+        .filter(user__in=place.group.members.all())
+        .distinct()
+    ):
+        payload = PlaceSerializer(
+            place, context={"request": MockRequest(user=subscription.user)}
+        ).data
+        send_in_channel(
+            subscription.reply_channel, topic="places:place", payload=payload
+        )
 
 
 @receiver(post_save, sender=PlaceSubscription)
@@ -299,9 +402,13 @@ def send_place_updates(sender, instance, **kwargs):
 def place_subscription_updated(sender, instance, **kwargs):
     place = instance.place
     user = instance.user
-    payload = PlaceSerializer(place, context={'request': MockRequest(user=user)}).data
-    for subscription in ChannelSubscription.objects.recent().filter(user=user).distinct():
-        send_in_channel(subscription.reply_channel, topic='places:place', payload=payload)
+    payload = PlaceSerializer(place, context={"request": MockRequest(user=user)}).data
+    for subscription in (
+        ChannelSubscription.objects.recent().filter(user=user).distinct()
+    ):
+        send_in_channel(
+            subscription.reply_channel, topic="places:place", payload=payload
+        )
 
 
 # Pickup Dates
@@ -313,18 +420,30 @@ def send_pickup_updates(sender, instance, **kwargs):
         return
 
     payload = PickupDateSerializer(pickup).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.place.group.members.all()
-                                                                    ).distinct():
-        send_in_channel(subscription.reply_channel, topic='pickups:pickupdate', payload=payload)
+    for subscription in (
+        ChannelSubscription.objects.recent()
+        .filter(user__in=pickup.place.group.members.all())
+        .distinct()
+    ):
+        send_in_channel(
+            subscription.reply_channel, topic="pickups:pickupdate", payload=payload
+        )
 
 
 @receiver(pre_delete, sender=PickupDate)
 def send_pickup_deleted(sender, instance, **kwargs):
     pickup = instance
     payload = PickupDateSerializer(pickup).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.place.group.members.all()
-                                                                    ).distinct():
-        send_in_channel(subscription.reply_channel, topic='pickups:pickupdate_deleted', payload=payload)
+    for subscription in (
+        ChannelSubscription.objects.recent()
+        .filter(user__in=pickup.place.group.members.all())
+        .distinct()
+    ):
+        send_in_channel(
+            subscription.reply_channel,
+            topic="pickups:pickupdate_deleted",
+            payload=payload,
+        )
 
 
 @receiver(post_save, sender=PickupDateCollector)
@@ -332,9 +451,14 @@ def send_pickup_deleted(sender, instance, **kwargs):
 def send_pickup_collector_updates(sender, instance, **kwargs):
     pickup = instance.pickupdate
     payload = PickupDateSerializer(pickup).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.place.group.members.all()
-                                                                    ).distinct():
-        send_in_channel(subscription.reply_channel, topic='pickups:pickupdate', payload=payload)
+    for subscription in (
+        ChannelSubscription.objects.recent()
+        .filter(user__in=pickup.place.group.members.all())
+        .distinct()
+    ):
+        send_in_channel(
+            subscription.reply_channel, topic="pickups:pickupdate", payload=payload
+        )
 
 
 # Pickup Date Series
@@ -342,18 +466,28 @@ def send_pickup_collector_updates(sender, instance, **kwargs):
 def send_pickup_series_updates(sender, instance, **kwargs):
     series = instance
     payload = PickupDateSeriesSerializer(series).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=series.place.group.members.all()
-                                                                    ).distinct():
-        send_in_channel(subscription.reply_channel, topic='pickups:series', payload=payload)
+    for subscription in (
+        ChannelSubscription.objects.recent()
+        .filter(user__in=series.place.group.members.all())
+        .distinct()
+    ):
+        send_in_channel(
+            subscription.reply_channel, topic="pickups:series", payload=payload
+        )
 
 
 @receiver(pre_delete, sender=PickupDateSeries)
 def send_pickup_series_delete(sender, instance, **kwargs):
     series = instance
     payload = PickupDateSeriesSerializer(series).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=series.place.group.members.all()
-                                                                    ).distinct():
-        send_in_channel(subscription.reply_channel, topic='pickups:series_deleted', payload=payload)
+    for subscription in (
+        ChannelSubscription.objects.recent()
+        .filter(user__in=series.place.group.members.all())
+        .distinct()
+    ):
+        send_in_channel(
+            subscription.reply_channel, topic="pickups:series_deleted", payload=payload
+        )
 
 
 # Offer
@@ -361,14 +495,28 @@ def send_pickup_series_delete(sender, instance, **kwargs):
 def send_offer_updates(sender, instance, created, **kwargs):
     offer = instance
     payload = OfferSerializer(offer).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=offer.group.members.all()).distinct():
-        if offer.status == OfferStatus.ACTIVE.value or \
-           offer.user == subscription.user or \
-           subscription.user.conversation_set.filter(id=offer.conversation.id).exists():
-            send_in_channel(subscription.reply_channel, topic='offers:offer', payload=payload)
+    for subscription in (
+        ChannelSubscription.objects.recent()
+        .filter(user__in=offer.group.members.all())
+        .distinct()
+    ):
+        if (
+            offer.status == OfferStatus.ACTIVE.value
+            or offer.user == subscription.user
+            or subscription.user.conversation_set.filter(
+                id=offer.conversation.id
+            ).exists()
+        ):
+            send_in_channel(
+                subscription.reply_channel, topic="offers:offer", payload=payload
+            )
         elif not created:
             # if the user cannot see it, it's deleted from their point of view!
-            send_in_channel(subscription.reply_channel, topic='offers:offer_deleted', payload=payload)
+            send_in_channel(
+                subscription.reply_channel,
+                topic="offers:offer_deleted",
+                payload=payload,
+            )
 
     if created:
         tasks.notify_new_offer_push_subscribers(offer)
@@ -378,18 +526,31 @@ def send_offer_updates(sender, instance, created, **kwargs):
 def send_offer_delete(sender, instance, **kwargs):
     offer = instance
     payload = OfferSerializer(offer).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=offer.group.members.all()).distinct():
-        send_in_channel(subscription.reply_channel, topic='offers:offer_deleted', payload=payload)
+    for subscription in (
+        ChannelSubscription.objects.recent()
+        .filter(user__in=offer.group.members.all())
+        .distinct()
+    ):
+        send_in_channel(
+            subscription.reply_channel, topic="offers:offer_deleted", payload=payload
+        )
 
 
 # Feedback
 @receiver(post_save, sender=Feedback)
 def send_feedback_updates(sender, instance, **kwargs):
     feedback = instance
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=feedback.about.place.group.members.all()
-                                                                    ).distinct():
-        payload = FeedbackSerializer(feedback, context={'request': MockRequest(user=subscription.user)}).data
-        send_in_channel(subscription.reply_channel, topic='feedback:feedback', payload=payload)
+    for subscription in (
+        ChannelSubscription.objects.recent()
+        .filter(user__in=feedback.about.place.group.members.all())
+        .distinct()
+    ):
+        payload = FeedbackSerializer(
+            feedback, context={"request": MockRequest(user=subscription.user)}
+        ).data
+        send_in_channel(
+            subscription.reply_channel, topic="feedback:feedback", payload=payload
+        )
 
 
 # Users
@@ -397,26 +558,30 @@ def send_feedback_updates(sender, instance, **kwargs):
 def send_auth_user_updates(sender, instance, **kwargs):
     """Send full details to the user"""
     user = instance
-    payload = AuthUserSerializer(user, context={'request': MockRequest(user=user)}).data
+    payload = AuthUserSerializer(user, context={"request": MockRequest(user=user)}).data
     for subscription in ChannelSubscription.objects.recent().filter(user=user):
-        send_in_channel(subscription.reply_channel, topic='auth:user', payload=payload)
+        send_in_channel(subscription.reply_channel, topic="auth:user", payload=payload)
 
 
 @receiver(user_logged_out)
 def notify_logged_out_user(sender, user, **kwargs):
     for subscription in ChannelSubscription.objects.recent().filter(user=user):
-        send_in_channel(subscription.reply_channel, topic='auth:logout', payload={})
+        send_in_channel(subscription.reply_channel, topic="auth:logout", payload={})
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def send_user_updates(sender, instance, **kwargs):
     """Send profile updates to everyone except the user"""
     user = instance
-    payload = UserSerializer(user, context={'request': MockRequest()}).data
-    user_groups = user.groups.values('id')
-    for subscription in ChannelSubscription.objects.recent().filter(user__groups__in=user_groups).exclude(user=user
-                                                                                                          ).distinct():
-        send_in_channel(subscription.reply_channel, topic='users:user', payload=payload)
+    payload = UserSerializer(user, context={"request": MockRequest()}).data
+    user_groups = user.groups.values("id")
+    for subscription in (
+        ChannelSubscription.objects.recent()
+        .filter(user__groups__in=user_groups)
+        .exclude(user=user)
+        .distinct()
+    ):
+        send_in_channel(subscription.reply_channel, topic="users:user", payload=payload)
 
 
 # History
@@ -424,8 +589,14 @@ def send_user_updates(sender, instance, **kwargs):
 def send_history_updates(sender, instance, **kwargs):
     history = instance
     payload = HistorySerializer(history).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=history.group.members.all()).distinct():
-        send_in_channel(subscription.reply_channel, topic='history:history', payload=payload)
+    for subscription in (
+        ChannelSubscription.objects.recent()
+        .filter(user__in=history.group.members.all())
+        .distinct()
+    ):
+        send_in_channel(
+            subscription.reply_channel, topic="history:history", payload=payload
+        )
 
 
 # Notification
@@ -433,16 +604,28 @@ def send_history_updates(sender, instance, **kwargs):
 def notification_saved(sender, instance, **kwargs):
     notification = instance
     payload = NotificationSerializer(notification).data
-    for subscription in ChannelSubscription.objects.recent().filter(user=notification.user):
-        send_in_channel(subscription.reply_channel, topic='notifications:notification', payload=payload)
+    for subscription in ChannelSubscription.objects.recent().filter(
+        user=notification.user
+    ):
+        send_in_channel(
+            subscription.reply_channel,
+            topic="notifications:notification",
+            payload=payload,
+        )
 
 
 @receiver(pre_delete, sender=Notification)
 def notification_deleted(sender, instance, **kwargs):
     notification = instance
     payload = NotificationSerializer(notification).data
-    for subscription in ChannelSubscription.objects.recent().filter(user=notification.user):
-        send_in_channel(subscription.reply_channel, topic='notifications:notification_deleted', payload=payload)
+    for subscription in ChannelSubscription.objects.recent().filter(
+        user=notification.user
+    ):
+        send_in_channel(
+            subscription.reply_channel,
+            topic="notifications:notification_deleted",
+            payload=payload,
+        )
 
 
 @receiver(post_save, sender=NotificationMeta)
@@ -450,15 +633,25 @@ def notification_meta_saved(sender, instance, **kwargs):
     meta = instance
     payload = NotificationMetaSerializer(meta).data
     for subscription in ChannelSubscription.objects.recent().filter(user=meta.user):
-        send_in_channel(subscription.reply_channel, topic='notifications:meta', payload=payload)
+        send_in_channel(
+            subscription.reply_channel, topic="notifications:meta", payload=payload
+        )
 
 
 # Issue
 @receiver(issue_changed)
 def send_issue_updates(sender, issue, **kwargs):
-    for subscription in ChannelSubscription.objects.recent().filter(user__issueparticipant__issue=issue).distinct():
-        payload = IssueSerializer(issue, context={'request': MockRequest(user=subscription.user)}).data
-        send_in_channel(subscription.reply_channel, topic='issues:issue', payload=payload)
+    for subscription in (
+        ChannelSubscription.objects.recent()
+        .filter(user__issueparticipant__issue=issue)
+        .distinct()
+    ):
+        payload = IssueSerializer(
+            issue, context={"request": MockRequest(user=subscription.user)}
+        ).data
+        send_in_channel(
+            subscription.reply_channel, topic="issues:issue", payload=payload
+        )
 
 
 # Community Feed
@@ -467,12 +660,16 @@ def community_feed_meta_saved(sender, instance, **kwargs):
     meta = instance
     payload = CommunityFeedMetaSerializer(meta).data
     for subscription in ChannelSubscription.objects.recent().filter(user=meta.user):
-        send_in_channel(subscription.reply_channel, topic='community_feed:meta', payload=payload)
+        send_in_channel(
+            subscription.reply_channel, topic="community_feed:meta", payload=payload
+        )
 
 
 # Status
 def send_conversation_status_update(subscriptions, changed_conversation=None):
-    for user, subscriptions in groupby(sorted(list(subscriptions), key=lambda x: x.user.id), key=lambda x: x.user):
+    for user, subscriptions in groupby(
+        sorted(list(subscriptions), key=lambda x: x.user.id), key=lambda x: x.user
+    ):
         payload = unread_conversations(user)
 
         if changed_conversation:
@@ -481,21 +678,23 @@ def send_conversation_status_update(subscriptions, changed_conversation=None):
             # Hence, set unread_wall_message_count to 0 if there are no unread messages for that conversation
             target_id = changed_conversation.target_id
             t = changed_conversation.type()
-            if t == 'group' and target_id not in payload['groups']:
-                payload['groups'][target_id] = {'unread_wall_message_count': 0}
-            elif t == 'place' and target_id not in payload['places']:
-                payload['places'][target_id] = {'unread_wall_message_count': 0}
+            if t == "group" and target_id not in payload["groups"]:
+                payload["groups"][target_id] = {"unread_wall_message_count": 0}
+            elif t == "place" and target_id not in payload["places"]:
+                payload["places"][target_id] = {"unread_wall_message_count": 0}
 
         for subscription in subscriptions:
-            send_in_channel(subscription.reply_channel, topic='status', payload=payload)
+            send_in_channel(subscription.reply_channel, topic="status", payload=payload)
 
 
 @receiver(new_conversation_message)
 def new_conversation_message_to_status(sender, message, **kwargs):
     conversation = message.conversation
     send_conversation_status_update(
-        ChannelSubscription.objects.recent().filter(user__in=conversation.participants.all()
-                                                    ).exclude(user=conversation.latest_message.author).distinct(),
+        ChannelSubscription.objects.recent()
+        .filter(user__in=conversation.participants.all())
+        .exclude(user=conversation.latest_message.author)
+        .distinct(),
     )
 
 
@@ -503,8 +702,10 @@ def new_conversation_message_to_status(sender, message, **kwargs):
 def new_thread_message_to_status(sender, message, **kwargs):
     thread = message.thread
     send_conversation_status_update(
-        ChannelSubscription.objects.recent().filter(user__in=thread.conversation.participants.all()
-                                                    ).exclude(user=thread.latest_message.author).distinct(),
+        ChannelSubscription.objects.recent()
+        .filter(user__in=thread.conversation.participants.all())
+        .exclude(user=thread.latest_message.author)
+        .distinct(),
     )
 
 
@@ -512,7 +713,9 @@ def new_thread_message_to_status(sender, message, **kwargs):
 def conversation_participant_saved(sender, instance, **kwargs):
     # user opened the latest messages menu
     meta = instance
-    send_conversation_status_update(ChannelSubscription.objects.recent().filter(user=meta.user))
+    send_conversation_status_update(
+        ChannelSubscription.objects.recent().filter(user=meta.user)
+    )
 
 
 @receiver(conversation_marked_seen)
@@ -526,7 +729,9 @@ def conversation_marked_seen_to_status(sender, participant, **kwargs):
 
 @receiver(thread_marked_seen)
 def conversation_thread_marked_to_status(sender, participant, **kwargs):
-    send_conversation_status_update(ChannelSubscription.objects.recent().filter(user=participant.user).distinct())
+    send_conversation_status_update(
+        ChannelSubscription.objects.recent().filter(user=participant.user).distinct()
+    )
 
 
 @receiver(post_delete, sender=ConversationParticipant)
@@ -544,9 +749,9 @@ def send_notification_status_update(user):
     count = unseen_notification_count(user)
     for subscription in ChannelSubscription.objects.recent().filter(user=user):
         send_in_channel(
-            subscription.reply_channel, topic='status', payload={
-                'unseen_notification_count': count,
-            }
+            subscription.reply_channel,
+            topic="status",
+            payload={"unseen_notification_count": count,},
         )
 
 
@@ -566,16 +771,26 @@ def notification_meta_to_status(sender, instance, **kwargs):
 @receiver(post_save, sender=Application)
 def application_saved(sender, instance, **kwargs):
     application = instance
-    for user, subscriptions in groupby(sorted(list(
-            ChannelSubscription.objects.recent().filter(user__in=application.group.members.all())),
-                                              key=lambda x: x.user.id), key=lambda x: x.user):
+    for user, subscriptions in groupby(
+        sorted(
+            list(
+                ChannelSubscription.objects.recent().filter(
+                    user__in=application.group.members.all()
+                )
+            ),
+            key=lambda x: x.user.id,
+        ),
+        key=lambda x: x.user,
+    ):
 
         groups = defaultdict(dict)
         for group_id, count in pending_applications(user):
-            groups[group_id]['pending_application_count'] = count
+            groups[group_id]["pending_application_count"] = count
 
         for subscription in subscriptions:
-            send_in_channel(subscription.reply_channel, topic='status', payload={'groups': groups})
+            send_in_channel(
+                subscription.reply_channel, topic="status", payload={"groups": groups}
+            )
 
 
 @receiver(post_save, sender=PickupDate)
@@ -587,16 +802,26 @@ def pickup_date_saved(sender, instance, **kwargs):
         return
     # TODO don't send if 'is_done' did not change
 
-    for user, subscriptions in groupby(sorted(list(
-            ChannelSubscription.objects.recent().filter(user__in=pickup.collectors.all())), key=lambda x: x.user.id),
-                                       key=lambda x: x.user):
+    for user, subscriptions in groupby(
+        sorted(
+            list(
+                ChannelSubscription.objects.recent().filter(
+                    user__in=pickup.collectors.all()
+                )
+            ),
+            key=lambda x: x.user.id,
+        ),
+        key=lambda x: x.user,
+    ):
 
         groups = defaultdict(dict)
         for group_id, count in get_feedback_possible(user):
-            groups[group_id]['feedback_possible_count'] = count
+            groups[group_id]["feedback_possible_count"] = count
 
         for subscription in subscriptions:
-            send_in_channel(subscription.reply_channel, topic='status', payload={'groups': groups})
+            send_in_channel(
+                subscription.reply_channel, topic="status", payload={"groups": groups}
+            )
 
 
 @receiver(post_save, sender=Feedback)
@@ -610,9 +835,9 @@ def feedback_saved(sender, instance, created, **kwargs):
 
     groups = defaultdict(dict)
     for group_id, count in get_feedback_possible(user):
-        groups[group_id]['feedback_possible_count'] = count
+        groups[group_id]["feedback_possible_count"] = count
 
-    payload = {'groups': groups}
+    payload = {"groups": groups}
 
     for subscription in ChannelSubscription.objects.recent().filter(user=user):
-        send_in_channel(subscription.reply_channel, topic='status', payload=payload)
+        send_in_channel(subscription.reply_channel, topic="status", payload=payload)

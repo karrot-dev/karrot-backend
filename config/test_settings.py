@@ -15,21 +15,16 @@ DEBUG = False
 TEMPLATE_DEBUG = False
 
 PASSWORD_HASHERS = [
-    'django.contrib.auth.hashers.MD5PasswordHasher',
+    "django.contrib.auth.hashers.MD5PasswordHasher",
 ]
 
 MIDDLEWARE_CLASSES = [
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
 ]
 
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache"
-    }
-}
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
 
 EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
-

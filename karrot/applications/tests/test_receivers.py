@@ -8,11 +8,17 @@ class TestApplicationReceivers(APITestCase):
     def setUp(self):
         self.new_member = UserFactory()
         self.existing_member = UserFactory()
-        self.group = GroupFactory(members=[self.existing_member], application_questions='')
+        self.group = GroupFactory(
+            members=[self.existing_member], application_questions=""
+        )
 
     def test_group_add_member_marks_existing_messages_as_read(self):
-        self.group.conversation.messages.create(author=self.existing_member, content='foo')
-        second_message = self.group.conversation.messages.create(author=self.existing_member, content='bar')
+        self.group.conversation.messages.create(
+            author=self.existing_member, content="foo"
+        )
+        second_message = self.group.conversation.messages.create(
+            author=self.existing_member, content="bar"
+        )
 
         self.group.add_member(self.new_member)
 

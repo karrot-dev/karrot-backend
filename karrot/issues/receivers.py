@@ -2,8 +2,10 @@ from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 from karrot.issues.models import Issue, Voting, IssueParticipant
-from karrot.issues.tasks import notify_about_new_conflict_resolution, \
-    notify_about_continued_conflict_resolution
+from karrot.issues.tasks import (
+    notify_about_new_conflict_resolution,
+    notify_about_continued_conflict_resolution,
+)
 from karrot.conversations.models import Conversation
 from karrot.groups.models import GroupNotificationType, GroupMembership
 
@@ -23,7 +25,9 @@ def issue_created(sender, instance, created, **kwargs):
     # add conversation
     conversation = Conversation.objects.get_or_create_for_target(issue)
     for membership in group.groupmembership_set.editors():
-        notifications_enabled = GroupNotificationType.CONFLICT_RESOLUTION in membership.notification_types
+        notifications_enabled = (
+            GroupNotificationType.CONFLICT_RESOLUTION in membership.notification_types
+        )
         conversation.join(membership.user, muted=not notifications_enabled)
 
     # make sure affected user is in conversation and has email notifications enabled

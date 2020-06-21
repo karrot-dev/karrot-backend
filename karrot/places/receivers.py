@@ -48,5 +48,7 @@ def subscription_removed(sender, instance, **kwargs):
 def group_member_removed(sender, instance, **kwargs):
     membership = instance
 
-    for subscription in PlaceSubscription.objects.filter(place__group=membership.group, user=membership.user):
+    for subscription in PlaceSubscription.objects.filter(
+        place__group=membership.group, user=membership.user
+    ):
         subscription.delete()

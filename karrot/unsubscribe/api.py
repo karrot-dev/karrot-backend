@@ -3,11 +3,14 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from karrot.unsubscribe.serializers import TokenUnsubscribeSerializer, UnsubscribeSerializer
+from karrot.unsubscribe.serializers import (
+    TokenUnsubscribeSerializer,
+    UnsubscribeSerializer,
+)
 
 
 class TokenUnsubscribeView(views.APIView):
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
 
     @staticmethod
     def post(request, token):
@@ -16,7 +19,7 @@ class TokenUnsubscribeView(views.APIView):
 
         These are the things people can click in emails regardless of whether they are logged in
         """
-        serializer = TokenUnsubscribeSerializer(data={'token': token, **request.data})
+        serializer = TokenUnsubscribeSerializer(data={"token": token, **request.data})
         if serializer.is_valid():
             serializer.save()
             return Response({}, status=status.HTTP_200_OK)
@@ -24,7 +27,7 @@ class TokenUnsubscribeView(views.APIView):
 
 
 class UnsubscribeViewSet(GenericViewSet):
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
     serializer_class = UnsubscribeSerializer
 
     def create(self, request, **kwargs):

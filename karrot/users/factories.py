@@ -1,5 +1,11 @@
 from django.contrib.auth import get_user_model
-from factory import DjangoModelFactory, CREATE_STRATEGY, LazyAttribute, PostGeneration, Sequence
+from factory import (
+    DjangoModelFactory,
+    CREATE_STRATEGY,
+    LazyAttribute,
+    PostGeneration,
+    Sequence,
+)
 
 from karrot.utils.tests.fake import faker
 
@@ -16,7 +22,9 @@ class UserFactory(DjangoModelFactory):
     description = LazyAttribute(lambda _: faker.text())
 
     # Use display_name as password, as it is readable
-    password = PostGeneration(lambda obj, *args, **kwargs: obj.set_password(obj.display_name))
+    password = PostGeneration(
+        lambda obj, *args, **kwargs: obj.set_password(obj.display_name)
+    )
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):

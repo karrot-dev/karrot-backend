@@ -9,18 +9,28 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from karrot.conversations.api import RetrievePrivateConversationMixin
-from karrot.users.serializers import UserSerializer, UserInfoSerializer, UserProfileSerializer
+from karrot.users.serializers import (
+    UserSerializer,
+    UserInfoSerializer,
+    UserProfileSerializer,
+)
 
 
-class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, RetrievePrivateConversationMixin, GenericViewSet):
+class UserViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    RetrievePrivateConversationMixin,
+    GenericViewSet,
+):
     """
     User Profiles
     """
+
     queryset = get_user_model().objects.active()
     serializer_class = UserSerializer
-    filter_backends = (filters.SearchFilter, )
-    permission_classes = (IsAuthenticated, )
-    search_fields = ('display_name', )
+    filter_backends = (filters.SearchFilter,)
+    permission_classes = (IsAuthenticated,)
+    search_fields = ("display_name",)
 
     def retrieve(self, request, *args, **kwargs):
         """Get one user profile"""
@@ -53,24 +63,28 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, RetrievePriv
         groups = self.request.user.groups.all()
         is_applicant_of_group = Q(application__group__in=groups)
 
-        return self.queryset.filter(is_member_of_group | is_applicant_of_group | is_self).distinct()
+        return self.queryset.filter(
+            is_member_of_group | is_applicant_of_group | is_self
+        ).distinct()
 
 
 class UserPagination(CursorPagination):
     page_size = 20
-    ordering = 'id'
+    ordering = "id"
 
 
 class UserInfoViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
     """
     Public User Profiles (for now only users that share a conversation)
     """
+
     queryset = get_user_model().objects.active()
     serializer_class = UserInfoSerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
     pagination_class = UserPagination
 
     def get_queryset(self):
         return self.queryset.filter(
-            Q(conversation__in=self.request.user.conversation_set.all()) | Q(id=self.request.user.id)
+            Q(conversation__in=self.request.user.conversation_set.all())
+            | Q(id=self.request.user.id)
         ).distinct()

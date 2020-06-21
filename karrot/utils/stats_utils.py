@@ -7,17 +7,16 @@ def periodic_task(name, seconds=None, extra_fields=None):
     if extra_fields is None:
         extra_fields = {}
     if seconds is not None:
-        extra_fields['seconds'] = seconds
-    write_points([{
-        'measurement': 'karrot.periodic',
-        'tags': {
-            'name': name,
-        },
-        'fields': {
-            'value': 1,
-            **extra_fields
-        },
-    }])
+        extra_fields["seconds"] = seconds
+    write_points(
+        [
+            {
+                "measurement": "karrot.periodic",
+                "tags": {"name": name,},
+                "fields": {"value": 1, **extra_fields},
+            }
+        ]
+    )
 
 
 class timer:

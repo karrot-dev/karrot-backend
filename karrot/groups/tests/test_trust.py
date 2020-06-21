@@ -23,30 +23,26 @@ class TestTrustThreshold(TestCase):
     def test_min_threshold(self):
         self.create_group_with_members(1)
         self.assertEqual(
-            self.group.trust_threshold_for_newcomer(),
-            1,
+            self.group.trust_threshold_for_newcomer(), 1,
         )
 
     def test_ramp_up_threshold(self):
         self.create_group_with_members(5)
         self.assertEqual(
-            self.group.trust_threshold_for_newcomer(),
-            2,
+            self.group.trust_threshold_for_newcomer(), 2,
         )
 
     def test_max_threshold(self):
         self.create_group_with_members(6)
         self.assertEqual(
-            self.group.trust_threshold_for_newcomer(),
-            3,
+            self.group.trust_threshold_for_newcomer(), 3,
         )
 
     def test_ignores_recently_joined_users(self):
         self.create_group_with_members(1)
         [self.group.add_member(UserFactory()) for _ in range(5)]
         self.assertEqual(
-            self.group.trust_threshold_for_newcomer(),
-            1,
+            self.group.trust_threshold_for_newcomer(), 1,
         )
 
 
@@ -64,9 +60,11 @@ class TestTrustReceiver(TestCase):
 
         self.assertTrue(group.is_editor(newcomer))
         self.assertEqual(len(mail.outbox), 1)
-        self.assertIn('You gained editing permissions', mail.outbox[0].subject)
+        self.assertIn("You gained editing permissions", mail.outbox[0].subject)
 
-        self.assertEqual(History.objects.filter(typus=HistoryTypus.MEMBER_BECAME_EDITOR).count(), 1)
+        self.assertEqual(
+            History.objects.filter(typus=HistoryTypus.MEMBER_BECAME_EDITOR).count(), 1
+        )
 
     def test_do_not_send_notification_again(self):
         editor = UserFactory()
@@ -80,7 +78,9 @@ class TestTrustReceiver(TestCase):
         Trust.objects.create(membership=membership, given_by=editor2)
 
         self.assertEqual(len(mail.outbox), 0)
-        self.assertEqual(History.objects.filter(typus=HistoryTypus.MEMBER_BECAME_EDITOR).count(), 0)
+        self.assertEqual(
+            History.objects.filter(typus=HistoryTypus.MEMBER_BECAME_EDITOR).count(), 0
+        )
 
     def test_remove_trust_when_giver_leaves_group(self):
         editor = UserFactory()
@@ -115,7 +115,7 @@ class TestTrustAPI(APITestCase):
     def test_give_trust(self):
         self.client.force_login(user=self.member1)
 
-        url = reverse('group-trust-user', args=(self.group.id, self.member2.id))
+        url = reverse("group-trust-user", args=(self.group.id, self.member2.id))
         response = self.client.post(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -132,7 +132,7 @@ class TestTrustAPI(APITestCase):
         Trust.objects.create(membership=membership, given_by=self.member1)
         self.client.force_login(user=self.member1)
 
-        url = reverse('group-trust-user', args=(self.group.id, self.member2.id))
+        url = reverse("group-trust-user", args=(self.group.id, self.member2.id))
         response = self.client.post(url)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -140,7 +140,7 @@ class TestTrustAPI(APITestCase):
     def test_cannot_give_trust_to_self(self):
         self.client.force_login(user=self.member1)
 
-        url = reverse('group-trust-user', args=(self.group.id, self.member1.id))
+        url = reverse("group-trust-user", args=(self.group.id, self.member1.id))
         response = self.client.post(url)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -166,6 +166,12 @@ class TestTrustList(APITestCase):
 
     def test_list_trust_for_group(self):
         self.client.force_login(user=self.member1)
-        response = self.client.get('/api/groups/{}/'.format(self.group.id))
-        self.assertEqual(response.data['memberships'][self.member1.id]['trusted_by'], [self.member2.id])
-        self.assertEqual(response.data['memberships'][self.member2.id]['trusted_by'], [self.member1.id])
+        response = self.client.get("/api/groups/{}/".format(self.group.id))
+        self.assertEqual(
+            response.data["memberships"][self.member1.id]["trusted_by"],
+            [self.member2.id],
+        )
+        self.assertEqual(
+            response.data["memberships"][self.member2.id]["trusted_by"],
+            [self.member1.id],
+        )

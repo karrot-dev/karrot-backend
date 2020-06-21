@@ -18,10 +18,10 @@ def render(text, truncate_words=None):
             MagiclinkExtension(),
             DeleteSubExtension(subscript=False),
             Nl2BrExtension(),
-        ]
+        ],
     )
-    markdown_attrs['img'].append('class')
-    markdown_tags.append('pre')
+    markdown_attrs["img"].append("class")
+    markdown_tags.append("pre")
     clean_html = bleach.clean(html, markdown_tags, markdown_attrs)
 
     if truncate_words:

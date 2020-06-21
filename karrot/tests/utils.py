@@ -19,8 +19,11 @@ class TestMigrations(TestCase):
     migrate_to = None
 
     def setUp(self):
-        assert self.migrate_from and self.migrate_to, \
-            "TestCase '{}' must define migrate_from and migrate_to properties".format(type(self).__name__)
+        assert (
+            self.migrate_from and self.migrate_to
+        ), "TestCase '{}' must define migrate_from and migrate_to properties".format(
+            type(self).__name__
+        )
 
         executor = MigrationExecutor(connection)
         old_apps = executor.loader.project_state(self.migrate_from).apps
@@ -45,8 +48,8 @@ class ExtractPaginationMixin(object):
     def get_results(self, *args, **kwargs):
         """Overrides response.data to remove the pagination control in tests"""
         response = self.client.get(*args, **kwargs)
-        if 'results' in response.data:
-            response.data = response.data['results']
+        if "results" in response.data:
+            response.data = response.data["results"]
         return response
 
 

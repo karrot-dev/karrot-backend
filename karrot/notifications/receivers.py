@@ -36,9 +36,7 @@ def user_became_editor(sender, instance, **kwargs):
     Notification.objects.create(
         type=NotificationType.YOU_BECAME_EDITOR.value,
         user=membership.user,
-        context={
-            'group': membership.group.id,
-        },
+        context={"group": membership.group.id,},
     )
 
     if membership.group.is_playground():
@@ -48,10 +46,7 @@ def user_became_editor(sender, instance, **kwargs):
         Notification.objects.create(
             type=NotificationType.USER_BECAME_EDITOR.value,
             user=member,
-            context={
-                'group': membership.group.id,
-                'user': membership.user.id,
-            },
+            context={"group": membership.group.id, "user": membership.user.id,},
         )
 
 
@@ -67,9 +62,9 @@ def new_applicant(sender, instance, created, **kwargs):
             type=NotificationType.NEW_APPLICANT.value,
             user=member,
             context={
-                'group': application.group.id,
-                'user': application.user.id,
-                'application': application.id,
+                "group": application.group.id,
+                "user": application.user.id,
+                "application": application.id,
             },
         )
 
@@ -79,9 +74,9 @@ def application_decided(sender, instance, **kwargs):
     application = instance
 
     if application.status not in (
-            ApplicationStatus.ACCEPTED.value,
-            ApplicationStatus.DECLINED.value,
-            ApplicationStatus.WITHDRAWN.value,
+        ApplicationStatus.ACCEPTED.value,
+        ApplicationStatus.DECLINED.value,
+        ApplicationStatus.WITHDRAWN.value,
     ):
         return
 
@@ -93,8 +88,7 @@ def application_decided(sender, instance, **kwargs):
 
     # clean up new_application notifications for this application
     Notification.objects.filter(
-        type=NotificationType.NEW_APPLICANT.value,
-        context__application=application.id,
+        type=NotificationType.NEW_APPLICANT.value, context__application=application.id,
     ).delete()
 
     # do not create more notifications if application was withdrawn
@@ -102,16 +96,13 @@ def application_decided(sender, instance, **kwargs):
         return
 
     notification_data = {
-        'context': {
-            'group': application.group.id,
-            'application': application.id,
-        },
+        "context": {"group": application.group.id, "application": application.id,},
     }
 
     if application.status == ApplicationStatus.ACCEPTED.value:
-        notification_data['type'] = NotificationType.APPLICATION_ACCEPTED.value
+        notification_data["type"] = NotificationType.APPLICATION_ACCEPTED.value
     elif application.status == ApplicationStatus.DECLINED.value:
-        notification_data['type'] = NotificationType.APPLICATION_DECLINED.value
+        notification_data["type"] = NotificationType.APPLICATION_DECLINED.value
 
     Notification.objects.create(user=application.user, **notification_data)
 
@@ -139,10 +130,7 @@ def feedback_possible(sender, instance, **kwargs):
         Notification.objects.create(
             user=user,
             type=NotificationType.FEEDBACK_POSSIBLE.value,
-            context={
-                'group': pickup.place.group.id,
-                'pickup': pickup.id,
-            },
+            context={"group": pickup.place.group.id, "pickup": pickup.id,},
             expires_at=expiry_date,
         )
 
@@ -159,9 +147,9 @@ def new_place(sender, instance, created, **kwargs):
             user=user,
             type=NotificationType.NEW_PLACE.value,
             context={
-                'group': place.group.id,
-                'place': place.id,
-                'user': place.last_changed_by_id,
+                "group": place.group.id,
+                "place": place.id,
+                "user": place.last_changed_by_id,
             },
         )
 
@@ -173,14 +161,16 @@ def new_member(sender, instance, created, **kwargs):
 
     membership = instance
 
-    for user in membership.group.members.exclude(id__in=(membership.user_id, membership.added_by_id)):
+    for user in membership.group.members.exclude(
+        id__in=(membership.user_id, membership.added_by_id)
+    ):
         Notification.objects.create(
             user=user,
             type=NotificationType.NEW_MEMBER.value,
             context={
-                'group': membership.group_id,
-                'user': membership.user_id,
-                'added_by': membership.added_by_id,
+                "group": membership.group_id,
+                "user": membership.user_id,
+                "added_by": membership.added_by_id,
             },
         )
 
@@ -208,15 +198,16 @@ def invitation_accepted(sender, instance, **kwargs):
         return
 
     # search for the user who accepted the invitation, as we don't have access to the request object
-    user = invitation.group.groupmembership_set.filter(added_by=invitation.invited_by).latest('created_at').user
+    user = (
+        invitation.group.groupmembership_set.filter(added_by=invitation.invited_by)
+        .latest("created_at")
+        .user
+    )
 
     Notification.objects.create(
         user=invitation.invited_by,
         type=NotificationType.INVITATION_ACCEPTED.value,
-        context={
-            'group': invitation.group.id,
-            'user': user.id
-        }
+        context={"group": invitation.group.id, "user": user.id},
     )
 
 
@@ -225,10 +216,10 @@ def invitation_accepted(sender, instance, **kwargs):
 def delete_pickup_notifications_when_collector_leaves(sender, instance, **kwargs):
     collector = instance
 
-    Notification.objects.order_by().not_expired()\
-        .filter(Q(type=NotificationType.PICKUP_UPCOMING.value) | Q(type=NotificationType.PICKUP_DISABLED.value))\
-        .filter(user=collector.user, context__pickup_collector=collector.id)\
-        .delete()
+    Notification.objects.order_by().not_expired().filter(
+        Q(type=NotificationType.PICKUP_UPCOMING.value)
+        | Q(type=NotificationType.PICKUP_DISABLED.value)
+    ).filter(user=collector.user, context__pickup_collector=collector.id).delete()
 
 
 @receiver(pre_save, sender=PickupDate)
@@ -244,17 +235,16 @@ def pickup_modified(sender, instance, **kwargs):
     collectors = pickup.pickupdatecollector_set
 
     def delete_notifications_for_collectors(collectors, type):
-        Notification.objects.order_by().not_expired() \
-            .filter(type=type) \
-            .annotate(collector_id=Cast(KeyTextTransform('pickup_collector', 'context'), IntegerField())) \
-            .filter(collector_id__in=collectors.values_list('id', flat=True)) \
-            .delete()
+        Notification.objects.order_by().not_expired().filter(type=type).annotate(
+            collector_id=Cast(
+                KeyTextTransform("pickup_collector", "context"), IntegerField()
+            )
+        ).filter(collector_id__in=collectors.values_list("id", flat=True)).delete()
 
     if old.is_disabled != pickup.is_disabled:
         if pickup.is_disabled:
             delete_notifications_for_collectors(
-                collectors=collectors,
-                type=NotificationType.PICKUP_UPCOMING.value,
+                collectors=collectors, type=NotificationType.PICKUP_UPCOMING.value,
             )
 
             Notification.objects.create_for_pickup_collectors(
@@ -279,11 +269,13 @@ def pickup_modified(sender, instance, **kwargs):
 # Issue
 def create_notification_about_issue(issue, user, type):
     return Notification.objects.create(
-        user=user, type=type, context={
-            'issue': issue.id,
-            'group': issue.group.id,
-            'user': issue.affected_user.id,
-        }
+        user=user,
+        type=type,
+        context={
+            "issue": issue.id,
+            "group": issue.group.id,
+            "user": issue.affected_user.id,
+        },
     )
 
 
@@ -302,9 +294,10 @@ def conflict_resolution_issue_created_or_continued(sender, instance, created, **
                 issue=issue,
                 user=user,
                 type=(
-                    NotificationType.CONFLICT_RESOLUTION_CREATED.value if user.id != issue.affected_user_id else
-                    NotificationType.CONFLICT_RESOLUTION_CREATED_ABOUT_YOU.value
-                )
+                    NotificationType.CONFLICT_RESOLUTION_CREATED.value
+                    if user.id != issue.affected_user_id
+                    else NotificationType.CONFLICT_RESOLUTION_CREATED_ABOUT_YOU.value
+                ),
             )
     else:
         for user in issue.participants.distinct():
@@ -312,9 +305,10 @@ def conflict_resolution_issue_created_or_continued(sender, instance, created, **
                 issue=issue,
                 user=user,
                 type=(
-                    NotificationType.CONFLICT_RESOLUTION_CONTINUED.value if user.id != issue.affected_user_id else
-                    NotificationType.CONFLICT_RESOLUTION_CONTINUED_ABOUT_YOU.value
-                )
+                    NotificationType.CONFLICT_RESOLUTION_CONTINUED.value
+                    if user.id != issue.affected_user_id
+                    else NotificationType.CONFLICT_RESOLUTION_CONTINUED_ABOUT_YOU.value
+                ),
             )
 
 
@@ -337,8 +331,9 @@ def conflict_resolution_issue_decided(sender, instance, **kwargs):
             user=user,
             type=(
                 NotificationType.CONFLICT_RESOLUTION_DECIDED.value
-                if user.id != issue.affected_user_id else NotificationType.CONFLICT_RESOLUTION_DECIDED_ABOUT_YOU.value
-            )
+                if user.id != issue.affected_user_id
+                else NotificationType.CONFLICT_RESOLUTION_DECIDED_ABOUT_YOU.value
+            ),
         )
 
     accepted_option = issue.latest_voting().accepted_option
@@ -346,9 +341,7 @@ def conflict_resolution_issue_decided(sender, instance, **kwargs):
         Notification.objects.create(
             user=issue.affected_user,
             type=NotificationType.CONFLICT_RESOLUTION_YOU_WERE_REMOVED.value,
-            context={
-                'group': issue.group.id,
-            }
+            context={"group": issue.group.id,},
         )
 
 
@@ -360,4 +353,6 @@ def make_notification_meta(sender, instance, created, **kwargs):
     user = instance
     # This is equivalent of not setting marked_at, by choosing a the earliest date possible
     # (but it has to be timezone-aware, otherwise there will be comparison errors)
-    NotificationMeta.objects.get_or_create({'marked_at': datetime.min.replace(tzinfo=utc)}, user=user)
+    NotificationMeta.objects.get_or_create(
+        {"marked_at": datetime.min.replace(tzinfo=utc)}, user=user
+    )

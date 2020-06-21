@@ -12,49 +12,48 @@ from karrot.utils.misc import find_changed
 class PlaceHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = PlaceModel
-        fields = '__all__'
+        fields = "__all__"
 
 
 class PlaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlaceModel
         fields = [
-            'id',
-            'name',
-            'description',
-            'group',
-            'address',
-            'latitude',
-            'longitude',
-            'weeks_in_advance',
-            'status',
-            'is_subscribed',
-            'subscribers',
+            "id",
+            "name",
+            "description",
+            "group",
+            "address",
+            "latitude",
+            "longitude",
+            "weeks_in_advance",
+            "status",
+            "is_subscribed",
+            "subscribers",
         ]
         extra_kwargs = {
-            'name': {
-                'min_length': 3,
-            },
-            'description': {
-                'trim_whitespace': False,
-                'max_length': settings.DESCRIPTION_MAX_LENGTH,
+            "name": {"min_length": 3,},
+            "description": {
+                "trim_whitespace": False,
+                "max_length": settings.DESCRIPTION_MAX_LENGTH,
             },
         }
         read_only_fields = [
-            'id',
-            'subscribers',
+            "id",
+            "subscribers",
         ]
 
     status = serializers.ChoiceField(
-        choices=[status.value for status in PlaceStatus], default=PlaceModel.DEFAULT_STATUS
+        choices=[status.value for status in PlaceStatus],
+        default=PlaceModel.DEFAULT_STATUS,
     )
     is_subscribed = serializers.SerializerMethodField()
 
     def get_is_subscribed(self, place):
-        return any(u == self.context['request'].user for u in place.subscribers.all())
+        return any(u == self.context["request"].user for u in place.subscribers.all())
 
     def save(self, **kwargs):
-        return super().save(last_changed_by=self.context['request'].user)
+        return super().save(last_changed_by=self.context["request"].user)
 
     def create(self, validated_data):
         place = super().create(validated_data)
@@ -64,9 +63,7 @@ class PlaceSerializer(serializers.ModelSerializer):
             typus=HistoryTypus.STORE_CREATE,
             group=place.group,
             place=place,
-            users=[
-                self.context['request'].user,
-            ],
+            users=[self.context["request"].user,],
             payload=self.initial_data,
             after=PlaceHistorySerializer(place).data,
         )
@@ -74,18 +71,19 @@ class PlaceSerializer(serializers.ModelSerializer):
         return place
 
     def validate_group(self, group):
-        if not group.is_member(self.context['request'].user):
-            raise PermissionDenied(_('You are not a member of this group.'))
-        if not group.is_editor(self.context['request'].user):
-            raise PermissionDenied(_('You need to be a group editor'))
+        if not group.is_member(self.context["request"].user):
+            raise PermissionDenied(_("You are not a member of this group."))
+        if not group.is_editor(self.context["request"].user):
+            raise PermissionDenied(_("You need to be a group editor"))
         return group
 
     def validate_weeks_in_advance(self, w):
         if w < 1:
-            raise serializers.ValidationError(_('Set at least one week in advance'))
+            raise serializers.ValidationError(_("Set at least one week in advance"))
         if w > settings.STORE_MAX_WEEKS_IN_ADVANCE:
             raise serializers.ValidationError(
-                _('Do not set more than %(count)s weeks in advance') % {'count': settings.STORE_MAX_WEEKS_IN_ADVANCE}
+                _("Do not set more than %(count)s weeks in advance")
+                % {"count": settings.STORE_MAX_WEEKS_IN_ADVANCE}
             )
         return w
 
@@ -115,9 +113,8 @@ class PlaceUpdateSerializer(PlaceSerializer):
                 typus=HistoryTypus.STORE_MODIFY,
                 group=place.group,
                 place=place,
-                users=[self.context['request'].user],
-                payload={k: self.initial_data.get(k)
-                         for k in validated_data.keys()},
+                users=[self.context["request"].user],
+                payload={k: self.initial_data.get(k) for k in validated_data.keys()},
                 before=before_data,
                 after=after_data,
             )
@@ -129,15 +126,19 @@ class PlaceSubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlaceSubscription
         fields = [
-            'place',
+            "place",
         ]
 
     def save(self, **kwargs):
-        return super().save(user=self.context['request'].user)
+        return super().save(user=self.context["request"].user)
 
     def validate_place(self, place):
-        if place.placesubscription_set.filter(user=self.context['request'].user).exists():
-            raise serializers.ValidationError(_('You are already subscribed to this place'))
+        if place.placesubscription_set.filter(
+            user=self.context["request"].user
+        ).exists():
+            raise serializers.ValidationError(
+                _("You are already subscribed to this place")
+            )
         return place
 
     def create(self, validated_data):

@@ -9,7 +9,7 @@ from karrot.offers.factories import OfferFactory
 from karrot.tests.utils import execute_scheduled_tasks_immediately
 from karrot.users.factories import VerifiedUserFactory
 
-image_path = os.path.join(os.path.dirname(__file__), './photo.jpg')
+image_path = os.path.join(os.path.dirname(__file__), "./photo.jpg")
 
 
 class TestTasks(TransactionTestCase):
@@ -23,7 +23,9 @@ class TestTasks(TransactionTestCase):
 
         with execute_scheduled_tasks_immediately():
             with transaction.atomic():
-                self.offer = OfferFactory(group=self.group, user=self.user, images=[image_path])
+                self.offer = OfferFactory(
+                    group=self.group, user=self.user, images=[image_path]
+                )
 
         email_addresses = [address for m in mail.outbox for address in m.to]
         self.assertEqual(len(mail.outbox), 1)

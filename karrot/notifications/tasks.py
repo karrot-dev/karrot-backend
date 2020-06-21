@@ -11,29 +11,36 @@ from karrot.utils import stats_utils
 from karrot.utils.stats_utils import timer
 
 
-@db_periodic_task(crontab(minute='*'))  # every minute
+@db_periodic_task(crontab(minute="*"))  # every minute
 def delete_expired_notifications():
     with timer() as t:
         Notification.objects.expired().delete()
-    stats_utils.periodic_task('notifications__delete_expired_notifications', seconds=t.elapsed_seconds)
+    stats_utils.periodic_task(
+        "notifications__delete_expired_notifications", seconds=t.elapsed_seconds
+    )
 
 
-@db_periodic_task(crontab(minute='*'))  # every minute
+@db_periodic_task(crontab(minute="*"))  # every minute
 def create_pickup_upcoming_notifications():
     # Oh oh, this is a bit complex. As notification.context is a JSONField, the collectors_already_notified subquery
     # would return a jsonb object by default (which can't be compared to integer).
     # We can work around this by transforming the property value to text ("->>" lookup) and then casting to integer
     with timer() as t:
-        collectors_already_notified = Notification.objects.\
-            order_by().\
-            filter(type=NotificationType.PICKUP_UPCOMING.value).\
-            exclude(context__pickup_collector=None).\
-            values_list(Cast(KeyTextTransform('pickup_collector', 'context'), IntegerField()), flat=True)
+        collectors_already_notified = (
+            Notification.objects.order_by()
+            .filter(type=NotificationType.PICKUP_UPCOMING.value)
+            .exclude(context__pickup_collector=None)
+            .values_list(
+                Cast(KeyTextTransform("pickup_collector", "context"), IntegerField()),
+                flat=True,
+            )
+        )
         pickups_due_soon = PickupDate.objects.order_by().due_soon()
-        collectors = PickupDateCollector.objects.\
-            filter(pickupdate__in=pickups_due_soon).\
-            exclude(id__in=collectors_already_notified).\
-            distinct()
+        collectors = (
+            PickupDateCollector.objects.filter(pickupdate__in=pickups_due_soon)
+            .exclude(id__in=collectors_already_notified)
+            .distinct()
+        )
 
         for collector in collectors:
             Notification.objects.create(
@@ -41,33 +48,46 @@ def create_pickup_upcoming_notifications():
                 user=collector.user,
                 expires_at=collector.pickupdate.date.start,
                 context={
-                    'group': collector.pickupdate.place.group.id,
-                    'place': collector.pickupdate.place.id,
-                    'pickup': collector.pickupdate.id,
-                    'pickup_collector': collector.id,
+                    "group": collector.pickupdate.place.group.id,
+                    "place": collector.pickupdate.place.id,
+                    "pickup": collector.pickupdate.id,
+                    "pickup_collector": collector.id,
                 },
             )
 
-    stats_utils.periodic_task('notifications__create_pickup_upcoming_notifications', seconds=t.elapsed_seconds)
+    stats_utils.periodic_task(
+        "notifications__create_pickup_upcoming_notifications", seconds=t.elapsed_seconds
+    )
 
 
-@db_periodic_task(crontab(minute='*/5'))  # every five minutes
+@db_periodic_task(crontab(minute="*/5"))  # every five minutes
 def create_voting_ends_soon_notifications():
     with timer() as t:
-        existing_notifications = Notification.objects.order_by().filter(type=NotificationType.VOTING_ENDS_SOON.value
-                                                                        ).values_list('user_id', 'context__issue')
-        for voting in Voting.objects.order_by().due_soon().filter(issue__status=IssueStatus.ONGOING.value):
+        existing_notifications = (
+            Notification.objects.order_by()
+            .filter(type=NotificationType.VOTING_ENDS_SOON.value)
+            .values_list("user_id", "context__issue")
+        )
+        for voting in (
+            Voting.objects.order_by()
+            .due_soon()
+            .filter(issue__status=IssueStatus.ONGOING.value)
+        ):
             # only notify users that haven't voted already
-            for user in voting.issue.participants.exclude(votes_given__option__voting=voting):
+            for user in voting.issue.participants.exclude(
+                votes_given__option__voting=voting
+            ):
                 if (user.id, voting.issue_id) not in existing_notifications:
                     Notification.objects.create(
                         type=NotificationType.VOTING_ENDS_SOON.value,
                         user=user,
                         expires_at=voting.expires_at,
                         context={
-                            'group': voting.issue.group_id,
-                            'issue': voting.issue_id,
+                            "group": voting.issue.group_id,
+                            "issue": voting.issue_id,
                         },
                     )
 
-    stats_utils.periodic_task('notifications__create_voting_ends_soon_notification', seconds=t.elapsed_seconds)
+    stats_utils.periodic_task(
+        "notifications__create_voting_ends_soon_notification", seconds=t.elapsed_seconds
+    )

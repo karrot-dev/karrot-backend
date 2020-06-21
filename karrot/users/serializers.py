@@ -7,39 +7,39 @@ class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = [
-            'id',
-            'display_name',
+            "id",
+            "display_name",
         ]
 
 
 class UserSerializer(serializers.ModelSerializer):
-    photo_urls = VersatileImageFieldSerializer(sizes='user_profile', source='photo')
+    photo_urls = VersatileImageFieldSerializer(sizes="user_profile", source="photo")
 
     class Meta:
         model = get_user_model()
         fields = [
-            'id',
-            'display_name',
-            'photo_urls',
-            'latitude',
-            'longitude',
+            "id",
+            "display_name",
+            "photo_urls",
+            "latitude",
+            "longitude",
         ]
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    photo_urls = VersatileImageFieldSerializer(sizes='user_profile', source='photo')
+    photo_urls = VersatileImageFieldSerializer(sizes="user_profile", source="photo")
 
     class Meta:
         model = get_user_model()
         fields = [
-            'id',
-            'display_name',
-            'email',
-            'mobile_number',
-            'address',
-            'latitude',
-            'longitude',
-            'description',
-            'photo_urls',
-            'groups',
+            "id",
+            "display_name",
+            "email",
+            "mobile_number",
+            "address",
+            "latitude",
+            "longitude",
+            "description",
+            "photo_urls",
+            "groups",
         ]

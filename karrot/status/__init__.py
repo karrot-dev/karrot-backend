@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class StatusConfig(AppConfig):
-    name = 'karrot.status'
+    name = "karrot.status"

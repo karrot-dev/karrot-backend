@@ -9,11 +9,15 @@ from karrot.offers.emails import prepare_new_offer_notification_email
 
 @db_task()
 def notify_members_about_new_offer(offer):
-    users = offer.group.members.filter(
-        groupmembership__in=GroupMembership.objects.active().with_notification_type(GroupNotificationType.NEW_OFFER),
-    ).exclude(
-        id__in=get_user_model().objects.unverified(),
-    ).exclude(id=offer.user.id)
+    users = (
+        offer.group.members.filter(
+            groupmembership__in=GroupMembership.objects.active().with_notification_type(
+                GroupNotificationType.NEW_OFFER
+            ),
+        )
+        .exclude(id__in=get_user_model().objects.unverified(),)
+        .exclude(id=offer.user.id)
+    )
 
     for user in users:
         try:

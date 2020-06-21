@@ -8,5 +8,7 @@ class ApplicationFactory(DjangoModelFactory):
     class Meta:
         model = Application
 
-    questions = LazyAttribute(lambda application: application.group.application_questions)
+    questions = LazyAttribute(
+        lambda application: application.group.application_questions
+    )
     answers = LazyAttribute(lambda x: faker.text())

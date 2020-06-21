@@ -19,11 +19,15 @@ class IssueModelTests(TestCase):
         self.member = VerifiedUserFactory()
         self.affected_member = VerifiedUserFactory()
         self.group = GroupFactory(members=[self.member, self.affected_member])
-        self.issue = IssueFactory(group=self.group, created_by=self.member, affected_user=self.affected_member)
+        self.issue = IssueFactory(
+            group=self.group, created_by=self.member, affected_user=self.affected_member
+        )
 
         # add notification type to send out emails
         for membership in self.group.groupmembership_set.all():
-            membership.add_notification_types([GroupNotificationType.CONFLICT_RESOLUTION])
+            membership.add_notification_types(
+                [GroupNotificationType.CONFLICT_RESOLUTION]
+            )
             membership.save()
 
     def get_voting(self):
@@ -31,7 +35,9 @@ class IssueModelTests(TestCase):
 
     def vote_on(self, option_type, user=None):
         for option in self.get_voting().options.all():
-            option.votes.create(user=user or self.member, score=5 if option.type == option_type else 0)
+            option.votes.create(
+                user=user or self.member, score=5 if option.type == option_type else 0
+            )
 
     def fast_forward_to_voting_expiration(self):
         time_when_voting_expires = self.get_voting().expires_at + relativedelta(hours=1)
@@ -71,14 +77,23 @@ class IssueModelTests(TestCase):
             self.assertFalse(self.issue.is_decided())
             self.assertTrue(self.group.is_member(self.affected_member))
             self.assertEqual(self.issue.votings.count(), 2)
-            self.assertEqual([v.is_expired() for v in self.issue.votings.order_by('created_at')], [True, False])
+            self.assertEqual(
+                [v.is_expired() for v in self.issue.votings.order_by("created_at")],
+                [True, False],
+            )
 
         # check if emails have been sent
         self.assertEqual(len(mail.outbox), 2)
-        email_to_affected_user = next(email for email in mail.outbox if email.to[0] == self.affected_member.email)
-        email_to_editor = next(email for email in mail.outbox if email.to[0] == self.member.email)
-        self.assertIn('with you', email_to_affected_user.subject)
-        self.assertIn('with {}'.format(self.affected_member.display_name), email_to_editor.subject)
+        email_to_affected_user = next(
+            email for email in mail.outbox if email.to[0] == self.affected_member.email
+        )
+        email_to_editor = next(
+            email for email in mail.outbox if email.to[0] == self.member.email
+        )
+        self.assertIn("with you", email_to_affected_user.subject)
+        self.assertIn(
+            "with {}".format(self.affected_member.display_name), email_to_editor.subject
+        )
 
     def test_no_change(self):
         self.vote_on(OptionTypes.NO_CHANGE.value)
@@ -98,7 +113,10 @@ class IssueModelTests(TestCase):
         self.process_votings()
 
         with self.fast_forward_to_voting_expiration():
-            self.assertEqual(self.get_voting().accepted_option.type, OptionTypes.FURTHER_DISCUSSION.value)
+            self.assertEqual(
+                self.get_voting().accepted_option.type,
+                OptionTypes.FURTHER_DISCUSSION.value,
+            )
 
     def test_no_vote_results_in_cancelled_issue(self):
         self.process_votings()
@@ -114,21 +132,29 @@ class IssueModelTests(TestCase):
 
     def test_new_members_are_not_in_existing_issues(self):
         # create a new member and a new editor
-        self.group.groupmembership_set.create(user=VerifiedUserFactory(), roles=[roles.GROUP_EDITOR])
+        self.group.groupmembership_set.create(
+            user=VerifiedUserFactory(), roles=[roles.GROUP_EDITOR]
+        )
         self.group.groupmembership_set.create(user=VerifiedUserFactory())
 
         # ...but they shouldn't become part of existing issues
         expected_ids = sorted([self.member.id, self.affected_member.id])
-        participant_ids = sorted(self.issue.participants.values_list('id', flat=True))
-        conversation_participant_ids = sorted(self.issue.conversation.participants.values_list('id', flat=True))
+        participant_ids = sorted(self.issue.participants.values_list("id", flat=True))
+        conversation_participant_ids = sorted(
+            self.issue.conversation.participants.values_list("id", flat=True)
+        )
         self.assertEqual(participant_ids, expected_ids)
         self.assertEqual(conversation_participant_ids, expected_ids)
 
     def test_remove_participant_if_they_leave_group(self):
         self.assertTrue(self.issue.participants.filter(id=self.member.id).exists())
-        self.assertTrue(self.issue.conversation.participants.filter(id=self.member.id).exists())
+        self.assertTrue(
+            self.issue.conversation.participants.filter(id=self.member.id).exists()
+        )
 
         self.group.groupmembership_set.filter(user=self.member).delete()
 
         self.assertFalse(self.issue.participants.filter(id=self.member.id).exists())
-        self.assertFalse(self.issue.conversation.participants.filter(id=self.member.id).exists())
+        self.assertFalse(
+            self.issue.conversation.participants.filter(id=self.member.id).exists()
+        )

@@ -11,4 +11,6 @@ def delete_expired_invitations():
     with timer() as t:
         Invitation.objects.delete_expired_invitations()
 
-    stats_utils.periodic_task('invitations__deleted_expired_invitations', seconds=t.elapsed_seconds)
+    stats_utils.periodic_task(
+        "invitations__deleted_expired_invitations", seconds=t.elapsed_seconds
+    )

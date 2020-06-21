@@ -10,7 +10,7 @@ class TestAcceptInvite(TestCase):
     def test_invite_accepted_joins_group_and_adds_history(self):
         g = GroupFactory()
         u = UserFactory()
-        i = Invitation.objects.create(email='bla@bla.com', group=g, invited_by=u)
+        i = Invitation.objects.create(email="bla@bla.com", group=g, invited_by=u)
         invited_user = UserFactory()
 
         i.accept(invited_user)
@@ -21,8 +21,8 @@ class TestAcceptInvite(TestCase):
         h = History.objects.all()
         self.assertEqual(h.count(), 1)
         h = h.first()
-        self.assertEqual(h.payload['invited_by'], u.id)
-        self.assertEqual(h.payload['invited_at'], i.created_at.isoformat())
-        self.assertEqual(h.payload['invited_via'], 'e-mail')
+        self.assertEqual(h.payload["invited_by"], u.id)
+        self.assertEqual(h.payload["invited_at"], i.created_at.isoformat())
+        self.assertEqual(h.payload["invited_via"], "e-mail")
 
         self.assertEqual(Invitation.objects.count(), 0)

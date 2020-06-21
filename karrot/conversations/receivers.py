@@ -6,8 +6,11 @@ from pytz import utc
 
 from karrot.conversations import tasks, stats
 from karrot.conversations.models import (
-    ConversationParticipant, ConversationMessage, ConversationMessageReaction, ConversationThreadParticipant,
-    ConversationMeta
+    ConversationParticipant,
+    ConversationMessage,
+    ConversationMessageReaction,
+    ConversationThreadParticipant,
+    ConversationMeta,
 )
 from karrot.users.models import User
 
@@ -24,7 +27,10 @@ def create_thread_participant(sender, instance, **kwargs):
             ConversationMessage.objects.filter(id=thread.id).update(thread=thread)
             thread.thread_id = thread.id
 
-        if message.author != thread.author and not thread.participants.filter(user=message.author).exists():
+        if (
+            message.author != thread.author
+            and not thread.participants.filter(user=message.author).exists()
+        ):
             thread.participants.create(user=message.author)
 
 
@@ -38,11 +44,12 @@ def mark_as_read(sender, instance, created, **kwargs):
 
     if message.is_thread_reply():
         participant = ConversationThreadParticipant.objects.get(
-            user=message.author,
-            thread=message.thread,
+            user=message.author, thread=message.thread,
         )
     else:
-        participant = ConversationParticipant.objects.get(user=message.author, conversation=message.conversation)
+        participant = ConversationParticipant.objects.get(
+            user=message.author, conversation=message.conversation
+        )
 
     participant.seen_up_to = message
     participant.save()
@@ -70,7 +77,7 @@ def notify_participants(sender, instance, created, **kwargs):
     if not created:
         return
 
-    tasks.notify_participants.schedule(args=(message, ), delay=5 * 60)
+    tasks.notify_participants.schedule(args=(message,), delay=5 * 60)
 
 
 @receiver(post_save, sender=ConversationMessage)
@@ -110,9 +117,6 @@ def make_conversation_meta(sender, instance, created, **kwargs):
     # (but it has to be timezone-aware, otherwise there will be comparison errors)
     min_date = datetime.min.replace(tzinfo=utc)
     ConversationMeta.objects.get_or_create(
-        {
-            'conversations_marked_at': min_date,
-            'threads_marked_at': min_date,
-        },
+        {"conversations_marked_at": min_date, "threads_marked_at": min_date,},
         user=user,
     )

@@ -12,9 +12,18 @@ class HistoryTypusFilter(filters.MultipleChoiceFilter):
 
 class HistoryFilter(filters.FilterSet):
     typus = HistoryTypusFilter(choices=HistoryTypus.items())
-    type = HistoryTypusFilter(choices=HistoryTypus.items(), field_name='typus')
-    date = filters.IsoDateTimeFromToRangeFilter(field_name='date')
+    type = HistoryTypusFilter(choices=HistoryTypus.items(), field_name="typus")
+    date = filters.IsoDateTimeFromToRangeFilter(field_name="date")
 
     class Meta:
         model = History
-        fields = ('group', 'place', 'users', 'typus', 'type', 'date', 'series', 'pickup')
+        fields = (
+            "group",
+            "place",
+            "users",
+            "typus",
+            "type",
+            "date",
+            "series",
+            "pickup",
+        )

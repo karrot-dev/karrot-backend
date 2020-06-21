@@ -21,7 +21,7 @@ class TestConversationReceiver(TestCase):
     def test_creates_conversation(self):
         group = GroupFactory()
         conversation = self.get_conversation_for_group(group)
-        self.assertIsInstance(conversation, Conversation, 'Did not have a conversation')
+        self.assertIsInstance(conversation, Conversation, "Did not have a conversation")
 
     def test_conversation_deleted(self):
         group = GroupFactory()
@@ -35,19 +35,25 @@ class TestConversationReceiver(TestCase):
         user = UserFactory()
         GroupMembership.objects.create(group=group, user=user)
         conversation = self.get_conversation_for_group(group)
-        self.assertIn(user, conversation.participants.all(), 'Conversation did not have user in')
+        self.assertIn(
+            user, conversation.participants.all(), "Conversation did not have user in"
+        )
 
     def test_adds_participant_marks_existing_messages_as_read(self):
         existing_member = UserFactory()
         group = GroupFactory(members=[existing_member])
 
-        group.conversation.messages.create(author=existing_member, content='foo')
-        second_message = group.conversation.messages.create(author=existing_member, content='bar')
+        group.conversation.messages.create(author=existing_member, content="foo")
+        second_message = group.conversation.messages.create(
+            author=existing_member, content="bar"
+        )
 
         new_member = UserFactory()
         GroupMembership.objects.create(group=group, user=new_member)
 
-        new_participant = ConversationParticipant.objects.get(user=new_member, conversation=group.conversation)
+        new_participant = ConversationParticipant.objects.get(
+            user=new_member, conversation=group.conversation
+        )
         self.assertTrue(new_participant.seen_up_to == second_message)
 
     def test_removes_participant(self):
@@ -55,7 +61,9 @@ class TestConversationReceiver(TestCase):
         group = GroupFactory(members=[user])
         GroupMembership.objects.filter(group=group, user=user).delete()
         conversation = self.get_conversation_for_group(group)
-        self.assertNotIn(user, conversation.participants.all(), 'Conversation still had user in')
+        self.assertNotIn(
+            user, conversation.participants.all(), "Conversation still had user in"
+        )
 
     def get_conversation_for_group(self, group):
         return Conversation.objects.filter(
@@ -69,12 +77,12 @@ class TestSendStatistics(TestCase):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
 
-    @patch('karrot.groups.stats.write_points')
+    @patch("karrot.groups.stats.write_points")
     def test_send_group_join_stats(self, write_mock):
         self.group.add_member(self.user)
         self.assertTrue(write_mock.called)
 
-    @patch('karrot.groups.stats.write_points')
+    @patch("karrot.groups.stats.write_points")
     def test_non_send_group_join_stats_on_update(self, write_mock):
         membership = GroupMembership.objects.get(group=self.group, user=self.member)
         membership.inactive_at = None

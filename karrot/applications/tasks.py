@@ -3,8 +3,11 @@ from django.contrib.auth import get_user_model
 from huey.contrib.djhuey import db_task
 from raven.contrib.django.raven_compat.models import client as sentry_client
 
-from karrot.applications.emails import prepare_new_application_notification_email, \
-    prepare_application_accepted_email, prepare_application_declined_email
+from karrot.applications.emails import (
+    prepare_new_application_notification_email,
+    prepare_application_accepted_email,
+    prepare_application_declined_email,
+)
 from karrot.groups.models import GroupMembership
 from karrot.groups.models import GroupNotificationType
 
@@ -15,9 +18,7 @@ def notify_members_about_new_application(application):
         groupmembership__in=GroupMembership.objects.active().with_notification_type(
             GroupNotificationType.NEW_APPLICATION
         ),
-    ).exclude(
-        id__in=get_user_model().objects.unverified(),
-    )
+    ).exclude(id__in=get_user_model().objects.unverified(),)
 
     for user in users:
         try:

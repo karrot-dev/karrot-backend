@@ -7,8 +7,7 @@ from django.utils import timezone
 from freezegun import freeze_time
 
 from karrot.history.models import History
-from karrot.pickups.factories import PickupDateFactory, \
-    PickupDateSeriesFactory
+from karrot.pickups.factories import PickupDateFactory, PickupDateSeriesFactory
 from karrot.pickups.models import Feedback, PickupDate, PickupDateSeries, to_range
 from karrot.places.factories import PlaceFactory
 from karrot.places.models import PlaceStatus
@@ -22,17 +21,23 @@ class TestFeedbackModel(TestCase):
 
     def test_weight_is_negative_fails(self):
         with self.assertRaises(ValidationError):
-            model = Feedback.objects.create(weight=-1, about=self.pickup, given_by=self.user, comment="soup")
+            model = Feedback.objects.create(
+                weight=-1, about=self.pickup, given_by=self.user, comment="soup"
+            )
             model.clean_fields()
 
     def test_weight_is_too_high_number_fails(self):
         with self.assertRaises(ValidationError):
-            model = Feedback.objects.create(weight=10001, about=self.pickup, given_by=self.user, comment="soup")
+            model = Feedback.objects.create(
+                weight=10001, about=self.pickup, given_by=self.user, comment="soup"
+            )
             model.clean_fields()
 
     def test_create_fails_if_comment_too_long(self):
         with self.assertRaises(DataError):
-            Feedback.objects.create(comment='a' * 100001, about=self.pickup, given_by=self.user, weight=1)
+            Feedback.objects.create(
+                comment="a" * 100001, about=self.pickup, given_by=self.user, weight=1
+            )
 
     def test_create_two_feedback_for_same_pickup_as_same_user_fails(self):
         Feedback.objects.create(given_by=self.user, about=self.pickup)
@@ -52,7 +57,9 @@ class TestPickupDateSeriesModel(TestCase):
         self.place.status = PlaceStatus.ARCHIVED.value
         self.place.save()
 
-        start_date = self.place.group.timezone.localize(datetime.now().replace(2017, 3, 18, 15, 0, 0, 0))
+        start_date = self.place.group.timezone.localize(
+            datetime.now().replace(2017, 3, 18, 15, 0, 0, 0)
+        )
 
         PickupDateSeriesFactory(place=self.place, start_date=start_date)
 
@@ -61,7 +68,9 @@ class TestPickupDateSeriesModel(TestCase):
         self.assertEqual(PickupDate.objects.count(), 0)
 
     def test_daylight_saving_time_to_summer(self):
-        start_date = self.place.group.timezone.localize(datetime.now().replace(2017, 3, 18, 15, 0, 0, 0))
+        start_date = self.place.group.timezone.localize(
+            datetime.now().replace(2017, 3, 18, 15, 0, 0, 0)
+        )
 
         before_dst_switch = timezone.now().replace(2017, 3, 18, 4, 40, 13)
         with freeze_time(before_dst_switch, tick=True):
@@ -69,12 +78,18 @@ class TestPickupDateSeriesModel(TestCase):
 
         expected_dates = []
         for month, day in [(3, 18), (3, 25), (4, 1), (4, 8)]:
-            expected_dates.append(self.place.group.timezone.localize(datetime(2017, month, day, 15, 0)))
-        for actual_date, expected_date in zip(PickupDate.objects.filter(series=series), expected_dates):
+            expected_dates.append(
+                self.place.group.timezone.localize(datetime(2017, month, day, 15, 0))
+            )
+        for actual_date, expected_date in zip(
+            PickupDate.objects.filter(series=series), expected_dates
+        ):
             self.assertEqual(actual_date.date.start, expected_date)
 
     def test_daylight_saving_time_to_winter(self):
-        start_date = self.place.group.timezone.localize(datetime.now().replace(2016, 10, 22, 15, 0, 0, 0))
+        start_date = self.place.group.timezone.localize(
+            datetime.now().replace(2016, 10, 22, 15, 0, 0, 0)
+        )
 
         before_dst_switch = timezone.now().replace(2016, 10, 22, 4, 40, 13)
         with freeze_time(before_dst_switch, tick=True):
@@ -82,8 +97,12 @@ class TestPickupDateSeriesModel(TestCase):
 
         expected_dates = []
         for month, day in [(10, 22), (10, 29), (11, 5), (11, 12)]:
-            expected_dates.append(self.place.group.timezone.localize(datetime(2016, month, day, 15, 0)))
-        for actual_date, expected_date in zip(PickupDate.objects.filter(series=series), expected_dates):
+            expected_dates.append(
+                self.place.group.timezone.localize(datetime(2016, month, day, 15, 0))
+            )
+        for actual_date, expected_date in zip(
+            PickupDate.objects.filter(series=series), expected_dates
+        ):
             self.assertEqual(actual_date.date.start, expected_date)
 
     def test_delete(self):
@@ -96,14 +115,20 @@ class TestPickupDateSeriesModel(TestCase):
         past_date_count = pickup_dates.filter(date__startswith__lt=now).count()
         self.assertGreater(pickup_dates.count(), 2)
         series.delete()
-        upcoming_pickups = PickupDate.objects.filter(date__startswith__gte=now, is_disabled=False)
+        upcoming_pickups = PickupDate.objects.filter(
+            date__startswith__gte=now, is_disabled=False
+        )
         self.assertEqual(upcoming_pickups.count(), 0, upcoming_pickups)
-        self.assertEqual(PickupDate.objects.filter(date__startswith__lt=now).count(), past_date_count)
+        self.assertEqual(
+            PickupDate.objects.filter(date__startswith__lt=now).count(), past_date_count
+        )
 
 
 class TestProcessFinishedPickupDates(TestCase):
     def setUp(self):
-        self.pickup = PickupDateFactory(date=to_range(timezone.now() - relativedelta(weeks=1), minutes=30))
+        self.pickup = PickupDateFactory(
+            date=to_range(timezone.now() - relativedelta(weeks=1), minutes=30)
+        )
 
     def test_process_finished_pickup_dates(self):
         PickupDate.objects.process_finished_pickup_dates()

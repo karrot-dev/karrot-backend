@@ -19,8 +19,7 @@ class TestApplicationConversationModel(APITestCase):
     def test_member_leaves_group(self):
         GroupMembership.objects.filter(user=self.member, group=self.group).delete()
         self.assertNotIn(
-            self.member,
-            self.conversation.participants.all(),
+            self.member, self.conversation.participants.all(),
         )
 
     def test_user_erased(self):

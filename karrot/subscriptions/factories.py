@@ -14,4 +14,6 @@ class PushSubscriptionFactory(DjangoModelFactory):
 
     user = SubFactory(UserFactory)
     token = LazyAttribute(lambda x: faker.uuid4())
-    platform = LazyAttribute(lambda x: random.choice(list(PushSubscriptionPlatform)).value)
+    platform = LazyAttribute(
+        lambda x: random.choice(list(PushSubscriptionPlatform)).value
+    )

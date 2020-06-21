@@ -18,20 +18,24 @@ from karrot.groups import themes
 class TestGroupModel(TestCase):
     def test_create_fails_if_name_too_long(self):
         with self.assertRaises(DataError):
-            Group.objects.create(name='a' * 81)
+            Group.objects.create(name="a" * 81)
 
     def test_create_group_with_same_name_fails(self):
-        Group.objects.create(name='abcdef')
+        Group.objects.create(name="abcdef")
         with self.assertRaises(IntegrityError):
-            Group.objects.create(name='abcdef')
+            Group.objects.create(name="abcdef")
 
     def test_notifications_on_by_default(self):
         user = UserFactory()
         group = GroupFactory()
         membership = group.groupmembership_set.create(user=user)
-        self.assertEqual(get_default_notification_types(), membership.notification_types)
+        self.assertEqual(
+            get_default_notification_types(), membership.notification_types
+        )
         conversation = Conversation.objects.get_for_target(group)
-        conversation_participant = ConversationParticipant.objects.get(conversation=conversation, user=user)
+        conversation_participant = ConversationParticipant.objects.get(
+            conversation=conversation, user=user
+        )
         self.assertFalse(conversation_participant.muted)
 
     def test_no_notifications_by_default_in_playground(self):
@@ -40,12 +44,14 @@ class TestGroupModel(TestCase):
         membership = group.groupmembership_set.create(user=user)
         self.assertEqual([], membership.notification_types)
         conversation = Conversation.objects.get_for_target(group)
-        conversation_participant = ConversationParticipant.objects.get(conversation=conversation, user=user)
+        conversation_participant = ConversationParticipant.objects.get(
+            conversation=conversation, user=user
+        )
         self.assertTrue(conversation_participant.muted)
 
     def test_uses_default_application_questions_if_not_specified(self):
-        group = GroupFactory(application_questions='')
-        self.assertIn('Hey there', group.get_application_questions_or_default())
+        group = GroupFactory(application_questions="")
+        self.assertIn("Hey there", group.get_application_questions_or_default())
 
 
 class TestGroupMembershipModel(TestCase):
@@ -58,9 +64,15 @@ class TestGroupMembershipModel(TestCase):
         self.other_place = PlaceFactory(group=self.other_group)
 
     def test_pickup_active_within(self):
-        PickupDateFactory(place=self.place, date=to_range(timezone.now() - timedelta(days=2)), collectors=[self.user])
         PickupDateFactory(
-            place=self.place, date=to_range(timezone.now() - timedelta(days=9)), collectors=[self.other_user]
+            place=self.place,
+            date=to_range(timezone.now() - timedelta(days=2)),
+            collectors=[self.user],
+        )
+        PickupDateFactory(
+            place=self.place,
+            date=to_range(timezone.now() - timedelta(days=9)),
+            collectors=[self.other_user],
         )
         memberships = self.group.groupmembership_set.pickup_active_within(days=7)
         self.assertEqual(memberships.count(), 1)
@@ -68,17 +80,23 @@ class TestGroupMembershipModel(TestCase):
     def test_pickup_active_within_does_not_double_count(self):
         for _ in range(1, 10):
             PickupDateFactory(
-                place=self.place, date=to_range(timezone.now() - timedelta(days=2)), collectors=[self.user]
+                place=self.place,
+                date=to_range(timezone.now() - timedelta(days=2)),
+                collectors=[self.user],
             )
             PickupDateFactory(
-                place=self.place, date=to_range(timezone.now() - timedelta(days=9)), collectors=[self.other_user]
+                place=self.place,
+                date=to_range(timezone.now() - timedelta(days=9)),
+                collectors=[self.other_user],
             )
         memberships = self.group.groupmembership_set.pickup_active_within(days=7)
         self.assertEqual(memberships.count(), 1)
 
     def test_does_not_count_from_other_groups(self):
         PickupDateFactory(
-            place=self.other_place, date=to_range(timezone.now() - timedelta(days=2)), collectors=[self.user]
+            place=self.other_place,
+            date=to_range(timezone.now() - timedelta(days=2)),
+            collectors=[self.user],
         )
         memberships = self.group.groupmembership_set.pickup_active_within(days=7)
         self.assertEqual(memberships.count(), 0)

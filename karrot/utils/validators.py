@@ -5,4 +5,6 @@ from django.utils.translation import gettext as _
 
 def prevent_reserved_names(value):
     if value.lower() in settings.RESERVED_NAMES:
-        raise serializers.ValidationError(_('%(value)s is a reserved name') % {'value': value})
+        raise serializers.ValidationError(
+            _("%(value)s is a reserved name") % {"value": value}
+        )

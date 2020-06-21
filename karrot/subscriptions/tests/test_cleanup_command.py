@@ -10,16 +10,18 @@ from karrot.users.factories import UserFactory
 class CleanupChannelCommandTests(TestCase):
     def setUp(self):
         self.user = UserFactory()
-        self.subscription = ChannelSubscription.objects.create(user=self.user, reply_channel='foo')
+        self.subscription = ChannelSubscription.objects.create(
+            user=self.user, reply_channel="foo"
+        )
 
     def test_keeps_recent_entries(self):
         self.set_lastseen_ago_in_minutes(3)
-        call_command('cleanup_channel_subscriptions')
+        call_command("cleanup_channel_subscriptions")
         self.assertIsNotNone(ChannelSubscription.objects.get(pk=self.subscription.id))
 
     def test_deletes_old_entries(self):
         self.set_lastseen_ago_in_minutes(10)
-        call_command('cleanup_channel_subscriptions')
+        call_command("cleanup_channel_subscriptions")
         with self.assertRaises(ChannelSubscription.DoesNotExist):
             self.assertIsNone(ChannelSubscription.objects.get(pk=self.subscription.id))
 

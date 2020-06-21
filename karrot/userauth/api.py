@@ -10,9 +10,16 @@ from rest_framework.response import Response
 from karrot.userauth import stats
 from karrot.userauth.models import VerificationCode
 from karrot.userauth.permissions import MailIsNotVerified
-from karrot.userauth.serializers import AuthLoginSerializer, AuthUserSerializer, \
-    ChangePasswordSerializer, RequestResetPasswordSerializer, ChangeMailSerializer, \
-    VerificationCodeSerializer, ResetPasswordSerializer, FailedEmailDeliverySerializer
+from karrot.userauth.serializers import (
+    AuthLoginSerializer,
+    AuthUserSerializer,
+    ChangePasswordSerializer,
+    RequestResetPasswordSerializer,
+    ChangeMailSerializer,
+    VerificationCodeSerializer,
+    ResetPasswordSerializer,
+    FailedEmailDeliverySerializer,
+)
 
 
 class LogoutView(views.APIView):
@@ -27,9 +34,13 @@ class AuthView(generics.GenericAPIView):
 
     def post(self, request, **kwargs):
         """ Log in """
-        serializer = AuthLoginSerializer(data=request.data, context={'request': request})
+        serializer = AuthLoginSerializer(
+            data=request.data, context={"request": request}
+        )
         if serializer.is_valid():
-            user_serializer = AuthUserSerializer(request.user, context={'request': request})
+            user_serializer = AuthUserSerializer(
+                request.user, context={"request": request}
+            )
             return Response(data=user_serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -37,16 +48,19 @@ class AuthView(generics.GenericAPIView):
 
 class AuthUserView(generics.GenericAPIView):
     serializer_class = AuthUserSerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def get_permissions(self):
         # Allow creating and deleting user when not logged in
-        if self.request.method.lower() == 'post' or self.request.method.lower() == 'delete':
+        if (
+            self.request.method.lower() == "post"
+            or self.request.method.lower() == "delete"
+        ):
             return ()
         return super().get_permissions()
 
     def get_serializer_class(self):
-        if self.request.method.lower() == 'delete':
+        if self.request.method.lower() == "delete":
             return VerificationCodeSerializer
         return self.serializer_class
 
@@ -75,14 +89,14 @@ class AuthUserView(generics.GenericAPIView):
         Delete the user account using a previously requested verification code.
         """
         serializer = self.get_serializer(data=request.query_params)
-        serializer.context['type'] = VerificationCode.ACCOUNT_DELETE
+        serializer.context["type"] = VerificationCode.ACCOUNT_DELETE
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=status.HTTP_204_NO_CONTENT, data={})
 
 
 class RequestDeleteUserView(views.APIView):
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
         """
@@ -91,7 +105,10 @@ class RequestDeleteUserView(views.APIView):
         try:
             request.user.send_account_deletion_verification_code()
         except AnymailAPIError:
-            return Response(status=status.HTTP_400_BAD_REQUEST, data={_('We could not send you an e-mail.')})
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={_("We could not send you an e-mail.")},
+            )
         stats.account_deletion_requested()
         return Response(status=status.HTTP_204_NO_CONTENT, data={})
 
@@ -99,7 +116,7 @@ class RequestDeleteUserView(views.APIView):
 class VerifyMailView(generics.GenericAPIView):
     # No need to add the MailIsNotVerified permission because e-mail
     # verification codes only exist for unverified users anyway.
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
     serializer_class = VerificationCodeSerializer
 
     def post(self, request):
@@ -107,7 +124,7 @@ class VerifyMailView(generics.GenericAPIView):
         Verify an e-mail address.
         """
         serializer = self.get_serializer(data=request.data)
-        serializer.context['type'] = VerificationCode.EMAIL_VERIFICATION
+        serializer.context["type"] = VerificationCode.EMAIL_VERIFICATION
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=status.HTTP_204_NO_CONTENT, data={})
@@ -130,7 +147,7 @@ class ResendMailVerificationCodeView(views.APIView):
 
 
 class RequestResetPasswordView(generics.GenericAPIView):
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
     serializer_class = RequestResetPasswordSerializer
 
     def post(self, request):
@@ -144,7 +161,7 @@ class RequestResetPasswordView(generics.GenericAPIView):
 
 
 class ResetPasswordView(generics.GenericAPIView):
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
     serializer_class = ResetPasswordSerializer
 
     def post(self, request):
@@ -152,14 +169,14 @@ class ResetPasswordView(generics.GenericAPIView):
         Reset the password using a previously requested verification token.
         """
         serializer = self.get_serializer(data=request.data)
-        serializer.context['type'] = VerificationCode.PASSWORD_RESET
+        serializer.context["type"] = VerificationCode.PASSWORD_RESET
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=status.HTTP_204_NO_CONTENT, data={})
 
 
 class ChangePasswordView(generics.GenericAPIView):
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
     serializer_class = ChangePasswordSerializer
 
     def put(self, request):
@@ -178,7 +195,7 @@ class ChangePasswordView(generics.GenericAPIView):
 
 
 class ChangeMailView(generics.GenericAPIView):
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
     serializer_class = ChangeMailSerializer
 
     def put(self, request):
@@ -194,11 +211,11 @@ class ChangeMailView(generics.GenericAPIView):
 
 class FailedEmailDeliveryPagination(CursorPagination):
     page_size = 10
-    ordering = '-id'
+    ordering = "-id"
 
 
 class FailedEmailDeliveryView(generics.GenericAPIView):
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
     serializer_class = FailedEmailDeliverySerializer
     pagination_class = FailedEmailDeliveryPagination
 

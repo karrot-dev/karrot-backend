@@ -9,7 +9,7 @@ from .consumers import WebsocketConsumer, TokenAuthMiddleware
 class OriginValidatorThatAllowsFileUrls(websocket.OriginValidator):
     # We need to allow file urls in the origin header for our cordova app
     def valid_origin(self, parsed_origin):
-        if parsed_origin is not None and parsed_origin.scheme == 'file':
+        if parsed_origin is not None and parsed_origin.scheme == "file":
             return True
         return super().valid_origin(parsed_origin)
 
@@ -22,13 +22,10 @@ def AllowedHostsAndFileOriginValidator(application):
     return OriginValidatorThatAllowsFileUrls(application, allowed_hosts)
 
 
-application = ProtocolTypeRouter({
-    'websocket':
-    AllowedHostsAndFileOriginValidator(
-        AuthMiddlewareStack(
-            TokenAuthMiddleware(
-                WebsocketConsumer,
-            ),
+application = ProtocolTypeRouter(
+    {
+        "websocket": AllowedHostsAndFileOriginValidator(
+            AuthMiddlewareStack(TokenAuthMiddleware(WebsocketConsumer,),),
         ),
-    ),
-})
+    }
+)

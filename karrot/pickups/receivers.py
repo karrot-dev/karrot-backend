@@ -13,10 +13,11 @@ from karrot.places.models import Place, PlaceStatus
 def leave_group_handler(sender, instance, **kwargs):
     group = instance.group
     user = instance.user
-    for _ in PickupDate.objects. \
-            filter(date__startswith__gte=timezone.now()). \
-            filter(collectors__in=[user, ]). \
-            filter(place__group=group):
+    for _ in (
+        PickupDate.objects.filter(date__startswith__gte=timezone.now())
+        .filter(collectors__in=[user,])
+        .filter(place__group=group)
+    ):
         _.remove_collector(user)
 
 
@@ -72,7 +73,9 @@ def update_pickup_series_when_place_changes(sender, instance, **kwargs):
         return
 
     old = Place.objects.get(id=place.id)
-    place_became_active = old.status != place.status and place.status == PlaceStatus.ACTIVE.value
+    place_became_active = (
+        old.status != place.status and place.status == PlaceStatus.ACTIVE.value
+    )
     weeks_in_advance_changed = old.weeks_in_advance != place.weeks_in_advance
     if place_became_active or weeks_in_advance_changed:
         for series in place.series.all():

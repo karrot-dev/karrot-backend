@@ -11,13 +11,13 @@ class HistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = History
         fields = [
-            'id',
-            'date',
-            'typus',
-            'group',
-            'place',
-            'users',
-            'payload',
+            "id",
+            "date",
+            "typus",
+            "group",
+            "place",
+            "users",
+            "payload",
         ]
 
     typus = SerializerMethodField()
@@ -30,14 +30,14 @@ class HistoryExportSerializer(HistorySerializer):
     class Meta:
         model = History
         fields = [
-            'id',
-            'date',
-            'typus',
-            'group',
-            'place',
-            'pickup',
-            'users',
-            'pickup_date',
+            "id",
+            "date",
+            "typus",
+            "group",
+            "place",
+            "pickup",
+            "users",
+            "pickup_date",
         ]
 
     pickup_date = serializers.SerializerMethodField()
@@ -49,7 +49,7 @@ class HistoryExportSerializer(HistorySerializer):
         if history.payload is None:
             return
 
-        dates = history.payload.get('date')
+        dates = history.payload.get("date")
         if dates is None:
             # It might be very old or about something else than a pickup
             return
@@ -67,15 +67,15 @@ class HistoryExportSerializer(HistorySerializer):
 
     def get_users(self, history):
         user_ids = [str(u.id) for u in history.users.all()]
-        return ','.join(user_ids)
+        return ",".join(user_ids)
 
 
 class HistoryExportRenderer(CSVRenderer):
     header = HistoryExportSerializer.Meta.fields
     labels = {
-        'group': 'group_id',
-        'users': 'user_ids',
-        'place': 'place_id',
-        'pickup': 'pickup_id',
-        'typus': 'type',
+        "group": "group_id",
+        "users": "user_ids",
+        "place": "place_id",
+        "pickup": "pickup_id",
+        "typus": "type",
     }

@@ -35,7 +35,9 @@ def match_pickups_with_dates(pickups, new_dates):
         next_pickup = pickups.peek(None)
         next_date = new_dates.peek(None)
 
-        if (not diff_is_small or (next_pickup and get_diff(next_pickup, date) < diff)) and pickup.date.start < date:
+        if (
+            not diff_is_small or (next_pickup and get_diff(next_pickup, date) < diff)
+        ) and pickup.date.start < date:
             # diff is too big or the next pickup is closer to given date, so the current pickup doesn't match a date
             yield pickup, None
             pickup = next(pickups, None)
@@ -61,11 +63,7 @@ def rrule_between_dates_in_local_time(rule, dtstart, tz, period_start, period_du
     if rule._until is not None:
         until = rule._until.astimezone(tz).replace(tzinfo=None)
 
-    rule = rule.replace(
-        dtstart=dtstart_local,
-        until=until,
-    ).between(
-        period_start_local,
-        period_start_local + period_duration,
+    rule = rule.replace(dtstart=dtstart_local, until=until,).between(
+        period_start_local, period_start_local + period_duration,
     )
     return [tz.localize(date) for date in rule]
