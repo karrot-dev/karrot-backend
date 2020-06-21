@@ -48,9 +48,6 @@ factory-boy
 ipython
 requests-mock
 tblib
-flake8
-autopep8
-autoflake
 pytest-asyncio
 pytest-django
 pytest-xdist
@@ -59,5 +56,5 @@ freezegun
 logging_tree
 django-silk
 # transifex-client # disabled to prevent pulling in urllib<1.24.1
-yapf
+black
 importlib-metadata # for py3.7 compat

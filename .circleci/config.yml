@@ -62,8 +62,8 @@ jobs:
             (cd mjml && yarn)
             mjml/convert
       - run:
-          name: flake8
-          command: env/bin/flake8 ./
+          name: check formatting
+          command: env/bin/black . --check --diff
       - run:
           name: no missing migrations?
           command: env/bin/python manage.py makemigrations --dry-run --check --no-input

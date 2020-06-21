@@ -10,16 +10,17 @@
 -e git+https://github.com/tiltec/talon@80886cd#egg=talon  # via -r requirements.in
 aioredis==1.3.1           # via channels-redis
 apipkg==1.5               # via execnet
+appdirs==1.4.4            # via black
 argon2-cffi==20.1.0       # via django
 asgiref==3.2.10           # via channels, channels-redis, daphne, django
 async-timeout==3.0.1      # via aioredis
-attrs==19.3.0             # via automat, glom, pytest, service-identity, twisted
+attrs==19.3.0             # via automat, black, glom, pytest, service-identity, twisted
 autobahn==20.6.1          # via daphne
-autoflake==1.3.1          # via -r requirements.in
 automat==20.2.0           # via twisted
-autopep8==1.5.3           # via -r requirements.in, django-silk
+autopep8==1.5.3           # via django-silk
 babel==2.8.0              # via -r requirements.in
 backcall==0.2.0           # via ipython
+black==19.10b0            # via -r requirements.in
 bleach-whitelist==0.0.10  # via -r requirements.in
 bleach==3.1.5             # via -r requirements.in
 boltons==20.1.0           # via face, glom
@@ -29,7 +30,7 @@ cffi==1.14.0              # via argon2-cffi, cryptography
 channels-redis==2.4.2     # via -r requirements.in
 channels==2.4.0           # via -r requirements.in, channels-redis
 chardet==3.0.4            # via requests, talon
-click==7.1.2              # via pip-tools
+click==7.1.2              # via black, pip-tools
 constantly==15.1.0        # via twisted
 coreapi==2.3.3            # via django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via coreapi
@@ -56,7 +57,6 @@ execnet==1.7.1            # via pytest-xdist
 face==20.1.1              # via glom
 factory-boy==2.12.0       # via -r requirements.in
 faker==4.1.1              # via factory-boy
-flake8==3.8.3             # via -r requirements.in
 freezegun==0.3.15         # via -r requirements.in
 furl==2.1.0               # via -r requirements.in
 gevent==20.6.2            # via -r requirements.in
@@ -69,7 +69,7 @@ html5lib==1.0.1           # via talon
 huey==2.2.0               # via -r requirements.in
 hyperlink==19.0.0         # via twisted
 idna==2.9                 # via hyperlink, requests, twisted
-importlib-metadata==1.6.1  # via -r requirements.in, flake8, markdown, pluggy, pytest
+importlib-metadata==1.6.1  # via -r requirements.in
 incremental==17.5.0       # via twisted
 influxdb==5.3.0           # via django-influxdb-metrics
 ipython-genutils==0.2.0   # via traitlets
@@ -81,13 +81,13 @@ logging-tree==1.8.1       # via -r requirements.in
 lxml==4.5.1               # via talon
 markdown==3.2.2           # via -r requirements.in, pymdown-extensions
 markupsafe==1.1.1         # via jinja2
-mccabe==0.6.1             # via flake8
 more-itertools==8.4.0     # via -r requirements.in, pytest
 msgpack==0.6.1            # via channels-redis, influxdb
 openapi-codec==1.3.2      # via django-rest-swagger
 orderedmultidict==1.0.1   # via furl
 packaging==20.4           # via bleach, pytest
 parso==0.7.0              # via jedi
+pathspec==0.8.0           # via black
 pexpect==4.8.0            # via ipython
 pickleshare==0.7.5        # via ipython
 pillow==7.1.2             # via django-versatileimagefield
@@ -100,10 +100,9 @@ ptyprocess==0.6.0         # via pexpect
 py==1.8.2                 # via pytest
 pyasn1-modules==0.2.8     # via service-identity
 pyasn1==0.4.8             # via pyasn1-modules, service-identity
-pycodestyle==2.6.0        # via autopep8, flake8
+pycodestyle==2.6.0        # via autopep8
 pycparser==2.20           # via cffi
 pyfcm==1.4.7              # via -r requirements.in
-pyflakes==2.2.0           # via autoflake, flake8
 pygments==2.6.1           # via django-silk, ipython
 pyhamcrest==2.0.2         # via twisted
 pymdown-extensions==7.1   # via -r requirements.in
@@ -121,7 +120,7 @@ python-server-metrics==0.2.1  # via django-influxdb-metrics
 pytz==2020.1              # via -r requirements.in, babel, django, django-dirtyfields, django-silk, django-timezone-field, influxdb
 raven==6.10.0             # via -r requirements.in
 redis==3.5.3              # via -r requirements.in, django-redis
-regex==2020.6.8           # via talon
+regex==2020.6.8           # via black, talon
 requests-mock==1.8.0      # via -r requirements.in
 requests==2.24.0          # via -r requirements.in, coreapi, django-anymail, django-silk, influxdb, pyfcm, requests-mock
 service-identity==18.1.0  # via twisted
@@ -131,16 +130,16 @@ sqlparse==0.3.1           # via django, django-silk
 tblib==1.6.0              # via -r requirements.in
 text-unidecode==1.3       # via faker
 tld==0.12.2               # via django-influxdb-metrics
-toml==0.10.1              # via autopep8
+toml==0.10.1              # via autopep8, black
 traitlets==4.3.3          # via ipython
 twisted[tls]==20.3.0      # via daphne
 txaio==20.4.1             # via autobahn
+typed-ast==1.4.1          # via black
 unicodecsv==0.14.1        # via djangorestframework-csv
 uritemplate==3.0.1        # via coreapi
 urllib3==1.25.9           # via requests
 wcwidth==0.2.4            # via prompt-toolkit, pytest
 webencodings==0.5.1       # via bleach, html5lib
-yapf==0.30.0              # via -r requirements.in
 zipp==3.1.0               # via importlib-metadata
 zope.event==4.4           # via gevent
 zope.interface==5.1.0     # via gevent, twisted
