@@ -19,7 +19,6 @@ class ConversationQuerySet(models.QuerySet):
     def create(self, **kwargs):
         target = kwargs.get('target', None)
         if target is not None:
-            kwargs['is_group_public'] = target.conversation_is_group_public
             kwargs['group'] = target.group
 
         return super().create(**kwargs)
@@ -48,8 +47,7 @@ class ConversationQuerySet(models.QuerySet):
         )
 
     def with_access(self, user):
-        return self.filter(Q(participants=user) |
-                           Q(group__groupmembership__user=user, is_group_public=True)).distinct()
+        return self.filter(Q(participants=user) | Q(group__groupmembership__user=user, group__isnull=False)).distinct()
 
 
 class Conversation(BaseModel, UpdatedAtMixin):
@@ -65,8 +63,6 @@ class Conversation(BaseModel, UpdatedAtMixin):
 
     # conversation belongs to this group
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, null=True)
-    # can any group member access this conversation?
-    is_group_public = models.BooleanField(default=False)
 
     target_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
     target_id = models.PositiveIntegerField(null=True)
@@ -109,7 +105,7 @@ class Conversation(BaseModel, UpdatedAtMixin):
     def can_access(self, user):
         if self.conversationparticipant_set.filter(user=user).exists():
             return True
-        if self.is_group_public and self.group.is_member(user):
+        if self.group is not None and self.group.is_member(user):
             return True
         return False
 
@@ -243,7 +239,7 @@ class ConversationMessageQuerySet(models.QuerySet):
         # should contain the same logic
         return self.filter(
             Q(conversation__participants=user) |
-            Q(conversation__group__groupmembership__user=user, conversation__is_group_public=True)
+            Q(conversation__group__groupmembership__user=user, conversation__group__isnull=False)
         ).annotate(
             has_conversation_access=Value(True, output_field=models.BooleanField())
             # This is not just an annotation, we use it because it results in a 'group by' clause
@@ -403,11 +399,6 @@ class ConversationMixin(object):
     def ended_at(self):
         """Override this property if the conversation should be closed after the target has ended"""
         return None
-
-    @property
-    def conversation_is_group_public(self):
-        """Override this property if the conversation should not be accessible to all group members"""
-        return True
 
     @property
     def conversation_supports_threads(self):

@@ -177,7 +177,7 @@ def send_participant_left(sender, instance, **kwargs):
 
     topic = 'conversations:conversation'
 
-    # TODO send to all group participants if it's a group_public conversation?
+    # TODO send to all group members?
 
     for subscription in ChannelSubscription.objects.recent() \
             .filter(user__in=conversation.participants.all()).distinct():

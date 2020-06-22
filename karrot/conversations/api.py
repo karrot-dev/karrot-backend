@@ -126,10 +126,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
             return super().get_object()
         except Http404:
             # user is not participant, create mock participant that could be saved if needed
-            queryset = Conversation.objects.filter(
-                group__groupmembership__user=self.request.user,
-                is_group_public=True,
-            )
+            queryset = Conversation.objects.filter(group__groupmembership__user=self.request.user, group__isnull=False)
             pk = self.kwargs['pk']
             conversation = get_object_or_404(queryset, id=pk)
             return conversation.make_participant(user=self.request.user)
