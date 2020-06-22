@@ -34,8 +34,9 @@ def match_pickups_with_dates(pickups, new_dates):
         diff_is_small = diff < timedelta(seconds=31)
         next_pickup = pickups.peek(None)
         next_date = new_dates.peek(None)
+        is_past = pickup.date.start < date
 
-        if (not diff_is_small or (next_pickup and get_diff(next_pickup, date) < diff)) and pickup.date.start < date:
+        if (not diff_is_small or (next_pickup and get_diff(next_pickup, date) < diff)) and is_past:
             # diff is too big or the next pickup is closer to given date, so the current pickup doesn't match a date
             yield pickup, None
             pickup = next(pickups, None)
