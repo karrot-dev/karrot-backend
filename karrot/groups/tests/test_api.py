@@ -131,7 +131,6 @@ class TestGroupsAPI(APITestCase):
             response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('photo_urls', response.data)
-        self.assertEqual(response.data['active_editors_count'], 2)
 
     def test_patch_group(self):
         url = self.url + str(self.group.id) + '/'

@@ -128,7 +128,7 @@ class GroupViewSet(
         qs = self.queryset
 
         if self.action in ('retrieve', 'list'):
-            qs = qs.annotate_active_editors_count().annotate_yesterdays_member_count().prefetch_related(
+            qs = qs.annotate_yesterdays_member_count().prefetch_related(
                 'members',
                 'groupmembership_set',
                 'groupmembership_set__trusted_by',
