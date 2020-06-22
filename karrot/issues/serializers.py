@@ -1,8 +1,6 @@
-from django.conf import settings
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
-
-from django.utils.translation import gettext as _
 
 from karrot.issues.models import Issue, Voting, Vote, Option
 
@@ -122,12 +120,6 @@ class IssueSerializer(serializers.ModelSerializer):
             raise PermissionDenied(_('You are not a member of this group.'))
         if not group.is_editor(self.context['request'].user):
             raise PermissionDenied(_('You need to be a group editor'))
-        if (group.groupmembership_set.active().editors().count() <
-                settings.CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION):
-            raise serializers.ValidationError(
-                _('You need at least %(count)s active trusted users in your group to start this process.') %
-                {'count': settings.CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION}
-            )
         return group
 
     def validate_affected_user(self, affected_user):

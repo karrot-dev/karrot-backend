@@ -73,9 +73,6 @@ class GroupDetailSerializer(GroupBaseSerializer):
     # setting constants
     member_inactive_after_days = serializers.ReadOnlyField(default=settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP)
     issue_voting_duration_days = serializers.ReadOnlyField(default=settings.VOTING_DURATION_DAYS)
-    active_editors_required_for_conflict_resolution = serializers.ReadOnlyField(
-        default=settings.CONFLICT_RESOLUTION_ACTIVE_EDITORS_REQUIRED_FOR_CREATION
-    )
 
     class Meta:
         model = GroupModel
@@ -102,8 +99,6 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'trust_threshold_for_newcomer',
             'member_inactive_after_days',
             'issue_voting_duration_days',
-            'active_editors_count',
-            'active_editors_required_for_conflict_resolution',
             'photo',
             'photo_urls',
         ]

@@ -230,11 +230,6 @@ class ConversationSerializer(serializers.ModelSerializer):
         if (participant and notifications == ConversationNotificationStatus.NONE.value
                 and participant.conversation.is_private):
             raise serializers.ValidationError('You cannot leave a private conversation')
-        if (participant and notifications == ConversationNotificationStatus.NONE.value
-                and not participant.conversation.is_group_public):
-            # We currently don't support unsubscribing from non group-public conversation
-            # TODO figure out a good solution how to handle this case, then remove this restriction
-            raise serializers.ValidationError('You cannot leave a conversation that is not group public')
         return notifications
 
     def update(self, participant, validated_data):

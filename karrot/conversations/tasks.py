@@ -28,7 +28,7 @@ def get_participants_to_notify(message):
             # (We don't remove thread participants after they left the group)
             Q(thread__conversation__participants=F('user')) | Q(
                 thread__conversation__group__groupmembership__user=F('user'),
-                thread__conversation__is_group_public=True,
+                thread__conversation__group__isnull=False,
             )
         )
     else:

@@ -34,17 +34,6 @@ class GroupQuerySet(models.QuerySet):
             groupmembership__user=user,
         )
 
-    def annotate_active_editors_count(self):
-        return self.annotate(
-            _active_editors_count=Count(
-                'groupmembership',
-                filter=Q(
-                    groupmembership__roles__contains=[roles.GROUP_EDITOR],
-                    groupmembership__inactive_at__isnull=True,
-                )
-            )
-        )
-
     def annotate_yesterdays_member_count(self):
         one_day_ago = timezone.now() - relativedelta(days=1)
         return self.annotate(
@@ -181,12 +170,6 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
         dynamic_threshold = max(1, count // 2)
         trust_threshold = min(settings.GROUP_EDITOR_TRUST_MAX_THRESHOLD, dynamic_threshold)
         return trust_threshold
-
-    def active_editors_count(self):
-        count = getattr(self, '_active_editors_count', None)
-        if count is None:
-            count = self.groupmembership_set.active().editors().count()
-        return count
 
     def delete_photo(self):
         if self.photo.name is None:

@@ -49,7 +49,7 @@ class IssuesViewSet(
         return super().get_throttles()
 
     def get_queryset(self):
-        qs = super().get_queryset().filter(participants=self.request.user)
+        qs = super().get_queryset().filter(group__members=self.request.user)
         if self.action == 'list':
             return qs.prefetch_for_serializer(user=self.request.user)
         return qs

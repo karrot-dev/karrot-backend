@@ -28,7 +28,6 @@ class IssueFactory(DjangoModelFactory):
             group=self.group,
         )
         self.group.groupmembership_set.get_or_create(user=self.affected_user)
-        self.issueparticipant_set.get_or_create(user=self.created_by)
         self.conversation.join(self.created_by)
 
 

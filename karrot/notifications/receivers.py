@@ -297,7 +297,7 @@ def conflict_resolution_issue_created_or_continued(sender, instance, created, **
 
     # if there's only one voting, the issue has just been created
     if issue.votings.count() <= 1:
-        for user in issue.participants.exclude(id=issue.created_by_id).distinct():
+        for user in issue.group.members.exclude(id=issue.created_by_id).distinct():
             create_notification_about_issue(
                 issue=issue,
                 user=user,
@@ -307,7 +307,7 @@ def conflict_resolution_issue_created_or_continued(sender, instance, created, **
                 )
             )
     else:
-        for user in issue.participants.distinct():
+        for user in issue.group.members.distinct():
             create_notification_about_issue(
                 issue=issue,
                 user=user,
@@ -331,7 +331,7 @@ def conflict_resolution_issue_decided(sender, instance, **kwargs):
     if old.is_decided() or not issue.is_decided():
         return
 
-    for user in issue.participants.distinct():
+    for user in issue.group.members.distinct():
         create_notification_about_issue(
             issue=issue,
             user=user,

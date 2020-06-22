@@ -191,7 +191,7 @@ class TestMessagePushNotificationTitles(TestCase):
 
     def test_issue_message_title(self):
         issue = IssueFactory()
-        author = issue.participants.first()
+        author = issue.group.members.first()
         conversation = issue.conversation
         message = conversation.messages.create(author=author, content='bla')
 

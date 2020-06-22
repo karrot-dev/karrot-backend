@@ -1,11 +1,11 @@
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
-from karrot.issues.models import Issue, Voting, IssueParticipant
-from karrot.issues.tasks import notify_about_new_conflict_resolution, \
-    notify_about_continued_conflict_resolution
 from karrot.conversations.models import Conversation
 from karrot.groups.models import GroupNotificationType, GroupMembership
+from karrot.issues.models import Issue, Voting
+from karrot.issues.tasks import notify_about_new_conflict_resolution, \
+    notify_about_continued_conflict_resolution
 
 
 @receiver(post_save, sender=Issue)
@@ -16,15 +16,12 @@ def issue_created(sender, instance, created, **kwargs):
     issue = instance
     group = instance.group
 
-    for membership in group.groupmembership_set.editors():
-        issue.issueparticipant_set.create(user=membership.user)
-    issue.issueparticipant_set.get_or_create(user=issue.affected_user)
-
     # add conversation
     conversation = Conversation.objects.get_or_create_for_target(issue)
-    for membership in group.groupmembership_set.editors():
+    for membership in group.groupmembership_set.all():
         notifications_enabled = GroupNotificationType.CONFLICT_RESOLUTION in membership.notification_types
-        conversation.join(membership.user, muted=not notifications_enabled)
+        if notifications_enabled:
+            conversation.join(membership.user, muted=False)
 
     # make sure affected user is in conversation and has email notifications enabled
     conversation.join(issue.affected_user)
@@ -52,9 +49,6 @@ def voting_created(sender, instance, created, **kwargs):
 def group_member_removed(sender, instance, **kwargs):
     group = instance.group
     user = instance.user
-
-    for participant in IssueParticipant.objects.filter(user=user, issue__group=group):
-        participant.delete()
 
     for issue in group.issues.all():
         conversation = Conversation.objects.get_for_target(issue)
