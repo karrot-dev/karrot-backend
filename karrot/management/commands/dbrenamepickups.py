@@ -30,8 +30,18 @@ class Command(BaseCommand):
             "truncate django_migrations",
             "update django_content_type set app_label = 'activities' where app_label = 'pickups'",
             "update django_content_type set model = 'activity' where model = 'pickup'",
-            "update notifications_notification set type = 'new_activity' where type = 'new_pickup'"
         ]
+
+        def rename_notification_types(type_from, type_to):
+            for notification_type, in fetchall(
+                    f"select type from notifications_notification where type like '%{type_from}%'"):
+                renamed = notification_type.replace(type_from, type_to)
+                queries.append(
+                    f"update notifications_notification set type = '{renamed}' where type = '{notification_type}'"
+                )
+
+        rename_notification_types('pickup', 'activity')
+        rename_notification_types('collector', 'participant')
 
         def rename_jsonb_field(table, column, field_from, field_to):
             query = """
@@ -46,54 +56,61 @@ class Command(BaseCommand):
         queries.append(rename_jsonb_field('notifications_notification', 'context', 'pickup_date', 'activity'))
         queries.append(rename_jsonb_field('notifications_notification', 'context', 'pickup', 'activity'))
         queries.append(
-            rename_jsonb_field('notifications_notification', 'context', 'pickup_collector', 'activity_collector')
+            rename_jsonb_field('notifications_notification', 'context', 'pickup_collector', 'activity_participant')
         )
-        queries.append(rename_jsonb_field('history_history', 'payload', 'pickup_date', 'activity_date'))
-        queries.append(rename_jsonb_field('history_history', 'before', 'pickup_date', 'activity_date'))
-        queries.append(rename_jsonb_field('history_history', 'after', 'pickup_date', 'activity_date'))
+        queries.append(rename_jsonb_field('history_history', 'payload', 'pickup_date', 'activity'))
+        queries.append(rename_jsonb_field('history_history', 'before', 'pickup_date', 'activity'))
+        queries.append(rename_jsonb_field('history_history', 'after', 'pickup_date', 'activity'))
 
         # foreign key columns
 
-        fkey_query = """
-            select table_name, column_name from information_schema.columns where column_name = 'pickupdate_id'
-        """
-        for table_name, column_name in fetchall(fkey_query):
-            queries.append("alter table {} rename column pickupdate_id to activitydate_id".format(table_name))
+        def rename_foreign_keys(key_from, key_to):
+            fkey_query = f"""
+                select table_name, column_name from information_schema.columns where column_name = '{key_from}'
+            """
+            for table_name, column_name in fetchall(fkey_query):
+                return f"alter table {table_name} rename column {key_from} to {key_to}"
 
-        fkey_query = """
-            select table_name, column_name from information_schema.columns where column_name = 'pickup_id'
-        """
-        for table_name, column_name in fetchall(fkey_query):
-            queries.append("alter table {} rename column pickup_id to activity_id".format(table_name))
+        queries.append(rename_foreign_keys('pickupdate_id', 'activity_id'))
+        queries.append(rename_foreign_keys('pickup_id', 'activity_id'))
 
         # constraints
 
-        for table_name, constraint_name in fetchall("""
+        def rename_constraints(constraint_from, constraint_to):
+            for table_name, constraint_name in fetchall(f"""
                 select table_name, constraint_name
                 from information_schema.table_constraints
-                where constraint_name like '%pickup%'
+                where constraint_name like '%{constraint_from}%'
                 """):
-            queries.append(
-                "alter table {} rename constraint {} to {}".format(
-                    table_name, constraint_name, constraint_name.replace('pickup', 'activity')
+                return "alter table {} rename constraint {} to {}".format(
+                    table_name, constraint_name, constraint_name.replace(constraint_from, constraint_to)
                 )
-            )
+
+        rename_constraints('pickup', 'activity')
 
         # indexes
 
-        index_query = "select indexname from pg_indexes where schemaname = 'public' and indexname like '%pickup%'"
-        for indexname, in fetchall(index_query):
-            queries.append(
-                "alter index if exists {} rename to {}".format(indexname, indexname.replace('pickup', 'activity'))
-            )
+        def rename_indexes(index_from, index_to):
+            index_query = f"select indexname from pg_indexes where schemaname = 'public' and indexname like '%{index_from}%'"
+            for indexname, in fetchall(index_query):
+                return "alter index if exists {} rename to {}".format(
+                    indexname, indexname.replace(index_from, index_to)
+                )
+
+        queries.append(rename_indexes('pickup', 'activity'))
+        queries.append(rename_indexes('collector', 'participant'))
 
         # sequences
 
-        sequence_query = "select relname from pg_class where relkind = 'S' and relname like '%pickup%'"
-        for relname, in fetchall(sequence_query):
-            queries.append(
-                "alter sequence if exists {} rename to {}".format(relname, relname.replace('pickup', 'activity'))
-            )
+        def rename_sequences(sequence_from, sequence_to):
+            sequence_query = f"select relname from pg_class where relkind = 'S' and relname like '%{sequence_from}%'"
+            for relname, in fetchall(sequence_query):
+                return "alter sequence if exists {} rename to {}".format(
+                    relname, relname.replace(sequence_from, sequence_to)
+                )
+
+        queries.append(rename_sequences('pickup', 'activity'))
+        queries.append(rename_sequences('collector', 'participant'))
 
         queries.append("alter table if exists pickups_pickupdate rename to activities_activitydate")
         queries.append("alter table if exists pickups_pickupdateseries rename to activities_activitydateseries")
@@ -105,8 +122,10 @@ class Command(BaseCommand):
         if do_execute:
             with connection.cursor() as cursor:
                 for query in queries:
-                    cursor.execute(query)
+                    if query:
+                        cursor.execute(query)
             print('done')
         else:
             for query in queries:
-                print(query + ';')
+                if query:
+                    print(query + ';')
