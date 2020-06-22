@@ -46,7 +46,6 @@ class Issue(BaseModel, ConversationMixin):
 
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='issues')
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='issues_created')
-    participants = models.ManyToManyField(settings.AUTH_USER_MODEL, through='IssueParticipant', related_name='issues')
     status = models.TextField(
         default=IssueStatus.ONGOING.value,
         choices=[(status.value, status.value) for status in IssueStatus],
@@ -63,7 +62,7 @@ class Issue(BaseModel, ConversationMixin):
 
     @property
     def conversation_is_group_public(self):
-        return False
+        return True
 
     @property
     def ended_at(self):
@@ -108,14 +107,6 @@ class Issue(BaseModel, ConversationMixin):
 
     def is_cancelled(self):
         return self.status == IssueStatus.CANCELLED.value
-
-
-class IssueParticipant(models.Model):
-    class Meta:
-        unique_together = ('issue', 'user')
-
-    issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
 
 class VotingQuerySet(models.QuerySet):

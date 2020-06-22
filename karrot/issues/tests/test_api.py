@@ -79,9 +79,9 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(voting['participant_count'], 0)
 
         # check if emails have been sent
-        self.assertEqual(len(mail.outbox), 2)
-        email_to_affected_user = next(email for email in mail.outbox if email.to[0] == self.affected_member.email)
         email_to_editor = next(email for email in mail.outbox if email.to[0] == notification_member.email)
+        email_to_affected_user = next(email for email in mail.outbox if email.to[0] == self.affected_member.email)
+        self.assertEqual(len(mail.outbox), 2)
         self.assertIn('with you', email_to_affected_user.subject)
         self.assertIn('with {}'.format(self.affected_member.display_name), email_to_editor.subject)
 
@@ -238,29 +238,29 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
 
     def test_cannot_list_issues_as_nonmember(self):
         self.create_issue()
-        self.client.force_login(user=self.newcomer)
+        self.client.force_login(user=VerifiedUserFactory())
         response = self.get_results('/api/issues/?group={}'.format(self.group.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 0)
 
-    def test_cannot_list_issues_as_newcomer(self):
+    def test_can_list_issues_as_newcomer(self):
         self.create_issue()
         self.client.force_login(user=self.newcomer)
         response = self.get_results('/api/issues/?group={}'.format(self.group.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data), 0)
+        self.assertEqual(len(response.data), 1)
 
-    def test_cannot_retrieve_issues_as_nonmember(self):
+    def test_cannot_retrieve_issue_as_nonmember(self):
         issue = self.create_issue()
         self.client.force_login(user=VerifiedUserFactory())
         response = self.get_results('/api/issues/{}/'.format(issue.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
-    def test_cannot_retrieve_issues_as_newcomer(self):
+    def test_can_retrieve_issue_as_newcomer(self):
         issue = self.create_issue()
         self.client.force_login(user=self.newcomer)
         response = self.get_results('/api/issues/{}/'.format(issue.id))
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_cannot_retrieve_issue_conversation_as_nonmember(self):
         issue = self.create_issue()
@@ -268,13 +268,13 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         response = self.get_results('/api/issues/{}/conversation/'.format(issue.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
-    def test_cannot_retrieve_issue_conversation_as_newcomer(self):
+    def test_can_retrieve_issue_conversation_as_newcomer(self):
         issue = self.create_issue()
         self.client.force_login(user=self.newcomer)
         response = self.get_results('/api/issues/{}/conversation/'.format(issue.id))
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
-    def test_cannot_leave_issue_conversation(self):
+    def test_can_leave_issue_conversation(self):
         # Make sure that users don't leave the issue conversation, because the API doesn't let them in again
         issue = self.create_issue()
         self.client.force_login(user=self.member)
@@ -287,8 +287,7 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
             },
             format='json'
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['notifications'], ['You cannot leave a conversation that is not group public'])
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_cannot_vote_as_nonmember(self):
         issue = self.create_issue()
@@ -296,11 +295,11 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         response = self.vote_via_API(issue)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
-    def test_cannot_vote_as_newcomer(self):
+    def test_can_vote_as_newcomer(self):
         issue = self.create_issue()
         self.client.force_login(user=self.newcomer)
         response = self.vote_via_API(issue)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
     def test_cannot_delete_vote_as_nonmember(self):
         issue = self.create_issue()

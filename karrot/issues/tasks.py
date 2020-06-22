@@ -9,7 +9,7 @@ from karrot.issues.emails import prepare_new_conflict_resolution_email, \
     prepare_conflict_resolution_continued_email, prepare_new_conflict_resolution_email_to_affected_user, \
     prepare_conflict_resolution_continued_email_to_affected_user
 from karrot.issues.models import Voting, IssueStatus
-from karrot.groups.models import GroupNotificationType
+from karrot.groups.models import GroupNotificationType, GroupMembership
 from karrot.utils import stats_utils
 from karrot.utils.stats_utils import timer
 
@@ -33,10 +33,13 @@ def process_expired_votings():
 
 
 def get_users_to_notify(issue):
-    return issue.participants.filter(
-        groupmembership__notification_types__contains=[GroupNotificationType.CONFLICT_RESOLUTION],
-        groupmembership__inactive_at__isnull=True,
-    ).exclude(id__in=get_user_model().objects.unverified()).distinct()
+    return issue.group.members.filter(
+        groupmembership__in=GroupMembership.objects.active().with_notification_type(
+            GroupNotificationType.CONFLICT_RESOLUTION
+        ),
+    ).exclude(
+        groupmembership__user__in=get_user_model().objects.unverified(),
+    ).distinct()
 
 
 def send_or_report_error(email):

@@ -456,7 +456,8 @@ def notification_meta_saved(sender, instance, **kwargs):
 # Issue
 @receiver(issue_changed)
 def send_issue_updates(sender, issue, **kwargs):
-    for subscription in ChannelSubscription.objects.recent().filter(user__issueparticipant__issue=issue).distinct():
+    for subscription in ChannelSubscription.objects.recent().filter(user__groupmembership__group=issue.group
+                                                                    ).distinct():
         payload = IssueSerializer(issue, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic='issues:issue', payload=payload)
 

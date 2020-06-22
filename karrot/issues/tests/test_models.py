@@ -112,23 +112,17 @@ class IssueModelTests(TestCase):
         self.issue.refresh_from_db()
         self.assertTrue(self.issue.is_cancelled())
 
-    def test_new_members_are_not_in_existing_issues(self):
+    def test_new_members_are_not_in_existing_issue_conversations(self):
         # create a new member and a new editor
         self.group.groupmembership_set.create(user=VerifiedUserFactory(), roles=[roles.GROUP_EDITOR])
         self.group.groupmembership_set.create(user=VerifiedUserFactory())
 
-        # ...but they shouldn't become part of existing issues
+        # ...they shouldn't become part of existing issue conversations
         expected_ids = sorted([self.member.id, self.affected_member.id])
-        participant_ids = sorted(self.issue.participants.values_list('id', flat=True))
         conversation_participant_ids = sorted(self.issue.conversation.participants.values_list('id', flat=True))
-        self.assertEqual(participant_ids, expected_ids)
         self.assertEqual(conversation_participant_ids, expected_ids)
 
     def test_remove_participant_if_they_leave_group(self):
-        self.assertTrue(self.issue.participants.filter(id=self.member.id).exists())
         self.assertTrue(self.issue.conversation.participants.filter(id=self.member.id).exists())
-
         self.group.groupmembership_set.filter(user=self.member).delete()
-
-        self.assertFalse(self.issue.participants.filter(id=self.member.id).exists())
         self.assertFalse(self.issue.conversation.participants.filter(id=self.member.id).exists())
