@@ -43,7 +43,11 @@ class Command(BaseCommand):
 
         # rename 'store' -> 'place' inside jsonb fields
 
-        queries.append(rename_jsonb_field('notifications_notification', 'context', 'pickup_date', 'activity_date'))
+        queries.append(rename_jsonb_field('notifications_notification', 'context', 'pickup_date', 'activity'))
+        queries.append(rename_jsonb_field('notifications_notification', 'context', 'pickup', 'activity'))
+        queries.append(
+            rename_jsonb_field('notifications_notification', 'context', 'pickup_collector', 'activity_collector')
+        )
         queries.append(rename_jsonb_field('history_history', 'payload', 'pickup_date', 'activity_date'))
         queries.append(rename_jsonb_field('history_history', 'before', 'pickup_date', 'activity_date'))
         queries.append(rename_jsonb_field('history_history', 'after', 'pickup_date', 'activity_date'))
