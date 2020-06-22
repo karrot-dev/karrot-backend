@@ -29,6 +29,7 @@ def convert_comment_to_description(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('history', '0005_auto_20181114_1126'),
         ('places', '0014_pickupdateseries_comment'),
     ]
 
