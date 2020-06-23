@@ -27,7 +27,7 @@ msgid "You need to have a verified email address"
 msgstr "आपके पास एक सत्यापित ईमेल पता होना जरूरी है"
 
 #: karrot/applications/api.py:36 karrot/groups/api.py:50
-#: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:124
+#: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
 #: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:112
 #: karrot/pickups/serializers.py:297 karrot/places/api.py:19
 #: karrot/places/serializers.py:80
@@ -137,8 +137,8 @@ msgstr ""
 "%(site_name)s पर देखें</a>, या <a href=\"%(mute_url)s\">बातचीत को चुप "
 "करें</a>।"
 
-#: karrot/conversations/api.py:63 karrot/conversations/api.py:245
-#: karrot/conversations/api.py:412 karrot/conversations/serializers.py:146
+#: karrot/conversations/api.py:63 karrot/conversations/api.py:242
+#: karrot/conversations/api.py:409 karrot/conversations/serializers.py:146
 msgid "You are not in this conversation"
 msgstr "आप इस बातचीत में नहीं हैं |"
 
@@ -154,11 +154,11 @@ msgstr ""
 "आप संदेश के निर्माण के %(days_number)s दिन से अधिक समय बाद संदेश संपादित "
 "नहीं कर सकते।"
 
-#: karrot/conversations/api.py:341
+#: karrot/conversations/api.py:338
 msgid "Must be first in thread"
 msgstr "बातचीत में पहले होना चाहिए"
 
-#: karrot/conversations/api.py:344
+#: karrot/conversations/api.py:341
 msgid "You are not a participant in this thread"
 msgstr "आप इस बातचीत में भागीदार नहीं हैं"
 
@@ -242,15 +242,15 @@ msgstr "अज्ञात समयक्षेत्र"
 msgid "Playground"
 msgstr "खेल-मैदान"
 
-#: karrot/groups/serializers.py:138 karrot/groups/serializers.py:233
+#: karrot/groups/serializers.py:133 karrot/groups/serializers.py:228
 msgid "You cannot manage agreements"
 msgstr "आप समझौतों का प्रबंधन नहीं कर सकते"
 
-#: karrot/groups/serializers.py:140
+#: karrot/groups/serializers.py:135
 msgid "Agreement is not for this group"
 msgstr "समझौता इस समूह के लिए नहीं है"
 
-#: karrot/groups/serializers.py:231
+#: karrot/groups/serializers.py:226
 msgid "You are not in this group"
 msgstr "आप इस समूह में नहीं हैं"
 
@@ -479,7 +479,7 @@ msgstr ""
 msgid "An invitation has already been sent to this e-mail address"
 msgstr "इस ई-मेल पते पर एक आमंत्रण पहले ही भेज दिया गया है |"
 
-#: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:122
+#: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
 #: karrot/offers/serializers.py:105 karrot/places/serializers.py:78
 msgid "You are not a member of this group."
 msgstr "आप इस समूह के सदस्य नहीं हैं।"
@@ -524,36 +524,27 @@ msgstr "निमंत्रण का अनुसरण करें"
 msgid "Can only modify vote for ongoing issues"
 msgstr "केवल चल रहे मुद्दों के लिए मत को बदल सकते हैं"
 
-#: karrot/issues/serializers.py:15
+#: karrot/issues/serializers.py:13
 msgid "You need to provide a score for all options"
 msgstr "आपको सभी विकल्पों के लिए एक अंक प्रदान करने की आवश्यकता है"
 
-#: karrot/issues/serializers.py:41
+#: karrot/issues/serializers.py:39
 msgid "Provided option is not part of this voting"
 msgstr "चुना हुआ विकल्प इस मतदान का हिस्सा नहीं है"
 
-#: karrot/issues/serializers.py:46
+#: karrot/issues/serializers.py:44
 msgid "Provided score is outside of allowed range"
 msgstr "चुना हुआ स्कोर अनुमत सीमा के बाहर है"
 
-#: karrot/issues/serializers.py:128
-#, python-format
-msgid ""
-"You need at least %(count)s active trusted users in your group to start this"
-" process."
-msgstr ""
-"इस प्रक्रिया को शुरू करने के लिए आपको अपने समूह में कम से कम %(count)s "
-"सक्रिय विश्वसनीय उपयोगकर्ताओं की आवश्यकता है।"
-
-#: karrot/issues/serializers.py:140
+#: karrot/issues/serializers.py:132
 msgid "Topic cannot be empty"
 msgstr "विषय खाली नहीं हो सकता"
 
-#: karrot/issues/serializers.py:147
+#: karrot/issues/serializers.py:139
 msgid "Affected user is not part of that group"
 msgstr "प्रभावित उपयोगकर्ता उस समूह का हिस्सा नहीं है"
 
-#: karrot/issues/serializers.py:149
+#: karrot/issues/serializers.py:141
 msgid "A conflict resolution about that user has already been started"
 msgstr ""
 "उस उपयोगकर्ता के बारे में एक संघर्ष प्रस्ताव पहले ही शुरू किया जा चुका है"
