@@ -30,7 +30,7 @@ msgid "You need to have a verified email address"
 msgstr "Du brauchst eine bestätigte E-Mail-Adresse."
 
 #: karrot/applications/api.py:36 karrot/groups/api.py:50
-#: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:124
+#: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
 #: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:112
 #: karrot/pickups/serializers.py:297 karrot/places/api.py:19
 #: karrot/places/serializers.py:80
@@ -139,8 +139,8 @@ msgstr ""
 "besuchen</a> oder <a href=\"%(mute_url)s\">die Unterhaltung "
 "stummschalten</a>."
 
-#: karrot/conversations/api.py:63 karrot/conversations/api.py:245
-#: karrot/conversations/api.py:412 karrot/conversations/serializers.py:146
+#: karrot/conversations/api.py:63 karrot/conversations/api.py:242
+#: karrot/conversations/api.py:409 karrot/conversations/serializers.py:146
 msgid "You are not in this conversation"
 msgstr "Du bist nicht Teil dieser Unterhaltung"
 
@@ -156,11 +156,11 @@ msgstr ""
 "Du kannst eine Nachricht nicht mehr als %(days_number)s Tage nach ihrer "
 "Erstellung bearbeiten."
 
-#: karrot/conversations/api.py:341
+#: karrot/conversations/api.py:338
 msgid "Must be first in thread"
 msgstr "Muss erste Nachricht im Thread sein"
 
-#: karrot/conversations/api.py:344
+#: karrot/conversations/api.py:341
 msgid "You are not a participant in this thread"
 msgstr "Du bist nicht Teil dieses Threads"
 
@@ -244,15 +244,15 @@ msgstr "Unbekannte Zeitzone"
 msgid "Playground"
 msgstr "Spielplatz"
 
-#: karrot/groups/serializers.py:138 karrot/groups/serializers.py:233
+#: karrot/groups/serializers.py:133 karrot/groups/serializers.py:228
 msgid "You cannot manage agreements"
 msgstr "Du darfst die Vereinbarungen nicht ändern"
 
-#: karrot/groups/serializers.py:140
+#: karrot/groups/serializers.py:135
 msgid "Agreement is not for this group"
 msgstr "Vereinbarung gehört nicht zu dieser Gruppe."
 
-#: karrot/groups/serializers.py:231
+#: karrot/groups/serializers.py:226
 msgid "You are not in this group"
 msgstr "Du bist nicht Mitglied dieser Gruppe."
 
@@ -486,7 +486,7 @@ msgstr ""
 msgid "An invitation has already been sent to this e-mail address"
 msgstr "Eine Einladung wurde bereits an diese E-Mail-Adresse versendet"
 
-#: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:122
+#: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
 #: karrot/offers/serializers.py:105 karrot/places/serializers.py:78
 msgid "You are not a member of this group."
 msgstr "Du bist kein Mitglied dieser Gruppe."
@@ -531,36 +531,27 @@ msgstr "Akzeptiere die Einladung"
 msgid "Can only modify vote for ongoing issues"
 msgstr "Wahl kann nur bei aktuellen Angelegenheiten geändert werden"
 
-#: karrot/issues/serializers.py:15
+#: karrot/issues/serializers.py:13
 msgid "You need to provide a score for all options"
 msgstr "Du musst eine Wahl für jede Option abgeben"
 
-#: karrot/issues/serializers.py:41
+#: karrot/issues/serializers.py:39
 msgid "Provided option is not part of this voting"
 msgstr "Gewählte Option ist kein Teil der Abstimmung"
 
-#: karrot/issues/serializers.py:46
+#: karrot/issues/serializers.py:44
 msgid "Provided score is outside of allowed range"
 msgstr "Wahl ist außerhalb des erlaubten Rahmens"
 
-#: karrot/issues/serializers.py:128
-#, python-format
-msgid ""
-"You need at least %(count)s active trusted users in your group to start this"
-" process."
-msgstr ""
-"Du benötigst mindestens %(count)s aktive vertrauenswürdige Nutzer, um diesen"
-" Prozess zu starten"
-
-#: karrot/issues/serializers.py:140
+#: karrot/issues/serializers.py:132
 msgid "Topic cannot be empty"
 msgstr "Thema kann nicht leer sein"
 
-#: karrot/issues/serializers.py:147
+#: karrot/issues/serializers.py:139
 msgid "Affected user is not part of that group"
 msgstr "Betroffener Nutzer ist nicht Teil dieser Gruppe"
 
-#: karrot/issues/serializers.py:149
+#: karrot/issues/serializers.py:141
 msgid "A conflict resolution about that user has already been started"
 msgstr "Ein Konfliktlösungsprozess mit diesem Nutzer wurde bereits gestartet"
 

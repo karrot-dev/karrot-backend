@@ -27,7 +27,7 @@ msgid "You need to have a verified email address"
 msgstr "Du behöver en verifierad mejladress"
 
 #: karrot/applications/api.py:36 karrot/groups/api.py:50
-#: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:124
+#: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
 #: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:112
 #: karrot/pickups/serializers.py:297 karrot/places/api.py:19
 #: karrot/places/serializers.py:80
@@ -135,8 +135,8 @@ msgstr ""
 " det på %(site_name)s</a>, eller  <a href=\"%(mute_url)s\"> stäng av "
 "konversationen </a>."
 
-#: karrot/conversations/api.py:63 karrot/conversations/api.py:245
-#: karrot/conversations/api.py:412 karrot/conversations/serializers.py:146
+#: karrot/conversations/api.py:63 karrot/conversations/api.py:242
+#: karrot/conversations/api.py:409 karrot/conversations/serializers.py:146
 msgid "You are not in this conversation"
 msgstr "Du är inte med i den här konversationen"
 
@@ -152,11 +152,11 @@ msgstr ""
 "Du kan inte redigera ett meddelande mer än %(days_number)s dagar efter "
 "skapandet."
 
-#: karrot/conversations/api.py:341
+#: karrot/conversations/api.py:338
 msgid "Must be first in thread"
 msgstr "Måste vara först i tråd"
 
-#: karrot/conversations/api.py:344
+#: karrot/conversations/api.py:341
 msgid "You are not a participant in this thread"
 msgstr "Du deltar inte i den här tråden"
 
@@ -240,15 +240,15 @@ msgstr "Okänd tidszon"
 msgid "Playground"
 msgstr "Lekplats"
 
-#: karrot/groups/serializers.py:138 karrot/groups/serializers.py:233
+#: karrot/groups/serializers.py:133 karrot/groups/serializers.py:228
 msgid "You cannot manage agreements"
 msgstr "Du kan inte hantera överenskommelser"
 
-#: karrot/groups/serializers.py:140
+#: karrot/groups/serializers.py:135
 msgid "Agreement is not for this group"
 msgstr "Överenskommelse är inte för denna grupp"
 
-#: karrot/groups/serializers.py:231
+#: karrot/groups/serializers.py:226
 msgid "You are not in this group"
 msgstr "Du är inte med i den här gruppen"
 
@@ -479,7 +479,7 @@ msgstr ""
 msgid "An invitation has already been sent to this e-mail address"
 msgstr "En inbjudan har redan skickats till mejldressen"
 
-#: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:122
+#: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
 #: karrot/offers/serializers.py:105 karrot/places/serializers.py:78
 msgid "You are not a member of this group."
 msgstr "Du är inte en medlem i denna grupp"
@@ -524,36 +524,27 @@ msgstr "Följ inbjudan"
 msgid "Can only modify vote for ongoing issues"
 msgstr "Kan bara ändra omröstningen för pågående problem"
 
-#: karrot/issues/serializers.py:15
+#: karrot/issues/serializers.py:13
 msgid "You need to provide a score for all options"
 msgstr "Du måste ange en poäng för alla alternativ"
 
-#: karrot/issues/serializers.py:41
+#: karrot/issues/serializers.py:39
 msgid "Provided option is not part of this voting"
 msgstr "Tillhandahållet alternativ ingår inte i denna omröstning"
 
-#: karrot/issues/serializers.py:46
+#: karrot/issues/serializers.py:44
 msgid "Provided score is outside of allowed range"
 msgstr "Förutsatt poäng är utanför tillåtet intervall"
 
-#: karrot/issues/serializers.py:128
-#, python-format
-msgid ""
-"You need at least %(count)s active trusted users in your group to start this"
-" process."
-msgstr ""
-"Du behöver åtminstone %(count)s aktiva betrodda användare i din grupp för "
-"att starta denna process."
-
-#: karrot/issues/serializers.py:140
+#: karrot/issues/serializers.py:132
 msgid "Topic cannot be empty"
 msgstr "Ämnet kan inte vara tomt"
 
-#: karrot/issues/serializers.py:147
+#: karrot/issues/serializers.py:139
 msgid "Affected user is not part of that group"
 msgstr "Berörd användare ingår inte i den gruppen"
 
-#: karrot/issues/serializers.py:149
+#: karrot/issues/serializers.py:141
 msgid "A conflict resolution about that user has already been started"
 msgstr "En konfliktlösning om den användaren har redan startats"
 

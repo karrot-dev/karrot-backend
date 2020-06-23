@@ -31,7 +31,7 @@ msgid "You need to have a verified email address"
 msgstr "Ton adresse email doit être vérifiée "
 
 #: karrot/applications/api.py:36 karrot/groups/api.py:50
-#: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:124
+#: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
 #: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:112
 #: karrot/pickups/serializers.py:297 karrot/places/api.py:19
 #: karrot/places/serializers.py:80
@@ -139,8 +139,8 @@ msgstr ""
 "sur%(site_name)s</a>, ou <a href=\"%(mute_url)s\"> rend muet la conversation"
 " </a>."
 
-#: karrot/conversations/api.py:63 karrot/conversations/api.py:245
-#: karrot/conversations/api.py:412 karrot/conversations/serializers.py:146
+#: karrot/conversations/api.py:63 karrot/conversations/api.py:242
+#: karrot/conversations/api.py:409 karrot/conversations/serializers.py:146
 msgid "You are not in this conversation"
 msgstr "Tu n'es pas dans cette conversation"
 
@@ -156,11 +156,11 @@ msgstr ""
 "Tu ne peux pas éditer un message plus de %(days_number)s jours après sa "
 "création."
 
-#: karrot/conversations/api.py:341
+#: karrot/conversations/api.py:338
 msgid "Must be first in thread"
 msgstr "Doit être le premier dans le fil de discussions"
 
-#: karrot/conversations/api.py:344
+#: karrot/conversations/api.py:341
 msgid "You are not a participant in this thread"
 msgstr "Tu n'es pas participant à ce fil de discussion."
 
@@ -246,15 +246,15 @@ msgstr "Fuseau horaire inconnu"
 msgid "Playground"
 msgstr "Terrain de jeux"
 
-#: karrot/groups/serializers.py:138 karrot/groups/serializers.py:233
+#: karrot/groups/serializers.py:133 karrot/groups/serializers.py:228
 msgid "You cannot manage agreements"
 msgstr "Tu ne peux pas gérer les agréements"
 
-#: karrot/groups/serializers.py:140
+#: karrot/groups/serializers.py:135
 msgid "Agreement is not for this group"
 msgstr "L’agrément n'est pas pour ce groupe "
 
-#: karrot/groups/serializers.py:231
+#: karrot/groups/serializers.py:226
 msgid "You are not in this group"
 msgstr "Tu n'es pas dans ce groupe"
 
@@ -492,7 +492,7 @@ msgstr ""
 msgid "An invitation has already been sent to this e-mail address"
 msgstr "Une invitation a déjà été envoyée à cette adresse e-mail"
 
-#: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:122
+#: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
 #: karrot/offers/serializers.py:105 karrot/places/serializers.py:78
 msgid "You are not a member of this group."
 msgstr "Tu n'est pas membre de ce groupe."
@@ -538,36 +538,27 @@ msgstr "Suivre l'invitation"
 msgid "Can only modify vote for ongoing issues"
 msgstr "Ne peut modifier le vote que pour les problèmes en cours"
 
-#: karrot/issues/serializers.py:15
+#: karrot/issues/serializers.py:13
 msgid "You need to provide a score for all options"
 msgstr "Tu dois fournir un score pour toutes les options."
 
-#: karrot/issues/serializers.py:41
+#: karrot/issues/serializers.py:39
 msgid "Provided option is not part of this voting"
 msgstr "L'option suivante n'est pas disponible pour ce vote"
 
-#: karrot/issues/serializers.py:46
+#: karrot/issues/serializers.py:44
 msgid "Provided score is outside of allowed range"
 msgstr "Le score suivant est en dehors des valeurs permises"
 
-#: karrot/issues/serializers.py:128
-#, python-format
-msgid ""
-"You need at least %(count)s active trusted users in your group to start this"
-" process."
-msgstr ""
-"Tu dois avoir au moins %(count)s actif de membre de confiance  dans ton "
-"groupe pour démarrer cette procédure. "
-
-#: karrot/issues/serializers.py:140
+#: karrot/issues/serializers.py:132
 msgid "Topic cannot be empty"
 msgstr "Ce sujet ne peut pas être vide"
 
-#: karrot/issues/serializers.py:147
+#: karrot/issues/serializers.py:139
 msgid "Affected user is not part of that group"
 msgstr "L'utilisateur concerné n'est pas membre de ce groupe"
 
-#: karrot/issues/serializers.py:149
+#: karrot/issues/serializers.py:141
 msgid "A conflict resolution about that user has already been started"
 msgstr ""
 "Une résolution de conflit concernant cet utilisateur a déjà été démarrée"
