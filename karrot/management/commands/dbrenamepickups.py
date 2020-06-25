@@ -29,7 +29,9 @@ class Command(BaseCommand):
         queries = [
             "truncate django_migrations",
             "update django_content_type set app_label = 'activities' where app_label = 'pickups'",
-            "update django_content_type set model = 'activity' where model = 'pickup'",
+            "update django_content_type set model = 'activity' where model = 'pickupdate'",
+            "update django_content_type set model = 'activityseries' where model = 'pickupdateseries'",
+            "update django_content_type set model = 'activityparticipant' where model = 'pickupdatecollector'",
         ]
 
         def rename_notification_types(type_from, type_to):
