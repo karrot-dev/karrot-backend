@@ -64,24 +64,25 @@ class Command(BaseCommand):
 
         # foreign key columns
 
-        def rename_foreign_keys(key_from, key_to):
+        def rename_columns(key_from, key_to):
             fkey_query = f"""
                 select table_name, column_name from information_schema.columns where column_name = '{key_from}'
             """
             for table_name, column_name in fetchall(fkey_query):
                 return f"alter table {table_name} rename column {key_from} to {key_to}"
 
-        queries.append(rename_foreign_keys('pickupdate_id', 'activity_id'))
-        queries.append(rename_foreign_keys('pickup_id', 'activity_id'))
+        queries.append(rename_columns('pickupdate_id', 'activity_id'))
+        queries.append(rename_columns('pickup_id', 'activity_id'))
 
         # constraints
 
         def rename_constraints(constraint_from, constraint_to):
-            for table_name, constraint_name in fetchall(f"""
+            constraints_query = f"""
                 select table_name, constraint_name
                 from information_schema.table_constraints
                 where constraint_name like '%{constraint_from}%'
-                """):
+            """
+            for table_name, constraint_name in fetchall(constraints_query):
                 return "alter table {} rename constraint {} to {}".format(
                     table_name, constraint_name, constraint_name.replace(constraint_from, constraint_to)
                 )
@@ -91,7 +92,9 @@ class Command(BaseCommand):
         # indexes
 
         def rename_indexes(index_from, index_to):
-            index_query = f"select indexname from pg_indexes where schemaname = 'public' and indexname like '%{index_from}%'"
+            index_query = f"""
+                select indexname from pg_indexes where schemaname = 'public' and indexname like '%{index_from}%'
+            """
             for indexname, in fetchall(index_query):
                 return "alter index if exists {} rename to {}".format(
                     indexname, indexname.replace(index_from, index_to)
@@ -112,10 +115,14 @@ class Command(BaseCommand):
         queries.append(rename_sequences('pickup', 'activity'))
         queries.append(rename_sequences('collector', 'participant'))
 
-        queries.append("alter table if exists pickups_pickupdate rename to activities_activitydate")
-        queries.append("alter table if exists pickups_pickupdateseries rename to activities_activitydateseries")
+        queries.append(rename_columns('max_collectors', 'max_participants'))
+
+        # table renames, do it last so it doesn't invalidate queries that were created above with the old table names
+
+        queries.append("alter table if exists pickups_pickupdate rename to activities_activity")
+        queries.append("alter table if exists pickups_pickupdateseries rename to activities_activityseries")
         queries.append(
-            "alter table if exists pickups_pickupdate_collectors rename to activities_activitydate_collectors"
+            "alter table if exists pickups_pickupdate_collectors rename to activities_activity_participants"
         )
         queries.append("alter table if exists pickups_feedback rename to activities_feedback")
 
