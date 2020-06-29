@@ -30,4 +30,6 @@ class TestConvertActivityToRangeMigration(TestMigrations):
         Activity = self.apps.get_model('activities', 'Activity')
         activity = Activity.objects.get(pk=self.activity_id)
         self.assertIsNotNone(activity.date_range)
-        self.assertEqual(activity.date_range, DateTimeTZRange(activity.date, activity.date + datetime.timedelta(minutes=30)))
+        self.assertEqual(
+            activity.date_range, DateTimeTZRange(activity.date, activity.date + datetime.timedelta(minutes=30))
+        )

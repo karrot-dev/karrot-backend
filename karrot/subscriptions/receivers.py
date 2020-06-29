@@ -589,8 +589,8 @@ def activity_date_saved(sender, instance, **kwargs):
     # TODO don't send if 'is_done' did not change
 
     for user, subscriptions in groupby(sorted(list(
-            ChannelSubscription.objects.recent().filter(user__in=activity.participants.all())), key=lambda x: x.user.id),
-                                       key=lambda x: x.user):
+            ChannelSubscription.objects.recent().filter(user__in=activity.participants.all())),
+                                              key=lambda x: x.user.id), key=lambda x: x.user):
 
         groups = defaultdict(dict)
         for group_id, count in get_feedback_possible(user):

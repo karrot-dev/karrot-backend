@@ -330,7 +330,7 @@ class Command(BaseCommand):
                 login_user(user['id'])
                 join_group(g['id'])
                 for p in Activity.objects.filter(date__startswith__gte=timezone.now() + relativedelta(hours=1),
-                                                   place__group_id=g['id']).order_by('?')[:n_activities]:
+                                                 place__group_id=g['id']).order_by('?')[:n_activities]:
                     join_activity(p.id)
 
             # create group applications

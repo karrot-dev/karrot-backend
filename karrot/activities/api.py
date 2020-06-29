@@ -18,9 +18,9 @@ from karrot.activities.permissions import (
     IsRecentActivity, IsGroupEditor
 )
 from karrot.activities.serializers import (
-    ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer, ActivityLeaveSerializer,
-    FeedbackSerializer, ActivityUpdateSerializer, ActivitySeriesUpdateSerializer,
-    ActivitySeriesHistorySerializer, FeedbackExportSerializer, FeedbackExportRenderer
+    ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer, ActivityLeaveSerializer, FeedbackSerializer,
+    ActivityUpdateSerializer, ActivitySeriesUpdateSerializer, ActivitySeriesHistorySerializer,
+    FeedbackExportSerializer, FeedbackExportRenderer
 )
 from karrot.places.models import PlaceStatus
 from karrot.utils.mixins import PartialUpdateModelMixin

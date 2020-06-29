@@ -107,7 +107,9 @@ class ActivitySeries(BaseModel):
                     if duration_changed:
                         if self.duration:
                             activity.has_duration = True
-                            activity.date = CustomDateTimeTZRange(activity.date.start, activity.date.start + self.duration)
+                            activity.date = CustomDateTimeTZRange(
+                                activity.date.start, activity.date.start + self.duration
+                            )
                         else:
                             activity.has_duration = False
                             activity.date = CustomDateTimeTZRange(

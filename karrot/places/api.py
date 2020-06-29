@@ -53,9 +53,7 @@ class PlaceViewSet(
         if self.action == 'statistics':
             return qs.annotate(
                 feedback_count=Count('activities__feedback', distinct=True),
-                activities_done=Count(
-                    'activities', filter=Q(activities__in=Activity.objects.done()), distinct=True
-                )
+                activities_done=Count('activities', filter=Q(activities__in=Activity.objects.done()), distinct=True)
             )
         else:
             return qs

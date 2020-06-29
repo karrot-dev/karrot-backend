@@ -71,7 +71,12 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         # create feedback for GET method
         cls.feedback_get = {'given_by': cls.participant, 'about': cls.past_activity, 'weight': 2, 'comment': 'asfjk2'}
 
-        cls.feedback_get_2 = {'given_by': cls.participant2, 'about': cls.past_activity, 'weight': 2, 'comment': 'asfjk'}
+        cls.feedback_get_2 = {
+            'given_by': cls.participant2,
+            'about': cls.past_activity,
+            'weight': 2,
+            'comment': 'asfjk'
+        }
 
         # create 2 instances of feedback for GET method
         cls.feedback = Feedback.objects.create(**cls.feedback_get)
