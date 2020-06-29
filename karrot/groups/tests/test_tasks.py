@@ -15,7 +15,7 @@ from karrot.groups.factories import GroupFactory, PlaygroundGroupFactory, Inacti
 from karrot.groups.models import GroupMembership, GroupStatus
 from karrot.groups.tasks import process_inactive_users, send_summary_emails, mark_inactive_groups
 from karrot.history.models import History, HistoryTypus
-from karrot.pickups.factories import PickupDateFactory, FeedbackFactory
+from karrot.activities.factories import ActivityFactory, FeedbackFactory
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory, VerifiedUserFactory
 
@@ -145,10 +145,10 @@ class TestProcessInactiveUsersNonActiveGroup(TestCase):
 class TestSummaryEmailTask(TestCase):
     def setUp(self):
         self.message_count = 10
-        self.pickups_missed_count = 5
+        self.activities_missed_count = 5
         self.feedback_count = 4
         self.new_user_count = 3
-        self.pickups_done_count = 8
+        self.activities_done_count = 8
 
     def make_activity_in_group(self, group):
         place = PlaceFactory(group=group)
@@ -162,17 +162,17 @@ class TestSummaryEmailTask(TestCase):
             # a couple of messages
             [group.conversation.messages.create(author=user, content='hello') for _ in range(self.message_count)]
 
-            # missed pickups
-            [PickupDateFactory(place=place) for _ in range(self.pickups_missed_count)]
+            # missed activities
+            [ActivityFactory(place=place) for _ in range(self.activities_missed_count)]
 
-            # fullfilled pickups
-            pickups = [
-                PickupDateFactory(place=place, max_collectors=1, collectors=[user])
-                for _ in range(self.pickups_done_count)
+            # fullfilled activities
+            activities = [
+                ActivityFactory(place=place, max_participants=1, participants=[user])
+                for _ in range(self.activities_done_count)
             ]
 
-            # pickup feedback
-            [FeedbackFactory(about=pickup, given_by=user) for pickup in pickups[:self.feedback_count]]
+            # activity feedback
+            [FeedbackFactory(about=activity, given_by=user) for activity in activities[:self.feedback_count]]
 
     def test_summary_email_dates_printed_correctly(self):
         mail.outbox = []
@@ -227,9 +227,9 @@ class TestSummaryEmailTask(TestCase):
                 'new_user_count': self.new_user_count,
                 'email_recipient_count': self.new_user_count,
                 'feedback_count': self.feedback_count,
-                'pickups_missed_count': self.pickups_missed_count,
+                'activities_missed_count': self.activities_missed_count,
                 'message_count': self.message_count,
-                'pickups_done_count': self.pickups_done_count,
+                'activities_done_count': self.activities_done_count,
                 'has_activity': True,
             },
         }])
@@ -255,9 +255,9 @@ class TestSummaryEmailTask(TestCase):
                 'new_user_count': 0,
                 'email_recipient_count': 0,
                 'feedback_count': 0,
-                'pickups_missed_count': 0,
+                'activities_missed_count': 0,
                 'message_count': 0,
-                'pickups_done_count': 0,
+                'activities_done_count': 0,
                 'has_activity': False,
             },
         }])

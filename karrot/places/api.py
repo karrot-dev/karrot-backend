@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from karrot.conversations.api import RetrieveConversationMixin
-from karrot.pickups.models import PickupDate
+from karrot.activities.models import Activity
 from karrot.places.models import Place as PlaceModel, PlaceSubscription
 from karrot.places.serializers import PlaceSerializer, PlaceUpdateSerializer, PlaceSubscriptionSerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
@@ -52,9 +52,9 @@ class PlaceViewSet(
             qs = qs.prefetch_related('subscribers')
         if self.action == 'statistics':
             return qs.annotate(
-                feedback_count=Count('pickup_dates__feedback', distinct=True),
-                pickups_done=Count(
-                    'pickup_dates', filter=Q(pickup_dates__in=PickupDate.objects.done()), distinct=True
+                feedback_count=Count('activities__feedback', distinct=True),
+                activities_done=Count(
+                    'activities', filter=Q(activities__in=Activity.objects.done()), distinct=True
                 )
             )
         else:
@@ -68,7 +68,7 @@ class PlaceViewSet(
     @action(detail=True)
     def statistics(self, request, pk=None):
         instance = self.get_object()
-        weight = instance.pickup_dates.annotate(
+        weight = instance.activities.annotate(
             feedback_weight=Case(
                 When(feedback_as_sum=True, then=Sum('feedback__weight')),
                 default=Avg('feedback__weight'),
@@ -78,7 +78,7 @@ class PlaceViewSet(
         data = {
             'feedback_count': instance.feedback_count,
             'feedback_weight': round(weight or 0),
-            'pickups_done': instance.pickups_done,
+            'activities_done': instance.activities_done,
         }
         return Response(data)
 

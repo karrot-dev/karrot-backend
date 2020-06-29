@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('places', '0016_feedback'),
-        ('places', '0016_pickupdate_done_and_processed'),
+        ('places', '0016_activity_done_and_processed'),
     ]
 
     operations = [

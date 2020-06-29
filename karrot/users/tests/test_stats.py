@@ -5,8 +5,8 @@ from django.utils import timezone
 
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
-from karrot.pickups.factories import PickupDateFactory
-from karrot.pickups.models import to_range
+from karrot.activities.factories import ActivityFactory
+from karrot.activities.models import to_range
 from karrot.places.factories import PlaceFactory
 from karrot.users import stats
 from karrot.users.factories import UserFactory, VerifiedUserFactory
@@ -22,9 +22,9 @@ class TestUserStats(TestCase):
         def update_member_activity(user, **kwargs):
             GroupMembership.objects.filter(user=user).update(lastseen_at=timezone.now() - relativedelta(**kwargs))
 
-        def do_pickup(place, user, **kwargs):
-            pickup = PickupDateFactory(place=place, date=to_range(timezone.now() - relativedelta(**kwargs)))
-            pickup.add_collector(user)
+        def do_activity(place, user, **kwargs):
+            activity = ActivityFactory(place=place, date=to_range(timezone.now() - relativedelta(**kwargs)))
+            activity.add_participant(user)
 
         # 9 verified users, 1 unverified user
         users = [VerifiedUserFactory() for _ in range(9)]
@@ -74,13 +74,13 @@ class TestUserStats(TestCase):
         group_all_inactive = GroupFactory(members=users[:9])
         GroupMembership.objects.filter(group=group_all_inactive).update(inactive_at=timezone.now())
 
-        # do some pickups!
+        # do some activities!
         place = PlaceFactory(group=group)
-        do_pickup(place, users[0], days=2)
-        do_pickup(place, users[1], days=8)
-        do_pickup(place, users[2], days=31)
-        do_pickup(place, users[3], days=61)
-        do_pickup(place, users[4], days=91)
+        do_activity(place, users[0], days=2)
+        do_activity(place, users[1], days=8)
+        do_activity(place, users[2], days=31)
+        do_activity(place, users[3], days=61)
+        do_activity(place, users[4], days=91)
 
         points = stats.get_users_stats()
 
@@ -100,10 +100,10 @@ class TestUserStats(TestCase):
                 'count_active_30d': 11,
                 'count_active_60d': 12,
                 'count_active_90d': 13,
-                'count_pickup_active_1d': 0,
-                'count_pickup_active_7d': 1,
-                'count_pickup_active_30d': 2,
-                'count_pickup_active_60d': 3,
-                'count_pickup_active_90d': 4,
+                'count_activity_active_1d': 0,
+                'count_activity_active_7d': 1,
+                'count_activity_active_30d': 2,
+                'count_activity_active_60d': 3,
+                'count_activity_active_90d': 4,
             }
         )

@@ -3,11 +3,11 @@
 from django.db import migrations
 
 
-def rewrite_to_collectors(apps, schema_editor):
+def rewrite_to_participants(apps, schema_editor):
     History = apps.get_model('history', 'History')
-    for h in History.objects.filter(payload__has_key='collector_ids'):
-        h.payload['collectors'] = h.payload['collector_ids']
-        del h.payload['collector_ids']
+    for h in History.objects.filter(payload__has_key='participant_ids'):
+        h.payload['participants'] = h.payload['participant_ids']
+        del h.payload['participant_ids']
         h.save()
 
 
@@ -17,4 +17,4 @@ class Migration(migrations.Migration):
         ('history', '0006_auto_20181216_2133'),
     ]
 
-    operations = [migrations.RunPython(rewrite_to_collectors, migrations.RunPython.noop, elidable=True)]
+    operations = [migrations.RunPython(rewrite_to_participants, migrations.RunPython.noop, elidable=True)]

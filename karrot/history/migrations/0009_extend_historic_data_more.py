@@ -6,7 +6,7 @@ BATCH_SIZE = 1000
 def migrate(apps, schema_editor):
     History = apps.get_model('history', 'History')
 
-    # rewrite pickup date payload date field from string to list
+    # rewrite activity payload date field from string to list
     save_payload = []
 
     for h in History.objects.filter(payload__date__0__isnull=True, payload__date__isnull=False):

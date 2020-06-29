@@ -26,8 +26,8 @@ from karrot.invitations.models import Invitation
 from karrot.offers.emails import prepare_new_offer_notification_email
 from karrot.offers.factories import OfferFactory
 from karrot.offers.models import Offer
-from karrot.pickups.emails import prepare_pickup_notification_email
-from karrot.pickups.models import PickupDate
+from karrot.activities.emails import prepare_activity_notification_email
+from karrot.activities.models import Activity
 from karrot.users.factories import VerifiedUserFactory
 from karrot.users.models import User
 from karrot.utils.tests.fake import faker
@@ -198,27 +198,27 @@ class Handlers:
     def passwordreset_success(self):
         return karrot.users.emails.prepare_passwordreset_success_email(user=random_user())
 
-    def pickup_notification(self):
+    def activity_notification(self):
         user = random_user()
 
-        pickup1 = PickupDate.objects.order_by('?').first()
-        pickup2 = PickupDate.objects.order_by('?').first()
-        pickup3 = PickupDate.objects.order_by('?').first()
-        pickup4 = PickupDate.objects.order_by('?').first()
+        activity1 = Activity.objects.order_by('?').first()
+        activity2 = Activity.objects.order_by('?').first()
+        activity3 = Activity.objects.order_by('?').first()
+        activity4 = Activity.objects.order_by('?').first()
 
         localtime = timezone.localtime()
 
-        return prepare_pickup_notification_email(
+        return prepare_activity_notification_email(
             user=user,
             group=user.groups.first(),
             tonight_date=localtime,
             tomorrow_date=localtime + relativedelta(days=1),
-            tonight_user=[pickup1, pickup2],
-            tonight_empty=[pickup3, pickup4],
-            tonight_not_full=[pickup4],
-            tomorrow_user=[pickup2],
-            tomorrow_empty=[pickup3],
-            tomorrow_not_full=[pickup4],
+            tonight_user=[activity1, activity2],
+            tonight_empty=[activity3, activity4],
+            tonight_not_full=[activity4],
+            tomorrow_user=[activity2],
+            tomorrow_empty=[activity3],
+            tomorrow_not_full=[activity4],
         )
 
     def user_became_editor(self):

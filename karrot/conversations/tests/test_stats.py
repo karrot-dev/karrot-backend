@@ -3,7 +3,7 @@ from django.test import TestCase
 from karrot.conversations.factories import ConversationFactory
 from karrot.conversations.stats import conversation_tags
 from karrot.groups.factories import GroupFactory
-from karrot.pickups.factories import PickupDateFactory
+from karrot.activities.factories import ActivityFactory
 from karrot.places.factories import PlaceFactory
 
 
@@ -17,13 +17,13 @@ class TestConversationStats(TestCase):
             'group_status': group.status,
         })
 
-    def test_tags_for_pickup_conversation(self):
+    def test_tags_for_activity_conversation(self):
         group = GroupFactory()
         place = PlaceFactory(group=group)
-        pickup = PickupDateFactory(place=place)
-        tags = conversation_tags(pickup.conversation)
+        activity = ActivityFactory(place=place)
+        tags = conversation_tags(activity.conversation)
         self.assertEqual(tags, {
-            'type': 'pickup',
+            'type': 'activity',
             'group': str(group.id),
             'group_status': group.status,
         })

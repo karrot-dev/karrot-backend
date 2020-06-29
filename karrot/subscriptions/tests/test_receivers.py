@@ -22,9 +22,9 @@ from karrot.invitations.models import Invitation
 from karrot.issues.factories import IssueFactory, vote_for_further_discussion
 from karrot.notifications.models import Notification
 from karrot.offers.factories import OfferFactory
-from karrot.pickups.factories import FeedbackFactory, PickupDateFactory, \
-    PickupDateSeriesFactory
-from karrot.pickups.models import PickupDate, to_range
+from karrot.activities.factories import FeedbackFactory, ActivityFactory, \
+    ActivitySeriesFactory
+from karrot.activities.models import Activity, to_range
 from karrot.places.factories import PlaceFactory
 from karrot.subscriptions.models import ChannelSubscription, \
     PushSubscription, PushSubscriptionPlatform
@@ -694,50 +694,50 @@ class PlaceReceiverTests(WSTestCase):
         self.assertEqual(len(client.messages), 1)
 
 
-class PickupDateReceiverTests(WSTestCase):
+class ActivityReceiverTests(WSTestCase):
     def setUp(self):
         super().setUp()
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
-        self.pickup = PickupDateFactory(place=self.place)
+        self.activity = ActivityFactory(place=self.place)
 
-    def test_receive_pickup_changes(self):
+    def test_receive_activity_changes(self):
         client = self.connect_as(self.member)
 
         # change property
         date = to_range(faker.future_datetime(end_date='+30d', tzinfo=timezone.utc))
-        self.pickup.date = date
-        self.pickup.save()
+        self.activity.date = date
+        self.activity.save()
 
-        response = client.messages_by_topic.get('pickups:pickupdate')[0]
+        response = client.messages_by_topic.get('activities:activity')[0]
         self.assertEqual(parse(response['payload']['date'][0]), date.start)
 
         # join
         client = self.connect_as(self.member)
-        self.pickup.add_collector(self.member)
+        self.activity.add_participant(self.member)
 
-        response = client.messages_by_topic.get('pickups:pickupdate')[0]
-        self.assertEqual(response['payload']['collectors'], [self.member.id])
+        response = client.messages_by_topic.get('activities:activity')[0]
+        self.assertEqual(response['payload']['participants'], [self.member.id])
 
         response = client.messages_by_topic.get('conversations:conversation')[0]
         self.assertEqual(response['payload']['participants'], [self.member.id])
 
         # leave
         client = self.connect_as(self.member)
-        self.pickup.remove_collector(self.member)
+        self.activity.remove_participant(self.member)
 
-        response = client.messages_by_topic.get('pickups:pickupdate')[0]
-        self.assertEqual(response['payload']['collectors'], [])
+        response = client.messages_by_topic.get('activities:activity')[0]
+        self.assertEqual(response['payload']['participants'], [])
 
         self.assertIn('conversations:leave', client.messages_by_topic.keys())
 
     def test_mark_as_done(self):
-        self.pickup.add_collector(self.member)
+        self.activity.add_participant(self.member)
         Notification.objects.all().delete()
         client = self.connect_as(self.member)
-        self.pickup.is_done = True
-        self.pickup.save()
+        self.activity.is_done = True
+        self.activity.save()
 
         messages = client.messages_by_topic
         self.assertEqual(len(messages['status']), 2, messages['status'])
@@ -746,28 +746,28 @@ class PickupDateReceiverTests(WSTestCase):
         self.assertEqual(len(messages['notifications:notification']), 1, messages['notifications:notification'])
         self.assertEqual(messages['notifications:notification'][0]['payload']['type'], 'feedback_possible')
 
-    def test_receive_pickup_delete(self):
+    def test_receive_activity_delete(self):
         client = self.connect_as(self.member)
 
-        pickup_id = self.pickup.id
-        self.pickup.delete()
+        activity_id = self.activity.id
+        self.activity.delete()
 
-        response = client.messages_by_topic.get('pickups:pickupdate_deleted')[0]
-        self.assertEqual(response['payload']['id'], pickup_id)
+        response = client.messages_by_topic.get('activities:activity_deleted')[0]
+        self.assertEqual(response['payload']['id'], activity_id)
 
         self.assertEqual(len(client.messages), 1)
 
 
-class PickupDateSeriesReceiverTests(WSTestCase):
+class ActivitySeriesReceiverTests(WSTestCase):
     def setUp(self):
         super().setUp()
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
 
-        # Create far in the future to generate no pickup dates
+        # Create far in the future to generate no activities
         # They would lead to interfering websocket messages
-        self.series = PickupDateSeriesFactory(place=self.place, start_date=timezone.now() + relativedelta(months=2))
+        self.series = ActivitySeriesFactory(place=self.place, start_date=timezone.now() + relativedelta(months=2))
 
     def test_receive_series_changes(self):
         client = self.connect_as(self.member)
@@ -776,7 +776,7 @@ class PickupDateSeriesReceiverTests(WSTestCase):
         self.series.start_date = date
         self.series.save()
 
-        response = client.messages_by_topic.get('pickups:series')[0]
+        response = client.messages_by_topic.get('activities:series')[0]
         self.assertEqual(parse(response['payload']['start_date']), date)
 
         self.assertEqual(len(client.messages), 1)
@@ -787,7 +787,7 @@ class PickupDateSeriesReceiverTests(WSTestCase):
         id = self.series.id
         self.series.delete()
 
-        response = client.messages_by_topic.get('pickups:series_deleted')[0]
+        response = client.messages_by_topic.get('activities:series_deleted')[0]
         self.assertEqual(response['payload']['id'], id)
 
         self.assertEqual(len(client.messages), 1)
@@ -849,12 +849,12 @@ class FeedbackReceiverTests(WSTestCase):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
-        self.pickup = PickupDateFactory(place=self.place)
+        self.activity = ActivityFactory(place=self.place)
 
     def test_receive_feedback_changes(self):
         client = self.connect_as(self.member)
 
-        feedback = FeedbackFactory(given_by=self.member, about=self.pickup)
+        feedback = FeedbackFactory(given_by=self.member, about=self.activity)
 
         response = client.messages_by_topic.get('feedback:feedback')[0]
         self.assertEqual(response['payload']['weight'], feedback.weight)
@@ -874,27 +874,27 @@ class FeedbackReceiverTests(WSTestCase):
         )
 
 
-class FinishedPickupReceiverTest(WSTestCase):
+class FinishedActivityReceiverTest(WSTestCase):
     def setUp(self):
         super().setUp()
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
-        self.pickup = PickupDateFactory(place=self.place, collectors=[self.member])
+        self.activity = ActivityFactory(place=self.place, participants=[self.member])
 
     def test_receive_history_and_notification(self):
-        self.pickup.date = to_range(timezone.now() - relativedelta(days=1))
-        self.pickup.save()
+        self.activity.date = to_range(timezone.now() - relativedelta(days=1))
+        self.activity.save()
 
         Notification.objects.all().delete()
 
         client = self.connect_as(self.member)
-        PickupDate.objects.process_finished_pickup_dates()
+        Activity.objects.process_finished_activities()
 
         messages_by_topic = client.messages_by_topic
 
         response = messages_by_topic['history:history'][0]
-        self.assertEqual(response['payload']['typus'], 'PICKUP_DONE')
+        self.assertEqual(response['payload']['typus'], 'ACTIVITY_DONE')
 
         response = messages_by_topic['notifications:notification'][0]
         self.assertEqual(response['payload']['type'], 'feedback_possible')

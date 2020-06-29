@@ -372,7 +372,7 @@
         },
         "id": 31,
         "panels": [],
-        "title": "Stores, Pickups and Feedback",
+        "title": "Stores, Activities and Feedback",
         "type": "row"
       },
       {
@@ -403,8 +403,8 @@
         "interval": null,
         "links": [
           {
-            "title": "Pickups",
-            "url": "/d/y-HBcQ6mk/pickups?$__url_time_range&$__all_variables"
+            "title": "Activities",
+            "url": "/d/y-HBcQ6mk/activities?$__url_time_range&$__all_variables"
           }
         ],
         "mappingType": 1,
@@ -460,7 +460,7 @@
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
+            "query": "SELECT sum(\"activity_done\") FROM \"karrot.events\" WHERE $timeFilter",
             "rawQuery": false,
             "refId": "A",
             "resultFormat": "time_series",
@@ -468,7 +468,7 @@
               [
                 {
                   "params": [
-                    "pickup_done"
+                    "activity_done"
                   ],
                   "type": "field"
                 },
@@ -488,7 +488,7 @@
           }
         ],
         "thresholds": "",
-        "title": "Pickups done",
+        "title": "Activities done",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -580,7 +580,7 @@
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
+            "query": "SELECT sum(\"activity_done\") FROM \"karrot.events\" WHERE $timeFilter",
             "rawQuery": false,
             "refId": "A",
             "resultFormat": "time_series",
@@ -588,7 +588,7 @@
               [
                 {
                   "params": [
-                    "pickup_missed"
+                    "activity_missed"
                   ],
                   "type": "field"
                 },
@@ -608,7 +608,7 @@
           }
         ],
         "thresholds": "",
-        "title": "Pickups missed",
+        "title": "Activities missed",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -700,7 +700,7 @@
             "measurement": "karrot.users",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
+            "query": "SELECT sum(\"activity_done\") FROM \"karrot.events\" WHERE $timeFilter",
             "rawQuery": false,
             "refId": "A",
             "resultFormat": "time_series",
@@ -708,7 +708,7 @@
               [
                 {
                   "params": [
-                    "count_pickup_active_7d"
+                    "count_activity_active_7d"
                   ],
                   "type": "field"
                 },
@@ -722,7 +722,7 @@
           }
         ],
         "thresholds": "",
-        "title": "Users that did a pickup in last 7d",
+        "title": "Users that did an activity in last 7d",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -814,7 +814,7 @@
             "measurement": "karrot.group.places",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
+            "query": "SELECT sum(\"activity_done\") FROM \"karrot.events\" WHERE $timeFilter",
             "rawQuery": false,
             "refId": "A",
             "resultFormat": "time_series",
@@ -934,7 +934,7 @@
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
+            "query": "SELECT sum(\"activity_done\") FROM \"karrot.events\" WHERE $timeFilter",
             "rawQuery": false,
             "refId": "A",
             "resultFormat": "time_series",
@@ -1054,7 +1054,7 @@
             "measurement": "karrot.users",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT last(\"count_pickup_active_7d\") / last(\"count_active_7d\") * 100 FROM \"karrot.users\" WHERE $timeFilter GROUP BY time($interval) fill(previous)",
+            "query": "SELECT last(\"count_activity_active_7d\") / last(\"count_active_7d\") * 100 FROM \"karrot.users\" WHERE $timeFilter GROUP BY time($interval) fill(previous)",
             "rawQuery": true,
             "refId": "A",
             "resultFormat": "time_series",
@@ -1062,7 +1062,7 @@
               [
                 {
                   "params": [
-                    "count_pickup_active_7d"
+                    "count_activity_active_7d"
                   ],
                   "type": "field"
                 },
@@ -1076,7 +1076,7 @@
           }
         ],
         "thresholds": "",
-        "title": "Active users that did a pickup (7d)",
+        "title": "Active users that did an activity (7d)",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -1187,7 +1187,7 @@
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
+            "query": "SELECT sum(\"activity_done\") FROM \"karrot.events\" WHERE $timeFilter",
             "rawQuery": false,
             "refId": "A",
             "resultFormat": "time_series",
@@ -1319,7 +1319,7 @@
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
+            "query": "SELECT sum(\"activity_done\") FROM \"karrot.events\" WHERE $timeFilter",
             "rawQuery": false,
             "refId": "A",
             "resultFormat": "time_series",
@@ -1445,7 +1445,7 @@
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
+            "query": "SELECT sum(\"activity_done\") FROM \"karrot.events\" WHERE $timeFilter",
             "rawQuery": false,
             "refId": "A",
             "resultFormat": "time_series",
@@ -1467,7 +1467,7 @@
               {
                 "key": "type",
                 "operator": "=",
-                "value": "pickup"
+                "value": "activity"
               },
               {
                 "condition": "AND",
@@ -1479,7 +1479,7 @@
           }
         ],
         "thresholds": "",
-        "title": "Pickup messages",
+        "title": "Activity messages",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -1571,7 +1571,7 @@
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
+            "query": "SELECT sum(\"activity_done\") FROM \"karrot.events\" WHERE $timeFilter",
             "rawQuery": false,
             "refId": "A",
             "resultFormat": "time_series",
@@ -1691,7 +1691,7 @@
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
+            "query": "SELECT sum(\"activity_done\") FROM \"karrot.events\" WHERE $timeFilter",
             "rawQuery": false,
             "refId": "A",
             "resultFormat": "time_series",
@@ -1811,7 +1811,7 @@
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
+            "query": "SELECT sum(\"activity_done\") FROM \"karrot.events\" WHERE $timeFilter",
             "rawQuery": false,
             "refId": "A",
             "resultFormat": "time_series",
@@ -1937,7 +1937,7 @@
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
+            "query": "SELECT sum(\"activity_done\") FROM \"karrot.events\" WHERE $timeFilter",
             "rawQuery": false,
             "refId": "A",
             "resultFormat": "time_series",
@@ -2063,7 +2063,7 @@
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
+            "query": "SELECT sum(\"activity_done\") FROM \"karrot.events\" WHERE $timeFilter",
             "rawQuery": false,
             "refId": "A",
             "resultFormat": "time_series",
@@ -2189,7 +2189,7 @@
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT sum(\"pickup_done\") FROM \"karrot.events\" WHERE $timeFilter",
+            "query": "SELECT sum(\"activity_done\") FROM \"karrot.events\" WHERE $timeFilter",
             "rawQuery": false,
             "refId": "A",
             "resultFormat": "time_series",
@@ -3985,7 +3985,7 @@
               [
                 {
                   "params": [
-                    "count_pickup_active_1d"
+                    "count_activity_active_1d"
                   ],
                   "type": "field"
                 },
@@ -3999,7 +3999,7 @@
           }
         ],
         "thresholds": "",
-        "title": "Pickup active users (1d)",
+        "title": "Activity active users (1d)",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -4101,7 +4101,7 @@
               [
                 {
                   "params": [
-                    "count_pickup_active_7d"
+                    "count_activity_active_7d"
                   ],
                   "type": "field"
                 },
@@ -4115,7 +4115,7 @@
           }
         ],
         "thresholds": "",
-        "title": "Pickup active users (7d)",
+        "title": "Activity active users (7d)",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -4217,7 +4217,7 @@
               [
                 {
                   "params": [
-                    "count_pickup_active_30d"
+                    "count_activity_active_30d"
                   ],
                   "type": "field"
                 },
@@ -4231,7 +4231,7 @@
           }
         ],
         "thresholds": "",
-        "title": "Pickup active users (30d)",
+        "title": "Activity active users (30d)",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -4333,7 +4333,7 @@
               [
                 {
                   "params": [
-                    "count_pickup_active_60d"
+                    "count_activity_active_60d"
                   ],
                   "type": "field"
                 },
@@ -4347,7 +4347,7 @@
           }
         ],
         "thresholds": "",
-        "title": "Pickup active users (60d)",
+        "title": "Activity active users (60d)",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -4449,7 +4449,7 @@
               [
                 {
                   "params": [
-                    "count_pickup_active_90d"
+                    "count_activity_active_90d"
                   ],
                   "type": "field"
                 },
@@ -4463,7 +4463,7 @@
           }
         ],
         "thresholds": "",
-        "title": "Pickup active users (90d)",
+        "title": "Activity active users (90d)",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -5856,7 +5856,7 @@
             "measurement": "karrot.events",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT sum(\"group_activity\") AS \"page impressions\", sum(\"pickup_joined\") AS \"pickups joined\", sum(\"pickup_done\") AS \"pickups done\", sum(\"pickup_missed\") AS \"pickups missed\", sum(\"feedback\") AS \"feedbacks given\", sum(\"message\") AS \"messages written\", sum(\"message_reaction\") AS \"message reactions\", sum(\"group_joined\") AS \"new members\" FROM \"karrot.events\" WHERE $timeFilter GROUP BY \"group\"",
+            "query": "SELECT sum(\"group_activity\") AS \"page impressions\", sum(\"activity_joined\") AS \"activities joined\", sum(\"activity_done\") AS \"activities done\", sum(\"activity_missed\") AS \"activities missed\", sum(\"feedback\") AS \"feedbacks given\", sum(\"message\") AS \"messages written\", sum(\"message_reaction\") AS \"message reactions\", sum(\"group_joined\") AS \"new members\" FROM \"karrot.events\" WHERE $timeFilter GROUP BY \"group\"",
             "rawQuery": false,
             "refId": "A",
             "resultFormat": "table",
@@ -5900,7 +5900,7 @@
               [
                 {
                   "params": [
-                    "pickup_joined"
+                    "activity_joined"
                   ],
                   "type": "field"
                 },
@@ -5910,7 +5910,7 @@
                 },
                 {
                   "params": [
-                    "pickups joined"
+                    "activities joined"
                   ],
                   "type": "alias"
                 }
@@ -5936,7 +5936,7 @@
               [
                 {
                   "params": [
-                    "pickup_done"
+                    "activity_done"
                   ],
                   "type": "field"
                 },
@@ -5946,7 +5946,7 @@
                 },
                 {
                   "params": [
-                    "pickups done"
+                    "activities done"
                   ],
                   "type": "alias"
                 }
@@ -5954,7 +5954,7 @@
               [
                 {
                   "params": [
-                    "pickup_missed"
+                    "activity_missed"
                   ],
                   "type": "field"
                 },
@@ -5964,7 +5964,7 @@
                 },
                 {
                   "params": [
-                    "pickups missed"
+                    "activities missed"
                   ],
                   "type": "alias"
                 }

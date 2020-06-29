@@ -13,8 +13,8 @@ from karrot.groups.models import Group as GroupModel, GroupMembership, Agreement
     GroupNotificationType, get_default_notification_types, Group
 from karrot.groups.stats import group_tags
 from karrot.history.models import History, HistoryTypus
-from karrot.pickups.factories import PickupDateFactory
-from karrot.pickups.models import to_range
+from karrot.activities.factories import ActivityFactory
+from karrot.activities.models import to_range
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory
 from karrot.utils.tests.fake import faker
@@ -194,28 +194,28 @@ class TestGroupsAPI(APITestCase):
 
     def test_leave_group(self):
         place = PlaceFactory(group=self.group)
-        pickupdate = PickupDateFactory(
-            place=place, collectors=[self.member, self.user], date=to_range(timezone.now() + relativedelta(weeks=1))
+        activity = ActivityFactory(
+            place=place, participants=[self.member, self.user], date=to_range(timezone.now() + relativedelta(weeks=1))
         )
-        past_pickupdate = PickupDateFactory(
-            place=place, collectors=[
+        past_activity = ActivityFactory(
+            place=place, participants=[
                 self.member,
             ], date=to_range(timezone.now() - relativedelta(weeks=1))
         )
-        unrelated_pickupdate = PickupDateFactory(
+        unrelated_activity = ActivityFactory(
             date=to_range(timezone.now() + relativedelta(weeks=1)),
-            collectors=[
+            participants=[
                 self.member,
             ],
         )
-        GroupMembership.objects.create(group=unrelated_pickupdate.place.group, user=self.member)
+        GroupMembership.objects.create(group=unrelated_activity.place.group, user=self.member)
 
         self.client.force_login(user=self.member)
         response = self.client.post('/api/groups/{}/leave/'.format(self.group.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertFalse(pickupdate.collectors.get_queryset().filter(id=self.member.id).exists())
-        self.assertTrue(past_pickupdate.collectors.get_queryset().filter(id=self.member.id).exists())
-        self.assertTrue(unrelated_pickupdate.collectors.get_queryset().filter(id=self.member.id).exists())
+        self.assertFalse(activity.participants.get_queryset().filter(id=self.member.id).exists())
+        self.assertTrue(past_activity.participants.get_queryset().filter(id=self.member.id).exists())
+        self.assertTrue(unrelated_activity.participants.get_queryset().filter(id=self.member.id).exists())
 
     def test_leave_group_fails_if_not_logged_in(self):
         response = self.client.post('/api/groups/{}/leave/'.format(self.group.id))

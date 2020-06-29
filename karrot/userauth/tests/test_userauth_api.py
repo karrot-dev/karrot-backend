@@ -14,8 +14,8 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from karrot.groups.factories import GroupFactory
-from karrot.pickups.factories import PickupDateFactory
-from karrot.pickups.models import to_range
+from karrot.activities.factories import ActivityFactory
+from karrot.activities.models import to_range
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.userauth.models import VerificationCode
@@ -97,15 +97,15 @@ class TestUserDeleteAPI(APITestCase):
         self.user2 = UserFactory()
         self.group = GroupFactory(members=[self.user, self.user2])
         self.place = PlaceFactory(group=self.group)
-        self.pickupdate = PickupDateFactory(
+        self.activity = ActivityFactory(
             place=self.place,
             date=to_range(timezone.now() + relativedelta(days=1)),
-            collectors=[self.user],
+            participants=[self.user],
         )
-        self.past_pickupdate = PickupDateFactory(
+        self.past_activity = ActivityFactory(
             place=self.place,
             date=to_range(timezone.now() - relativedelta(days=1)),
-            collectors=[self.user],
+            participants=[self.user],
         )
         self.url_user = '/api/auth/user/'
         self.url_delete = '/api/auth/user/?code={:s}'
@@ -135,8 +135,8 @@ class TestUserDeleteAPI(APITestCase):
         self.assertEqual(codes.count(), 1)
 
     def test_delete_succeeds(self):
-        self.assertEqual(self.pickupdate.collectors.count(), 1)
-        self.assertEqual(self.past_pickupdate.collectors.count(), 1)
+        self.assertEqual(self.activity.participants.count(), 1)
+        self.assertEqual(self.past_activity.participants.count(), 1)
 
         self.client.force_login(self.user)
         self.client.post(self.url_request_delete)
@@ -145,8 +145,8 @@ class TestUserDeleteAPI(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(self.group.members.get_queryset().filter(id=self.user.id).exists())
-        self.assertFalse(self.pickupdate.collectors.get_queryset().filter(id=self.user.id).exists())
-        self.assertTrue(self.past_pickupdate.collectors.get_queryset().filter(id=self.user.id).exists())
+        self.assertFalse(self.activity.participants.get_queryset().filter(id=self.user.id).exists())
+        self.assertTrue(self.past_activity.participants.get_queryset().filter(id=self.user.id).exists())
 
         self.assertEqual(len(mail.outbox), 2)
         self.assertIn('Account successfully deleted', mail.outbox[1].subject)

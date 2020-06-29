@@ -17,4 +17,4 @@ class HistoryFilter(filters.FilterSet):
 
     class Meta:
         model = History
-        fields = ('group', 'place', 'users', 'typus', 'type', 'date', 'series', 'pickup')
+        fields = ('group', 'place', 'users', 'typus', 'type', 'date', 'series', 'activity')

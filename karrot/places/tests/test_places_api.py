@@ -11,8 +11,8 @@ from rest_framework.test import APITestCase
 
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupStatus
-from karrot.pickups.factories import PickupDateSeriesFactory, PickupDateFactory, FeedbackFactory
-from karrot.pickups.models import to_range
+from karrot.activities.factories import ActivitySeriesFactory, ActivityFactory, FeedbackFactory
+from karrot.activities.models import to_range
 from karrot.places.factories import PlaceFactory
 from karrot.places.models import PlaceStatus
 from karrot.tests.utils import ExtractPaginationMixin
@@ -224,7 +224,7 @@ class TestPlacesAPI(APITestCase, ExtractPaginationMixin):
         self.assertNotIn(self.member.id, response.data['participants'])
 
 
-class TestPlaceChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
+class TestPlaceChangesActivitySeriesAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):
 
         self.now = timezone.now()
@@ -233,12 +233,12 @@ class TestPlaceChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
         self.place_url = self.url + str(self.place.id) + '/'
-        self.series = PickupDateSeriesFactory(max_collectors=3, place=self.place)
+        self.series = ActivitySeriesFactory(max_participants=3, place=self.place)
 
     def test_reduce_weeks_in_advance(self):
         self.client.force_login(user=self.member)
 
-        url = '/api/pickup-dates/'
+        url = '/api/activities/'
         response = self.get_results(url, {'series': self.series.id, 'date_min': self.now})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
@@ -246,7 +246,7 @@ class TestPlaceChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data['weeks_in_advance'], 2)
 
-        url = '/api/pickup-dates/'
+        url = '/api/activities/'
         response = self.get_results(url, {'series': self.series.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         for _ in response.data:
@@ -255,7 +255,7 @@ class TestPlaceChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
     def test_increase_weeks_in_advance(self):
         self.client.force_login(user=self.member)
 
-        url = '/api/pickup-dates/'
+        url = '/api/activities/'
         response = self.get_results(url, {'series': self.series.id, 'date_min': self.now})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         original_dates = [parse(_['date'][0]) for _ in response.data]
@@ -264,7 +264,7 @@ class TestPlaceChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data['weeks_in_advance'], 10)
 
-        url = '/api/pickup-dates/'
+        url = '/api/activities/'
         response = self.get_results(url, {'series': self.series.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertGreater(len(response.data), len(original_dates))
@@ -282,14 +282,14 @@ class TestPlaceChangesPickupDateSeriesAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertIn('Do not set more than', response.data['weeks_in_advance'][0])
 
-    def test_set_place_active_status_updates_pickup_dates(self):
+    def test_set_place_active_status_updates_activities(self):
         self.place.status = PlaceStatus.ARCHIVED.value
         self.place.save()
-        self.place.pickup_dates.all().delete()
+        self.place.activities.all().delete()
         self.client.force_login(user=self.member)
         response = self.client.patch(self.place_url, {'status': PlaceStatus.ACTIVE.value}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertGreater(self.place.pickup_dates.count(), 0)
+        self.assertGreater(self.place.activities.count(), 0)
 
 
 class TestPlaceStatisticsAPI(APITestCase):
@@ -304,22 +304,22 @@ class TestPlaceStatisticsAPI(APITestCase):
         self.assertEqual(response.data, {
             'feedback_count': 0,
             'feedback_weight': 0,
-            'pickups_done': 0,
+            'activities_done': 0,
         })
 
         one_day_ago = to_range(timezone.now() - relativedelta(days=1))
 
         users = [UserFactory() for _ in range(9)]
-        pickups = [
-            PickupDateFactory(
+        activities = [
+            ActivityFactory(
                 place=place,
                 date=one_day_ago,
-                collectors=users,
+                participants=users,
                 is_done=True,
                 feedback_as_sum=False,
             ) for _ in range(3)
         ]
-        feedback = [FeedbackFactory(about=choice(pickups), given_by=u) for u in users]
+        feedback = [FeedbackFactory(about=choice(activities), given_by=u) for u in users]
 
         # calculate weight from feedback
         feedback.sort(key=attrgetter('about.id'))
@@ -335,6 +335,6 @@ class TestPlaceStatisticsAPI(APITestCase):
             response.data, {
                 'feedback_count': len(feedback),
                 'feedback_weight': weight,
-                'pickups_done': len(pickups),
+                'activities_done': len(activities),
             }
         )

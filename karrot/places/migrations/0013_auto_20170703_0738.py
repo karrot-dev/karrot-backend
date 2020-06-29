@@ -13,12 +13,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name='pickupdate',
+            model_name='activity',
             name='comment',
             field=models.TextField(blank=True),
         ),
         migrations.AddField(
-            model_name='pickupdate',
+            model_name='activity',
             name='is_comment_changed',
             field=models.BooleanField(default=False),
         ),

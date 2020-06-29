@@ -13,8 +13,8 @@ def conversation_url(conversation, user):
         return group_wall_url(conversation.target)
     elif type == 'place':
         return place_wall_url(conversation.target)
-    elif type == 'pickup':
-        return pickup_detail_url(conversation.target)
+    elif type == 'activity':
+        return activity_detail_url(conversation.target)
     elif type == 'private':
         return user_detail_url(user)
     elif type == 'application':
@@ -30,7 +30,7 @@ def conversation_url(conversation, user):
 
 
 def place_url(place):
-    return '{hostname}/#/group/{group_id}/place/{place_id}/pickups'.format(
+    return '{hostname}/#/group/{group_id}/place/{place_id}/activities'.format(
         hostname=settings.HOSTNAME,
         group_id=place.group.id,
         place_id=place.id,
@@ -53,19 +53,19 @@ def absolute_url(path):
     )
 
 
-def pickup_detail_url(pickup):
-    place = pickup.place
+def activity_detail_url(activity):
+    place = activity.place
     group = place.group
-    return '{hostname}/#/group/{group_id}/place/{place_id}/pickups/{pickup_id}/detail'.format(
+    return '{hostname}/#/group/{group_id}/place/{place_id}/activities/{activity_id}/detail'.format(
         hostname=settings.HOSTNAME,
         group_id=group.id,
         place_id=place.id,
-        pickup_id=pickup.id,
+        activity_id=activity.id,
     )
 
 
-def pickup_notification_unsubscribe_url(user, group):
-    return unsubscribe_url(user, group, notification_type=GroupNotificationType.DAILY_PICKUP_NOTIFICATION)
+def activity_notification_unsubscribe_url(user, group):
+    return unsubscribe_url(user, group, notification_type=GroupNotificationType.DAILY_ACTIVITY_NOTIFICATION)
 
 
 def group_summary_unsubscribe_url(user, group):

@@ -3,7 +3,7 @@ from django.test import TestCase
 from karrot.applications.factories import ApplicationFactory
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupNotificationType
-from karrot.pickups.factories import PickupDateFactory
+from karrot.activities.factories import ActivityFactory
 from karrot.places.factories import PlaceFactory
 from karrot.unsubscribe.utils import unsubscribe_from_all_conversations_in_group, generate_token, parse_token, \
     unsubscribe_from_notification_type
@@ -33,10 +33,10 @@ class TestTokenParser(TestCase):
 
     def test_with_notification_types(self):
         token = generate_token(
-            self.user, self.group, notification_type=GroupNotificationType.DAILY_PICKUP_NOTIFICATION
+            self.user, self.group, notification_type=GroupNotificationType.DAILY_ACTIVITY_NOTIFICATION
         )
         data = parse_token(token)
-        self.assertEqual(data['notification_type'], 'daily_pickup_notification')
+        self.assertEqual(data['notification_type'], 'daily_activity_notification')
 
 
 class TestUnsubscribeFromNotificationTypes(TestCase):
@@ -87,7 +87,7 @@ class TestUnsubscribeFromAllConversationsInGroup(TestCase):
         self.assertEqual(
             membership.get().notification_types, [
                 'weekly_summary',
-                'daily_pickup_notification',
+                'daily_activity_notification',
                 'conflict_resolution',
                 'new_application',
                 'new_offer',
@@ -96,16 +96,16 @@ class TestUnsubscribeFromAllConversationsInGroup(TestCase):
         unsubscribe_from_all_conversations_in_group(self.user, self.group)
         self.assertEqual(membership.get().notification_types, [])
 
-    def test_unsubscribe_from_pickup_conversation(self):
-        pickup = PickupDateFactory(place=self.place, collectors=[self.user])
-        participant = pickup.conversation.conversationparticipant_set.filter(user=self.user)
+    def test_unsubscribe_from_activity_conversation(self):
+        activity = ActivityFactory(place=self.place, participants=[self.user])
+        participant = activity.conversation.conversationparticipant_set.filter(user=self.user)
         self.assertFalse(participant.get().muted)
         unsubscribe_from_all_conversations_in_group(self.user, self.group)
         self.assertTrue(participant.get().muted)
 
-    def test_does_not_unsubscribe_from_other_group_pickup_conversations(self):
-        pickup = PickupDateFactory(place=self.other_place, collectors=[self.user])
-        participant = pickup.conversation.conversationparticipant_set.filter(user=self.user)
+    def test_does_not_unsubscribe_from_other_group_activity_conversations(self):
+        activity = ActivityFactory(place=self.other_place, participants=[self.user])
+        participant = activity.conversation.conversationparticipant_set.filter(user=self.user)
         self.assertFalse(participant.get().muted)
         unsubscribe_from_all_conversations_in_group(self.user, self.group)
         self.assertFalse(participant.get().muted)

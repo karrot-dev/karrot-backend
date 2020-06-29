@@ -7,19 +7,19 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pickups', '0007_auto_20181216_2133'),
+        ('activities', '0007_auto_20181216_2133'),
         ('history', '0005_auto_20181114_1126'),
     ]
 
     operations = [
         migrations.AddField(
             model_name='history',
-            name='pickup',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='pickups.PickupDate'),
+            name='activity',
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='activities.Activity'),
         ),
         migrations.AddField(
             model_name='history',
             name='series',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='pickups.PickupDateSeries'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='activities.ActivitySeries'),
         ),
     ]

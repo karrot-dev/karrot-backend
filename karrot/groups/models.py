@@ -16,7 +16,7 @@ from versatileimagefield.fields import VersatileImageField
 from karrot.base.base_models import BaseModel, LocationModel
 from karrot.conversations.models import ConversationMixin
 from karrot.history.models import History, HistoryTypus
-from karrot.pickups.models import PickupDate
+from karrot.activities.models import Activity
 from karrot.utils import markdown
 from karrot.groups import roles, themes
 
@@ -197,7 +197,7 @@ class UserAgreement(BaseModel):
 
 class GroupNotificationType(object):
     WEEKLY_SUMMARY = 'weekly_summary'
-    DAILY_PICKUP_NOTIFICATION = 'daily_pickup_notification'
+    DAILY_ACTIVITY_NOTIFICATION = 'daily_activity_notification'
     NEW_APPLICATION = 'new_application'
     CONFLICT_RESOLUTION = 'conflict_resolution'
     NEW_OFFER = 'new_offer'
@@ -206,7 +206,7 @@ class GroupNotificationType(object):
 def get_default_notification_types():
     return [
         GroupNotificationType.WEEKLY_SUMMARY,
-        GroupNotificationType.DAILY_PICKUP_NOTIFICATION,
+        GroupNotificationType.DAILY_ACTIVITY_NOTIFICATION,
         GroupNotificationType.CONFLICT_RESOLUTION,
     ]
 
@@ -228,14 +228,14 @@ class GroupMembershipQuerySet(QuerySet):
         now = timezone.now()
         return self.filter(lastseen_at__gte=now - relativedelta(**kwargs))
 
-    def pickup_active_within(self, **kwargs):
+    def activity_active_within(self, **kwargs):
         now = timezone.now()
         return self.filter(
-            user__pickup_dates__in=PickupDate.objects.exclude_disabled().filter(
+            user__activities__in=Activity.objects.exclude_disabled().filter(
                 date__startswith__lt=now,
                 date__startswith__gte=now - relativedelta(**kwargs),
             ),
-            user__pickup_dates__place__group=F('group'),
+            user__activities__place__group=F('group'),
         ).distinct()
 
     def editors(self):

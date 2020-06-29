@@ -7,7 +7,7 @@ from django.utils.timezone import get_current_timezone
 from config import settings
 from karrot.conversations.models import ConversationMessage
 from karrot.groups.models import Group, GroupNotificationType, GroupMembership
-from karrot.pickups.models import PickupDate, Feedback
+from karrot.activities.models import Activity, Feedback
 from karrot.utils.email_utils import prepare_email
 from karrot.utils.frontend_urls import group_wall_url, group_settings_url, group_summary_unsubscribe_url
 
@@ -18,13 +18,13 @@ def prepare_group_summary_data(group, from_date, to_date):
         groupmembership__created_at__lt=to_date,
     ).all()
 
-    pickup_dates = PickupDate.objects.in_group(group).exclude_disabled().filter(
+    activities = Activity.objects.in_group(group).exclude_disabled().filter(
         date__startswith__gte=from_date, date__startswith__lt=to_date
-    ).annotate_num_collectors()
+    ).annotate_num_participants()
 
-    pickups_done_count = pickup_dates.done().count()
+    activities_done_count = activities.done().count()
 
-    pickups_missed_count = pickup_dates.missed().count()
+    activities_missed_count = activities.missed().count()
 
     feedbacks = Feedback.objects.filter(
         created_at__gte=from_date,
@@ -45,14 +45,14 @@ def prepare_group_summary_data(group, from_date, to_date):
         'from_date': from_date,
         'group': group,
         'new_users': new_users,
-        'pickups_done_count': pickups_done_count,
-        'pickups_missed_count': pickups_missed_count,
+        'activities_done_count': activities_done_count,
+        'activities_missed_count': activities_missed_count,
         'feedbacks': feedbacks,
         'messages': messages,
         'settings_url': group_settings_url(group),
     }
 
-    data['has_activity'] = any(data[field] > 0 for field in ['pickups_done_count', 'pickups_missed_count']) or \
+    data['has_activity'] = any(data[field] > 0 for field in ['activities_done_count', 'activities_missed_count']) or \
         any(len(data[field]) > 0 for field in ['feedbacks', 'messages', 'new_users'])
 
     return data

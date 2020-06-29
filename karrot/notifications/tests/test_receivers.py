@@ -12,9 +12,9 @@ from karrot.issues.factories import IssueFactory, vote_for_further_discussion, f
     vote_for_remove_user
 from karrot.issues.tasks import process_expired_votings
 from karrot.notifications.models import Notification, NotificationType
-from karrot.notifications.tasks import create_pickup_upcoming_notifications
-from karrot.pickups.factories import PickupDateFactory
-from karrot.pickups.models import to_range
+from karrot.notifications.tasks import create_activity_upcoming_notifications
+from karrot.activities.factories import ActivityFactory
+from karrot.activities.models import to_range
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory
 
@@ -114,16 +114,16 @@ class TestNotificationReceivers(TestCase):
         member = UserFactory()
         group = GroupFactory(members=[member])
         place = PlaceFactory(group=group)
-        pickup = PickupDateFactory(place=place)
+        activity = ActivityFactory(place=place)
 
-        pickup.add_collector(member)
-        pickup.is_done = True
-        pickup.save()
+        activity.add_participant(member)
+        activity.is_done = True
+        activity.save()
 
         notification = Notification.objects.filter(user=member, type=NotificationType.FEEDBACK_POSSIBLE.value)
         self.assertEqual(notification.count(), 1)
         self.assertLessEqual(
-            notification[0].expires_at, pickup.date.end + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
+            notification[0].expires_at, activity.date.end + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
         )
 
     def test_creates_new_place_notification(self):
@@ -173,84 +173,84 @@ class TestNotificationReceivers(TestCase):
         self.assertEqual(context['group'], group.id)
         self.assertEqual(context['user'], user.id)
 
-    def test_deletes_pickup_upcoming_notification(self):
+    def test_deletes_activity_upcoming_notification(self):
         user = UserFactory()
         group = GroupFactory(members=[user])
         place = PlaceFactory(group=group)
         in_one_hour = to_range(timezone.now() + relativedelta(hours=1))
-        pickup = PickupDateFactory(place=place, date=in_one_hour, collectors=[user])
+        activity = ActivityFactory(place=place, date=in_one_hour, participants=[user])
         Notification.objects.all().delete()
 
-        create_pickup_upcoming_notifications.call_local()
-        pickup.remove_collector(user)
+        create_activity_upcoming_notifications.call_local()
+        activity.remove_participant(user)
 
-        notifications = Notification.objects.filter(type=NotificationType.PICKUP_UPCOMING.value)
+        notifications = Notification.objects.filter(type=NotificationType.ACTIVITY_UPCOMING.value)
         self.assertEqual(notifications.count(), 0)
 
-    def test_creates_pickup_disabled_notification_and_deletes_pickup_upcoming_notification(self):
+    def test_creates_activity_disabled_notification_and_deletes_activity_upcoming_notification(self):
         user1, user2 = UserFactory(), UserFactory()
         group = GroupFactory(members=[user1, user2])
         place = PlaceFactory(group=group)
         in_one_hour = to_range(timezone.now() + relativedelta(hours=1))
-        pickup = PickupDateFactory(place=place, date=in_one_hour, collectors=[user1, user2])
+        activity = ActivityFactory(place=place, date=in_one_hour, participants=[user1, user2])
         Notification.objects.all().delete()
 
-        create_pickup_upcoming_notifications.call_local()
-        pickup.last_changed_by = user2
-        pickup.is_disabled = True
-        pickup.save()
+        create_activity_upcoming_notifications.call_local()
+        activity.last_changed_by = user2
+        activity.is_disabled = True
+        activity.save()
 
-        pickup_upcoming_notifications = Notification.objects.filter(type=NotificationType.PICKUP_UPCOMING.value)
-        self.assertEqual(pickup_upcoming_notifications.count(), 0)
+        activity_upcoming_notifications = Notification.objects.filter(type=NotificationType.ACTIVITY_UPCOMING.value)
+        self.assertEqual(activity_upcoming_notifications.count(), 0)
 
-        pickup_disabled_notifications = Notification.objects.filter(type=NotificationType.PICKUP_DISABLED.value)
-        self.assertEqual(pickup_disabled_notifications.count(), 1)
-        self.assertEqual(pickup_disabled_notifications[0].user, user1)
-        context = pickup_disabled_notifications[0].context
+        activity_disabled_notifications = Notification.objects.filter(type=NotificationType.ACTIVITY_DISABLED.value)
+        self.assertEqual(activity_disabled_notifications.count(), 1)
+        self.assertEqual(activity_disabled_notifications[0].user, user1)
+        context = activity_disabled_notifications[0].context
         self.assertEqual(context['group'], group.id)
-        self.assertEqual(context['pickup'], pickup.id)
+        self.assertEqual(context['activity'], activity.id)
         self.assertEqual(context['place'], place.id)
 
-    def test_creates_pickup_enabled_notification(self):
+    def test_creates_activity_enabled_notification(self):
         user1, user2 = UserFactory(), UserFactory()
         group = GroupFactory(members=[user1, user2])
         place = PlaceFactory(group=group)
-        pickup = PickupDateFactory(place=place, collectors=[user1, user2])
+        activity = ActivityFactory(place=place, participants=[user1, user2])
         Notification.objects.all().delete()
 
-        pickup.last_changed_by = user2
-        pickup.is_disabled = True
-        pickup.save()
+        activity.last_changed_by = user2
+        activity.is_disabled = True
+        activity.save()
 
-        pickup.is_disabled = False
-        pickup.save()
+        activity.is_disabled = False
+        activity.save()
 
-        pickup_enabled_notifications = Notification.objects.filter(type=NotificationType.PICKUP_ENABLED.value)
-        self.assertEqual(pickup_enabled_notifications.count(), 1)
-        self.assertEqual(pickup_enabled_notifications[0].user, user1)
-        context = pickup_enabled_notifications[0].context
+        activity_enabled_notifications = Notification.objects.filter(type=NotificationType.ACTIVITY_ENABLED.value)
+        self.assertEqual(activity_enabled_notifications.count(), 1)
+        self.assertEqual(activity_enabled_notifications[0].user, user1)
+        context = activity_enabled_notifications[0].context
         self.assertEqual(context['group'], group.id)
-        self.assertEqual(context['pickup'], pickup.id)
+        self.assertEqual(context['activity'], activity.id)
         self.assertEqual(context['place'], place.id)
 
-    def test_creates_pickup_moved_notification(self):
+    def test_creates_activity_moved_notification(self):
         user1, user2 = UserFactory(), UserFactory()
         group = GroupFactory(members=[user1, user2])
         place = PlaceFactory(group=group)
-        pickup = PickupDateFactory(place=place, collectors=[user1, user2])
+        activity = ActivityFactory(place=place, participants=[user1, user2])
         Notification.objects.all().delete()
 
-        pickup.last_changed_by = user2
-        pickup.date = pickup.date + relativedelta(days=2)
-        pickup.save()
+        activity.last_changed_by = user2
+        activity.date = activity.date + relativedelta(days=2)
+        activity.save()
 
         notifications = Notification.objects.all()
         self.assertEqual(notifications.count(), 1)
-        self.assertEqual(notifications[0].type, NotificationType.PICKUP_MOVED.value)
+        self.assertEqual(notifications[0].type, NotificationType.ACTIVITY_MOVED.value)
         self.assertEqual(notifications[0].user, user1)
         context = notifications[0].context
         self.assertEqual(context['group'], group.id)
-        self.assertEqual(context['pickup'], pickup.id)
+        self.assertEqual(context['activity'], activity.id)
         self.assertEqual(context['place'], place.id)
 
     def test_conflict_resolution_notifications(self):

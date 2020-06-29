@@ -313,7 +313,7 @@
               }
             ],
             "hide": false,
-            "measurement": "karrot.email.pickup_notification",
+            "measurement": "karrot.email.activity_notification",
             "orderByTime": "ASC",
             "policy": "default",
             "refId": "A",
@@ -435,7 +435,7 @@
         "timeFrom": null,
         "timeRegions": [],
         "timeShift": null,
-        "title": "Pickup notification stats",
+        "title": "Activity notification stats",
         "tooltip": {
           "shared": true,
           "sort": 2,
@@ -622,7 +622,7 @@
               [
                 {
                   "params": [
-                    "pickups_done_count"
+                    "activities_done_count"
                   ],
                   "type": "field"
                 },
@@ -632,7 +632,7 @@
                 },
                 {
                   "params": [
-                    "pickups done"
+                    "activities done"
                   ],
                   "type": "alias"
                 }
@@ -640,7 +640,7 @@
               [
                 {
                   "params": [
-                    "pickups_missed_count"
+                    "activities_missed_count"
                   ],
                   "type": "field"
                 },
@@ -650,7 +650,7 @@
                 },
                 {
                   "params": [
-                    "pickups missed"
+                    "activities missed"
                   ],
                   "type": "alias"
                 }
@@ -658,7 +658,7 @@
               [
                 {
                   "params": [
-                    "pickups_missed_count"
+                    "activities_missed_count"
                   ],
                   "type": "field"
                 },
@@ -668,7 +668,7 @@
                 },
                 {
                   "params": [
-                    "pickups missed"
+                    "activities missed"
                   ],
                   "type": "alias"
                 }

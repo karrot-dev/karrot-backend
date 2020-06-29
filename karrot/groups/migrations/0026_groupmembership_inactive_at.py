@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('groups', '0025_subscribe_to_daily_pickup_notifications_20180307_2051'),
+        ('groups', '0025_subscribe_to_daily_activity_notifications_20180307_2051'),
     ]
 
     operations = [

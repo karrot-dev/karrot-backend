@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(default=django.utils.timezone.now)),
                 ('weight', models.PositiveIntegerField()),
                 ('comment', models.CharField(max_length=80)),
-                ('about', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='places.PickupDate')),
+                ('about', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='places.Activity')),
                 ('given_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
                                                related_name='user_feedback', to=settings.AUTH_USER_MODEL)),
             ],

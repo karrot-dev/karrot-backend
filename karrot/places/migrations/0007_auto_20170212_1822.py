@@ -15,11 +15,11 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='PickupDateSeries',
+            name='ActivitySeries',
             fields=[
                 ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('created_at', models.DateTimeField(default=django.utils.timezone.now)),
-                ('max_collectors', models.PositiveIntegerField(blank=True, null=True)),
+                ('max_participants', models.PositiveIntegerField(blank=True, null=True)),
                 ('rule', models.TextField()),
                 ('start_date', models.DateTimeField()),
             ],
@@ -28,22 +28,22 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.AlterModelOptions(
-            name='pickupdate',
+            name='activity',
             options={'ordering': ['date']},
         ),
         migrations.AddField(
-            model_name='pickupdate',
+            model_name='activity',
             name='deleted',
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='pickupdate',
+            model_name='activity',
             name='is_date_changed',
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='pickupdate',
-            name='is_max_collectors_changed',
+            model_name='activity',
+            name='is_max_participants_changed',
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
@@ -52,26 +52,26 @@ class Migration(migrations.Migration):
             field=models.PositiveIntegerField(default=4),
         ),
         migrations.AlterField(
-            model_name='pickupdate',
-            name='max_collectors',
+            model_name='activity',
+            name='max_participants',
             field=models.PositiveIntegerField(null=True),
         ),
         migrations.AlterField(
-            model_name='pickupdate',
+            model_name='activity',
             name='place',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='pickup_dates',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='activities',
                                     to='places.Place'),
         ),
         migrations.AddField(
-            model_name='pickupdateseries',
+            model_name='activityseries',
             name='place',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='series',
                                     to='places.Place'),
         ),
         migrations.AddField(
-            model_name='pickupdate',
+            model_name='activity',
             name='series',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL,
-                                    related_name='pickup_dates', to='places.PickupDateSeries'),
+                                    related_name='activities', to='places.ActivitySeries'),
         ),
     ]

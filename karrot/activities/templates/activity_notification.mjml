@@ -1,0 +1,101 @@
+<mjml>
+    <mj-head>
+        <mj-include path="../../base/templates/_base-head.mjml"/>
+        <mj-title>{% trans group_name=group.name %}{{ group_name }} upcoming pickups{% endtrans %}</mj-title>
+    </mj-head>
+    <mj-body>
+        <mj-include path="../../base/templates/_header.mjml"/>
+        <mj-section>
+            <mj-column>
+                <mj-text>
+
+                    {% macro activity_list(activities, show_empty_participants_count=false) -%}
+                        {% if activities and activities|length > 0 %}
+                            <ul>
+                                {% for activity in activities %}
+                                    <li>
+                                        {{ activity.date.start | time }} @
+                                        <a href="{{ place_url(activity.place) }}">
+                                            {{ activity.place.name }}
+                                        </a>
+                                        {% if show_empty_participants_count %}
+                                            -
+                                            {% trans trimmed empty_participants_count=activity.empty_participants_count(),
+                                                    max_participants=activity.max_participants %}
+                                                {{ empty_participants_count }}/{{ max_participants }} remaining
+                                            {% endtrans %}
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    {%- endmacro %}
+
+                    <h1>{% trans group_name=group.name %}{{ group_name }} upcoming pickups{% endtrans %}</h1>
+
+                    {% if has_activities_tonight %}
+                        <h2>
+                            {% trans %}Tonight{% endtrans %},
+                            {{ tonight_date | date }}
+                        </h2>
+
+                        <p>{% trans %}The day is not over, there are still pickups to be done!{% endtrans %}</p>
+
+                        {% if tonight_user and tonight_user|length > 0 %}
+                            {% trans %}You are signed up for{% endtrans %}:
+                            {{ activity_list(tonight_user) }}
+                        {% endif %}
+
+                        {% if tonight_empty and tonight_empty|length > 0 %}
+                            {% trans %}No-one is yet signed up for{% endtrans %}:
+                            {{ activity_list(tonight_empty) }}
+                        {% endif %}
+
+                        {% if tonight_not_full and tonight_not_full|length > 0 %}
+                            {% trans %}There is still space available for{% endtrans %}:
+                            {{ activity_list(tonight_not_full, show_empty_participants_count=true) }}
+                        {% endif %}
+
+                    {% endif %}
+
+                    {% if has_activities_tomorrow %}
+                        {% if has_activities_tonight %}
+                            <div class="divider"></div>
+                            <br>
+                        {% endif %}
+
+                        <h2>
+                            {% trans %}Tomorrow{% endtrans %},
+                            {{ tomorrow_date | date }}
+                        </h2>
+
+                        {% if tomorrow_user and tomorrow_user|length > 0 %}
+                            {% trans %}You are signed up for{% endtrans %}:
+                            {{ activity_list(tomorrow_user) }}
+                        {% endif %}
+
+                        {% if tomorrow_empty and tomorrow_empty|length > 0 %}
+                            {% trans %}No-one is yet signed up for{% endtrans %}:
+                            {{ activity_list(tomorrow_empty) }}
+                        {% endif %}
+
+                        {% if tomorrow_not_full and tomorrow_not_full|length > 0 %}
+                            {% trans %}There is still space available for{% endtrans %}:
+                            {{ activity_list(tomorrow_not_full, show_empty_participants_count=true) }}
+                        {% endif %}
+
+                    {% endif %}
+                </mj-text>
+                <mj-divider/>
+                <mj-text font-size="13px" line-height="18px" color="#777">
+                    <p>
+                        {% trans -%}You are receiving this because you are subscribed to
+                            <strong>Pickup notification</strong> emails for this group.{% endtrans %}
+                        <a href="{{ unsubscribe_url }}">{% trans %}Click here to unsubscribe{%  endtrans %}</a>.
+                    </p>
+                </mj-text>
+            </mj-column>
+        </mj-section>
+        <mj-include path="../../base/templates/_footer.mjml"/>
+    </mj-body>
+</mjml>

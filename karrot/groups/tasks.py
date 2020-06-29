@@ -150,8 +150,8 @@ def send_summary_emails():
                     feedback_count=context['feedbacks'].count(),
                     message_count=context['messages'].count(),
                     new_user_count=context['new_users'].count(),
-                    pickups_done_count=context['pickups_done_count'],
-                    pickups_missed_count=context['pickups_missed_count'],
+                    activities_done_count=context['activities_done_count'],
+                    activities_missed_count=context['activities_missed_count'],
                     has_activity=context['has_activity'],
                 )
 
