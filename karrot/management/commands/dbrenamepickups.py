@@ -4,7 +4,7 @@ from django.core.management import BaseCommand
 from django.db import connection
 
 #
-# A script to migrate the database from "stores" to "places"
+# A script to migrate the database from "pickups" to "activities"
 #
 # We use the fancy postgres tables to find things like sequence names, etc...
 #
@@ -53,7 +53,7 @@ class Command(BaseCommand):
             """.format(table, column, column, field_from, field_to, column, field_from, column, field_from)
             return re.sub('\\s+', ' ', query).strip()
 
-        # rename 'store' -> 'place' inside jsonb fields
+        # rename inside jsonb fields
 
         queries.append(rename_jsonb_field('notifications_notification', 'context', 'pickup_date', 'activity'))
         queries.append(rename_jsonb_field('notifications_notification', 'context', 'pickup', 'activity'))
