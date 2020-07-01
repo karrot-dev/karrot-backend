@@ -42,7 +42,7 @@ django-cors-headers==3.4.0  # via -r requirements.in
 django-crispy-forms==1.9.1  # via -r requirements.in
 django-dirtyfields==1.4   # via -r requirements.in
 django-enumfield==2.0.1   # via -r requirements.in
-django-extensions==2.2.9  # via -r requirements.in
+django-extensions==3.0.1  # via -r requirements.in
 django-filter==2.3.0      # via -r requirements.in
 django-jinja==2.6.0       # via -r requirements.in
 django-redis==4.12.1      # via -r requirements.in
@@ -69,7 +69,7 @@ html5lib==1.1             # via talon
 huey==2.2.0               # via -r requirements.in
 hyperlink==19.0.0         # via twisted
 idna==2.10                # via hyperlink, requests, twisted
-importlib-metadata==1.7.0  # via -r requirements.in, flake8, markdown, pluggy, pytest
+importlib-metadata==1.7.0  # via -r requirements.in
 incremental==17.5.0       # via twisted
 influxdb==5.3.0           # via django-influxdb-metrics
 ipython-genutils==0.2.0   # via traitlets
