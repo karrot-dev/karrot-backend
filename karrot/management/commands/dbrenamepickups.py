@@ -61,6 +61,8 @@ class Command(BaseCommand):
             rename_jsonb_field('notifications_notification', 'context', 'pickup_collector', 'activity_participant')
         )
         queries.append(rename_jsonb_field('history_history', 'payload', 'pickup_date', 'activity'))
+        queries.append(rename_jsonb_field('history_history', 'payload', 'collectors', 'participants'))
+        queries.append(rename_jsonb_field('history_history', 'payload', 'max_collectors', 'max_participants'))
         queries.append(rename_jsonb_field('history_history', 'before', 'pickup_date', 'activity'))
         queries.append(rename_jsonb_field('history_history', 'after', 'pickup_date', 'activity'))
 
@@ -75,6 +77,7 @@ class Command(BaseCommand):
 
         queries.append(rename_columns('pickupdate_id', 'activity_id'))
         queries.append(rename_columns('pickup_id', 'activity_id'))
+        queries.append(rename_columns('max_collectors', 'max_participants'))
 
         # constraints
 
@@ -116,8 +119,6 @@ class Command(BaseCommand):
 
         queries.append(rename_sequences('pickup', 'activity'))
         queries.append(rename_sequences('collector', 'participant'))
-
-        queries.append(rename_columns('max_collectors', 'max_participants'))
 
         # table renames, do it last so it doesn't invalidate queries that were created above with the old table names
 
