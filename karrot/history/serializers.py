@@ -35,23 +35,23 @@ class HistoryExportSerializer(HistorySerializer):
             'typus',
             'group',
             'place',
-            'pickup',
+            'activity',
             'users',
-            'pickup_date',
+            'activity_date',
         ]
 
-    pickup_date = serializers.SerializerMethodField()
+    activity_date = serializers.SerializerMethodField()
     date = serializers.SerializerMethodField()
     users = serializers.SerializerMethodField()
 
-    def get_pickup_date(self, history):
-        # Try to get start date of pickup
+    def get_activity_date(self, history):
+        # Try to get start date of activity
         if history.payload is None:
             return
 
         dates = history.payload.get('date')
         if dates is None:
-            # It might be very old or about something else than a pickup
+            # It might be very old or about something else than an activity
             return
 
         date = parse_datetime(dates[0])
@@ -76,6 +76,6 @@ class HistoryExportRenderer(CSVRenderer):
         'group': 'group_id',
         'users': 'user_ids',
         'place': 'place_id',
-        'pickup': 'pickup_id',
+        'activity': 'activity_id',
         'typus': 'type',
     }

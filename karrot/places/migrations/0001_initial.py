@@ -17,12 +17,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='PickupDate',
+            name='Activity',
             fields=[
                 ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('created_at', models.DateTimeField(default=django.utils.timezone.now)),
                 ('date', models.DateTimeField()),
-                ('max_collectors', models.IntegerField(null=True)),
+                ('max_participants', models.IntegerField(null=True)),
             ],
             options={
                 'abstract': False,

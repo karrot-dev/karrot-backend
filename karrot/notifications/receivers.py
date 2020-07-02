@@ -16,7 +16,7 @@ from karrot.notifications.models import Notification, NotificationType, Notifica
 from karrot.groups.models import GroupMembership
 from karrot.groups.roles import GROUP_EDITOR
 from karrot.invitations.models import Invitation
-from karrot.pickups.models import PickupDate, PickupDateCollector
+from karrot.activities.models import Activity, ActivityParticipant
 from karrot.places.models import Place
 from karrot.users.models import User
 
@@ -116,32 +116,32 @@ def application_decided(sender, instance, **kwargs):
     Notification.objects.create(user=application.user, **notification_data)
 
 
-@receiver(pre_save, sender=PickupDate)
+@receiver(pre_save, sender=Activity)
 def feedback_possible(sender, instance, **kwargs):
-    pickup = instance
-    if not pickup.is_done:
+    activity = instance
+    if not activity.is_done:
         return
 
-    if pickup.id:
-        # skip if pickup was already processed
-        old = PickupDate.objects.get(id=pickup.id)
-        if old.is_done == pickup.is_done:
+    if activity.id:
+        # skip if activity was already processed
+        old = Activity.objects.get(id=activity.id)
+        if old.is_done == activity.is_done:
             return
     else:
-        # Pickup is not saved yet and can't have any collectors
+        # Activity is not saved yet and can't have any participants
         return
 
     # TODO take into account that settings can change
-    # better save feedback possible expiry in pickup too
-    expiry_date = pickup.date.end + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
+    # better save feedback possible expiry in activity too
+    expiry_date = activity.date.end + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
-    for user in pickup.collectors.all():
+    for user in activity.participants.all():
         Notification.objects.create(
             user=user,
             type=NotificationType.FEEDBACK_POSSIBLE.value,
             context={
-                'group': pickup.place.group.id,
-                'pickup': pickup.id,
+                'group': activity.place.group.id,
+                'activity': activity.id,
             },
             expires_at=expiry_date,
         )
@@ -220,59 +220,59 @@ def invitation_accepted(sender, instance, **kwargs):
     )
 
 
-# Pickups
-@receiver(pre_delete, sender=PickupDateCollector)
-def delete_pickup_notifications_when_collector_leaves(sender, instance, **kwargs):
-    collector = instance
+# Activities
+@receiver(pre_delete, sender=ActivityParticipant)
+def delete_activity_notifications_when_participant_leaves(sender, instance, **kwargs):
+    participant = instance
 
     Notification.objects.order_by().not_expired()\
-        .filter(Q(type=NotificationType.PICKUP_UPCOMING.value) | Q(type=NotificationType.PICKUP_DISABLED.value))\
-        .filter(user=collector.user, context__pickup_collector=collector.id)\
+        .filter(Q(type=NotificationType.ACTIVITY_UPCOMING.value) | Q(type=NotificationType.ACTIVITY_DISABLED.value))\
+        .filter(user=participant.user, context__activity_participant=participant.id)\
         .delete()
 
 
-@receiver(pre_save, sender=PickupDate)
-def pickup_modified(sender, instance, **kwargs):
-    pickup = instance
+@receiver(pre_save, sender=Activity)
+def activity_modified(sender, instance, **kwargs):
+    activity = instance
 
-    # abort if pickup was just created
-    if not pickup.id:
+    # abort if activity was just created
+    if not activity.id:
         return
 
-    old = PickupDate.objects.get(id=pickup.id)
+    old = Activity.objects.get(id=activity.id)
 
-    collectors = pickup.pickupdatecollector_set
+    participants = activity.activityparticipant_set
 
-    def delete_notifications_for_collectors(collectors, type):
+    def delete_notifications_for_participants(participants, type):
         Notification.objects.order_by().not_expired() \
             .filter(type=type) \
-            .annotate(collector_id=Cast(KeyTextTransform('pickup_collector', 'context'), IntegerField())) \
-            .filter(collector_id__in=collectors.values_list('id', flat=True)) \
+            .annotate(participant_id=Cast(KeyTextTransform('activity_participant', 'context'), IntegerField())) \
+            .filter(participant_id__in=participants.values_list('id', flat=True)) \
             .delete()
 
-    if old.is_disabled != pickup.is_disabled:
-        if pickup.is_disabled:
-            delete_notifications_for_collectors(
-                collectors=collectors,
-                type=NotificationType.PICKUP_UPCOMING.value,
+    if old.is_disabled != activity.is_disabled:
+        if activity.is_disabled:
+            delete_notifications_for_participants(
+                participants=participants,
+                type=NotificationType.ACTIVITY_UPCOMING.value,
             )
 
-            Notification.objects.create_for_pickup_collectors(
-                collectors=collectors.exclude(user=pickup.last_changed_by),
-                type=NotificationType.PICKUP_DISABLED.value,
+            Notification.objects.create_for_activity_participants(
+                participants=participants.exclude(user=activity.last_changed_by),
+                type=NotificationType.ACTIVITY_DISABLED.value,
             )
         else:
-            # pickup is enabled
-            Notification.objects.create_for_pickup_collectors(
-                collectors=collectors.exclude(user=pickup.last_changed_by),
-                type=NotificationType.PICKUP_ENABLED.value,
+            # activity is enabled
+            Notification.objects.create_for_activity_participants(
+                participants=participants.exclude(user=activity.last_changed_by),
+                type=NotificationType.ACTIVITY_ENABLED.value,
             )
-            # pickup_upcoming notifications will automatically get created by cronjob
+            # activity_upcoming notifications will automatically get created by cronjob
 
-    if abs((old.date.start - pickup.date.start).total_seconds()) > 60:
-        Notification.objects.create_for_pickup_collectors(
-            collectors=collectors.exclude(user=pickup.last_changed_by),
-            type=NotificationType.PICKUP_MOVED.value,
+    if abs((old.date.start - activity.date.start).total_seconds()) > 60:
+        Notification.objects.create_for_activity_participants(
+            participants=participants.exclude(user=activity.last_changed_by),
+            type=NotificationType.ACTIVITY_MOVED.value,
         )
 
 

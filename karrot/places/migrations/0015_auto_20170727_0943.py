@@ -29,22 +29,23 @@ def convert_comment_to_description(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('places', '0014_pickupdateseries_comment'),
+        ('history', '0005_auto_20181114_1126'),
+        ('places', '0014_activityseries_comment'),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='pickupdate',
+            model_name='activity',
             old_name='comment',
             new_name='description',
         ),
         migrations.RenameField(
-            model_name='pickupdate',
+            model_name='activity',
             old_name='is_comment_changed',
             new_name='is_description_changed',
         ),
         migrations.RenameField(
-            model_name='pickupdateseries',
+            model_name='activityseries',
             old_name='comment',
             new_name='description',
         ),

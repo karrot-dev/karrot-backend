@@ -8,8 +8,8 @@ from karrot.issues.factories import IssueFactory
 from karrot.conversations.models import Conversation, ConversationMessage, ConversationThreadParticipant, \
     ConversationParticipant
 from karrot.groups.factories import GroupFactory
-from karrot.pickups.factories import PickupDateFactory
-from karrot.pickups.models import to_range
+from karrot.activities.factories import ActivityFactory
+from karrot.activities.models import to_range
 from karrot.places.factories import PlaceFactory
 from karrot.subscriptions.models import PushSubscription, PushSubscriptionPlatform
 from karrot.subscriptions.tasks import get_message_title, notify_message_push_subscribers
@@ -147,12 +147,12 @@ class TestMessagePushNotificationTitles(TestCase):
         title = get_message_title(reply, 'en')
         self.assertEqual(title, 'blablablablabl… / {}'.format(author.display_name))
 
-    def test_pickup_message_title(self):
+    def test_activity_message_title(self):
         author = UserFactory()
         group = GroupFactory(members=[author], timezone='Europe/Berlin')
         place = PlaceFactory(group=group)
-        pickup = PickupDateFactory(place=place, collectors=[author], date=to_range(parse('2018-11-11T20:00:00Z')))
-        conversation = Conversation.objects.get_or_create_for_target(pickup)
+        activity = ActivityFactory(place=place, participants=[author], date=to_range(parse('2018-11-11T20:00:00Z')))
+        conversation = Conversation.objects.get_or_create_for_target(activity)
         message = conversation.messages.create(author=author, content='bla')
 
         title = get_message_title(message, 'en')

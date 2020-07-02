@@ -29,8 +29,8 @@ from karrot.notifications.models import Notification, NotificationMeta
 from karrot.notifications.serializers import NotificationSerializer, NotificationMetaSerializer
 from karrot.offers.models import Offer, OfferStatus
 from karrot.offers.serializers import OfferSerializer
-from karrot.pickups.models import PickupDate, PickupDateSeries, Feedback, PickupDateCollector
-from karrot.pickups.serializers import PickupDateSerializer, PickupDateSeriesSerializer, FeedbackSerializer
+from karrot.activities.models import Activity, ActivitySeries, Feedback, ActivityParticipant
+from karrot.activities.serializers import ActivitySerializer, ActivitySeriesSerializer, FeedbackSerializer
 from karrot.places.models import Place, PlaceSubscription
 from karrot.places.serializers import PlaceSerializer
 from karrot.status.helpers import unseen_notification_count, unread_conversations, pending_applications, \
@@ -304,56 +304,56 @@ def place_subscription_updated(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='places:place', payload=payload)
 
 
-# Pickup Dates
-@receiver(post_save, sender=PickupDate)
-def send_pickup_updates(sender, instance, **kwargs):
-    pickup = instance
-    if pickup.is_done:
+# Activity Dates
+@receiver(post_save, sender=Activity)
+def send_activity_updates(sender, instance, **kwargs):
+    activity = instance
+    if activity.is_done:
         # doesn't change serialized data
         return
 
-    payload = PickupDateSerializer(pickup).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.place.group.members.all()
+    payload = ActivitySerializer(activity).data
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=activity.place.group.members.all()
                                                                     ).distinct():
-        send_in_channel(subscription.reply_channel, topic='pickups:pickupdate', payload=payload)
+        send_in_channel(subscription.reply_channel, topic='activities:activity', payload=payload)
 
 
-@receiver(pre_delete, sender=PickupDate)
-def send_pickup_deleted(sender, instance, **kwargs):
-    pickup = instance
-    payload = PickupDateSerializer(pickup).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.place.group.members.all()
+@receiver(pre_delete, sender=Activity)
+def send_activity_deleted(sender, instance, **kwargs):
+    activity = instance
+    payload = ActivitySerializer(activity).data
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=activity.place.group.members.all()
                                                                     ).distinct():
-        send_in_channel(subscription.reply_channel, topic='pickups:pickupdate_deleted', payload=payload)
+        send_in_channel(subscription.reply_channel, topic='activities:activity_deleted', payload=payload)
 
 
-@receiver(post_save, sender=PickupDateCollector)
-@receiver(post_delete, sender=PickupDateCollector)
-def send_pickup_collector_updates(sender, instance, **kwargs):
-    pickup = instance.pickupdate
-    payload = PickupDateSerializer(pickup).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=pickup.place.group.members.all()
+@receiver(post_save, sender=ActivityParticipant)
+@receiver(post_delete, sender=ActivityParticipant)
+def send_activity_participant_updates(sender, instance, **kwargs):
+    activity = instance.activity
+    payload = ActivitySerializer(activity).data
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=activity.place.group.members.all()
                                                                     ).distinct():
-        send_in_channel(subscription.reply_channel, topic='pickups:pickupdate', payload=payload)
+        send_in_channel(subscription.reply_channel, topic='activities:activity', payload=payload)
 
 
-# Pickup Date Series
-@receiver(post_save, sender=PickupDateSeries)
-def send_pickup_series_updates(sender, instance, **kwargs):
+# Activity Date Series
+@receiver(post_save, sender=ActivitySeries)
+def send_activity_series_updates(sender, instance, **kwargs):
     series = instance
-    payload = PickupDateSeriesSerializer(series).data
+    payload = ActivitySeriesSerializer(series).data
     for subscription in ChannelSubscription.objects.recent().filter(user__in=series.place.group.members.all()
                                                                     ).distinct():
-        send_in_channel(subscription.reply_channel, topic='pickups:series', payload=payload)
+        send_in_channel(subscription.reply_channel, topic='activities:series', payload=payload)
 
 
-@receiver(pre_delete, sender=PickupDateSeries)
-def send_pickup_series_delete(sender, instance, **kwargs):
+@receiver(pre_delete, sender=ActivitySeries)
+def send_activity_series_delete(sender, instance, **kwargs):
     series = instance
-    payload = PickupDateSeriesSerializer(series).data
+    payload = ActivitySeriesSerializer(series).data
     for subscription in ChannelSubscription.objects.recent().filter(user__in=series.place.group.members.all()
                                                                     ).distinct():
-        send_in_channel(subscription.reply_channel, topic='pickups:series_deleted', payload=payload)
+        send_in_channel(subscription.reply_channel, topic='activities:series_deleted', payload=payload)
 
 
 # Offer
@@ -579,18 +579,18 @@ def application_saved(sender, instance, **kwargs):
             send_in_channel(subscription.reply_channel, topic='status', payload={'groups': groups})
 
 
-@receiver(post_save, sender=PickupDate)
-def pickup_date_saved(sender, instance, **kwargs):
-    pickup = instance
+@receiver(post_save, sender=Activity)
+def activity_date_saved(sender, instance, **kwargs):
+    activity = instance
 
-    if pickup.is_done is False:
-        # Pickup is not done
+    if activity.is_done is False:
+        # Activity is not done
         return
     # TODO don't send if 'is_done' did not change
 
     for user, subscriptions in groupby(sorted(list(
-            ChannelSubscription.objects.recent().filter(user__in=pickup.collectors.all())), key=lambda x: x.user.id),
-                                       key=lambda x: x.user):
+            ChannelSubscription.objects.recent().filter(user__in=activity.participants.all())),
+                                              key=lambda x: x.user.id), key=lambda x: x.user):
 
         groups = defaultdict(dict)
         for group_id, count in get_feedback_possible(user):

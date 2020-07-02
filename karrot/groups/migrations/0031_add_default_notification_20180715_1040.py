@@ -5,7 +5,7 @@ from django.db import migrations
 
 class GroupNotificationType(object):
     WEEKLY_SUMMARY = 'weekly_summary'
-    DAILY_PICKUP_NOTIFICATION = 'daily_pickup_notification'
+    DAILY_ACTIVITY_NOTIFICATION = 'daily_activity_notification'
     NEW_APPLICATION = 'new_application'
 
 

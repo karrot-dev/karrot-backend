@@ -18,20 +18,20 @@ class HistoryTypus(enum.Enum):
     STORE_CREATE = 4
     STORE_MODIFY = 5
     STORE_DELETE = 6
-    PICKUP_CREATE = 7
-    PICKUP_MODIFY = 8
-    PICKUP_DELETE = 9
+    ACTIVITY_CREATE = 7
+    ACTIVITY_MODIFY = 8
+    ACTIVITY_DELETE = 9
     SERIES_CREATE = 10
     SERIES_MODIFY = 11
     SERIES_DELETE = 12
-    PICKUP_DONE = 13
-    PICKUP_JOIN = 14
-    PICKUP_LEAVE = 15
-    PICKUP_MISSED = 16
+    ACTIVITY_DONE = 13
+    ACTIVITY_JOIN = 14
+    ACTIVITY_LEAVE = 15
+    ACTIVITY_MISSED = 16
     APPLICATION_DECLINED = 17
     MEMBER_BECAME_EDITOR = 18
-    PICKUP_DISABLE = 19
-    PICKUP_ENABLE = 20
+    ACTIVITY_DISABLE = 19
+    ACTIVITY_ENABLE = 20
     GROUP_LEAVE_INACTIVE = 21
     GROUP_CHANGE_PHOTO = 22
     GROUP_DELETE_PHOTO = 23
@@ -59,8 +59,8 @@ class History(NicelyFormattedModel):
     typus = enum.EnumField(HistoryTypus)
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE)
     place = models.ForeignKey('places.Place', null=True, on_delete=models.CASCADE)
-    pickup = models.ForeignKey('pickups.PickupDate', null=True, on_delete=models.SET_NULL)
-    series = models.ForeignKey('pickups.PickupDateSeries', null=True, on_delete=models.SET_NULL)
+    activity = models.ForeignKey('activities.Activity', null=True, on_delete=models.SET_NULL)
+    series = models.ForeignKey('activities.ActivitySeries', null=True, on_delete=models.SET_NULL)
     users = models.ManyToManyField('users.User')
     payload = JSONField(null=True)
     before = JSONField(null=True)

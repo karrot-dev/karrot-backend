@@ -181,7 +181,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         """
         Delete the user.
 
-        To keep historic pickup infos, keep the user account but clear personal data.
+        To keep historic activity infos, keep the user account but clear personal data.
         """
         # Removing group memberships emits pre_delete and post_delete signals,
         # they are used to remove the user from pick-ups

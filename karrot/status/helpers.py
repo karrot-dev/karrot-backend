@@ -4,7 +4,7 @@ from karrot.applications.models import ApplicationStatus
 from karrot.conversations.models import ConversationParticipant, ConversationThreadParticipant
 from karrot.groups.models import Group
 from karrot.notifications.models import Notification
-from karrot.pickups.models import PickupDate
+from karrot.activities.models import Activity
 from karrot.places.models import PlaceStatus
 
 
@@ -76,9 +76,9 @@ def pending_applications(user):
 def get_feedback_possible(user):
     return Group.objects.filter(members=user).annotate(
         feedback_possible=Count(
-            'places__pickup_dates',
+            'places__activities',
             filter=Q(
-                places__pickup_dates__in=PickupDate.objects.only_feedback_possible(user),
+                places__activities__in=Activity.objects.only_feedback_possible(user),
                 places__status=PlaceStatus.ACTIVE.value
             )
         )

@@ -52,17 +52,17 @@ def get_message_title(message, language):
     if type == 'place':
         return '{} / {}'.format(conversation.target.name, author_name)
 
-    if type == 'pickup':
-        pickup = conversation.target
-        group_tz = pickup.place.group.timezone
+    if type == 'activity':
+        activity = conversation.target
+        group_tz = activity.place.group.timezone
         with timezone.override(group_tz):
             weekday = format_date(
-                pickup.date.start.astimezone(timezone.get_current_timezone()),
+                activity.date.start.astimezone(timezone.get_current_timezone()),
                 'EEEE',
                 locale=translation.to_locale(language),
             )
             time = format_time(
-                pickup.date.start,
+                activity.date.start,
                 format='short',
                 locale=translation.to_locale(language),
                 tzinfo=timezone.get_current_timezone(),

@@ -14,25 +14,25 @@ class HistoryTypus(enum.Enum):
     STORE_CREATE = 4
     STORE_MODIFY = 5
     STORE_DELETE = 6
-    PICKUP_CREATE = 7
-    PICKUP_MODIFY = 8
-    PICKUP_DELETE = 9
+    ACTIVITY_CREATE = 7
+    ACTIVITY_MODIFY = 8
+    ACTIVITY_DELETE = 9
     SERIES_CREATE = 10
     SERIES_MODIFY = 11
     SERIES_DELETE = 12
-    PICKUP_DONE = 13
-    PICKUP_JOIN = 14
-    PICKUP_LEAVE = 15
-    PICKUP_MISSED = 16
+    ACTIVITY_DONE = 13
+    ACTIVITY_JOIN = 14
+    ACTIVITY_LEAVE = 15
+    ACTIVITY_MISSED = 16
 
 
-def convert_missed_pickups(apps, schema_editor):
+def convert_missed_activities(apps, schema_editor):
     history_model = apps.get_model('history', 'History')
-    to_convert = history_model.objects.filter(typus=HistoryTypus.PICKUP_DONE, users=None)
+    to_convert = history_model.objects.filter(typus=HistoryTypus.ACTIVITY_DONE, users=None)
     print('converting', to_convert.count(), 'history entries')
-    to_convert.update(typus=HistoryTypus.PICKUP_MISSED)
+    to_convert.update(typus=HistoryTypus.ACTIVITY_MISSED)
 
-    assert history_model.objects.filter(typus=HistoryTypus.PICKUP_DONE, users=None).count() == 0
+    assert history_model.objects.filter(typus=HistoryTypus.ACTIVITY_DONE, users=None).count() == 0
 
 
 class Migration(migrations.Migration):
@@ -42,5 +42,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(convert_missed_pickups, elidable=True)
+        migrations.RunPython(convert_missed_activities, elidable=True)
     ]

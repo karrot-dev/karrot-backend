@@ -20,10 +20,10 @@ class NotificationType(Enum):
     NEW_PLACE = 'new_place'
     NEW_MEMBER = 'new_member'
     INVITATION_ACCEPTED = 'invitation_accepted'
-    PICKUP_UPCOMING = 'pickup_upcoming'
-    PICKUP_DISABLED = 'pickup_disabled'
-    PICKUP_ENABLED = 'pickup_enabled'
-    PICKUP_MOVED = 'pickup_moved'
+    ACTIVITY_UPCOMING = 'activity_upcoming'
+    ACTIVITY_DISABLED = 'activity_disabled'
+    ACTIVITY_ENABLED = 'activity_enabled'
+    ACTIVITY_MOVED = 'activity_moved'
     CONFLICT_RESOLUTION_CREATED = 'conflict_resolution_created'
     CONFLICT_RESOLUTION_CREATED_ABOUT_YOU = 'conflict_resolution_created_about_you'
     CONFLICT_RESOLUTION_CONTINUED = 'conflict_resolution_continued'
@@ -43,17 +43,17 @@ class NotificationQuerySet(models.QuerySet):
 
 
 class NotificationManager(BaseManager.from_queryset(NotificationQuerySet)):
-    def create_for_pickup_collectors(self, collectors, type):
-        for collector in collectors:
-            pickup = collector.pickupdate
+    def create_for_activity_participants(self, participants, type):
+        for participant in participants:
+            activity = participant.activity
             super().create(
-                user=collector.user,
+                user=participant.user,
                 type=type,
                 context={
-                    'group': pickup.group.id,
-                    'place': pickup.place.id,
-                    'pickup': pickup.id,
-                    'pickup_collector': collector.id,
+                    'group': activity.group.id,
+                    'place': activity.place.id,
+                    'activity': activity.id,
+                    'activity_participant': participant.id,
                 }
             )
 

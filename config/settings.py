@@ -51,9 +51,9 @@ GROUP_THEME_DEFAULT = themes.GroupTheme.FOODSAVING
 # Places
 STORE_MAX_WEEKS_IN_ADVANCE = 52
 
-# Pickups
+# Activities
 FEEDBACK_POSSIBLE_DAYS = 30
-PICKUPDATE_DUE_SOON_HOURS = 6
+ACTIVITY_DUE_SOON_HOURS = 6
 
 # Conversations
 MESSAGE_EDIT_DAYS = 2
@@ -96,7 +96,7 @@ INSTALLED_APPS = (
     'karrot.places.PlacesConfig',
     'karrot.unsubscribe',
     'karrot.offers.OffersConfig',
-    'karrot.pickups.PickupsConfig',
+    'karrot.activities.ActivitiesConfig',
     'karrot.invitations.InvitationsConfig',
     'karrot.template_previews',
     'karrot.webhooks.WebhooksConfig',

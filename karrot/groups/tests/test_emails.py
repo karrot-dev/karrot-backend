@@ -10,7 +10,7 @@ import karrot.groups
 import karrot.groups.emails as group_emails
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupNotificationType, GroupMembership
-from karrot.pickups.factories import PickupDateFactory
+from karrot.activities.factories import ActivityFactory
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import VerifiedUserFactory, UserFactory
 
@@ -110,7 +110,7 @@ class TestGroupSummaryEmails(APITestCase):
         )
         self.assertNotIn(self.user_without_notifications.email, emails[0].to)
 
-    def test_ignores_deleted_pickups(self):
+    def test_ignores_deleted_activities(self):
         a_few_days_ago = timezone.now() - relativedelta(days=4)
 
         place = PlaceFactory(group=self.group)
@@ -119,12 +119,12 @@ class TestGroupSummaryEmails(APITestCase):
 
         with freeze_time(a_few_days_ago, tick=True):
             # fulfilled, but deleted
-            PickupDateFactory(place=place, max_collectors=1, collectors=[user], is_disabled=True)
+            ActivityFactory(place=place, max_participants=1, participants=[user], is_disabled=True)
 
         from_date, to_date = karrot.groups.emails.calculate_group_summary_dates(self.group)
         data = karrot.groups.emails.prepare_group_summary_data(self.group, from_date, to_date)
 
-        self.assertEqual(data['pickups_done_count'], 0)
+        self.assertEqual(data['activities_done_count'], 0)
 
     def test_group_summary_data(self):
 
@@ -139,8 +139,8 @@ class TestGroupSummaryEmails(APITestCase):
         with freeze_time(a_couple_of_weeks_ago, tick=True):
             self.group.add_member(old_user)
             self.group.conversation.messages.create(author=old_user, content='old message')
-            PickupDateFactory(place=place)
-            PickupDateFactory(place=place, max_collectors=1, collectors=[old_user])
+            ActivityFactory(place=place)
+            ActivityFactory(place=place, max_participants=1, participants=[old_user])
 
         # should be included in summary email
         with freeze_time(a_few_days_ago, tick=True):
@@ -150,15 +150,15 @@ class TestGroupSummaryEmails(APITestCase):
             self.group.conversation.messages.create(author=user, content='hello')
             self.group.conversation.messages.create(author=user, content='whats up')
 
-            # a missed pickup
-            PickupDateFactory(place=place)
+            # a missed activity
+            ActivityFactory(place=place)
 
-            # a fulfilled pickup
-            PickupDateFactory(place=place, max_collectors=1, collectors=[user])
+            # a fulfilled activity
+            ActivityFactory(place=place, max_participants=1, participants=[user])
 
         from_date, to_date = karrot.groups.emails.calculate_group_summary_dates(self.group)
         data = karrot.groups.emails.prepare_group_summary_data(self.group, from_date, to_date)
-        self.assertEqual(data['pickups_done_count'], 1)
-        self.assertEqual(data['pickups_missed_count'], 1)
+        self.assertEqual(data['activities_done_count'], 1)
+        self.assertEqual(data['activities_missed_count'], 1)
         self.assertEqual(len(data['new_users']), 1)
         self.assertEqual(len(data['messages']), 2)

@@ -18,14 +18,14 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name='pickupdate',
-            name='collectors',
+            model_name='activity',
+            name='participants',
             field=models.ManyToManyField(to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
-            model_name='pickupdate',
+            model_name='activity',
             name='place',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='pickupdates',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='activities',
                                     to='places.Place'),
         ),
     ]

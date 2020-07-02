@@ -4,7 +4,7 @@ from django.db.models import Count
 from django.utils import timezone
 
 from karrot.groups.models import GroupMembership, GroupStatus
-from karrot.pickups.models import PickupDate
+from karrot.activities.models import Activity
 
 
 def get_users_stats():
@@ -33,8 +33,8 @@ def get_users_stats():
             deleted=False,
         ).distinct()
         now = timezone.now()
-        pickup_active_users = User.objects.filter(
-            pickup_dates__in=PickupDate.objects.exclude_disabled().filter(
+        activity_active_users = User.objects.filter(
+            activities__in=Activity.objects.exclude_disabled().filter(
                 date__startswith__lt=now,
                 date__startswith__gte=now - relativedelta(days=n),
             ).exclude(place__group__status=GroupStatus.PLAYGROUND, ),
@@ -42,7 +42,7 @@ def get_users_stats():
         ).distinct()
         fields.update({
             'count_active_{}d'.format(n): active_users.count(),
-            'count_pickup_active_{}d'.format(n): pickup_active_users.count(),
+            'count_activity_active_{}d'.format(n): activity_active_users.count(),
         })
 
     return fields

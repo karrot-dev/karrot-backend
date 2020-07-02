@@ -14,8 +14,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name='pickupdate',
-            name='collectors',
-            field=models.ManyToManyField(related_name='pickup_dates', to=settings.AUTH_USER_MODEL),
+            model_name='activity',
+            name='participants',
+            field=models.ManyToManyField(related_name='activities', to=settings.AUTH_USER_MODEL),
         ),
     ]

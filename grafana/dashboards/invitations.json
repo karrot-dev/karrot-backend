@@ -3,6 +3,7 @@
     "annotations": {
       "list": [
         {
+          "$$hashKey": "object:10",
           "builtIn": 1,
           "datasource": "-- Grafana --",
           "enable": true,
@@ -17,9 +18,125 @@
     "gnetId": null,
     "graphTooltip": 0,
     "id": 38,
-    "iteration": 1554800793065,
+    "iteration": 1590952365945,
     "links": [],
     "panels": [
+      {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 0,
+          "y": 0
+        },
+        "id": 4,
+        "interval": null,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "0"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.events",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "invitation_accepted"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
+          }
+        ],
+        "thresholds": "",
+        "title": "Invitations accepted",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "total"
+      },
       {
         "columns": [],
         "datasource": "$site",
@@ -28,7 +145,7 @@
           "h": 7,
           "w": 7,
           "x": 0,
-          "y": 0
+          "y": 3
         },
         "id": 2,
         "links": [],
@@ -36,18 +153,20 @@
         "scroll": true,
         "showHeader": true,
         "sort": {
-          "col": 0,
+          "col": 3,
           "desc": true
         },
         "styles": [
           {
             "alias": "Time",
+            "align": "auto",
             "dateFormat": "YYYY-MM-DD HH:mm:ss",
             "pattern": "Time",
             "type": "hidden"
           },
           {
             "alias": "",
+            "align": "auto",
             "colorMode": null,
             "colors": [
               "rgba(245, 54, 54, 0.9)",
@@ -130,7 +249,7 @@
         "type": "table"
       }
     ],
-    "schemaVersion": 18,
+    "schemaVersion": 22,
     "style": "dark",
     "tags": [],
     "templating": {
@@ -142,7 +261,9 @@
             "value": "karrot-prod"
           },
           "hide": 0,
+          "includeAll": false,
           "label": null,
+          "multi": false,
           "name": "site",
           "options": [],
           "query": "influxdb",
@@ -185,7 +306,10 @@
     "timezone": "",
     "title": "Invitations",
     "uid": "Vz3_tZRZk",
-    "version": 2
+    "variables": {
+      "list": []
+    },
+    "version": 4
   },
   "meta": {
     "canAdmin": false,
@@ -204,9 +328,9 @@
     "provisionedExternalId": "",
     "slug": "invitations",
     "type": "db",
-    "updated": "2019-04-09T11:10:33+02:00",
+    "updated": "2020-05-31T21:22:35+02:00",
     "updatedBy": "tiltec",
     "url": "/d/Vz3_tZRZk/invitations",
-    "version": 2
+    "version": 4
   }
 }

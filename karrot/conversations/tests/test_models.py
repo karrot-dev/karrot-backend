@@ -10,7 +10,7 @@ from karrot.conversations.models import Conversation, ConversationMessage, Conve
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupNotificationType
 from karrot.issues.factories import IssueFactory
-from karrot.pickups.factories import PickupDateFactory
+from karrot.activities.factories import ActivityFactory
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import execute_scheduled_tasks_immediately
 from karrot.users.factories import UserFactory, VerifiedUserFactory
@@ -194,17 +194,17 @@ class TestPlaceConversations(TestCase):
         self.assertIn(reply.content, mail.outbox[0].body)
 
 
-class TestPickupConversations(TestCase):
+class TestActivityConversations(TestCase):
     def setUp(self):
         self.user = VerifiedUserFactory()
         self.group = GroupFactory(members=[self.user])
         self.place = PlaceFactory(group=self.group)
-        self.pickup = PickupDateFactory(place=self.place, collectors=[self.user])
-        self.conversation = self.pickup.conversation
+        self.activity = ActivityFactory(place=self.place, participants=[self.user])
+        self.conversation = self.activity.conversation
 
     def test_send_email_notifications(self):
         users = [VerifiedUserFactory() for _ in range(2)]
-        [self.pickup.add_collector(u) for u in users]
+        [self.activity.add_participant(u) for u in users]
 
         mail.outbox = []
         with execute_scheduled_tasks_immediately():

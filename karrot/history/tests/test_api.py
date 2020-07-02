@@ -7,9 +7,9 @@ from rest_framework.test import APITestCase
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
 from karrot.history.models import History
-from karrot.pickups.factories import PickupDateFactory, \
-    PickupDateSeriesFactory
-from karrot.pickups.models import PickupDate, to_range
+from karrot.activities.factories import ActivityFactory, \
+    ActivitySeriesFactory
+from karrot.activities.models import Activity, to_range
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import UserFactory
@@ -122,22 +122,22 @@ class TestHistoryAPIWithExistingPlace(APITestCase, ExtractPaginationMixin):
         response = self.get_results(history_url)
         self.assertEqual(len(response.data), 0)
 
-    def test_create_pickup(self):
+    def test_create_activity(self):
         self.client.force_login(self.member)
         self.client.post(
-            '/api/pickup-dates/', {
+            '/api/activities/', {
                 'date': to_range(timezone.now() + relativedelta(days=1)).as_list(),
                 'place': self.place.id
             },
             format='json'
         )
         response = self.get_results(history_url)
-        self.assertEqual(response.data[0]['typus'], 'PICKUP_CREATE')
+        self.assertEqual(response.data[0]['typus'], 'ACTIVITY_CREATE')
 
     def test_create_series(self):
         self.client.force_login(self.member)
         self.client.post(
-            '/api/pickup-date-series/', {
+            '/api/activity-series/', {
                 'start_date': timezone.now(),
                 'rule': 'FREQ=WEEKLY',
                 'place': self.place.id
@@ -147,35 +147,35 @@ class TestHistoryAPIWithExistingPlace(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.data[0]['typus'], 'SERIES_CREATE')
 
 
-class TestHistoryAPIWithExistingPickups(APITestCase, ExtractPaginationMixin):
+class TestHistoryAPIWithExistingActivities(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
-        self.pickup = PickupDateFactory(place=self.place)
-        self.pickup_url = '/api/pickup-dates/{}/'.format(self.pickup.id)
-        self.series = PickupDateSeriesFactory(place=self.place)
-        self.series_url = '/api/pickup-date-series/{}/'.format(self.series.id)
+        self.activity = ActivityFactory(place=self.place)
+        self.activity_url = '/api/activities/{}/'.format(self.activity.id)
+        self.series = ActivitySeriesFactory(place=self.place)
+        self.series_url = '/api/activity-series/{}/'.format(self.series.id)
 
-    def test_modify_pickup(self):
+    def test_modify_activity(self):
         self.client.force_login(self.member)
-        self.client.patch(self.pickup_url, {'max_collectors': '11'})
+        self.client.patch(self.activity_url, {'max_participants': '11'})
         response = self.get_results(history_url)
-        self.assertEqual(response.data[0]['typus'], 'PICKUP_MODIFY')
-        self.assertEqual(response.data[0]['payload']['max_collectors'], '11')
+        self.assertEqual(response.data[0]['typus'], 'ACTIVITY_MODIFY')
+        self.assertEqual(response.data[0]['payload']['max_participants'], '11')
 
-    def test_dont_modify_pickup(self):
+    def test_dont_modify_activity(self):
         self.client.force_login(self.member)
-        self.client.patch(self.pickup_url, {'date': self.pickup.date.as_list()}, format='json')
+        self.client.patch(self.activity_url, {'date': self.activity.date.as_list()}, format='json')
         response = self.get_results(history_url)
         self.assertEqual(len(response.data), 0, response.data)
 
     def test_modify_series(self):
         self.client.force_login(self.member)
-        self.client.patch(self.series_url, {'max_collectors': '11'})
+        self.client.patch(self.series_url, {'max_participants': '11'})
         response = self.get_results(history_url)
         self.assertEqual(response.data[0]['typus'], 'SERIES_MODIFY')
-        self.assertEqual(response.data[0]['payload']['max_collectors'], '11')
+        self.assertEqual(response.data[0]['payload']['max_participants'], '11')
 
     def test_dont_modify_series(self):
         self.client.force_login(self.member)
@@ -190,125 +190,125 @@ class TestHistoryAPIWithExistingPickups(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.data[0]['typus'], 'SERIES_DELETE')
         self.assertEqual(response.data[0]['payload']['rule'], self.series.rule)
 
-    def test_join_pickup(self):
+    def test_join_activity(self):
         self.client.force_login(self.member)
-        self.client.post(self.pickup_url + 'add/')
+        self.client.post(self.activity_url + 'add/')
         response = self.get_results(history_url)
-        self.assertEqual(response.data[0]['typus'], 'PICKUP_JOIN')
-        self.assertEqual(parse(response.data[0]['payload']['date'][0]), self.pickup.date.start)
+        self.assertEqual(response.data[0]['typus'], 'ACTIVITY_JOIN')
+        self.assertEqual(parse(response.data[0]['payload']['date'][0]), self.activity.date.start)
 
-    def test_leave_pickup(self):
+    def test_leave_activity(self):
         self.client.force_login(self.member)
-        self.pickup.add_collector(self.member)
-        self.client.post(self.pickup_url + 'remove/')
+        self.activity.add_participant(self.member)
+        self.client.post(self.activity_url + 'remove/')
         response = self.get_results(history_url)
-        self.assertEqual(response.data[0]['typus'], 'PICKUP_LEAVE')
-        self.assertEqual(parse(response.data[0]['payload']['date'][0]), self.pickup.date.start)
+        self.assertEqual(response.data[0]['typus'], 'ACTIVITY_LEAVE')
+        self.assertEqual(parse(response.data[0]['payload']['date'][0]), self.activity.date.start)
 
-    def test_disable_pickup(self):
-        self.client.force_login(self.member)
-        History.objects.all().delete()
-
-        self.client.patch(self.pickup_url, {'is_disabled': True})
-
-        response = self.get_results(history_url)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]['typus'], 'PICKUP_DISABLE')
-
-    def test_enable_pickup(self):
-        self.pickup.is_disabled = True
-        self.pickup.save()
+    def test_disable_activity(self):
         self.client.force_login(self.member)
         History.objects.all().delete()
 
-        self.client.patch(self.pickup_url, {'is_disabled': False})
+        self.client.patch(self.activity_url, {'is_disabled': True})
 
         response = self.get_results(history_url)
         self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]['typus'], 'PICKUP_ENABLE')
+        self.assertEqual(response.data[0]['typus'], 'ACTIVITY_DISABLE')
+
+    def test_enable_activity(self):
+        self.activity.is_disabled = True
+        self.activity.save()
+        self.client.force_login(self.member)
+        History.objects.all().delete()
+
+        self.client.patch(self.activity_url, {'is_disabled': False})
+
+        response = self.get_results(history_url)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['typus'], 'ACTIVITY_ENABLE')
 
 
-class TestHistoryAPIWithDonePickup(APITestCase, ExtractPaginationMixin):
+class TestHistoryAPIWithDoneActivity(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
-        self.pickup = PickupDateFactory(place=self.place, date=to_range(timezone.now() - relativedelta(days=1)))
-        self.pickup.add_collector(self.member)
-        PickupDate.objects.process_finished_pickup_dates()
+        self.activity = ActivityFactory(place=self.place, date=to_range(timezone.now() - relativedelta(days=1)))
+        self.activity.add_participant(self.member)
+        Activity.objects.process_finished_activities()
 
-    def test_pickup_done(self):
+    def test_activity_done(self):
         self.client.force_login(self.member)
         response = self.get_results(history_url)
-        self.assertEqual(response.data[0]['typus'], 'PICKUP_DONE')
+        self.assertEqual(response.data[0]['typus'], 'ACTIVITY_DONE')
         self.assertLess(parse(response.data[0]['date']), timezone.now() - relativedelta(hours=22))
 
-    def test_filter_pickup_done(self):
+    def test_filter_activity_done(self):
         self.client.force_login(self.member)
-        response = self.get_results(history_url, {'typus': 'PICKUP_DONE'})
-        self.assertEqual(response.data[0]['typus'], 'PICKUP_DONE')
+        response = self.get_results(history_url, {'typus': 'ACTIVITY_DONE'})
+        self.assertEqual(response.data[0]['typus'], 'ACTIVITY_DONE')
         response = self.get_results(history_url, {'typus': 'GROUP_JOIN'})  # unrelated event should give no result
         self.assertEqual(len(response.data), 0)
 
 
-class TestHistoryAPIWithMissedPickup(APITestCase, ExtractPaginationMixin):
+class TestHistoryAPIWithMissedActivity(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
-        self.pickup = PickupDateFactory(place=self.place, date=to_range(timezone.now() - relativedelta(days=1)))
-        # No one joined the pickup
-        PickupDate.objects.process_finished_pickup_dates()
+        self.activity = ActivityFactory(place=self.place, date=to_range(timezone.now() - relativedelta(days=1)))
+        # No one joined the activity
+        Activity.objects.process_finished_activities()
 
-    def test_pickup_missed(self):
+    def test_activity_missed(self):
         self.client.force_login(self.member)
         response = self.get_results(history_url)
-        self.assertEqual(response.data[0]['typus'], 'PICKUP_MISSED')
+        self.assertEqual(response.data[0]['typus'], 'ACTIVITY_MISSED')
         self.assertLess(parse(response.data[0]['date']), timezone.now() - relativedelta(hours=22))
 
-    def test_filter_pickup_missed(self):
+    def test_filter_activity_missed(self):
         self.client.force_login(self.member)
-        response = self.get_results(history_url, {'typus': 'PICKUP_MISSED'})
-        self.assertEqual(response.data[0]['typus'], 'PICKUP_MISSED')
+        response = self.get_results(history_url, {'typus': 'ACTIVITY_MISSED'})
+        self.assertEqual(response.data[0]['typus'], 'ACTIVITY_MISSED')
         response = self.get_results(history_url, {'typus': 'GROUP_JOIN'})  # unrelated event should give no result
         self.assertEqual(len(response.data), 0)
 
 
-class TestHistoryAPIPickupForInactivePlace(APITestCase, ExtractPaginationMixin):
+class TestHistoryAPIActivityForInactivePlace(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group, status='archived')
-        self.pickup = PickupDateFactory(place=self.place, date=to_range(timezone.now() - relativedelta(days=1)))
-        self.pickup.add_collector(self.member)
+        self.activity = ActivityFactory(place=self.place, date=to_range(timezone.now() - relativedelta(days=1)))
+        self.activity.add_participant(self.member)
 
-        PickupDateFactory(place=self.place, date=to_range(timezone.now() - relativedelta(days=1), minutes=30))
-        PickupDate.objects.process_finished_pickup_dates()
+        ActivityFactory(place=self.place, date=to_range(timezone.now() - relativedelta(days=1), minutes=30))
+        Activity.objects.process_finished_activities()
 
-    def test_no_pickup_done_for_inactive_place(self):
+    def test_no_activity_done_for_inactive_place(self):
         self.client.force_login(self.member)
-        response = self.get_results(history_url, {'typus': 'PICKUP_DONE'})
+        response = self.get_results(history_url, {'typus': 'ACTIVITY_DONE'})
         self.assertEqual(len(response.data), 0)
 
-    def test_no_pickup_missed_for_inactive_place(self):
+    def test_no_activity_missed_for_inactive_place(self):
         self.client.force_login(self.member)
-        response = self.get_results(history_url, {'typus': 'PICKUP_MISSED'})
+        response = self.get_results(history_url, {'typus': 'ACTIVITY_MISSED'})
         self.assertEqual(len(response.data), 0)
 
 
-class TestHistoryAPIWithDisabledPickup(APITestCase, ExtractPaginationMixin):
+class TestHistoryAPIWithDisabledActivity(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
-        self.pickup = PickupDateFactory(
+        self.activity = ActivityFactory(
             place=self.place,
             date=to_range(timezone.now() - relativedelta(days=1)),
             is_disabled=True,
         )
-        PickupDate.objects.process_finished_pickup_dates()
+        Activity.objects.process_finished_activities()
 
-    def test_no_history_for_disabled_pickup(self):
+    def test_no_history_for_disabled_activity(self):
         self.client.force_login(self.member)
         response = self.get_results(history_url)
         self.assertEqual(len(response.data), 0)

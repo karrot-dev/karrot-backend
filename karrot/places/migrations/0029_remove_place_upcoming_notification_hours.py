@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('places', '0028_extract_pickups_app'),
+        ('places', '0028_extract_activities_app'),
     ]
 
     operations = [

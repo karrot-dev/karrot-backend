@@ -14,7 +14,7 @@ from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupStatus
 from karrot.issues.factories import IssueFactory
 from karrot.offers.factories import OfferFactory
-from karrot.pickups.factories import PickupDateFactory
+from karrot.activities.factories import ActivityFactory
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import execute_scheduled_tasks_immediately
 from karrot.users.factories import UserFactory, VerifiedUserFactory
@@ -63,12 +63,12 @@ class TestConversationsAPI(APITestCase):
         user = UserFactory()
         group = GroupFactory(members=[user])
         place = PlaceFactory(group=group)
-        pickup = PickupDateFactory(place=place)
+        activity = ActivityFactory(place=place)
         application = ApplicationFactory(user=UserFactory(), group=group)
         issue = IssueFactory(group=group)
         offer = OfferFactory(group=group)
 
-        conversations = [t.conversation for t in (group, pickup, application, issue, offer)]
+        conversations = [t.conversation for t in (group, activity, application, issue, offer)]
         [c.sync_users([user]) for c in conversations]
         [c.messages.create(content='hey', author=user) for c in conversations]
 
@@ -78,7 +78,7 @@ class TestConversationsAPI(APITestCase):
         results = response.data['results']
 
         self.assertEqual(len(results['conversations']), len(conversations))
-        self.assertEqual(results['pickups'][0]['id'], pickup.id)
+        self.assertEqual(results['activities'][0]['id'], activity.id)
         self.assertEqual(results['applications'][0]['id'], application.id)
         self.assertEqual(results['issues'][0]['id'], issue.id)
         self.assertEqual(results['offers'][0]['id'], offer.id)
@@ -182,8 +182,8 @@ class TestGroupPublicConversation(APITestCase):
         user = UserFactory()
         author = UserFactory()
         group = GroupFactory(members=[user, author])
-        pickup = PickupDateFactory(place=PlaceFactory(group=group))
-        conversation = pickup.conversation
+        activity = ActivityFactory(place=PlaceFactory(group=group))
+        conversation = activity.conversation
         conversation.messages.create(author=author, content='asdf')
 
         self.client.force_login(user=user)

@@ -8,7 +8,7 @@ from django.utils import timezone
 
 def add_place_subscriptions(apps, schema_editor):
     """Adds place subscribers
-    Only adds users who signed up for pickups three weeks ago or later
+    Only adds users who signed up for activities three weeks ago or later
     """
     app_config = apps.get_app_config('places')
     app_config.models_module = app_config.models_module or True
@@ -25,11 +25,11 @@ def add_place_subscriptions(apps, schema_editor):
     for place in Place.objects.all():
         conversation, _ = Conversation.objects.get_or_create(target_type=ct, target_id=place.id)
         some_time_ago = timezone.now() - relativedelta(days=21)
-        recent_collectors = User.objects.filter(
-            pickup_dates__date__startswith__gte=some_time_ago,
-            pickup_dates__place_id=place.id,
+        recent_participants = User.objects.filter(
+            activities__date__startswith__gte=some_time_ago,
+            activities__place_id=place.id,
         ).distinct()
-        for user in recent_collectors:
+        for user in recent_participants:
             PlaceSubscription.objects.create(user=user, place=place)
             ConversationParticipant.objects.create(user=user, conversation=conversation)
 
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('users', '0021_user_email_deletable'),
         ('places', '0032_auto_20190130_1128'),
-        ('pickups', '0013_auto_20190122_1210'),
+        ('activities', '0013_auto_20190122_1210'),
         ('conversations', '0026_conversationmeta'),
         ('contenttypes', '0002_remove_content_type_name'),
     ]

@@ -8,8 +8,8 @@ from django.utils import timezone
 from karrot.conversations.models import Conversation, ConversationParticipant
 from karrot.groups.factories import GroupFactory, PlaygroundGroupFactory
 from karrot.groups.models import Group, get_default_notification_types
-from karrot.pickups.factories import PickupDateFactory
-from karrot.pickups.models import to_range
+from karrot.activities.factories import ActivityFactory
+from karrot.activities.models import to_range
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory
 from karrot.groups import themes
@@ -57,30 +57,30 @@ class TestGroupMembershipModel(TestCase):
         self.place = PlaceFactory(group=self.group)
         self.other_place = PlaceFactory(group=self.other_group)
 
-    def test_pickup_active_within(self):
-        PickupDateFactory(place=self.place, date=to_range(timezone.now() - timedelta(days=2)), collectors=[self.user])
-        PickupDateFactory(
-            place=self.place, date=to_range(timezone.now() - timedelta(days=9)), collectors=[self.other_user]
+    def test_activity_active_within(self):
+        ActivityFactory(place=self.place, date=to_range(timezone.now() - timedelta(days=2)), participants=[self.user])
+        ActivityFactory(
+            place=self.place, date=to_range(timezone.now() - timedelta(days=9)), participants=[self.other_user]
         )
-        memberships = self.group.groupmembership_set.pickup_active_within(days=7)
+        memberships = self.group.groupmembership_set.activity_active_within(days=7)
         self.assertEqual(memberships.count(), 1)
 
-    def test_pickup_active_within_does_not_double_count(self):
+    def test_activity_active_within_does_not_double_count(self):
         for _ in range(1, 10):
-            PickupDateFactory(
-                place=self.place, date=to_range(timezone.now() - timedelta(days=2)), collectors=[self.user]
+            ActivityFactory(
+                place=self.place, date=to_range(timezone.now() - timedelta(days=2)), participants=[self.user]
             )
-            PickupDateFactory(
-                place=self.place, date=to_range(timezone.now() - timedelta(days=9)), collectors=[self.other_user]
+            ActivityFactory(
+                place=self.place, date=to_range(timezone.now() - timedelta(days=9)), participants=[self.other_user]
             )
-        memberships = self.group.groupmembership_set.pickup_active_within(days=7)
+        memberships = self.group.groupmembership_set.activity_active_within(days=7)
         self.assertEqual(memberships.count(), 1)
 
     def test_does_not_count_from_other_groups(self):
-        PickupDateFactory(
-            place=self.other_place, date=to_range(timezone.now() - timedelta(days=2)), collectors=[self.user]
+        ActivityFactory(
+            place=self.other_place, date=to_range(timezone.now() - timedelta(days=2)), participants=[self.user]
         )
-        memberships = self.group.groupmembership_set.pickup_active_within(days=7)
+        memberships = self.group.groupmembership_set.activity_active_within(days=7)
         self.assertEqual(memberships.count(), 0)
 
 

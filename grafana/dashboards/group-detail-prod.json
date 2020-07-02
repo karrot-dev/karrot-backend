@@ -28,10 +28,10 @@
           {
             "aliasColors": {
               "feedback given": "#ba43a9",
-              "joined pickup": "#d683ce",
-              "left pickup": "#6ed0e0",
-              "pickup done": "#7eb26d",
-              "pickup missed": "#e24d42"
+              "joined activity": "#d683ce",
+              "left activity": "#6ed0e0",
+              "activity done": "#7eb26d",
+              "activity missed": "#e24d42"
             },
             "bars": false,
             "dashLength": 10,
@@ -69,7 +69,7 @@
             "steppedLine": false,
             "targets": [
               {
-                "alias": "left pickup",
+                "alias": "left activity",
                 "dsType": "influxdb",
                 "groupBy": [
                   {
@@ -85,7 +85,7 @@
                     "type": "fill"
                   }
                 ],
-                "measurement": "karrot.pickup.left",
+                "measurement": "karrot.activity.left",
                 "orderByTime": "ASC",
                 "policy": "default",
                 "refId": "B",
@@ -113,7 +113,7 @@
                 ]
               },
               {
-                "alias": "pickup done",
+                "alias": "activity done",
                 "dsType": "influxdb",
                 "groupBy": [
                   {
@@ -129,7 +129,7 @@
                     "type": "fill"
                   }
                 ],
-                "measurement": "karrot.pickup.done",
+                "measurement": "karrot.activity.done",
                 "orderByTime": "ASC",
                 "policy": "default",
                 "refId": "C",
@@ -157,7 +157,7 @@
                 ]
               },
               {
-                "alias": "pickup missed",
+                "alias": "activity missed",
                 "dsType": "influxdb",
                 "groupBy": [
                   {
@@ -173,7 +173,7 @@
                     "type": "fill"
                   }
                 ],
-                "measurement": "karrot.pickup.missed",
+                "measurement": "karrot.activity.missed",
                 "orderByTime": "ASC",
                 "policy": "default",
                 "refId": "D",
@@ -248,7 +248,7 @@
             "thresholds": [],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Pickups",
+            "title": "Activities",
             "tooltip": {
               "shared": true,
               "sort": 0,

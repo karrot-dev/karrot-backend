@@ -7,7 +7,7 @@ from django.utils.translation import gettext as _
 from config import settings
 from karrot.utils.email_utils import prepare_email, formataddr
 from karrot.utils.frontend_urls import (
-    group_wall_url, conversation_unsubscribe_url, pickup_detail_url, user_detail_url, application_url, thread_url,
+    group_wall_url, conversation_unsubscribe_url, activity_detail_url, user_detail_url, application_url, thread_url,
     thread_unsubscribe_url, issue_url, place_wall_url, offer_url
 )
 from karrot.webhooks.utils import make_local_part
@@ -23,8 +23,8 @@ def prepare_conversation_message_notification(user, messages):
 
     if first_message.is_thread_reply():
         return prepare_thread_message_notification(user, messages)
-    if type == 'pickup':
-        return prepare_pickup_conversation_message_notification(user, messages)
+    if type == 'activity':
+        return prepare_activity_conversation_message_notification(user, messages)
     if type == 'application':
         return prepare_application_message_notification(user, messages)
     if type == 'issue':
@@ -176,24 +176,24 @@ def prepare_place_conversation_message_notification(user, message):
         )
 
 
-def prepare_pickup_conversation_message_notification(user, messages):
-    pickup = target_from_messages(messages)
+def prepare_activity_conversation_message_notification(user, messages):
+    activity = target_from_messages(messages)
     language = language_for_user(user)
     with translation.override(language):
-        with timezone.override(pickup.place.group.timezone):
+        with timezone.override(activity.place.group.timezone):
             weekday = format_date(
-                pickup.date.start.astimezone(timezone.get_current_timezone()),
+                activity.date.start.astimezone(timezone.get_current_timezone()),
                 'EEEE',
                 locale=translation.to_locale(language),
             )
             time = format_time(
-                pickup.date.start,
+                activity.date.start,
                 format='short',
                 locale=translation.to_locale(language),
                 tzinfo=timezone.get_current_timezone(),
             )
             date = format_date(
-                pickup.date.start.astimezone(timezone.get_current_timezone()),
+                activity.date.start.astimezone(timezone.get_current_timezone()),
                 format='long',
                 locale=translation.to_locale(language),
             )
@@ -211,11 +211,11 @@ def prepare_pickup_conversation_message_notification(user, messages):
         return prepare_message_notification(
             user,
             messages,
-            group=pickup.place.group,
+            group=activity.place.group,
             reply_to_name=reply_to_name,
             conversation_name=conversation_name,
-            conversation_url=pickup_detail_url(pickup),
-            stats_category='pickup_conversation_message'
+            conversation_url=activity_detail_url(activity),
+            stats_category='activity_conversation_message'
         )
 
 

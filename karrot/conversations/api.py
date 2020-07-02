@@ -31,8 +31,8 @@ from karrot.issues.models import Issue
 from karrot.issues.serializers import IssueSerializer
 from karrot.offers.models import Offer
 from karrot.offers.serializers import OfferSerializer
-from karrot.pickups.models import PickupDate
-from karrot.pickups.serializers import PickupDateSerializer
+from karrot.activities.models import Activity
+from karrot.activities.serializers import ActivitySerializer
 from karrot.users.serializers import UserInfoSerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
 
@@ -154,11 +154,11 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
         messages = [c.latest_message for c in conversations if c.latest_message is not None]
 
         # Prefetch related objects per target type
-        pickup_ct = ContentType.objects.get_for_model(PickupDate)
-        pickup_conversations = [item for item in conversations if item.target_type == pickup_ct]
-        pickups = PickupDate.objects. \
-            filter(id__in=[c.target_id for c in pickup_conversations]). \
-            prefetch_related('pickupdatecollector_set', 'feedback_given_by')
+        activity_ct = ContentType.objects.get_for_model(Activity)
+        activity_conversations = [item for item in conversations if item.target_type == activity_ct]
+        activities = Activity.objects. \
+            filter(id__in=[c.target_id for c in activity_conversations]). \
+            prefetch_related('activityparticipant_set', 'feedback_given_by')
 
         applications_ct = ContentType.objects.get_for_model(Application)
         application_conversations = [item for item in conversations if item.target_type == applications_ct]
@@ -191,7 +191,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
         context = self.get_serializer_context()
         serializer = self.get_serializer(participations, many=True)
         message_serializer = ConversationMessageSerializer(messages, many=True, context=context)
-        pickups_serializer = PickupDateSerializer(pickups, many=True, context=context)
+        activities_serializer = ActivitySerializer(activities, many=True, context=context)
         application_serializer = ApplicationSerializer(applications, many=True, context=context)
         issue_serializer = IssueSerializer(issues, many=True, context=context)
         offer_serializer = OfferSerializer(offers, many=True, context=context)
@@ -202,7 +202,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
         return self.get_paginated_response({
             'conversations': serializer.data,
             'messages': message_serializer.data,
-            'pickups': pickups_serializer.data,
+            'activities': activities_serializer.data,
             'applications': application_serializer.data,
             'issues': issue_serializer.data,
             'offers': offer_serializer.data,

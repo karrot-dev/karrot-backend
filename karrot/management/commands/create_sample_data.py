@@ -12,7 +12,7 @@ from rest_framework.test import APIClient
 
 from karrot.groups.models import Group, GroupMembership, GroupStatus
 from karrot.groups.roles import GROUP_EDITOR
-from karrot.pickups.models import PickupDate, PickupDateSeries, to_range
+from karrot.activities.models import Activity, ActivitySeries, to_range
 from karrot.places.models import Place
 from karrot.users.models import User
 from karrot.utils.tests.fake import faker
@@ -200,10 +200,10 @@ class Command(BaseCommand):
 
         def make_series(place):
             response = c.post(
-                '/api/pickup-date-series/', {
+                '/api/activity-series/', {
                     'start_date': faker.date_time_between(start_date='now', end_date='+24h', tzinfo=pytz.utc),
                     'rule': 'FREQ=WEEKLY;BYDAY=MO,TU,SA',
-                    'max_collectors': 10,
+                    'max_participants': 10,
                     'place': place
                 }
             )
@@ -215,7 +215,7 @@ class Command(BaseCommand):
 
         def modify_series(series):
             response = c.patch(
-                '/api/pickup-date-series/{}/'.format(series), {
+                '/api/activity-series/{}/'.format(series), {
                     'start_date': timezone.now().replace(hour=20),
                     'rule': 'FREQ=WEEKLY'
                 }
@@ -226,74 +226,74 @@ class Command(BaseCommand):
             return response.data
 
         def delete_series(series):
-            response = c.delete('/api/pickup-date-series/{}/'.format(series))
+            response = c.delete('/api/activity-series/{}/'.format(series))
             if response.status_code != 204:
                 raise Exception('could not delete series', series, response.status_code, response.data)
             print('deleted series: ', series)
             return response.data
 
-        def make_pickup(place):
+        def make_activity(place):
             date = to_range(faker.date_time_between(start_date='+2d', end_date='+7d', tzinfo=pytz.utc))
             response = c.post(
-                '/api/pickup-dates/',
+                '/api/activities/',
                 {
                     'date': date.as_list(),
                     'place': place,
-                    'max_collectors': 10
+                    'max_participants': 10
                 },
                 format='json',
             )
             if response.status_code != 201:
-                raise Exception('could not make pickup', response.data)
+                raise Exception('could not make activity', response.data)
             data = response.data
-            p = PickupDate.objects.get(pk=data['id'])
-            print('created pickup: ', data, p.date)
+            p = Activity.objects.get(pk=data['id'])
+            print('created activity: ', data, p.date)
             return data
 
-        def modify_pickup(pickup):
-            response = c.patch('/api/pickup-dates/{}/'.format(pickup), {'max_collectors': 3})
+        def modify_activity(activity):
+            response = c.patch('/api/activities/{}/'.format(activity), {'max_participants': 3})
             if response.status_code != 200:
-                raise Exception('could not modify pickup', pickup, response.data)
-            print('modified pickup: ', pickup)
+                raise Exception('could not modify activity', activity, response.data)
+            print('modified activity: ', activity)
             return response.data
 
-        def join_pickup(pickup):
-            response = c.post('/api/pickup-dates/{}/add/'.format(pickup))
+        def join_activity(activity):
+            response = c.post('/api/activities/{}/add/'.format(activity))
             if response.status_code != 200:
-                raise Exception('could not join pickup', pickup, response.data)
-            print('joined pickup: ', pickup)
+                raise Exception('could not join activity', activity, response.data)
+            print('joined activity: ', activity)
             return response.data
 
-        def leave_pickup(pickup):
-            response = c.post('/api/pickup-dates/{}/remove/'.format(pickup))
+        def leave_activity(activity):
+            response = c.post('/api/activities/{}/remove/'.format(activity))
             if response.status_code != 200:
-                raise Exception('could not leave pickup', pickup, response.data)
-            print('left pickup: ', pickup)
+                raise Exception('could not leave activity', activity, response.data)
+            print('left activity: ', activity)
             return response.data
 
-        def make_feedback(pickup, given_by):
+        def make_feedback(activity, given_by):
             response = c.post(
                 '/api/feedback/', {
                     'comment': faker.text(),
                     'weight': 100.0,
-                    'about': pickup,
+                    'about': activity,
                     'given_by': given_by,
                 }
             )
             if response.status_code != 201:
-                raise Exception('could not make feedback', pickup, response.data)
+                raise Exception('could not make feedback', activity, response.data)
             print('created feedback: ', response.data)
             return response.data
 
-        def create_done_pickup(place, user_id):
-            pickup = PickupDate.objects.create(
+        def create_done_activity(place, user_id):
+            activity = Activity.objects.create(
                 date=to_range(faker.date_time_between(start_date='-9d', end_date='-1d', tzinfo=pytz.utc), minutes=30),
                 place_id=place,
-                max_collectors=10,
+                max_participants=10,
             )
-            pickup.add_collector(User.objects.get(pk=user_id))
-            print('created done pickup: ', pickup)
-            return pickup
+            activity.add_participant(User.objects.get(pk=user_id))
+            print('created done activity: ', activity)
+            return activity
 
         ######################
         # Sample data
@@ -312,26 +312,26 @@ class Command(BaseCommand):
             for _ in range(5):
                 place = make_place(group['id'])
                 make_series(place['id'])
-                pickup = make_pickup(place['id'])
-                join_pickup(pickup['id'])
+                activity = make_activity(place['id'])
+                join_activity(activity['id'])
                 print(group['conversation'])
                 make_message(group['conversation']['id'])
-                done_pickup = create_done_pickup(place['id'], user['id'])
-                make_feedback(done_pickup.id, user['id'])
+                done_activity = create_done_activity(place['id'], user['id'])
+                make_feedback(done_activity.id, user['id'])
 
         # group members
         min_members = (6, 3, 1)[i]
         max_members = (18, 6, 2)[i]
-        n_pickups = (3, 2, 1)[i]
+        n_activities = (3, 2, 1)[i]
         for g in groups:
             for _ in range(random.randint(min_members, max_members)):
                 user = make_user()
                 users.append(user)
                 login_user(user['id'])
                 join_group(g['id'])
-                for p in PickupDate.objects.filter(date__startswith__gte=timezone.now() + relativedelta(hours=1),
-                                                   place__group_id=g['id']).order_by('?')[:n_pickups]:
-                    join_pickup(p.id)
+                for p in Activity.objects.filter(date__startswith__gte=timezone.now() + relativedelta(hours=1),
+                                                 place__group_id=g['id']).order_by('?')[:n_activities]:
+                    join_activity(p.id)
 
             # create group applications
             applicant = make_user()
@@ -357,42 +357,42 @@ class Command(BaseCommand):
         modify_place(o.id)
 
         u = login_user()
-        o = PickupDateSeries.objects.filter(place__group__in=Group.objects.user_is_editor(u)).first()
+        o = ActivitySeries.objects.filter(place__group__in=Group.objects.user_is_editor(u)).first()
         modify_series(o.id)
 
         u = login_user()
-        o = PickupDate.objects.filter(
+        o = Activity.objects.filter(
             date__startswith__gte=timezone.now() + relativedelta(hours=1),
             place__group__in=Group.objects.user_is_editor(u)
         ).first()
-        modify_pickup(o.id)
+        modify_activity(o.id)
 
         # leave
         u = login_user()
-        o = PickupDate.objects.filter(
-            date__startswith__gte=timezone.now() + relativedelta(minutes=10), collectors=u
+        o = Activity.objects.filter(
+            date__startswith__gte=timezone.now() + relativedelta(minutes=10), participants=u
         ).first()
-        leave_pickup(o.id)
+        leave_activity(o.id)
 
-        # pickup done
-        # We join a pickup and shift it back
+        # activity done
+        # We join an activity and shift it back
         n_done = (5, 3, 1)[i]
         for _ in range(n_done):
             u = login_user()
-            p = PickupDate.objects.filter(
+            p = Activity.objects.filter(
                 date__startswith__gte=timezone.now() + relativedelta(hours=1), place__group__members=u
-            ).exclude(collectors=u).first()
-            join_pickup(p.id)
+            ).exclude(participants=u).first()
+            join_activity(p.id)
 
             difference = timezone.now() - p.date.end + relativedelta(days=4)
             p.date -= difference
             p.save()
-            print('did a pickup at', p.date)
-        PickupDate.objects.process_finished_pickup_dates()
+            print('did an activity at', p.date)
+        Activity.objects.process_finished_activities()
 
         # delete
         u = login_user()
-        o = PickupDateSeries.objects.filter(place__group__in=Group.objects.user_is_editor(u)).first()
+        o = ActivitySeries.objects.filter(place__group__in=Group.objects.user_is_editor(u)).first()
         delete_series(o.id)
 
         u = login_user()

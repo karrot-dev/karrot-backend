@@ -3,6 +3,7 @@
     "annotations": {
       "list": [
         {
+          "$$hashKey": "object:249",
           "builtIn": 1,
           "datasource": "-- Grafana --",
           "enable": true,
@@ -17,7 +18,7 @@
     "gnetId": null,
     "graphTooltip": 0,
     "id": 50,
-    "iteration": 1579472358302,
+    "iteration": 1592134350526,
     "links": [],
     "panels": [
       {
@@ -61,7 +62,6 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
-        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -196,7 +196,6 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
-        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -331,7 +330,6 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
-        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -466,7 +464,6 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
-        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -640,6 +637,12 @@
                 "key": "dev",
                 "operator": "=",
                 "value": "False"
+              },
+              {
+                "condition": "AND",
+                "key": "first_load",
+                "operator": "=",
+                "value": "True"
               }
             ]
           }
@@ -648,7 +651,7 @@
         "timeFrom": null,
         "timeRegions": [],
         "timeShift": null,
-        "title": "median load",
+        "title": "median first load",
         "tooltip": {
           "shared": true,
           "sort": 0,
@@ -664,6 +667,7 @@
         },
         "yaxes": [
           {
+            "$$hashKey": "object:480",
             "format": "ms",
             "label": null,
             "logBase": 1,
@@ -672,6 +676,7 @@
             "show": true
           },
           {
+            "$$hashKey": "object:481",
             "format": "short",
             "label": null,
             "logBase": 1,
@@ -1121,7 +1126,6 @@
         "links": [],
         "maxDataPoints": 3,
         "nullPointMode": "connected",
-        "options": {},
         "pieType": "donut",
         "pluginVersion": "6.5.1",
         "strokeWidth": 1,
@@ -1199,7 +1203,6 @@
         "links": [],
         "maxDataPoints": 3,
         "nullPointMode": "connected",
-        "options": {},
         "pieType": "donut",
         "pluginVersion": "6.5.1",
         "strokeWidth": 1,
@@ -1277,7 +1280,6 @@
         "links": [],
         "maxDataPoints": 3,
         "nullPointMode": "connected",
-        "options": {},
         "pieType": "donut",
         "pluginVersion": "6.5.1",
         "strokeWidth": 1,
@@ -1356,7 +1358,6 @@
         "links": [],
         "maxDataPoints": 3,
         "nullPointMode": "connected",
-        "options": {},
         "pieType": "donut",
         "pluginVersion": "6.5.1",
         "strokeWidth": 1,
@@ -1419,7 +1420,6 @@
           "y": 36
         },
         "id": 9,
-        "options": {},
         "pageSize": null,
         "pluginVersion": "6.5.1",
         "showHeader": true,
@@ -1430,6 +1430,7 @@
         "styles": [
           {
             "alias": "Time",
+            "align": "auto",
             "dateFormat": "YYYY-MM-DD HH:mm:ss",
             "link": false,
             "pattern": "Time",
@@ -1437,6 +1438,7 @@
           },
           {
             "alias": "95th percentile",
+            "align": "auto",
             "colorMode": "value",
             "colors": [
               "rgba(50, 172, 45, 0.97)",
@@ -1533,7 +1535,6 @@
         },
         "id": 10,
         "interval": "",
-        "options": {},
         "pageSize": null,
         "pluginVersion": "6.5.1",
         "showHeader": true,
@@ -1544,6 +1545,7 @@
         "styles": [
           {
             "alias": "Time",
+            "align": "auto",
             "dateFormat": "YYYY-MM-DD HH:mm:ss",
             "link": false,
             "pattern": "Time",
@@ -1551,6 +1553,7 @@
           },
           {
             "alias": "95th percentile",
+            "align": "auto",
             "colorMode": "value",
             "colors": [
               "rgba(50, 172, 45, 0.97)",
@@ -1644,7 +1647,7 @@
       }
     ],
     "refresh": false,
-    "schemaVersion": 21,
+    "schemaVersion": 22,
     "style": "dark",
     "tags": [],
     "templating": {
@@ -1690,7 +1693,10 @@
     "timezone": "",
     "title": "frontend stats",
     "uid": "AyeDdv-Wz",
-    "version": 40
+    "variables": {
+      "list": []
+    },
+    "version": 41
   },
   "meta": {
     "canAdmin": false,
@@ -1709,9 +1715,9 @@
     "provisionedExternalId": "",
     "slug": "frontend-stats",
     "type": "db",
-    "updated": "2020-01-19T23:19:53+01:00",
-    "updatedBy": "nicksellen",
+    "updated": "2020-06-14T13:34:20+02:00",
+    "updatedBy": "tiltec",
     "url": "/d/AyeDdv-Wz/frontend-stats",
-    "version": 40
+    "version": 41
   }
 }

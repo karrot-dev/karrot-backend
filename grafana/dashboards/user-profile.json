@@ -100,7 +100,7 @@
             "tags": []
           },
           {
-            "alias": "pickup active",
+            "alias": "activity active",
             "groupBy": [
               {
                 "params": [
@@ -124,7 +124,7 @@
               [
                 {
                   "params": [
-                    "count_pickup_active_30d"
+                    "count_activity_active_30d"
                   ],
                   "type": "field"
                 },
@@ -374,7 +374,7 @@
               [
                 {
                   "params": [
-                    "count_pickup_active_30d"
+                    "count_activity_active_30d"
                   ],
                   "type": "field"
                 },
@@ -388,7 +388,7 @@
           }
         ],
         "thresholds": "",
-        "title": "pickup active users (30d)",
+        "title": "activity active users (30d)",
         "type": "singlestat",
         "valueFontSize": "80%",
         "valueMaps": [
@@ -925,7 +925,7 @@
             "tags": []
           },
           {
-            "alias": "pickup active",
+            "alias": "activity active",
             "groupBy": [
               {
                 "params": [
@@ -949,7 +949,7 @@
               [
                 {
                   "params": [
-                    "count_pickup_active_7d"
+                    "count_activity_active_7d"
                   ],
                   "type": "field"
                 },

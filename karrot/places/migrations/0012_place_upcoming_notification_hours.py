@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('places', '0011_pickupdate_notifications_sent'),
+        ('places', '0011_activity_notifications_sent'),
     ]
 
     operations = [

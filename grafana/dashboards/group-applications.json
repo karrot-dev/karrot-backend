@@ -3,6 +3,7 @@
     "annotations": {
       "list": [
         {
+          "$$hashKey": "object:10",
           "builtIn": 1,
           "datasource": "-- Grafana --",
           "enable": true,
@@ -17,7 +18,7 @@
     "gnetId": null,
     "graphTooltip": 0,
     "id": 25,
-    "iteration": 1568715810866,
+    "iteration": 1590952137495,
     "links": [],
     "panels": [
       {
@@ -61,7 +62,6 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
-        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -148,6 +148,129 @@
         "valueName": "current"
       },
       {
+        "cacheTimeout": null,
+        "colorBackground": false,
+        "colorValue": false,
+        "colors": [
+          "#299c46",
+          "rgba(237, 129, 40, 0.89)",
+          "#d44a3a"
+        ],
+        "datasource": "$site",
+        "format": "none",
+        "gauge": {
+          "maxValue": 100,
+          "minValue": 0,
+          "show": false,
+          "thresholdLabels": false,
+          "thresholdMarkers": true
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 3,
+          "y": 0
+        },
+        "id": 11,
+        "interval": null,
+        "links": [],
+        "mappingType": 1,
+        "mappingTypes": [
+          {
+            "$$hashKey": "object:177",
+            "name": "value to text",
+            "value": 1
+          },
+          {
+            "$$hashKey": "object:178",
+            "name": "range to text",
+            "value": 2
+          }
+        ],
+        "maxDataPoints": 100,
+        "nullPointMode": "connected",
+        "nullText": null,
+        "postfix": "",
+        "postfixFontSize": "50%",
+        "prefix": "",
+        "prefixFontSize": "50%",
+        "rangeMaps": [
+          {
+            "from": "null",
+            "text": "N/A",
+            "to": "null"
+          }
+        ],
+        "sparkline": {
+          "fillColor": "rgba(31, 118, 189, 0.18)",
+          "full": false,
+          "lineColor": "rgb(31, 120, 193)",
+          "show": true
+        },
+        "tableColumn": "",
+        "targets": [
+          {
+            "groupBy": [
+              {
+                "params": [
+                  "$__interval"
+                ],
+                "type": "time"
+              },
+              {
+                "params": [
+                  "none"
+                ],
+                "type": "fill"
+              }
+            ],
+            "measurement": "karrot.events",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT sum(\"count\") FROM (SELECT last(\"count_status_pending\") as \"count\" FROM \"karrot.group.applications\" WHERE (\"group_status\" = 'active') AND $timeFilter GROUP BY \"group\" fill(previous))",
+            "rawQuery": false,
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "application_accepted"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [],
+                  "type": "sum"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "group_status",
+                "operator": "=",
+                "value": "active"
+              }
+            ]
+          }
+        ],
+        "thresholds": "",
+        "timeFrom": null,
+        "timeShift": null,
+        "title": "Applications accepted",
+        "type": "singlestat",
+        "valueFontSize": "80%",
+        "valueMaps": [
+          {
+            "$$hashKey": "object:180",
+            "op": "=",
+            "text": "0",
+            "value": "null"
+          }
+        ],
+        "valueName": "total"
+      },
+      {
         "aliasColors": {},
         "bars": false,
         "dashLength": 10,
@@ -161,6 +284,7 @@
           "x": 0,
           "y": 3
         },
+        "hiddenSeries": false,
         "id": 8,
         "legend": {
           "avg": false,
@@ -323,7 +447,6 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
-        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -421,7 +544,6 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
-        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -519,7 +641,6 @@
         "maxDataPoints": 100,
         "nullPointMode": "connected",
         "nullText": null,
-        "options": {},
         "postfix": "",
         "postfixFontSize": "50%",
         "prefix": "",
@@ -588,7 +709,6 @@
         },
         "id": 2,
         "links": [],
-        "options": {},
         "pageSize": null,
         "scroll": true,
         "showHeader": true,
@@ -599,12 +719,14 @@
         "styles": [
           {
             "alias": "Time",
+            "align": "auto",
             "dateFormat": "YYYY-MM-DD HH:mm:ss",
             "pattern": "Time",
             "type": "hidden"
           },
           {
             "alias": "",
+            "align": "auto",
             "colorMode": null,
             "colors": [
               "rgba(245, 54, 54, 0.9)",
@@ -621,6 +743,7 @@
           },
           {
             "alias": "",
+            "align": "auto",
             "colorMode": null,
             "colors": [
               "rgba(245, 54, 54, 0.9)",
@@ -734,7 +857,7 @@
         "type": "table"
       }
     ],
-    "schemaVersion": 19,
+    "schemaVersion": 22,
     "style": "dark",
     "tags": [],
     "templating": {
@@ -791,7 +914,10 @@
     "timezone": "",
     "title": "Group Applications",
     "uid": "ydNQAo5ika",
-    "version": 9
+    "variables": {
+      "list": []
+    },
+    "version": 11
   },
   "meta": {
     "canAdmin": false,
@@ -810,9 +936,9 @@
     "provisionedExternalId": "",
     "slug": "group-applications",
     "type": "db",
-    "updated": "2019-09-17T12:30:12+02:00",
+    "updated": "2020-05-31T21:12:01+02:00",
     "updatedBy": "tiltec",
     "url": "/d/ydNQAo5ika/group-applications",
-    "version": 9
+    "version": 11
   }
 }

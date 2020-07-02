@@ -3,6 +3,7 @@
     "annotations": {
       "list": [
         {
+          "$$hashKey": "object:297",
           "builtIn": 1,
           "datasource": "-- Grafana --",
           "enable": true,
@@ -17,7 +18,7 @@
     "gnetId": null,
     "graphTooltip": 1,
     "id": 3,
-    "iteration": 1576442148677,
+    "iteration": 1589570867238,
     "links": [],
     "panels": [
       {
@@ -626,7 +627,6 @@
         },
         "id": 10,
         "links": [],
-        "options": {},
         "pageSize": null,
         "repeat": null,
         "repeatDirection": "h",
@@ -639,12 +639,14 @@
         "styles": [
           {
             "alias": "Time",
+            "align": "auto",
             "dateFormat": "YYYY-MM-DD HH:mm:ss",
             "pattern": "Time",
             "type": "hidden"
           },
           {
             "alias": "",
+            "align": "auto",
             "colorMode": null,
             "colors": [
               "rgba(245, 54, 54, 0.9)",
@@ -756,7 +758,6 @@
         },
         "id": 6,
         "links": [],
-        "options": {},
         "pageSize": 15,
         "scroll": false,
         "showHeader": true,
@@ -766,11 +767,13 @@
         },
         "styles": [
           {
+            "align": "auto",
             "dateFormat": "YYYY-MM-DD HH:mm:ss",
             "pattern": "Time",
             "type": "date"
           },
           {
+            "align": "auto",
             "colorMode": null,
             "colors": [
               "rgba(245, 54, 54, 0.9)",
@@ -785,6 +788,7 @@
             "unit": "ms"
           },
           {
+            "align": "auto",
             "colorMode": null,
             "colors": [
               "rgba(245, 54, 54, 0.9)",
@@ -808,7 +812,7 @@
             "orderByTime": "ASC",
             "policy": "default",
             "query": "SELECT \"value\", \"url\" FROM \"django_request\" WHERE $timeFilter AND value > 1000",
-            "rawQuery": true,
+            "rawQuery": false,
             "refId": "A",
             "resultFormat": "table",
             "select": [
@@ -829,7 +833,13 @@
                 }
               ]
             ],
-            "tags": []
+            "tags": [
+              {
+                "key": "value",
+                "operator": ">",
+                "value": "1000"
+              }
+            ]
           }
         ],
         "title": "Slow individual requests",
@@ -838,7 +848,7 @@
       }
     ],
     "refresh": false,
-    "schemaVersion": 21,
+    "schemaVersion": 22,
     "style": "dark",
     "tags": [],
     "templating": {
@@ -894,7 +904,10 @@
     "timezone": "utc",
     "title": "Requests",
     "uid": "000000003",
-    "version": 26
+    "variables": {
+      "list": []
+    },
+    "version": 27
   },
   "meta": {
     "canAdmin": false,
@@ -913,9 +926,9 @@
     "provisionedExternalId": "",
     "slug": "requests",
     "type": "db",
-    "updated": "2019-12-15T21:36:33+01:00",
+    "updated": "2020-05-15T21:29:32+02:00",
     "updatedBy": "tiltec",
     "url": "/d/000000003/requests",
-    "version": 26
+    "version": 27
   }
 }

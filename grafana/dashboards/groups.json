@@ -159,7 +159,7 @@
         "dashLength": 10,
         "dashes": false,
         "datasource": "$site",
-        "description": "(users that have done at least 1 pickup)",
+        "description": "(users that have done at least 1 activity)",
         "fill": 1,
         "fillGradient": 0,
         "gridPos": {
@@ -225,7 +225,7 @@
               [
                 {
                   "params": [
-                    "count_pickup_active_7d"
+                    "count_activity_active_7d"
                   ],
                   "type": "field"
                 },
@@ -237,7 +237,7 @@
             ],
             "tags": [
               {
-                "key": "count_pickup_active_7d",
+                "key": "count_activity_active_7d",
                 "operator": ">",
                 "value": "0"
               }
@@ -248,7 +248,7 @@
         "timeFrom": null,
         "timeRegions": [],
         "timeShift": null,
-        "title": "7d pickup active users",
+        "title": "7d activity active users",
         "tooltip": {
           "shared": true,
           "sort": 2,
@@ -343,7 +343,7 @@
             "measurement": "karrot.group.members",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT last(\"count_active_7d\") AS \"active\", last(\"count_pickup_active_7d\") AS \"pickup active\", last(\"count_pickup_active_7d\") / last(\"count_active_7d\") * 100 AS \"ratio\" FROM \"karrot.group.members\" WHERE $timeFilter GROUP BY \"group\"",
+            "query": "SELECT last(\"count_active_7d\") AS \"active\", last(\"count_activity_active_7d\") AS \"activity active\", last(\"count_activity_active_7d\") / last(\"count_active_7d\") * 100 AS \"ratio\" FROM \"karrot.group.members\" WHERE $timeFilter GROUP BY \"group\"",
             "rawQuery": false,
             "refId": "A",
             "resultFormat": "table",
@@ -369,7 +369,7 @@
               [
                 {
                   "params": [
-                    "count_active_30d_with_notification_type_daily_pickup_notification"
+                    "count_active_30d_with_notification_type_daily_activity_notification"
                   ],
                   "type": "field"
                 },
@@ -379,7 +379,7 @@
                 },
                 {
                   "params": [
-                    "pickup_notification"
+                    "activity_notification"
                   ],
                   "type": "alias"
                 }
@@ -503,7 +503,7 @@
             "measurement": "karrot.group.members",
             "orderByTime": "ASC",
             "policy": "default",
-            "query": "SELECT last(\"count_active_7d\") AS \"active\", last(\"count_pickup_active_7d\") AS \"pickup active\", last(\"count_pickup_active_7d\") / last(\"count_active_7d\") * 100 AS \"ratio\" FROM \"karrot.group.members\" WHERE $timeFilter GROUP BY \"group\"",
+            "query": "SELECT last(\"count_active_7d\") AS \"active\", last(\"count_activity_active_7d\") AS \"activity active\", last(\"count_activity_active_7d\") / last(\"count_active_7d\") * 100 AS \"ratio\" FROM \"karrot.group.members\" WHERE $timeFilter GROUP BY \"group\"",
             "rawQuery": true,
             "refId": "A",
             "resultFormat": "table",
@@ -529,7 +529,7 @@
               [
                 {
                   "params": [
-                    "count_pickup_active_7d"
+                    "count_activity_active_7d"
                   ],
                   "type": "field"
                 },
@@ -539,7 +539,7 @@
                 },
                 {
                   "params": [
-                    "pickup active"
+                    "activity active"
                   ],
                   "type": "alias"
                 }
@@ -547,7 +547,7 @@
               [
                 {
                   "params": [
-                    "count_pickup_active_7d / count_active_7d"
+                    "count_activity_active_7d / count_active_7d"
                   ],
                   "type": "field"
                 },
@@ -566,7 +566,7 @@
             "tags": []
           }
         ],
-        "title": "Active users and pickups",
+        "title": "Active users and activities",
         "transform": "table",
         "type": "table"
       }
