@@ -85,7 +85,6 @@ def new_offer_unsubscribe_url(user, offer):
     return unsubscribe_url(
         user,
         group=offer.group,
-        conversation=offer.conversation,
         notification_type=GroupNotificationType.NEW_OFFER,
     )
 
