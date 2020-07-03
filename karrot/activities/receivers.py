@@ -88,7 +88,6 @@ def revoke_activity_reminder(sender, instance, **kwargs):
     participant = instance
     if participant.reminder_task_id:
         revoke_by_id(participant.reminder_task_id)
-        print('revoked', participant.reminder_task_id)
 
 
 @receiver(pre_save, sender=Place)

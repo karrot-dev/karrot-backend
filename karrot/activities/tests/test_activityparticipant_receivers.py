@@ -1,3 +1,5 @@
+from huey.contrib.djhuey import restore_by_id, result, scheduled
+
 from karrot.conversations.models import ConversationParticipant
 from karrot.groups.factories import GroupFactory
 from karrot.activities.factories import ActivityFactory
@@ -39,3 +41,7 @@ class TestPickUpParticipantReceivers(APITestCase):
         self.assertIn(self.second_member, self.activity.conversation.participants.all())
         ActivityParticipant.objects.filter(user=self.first_member, activity=self.activity).delete()
         self.assertIn(self.second_member, self.activity.conversation.participants.all())
+
+    def test_schedules_activity_reminder(self):
+        participant = ActivityParticipant.objects.create(user=self.second_member, activity=self.activity)
+        self.assertIsNotNone(participant.reminder_task_id)

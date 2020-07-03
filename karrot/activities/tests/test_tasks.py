@@ -4,16 +4,20 @@ from unittest.mock import patch
 
 from dateutil.relativedelta import relativedelta
 from django.core import mail
+from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
 from rest_framework.test import APITestCase
 
+from karrot.activities import tasks
+from karrot.activities.factories import ActivityFactory
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
-from karrot.activities.models import Activity, to_range
+from karrot.activities.models import Activity, to_range, ActivityParticipant
 from karrot.activities.tasks import daily_activity_notifications, fetch_activity_notification_data_for_group
 from karrot.places.factories import PlaceFactory
 from karrot.places.models import PlaceStatus
+from karrot.subscriptions.models import PushSubscription, PushSubscriptionPlatform
 from karrot.users.factories import VerifiedUserFactory, UserFactory
 from karrot.utils.frontend_urls import place_url
 
@@ -24,6 +28,38 @@ def group_timezone_at(group, **kwargs):
         datetime = timezone.localtime(timezone=group.timezone).replace(**kwargs)
         with freeze_time(datetime, tick=True):
             yield
+
+
+@patch('karrot.activities.tasks.notify_subscribers_by_device')
+class TestActivityReminderTask(TestCase):
+    def setUp(self):
+        self.user = VerifiedUserFactory()
+        self.other_user = VerifiedUserFactory()
+        self.group = GroupFactory(members=[self.user, self.other_user])
+        self.place = PlaceFactory(group=self.group, subscribers=[self.user, self.other_user])
+        self.activity = ActivityFactory(place=self.place)
+        self.subscriptions = [
+            PushSubscription.objects.create(user=self.user, token='', platform=PushSubscriptionPlatform.ANDROID.value)
+        ]
+
+    def test_activity_reminder_notifies_subscribers(self, notify_subscribers_by_device):
+        participant = ActivityParticipant.objects.create(user=self.user, activity=self.activity)
+        notify_subscribers_by_device.reset_mock()
+        tasks.activity_reminder.call_local(participant.id)
+        self.assertEqual(len(notify_subscribers_by_device.call_args.args[0]), 1)
+        self.assertEqual(notify_subscribers_by_device.call_args.args[0].first(), self.subscriptions[0])
+        self.assertIn(
+            f'/group/{self.group.id}/place/{self.place.id}/activities/{self.activity.id}/detail',
+            notify_subscribers_by_device.call_args.kwargs['click_action'],
+        )
+        self.assertIn(
+            'Upcoming pickup',
+            notify_subscribers_by_device.call_args.kwargs['fcm_options']['message_title'],
+        )
+        self.assertIn(
+            self.place.name,
+            notify_subscribers_by_device.call_args.kwargs['fcm_options']['message_body'],
+        )
 
 
 class TestActivityNotificationTask(APITestCase):

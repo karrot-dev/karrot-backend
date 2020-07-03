@@ -64,13 +64,12 @@ def activity_reminder(participant_id):
                 tzinfo=tz,
             )
 
-        where = f'{activity.place.name}, {activity.place.address}'
+        where = ', '.join(part for part in [activity.place.name, activity.place.address] if part)
 
         title = _('Upcoming %(activity_type)s') % {'activity_type': activity_type}
         title = f'{emoji} {title}!'
 
-        body_parts = [when, where, activity.description]
-        body = Truncator(' / '.join([part for part in body_parts if part])).chars(num=1000)
+        body = Truncator(' / '.join(part for part in [when, where, activity.description] if part)).chars(num=1000)
 
         click_action = frontend_urls.activity_detail_url(activity)
 
