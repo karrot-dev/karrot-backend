@@ -1,17 +1,88 @@
+from babel.dates import format_time, format_datetime
 from dateutil.relativedelta import relativedelta
 from django.db.models import F, QuerySet
-from django.utils import timezone
+from django.utils import timezone, translation
+from django.utils.text import Truncator
+from django.utils.translation import gettext as _
 from huey import crontab
-from huey.contrib.djhuey import db_periodic_task
+from huey.contrib.djhuey import db_periodic_task, db_task
 
-from karrot.groups.models import Group, GroupMembership, GroupNotificationType
 from karrot.activities import stats
 from karrot.activities.emails import prepare_activity_notification_email
-from karrot.activities.models import Activity, ActivitySeries
+from karrot.activities.models import Activity, ActivitySeries, ActivityParticipant
+from karrot.groups.models import Group, GroupMembership, GroupNotificationType
 from karrot.places.models import PlaceStatus
+from karrot.subscriptions.models import PushSubscription
+from karrot.subscriptions.tasks import notify_subscribers_by_device
 from karrot.users.models import User
-from karrot.utils import stats_utils
+from karrot.utils import stats_utils, frontend_urls
 from karrot.utils.stats_utils import timer
+
+
+def is_today(dt):
+    return dt.date() == timezone.now().date()
+
+
+def is_past(dt):
+    return dt < timezone.now()
+
+
+@db_task()
+def activity_reminder(participant_id):
+    participant = ActivityParticipant.objects.filter(id=participant_id).first()
+    if not participant:
+        return
+
+    activity = participant.activity
+    user = participant.user
+    language = user.language
+    tz = activity.group.timezone
+
+    with translation.override(language), timezone.override(tz):
+        if is_past(activity.date.start):
+            return
+
+        subscriptions = PushSubscription.objects.filter(user=user)
+        if subscriptions.count() == 0:
+            return
+
+        emoji = '⏰'
+        activity_type = 'pickup'
+
+        if is_today(activity.date.start):
+            when = format_time(
+                activity.date.start,
+                format='short',
+                locale=translation.to_locale(language),
+                tzinfo=tz,
+            )
+        else:
+            when = format_datetime(
+                activity.date.start,
+                format='medium',  # short gives US date format in English, is confusing!
+                locale=translation.to_locale(language),
+                tzinfo=tz,
+            )
+
+        where = f'{activity.place.name}, {activity.place.address}'
+
+        title = _('Upcoming %(activity_type)s') % {'activity_type': activity_type}
+        title = f'{emoji} {title}!'
+
+        body_parts = [when, where, activity.description]
+        body = Truncator(' / '.join([part for part in body_parts if part])).chars(num=1000)
+
+        click_action = frontend_urls.activity_detail_url(activity)
+
+        notify_subscribers_by_device(
+            subscriptions,
+            click_action=click_action,
+            fcm_options={
+                'message_title': title,
+                'message_body': body,
+                'tag': 'activity:{}'.format(activity.id),
+            }
+        )
 
 
 @db_periodic_task(crontab(minute='*'))  # every minute

@@ -1,11 +1,14 @@
+from datetime import timedelta
+
 from django.db.models.signals import pre_delete, post_save, post_delete, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
+from huey.contrib.djhuey import revoke_by_id
 
+from karrot.activities import stats, tasks
+from karrot.activities.models import Activity, Feedback, ActivityParticipant
 from karrot.conversations.models import Conversation
 from karrot.groups.models import GroupMembership
-from karrot.activities import stats
-from karrot.activities.models import Activity, Feedback, ActivityParticipant
 from karrot.places.models import Place, PlaceStatus
 
 
@@ -62,6 +65,30 @@ def remove_activity_participant_from_conversation(sender, instance, **kwargs):
     activity = instance.activity
     conversation = Conversation.objects.get_or_create_for_target(activity)
     conversation.leave(user)
+
+
+@receiver(post_save, sender=ActivityParticipant)
+def schedule_activity_reminder(sender, instance, **kwargs):
+    participant = instance
+    if participant.reminder_task_id:
+        return
+
+    activity = participant.activity
+    remind_at = activity.date.start - timedelta(hours=3)
+    task = tasks.activity_reminder.schedule(
+        (participant.id, ),
+        eta=remind_at,
+    )
+    participant.reminder_task_id = task.id
+    participant.save()
+
+
+@receiver(post_delete, sender=ActivityParticipant)
+def revoke_activity_reminder(sender, instance, **kwargs):
+    participant = instance
+    if participant.reminder_task_id:
+        revoke_by_id(participant.reminder_task_id)
+        print('revoked', participant.reminder_task_id)
 
 
 @receiver(pre_save, sender=Place)
