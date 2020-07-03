@@ -1,12 +1,11 @@
-from huey.contrib.djhuey import restore_by_id, result, scheduled
+from rest_framework.test import APITestCase
 
-from karrot.conversations.models import ConversationParticipant
-from karrot.groups.factories import GroupFactory
 from karrot.activities.factories import ActivityFactory
 from karrot.activities.models import ActivityParticipant
+from karrot.conversations.models import ConversationParticipant
+from karrot.groups.factories import GroupFactory
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory
-from rest_framework.test import APITestCase
 
 
 class TestPickUpParticipantReceivers(APITestCase):
