@@ -75,12 +75,13 @@ def schedule_activity_reminder(sender, instance, **kwargs):
 
     activity = participant.activity
     remind_at = activity.date.start - timedelta(hours=3)
-    task = tasks.activity_reminder.schedule(
-        (participant.id, ),
-        eta=remind_at,
-    )
-    participant.reminder_task_id = task.id
-    participant.save()
+    if remind_at > timezone.now():
+        task = tasks.activity_reminder.schedule(
+            (participant.id, ),
+            eta=remind_at,
+        )
+        participant.reminder_task_id = task.id
+        participant.save()
 
 
 @receiver(post_delete, sender=ActivityParticipant)
