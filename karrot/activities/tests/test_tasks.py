@@ -46,19 +46,20 @@ class TestActivityReminderTask(TestCase):
         participant = ActivityParticipant.objects.create(user=self.user, activity=self.activity)
         notify_subscribers_by_device.reset_mock()
         tasks.activity_reminder.call_local(participant.id)
-        self.assertEqual(len(notify_subscribers_by_device.call_args.args[0]), 1)
-        self.assertEqual(notify_subscribers_by_device.call_args.args[0].first(), self.subscriptions[0])
+        args, kwargs = notify_subscribers_by_device.call_args
+        self.assertEqual(len(args[0]), 1)
+        self.assertEqual(args[0].first(), self.subscriptions[0])
         self.assertIn(
             f'/group/{self.group.id}/place/{self.place.id}/activities/{self.activity.id}/detail',
-            notify_subscribers_by_device.call_args.kwargs['click_action'],
+            kwargs['click_action'],
         )
         self.assertIn(
             'Upcoming pickup',
-            notify_subscribers_by_device.call_args.kwargs['fcm_options']['message_title'],
+            kwargs['fcm_options']['message_title'],
         )
         self.assertIn(
             self.place.name,
-            notify_subscribers_by_device.call_args.kwargs['fcm_options']['message_body'],
+            kwargs['fcm_options']['message_body'],
         )
 
 
