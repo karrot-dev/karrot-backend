@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.conf import settings
 from django.db.models.signals import pre_delete, post_save, post_delete, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -74,7 +75,7 @@ def schedule_activity_reminder(sender, instance, **kwargs):
         return
 
     activity = participant.activity
-    remind_at = activity.date.start - timedelta(hours=3)
+    remind_at = activity.date.start - timedelta(hours=settings.ACTIVITY_REMINDER_HOURS)
     if remind_at > timezone.now():
         task = tasks.activity_reminder.schedule(
             (participant.id, ),
