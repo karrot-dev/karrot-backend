@@ -333,6 +333,7 @@ class ActivityParticipant(BaseModel):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
+    reminder_task_id = models.TextField(null=True)  # stores a huey task id
 
     class Meta:
         db_table = 'activities_activity_participants'
