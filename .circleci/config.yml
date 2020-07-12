@@ -33,7 +33,9 @@ aliases:
       name: set git remote to include token
       command: git remote set-url origin https://${GITHUB_TOKEN}@github.com/yunity/karrot-backend.git
 
-version: 2
+version: 2.1
+orbs:
+  slack: circleci/slack@3.4.2
 jobs:
   test:
     <<: *defaults
@@ -81,6 +83,9 @@ jobs:
           path: test-reports
       - store_artifacts:
           path: test-reports
+      - slack/status:
+          fail_only: true
+          only_for_branches: master
 
   push-locale-messages:
     <<: *defaults
@@ -99,24 +104,32 @@ jobs:
             source env/bin/activate
             python manage.py makemessages
             tx push -s --no-interactive
+      - slack/status:
+          fail_only: true
 
   deploy-dev:
     <<: *defaults
     steps:
       - checkout
       - run: ./deploy.sh karrot-dev
+      - slack/status:
+          fail_only: true
 
   deploy-karrot-world:
     <<: *defaults
     steps:
       - checkout
       - run: ./deploy.sh karrot-world
+      - slack/status:
+          fail_only: true
 
   deploy-foodsharing-taiwan:
     <<: *defaults
     steps:
       - checkout
       - run: ./deploy.sh foodsharing-taiwan
+      - slack/status:
+          fail_only: true
 
   update-locales:
     <<: *defaults
@@ -145,6 +158,8 @@ jobs:
             git commit -m "[CI] update locales" || exit 0
             git push --force origin $BRANCH
             hub pull-request -m "[CI] Update locales" || true
+      - slack/status:
+          fail_only: true
 
   update-dependencies:
     <<: *defaults
@@ -172,7 +187,7 @@ jobs:
             popd
             git commit -m "[CI] update dependencies" || exit 0
             git push --force origin $BRANCH
-            hub pull-request -F - <<EOL || true
+            hub pull-request -F - \<<EOL || true
             [CI] update dependencies
 
             Good morning, I found some fresh dependencies for you!
@@ -182,6 +197,8 @@ jobs:
 
             Please check the changes before merging and consider trying out the branch locally to verify if it works.
             EOL
+      - slack/status:
+          fail_only: true
 
 workflows:
   version: 2
@@ -230,7 +247,7 @@ workflows:
   update-dependencies-cronjob:
     triggers:
       - schedule:
-          cron: "0 2 * * 0"
+          cron: "0 2 * * *"
           filters:
             branches:
               only: master
