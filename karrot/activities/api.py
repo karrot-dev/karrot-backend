@@ -1,3 +1,4 @@
+from django.db.models import F
 from django_filters import rest_framework as filters
 from rest_framework import mixins
 from rest_framework import viewsets
@@ -11,7 +12,7 @@ from karrot.conversations.api import RetrieveConversationMixin
 from karrot.history.models import History, HistoryTypus
 from karrot.activities.filters import (ActivitiesFilter, ActivitySeriesFilter, FeedbackFilter)
 from karrot.activities.models import (
-    Activity as ActivityModel, ActivitySeries as ActivitySeriesModel, Feedback as FeedbackModel
+    Activity as ActivityModel, ActivitySeries as ActivitySeriesModel, Feedback as FeedbackModel, Activity
 )
 from karrot.activities.permissions import (
     IsUpcoming, HasNotJoinedActivity, HasJoinedActivity, IsEmptyActivity, IsNotFull, IsSameParticipant,
@@ -63,10 +64,15 @@ class FeedbackViewSet(
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset()) \
             .select_related('about') \
-            .prefetch_related('about__activityparticipant_set', 'about__feedback_given_by')
+            .prefetch_related('about__activityparticipant_set', 'about__feedback_given_by') \
+            .annotate(timezone=F('about__place__group__timezone'))
         feedback = self.paginate_queryset(queryset)
 
-        activities = set(f.about for f in feedback)
+        activities = set()
+        for f in feedback:
+            activity = f.about
+            setattr(activity, 'timezone', f.timezone)
+            activities.add(activity)
 
         serializer = self.get_serializer(feedback, many=True)
         context = self.get_serializer_context()

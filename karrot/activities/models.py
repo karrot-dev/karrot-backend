@@ -1,12 +1,13 @@
 from datetime import timedelta
 
+import pytz
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrulestr
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db import transaction
-from django.db.models import Count, Q, DurationField
+from django.db.models import Count, Q, DurationField, F
 from django.utils import timezone
 
 from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField
@@ -23,9 +24,17 @@ class ActivitySeriesQuerySet(models.QuerySet):
         for series in self.filter(place__status=PlaceStatus.ACTIVE.value):
             series.update_activities()
 
+    def annotate_timezone(self):
+        return self.annotate(timezone=F('place__group__timezone'))
+
+
+class ActivitySeriesManager(models.Manager.from_queryset(ActivitySeriesQuerySet)):
+    def get_queryset(self):
+        return super().get_queryset().annotate_timezone()
+
 
 class ActivitySeries(BaseModel):
-    objects = ActivitySeriesQuerySet.as_manager()
+    objects = ActivitySeriesManager()
 
     place = models.ForeignKey('places.Place', related_name='series', on_delete=models.CASCADE)
     max_participants = models.PositiveIntegerField(blank=True, null=True)
@@ -60,10 +69,14 @@ class ActivitySeries(BaseModel):
         return rrule_between_dates_in_local_time(
             rule=self.rule,
             dtstart=self.start_date,
-            tz=self.place.group.timezone,
+            tz=self.get_timezone(),
             period_start=self.period_start(),
             period_duration=relativedelta(weeks=self.place.weeks_in_advance)
         )
+
+    def get_timezone(self):
+        value = self.timezone if hasattr(self, 'timezone') else self.place.group.timezone
+        return pytz.timezone(value) if isinstance(value, str) else value
 
     def get_matched_activities(self):
         return match_activities_with_dates(
@@ -139,6 +152,9 @@ class ActivityQuerySet(models.QuerySet):
     def annotate_num_participants(self):
         return self.annotate(num_participants=Count('participants'))
 
+    def annotate_timezone(self):
+        return self.annotate(timezone=F('place__group__timezone'))
+
     def exclude_disabled(self):
         return self.filter(is_disabled=False)
 
@@ -206,6 +222,11 @@ class ActivityQuerySet(models.QuerySet):
             activity.save()
 
 
+class ActivityManager(models.Manager.from_queryset(ActivityQuerySet)):
+    def get_queryset(self):
+        return super().get_queryset().annotate_timezone()
+
+
 default_duration = timedelta(minutes=30)
 
 
@@ -219,7 +240,7 @@ def to_range(date, **kwargs):
 
 
 class Activity(BaseModel, ConversationMixin):
-    objects = ActivityQuerySet.as_manager()
+    objects = ActivityManager()
 
     class Meta:
         ordering = ['date']
@@ -279,8 +300,13 @@ class Activity(BaseModel, ConversationMixin):
     def __str__(self):
         return 'Activity {} - {}'.format(self.date.start, self.place)
 
+    def get_timezone(self):
+        value = self.timezone if hasattr(self, 'timezone') else self.group.timezone
+        return pytz.timezone(value) if isinstance(value, str) else value
+
     def feedback_due(self):
-        return self.date.end + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
+        due = self.date.end + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
+        return due.astimezone(self.get_timezone())
 
     def is_upcoming(self):
         return self.date.start > timezone.now()

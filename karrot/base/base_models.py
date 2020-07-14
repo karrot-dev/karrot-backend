@@ -82,6 +82,12 @@ class CustomDateTimeTZRange(DateTimeTZRange):
     def as_list(self):
         return [self.start, self.end]
 
+    def astimezone(self, tz):
+        return CustomDateTimeTZRange(
+            self.lower.astimezone(tz) if self.lower else None,
+            self.upper.astimezone(tz) if self.upper else None
+        )
+
 
 class CustomDateTimeRangeField(DateTimeRangeField):
     range_type = CustomDateTimeTZRange
