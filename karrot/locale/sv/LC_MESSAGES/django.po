@@ -22,17 +22,149 @@ msgstr ""
 "Language: sv\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: karrot/applications/api.py:27
-msgid "You need to have a verified email address"
-msgstr "Du behöver en verifierad mejladress"
+#: karrot/activities/permissions.py:7
+msgid "The pickup date is in the past."
+msgstr "Upphämtningsdatumet är satt i det förflutna."
 
-#: karrot/applications/api.py:36 karrot/groups/api.py:50
-#: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
-#: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:112
-#: karrot/pickups/serializers.py:297 karrot/places/api.py:19
+#: karrot/activities/permissions.py:18
+msgid "You can only delete empty pickup dates."
+msgstr "Du kan bara ta bort tomma upphämtningsdatum."
+
+#: karrot/activities/permissions.py:27
+msgid "You have not joined this pickup date."
+msgstr "Du har inte gått med i detta upphämtningsdatum."
+
+#: karrot/activities/permissions.py:34
+msgid "You have already joined this pickup date."
+msgstr "Du har redan gått med i detta upphämtningsdatum."
+
+#: karrot/activities/permissions.py:41
+msgid "Pickup date is already full."
+msgstr "Upphämtningsdatumet är redan fullt."
+
+#: karrot/activities/permissions.py:48
+msgid "This feedback is given by another user."
+msgstr "Denna feedback ges av en annan användare."
+
+#: karrot/activities/permissions.py:57 karrot/activities/serializers.py:399
+#, python-format
+msgid ""
+"You can't give feedback for pickups more than %(days_number)s days ago."
+msgstr ""
+"Du kan inte ge feedback för upphämtningar äldre än %(days_number)s dagar."
+
+#: karrot/activities/permissions.py:67 karrot/activities/serializers.py:112
+#: karrot/activities/serializers.py:297 karrot/applications/api.py:36
+#: karrot/groups/api.py:50 karrot/invitations/serializers.py:28
+#: karrot/issues/serializers.py:122 karrot/places/api.py:19
 #: karrot/places/serializers.py:80
 msgid "You need to be a group editor"
 msgstr "Du måste vara gruppredigerare"
+
+#: karrot/activities/serializers.py:33
+msgid "Must be a list"
+msgstr "Måste vara en lista"
+
+#: karrot/activities/serializers.py:34
+msgid "Must be a list with one or two values"
+msgstr "Måste vara en lista med ett eller två värden"
+
+#: karrot/activities/serializers.py:35
+msgid "Must pass start value"
+msgstr "Måste passera startvärdet"
+
+#: karrot/activities/serializers.py:117
+msgid "The date should be in the future."
+msgstr "Datumet bör vara i framtiden."
+
+#: karrot/activities/serializers.py:175
+msgid "You can't move pickups that are part of a series."
+msgstr "Du kan inte flytta upphämtningar som ingår i en serie."
+
+#: karrot/activities/serializers.py:310
+msgid "Invalid recurrence rule."
+msgstr "Ogiltig återfallsregel."
+
+#: karrot/activities/serializers.py:312
+msgid "Only single recurrence rules are allowed."
+msgstr "Endast enskilda återfallsregler är tillåtna."
+
+#: karrot/activities/serializers.py:394
+msgid "The pickup is not done yet"
+msgstr "Upphämtningen är inte klar ännu"
+
+#: karrot/activities/serializers.py:396
+msgid "You aren't assigned to the pickup."
+msgstr "Du har inte tilldelats upphämtningen."
+
+#: karrot/activities/serializers.py:413
+msgid "Both comment and weight cannot be blank."
+msgstr "Både kommentar och vikt kan inte vara tomma."
+
+#: karrot/activities/tasks.py:69
+#, python-format
+msgid "Upcoming %(activity_type)s"
+msgstr ""
+
+#: karrot/activities/templates/activity_notification.html.jinja2:6
+#: karrot/activities/templates/activity_notification.html.jinja2:227
+#: karrot/activities/templates/activity_notification.subject.jinja2:1
+#, python-format
+msgid "%(group_name)s upcoming pickups"
+msgstr "kommande upphämtningar i %(group_name)s"
+
+#: karrot/activities/templates/activity_notification.html.jinja2:216
+#, python-format
+msgid "%(empty_participants_count)s/%(max_participants)s remaining"
+msgstr ""
+
+#: karrot/activities/templates/activity_notification.html.jinja2:231
+msgid "Tonight"
+msgstr "Ikväll"
+
+#: karrot/activities/templates/activity_notification.html.jinja2:235
+msgid "The day is not over, there are still pickups to be done!"
+msgstr "Dagen är inte över, det finns fortfarande upphämtningar att göra!"
+
+#: karrot/activities/templates/activity_notification.html.jinja2:238
+#: karrot/activities/templates/activity_notification.html.jinja2:266
+msgid "You are signed up for"
+msgstr "Du har registrerat dig för"
+
+#: karrot/activities/templates/activity_notification.html.jinja2:243
+#: karrot/activities/templates/activity_notification.html.jinja2:271
+msgid "No-one is yet signed up for"
+msgstr "Ingen har ännu registrerat sig för"
+
+#: karrot/activities/templates/activity_notification.html.jinja2:248
+#: karrot/activities/templates/activity_notification.html.jinja2:276
+msgid "There is still space available for"
+msgstr "Det finns fortfarande utrymme tillgängligt för"
+
+#: karrot/activities/templates/activity_notification.html.jinja2:261
+msgid "Tomorrow"
+msgstr "I morgon"
+
+#: karrot/activities/templates/activity_notification.html.jinja2:311
+msgid ""
+"You are receiving this because you are subscribed to\n"
+"                            <strong>Pickup notification</strong> emails for this group."
+msgstr ""
+"Du får detta eftersom du är prenumererad på\n"
+"<strong>E-postmeddelanden</strong> om upphämtning för denna grupp."
+
+#: karrot/activities/templates/activity_notification.html.jinja2:313
+#: karrot/applications/templates/new_application.html.jinja2:266
+#: karrot/groups/templates/group_summary.html.jinja2:310
+#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:255
+#: karrot/issues/templates/new_conflict_resolution.html.jinja2:262
+#: karrot/offers/templates/new_offer.html.jinja2:275
+msgid "Click here to unsubscribe"
+msgstr "Klicka här för att avregistrera prenumerationen"
+
+#: karrot/applications/api.py:27
+msgid "You need to have a verified email address"
+msgstr "Du behöver en verifierad mejladress"
 
 #: karrot/applications/api.py:44
 msgid "You need to be the applicant"
@@ -112,15 +244,6 @@ msgid ""
 msgstr ""
 "Du får detta eftersom du prenumererar på e-postmeddelanden för <strong> "
 "användaransökan </strong> för den här gruppen."
-
-#: karrot/applications/templates/new_application.html.jinja2:266
-#: karrot/groups/templates/group_summary.html.jinja2:310
-#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:255
-#: karrot/issues/templates/new_conflict_resolution.html.jinja2:262
-#: karrot/offers/templates/new_offer.html.jinja2:275
-#: karrot/pickups/templates/pickup_notification.html.jinja2:313
-msgid "Click here to unsubscribe"
-msgstr "Klicka här för att avregistrera prenumerationen"
 
 #: karrot/applications/templates/new_application.html.jinja2:269
 #: karrot/conversations/templates/conversation_message_notification.html.jinja2:166
@@ -369,9 +492,6 @@ msgid ""
 "<strong>editing permissions</strong>. For example, you can now modify your "
 "group, places and pickup dates, or create new ones."
 msgstr ""
-"Du har fått tillräckligt förtroende från andra gruppmedlemmar för att ge dig"
-" <strong>redigeringsbehörigheter</strong>. Till exempel kan du nu ändra din "
-"grupp, platser och upphämtningsdatum eller skapa nya."
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:215
 msgid "Use your power wisely!"
@@ -660,124 +780,6 @@ msgstr ""
 "Svara på detta e-postmeddelande direkt, <a href=\"%(offer_url)s\">se det på "
 "%(site_name)s</a>, eller <a href=\"%(mute_url)s\">stäng av "
 "konversationen</a>."
-
-#: karrot/pickups/permissions.py:7
-msgid "The pickup date is in the past."
-msgstr "Upphämtningsdatumet är satt i det förflutna."
-
-#: karrot/pickups/permissions.py:18
-msgid "You can only delete empty pickup dates."
-msgstr "Du kan bara ta bort tomma upphämtningsdatum."
-
-#: karrot/pickups/permissions.py:27
-msgid "You have not joined this pickup date."
-msgstr "Du har inte gått med i detta upphämtningsdatum."
-
-#: karrot/pickups/permissions.py:34
-msgid "You have already joined this pickup date."
-msgstr "Du har redan gått med i detta upphämtningsdatum."
-
-#: karrot/pickups/permissions.py:41
-msgid "Pickup date is already full."
-msgstr "Upphämtningsdatumet är redan fullt."
-
-#: karrot/pickups/permissions.py:48
-msgid "This feedback is given by another user."
-msgstr "Denna feedback ges av en annan användare."
-
-#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:399
-#, python-format
-msgid ""
-"You can't give feedback for pickups more than %(days_number)s days ago."
-msgstr ""
-"Du kan inte ge feedback för upphämtningar äldre än %(days_number)s dagar."
-
-#: karrot/pickups/serializers.py:33
-msgid "Must be a list"
-msgstr "Måste vara en lista"
-
-#: karrot/pickups/serializers.py:34
-msgid "Must be a list with one or two values"
-msgstr "Måste vara en lista med ett eller två värden"
-
-#: karrot/pickups/serializers.py:35
-msgid "Must pass start value"
-msgstr "Måste passera startvärdet"
-
-#: karrot/pickups/serializers.py:117
-msgid "The date should be in the future."
-msgstr "Datumet bör vara i framtiden."
-
-#: karrot/pickups/serializers.py:175
-msgid "You can't move pickups that are part of a series."
-msgstr "Du kan inte flytta upphämtningar som ingår i en serie."
-
-#: karrot/pickups/serializers.py:310
-msgid "Invalid recurrence rule."
-msgstr "Ogiltig återfallsregel."
-
-#: karrot/pickups/serializers.py:312
-msgid "Only single recurrence rules are allowed."
-msgstr "Endast enskilda återfallsregler är tillåtna."
-
-#: karrot/pickups/serializers.py:394
-msgid "The pickup is not done yet"
-msgstr "Upphämtningen är inte klar ännu"
-
-#: karrot/pickups/serializers.py:396
-msgid "You aren't assigned to the pickup."
-msgstr "Du har inte tilldelats upphämtningen."
-
-#: karrot/pickups/serializers.py:413
-msgid "Both comment and weight cannot be blank."
-msgstr "Både kommentar och vikt kan inte vara tomma."
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:6
-#: karrot/pickups/templates/pickup_notification.html.jinja2:227
-#: karrot/pickups/templates/pickup_notification.subject.jinja2:1
-#, python-format
-msgid "%(group_name)s upcoming pickups"
-msgstr "kommande upphämtningar i %(group_name)s"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:216
-#, python-format
-msgid "%(empty_collectors_count)s/%(max_collectors)s remaining"
-msgstr "%(empty_collectors_count)s / %(max_collectors)s återstående"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:231
-msgid "Tonight"
-msgstr "Ikväll"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:235
-msgid "The day is not over, there are still pickups to be done!"
-msgstr "Dagen är inte över, det finns fortfarande upphämtningar att göra!"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:238
-#: karrot/pickups/templates/pickup_notification.html.jinja2:266
-msgid "You are signed up for"
-msgstr "Du har registrerat dig för"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:243
-#: karrot/pickups/templates/pickup_notification.html.jinja2:271
-msgid "No-one is yet signed up for"
-msgstr "Ingen har ännu registrerat sig för"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:248
-#: karrot/pickups/templates/pickup_notification.html.jinja2:276
-msgid "There is still space available for"
-msgstr "Det finns fortfarande utrymme tillgängligt för"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:261
-msgid "Tomorrow"
-msgstr "I morgon"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:311
-msgid ""
-"You are receiving this because you are subscribed to\n"
-"                            <strong>Pickup notification</strong> emails for this group."
-msgstr ""
-"Du får detta eftersom du är prenumererad på\n"
-"<strong>E-postmeddelanden</strong> om upphämtning för denna grupp."
 
 #: karrot/places/serializers.py:85
 msgid "Set at least one week in advance"

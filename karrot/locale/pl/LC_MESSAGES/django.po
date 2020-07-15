@@ -21,17 +21,152 @@ msgstr ""
 "Language: pl\n"
 "Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 
-#: karrot/applications/api.py:27
-msgid "You need to have a verified email address"
-msgstr "Musisz posiadać zweryfikowany adres e-mail"
+#: karrot/activities/permissions.py:7
+msgid "The pickup date is in the past."
+msgstr "Data odbioru minęła."
 
-#: karrot/applications/api.py:36 karrot/groups/api.py:50
-#: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
-#: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:112
-#: karrot/pickups/serializers.py:297 karrot/places/api.py:19
+#: karrot/activities/permissions.py:18
+msgid "You can only delete empty pickup dates."
+msgstr "Możesz usunąć jedynie odbiory, na które nikt się nie zapisał."
+
+#: karrot/activities/permissions.py:27
+msgid "You have not joined this pickup date."
+msgstr "Nie jesteś zapisana/-y na ten odbiór."
+
+#: karrot/activities/permissions.py:34
+msgid "You have already joined this pickup date."
+msgstr "Już zapisałaś/-łeś się na ten odbiór."
+
+#: karrot/activities/permissions.py:41
+msgid "Pickup date is already full."
+msgstr "Nie ma już miejsc na ten odbiór."
+
+#: karrot/activities/permissions.py:48
+msgid "This feedback is given by another user."
+msgstr "Ten komentarz został dodany przez innego użytkownika."
+
+#: karrot/activities/permissions.py:57 karrot/activities/serializers.py:399
+#, python-format
+msgid ""
+"You can't give feedback for pickups more than %(days_number)s days ago."
+msgstr ""
+"Nie możesz dodawać komentarzy do odbiorów wcześniejszych niż %(days_number)s"
+" dni temu."
+
+#: karrot/activities/permissions.py:67 karrot/activities/serializers.py:112
+#: karrot/activities/serializers.py:297 karrot/applications/api.py:36
+#: karrot/groups/api.py:50 karrot/invitations/serializers.py:28
+#: karrot/issues/serializers.py:122 karrot/places/api.py:19
 #: karrot/places/serializers.py:80
 msgid "You need to be a group editor"
 msgstr "Musisz posiadać uprawnienia do edycji"
+
+#: karrot/activities/serializers.py:33
+msgid "Must be a list"
+msgstr "Musi być listą"
+
+#: karrot/activities/serializers.py:34
+msgid "Must be a list with one or two values"
+msgstr "Musi być listą z co najmniej jednym lub dwoma elementami"
+
+#: karrot/activities/serializers.py:35
+msgid "Must pass start value"
+msgstr "Musi przekroczyć wartość początkową"
+
+#: karrot/activities/serializers.py:117
+msgid "The date should be in the future."
+msgstr "Data musi być w przyszłości."
+
+#: karrot/activities/serializers.py:175
+msgid "You can't move pickups that are part of a series."
+msgstr "Nie możesz przenosić odbiorów, które występują w serii."
+
+#: karrot/activities/serializers.py:310
+msgid "Invalid recurrence rule."
+msgstr "Nieprawidłowe zasady powtarzających się odbiorów."
+
+#: karrot/activities/serializers.py:312
+msgid "Only single recurrence rules are allowed."
+msgstr "Można zastosować tylko jedną zasadę powtarzających się odbiorów"
+
+#: karrot/activities/serializers.py:394
+msgid "The pickup is not done yet"
+msgstr "Jeszcze nie wykonano tego odbioru"
+
+#: karrot/activities/serializers.py:396
+msgid "You aren't assigned to the pickup."
+msgstr "Nie jesteś zapisana/-y na ten odbiór."
+
+#: karrot/activities/serializers.py:413
+msgid "Both comment and weight cannot be blank."
+msgstr ""
+"Pola komentarza i ilości uratowanego jedzenia nie mogą być jednocześnie "
+"puste"
+
+#: karrot/activities/tasks.py:69
+#, python-format
+msgid "Upcoming %(activity_type)s"
+msgstr ""
+
+#: karrot/activities/templates/activity_notification.html.jinja2:6
+#: karrot/activities/templates/activity_notification.html.jinja2:227
+#: karrot/activities/templates/activity_notification.subject.jinja2:1
+#, python-format
+msgid "%(group_name)s upcoming pickups"
+msgstr "Nadchodzące odbiory w %(group_name)s"
+
+#: karrot/activities/templates/activity_notification.html.jinja2:216
+#, python-format
+msgid "%(empty_participants_count)s/%(max_participants)s remaining"
+msgstr ""
+
+#: karrot/activities/templates/activity_notification.html.jinja2:231
+msgid "Tonight"
+msgstr "Dziś wieczorem"
+
+#: karrot/activities/templates/activity_notification.html.jinja2:235
+msgid "The day is not over, there are still pickups to be done!"
+msgstr "Zostały jeszcze wolne odbiory na dzisiaj!"
+
+#: karrot/activities/templates/activity_notification.html.jinja2:238
+#: karrot/activities/templates/activity_notification.html.jinja2:266
+msgid "You are signed up for"
+msgstr "Zapisałaś/-eś się na"
+
+#: karrot/activities/templates/activity_notification.html.jinja2:243
+#: karrot/activities/templates/activity_notification.html.jinja2:271
+msgid "No-one is yet signed up for"
+msgstr "Jeszcze nikt nie zapisał się na"
+
+#: karrot/activities/templates/activity_notification.html.jinja2:248
+#: karrot/activities/templates/activity_notification.html.jinja2:276
+msgid "There is still space available for"
+msgstr "Wciąż są wolne miejsca na odbiór"
+
+#: karrot/activities/templates/activity_notification.html.jinja2:261
+msgid "Tomorrow"
+msgstr "Jutro"
+
+#: karrot/activities/templates/activity_notification.html.jinja2:311
+msgid ""
+"You are receiving this because you are subscribed to\n"
+"                            <strong>Pickup notification</strong> emails for this group."
+msgstr ""
+"Otrzymałaś/-eś tę wiadomość, ponieważ subskrybujesz <strong>powiadomienia o "
+"odbiorach</strong> dla tej grupy."
+
+#: karrot/activities/templates/activity_notification.html.jinja2:313
+#: karrot/applications/templates/new_application.html.jinja2:266
+#: karrot/groups/templates/group_summary.html.jinja2:310
+#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:255
+#: karrot/issues/templates/new_conflict_resolution.html.jinja2:262
+#: karrot/offers/templates/new_offer.html.jinja2:275
+msgid "Click here to unsubscribe"
+msgstr "Kliknij, aby zrezygnować z subskrypcji"
+
+#: karrot/applications/api.py:27
+msgid "You need to have a verified email address"
+msgstr "Musisz posiadać zweryfikowany adres e-mail"
 
 #: karrot/applications/api.py:44
 msgid "You need to be the applicant"
@@ -111,15 +246,6 @@ msgid ""
 msgstr ""
 "Otrzymałaś/-eś tę wiadomość, ponieważ subskrybujesz <strong>zgłoszenia "
 "nowych użytkowników</strong> dla tej grupy."
-
-#: karrot/applications/templates/new_application.html.jinja2:266
-#: karrot/groups/templates/group_summary.html.jinja2:310
-#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:255
-#: karrot/issues/templates/new_conflict_resolution.html.jinja2:262
-#: karrot/offers/templates/new_offer.html.jinja2:275
-#: karrot/pickups/templates/pickup_notification.html.jinja2:313
-msgid "Click here to unsubscribe"
-msgstr "Kliknij, aby zrezygnować z subskrypcji"
 
 #: karrot/applications/templates/new_application.html.jinja2:269
 #: karrot/conversations/templates/conversation_message_notification.html.jinja2:166
@@ -367,9 +493,6 @@ msgid ""
 "<strong>editing permissions</strong>. For example, you can now modify your "
 "group, places and pickup dates, or create new ones."
 msgstr ""
-"Otrzymałaś/-eś wystarczające zaufanie od innych członków grupy, aby przyznać"
-" Ci <strong>uprawnienia do edycji</strong>. Możesz teraz na przykład "
-"zmieniać daty odbiorów, edytować istniejące punkty lub tworzyć nowe."
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:215
 msgid "Use your power wisely!"
@@ -655,127 +778,6 @@ msgid ""
 msgstr ""
 "Odpowiedz bezpośrednio na tą wiadomość, <a href=\"%(offer_url)s\">otwórz w "
 "%(site_name)s</a> lub <a href=\"%(mute_url)s\">wycisz konwersację</a>."
-
-#: karrot/pickups/permissions.py:7
-msgid "The pickup date is in the past."
-msgstr "Data odbioru minęła."
-
-#: karrot/pickups/permissions.py:18
-msgid "You can only delete empty pickup dates."
-msgstr "Możesz usunąć jedynie odbiory, na które nikt się nie zapisał."
-
-#: karrot/pickups/permissions.py:27
-msgid "You have not joined this pickup date."
-msgstr "Nie jesteś zapisana/-y na ten odbiór."
-
-#: karrot/pickups/permissions.py:34
-msgid "You have already joined this pickup date."
-msgstr "Już zapisałaś/-łeś się na ten odbiór."
-
-#: karrot/pickups/permissions.py:41
-msgid "Pickup date is already full."
-msgstr "Nie ma już miejsc na ten odbiór."
-
-#: karrot/pickups/permissions.py:48
-msgid "This feedback is given by another user."
-msgstr "Ten komentarz został dodany przez innego użytkownika."
-
-#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:399
-#, python-format
-msgid ""
-"You can't give feedback for pickups more than %(days_number)s days ago."
-msgstr ""
-"Nie możesz dodawać komentarzy do odbiorów wcześniejszych niż %(days_number)s"
-" dni temu."
-
-#: karrot/pickups/serializers.py:33
-msgid "Must be a list"
-msgstr "Musi być listą"
-
-#: karrot/pickups/serializers.py:34
-msgid "Must be a list with one or two values"
-msgstr "Musi być listą z co najmniej jednym lub dwoma elementami"
-
-#: karrot/pickups/serializers.py:35
-msgid "Must pass start value"
-msgstr "Musi przekroczyć wartość początkową"
-
-#: karrot/pickups/serializers.py:117
-msgid "The date should be in the future."
-msgstr "Data musi być w przyszłości."
-
-#: karrot/pickups/serializers.py:175
-msgid "You can't move pickups that are part of a series."
-msgstr "Nie możesz przenosić odbiorów, które występują w serii."
-
-#: karrot/pickups/serializers.py:310
-msgid "Invalid recurrence rule."
-msgstr "Nieprawidłowe zasady powtarzających się odbiorów."
-
-#: karrot/pickups/serializers.py:312
-msgid "Only single recurrence rules are allowed."
-msgstr "Można zastosować tylko jedną zasadę powtarzających się odbiorów"
-
-#: karrot/pickups/serializers.py:394
-msgid "The pickup is not done yet"
-msgstr "Jeszcze nie wykonano tego odbioru"
-
-#: karrot/pickups/serializers.py:396
-msgid "You aren't assigned to the pickup."
-msgstr "Nie jesteś zapisana/-y na ten odbiór."
-
-#: karrot/pickups/serializers.py:413
-msgid "Both comment and weight cannot be blank."
-msgstr ""
-"Pola komentarza i ilości uratowanego jedzenia nie mogą być jednocześnie "
-"puste"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:6
-#: karrot/pickups/templates/pickup_notification.html.jinja2:227
-#: karrot/pickups/templates/pickup_notification.subject.jinja2:1
-#, python-format
-msgid "%(group_name)s upcoming pickups"
-msgstr "Nadchodzące odbiory w %(group_name)s"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:216
-#, python-format
-msgid "%(empty_collectors_count)s/%(max_collectors)s remaining"
-msgstr "Pozostało %(empty_collectors_count)s/%(max_collectors)s"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:231
-msgid "Tonight"
-msgstr "Dziś wieczorem"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:235
-msgid "The day is not over, there are still pickups to be done!"
-msgstr "Zostały jeszcze wolne odbiory na dzisiaj!"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:238
-#: karrot/pickups/templates/pickup_notification.html.jinja2:266
-msgid "You are signed up for"
-msgstr "Zapisałaś/-eś się na"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:243
-#: karrot/pickups/templates/pickup_notification.html.jinja2:271
-msgid "No-one is yet signed up for"
-msgstr "Jeszcze nikt nie zapisał się na"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:248
-#: karrot/pickups/templates/pickup_notification.html.jinja2:276
-msgid "There is still space available for"
-msgstr "Wciąż są wolne miejsca na odbiór"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:261
-msgid "Tomorrow"
-msgstr "Jutro"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:311
-msgid ""
-"You are receiving this because you are subscribed to\n"
-"                            <strong>Pickup notification</strong> emails for this group."
-msgstr ""
-"Otrzymałaś/-eś tę wiadomość, ponieważ subskrybujesz <strong>powiadomienia o "
-"odbiorach</strong> dla tej grupy."
 
 #: karrot/places/serializers.py:85
 msgid "Set at least one week in advance"

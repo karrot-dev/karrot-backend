@@ -22,17 +22,149 @@ msgstr ""
 "Language: hi\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: karrot/applications/api.py:27
-msgid "You need to have a verified email address"
-msgstr "आपके पास एक सत्यापित ईमेल पता होना जरूरी है"
+#: karrot/activities/permissions.py:7
+msgid "The pickup date is in the past."
+msgstr "पिकअप की तारीख अतीत में है |"
 
-#: karrot/applications/api.py:36 karrot/groups/api.py:50
-#: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
-#: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:112
-#: karrot/pickups/serializers.py:297 karrot/places/api.py:19
+#: karrot/activities/permissions.py:18
+msgid "You can only delete empty pickup dates."
+msgstr "आप केवल खाली पिकअप तिथियां हटा सकते हैं"
+
+#: karrot/activities/permissions.py:27
+msgid "You have not joined this pickup date."
+msgstr "आप इस पिकअप तारीख में शामिल नहीं हुए हैं।"
+
+#: karrot/activities/permissions.py:34
+msgid "You have already joined this pickup date."
+msgstr "आप पहले से ही इस पिकअप की तारीख में शामिल हो गए हैं।"
+
+#: karrot/activities/permissions.py:41
+msgid "Pickup date is already full."
+msgstr "पिकअप की तारीख पहले ही पूर्ण है।"
+
+#: karrot/activities/permissions.py:48
+msgid "This feedback is given by another user."
+msgstr "यह प्रतिक्रिया अन्य उपयोगकर्ता द्वारा दी गई है।"
+
+#: karrot/activities/permissions.py:57 karrot/activities/serializers.py:399
+#, python-format
+msgid ""
+"You can't give feedback for pickups more than %(days_number)s days ago."
+msgstr "आप %(days_number)s दिन पहले पिकअप के लिए प्रतिक्रिया नहीं दे सकते।"
+
+#: karrot/activities/permissions.py:67 karrot/activities/serializers.py:112
+#: karrot/activities/serializers.py:297 karrot/applications/api.py:36
+#: karrot/groups/api.py:50 karrot/invitations/serializers.py:28
+#: karrot/issues/serializers.py:122 karrot/places/api.py:19
 #: karrot/places/serializers.py:80
 msgid "You need to be a group editor"
 msgstr "आपका समूह संपादक होना जरूरी है"
+
+#: karrot/activities/serializers.py:33
+msgid "Must be a list"
+msgstr "सूची होनी चाहिए"
+
+#: karrot/activities/serializers.py:34
+msgid "Must be a list with one or two values"
+msgstr "एक या दो मूल्यों वाली सूची होनी चाहिए"
+
+#: karrot/activities/serializers.py:35
+msgid "Must pass start value"
+msgstr "शुरुवाती राशि चाहिए"
+
+#: karrot/activities/serializers.py:117
+msgid "The date should be in the future."
+msgstr "तारीख भविष्य में होनी चाहिए।"
+
+#: karrot/activities/serializers.py:175
+msgid "You can't move pickups that are part of a series."
+msgstr ""
+"श्रृंखला का हिस्सा रहने वाले पिक अप को आप स्थानांतरित नहीं कर सकते हैं।"
+
+#: karrot/activities/serializers.py:310
+msgid "Invalid recurrence rule."
+msgstr "अमान्य पुनरावृत्ति नियम |"
+
+#: karrot/activities/serializers.py:312
+msgid "Only single recurrence rules are allowed."
+msgstr "केवल एकल पुनरावृत्ति नियमों की अनुमति है |"
+
+#: karrot/activities/serializers.py:394
+msgid "The pickup is not done yet"
+msgstr "पिकअप अभी तक नहीं किया गया है"
+
+#: karrot/activities/serializers.py:396
+msgid "You aren't assigned to the pickup."
+msgstr "आपको पिकअप को सौंपा नहीं गया है |"
+
+#: karrot/activities/serializers.py:413
+msgid "Both comment and weight cannot be blank."
+msgstr "टिप्पणी और वजन दोनों रिक्त नहीं हो सकते।"
+
+#: karrot/activities/tasks.py:69
+#, python-format
+msgid "Upcoming %(activity_type)s"
+msgstr ""
+
+#: karrot/activities/templates/activity_notification.html.jinja2:6
+#: karrot/activities/templates/activity_notification.html.jinja2:227
+#: karrot/activities/templates/activity_notification.subject.jinja2:1
+#, python-format
+msgid "%(group_name)s upcoming pickups"
+msgstr "%(group_name)s आगामी पिकअप"
+
+#: karrot/activities/templates/activity_notification.html.jinja2:216
+#, python-format
+msgid "%(empty_participants_count)s/%(max_participants)s remaining"
+msgstr ""
+
+#: karrot/activities/templates/activity_notification.html.jinja2:231
+msgid "Tonight"
+msgstr "आज रात"
+
+#: karrot/activities/templates/activity_notification.html.jinja2:235
+msgid "The day is not over, there are still pickups to be done!"
+msgstr "दिन खत्म नहीं हुआ है, अभी भी पिकअप किए जाने बाकी हैं!"
+
+#: karrot/activities/templates/activity_notification.html.jinja2:238
+#: karrot/activities/templates/activity_notification.html.jinja2:266
+msgid "You are signed up for"
+msgstr "आप इन के लिए जुड़े हुए है "
+
+#: karrot/activities/templates/activity_notification.html.jinja2:243
+#: karrot/activities/templates/activity_notification.html.jinja2:271
+msgid "No-one is yet signed up for"
+msgstr "अभी तक कोई जुड़े नहीं है "
+
+#: karrot/activities/templates/activity_notification.html.jinja2:248
+#: karrot/activities/templates/activity_notification.html.jinja2:276
+msgid "There is still space available for"
+msgstr "अभी भी जगह उपलब्ध है"
+
+#: karrot/activities/templates/activity_notification.html.jinja2:261
+msgid "Tomorrow"
+msgstr "आने वाला कल"
+
+#: karrot/activities/templates/activity_notification.html.jinja2:311
+msgid ""
+"You are receiving this because you are subscribed to\n"
+"                            <strong>Pickup notification</strong> emails for this group."
+msgstr ""
+"आप इसे प्राप्त कर रहे हैं क्योंकि आपको इस समूह के लिए <strong>पिक अप "
+"सूचना</strong> ईमेल की सदस्यता दी गई है।"
+
+#: karrot/activities/templates/activity_notification.html.jinja2:313
+#: karrot/applications/templates/new_application.html.jinja2:266
+#: karrot/groups/templates/group_summary.html.jinja2:310
+#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:255
+#: karrot/issues/templates/new_conflict_resolution.html.jinja2:262
+#: karrot/offers/templates/new_offer.html.jinja2:275
+msgid "Click here to unsubscribe"
+msgstr "सदस्यता समाप्त करने के लिए यहां क्लिक करें"
+
+#: karrot/applications/api.py:27
+msgid "You need to have a verified email address"
+msgstr "आपके पास एक सत्यापित ईमेल पता होना जरूरी है"
 
 #: karrot/applications/api.py:44
 msgid "You need to be the applicant"
@@ -114,15 +246,6 @@ msgid ""
 msgstr ""
 "आप इसे प्राप्त कर रहे हैं क्योंकि आपको इस समूह के लिए <strong>उपयोगकर्ता "
 "आवेदन</strong> ईमेल की सदस्यता दी गई है।"
-
-#: karrot/applications/templates/new_application.html.jinja2:266
-#: karrot/groups/templates/group_summary.html.jinja2:310
-#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:255
-#: karrot/issues/templates/new_conflict_resolution.html.jinja2:262
-#: karrot/offers/templates/new_offer.html.jinja2:275
-#: karrot/pickups/templates/pickup_notification.html.jinja2:313
-msgid "Click here to unsubscribe"
-msgstr "सदस्यता समाप्त करने के लिए यहां क्लिक करें"
 
 #: karrot/applications/templates/new_application.html.jinja2:269
 #: karrot/conversations/templates/conversation_message_notification.html.jinja2:166
@@ -372,9 +495,6 @@ msgid ""
 "<strong>editing permissions</strong>. For example, you can now modify your "
 "group, places and pickup dates, or create new ones."
 msgstr ""
-"आपको <strong>संपादन अनुमति</strong> देने के लिए साथी समूह के सदस्यों से "
-"पर्याप्त विश्वास प्राप्त हुआ है। उदाहरण के लिए, अब आप अपने समूह, स्थानों और "
-"पिक अप तिथियों को संशोधित कर सकते हैं या नए बना सकते हैं।"
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:215
 msgid "Use your power wisely!"
@@ -660,124 +780,6 @@ msgid ""
 msgstr ""
 "सीधे इस ईमेल का उत्तर दें, इसे <a href=\"%(offer_url)s\">%(site_name)s पर "
 "देखें</a>, या <a href=\"%(mute_url)s\">बातचीत को चुप करें</a>।"
-
-#: karrot/pickups/permissions.py:7
-msgid "The pickup date is in the past."
-msgstr "पिकअप की तारीख अतीत में है |"
-
-#: karrot/pickups/permissions.py:18
-msgid "You can only delete empty pickup dates."
-msgstr "आप केवल खाली पिकअप तिथियां हटा सकते हैं"
-
-#: karrot/pickups/permissions.py:27
-msgid "You have not joined this pickup date."
-msgstr "आप इस पिकअप तारीख में शामिल नहीं हुए हैं।"
-
-#: karrot/pickups/permissions.py:34
-msgid "You have already joined this pickup date."
-msgstr "आप पहले से ही इस पिकअप की तारीख में शामिल हो गए हैं।"
-
-#: karrot/pickups/permissions.py:41
-msgid "Pickup date is already full."
-msgstr "पिकअप की तारीख पहले ही पूर्ण है।"
-
-#: karrot/pickups/permissions.py:48
-msgid "This feedback is given by another user."
-msgstr "यह प्रतिक्रिया अन्य उपयोगकर्ता द्वारा दी गई है।"
-
-#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:399
-#, python-format
-msgid ""
-"You can't give feedback for pickups more than %(days_number)s days ago."
-msgstr "आप %(days_number)s दिन पहले पिकअप के लिए प्रतिक्रिया नहीं दे सकते।"
-
-#: karrot/pickups/serializers.py:33
-msgid "Must be a list"
-msgstr "सूची होनी चाहिए"
-
-#: karrot/pickups/serializers.py:34
-msgid "Must be a list with one or two values"
-msgstr "एक या दो मूल्यों वाली सूची होनी चाहिए"
-
-#: karrot/pickups/serializers.py:35
-msgid "Must pass start value"
-msgstr "शुरुवाती राशि चाहिए"
-
-#: karrot/pickups/serializers.py:117
-msgid "The date should be in the future."
-msgstr "तारीख भविष्य में होनी चाहिए।"
-
-#: karrot/pickups/serializers.py:175
-msgid "You can't move pickups that are part of a series."
-msgstr ""
-"श्रृंखला का हिस्सा रहने वाले पिक अप को आप स्थानांतरित नहीं कर सकते हैं।"
-
-#: karrot/pickups/serializers.py:310
-msgid "Invalid recurrence rule."
-msgstr "अमान्य पुनरावृत्ति नियम |"
-
-#: karrot/pickups/serializers.py:312
-msgid "Only single recurrence rules are allowed."
-msgstr "केवल एकल पुनरावृत्ति नियमों की अनुमति है |"
-
-#: karrot/pickups/serializers.py:394
-msgid "The pickup is not done yet"
-msgstr "पिकअप अभी तक नहीं किया गया है"
-
-#: karrot/pickups/serializers.py:396
-msgid "You aren't assigned to the pickup."
-msgstr "आपको पिकअप को सौंपा नहीं गया है |"
-
-#: karrot/pickups/serializers.py:413
-msgid "Both comment and weight cannot be blank."
-msgstr "टिप्पणी और वजन दोनों रिक्त नहीं हो सकते।"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:6
-#: karrot/pickups/templates/pickup_notification.html.jinja2:227
-#: karrot/pickups/templates/pickup_notification.subject.jinja2:1
-#, python-format
-msgid "%(group_name)s upcoming pickups"
-msgstr "%(group_name)s आगामी पिकअप"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:216
-#, python-format
-msgid "%(empty_collectors_count)s/%(max_collectors)s remaining"
-msgstr "%(empty_collectors_count)s/%(max_collectors)s शेष"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:231
-msgid "Tonight"
-msgstr "आज रात"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:235
-msgid "The day is not over, there are still pickups to be done!"
-msgstr "दिन खत्म नहीं हुआ है, अभी भी पिकअप किए जाने बाकी हैं!"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:238
-#: karrot/pickups/templates/pickup_notification.html.jinja2:266
-msgid "You are signed up for"
-msgstr "आप इन के लिए जुड़े हुए है "
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:243
-#: karrot/pickups/templates/pickup_notification.html.jinja2:271
-msgid "No-one is yet signed up for"
-msgstr "अभी तक कोई जुड़े नहीं है "
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:248
-#: karrot/pickups/templates/pickup_notification.html.jinja2:276
-msgid "There is still space available for"
-msgstr "अभी भी जगह उपलब्ध है"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:261
-msgid "Tomorrow"
-msgstr "आने वाला कल"
-
-#: karrot/pickups/templates/pickup_notification.html.jinja2:311
-msgid ""
-"You are receiving this because you are subscribed to\n"
-"                            <strong>Pickup notification</strong> emails for this group."
-msgstr ""
-"आप इसे प्राप्त कर रहे हैं क्योंकि आपको इस समूह के लिए <strong>पिक अप "
-"सूचना</strong> ईमेल की सदस्यता दी गई है।"
 
 #: karrot/places/serializers.py:85
 msgid "Set at least one week in advance"
