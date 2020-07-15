@@ -93,6 +93,11 @@ msgstr ""
 msgid "Both comment and weight cannot be blank."
 msgstr ""
 
+#: karrot/activities/tasks.py:69
+#, python-format
+msgid "Upcoming %(activity_type)s"
+msgstr ""
+
 #: karrot/activities/templates/activity_notification.html.jinja2:6
 #: karrot/activities/templates/activity_notification.html.jinja2:227
 #: karrot/activities/templates/activity_notification.subject.jinja2:1
