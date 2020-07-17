@@ -6516,12 +6516,12 @@
     "timezone": "",
     "title": "Activity",
     "uid": "000000019",
-    "version": 107
+    "version": 108
   },
   "meta": {
     "canAdmin": false,
-    "canEdit": false,
-    "canSave": false,
+    "canEdit": true,
+    "canSave": true,
     "canStar": true,
     "created": "2018-03-24T21:17:27+01:00",
     "createdBy": "tiltec",
@@ -6535,9 +6535,9 @@
     "provisionedExternalId": "",
     "slug": "activity",
     "type": "db",
-    "updated": "2019-12-21T23:16:08+01:00",
-    "updatedBy": "tiltec",
+    "updated": "2020-07-17T13:33:43+02:00",
+    "updatedBy": "Anonymous",
     "url": "/d/000000019/activity",
-    "version": 107
+    "version": 108
   }
 }

@@ -309,12 +309,12 @@
     "variables": {
       "list": []
     },
-    "version": 4
+    "version": 5
   },
   "meta": {
     "canAdmin": false,
-    "canEdit": false,
-    "canSave": false,
+    "canEdit": true,
+    "canSave": true,
     "canStar": true,
     "created": "2019-04-09T11:06:32+02:00",
     "createdBy": "tiltec",
@@ -328,9 +328,9 @@
     "provisionedExternalId": "",
     "slug": "invitations",
     "type": "db",
-    "updated": "2020-05-31T21:22:35+02:00",
-    "updatedBy": "tiltec",
+    "updated": "2020-07-17T13:32:35+02:00",
+    "updatedBy": "Anonymous",
     "url": "/d/Vz3_tZRZk/invitations",
-    "version": 4
+    "version": 5
   }
 }

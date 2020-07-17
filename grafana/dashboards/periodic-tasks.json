@@ -293,12 +293,12 @@
     "timezone": "",
     "title": "Periodic tasks",
     "uid": "QI3dHATZz",
-    "version": 3
+    "version": 4
   },
   "meta": {
     "canAdmin": false,
-    "canEdit": false,
-    "canSave": false,
+    "canEdit": true,
+    "canSave": true,
     "canStar": true,
     "created": "2019-10-17T20:36:00+02:00",
     "createdBy": "tiltec",
@@ -312,9 +312,9 @@
     "provisionedExternalId": "",
     "slug": "periodic-tasks",
     "type": "db",
-    "updated": "2019-10-17T20:45:57+02:00",
-    "updatedBy": "tiltec",
+    "updated": "2020-07-17T13:32:14+02:00",
+    "updatedBy": "Anonymous",
     "url": "/d/QI3dHATZz/periodic-tasks",
-    "version": 3
+    "version": 4
   }
 }

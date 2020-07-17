@@ -1173,12 +1173,12 @@
     "timezone": "",
     "title": "User profile",
     "uid": "7rEbhblik",
-    "version": 6
+    "version": 7
   },
   "meta": {
     "canAdmin": false,
-    "canEdit": false,
-    "canSave": false,
+    "canEdit": true,
+    "canSave": true,
     "canStar": true,
     "created": "2019-01-30T16:33:57+01:00",
     "createdBy": "tiltec",
@@ -1192,9 +1192,9 @@
     "provisionedExternalId": "",
     "slug": "user-profile",
     "type": "db",
-    "updated": "2020-02-12T12:44:16+01:00",
-    "updatedBy": "nicksellen",
+    "updated": "2020-07-17T13:33:02+02:00",
+    "updatedBy": "Anonymous",
     "url": "/d/7rEbhblik/user-profile",
-    "version": 6
+    "version": 7
   }
 }

@@ -546,12 +546,12 @@
     "timezone": "utc",
     "title": "User auth statistics",
     "uid": "000000002",
-    "version": 11
+    "version": 12
   },
   "meta": {
     "canAdmin": false,
-    "canEdit": false,
-    "canSave": false,
+    "canEdit": true,
+    "canSave": true,
     "canStar": true,
     "created": "2016-12-14T17:33:08+01:00",
     "createdBy": "tiltec",
@@ -565,9 +565,9 @@
     "provisionedExternalId": "",
     "slug": "user-auth-statistics",
     "type": "db",
-    "updated": "2019-10-17T20:48:40+02:00",
-    "updatedBy": "tiltec",
+    "updated": "2020-07-17T13:26:37+02:00",
+    "updatedBy": "Anonymous",
     "url": "/d/000000002/user-auth-statistics",
-    "version": 11
+    "version": 12
   }
 }

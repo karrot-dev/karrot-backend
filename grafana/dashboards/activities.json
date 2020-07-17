@@ -639,12 +639,12 @@
     "timezone": "",
     "title": "Activities",
     "uid": "y-HBcQ6mk",
-    "version": 5
+    "version": 7
   },
   "meta": {
     "canAdmin": false,
-    "canEdit": false,
-    "canSave": false,
+    "canEdit": true,
+    "canSave": true,
     "canStar": true,
     "created": "2019-04-05T13:33:01+02:00",
     "createdBy": "tiltec",
@@ -658,9 +658,9 @@
     "provisionedExternalId": "",
     "slug": "activities",
     "type": "db",
-    "updated": "2019-06-12T14:06:04+02:00",
-    "updatedBy": "tiltec",
+    "updated": "2020-07-17T13:29:48+02:00",
+    "updatedBy": "Anonymous",
     "url": "/d/y-HBcQ6mk/activities",
-    "version": 5
+    "version": 7
   }
 }

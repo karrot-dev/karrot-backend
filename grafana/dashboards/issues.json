@@ -812,12 +812,12 @@
     "variables": {
       "list": []
     },
-    "version": 7
+    "version": 8
   },
   "meta": {
     "canAdmin": false,
-    "canEdit": false,
-    "canSave": false,
+    "canEdit": true,
+    "canSave": true,
     "canStar": true,
     "created": "2019-03-18T16:44:35+01:00",
     "createdBy": "tiltec",
@@ -831,9 +831,9 @@
     "provisionedExternalId": "",
     "slug": "issues",
     "type": "db",
-    "updated": "2020-05-08T14:42:08+02:00",
-    "updatedBy": "tiltec",
+    "updated": "2020-07-17T13:27:20+02:00",
+    "updatedBy": "Anonymous",
     "url": "/d/L9quTFqmk/issues",
-    "version": 7
+    "version": 8
   }
 }

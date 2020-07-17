@@ -1696,12 +1696,12 @@
     "variables": {
       "list": []
     },
-    "version": 41
+    "version": 42
   },
   "meta": {
     "canAdmin": false,
-    "canEdit": false,
-    "canSave": false,
+    "canEdit": true,
+    "canSave": true,
     "canStar": true,
     "created": "2019-12-03T19:58:32+01:00",
     "createdBy": "Anonymous",
@@ -1715,9 +1715,9 @@
     "provisionedExternalId": "",
     "slug": "frontend-stats",
     "type": "db",
-    "updated": "2020-06-14T13:34:20+02:00",
-    "updatedBy": "tiltec",
+    "updated": "2020-07-17T13:34:27+02:00",
+    "updatedBy": "Anonymous",
     "url": "/d/AyeDdv-Wz/frontend-stats",
-    "version": 41
+    "version": 42
   }
 }

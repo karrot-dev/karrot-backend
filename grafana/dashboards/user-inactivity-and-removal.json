@@ -476,12 +476,12 @@
     "variables": {
       "list": []
     },
-    "version": 5
+    "version": 6
   },
   "meta": {
     "canAdmin": false,
-    "canEdit": false,
-    "canSave": false,
+    "canEdit": true,
+    "canSave": true,
     "canStar": true,
     "created": "2019-04-05T13:43:48+02:00",
     "createdBy": "tiltec",
@@ -495,9 +495,9 @@
     "provisionedExternalId": "",
     "slug": "user-inactivity-and-removal",
     "type": "db",
-    "updated": "2020-05-11T16:57:04+02:00",
-    "updatedBy": "tiltec",
+    "updated": "2020-07-17T13:32:06+02:00",
+    "updatedBy": "Anonymous",
     "url": "/d/kZkNpw6mk/user-inactivity-and-removal",
-    "version": 5
+    "version": 6
   }
 }

@@ -27,11 +27,11 @@
         "panels": [
           {
             "aliasColors": {
+              "activity done": "#7eb26d",
+              "activity missed": "#e24d42",
               "feedback given": "#ba43a9",
               "joined activity": "#d683ce",
-              "left activity": "#6ed0e0",
-              "activity done": "#7eb26d",
-              "activity missed": "#e24d42"
+              "left activity": "#6ed0e0"
             },
             "bars": false,
             "dashLength": 10,
@@ -1015,12 +1015,12 @@
     "timezone": "",
     "title": "Group Detail (Prod)",
     "uid": "000000012",
-    "version": 8
+    "version": 9
   },
   "meta": {
     "canAdmin": false,
-    "canEdit": false,
-    "canSave": false,
+    "canEdit": true,
+    "canSave": true,
     "canStar": true,
     "created": "2018-03-12T13:30:39+01:00",
     "createdBy": "Anonymous",
@@ -1034,9 +1034,9 @@
     "provisionedExternalId": "",
     "slug": "group-detail-prod",
     "type": "db",
-    "updated": "2018-03-13T21:46:37+01:00",
+    "updated": "2020-07-17T13:34:16+02:00",
     "updatedBy": "Anonymous",
     "url": "/d/000000012/group-detail-prod",
-    "version": 8
+    "version": 9
   }
 }

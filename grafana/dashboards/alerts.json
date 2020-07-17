@@ -221,12 +221,12 @@
     "variables": {
       "list": []
     },
-    "version": 2
+    "version": 3
   },
   "meta": {
     "canAdmin": false,
-    "canEdit": false,
-    "canSave": false,
+    "canEdit": true,
+    "canSave": true,
     "canStar": true,
     "created": "2020-05-15T18:33:28+02:00",
     "createdBy": "tiltec",
@@ -240,9 +240,9 @@
     "provisionedExternalId": "",
     "slug": "alerts",
     "type": "db",
-    "updated": "2020-05-15T18:34:04+02:00",
-    "updatedBy": "tiltec",
+    "updated": "2020-07-17T13:31:57+02:00",
+    "updatedBy": "Anonymous",
     "url": "/d/whSVKTRMk/alerts",
-    "version": 2
+    "version": 3
   }
 }

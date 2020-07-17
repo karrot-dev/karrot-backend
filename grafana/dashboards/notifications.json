@@ -850,12 +850,12 @@
     "timezone": "",
     "title": "Notifications",
     "uid": "fUG6B0Ymz",
-    "version": 6
+    "version": 7
   },
   "meta": {
     "canAdmin": false,
-    "canEdit": false,
-    "canSave": false,
+    "canEdit": true,
+    "canSave": true,
     "canStar": true,
     "created": "2018-11-28T20:28:38+01:00",
     "createdBy": "tiltec",
@@ -869,9 +869,9 @@
     "provisionedExternalId": "",
     "slug": "notifications",
     "type": "db",
-    "updated": "2018-11-28T21:57:04+01:00",
-    "updatedBy": "tiltec",
+    "updated": "2020-07-17T13:32:49+02:00",
+    "updatedBy": "Anonymous",
     "url": "/d/fUG6B0Ymz/notifications",
-    "version": 6
+    "version": 7
   }
 }

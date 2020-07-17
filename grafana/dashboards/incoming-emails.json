@@ -171,12 +171,12 @@
     "timezone": "",
     "title": "Incoming emails",
     "uid": "QpoAYo6mk",
-    "version": 7
+    "version": 8
   },
   "meta": {
     "canAdmin": false,
-    "canEdit": false,
-    "canSave": false,
+    "canEdit": true,
+    "canSave": true,
     "canStar": true,
     "created": "2019-04-01T18:55:49+02:00",
     "createdBy": "tiltec",
@@ -190,9 +190,9 @@
     "provisionedExternalId": "",
     "slug": "incoming-emails",
     "type": "db",
-    "updated": "2019-07-26T13:46:44+02:00",
-    "updatedBy": "tiltec",
+    "updated": "2020-07-17T13:32:38+02:00",
+    "updatedBy": "Anonymous",
     "url": "/d/QpoAYo6mk/incoming-emails",
-    "version": 7
+    "version": 8
   }
 }

@@ -505,12 +505,12 @@
     "timezone": "",
     "title": "Push messages",
     "uid": "xyTxbocmz",
-    "version": 6
+    "version": 7
   },
   "meta": {
     "canAdmin": false,
-    "canEdit": false,
-    "canSave": false,
+    "canEdit": true,
+    "canSave": true,
     "canStar": true,
     "created": "2018-08-08T15:06:15+02:00",
     "createdBy": "tiltec",
@@ -524,9 +524,9 @@
     "provisionedExternalId": "",
     "slug": "push-messages",
     "type": "db",
-    "updated": "2018-11-28T21:35:58+01:00",
-    "updatedBy": "tiltec",
+    "updated": "2020-07-17T13:32:33+02:00",
+    "updatedBy": "Anonymous",
     "url": "/d/xyTxbocmz/push-messages",
-    "version": 6
+    "version": 7
   }
 }

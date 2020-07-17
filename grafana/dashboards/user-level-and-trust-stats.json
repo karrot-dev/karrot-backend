@@ -830,12 +830,12 @@
     "timezone": "",
     "title": "User level and trust stats",
     "uid": "ydNQAo5ik",
-    "version": 40
+    "version": 41
   },
   "meta": {
     "canAdmin": false,
-    "canEdit": false,
-    "canSave": false,
+    "canEdit": true,
+    "canSave": true,
     "canStar": true,
     "created": "2018-08-08T14:35:00+02:00",
     "createdBy": "tiltec",
@@ -849,9 +849,9 @@
     "provisionedExternalId": "",
     "slug": "user-level-and-trust-stats",
     "type": "db",
-    "updated": "2019-06-30T20:43:31+02:00",
-    "updatedBy": "tiltec",
+    "updated": "2020-07-17T13:31:49+02:00",
+    "updatedBy": "Anonymous",
     "url": "/d/ydNQAo5ik/user-level-and-trust-stats",
-    "version": 40
+    "version": 41
   }
 }

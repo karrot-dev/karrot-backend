@@ -907,12 +907,12 @@
     "variables": {
       "list": []
     },
-    "version": 27
+    "version": 28
   },
   "meta": {
     "canAdmin": false,
-    "canEdit": false,
-    "canSave": false,
+    "canEdit": true,
+    "canSave": true,
     "canStar": true,
     "created": "2017-02-28T16:09:41+01:00",
     "createdBy": "tiltec",
@@ -926,9 +926,9 @@
     "provisionedExternalId": "",
     "slug": "requests",
     "type": "db",
-    "updated": "2020-05-15T21:29:32+02:00",
-    "updatedBy": "tiltec",
+    "updated": "2020-07-17T13:32:37+02:00",
+    "updatedBy": "Anonymous",
     "url": "/d/000000003/requests",
-    "version": 27
+    "version": 28
   }
 }
