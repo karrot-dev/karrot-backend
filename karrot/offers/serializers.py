@@ -86,20 +86,6 @@ class OfferSerializer(serializers.ModelSerializer):
                     OfferImage.objects.create(offer=offer, **image)
         return serializers.ModelSerializer.update(self, instance, validated_data)
 
-    def validate_images(self, images):
-        existing_image_count = self.instance.images.count() if self.instance else 0
-        add_image_count = 0
-        remove_image_count = 0
-        for image in images:
-            if image.get('_removed', False):
-                remove_image_count += 1
-            elif not image.get('id', False):
-                add_image_count += 1
-        resulting_image_count = existing_image_count + add_image_count - remove_image_count
-        if resulting_image_count == 0:
-            raise serializers.ValidationError(_('Must have at least one image'))
-        return images
-
     def validate_group(self, group):
         if not group.is_member(self.context['request'].user):
             raise PermissionDenied(_('You are not a member of this group.'))
