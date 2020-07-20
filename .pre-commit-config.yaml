@@ -25,3 +25,11 @@
     entry: flake8
     language: system
     types: [python]
+  - id: makemessages
+    name: makemessages
+    entry: python manage.py makemessages
+    language: system
+    types: [python]
+    stages: [push]
+    require_serial: true
+    pass_filenames: false
