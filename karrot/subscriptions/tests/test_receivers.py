@@ -30,6 +30,7 @@ from karrot.subscriptions.models import ChannelSubscription, \
     PushSubscription, PushSubscriptionPlatform
 from karrot.users.factories import UserFactory, VerifiedUserFactory
 from karrot.utils.tests.fake import faker
+from karrot.utils.tests.images import image_path
 
 
 def parse_dates(data):
@@ -916,9 +917,7 @@ class UserReceiverTest(WSTestCase):
         self.unrelated_user = UserFactory()
         self.group = GroupFactory(members=[self.member, self.other_member])
         pathlib.Path(settings.MEDIA_ROOT).mkdir(exist_ok=True)
-        copyfile(
-            os.path.join(os.path.dirname(__file__), './photo.jpg'), os.path.join(settings.MEDIA_ROOT, 'photo.jpg')
-        )
+        copyfile(image_path, os.path.join(settings.MEDIA_ROOT, 'photo.jpg'))
         self.member.photo = 'photo.jpg'
         self.member.save()
         self.other_member.photo = 'photo.jpg'

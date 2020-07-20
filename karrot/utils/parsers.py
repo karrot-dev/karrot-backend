@@ -2,6 +2,7 @@ import json
 
 import glom
 from rest_framework.parsers import MultiPartParser
+from rest_framework.exceptions import ParseError
 
 
 class JSONWithFilesMultiPartParser(MultiPartParser):
@@ -50,8 +51,14 @@ class JSONWithFilesMultiPartParser(MultiPartParser):
 
     """
     def parse(self, stream, media_type=None, parser_context=None):
-        data = {}
         parsed = MultiPartParser.parse(self, stream, media_type, parser_context)
+
+        if len(parsed.data) > 0:
+            if len(parsed.files) > 0:
+                raise ParseError('Either pass data or files')
+            return parsed.data
+
+        data = {}
 
         # Find any JSON content first
         for name, content in parsed.files.items():

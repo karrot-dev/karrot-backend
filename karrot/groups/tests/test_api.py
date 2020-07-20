@@ -1,5 +1,4 @@
 import json
-import os
 from unittest.mock import patch, call
 
 from dateutil.relativedelta import relativedelta
@@ -18,6 +17,7 @@ from karrot.activities.models import to_range
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory
 from karrot.utils.tests.fake import faker
+from karrot.utils.tests.images import image_path
 
 
 class TestGroupsInfoAPI(APITestCase):
@@ -56,8 +56,7 @@ class TestGroupsInfoAPI(APITestCase):
 
     def test_group_image_redirect(self):
         # NOT logged in (as it needs to work in emails)
-        photo_file = os.path.join(os.path.dirname(__file__), './photo.jpg')
-        group = GroupFactory(photo=photo_file, members=[self.member])
+        group = GroupFactory(photo=image_path, members=[self.member])
         response = self.client.get('/api/groups-info/{}/photo/'.format(group.id))
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertEqual(response.url, group.photo.url)
@@ -239,7 +238,6 @@ class TestUploadGroupPhoto(APITestCase):
         self.user = UserFactory()
         self.group = GroupFactory(members=[self.user])
         self.url = '/api/groups/' + str(self.group.id) + '/'
-        self.photo_file = os.path.join(os.path.dirname(__file__), './photo.jpg')
 
     def test_upload_and_delete_photo(self):
         self.client.force_login(user=self.user)
@@ -248,7 +246,7 @@ class TestUploadGroupPhoto(APITestCase):
 
         History.objects.all().delete()
 
-        with open(self.photo_file, 'rb') as photo:
+        with open(image_path, 'rb') as photo:
             response = self.client.patch(self.url, {'photo': photo})
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 

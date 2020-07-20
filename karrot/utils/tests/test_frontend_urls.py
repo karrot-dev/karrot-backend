@@ -1,5 +1,3 @@
-import os
-
 from django.conf import settings
 from django.test import TestCase, override_settings
 
@@ -7,8 +5,7 @@ from karrot.groups.factories import GroupFactory
 from karrot.offers.factories import OfferFactory
 from karrot.utils.frontend_urls import absolute_url, offer_image_url, group_photo_url, group_photo_or_karrot_logo_url, \
     karrot_logo_url
-
-photo_path = os.path.join(os.path.dirname(__file__), './photo.jpg')
+from karrot.utils.tests.images import image_path
 
 
 class TestAbsoluteURL(TestCase):
@@ -21,7 +18,7 @@ class TestAbsoluteURL(TestCase):
         self.assertEqual(absolute_url('https://example.com/yay'), 'https://example.com/yay')
 
     def test_group_photo_url(self):
-        group = GroupFactory(photo=photo_path)
+        group = GroupFactory(photo=image_path)
         url = group_photo_url(group)
         self.assertEqual(
             url,
@@ -37,7 +34,7 @@ class TestAbsoluteURL(TestCase):
         self.assertEqual(url, None)
 
     def test_group_photo_or_karrot_logo_url(self):
-        group = GroupFactory(photo=photo_path)
+        group = GroupFactory(photo=image_path)
         url = group_photo_or_karrot_logo_url(group)
         self.assertEqual(
             url,
@@ -53,7 +50,7 @@ class TestAbsoluteURL(TestCase):
         self.assertEqual(url, karrot_logo_url())
 
     def test_offer_image_url(self):
-        offer = OfferFactory(images=[photo_path])
+        offer = OfferFactory(images=[image_path])
         url = offer_image_url(offer)
         self.assertEqual(url, '{hostname}/api/offers/{id}/image/'.format(
             hostname=settings.HOSTNAME,

@@ -19,6 +19,7 @@ from karrot.users.factories import UserFactory
 from karrot.utils.email_utils import time_filter, date_filter, generate_plaintext_from_html, prepare_email, \
     CustomAnymailMessage
 from karrot.utils.frontend_urls import group_photo_url, karrot_logo_url
+from karrot.utils.tests.images import image_path
 
 
 class TestEmailUtils(TestCase):
@@ -90,9 +91,7 @@ class TestEmailUtils(TestCase):
 
     def test_custom_header_image(self):
         pathlib.Path(settings.MEDIA_ROOT).mkdir(exist_ok=True)
-        copyfile(
-            os.path.join(os.path.dirname(__file__), './photo.jpg'), os.path.join(settings.MEDIA_ROOT, 'photo.jpg')
-        )
+        copyfile(image_path, os.path.join(settings.MEDIA_ROOT, 'photo.jpg'))
         self.group.photo = 'photo.jpg'
         self.group.save()
 
