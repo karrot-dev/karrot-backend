@@ -558,7 +558,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr ""
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
-#: karrot/offers/serializers.py:105 karrot/places/serializers.py:78
+#: karrot/offers/serializers.py:91 karrot/places/serializers.py:78
 msgid "You are not a member of this group."
 msgstr ""
 
@@ -694,10 +694,6 @@ msgstr ""
 
 #: karrot/offers/api.py:160
 msgid "You can only archive an active offer"
-msgstr ""
-
-#: karrot/offers/serializers.py:100
-msgid "Must have at least one image"
 msgstr ""
 
 #: karrot/offers/templates/new_offer.html.jinja2:6
