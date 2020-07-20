@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class IsUpcoming(permissions.BasePermission):
-    message = _('The pickup date is in the past. CHANGED')
+    message = _('The pickup date is in the past.')
 
     def has_object_permission(self, request, view, obj):
         # do allow GETs for pick-ups in the past
