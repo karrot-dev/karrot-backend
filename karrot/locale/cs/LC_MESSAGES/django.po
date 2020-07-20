@@ -105,7 +105,7 @@ msgstr "Komentář i váha nemohou být prázdné."
 #: karrot/activities/tasks.py:69
 #, python-format
 msgid "Upcoming %(activity_type)s"
-msgstr ""
+msgstr "Připravujeme %(activity_type)s"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:6
 #: karrot/activities/templates/activity_notification.html.jinja2:227
@@ -494,6 +494,9 @@ msgid ""
 "<strong>editing permissions</strong>. For example, you can now modify your "
 "group, places and pickup dates, or create new ones."
 msgstr ""
+"Od ostatních členů skupiny jste získali dostatečnou důvěru, abyste vám "
+"udělili <strong>oprávnění k úpravám</strong>. Nyní můžete například upravit "
+"svou skupinu, místa a data vyzvednutí nebo vytvořit nová."
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:215
 msgid "Use your power wisely!"
