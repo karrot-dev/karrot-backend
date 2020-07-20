@@ -1,12 +1,14 @@
+from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.fields import DateTimeField
+from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from karrot.conversations.helpers import normalize_emoji_name
 from karrot.conversations.models import (
     ConversationMessage, ConversationParticipant, ConversationMessageReaction, ConversationThreadParticipant,
-    ConversationMeta, ConversationNotificationStatus
+    ConversationMeta, ConversationNotificationStatus, ConversationMessageImage
 )
 
 
@@ -97,6 +99,33 @@ class ConversationThreadSerializer(serializers.ModelSerializer):
         return participant
 
 
+class ConversationMessageImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConversationMessageImage
+        fields = (
+            'id',
+            'position',
+            'image',
+            'image_urls',
+            '_removed',
+        )
+
+    id = serializers.IntegerField(required=False)
+    _removed = serializers.BooleanField(required=False)
+
+    image = VersatileImageFieldSerializer(
+        sizes='conversation_message_image',
+        required=True,
+        allow_null=False,
+        write_only=True,
+    )
+    image_urls = VersatileImageFieldSerializer(
+        sizes='conversation_message_image',
+        source='image',
+        read_only=True,
+    )
+
+
 class ConversationMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConversationMessage
@@ -113,6 +142,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
             'is_editable',
             'thread',  # ideally would only be writable on create
             'thread_meta',
+            'images',
         ]
         read_only_fields = (
             'author',
@@ -124,6 +154,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
         )
 
     thread_meta = serializers.SerializerMethodField()
+    images = ConversationMessageImageSerializer(many=True)
 
     def get_thread_meta(self, message):
         if not message.is_first_in_thread():
@@ -173,8 +204,30 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        user = self.context['request'].user
-        return ConversationMessage.objects.create(author=user, **validated_data)
+        images = validated_data.pop('images')
+        # Save the offer and its associated images in one transaction
+        # Allows us to trigger the notifications in the receiver only after all is saved
+        with transaction.atomic():
+            user = self.context['request'].user
+            conversation_message = ConversationMessage.objects.create(author=user, **validated_data)
+            for image in images:
+                ConversationMessageImage.objects.create(conversation_message=conversation_message, **image)
+        return conversation_message
+
+    def update(self, instance, validated_data):
+        conversation_message = instance
+        images = validated_data.pop('images', None)
+        if images:
+            for image in images:
+                pk = image.pop('id', None)
+                if pk:
+                    if image.get('_removed', False):
+                        ConversationMessageImage.objects.filter(pk=pk).delete()
+                    else:
+                        ConversationMessageImage.objects.filter(pk=pk).update(**image)
+                else:
+                    ConversationMessageImage.objects.create(conversation_message=conversation_message, **image)
+        return serializers.ModelSerializer.update(self, instance, validated_data)
 
 
 class ConversationSerializer(serializers.ModelSerializer):

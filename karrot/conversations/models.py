@@ -5,9 +5,10 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import Count, F, Q, Value
+from django.db.models import Count, F, Q, Value, IntegerField
 from django.db.models.manager import BaseManager
 from django.utils import timezone
+from versatileimagefield.fields import VersatileImageField
 
 from karrot.base.base_models import BaseModel, UpdatedAtMixin
 from karrot.conversations.signals import new_conversation_message, new_thread_message, conversation_marked_seen, \
@@ -423,3 +424,20 @@ class ConversationMessageReaction(BaseModel):
 
     class Meta:
         unique_together = ['user', 'name', 'message']
+
+
+class ConversationMessageImage(BaseModel):
+    class Meta:
+        ordering = ['position']
+
+    offer = models.ForeignKey(
+        ConversationMessage,
+        related_name='images',
+        on_delete=models.CASCADE,
+    )
+    image = VersatileImageField(
+        'ConversationMessage Image',
+        upload_to='conversation_message_images',
+        null=False,
+    )
+    position = IntegerField(default=0)
