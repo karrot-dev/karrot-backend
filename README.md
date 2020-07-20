@@ -34,7 +34,6 @@ To get proper introspection and support from PyCharm, it's necessary to set up a
 ```
 virtualenv env
 source ./env/bin/activate
-pip install pip-tools
 ./sync.py
 ```
 
