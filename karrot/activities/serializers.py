@@ -1,5 +1,6 @@
 import dateutil.rrule
 from datetime import timedelta
+
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
@@ -26,14 +27,33 @@ class ActivityHistorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class DateTimeFieldWithTimezone(DateTimeField):
+    def get_attribute(self, instance):
+        value = super().get_attribute(instance)
+        if hasattr(instance, 'timezone'):
+            return value.astimezone(instance.timezone)
+        return value
+
+    def enforce_timezone(self, value):
+        if timezone.is_aware(value):
+            return value
+        return super().enforce_timezone(value)
+
+
 class DateTimeRangeField(serializers.Field):
-    child = DateTimeField()
+    child = DateTimeFieldWithTimezone()
 
     default_error_messages = {
         'list': _('Must be a list'),
         'length': _('Must be a list with one or two values'),
         'required': _('Must pass start value'),
     }
+
+    def get_attribute(self, instance):
+        value = super().get_attribute(instance)
+        if hasattr(instance, 'timezone'):
+            return value.astimezone(instance.timezone)
+        return value
 
     def to_representation(self, value):
         return [
@@ -81,7 +101,7 @@ class ActivitySerializer(serializers.ModelSerializer):
         ]
 
     participants = serializers.SerializerMethodField()
-    feedback_due = serializers.DateTimeField(read_only=True)
+    feedback_due = DateTimeFieldWithTimezone(read_only=True)
 
     date = DateTimeRangeField()
 
@@ -265,8 +285,9 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
             'id',
         ]
 
+    start_date = DateTimeFieldWithTimezone()
     dates_preview = serializers.ListField(
-        child=serializers.DateTimeField(),
+        child=DateTimeFieldWithTimezone(),
         read_only=True,
         source='dates',
     )
