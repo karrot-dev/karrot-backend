@@ -1,0 +1,27 @@
+- repo: local
+  hooks:
+  - id: autoflake
+    name: autoflake
+    entry: autoflake
+    args:
+    - "--in-place"
+    - "--remove-all-unused-imports"
+    - "--remove-unused-variables"
+    - "--remove-duplicate-keys"
+    - "--expand-star-imports"
+    language: system
+    types: [python]
+    exclude: "karrot\/.*\/migrations"
+  - id: yapf
+    name: yapf
+    entry: yapf
+    args:
+    - "--in-place"
+    language: system
+    types: [python]
+    exclude: "karrot\/.*\/migrations"
+  - id: flake8
+    name: flake8
+    entry: flake8
+    language: system
+    types: [python]
