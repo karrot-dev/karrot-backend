@@ -70,6 +70,14 @@ jobs:
           name: no missing migrations?
           command: env/bin/python manage.py makemigrations --dry-run --check --no-input
       - run:
+          name: no missing makemessages?
+          command: |
+            set -xe
+            source env/bin/activate
+            python manage.py makemessages
+            git add .
+            git diff --staged --exit-code
+      - run:
           name: run tests
           command: |
             mkdir -p test-reports
@@ -99,10 +107,7 @@ jobs:
           name: push source messages to transifex
           command: |
             set -xe
-            cp config/local_settings.py.ci config/local_settings.py
-            (cd mjml && yarn && ./convert)
             source env/bin/activate
-            python manage.py makemessages
             tx push -s --no-interactive
       - slack/status:
           fail_only: true
