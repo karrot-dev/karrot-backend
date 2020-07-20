@@ -430,7 +430,7 @@ class ConversationMessageImage(BaseModel):
     class Meta:
         ordering = ['position']
 
-    offer = models.ForeignKey(
+    message = models.ForeignKey(
         ConversationMessage,
         related_name='images',
         on_delete=models.CASCADE,

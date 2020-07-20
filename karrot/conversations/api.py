@@ -143,6 +143,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
              ) \
             .prefetch_related(
                 'conversation__latest_message__reactions',
+                'conversation__latest_message__images',
                 'conversation__participants',
              ) \
             .order_by('-conversation__latest_message_id')
@@ -296,7 +297,7 @@ class ConversationMessageViewSet(
                 .prefetch_related('participants', 'latest_message')
 
         if self.action == 'list':
-            qs = qs.prefetch_related('reactions', 'participants')
+            qs = qs.prefetch_related('reactions', 'participants', 'images')
 
         if self.request.query_params.get('thread', None):
             return qs.only_threads_and_replies()
@@ -322,6 +323,7 @@ class ConversationMessageViewSet(
         messages = [t.latest_message for t in threads if t.latest_message is not None]
 
         prefetch_related_objects(threads + messages, 'reactions')
+        prefetch_related_objects(threads + messages, 'images')
 
         serializer = self.get_serializer(threads, many=True)
         message_serializer = self.get_serializer(messages, many=True)

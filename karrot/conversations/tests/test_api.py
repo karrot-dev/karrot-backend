@@ -73,7 +73,7 @@ class TestConversationsAPI(APITestCase):
         [c.messages.create(content='hey', author=user) for c in conversations]
 
         self.client.force_login(user=user)
-        with self.assertNumQueries(15):
+        with self.assertNumQueries(16):
             response = self.client.get('/api/conversations/', {'group': group.id}, format='json')
         results = response.data['results']
 
@@ -107,7 +107,7 @@ class TestConversationsAPI(APITestCase):
 
     def test_list_messages(self):
         self.client.force_login(user=self.participant1)
-        with self.assertNumQueries(5):
+        with self.assertNumQueries(6):
             response = self.client.get('/api/messages/?conversation={}'.format(self.conversation1.id), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 1)
@@ -263,7 +263,7 @@ class TestConversationThreadsAPI(APITestCase):
         self.create_reply(thread=most_recent_thread)
 
         self.client.force_login(user=self.user)
-        with self.assertNumQueries(5):
+        with self.assertNumQueries(6):
             response = self.client.get('/api/messages/my_threads/', format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

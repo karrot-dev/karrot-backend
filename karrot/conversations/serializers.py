@@ -154,7 +154,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
         )
 
     thread_meta = serializers.SerializerMethodField()
-    images = ConversationMessageImageSerializer(many=True)
+    images = ConversationMessageImageSerializer(many=True, default=list)
 
     def get_thread_meta(self, message):
         if not message.is_first_in_thread():
@@ -204,7 +204,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        images = validated_data.pop('images')
+        images = validated_data.pop('images', [])
         # Save the offer and its associated images in one transaction
         # Allows us to trigger the notifications in the receiver only after all is saved
         with transaction.atomic():
