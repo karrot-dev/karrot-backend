@@ -13,6 +13,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import CursorPagination
+from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.schemas import ManualSchema
@@ -29,6 +30,7 @@ from karrot.conversations.serializers import (
 )
 from karrot.issues.models import Issue
 from karrot.issues.serializers import IssueSerializer
+from karrot.utils.parsers import JSONWithFilesMultiPartParser
 from karrot.offers.models import Offer
 from karrot.offers.serializers import OfferSerializer
 from karrot.activities.models import Activity
@@ -277,6 +279,7 @@ class ConversationMessageViewSet(
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = ConversationMessageFilter
     pagination_class = MessagePagination
+    parser_classes = [JSONWithFilesMultiPartParser, JSONParser]
 
     @property
     def paginator(self):

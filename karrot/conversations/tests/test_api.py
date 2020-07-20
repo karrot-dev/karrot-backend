@@ -18,6 +18,7 @@ from karrot.activities.factories import ActivityFactory
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import execute_scheduled_tasks_immediately
 from karrot.users.factories import UserFactory, VerifiedUserFactory
+from karrot.utils.tests.images import encode_data_with_images, image_path
 
 
 class TestConversationsAPI(APITestCase):
@@ -150,6 +151,24 @@ class TestConversationsAPI(APITestCase):
         self.assertEqual(conversation.messages.first().created_at, parse(response.data['created_at']), response.data)
         self.assertEqual(conversation.messages.first().id, response.data['id'])
         self.assertEqual(conversation.messages.first().author.id, response.data['author'])
+
+    def test_create_message_with_image(self):
+        conversation = ConversationFactory(participants=[self.participant1])
+
+        self.client.force_login(user=self.participant1)
+        with open(image_path, 'rb') as image_file:
+            data = {
+                'conversation': conversation.id,
+                'content': 'a nice message',
+                'images': [{
+                    'position': 0,
+                    'image': image_file
+                }],
+            }
+            response = self.client.post('/api/messages/', data=encode_data_with_images(data))
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+            self.assertEqual(response.data['content'], data['content'])
+            self.assertTrue('full_size' in response.data['images'][0]['image_urls'])
 
     def test_cannot_create_message_without_specifying_conversation(self):
         self.client.force_login(user=self.participant1)

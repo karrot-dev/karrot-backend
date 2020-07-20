@@ -209,13 +209,13 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
         # Allows us to trigger the notifications in the receiver only after all is saved
         with transaction.atomic():
             user = self.context['request'].user
-            conversation_message = ConversationMessage.objects.create(author=user, **validated_data)
+            message = ConversationMessage.objects.create(author=user, **validated_data)
             for image in images:
-                ConversationMessageImage.objects.create(conversation_message=conversation_message, **image)
-        return conversation_message
+                ConversationMessageImage.objects.create(message=message, **image)
+        return message
 
     def update(self, instance, validated_data):
-        conversation_message = instance
+        message = instance
         images = validated_data.pop('images', None)
         if images:
             for image in images:
@@ -226,7 +226,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
                     else:
                         ConversationMessageImage.objects.filter(pk=pk).update(**image)
                 else:
-                    ConversationMessageImage.objects.create(conversation_message=conversation_message, **image)
+                    ConversationMessageImage.objects.create(message=message, **image)
         return serializers.ModelSerializer.update(self, instance, validated_data)
 
 
