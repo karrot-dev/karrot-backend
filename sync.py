@@ -54,7 +54,10 @@ if process_mjml:
     header("Generating new templates")
     subprocess.run(['./mjml/convert'], env=environ, check=True)
 
-header("Installing pre-commit hook")
-subprocess.run(['pre-commit', 'install'], env=environ, check=True)
+header("Installing pre-commit hooks")
+hook_types = ['pre-commit', 'pre-push']
+
+for t in hook_types:
+    subprocess.run(['pre-commit', 'install', '--hook-type', t], env=environ, check=True)
 
 header('All done ☺')
