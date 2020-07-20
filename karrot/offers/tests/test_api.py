@@ -62,6 +62,18 @@ class TestOffersAPI(APITestCase):
             self.assertEqual(response.data['name'], data['name'])
             self.assertTrue('full_size' in response.data['images'][0]['image_urls'])
 
+    def test_create_offer_without_image(self):
+        self.client.force_login(user=self.user)
+        data = {
+            'name': faker.name(),
+            'description': faker.text(),
+            'group': self.group.id,
+            'images': [],
+        }
+        response = self.client.post('/api/offers/', data=encode_offer_data(data))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.assertEqual(response.data['name'], data['name'])
+
     def test_cannot_fetch_another_users_archived_offer(self):
         offer = OfferFactory(user=self.user, group=self.group, images=[image_path], status='archived')
         self.client.force_login(user=self.another_user)
@@ -143,7 +155,7 @@ class TestOffersAPI(APITestCase):
             } for image in offer.images.all()],
         }
         response = self.client.patch('/api/offers/{}/'.format(offer.id), encode_offer_data(data), format='multipart')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_reposition_image(self):
         offer = OfferFactory(user=self.user, group=self.group, images=[image_path, image_path])

@@ -21,6 +21,10 @@ from karrot.utils import markdown
 from karrot.groups import roles, themes
 
 
+def default_group_features():
+    return ['offers']
+
+
 class GroupStatus(Enum):
     ACTIVE = 'active'
     INACTIVE = 'inactive'
@@ -91,7 +95,7 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
         upload_to='group_photos',
         null=True,
     )
-    features = ArrayField(TextField(), default=list)
+    features = ArrayField(TextField(), default=default_group_features)
 
     @property
     def group(self):
