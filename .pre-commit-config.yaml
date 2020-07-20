@@ -6,6 +6,9 @@
     args:
     - "--in-place"
     - "--remove-all-unused-imports"
+    - "--remove-unused-variables"
+    - "--remove-duplicate-keys"
+    - "--expand-star-imports"
     language: system
     types: [python]
     exclude: "karrot\/.*\/migrations"
