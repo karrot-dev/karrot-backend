@@ -309,7 +309,7 @@ EMAIL_REPLY_TRIMMER_URL = None
 # NB: Keep this as the last line, and keep
 # local_settings.py out of version control
 try:
-    from .local_settings import *
+    from .local_settings import *  # noqa
 except ImportError:
     raise Exception(
         "config/local_settings.py is missing! Copy the provided example file and adapt it to your own config."
