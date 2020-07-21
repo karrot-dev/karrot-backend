@@ -46,58 +46,58 @@ msgstr "Upphämtningsdatumet är redan fullt."
 msgid "This feedback is given by another user."
 msgstr "Denna feedback ges av en annan användare."
 
-#: karrot/activities/permissions.py:57 karrot/activities/serializers.py:399
+#: karrot/activities/permissions.py:57 karrot/activities/serializers.py:420
 #, python-format
 msgid ""
 "You can't give feedback for pickups more than %(days_number)s days ago."
 msgstr ""
 "Du kan inte ge feedback för upphämtningar äldre än %(days_number)s dagar."
 
-#: karrot/activities/permissions.py:67 karrot/activities/serializers.py:112
-#: karrot/activities/serializers.py:297 karrot/applications/api.py:36
+#: karrot/activities/permissions.py:67 karrot/activities/serializers.py:132
+#: karrot/activities/serializers.py:318 karrot/applications/api.py:36
 #: karrot/groups/api.py:50 karrot/invitations/serializers.py:28
 #: karrot/issues/serializers.py:122 karrot/places/api.py:19
 #: karrot/places/serializers.py:80
 msgid "You need to be a group editor"
 msgstr "Du måste vara gruppredigerare"
 
-#: karrot/activities/serializers.py:33
+#: karrot/activities/serializers.py:47
 msgid "Must be a list"
 msgstr "Måste vara en lista"
 
-#: karrot/activities/serializers.py:34
+#: karrot/activities/serializers.py:48
 msgid "Must be a list with one or two values"
 msgstr "Måste vara en lista med ett eller två värden"
 
-#: karrot/activities/serializers.py:35
+#: karrot/activities/serializers.py:49
 msgid "Must pass start value"
 msgstr "Måste passera startvärdet"
 
-#: karrot/activities/serializers.py:117
+#: karrot/activities/serializers.py:137
 msgid "The date should be in the future."
 msgstr "Datumet bör vara i framtiden."
 
-#: karrot/activities/serializers.py:175
+#: karrot/activities/serializers.py:195
 msgid "You can't move pickups that are part of a series."
 msgstr "Du kan inte flytta upphämtningar som ingår i en serie."
 
-#: karrot/activities/serializers.py:310
+#: karrot/activities/serializers.py:331
 msgid "Invalid recurrence rule."
 msgstr "Ogiltig återfallsregel."
 
-#: karrot/activities/serializers.py:312
+#: karrot/activities/serializers.py:333
 msgid "Only single recurrence rules are allowed."
 msgstr "Endast enskilda återfallsregler är tillåtna."
 
-#: karrot/activities/serializers.py:394
+#: karrot/activities/serializers.py:415
 msgid "The pickup is not done yet"
 msgstr "Upphämtningen är inte klar ännu"
 
-#: karrot/activities/serializers.py:396
+#: karrot/activities/serializers.py:417
 msgid "You aren't assigned to the pickup."
 msgstr "Du har inte tilldelats upphämtningen."
 
-#: karrot/activities/serializers.py:413
+#: karrot/activities/serializers.py:434
 msgid "Both comment and weight cannot be blank."
 msgstr "Både kommentar och vikt kan inte vara tomma."
 
@@ -600,7 +600,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "En inbjudan har redan skickats till mejldressen"
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
-#: karrot/offers/serializers.py:105 karrot/places/serializers.py:78
+#: karrot/offers/serializers.py:91 karrot/places/serializers.py:78
 msgid "You are not a member of this group."
 msgstr "Du är inte en medlem i denna grupp"
 
@@ -743,10 +743,6 @@ msgstr "Du är inte ägare till detta erbjudande"
 #: karrot/offers/api.py:160
 msgid "You can only archive an active offer"
 msgstr "Du kan bara arkivera ett aktivt erbjudande"
-
-#: karrot/offers/serializers.py:100
-msgid "Must have at least one image"
-msgstr "Måste ha minst en bild"
 
 #: karrot/offers/templates/new_offer.html.jinja2:6
 #: karrot/offers/templates/new_offer.subject.jinja2:1

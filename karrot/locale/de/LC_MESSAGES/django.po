@@ -49,7 +49,7 @@ msgstr "Dieser Abholtermin ist bereits voll."
 msgid "This feedback is given by another user."
 msgstr "Diese Rückmeldung wurde von einem anderen Benutzer abgegeben."
 
-#: karrot/activities/permissions.py:57 karrot/activities/serializers.py:399
+#: karrot/activities/permissions.py:57 karrot/activities/serializers.py:420
 #, python-format
 msgid ""
 "You can't give feedback for pickups more than %(days_number)s days ago."
@@ -57,51 +57,51 @@ msgstr ""
 "Du kannst keine Rückmeldung geben, wenn die Abholung mehr als "
 "%(days_number)s Tage zurückliegt."
 
-#: karrot/activities/permissions.py:67 karrot/activities/serializers.py:112
-#: karrot/activities/serializers.py:297 karrot/applications/api.py:36
+#: karrot/activities/permissions.py:67 karrot/activities/serializers.py:132
+#: karrot/activities/serializers.py:318 karrot/applications/api.py:36
 #: karrot/groups/api.py:50 karrot/invitations/serializers.py:28
 #: karrot/issues/serializers.py:122 karrot/places/api.py:19
 #: karrot/places/serializers.py:80
 msgid "You need to be a group editor"
 msgstr "Du brauchst Bearbeitungsrechte für diese Gruppe."
 
-#: karrot/activities/serializers.py:33
+#: karrot/activities/serializers.py:47
 msgid "Must be a list"
 msgstr "Muss eine Liste sein"
 
-#: karrot/activities/serializers.py:34
+#: karrot/activities/serializers.py:48
 msgid "Must be a list with one or two values"
 msgstr "Muss eine Liste mit einem oder zwei Werten sein"
 
-#: karrot/activities/serializers.py:35
+#: karrot/activities/serializers.py:49
 msgid "Must pass start value"
 msgstr "Muss einen Startwert enthalten"
 
-#: karrot/activities/serializers.py:117
+#: karrot/activities/serializers.py:137
 msgid "The date should be in the future."
 msgstr "Der Abholtermin muss in der Zukunft liegen."
 
-#: karrot/activities/serializers.py:175
+#: karrot/activities/serializers.py:195
 msgid "You can't move pickups that are part of a series."
 msgstr "Du kannst keinen Abholungen verschieben, die Teil einer Serie sind."
 
-#: karrot/activities/serializers.py:310
+#: karrot/activities/serializers.py:331
 msgid "Invalid recurrence rule."
 msgstr "Ungültige Wiederholungsregel"
 
-#: karrot/activities/serializers.py:312
+#: karrot/activities/serializers.py:333
 msgid "Only single recurrence rules are allowed."
 msgstr "Nur einfache Wiederholungsregeln sind erlaubt."
 
-#: karrot/activities/serializers.py:394
+#: karrot/activities/serializers.py:415
 msgid "The pickup is not done yet"
 msgstr "Diese Abholung ist noch nicht erledigt."
 
-#: karrot/activities/serializers.py:396
+#: karrot/activities/serializers.py:417
 msgid "You aren't assigned to the pickup."
 msgstr "Du hast dich nicht für diese Abholung gemeldet."
 
-#: karrot/activities/serializers.py:413
+#: karrot/activities/serializers.py:434
 msgid "Both comment and weight cannot be blank."
 msgstr "Kommentar und Gewicht dürfen nicht beide leer sein."
 
@@ -608,7 +608,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "Eine Einladung wurde bereits an diese E-Mail-Adresse versendet"
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
-#: karrot/offers/serializers.py:105 karrot/places/serializers.py:78
+#: karrot/offers/serializers.py:91 karrot/places/serializers.py:78
 msgid "You are not a member of this group."
 msgstr "Du bist kein Mitglied dieser Gruppe."
 
@@ -754,10 +754,6 @@ msgstr "Du bist nicht der Eigentümer dieses Angebots"
 #: karrot/offers/api.py:160
 msgid "You can only archive an active offer"
 msgstr "Nur aktive Angebote können archiviert werden."
-
-#: karrot/offers/serializers.py:100
-msgid "Must have at least one image"
-msgstr "Muss mindestens ein Bild haben"
 
 #: karrot/offers/templates/new_offer.html.jinja2:6
 #: karrot/offers/templates/new_offer.subject.jinja2:1
