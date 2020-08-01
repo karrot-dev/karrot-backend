@@ -67,7 +67,7 @@ gevent==20.6.2            # via -r requirements.in
 glom==20.5.0              # via -r requirements.in
 gprof2dot==2019.11.30     # via django-silk
 greenlet==0.4.16          # via gevent
-hiredis==1.0.1            # via -r requirements.in, aioredis
+hiredis==1.1.0            # via -r requirements.in, aioredis
 html2text==2020.1.16      # via -r requirements.in
 html5lib==1.1             # via talon
 huey==2.2.0               # via -r requirements.in
