@@ -69,7 +69,7 @@ msgstr "Muss eng Lëscht mat een oder zwee Wäerter sinn"
 
 #: karrot/activities/serializers.py:49
 msgid "Must pass start value"
-msgstr ""
+msgstr "Ee Start-Wäert muss ugi ginn."
 
 #: karrot/activities/serializers.py:137
 msgid "The date should be in the future."
@@ -81,7 +81,7 @@ msgstr "Du kanns Ofhuelungen, déi Deel vun enger Serie sinn, net réckelen."
 
 #: karrot/activities/serializers.py:331
 msgid "Invalid recurrence rule."
-msgstr ""
+msgstr "Ongëlteg Widderhuelungs-Reegel."
 
 #: karrot/activities/serializers.py:333
 msgid "Only single recurrence rules are allowed."
