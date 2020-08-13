@@ -250,7 +250,7 @@ msgstr ""
 #: karrot/conversations/api.py:63 karrot/conversations/api.py:242
 #: karrot/conversations/api.py:409 karrot/conversations/serializers.py:146
 msgid "You are not in this conversation"
-msgstr ""
+msgstr "Du bass net an dëser Ënnerhalung"
 
 #: karrot/conversations/api.py:72
 msgid "You are not the author of this message"
@@ -298,7 +298,7 @@ msgstr ""
 
 #: karrot/conversations/serializers.py:148
 msgid "This conversation has been closed"
-msgstr ""
+msgstr "Dës Ënnerhalung gouf zougemaach"
 
 #: karrot/conversations/templates/conversation_message_notification.html.jinja2:165
 msgid ""
@@ -324,7 +324,7 @@ msgstr ""
 
 #: karrot/groups/api.py:29
 msgid "You are already a member."
-msgstr ""
+msgstr "Du bass schonn e Member."
 
 #: karrot/groups/api.py:36
 msgid "You can only join open groups."
@@ -332,11 +332,11 @@ msgstr "Du kanns just oppe Gruppe bäitrieden."
 
 #: karrot/groups/api.py:43
 msgid "You cannot give trust to yourself"
-msgstr ""
+msgstr "Du kanns dir selwer kee Vertraue ginn"
 
 #: karrot/groups/api.py:200
 msgid "You already gave trust to this user"
-msgstr ""
+msgstr "Du hues dësem Benotzer scho Vertraue ginn"
 
 #: karrot/groups/serializers.py:25
 msgid "Unknown timezone"
@@ -348,11 +348,11 @@ msgstr "Spillplaz"
 
 #: karrot/groups/serializers.py:133 karrot/groups/serializers.py:228
 msgid "You cannot manage agreements"
-msgstr ""
+msgstr "Du kanns Ofkommes net verwalten"
 
 #: karrot/groups/serializers.py:135
 msgid "Agreement is not for this group"
-msgstr ""
+msgstr "D'Ofkommes ass net fir dës Grupp"
 
 #: karrot/groups/serializers.py:226
 msgid "You are not in this group"
@@ -372,13 +372,15 @@ msgstr ""
 #: karrot/groups/templates/group_summary.html.jinja2:205
 #, python-format
 msgid "%(group_name)s weekly summary"
-msgstr ""
+msgstr "Zesummefaassung vun der Woch vun %(group_name)s"
 
 #: karrot/groups/templates/group_summary.html.jinja2:207
 msgid ""
 "Hope you are having a good weekend! Here's a summary of what happened in "
 "your group last week"
 msgstr ""
+"Hoffentlech hues du ee gudde Weekend! Hei ass eng Zesummefaassung vun deem "
+"wat d'läscht Woch an denger Grupp geschitt ass"
 
 #: karrot/groups/templates/group_summary.html.jinja2:211
 #, python-format
@@ -563,7 +565,7 @@ msgstr ""
 
 #: karrot/invitations/serializers.py:20
 msgid "An invitation has already been sent to this e-mail address"
-msgstr ""
+msgstr "Eng Aluedung gouf schonn un dës E-Mail-Adress geschéckt"
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
 #: karrot/offers/serializers.py:91 karrot/places/serializers.py:78
@@ -572,11 +574,11 @@ msgstr "Du bass kee Member vun dëser Grupp."
 
 #: karrot/invitations/serializers.py:33
 msgid "User is already member of group"
-msgstr ""
+msgstr "De Benotzer ass scho Member vun der Grupp"
 
 #: karrot/invitations/serializers.py:41
 msgid "Email could not be sent"
-msgstr ""
+msgstr "D'E-Mail konnt net geschéckt ginn"
 
 #: karrot/invitations/templates/emailinvitation.html.jinja2:6
 #: karrot/invitations/templates/emailinvitation.subject.jinja2:1
@@ -628,7 +630,7 @@ msgstr ""
 
 #: karrot/issues/serializers.py:139
 msgid "Affected user is not part of that group"
-msgstr ""
+msgstr "De betraffene Benotzer ass net Deel vun där Grupp"
 
 #: karrot/issues/serializers.py:141
 msgid "A conflict resolution about that user has already been started"
@@ -704,7 +706,7 @@ msgstr ""
 
 #: karrot/offers/api.py:160
 msgid "You can only archive an active offer"
-msgstr ""
+msgstr "Du kanns just eng aktiv Offer archivéieren"
 
 #: karrot/offers/templates/new_offer.html.jinja2:6
 #: karrot/offers/templates/new_offer.subject.jinja2:1
@@ -916,12 +918,12 @@ msgstr ""
 
 #: karrot/users/templates/passwordreset_success.html.jinja2:213
 msgid "Your password has been successfully changed!"
-msgstr ""
+msgstr "Däi Passwuert gouf erfollegräich geännert!"
 
 #: karrot/users/templates/signup.html.jinja2:205
 #, python-format
 msgid "Thank you for signing up to %(site_name)s"
-msgstr ""
+msgstr "Merci fir d'Umellen op %(site_name)s"
 
 #: karrot/users/templates/signup.html.jinja2:237
 msgid ""
