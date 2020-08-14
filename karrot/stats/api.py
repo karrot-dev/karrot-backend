@@ -12,7 +12,7 @@ from rest_framework.viewsets import GenericViewSet
 from karrot.history.models import HistoryTypus, History
 from karrot.places.models import Place
 from karrot.stats import stats
-from karrot.stats.serializers import StatsSerializer, PlaceStatsSerializer
+from karrot.stats.serializers import FrontendStatsSerializer, PlaceStatsSerializer
 
 
 class StatsThrottle(UserRateThrottle):
@@ -53,13 +53,13 @@ class PlaceStatsViewSet(ListModelMixin, GenericViewSet):
         )
 
 
-class StatsView(views.APIView):
+class FrontendStatsView(views.APIView):
     throttle_classes = [StatsThrottle]
     parser_classes = [JSONParser]
 
     @staticmethod
     def post(request, **kwargs):
-        serializer = StatsSerializer(data=request.data, context={'request': request})
+        serializer = FrontendStatsSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             stats.received_stats(serializer.data['stats'])
             return Response(status=status.HTTP_204_NO_CONTENT)

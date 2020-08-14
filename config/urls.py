@@ -23,7 +23,7 @@ from karrot.notifications.api import NotificationViewSet
 from karrot.offers.api import OfferViewSet
 from karrot.activities.api import ActivityViewSet, ActivitySeriesViewSet, FeedbackViewSet
 from karrot.places.api import PlaceViewSet
-from karrot.stats.api import StatsView, PlaceStatsViewSet
+from karrot.stats.api import FrontendStatsView, PlaceStatsViewSet
 from karrot.status.api import StatusView
 from karrot.subscriptions.api import PushSubscriptionViewSet
 from karrot.template_previews import views as template_preview_views
@@ -95,7 +95,7 @@ urlpatterns = [
     path('api/auth/password/reset/', ResetPasswordView.as_view()),
     path('api/unsubscribe/<token>/', TokenUnsubscribeView.as_view()),
     path('api/auth/', AuthView.as_view()),
-    path('api/stats/', StatsView.as_view()),
+    path('api/stats/', FrontendStatsView.as_view()),
     path('api/status/', StatusView.as_view()),
     path('api/', include((router.urls))),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),

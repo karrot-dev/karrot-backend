@@ -26,7 +26,7 @@ class PlaceStatsSerializer(serializers.ModelSerializer):
         ]
 
 
-class StatsEntrySerializer(serializers.Serializer):
+class FrontendStatsEntrySerializer(serializers.Serializer):
     # timings
     ms = serializers.IntegerField()
     ms_resources = serializers.IntegerField()
@@ -46,8 +46,8 @@ class StatsEntrySerializer(serializers.Serializer):
     dev = serializers.BooleanField()
 
 
-class StatsSerializer(serializers.Serializer):
-    stats = StatsEntrySerializer(many=True)
+class FrontendStatsSerializer(serializers.Serializer):
+    stats = FrontendStatsEntrySerializer(many=True)
 
     def validate_stats(self, stats):
         if len(stats) > MAX_STATS:
