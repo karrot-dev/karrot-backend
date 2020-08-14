@@ -1,5 +1,9 @@
+from datetime import timedelta
+
 from django.contrib.postgres.fields import JSONField
 from django.db import models
+from django.db.models import IntegerField
+from django.db.models.expressions import RawSQL, When, Case
 from django.dispatch import Signal
 from django.utils import timezone
 from django_enumfield import enum
@@ -47,6 +51,34 @@ class HistoryQuerySet(models.QuerySet):
         # TODO remove and just use post_save signal
         history_created.send(sender=History.__class__, instance=entry)
         return entry
+
+    def activity_left_late(self, **kwargs):
+        return self.annotate_activity_leave_seconds().filter(
+            typus=HistoryTypus.ACTIVITY_LEAVE,
+            activity_leave_seconds__lte=timedelta(**kwargs).total_seconds(),
+        )
+
+    def annotate_activity_leave_seconds(self):
+        sql = f"""
+            ROUND (
+                EXTRACT (
+                    EPOCH FROM (
+                        "{History._meta.db_table}"."payload" #>> ARRAY['date','0']
+                    ) :: timestamp with time zone
+                )
+                -
+                EXTRACT (EPOCH FROM "{History._meta.db_table}"."date")
+            )
+        """
+        return self.annotate(
+            activity_leave_seconds=Case(
+                When(
+                    typus=HistoryTypus.ACTIVITY_LEAVE,
+                    then=RawSQL(sql, [], output_field=IntegerField()),
+                ),
+                default=None,
+            ),
+        )
 
 
 class History(NicelyFormattedModel):

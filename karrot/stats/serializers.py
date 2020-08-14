@@ -1,7 +1,29 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from karrot.places.models import Place
+
 MAX_STATS = 50
+
+
+class PlaceStatsSerializer(serializers.ModelSerializer):
+    activity_join_count = serializers.IntegerField()
+    activity_leave_count = serializers.IntegerField()
+    activity_leave_late_count = serializers.IntegerField()
+    activity_done_count = serializers.IntegerField()
+
+    class Meta:
+        model = Place
+        fields = [
+            'id',
+            'name',
+            'group',
+            'status',
+            'activity_join_count',
+            'activity_leave_count',
+            'activity_leave_late_count',
+            'activity_done_count',
+        ]
 
 
 class StatsEntrySerializer(serializers.Serializer):
