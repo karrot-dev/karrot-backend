@@ -18,6 +18,7 @@ from karrot.activities.factories import ActivityFactory
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import execute_scheduled_tasks_immediately
 from karrot.users.factories import UserFactory, VerifiedUserFactory
+from karrot.utils.tests.images import encode_data_with_images, image_path, image_upload_for
 
 
 class TestConversationsAPI(APITestCase):
@@ -73,7 +74,7 @@ class TestConversationsAPI(APITestCase):
         [c.messages.create(content='hey', author=user) for c in conversations]
 
         self.client.force_login(user=user)
-        with self.assertNumQueries(15):
+        with self.assertNumQueries(16):
             response = self.client.get('/api/conversations/', {'group': group.id}, format='json')
         results = response.data['results']
 
@@ -107,7 +108,7 @@ class TestConversationsAPI(APITestCase):
 
     def test_list_messages(self):
         self.client.force_login(user=self.participant1)
-        with self.assertNumQueries(5):
+        with self.assertNumQueries(6):
             response = self.client.get('/api/messages/?conversation={}'.format(self.conversation1.id), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 1)
@@ -150,6 +151,24 @@ class TestConversationsAPI(APITestCase):
         self.assertEqual(conversation.messages.first().created_at, parse(response.data['created_at']), response.data)
         self.assertEqual(conversation.messages.first().id, response.data['id'])
         self.assertEqual(conversation.messages.first().author.id, response.data['author'])
+
+    def test_create_message_with_image(self):
+        conversation = ConversationFactory(participants=[self.participant1])
+
+        self.client.force_login(user=self.participant1)
+        with open(image_path, 'rb') as image_file:
+            data = {
+                'conversation': conversation.id,
+                'content': 'a nice message',
+                'images': [{
+                    'position': 0,
+                    'image': image_file
+                }],
+            }
+            response = self.client.post('/api/messages/', data=encode_data_with_images(data))
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+            self.assertEqual(response.data['content'], data['content'])
+            self.assertTrue('full_size' in response.data['images'][0]['image_urls'])
 
     def test_cannot_create_message_without_specifying_conversation(self):
         self.client.force_login(user=self.participant1)
@@ -263,7 +282,7 @@ class TestConversationThreadsAPI(APITestCase):
         self.create_reply(thread=most_recent_thread)
 
         self.client.force_login(user=self.user)
-        with self.assertNumQueries(5):
+        with self.assertNumQueries(6):
             response = self.client.get('/api/messages/my_threads/', format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -818,6 +837,37 @@ class TestConversationsMessageEditAPI(APITestCase):
         data = {'content': 'a nicer message'}
         response = self.client.patch('/api/messages/{}/'.format(self.message3.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_update_message_with_new_image(self):
+        self.client.force_login(user=self.user)
+        with open(image_path, 'rb') as image_file:
+            data = {
+                'images': [{
+                    'position': 0,
+                    'image': image_file
+                }],
+            }
+            response = self.client.patch(
+                '/api/messages/{}/'.format(self.message.id), data=encode_data_with_images(data)
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+            self.assertTrue('full_size' in response.data['images'][0]['image_urls'])
+
+    def test_update_message_remove_image(self):
+        self.message.images.create(image=image_upload_for(image_path), position=0)
+
+        self.client.force_login(user=self.user)
+        data = {
+            'images': [{
+                'id': self.message.images.first().id,
+                '_removed': True
+            }],
+        }
+        response = self.client.patch(
+            '/api/messages/{}/'.format(self.message.id), encode_data_with_images(data), format='multipart'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data['images']), 0)
 
 
 class TestWallMessagesUpdateStatus(APITestCase):

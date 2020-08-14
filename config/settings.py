@@ -225,6 +225,11 @@ VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
     'offer_image': [
         ('full_size', 'url'),
         ('600', 'thumbnail__600x600'),
+    ],
+    'conversation_message_image': [
+        ('full_size', 'url'),
+        ('200', 'thumbnail__200x200'),
+        ('600', 'thumbnail__600x600'),
     ]
 }
 

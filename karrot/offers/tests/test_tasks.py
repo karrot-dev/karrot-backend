@@ -1,5 +1,3 @@
-import os
-
 from django.core import mail
 from django.db import transaction
 from django.test import TransactionTestCase
@@ -8,8 +6,7 @@ from karrot.groups.factories import GroupFactory
 from karrot.offers.factories import OfferFactory
 from karrot.tests.utils import execute_scheduled_tasks_immediately
 from karrot.users.factories import VerifiedUserFactory
-
-image_path = os.path.join(os.path.dirname(__file__), './photo.jpg')
+from karrot.utils.tests.images import image_path
 
 
 class TestTasks(TransactionTestCase):

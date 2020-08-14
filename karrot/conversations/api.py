@@ -13,6 +13,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import CursorPagination
+from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.schemas import ManualSchema
@@ -29,6 +30,7 @@ from karrot.conversations.serializers import (
 )
 from karrot.issues.models import Issue
 from karrot.issues.serializers import IssueSerializer
+from karrot.utils.parsers import JSONWithFilesMultiPartParser
 from karrot.offers.models import Offer
 from karrot.offers.serializers import OfferSerializer
 from karrot.activities.models import Activity
@@ -143,6 +145,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
              ) \
             .prefetch_related(
                 'conversation__latest_message__reactions',
+                'conversation__latest_message__images',
                 'conversation__participants',
              ) \
             .order_by('-conversation__latest_message_id')
@@ -276,6 +279,7 @@ class ConversationMessageViewSet(
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = ConversationMessageFilter
     pagination_class = MessagePagination
+    parser_classes = [JSONWithFilesMultiPartParser, JSONParser]
 
     @property
     def paginator(self):
@@ -296,7 +300,7 @@ class ConversationMessageViewSet(
                 .prefetch_related('participants', 'latest_message')
 
         if self.action == 'list':
-            qs = qs.prefetch_related('reactions', 'participants')
+            qs = qs.prefetch_related('reactions', 'participants', 'images')
 
         if self.request.query_params.get('thread', None):
             return qs.only_threads_and_replies()
@@ -322,6 +326,7 @@ class ConversationMessageViewSet(
         messages = [t.latest_message for t in threads if t.latest_message is not None]
 
         prefetch_related_objects(threads + messages, 'reactions')
+        prefetch_related_objects(threads + messages, 'images')
 
         serializer = self.get_serializer(threads, many=True)
         message_serializer = self.get_serializer(messages, many=True)

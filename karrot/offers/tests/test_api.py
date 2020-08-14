@@ -1,6 +1,3 @@
-import json
-import os
-from io import StringIO
 from unittest.mock import patch
 
 from rest_framework import status
@@ -10,20 +7,7 @@ from karrot.groups.factories import GroupFactory
 from karrot.offers.factories import OfferFactory
 from karrot.users.factories import UserFactory, VerifiedUserFactory
 from karrot.utils.tests.fake import faker
-
-image_path = os.path.join(os.path.dirname(__file__), './photo.jpg')
-
-
-def encode_offer_data(data):
-    post_data = {}
-    for index, image in enumerate(data.get('images', [])):
-        image_file = image.pop('image', None)
-        if image_file:
-            post_data['images.{}.image'.format(index)] = image_file
-    data_file = StringIO(json.dumps(data))
-    setattr(data_file, 'content_type', 'application/json')
-    post_data['document'] = data_file
-    return post_data
+from karrot.utils.tests.images import image_path, encode_data_with_images
 
 
 class TestOffersAPI(APITestCase):
@@ -57,7 +41,7 @@ class TestOffersAPI(APITestCase):
                     'image': image_file
                 }],
             }
-            response = self.client.post('/api/offers/', data=encode_offer_data(data))
+            response = self.client.post('/api/offers/', data=encode_data_with_images(data))
             self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
             self.assertEqual(response.data['name'], data['name'])
             self.assertTrue('full_size' in response.data['images'][0]['image_urls'])
@@ -70,7 +54,7 @@ class TestOffersAPI(APITestCase):
             'group': self.group.id,
             'images': [],
         }
-        response = self.client.post('/api/offers/', data=encode_offer_data(data))
+        response = self.client.post('/api/offers/', data=encode_data_with_images(data))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertEqual(response.data['name'], data['name'])
 
@@ -127,7 +111,7 @@ class TestOffersAPI(APITestCase):
                 }],
             }
             response = self.client.patch(
-                '/api/offers/{}/'.format(offer.id), encode_offer_data(data), format='multipart'
+                '/api/offers/{}/'.format(offer.id), encode_data_with_images(data), format='multipart'
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
             self.assertEqual(len(response.data['images']), 2)
@@ -141,7 +125,9 @@ class TestOffersAPI(APITestCase):
                 '_removed': True
             }],
         }
-        response = self.client.patch('/api/offers/{}/'.format(offer.id), encode_offer_data(data), format='multipart')
+        response = self.client.patch(
+            '/api/offers/{}/'.format(offer.id), encode_data_with_images(data), format='multipart'
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data['images']), 1)
 
@@ -154,7 +140,9 @@ class TestOffersAPI(APITestCase):
                 '_removed': True,
             } for image in offer.images.all()],
         }
-        response = self.client.patch('/api/offers/{}/'.format(offer.id), encode_offer_data(data), format='multipart')
+        response = self.client.patch(
+            '/api/offers/{}/'.format(offer.id), encode_data_with_images(data), format='multipart'
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_reposition_image(self):
@@ -193,7 +181,7 @@ class TestOffersTransactionAPI(APITransactionTestCase):
                     'image': image_file
                 }],
             }
-            response = self.client.post('/api/offers/', data=encode_offer_data(data))
+            response = self.client.post('/api/offers/', data=encode_data_with_images(data))
             self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
             args, kwargs = prepare_email.call_args
             self.assertIsNotNone(kwargs['context']['offer_photo'])
