@@ -18,7 +18,7 @@ from karrot.activities.factories import ActivityFactory
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import execute_scheduled_tasks_immediately
 from karrot.users.factories import UserFactory, VerifiedUserFactory
-from karrot.utils.tests.images import encode_data_with_images, image_path
+from karrot.utils.tests.images import encode_data_with_images, image_path, image_upload_for
 
 
 class TestConversationsAPI(APITestCase):
@@ -837,6 +837,37 @@ class TestConversationsMessageEditAPI(APITestCase):
         data = {'content': 'a nicer message'}
         response = self.client.patch('/api/messages/{}/'.format(self.message3.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_update_message_with_new_image(self):
+        self.client.force_login(user=self.user)
+        with open(image_path, 'rb') as image_file:
+            data = {
+                'images': [{
+                    'position': 0,
+                    'image': image_file
+                }],
+            }
+            response = self.client.patch(
+                '/api/messages/{}/'.format(self.message.id), data=encode_data_with_images(data)
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+            self.assertTrue('full_size' in response.data['images'][0]['image_urls'])
+
+    def test_update_message_remove_image(self):
+        self.message.images.create(image=image_upload_for(image_path), position=0)
+
+        self.client.force_login(user=self.user)
+        data = {
+            'images': [{
+                'id': self.message.images.first().id,
+                '_removed': True
+            }],
+        }
+        response = self.client.patch(
+            '/api/messages/{}/'.format(self.message.id), encode_data_with_images(data), format='multipart'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data['images']), 0)
 
 
 class TestWallMessagesUpdateStatus(APITestCase):
