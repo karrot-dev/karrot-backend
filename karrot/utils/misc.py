@@ -1,6 +1,14 @@
 from json import dumps as dump_json
 
+from django.db import transaction
 from rest_framework.views import exception_handler
+
+
+def on_transaction_commit(func):
+    def inner(*args, **kwargs):
+        transaction.on_commit(lambda: func(*args, **kwargs))
+
+    return inner
 
 
 def json_stringify(data):

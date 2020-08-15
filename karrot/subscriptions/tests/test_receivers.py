@@ -8,7 +8,7 @@ from unittest.mock import patch
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 
@@ -134,7 +134,20 @@ class WSTestCase(TestCase):
         return client
 
 
-class ConversationReceiverTests(WSTestCase):
+class WSTransactionTestCase(TransactionTestCase):
+    def setUp(self):
+        super().setUp()
+        self.send_in_channel_patcher = patch('karrot.subscriptions.receivers.send_in_channel')
+        self.send_in_channel_mock = self.send_in_channel_patcher.start()
+        self.addCleanup(self.send_in_channel_patcher.stop)
+
+    def connect_as(self, user):
+        client = WSClient(self.send_in_channel_mock)
+        client.connect_as(user)
+        return client
+
+
+class ConversationReceiverTests(WSTransactionTestCase):
     def test_receives_messages(self):
         self.maxDiff = None
         user = UserFactory()
@@ -279,7 +292,7 @@ class ConversationReceiverTests(WSTestCase):
         )
 
 
-class ConversationThreadReceiverTests(WSTestCase):
+class ConversationThreadReceiverTests(WSTransactionTestCase):
     def test_receives_messages(self):
         self.maxDiff = None
         op_user = UserFactory()  # op: original post
@@ -397,7 +410,7 @@ class ConversationThreadReceiverTests(WSTestCase):
         )
 
 
-class ConversationMessageReactionReceiverTests(WSTestCase):
+class ConversationMessageReactionReceiverTests(WSTransactionTestCase):
     def test_receive_reaction_update(self):
         self.maxDiff = None
         author, user, reaction_user = [UserFactory() for _ in range(3)]
@@ -1019,7 +1032,7 @@ class IssueReceiverTest(WSTestCase):
 
 
 @patch('karrot.subscriptions.tasks.notify_subscribers')
-class ReceiverPushTests(TestCase):
+class ReceiverPushTests(TransactionTestCase):
     def setUp(self):
         self.user = UserFactory()
         self.author = UserFactory()
@@ -1073,7 +1086,7 @@ class ReceiverPushTests(TestCase):
 
 
 @patch('karrot.subscriptions.tasks.notify_subscribers')
-class GroupConversationReceiverPushTests(TestCase):
+class GroupConversationReceiverPushTests(TransactionTestCase):
     def setUp(self):
         self.group = GroupFactory()
         self.user = UserFactory()
