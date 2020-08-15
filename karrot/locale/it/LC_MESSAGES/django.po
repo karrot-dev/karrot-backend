@@ -247,16 +247,16 @@ msgid ""
 "%(site_name)s</a>, or <a href=\"%(mute_url)s\">mute the conversation</a>."
 msgstr ""
 
-#: karrot/conversations/api.py:63 karrot/conversations/api.py:242
-#: karrot/conversations/api.py:409 karrot/conversations/serializers.py:146
+#: karrot/conversations/api.py:65 karrot/conversations/api.py:245
+#: karrot/conversations/api.py:414 karrot/conversations/serializers.py:177
 msgid "You are not in this conversation"
 msgstr "Non sei in questa conversazione"
 
-#: karrot/conversations/api.py:72
+#: karrot/conversations/api.py:74
 msgid "You are not the author of this message"
 msgstr ""
 
-#: karrot/conversations/api.py:81
+#: karrot/conversations/api.py:83
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
@@ -264,11 +264,11 @@ msgstr ""
 "Non puoi modificare un messaggio più di %(days_number)s giorni dopo la sua "
 "creazione."
 
-#: karrot/conversations/api.py:338
+#: karrot/conversations/api.py:343
 msgid "Must be first in thread"
 msgstr ""
 
-#: karrot/conversations/api.py:341
+#: karrot/conversations/api.py:346
 msgid "You are not a participant in this thread"
 msgstr ""
 
@@ -298,7 +298,7 @@ msgstr ""
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/serializers.py:148
+#: karrot/conversations/serializers.py:179
 msgid "This conversation has been closed"
 msgstr ""
 
@@ -689,11 +689,11 @@ msgstr ""
 msgid "A conflict resolution process was started with you"
 msgstr ""
 
-#: karrot/offers/api.py:98
+#: karrot/offers/api.py:31
 msgid "You are not the owner of this offer"
 msgstr ""
 
-#: karrot/offers/api.py:160
+#: karrot/offers/api.py:93
 msgid "You can only archive an active offer"
 msgstr ""
 
