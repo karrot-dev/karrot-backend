@@ -1,4 +1,5 @@
 from collections import defaultdict
+
 from itertools import groupby
 
 from django.conf import settings
@@ -40,9 +41,11 @@ from karrot.subscriptions.models import ChannelSubscription
 from karrot.subscriptions.utils import send_in_channel, MockRequest
 from karrot.userauth.serializers import AuthUserSerializer
 from karrot.users.serializers import UserSerializer
+from karrot.utils.misc import on_transaction_commit
 
 
 @receiver(post_save, sender=ConversationMessage)
+@on_transaction_commit
 def send_messages(sender, instance, created, **kwargs):
     """When there is a message in a conversation we need to send it to any subscribed participants."""
     message = instance
@@ -110,6 +113,7 @@ def conversation_meta_saved(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=ConversationThreadParticipant)
+@on_transaction_commit
 def send_thread_update(sender, instance, created, **kwargs):
     # Update thread object for user after updating their participation
     # (important for seen_up_to and unread_message_count)
@@ -129,6 +133,7 @@ def send_thread_update(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=ConversationMessageReaction)
 @receiver(post_delete, sender=ConversationMessageReaction)
+@on_transaction_commit
 def send_reaction_update(sender, instance, **kwargs):
     reaction = instance
     message = reaction.message
