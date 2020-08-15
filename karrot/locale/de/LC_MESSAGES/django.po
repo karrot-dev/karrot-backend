@@ -263,16 +263,16 @@ msgstr ""
 "besuchen</a> oder <a href=\"%(mute_url)s\">die Unterhaltung "
 "stummschalten</a>."
 
-#: karrot/conversations/api.py:63 karrot/conversations/api.py:242
-#: karrot/conversations/api.py:409 karrot/conversations/serializers.py:146
+#: karrot/conversations/api.py:65 karrot/conversations/api.py:245
+#: karrot/conversations/api.py:414 karrot/conversations/serializers.py:177
 msgid "You are not in this conversation"
 msgstr "Du bist nicht Teil dieser Unterhaltung"
 
-#: karrot/conversations/api.py:72
+#: karrot/conversations/api.py:74
 msgid "You are not the author of this message"
 msgstr "Du bist nicht Autor dieser Nachricht"
 
-#: karrot/conversations/api.py:81
+#: karrot/conversations/api.py:83
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
@@ -280,11 +280,11 @@ msgstr ""
 "Du kannst eine Nachricht nicht mehr als %(days_number)s Tage nach ihrer "
 "Erstellung bearbeiten."
 
-#: karrot/conversations/api.py:338
+#: karrot/conversations/api.py:343
 msgid "Must be first in thread"
 msgstr "Muss erste Nachricht im Thread sein"
 
-#: karrot/conversations/api.py:341
+#: karrot/conversations/api.py:346
 msgid "You are not a participant in this thread"
 msgstr "Du bist nicht Teil dieses Threads"
 
@@ -314,7 +314,7 @@ msgstr "Neue Nachricht bei Konfliktlösung in %(group_name)s"
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr "Neue Nachricht für Angebot %(offer_name)s in %(group_name)s"
 
-#: karrot/conversations/serializers.py:148
+#: karrot/conversations/serializers.py:179
 msgid "This conversation has been closed"
 msgstr "Diese Unterhaltung wurde beendet"
 
@@ -747,11 +747,11 @@ msgstr "Diese Abstimmungsrunde endet am %(expiry_date)s."
 msgid "A conflict resolution process was started with you"
 msgstr "Ein Konfliktlösungsprozess mit dir wurde gestartet"
 
-#: karrot/offers/api.py:98
+#: karrot/offers/api.py:31
 msgid "You are not the owner of this offer"
 msgstr "Du bist nicht der Eigentümer dieses Angebots"
 
-#: karrot/offers/api.py:160
+#: karrot/offers/api.py:93
 msgid "You can only archive an active offer"
 msgstr "Nur aktive Angebote können archiviert werden."
 

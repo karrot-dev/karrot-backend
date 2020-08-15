@@ -250,26 +250,26 @@ msgstr ""
 "直接回覆這封郵件，<a href=\"%(conversation_url)s\">在%(site_name)s上檢視</a>, 或是<a "
 "href=\"%(mute_url)s\">將對話靜音</a>"
 
-#: karrot/conversations/api.py:63 karrot/conversations/api.py:242
-#: karrot/conversations/api.py:409 karrot/conversations/serializers.py:146
+#: karrot/conversations/api.py:65 karrot/conversations/api.py:245
+#: karrot/conversations/api.py:414 karrot/conversations/serializers.py:177
 msgid "You are not in this conversation"
 msgstr "你並未加入對話"
 
-#: karrot/conversations/api.py:72
+#: karrot/conversations/api.py:74
 msgid "You are not the author of this message"
 msgstr "這則訊息不是你寫的"
 
-#: karrot/conversations/api.py:81
+#: karrot/conversations/api.py:83
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
 msgstr "在發出訊息%(days_number)s天後你就不能編輯了"
 
-#: karrot/conversations/api.py:338
+#: karrot/conversations/api.py:343
 msgid "Must be first in thread"
 msgstr "必須是討論串中的第一個"
 
-#: karrot/conversations/api.py:341
+#: karrot/conversations/api.py:346
 msgid "You are not a participant in this thread"
 msgstr "你並未加入此討論串"
 
@@ -299,7 +299,7 @@ msgstr ""
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/serializers.py:148
+#: karrot/conversations/serializers.py:179
 msgid "This conversation has been closed"
 msgstr ""
 
@@ -697,11 +697,11 @@ msgstr ""
 msgid "A conflict resolution process was started with you"
 msgstr ""
 
-#: karrot/offers/api.py:98
+#: karrot/offers/api.py:31
 msgid "You are not the owner of this offer"
 msgstr ""
 
-#: karrot/offers/api.py:160
+#: karrot/offers/api.py:93
 msgid "You can only archive an active offer"
 msgstr ""
 
