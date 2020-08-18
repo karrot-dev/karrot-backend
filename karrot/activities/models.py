@@ -247,11 +247,25 @@ def to_range(date, **kwargs):
     return CustomDateTimeTZRange(date, date + duration)
 
 
+class ActivityType(BaseModel):
+    name = models.CharField(max_length=80)
+    colour = models.IntegerField()
+    icon = models.CharField(max_length=32)
+    feedback = models.BooleanField(default=True)
+    feedback_has_weight = models.BooleanField()
+
+
 class Activity(BaseModel, ConversationMixin):
     objects = ActivityManager()
 
     class Meta:
         ordering = ['date']
+
+    typus = models.ForeignKey(
+        ActivityType,
+        related_name='activities',
+        on_delete=models.CASCADE,
+    )
 
     series = models.ForeignKey(
         'ActivitySeries',
