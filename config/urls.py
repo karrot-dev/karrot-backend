@@ -21,7 +21,7 @@ from karrot.invitations.api import InvitationsViewSet, InvitationAcceptViewSet
 from karrot.issues.api import IssuesViewSet
 from karrot.notifications.api import NotificationViewSet
 from karrot.offers.api import OfferViewSet
-from karrot.activities.api import ActivityViewSet, ActivitySeriesViewSet, FeedbackViewSet
+from karrot.activities.api import ActivityViewSet, ActivitySeriesViewSet, FeedbackViewSet, ActivityTypeViewSet
 from karrot.places.api import PlaceViewSet
 from karrot.stats.api import StatsView
 from karrot.status.api import StatusView
@@ -49,6 +49,7 @@ router.register('users-info', UserInfoViewSet)
 # activity endpoints
 router.register('activity-series', ActivitySeriesViewSet)
 router.register('activities', ActivityViewSet)
+router.register('activity-types', ActivityTypeViewSet)
 
 # Conversation/Message endpoints
 router.register('conversations', ConversationViewSet)

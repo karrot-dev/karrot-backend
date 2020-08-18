@@ -8,7 +8,7 @@ from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
 from karrot.history.models import History
 from karrot.activities.factories import ActivityFactory, \
-    ActivitySeriesFactory
+    ActivitySeriesFactory, ActivityTypeFactory
 from karrot.activities.models import Activity, to_range
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import ExtractPaginationMixin
@@ -100,6 +100,7 @@ class TestHistoryAPIWithExistingPlace(APITestCase, ExtractPaginationMixin):
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
         self.place_url = '/api/places/{}/'.format(self.place.id)
+        self.activity_type = ActivityTypeFactory(group=self.group)
 
     def test_modify_place(self):
         self.client.force_login(self.member)
@@ -126,6 +127,7 @@ class TestHistoryAPIWithExistingPlace(APITestCase, ExtractPaginationMixin):
         self.client.force_login(self.member)
         self.client.post(
             '/api/activities/', {
+                'typus': self.activity_type.id,
                 'date': to_range(timezone.now() + relativedelta(days=1)).as_list(),
                 'place': self.place.id
             },
@@ -138,6 +140,7 @@ class TestHistoryAPIWithExistingPlace(APITestCase, ExtractPaginationMixin):
         self.client.force_login(self.member)
         self.client.post(
             '/api/activity-series/', {
+                'typus': self.activity_type.id,
                 'start_date': timezone.now(),
                 'rule': 'FREQ=WEEKLY',
                 'place': self.place.id

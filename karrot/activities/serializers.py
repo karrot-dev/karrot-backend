@@ -15,10 +15,16 @@ from karrot.base.base_models import CustomDateTimeTZRange
 from karrot.history.models import History, HistoryTypus
 from karrot.activities import stats
 from karrot.activities.models import (
-    Activity as ActivityModel, Feedback as FeedbackModel, ActivitySeries as ActivitySeriesModel
+    Activity as ActivityModel, Feedback as FeedbackModel, ActivitySeries as ActivitySeriesModel, ActivityType
 )
 from karrot.utils.date_utils import csv_datetime
 from karrot.utils.misc import find_changed
+
+
+class ActivityTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ActivityType
+        fields = '__all__'
 
 
 class ActivityHistorySerializer(serializers.ModelSerializer):
@@ -81,6 +87,7 @@ class ActivitySerializer(serializers.ModelSerializer):
         model = ActivityModel
         fields = [
             'id',
+            'typus',
             'date',
             'series',
             'place',
@@ -139,6 +146,20 @@ class ActivitySerializer(serializers.ModelSerializer):
         if duration < timedelta(seconds=1):
             raise serializers.ValidationError('Duration must be at least one second.')
         return date
+
+    def validate(self, data):
+        def get_instance_attr(field):
+            if self.instance is None:
+                return None
+            return getattr(self.instance, field)
+
+        typus = data.get('typus', get_instance_attr('typus'))
+        place = data.get('place', get_instance_attr('place'))
+
+        if typus and place and typus.group_id != place.group_id:
+            raise serializers.ValidationError(_('Typus is not for this group.'))
+
+        return data
 
 
 class ActivityUpdateSerializer(ActivitySerializer):
@@ -273,6 +294,7 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
         model = ActivitySeriesModel
         fields = [
             'id',
+            'typus',
             'max_participants',
             'place',
             'rule',
@@ -332,6 +354,20 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
         if not isinstance(rrule, dateutil.rrule.rrule):
             raise serializers.ValidationError(_('Only single recurrence rules are allowed.'))
         return rule_string
+
+    def validate(self, data):
+        def get_instance_attr(field):
+            if self.instance is None:
+                return None
+            return getattr(self.instance, field)
+
+        typus = data.get('typus', get_instance_attr('typus'))
+        place = data.get('place', get_instance_attr('place'))
+
+        if typus and place and typus.group_id != place.group_id:
+            raise serializers.ValidationError(_('Typus is not for this group.'))
+
+        return data
 
 
 class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
