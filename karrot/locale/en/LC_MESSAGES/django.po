@@ -40,56 +40,60 @@ msgstr ""
 msgid "This feedback is given by another user."
 msgstr ""
 
-#: karrot/activities/permissions.py:57 karrot/activities/serializers.py:420
+#: karrot/activities/permissions.py:57 karrot/activities/serializers.py:456
 #, python-format
 msgid "You can't give feedback for pickups more than %(days_number)s days ago."
 msgstr ""
 
-#: karrot/activities/permissions.py:67 karrot/activities/serializers.py:132
-#: karrot/activities/serializers.py:318 karrot/applications/api.py:36
+#: karrot/activities/permissions.py:67 karrot/activities/serializers.py:139
+#: karrot/activities/serializers.py:340 karrot/applications/api.py:36
 #: karrot/groups/api.py:50 karrot/invitations/serializers.py:28
 #: karrot/issues/serializers.py:122 karrot/places/api.py:19
 #: karrot/places/serializers.py:80
 msgid "You need to be a group editor"
 msgstr ""
 
-#: karrot/activities/serializers.py:47
+#: karrot/activities/serializers.py:53
 msgid "Must be a list"
 msgstr ""
 
-#: karrot/activities/serializers.py:48
+#: karrot/activities/serializers.py:54
 msgid "Must be a list with one or two values"
 msgstr ""
 
-#: karrot/activities/serializers.py:49
+#: karrot/activities/serializers.py:55
 msgid "Must pass start value"
 msgstr ""
 
-#: karrot/activities/serializers.py:137
+#: karrot/activities/serializers.py:144
 msgid "The date should be in the future."
 msgstr ""
 
-#: karrot/activities/serializers.py:195
+#: karrot/activities/serializers.py:160 karrot/activities/serializers.py:368
+msgid "Typus is not for this group."
+msgstr ""
+
+#: karrot/activities/serializers.py:216
 msgid "You can't move pickups that are part of a series."
 msgstr ""
 
-#: karrot/activities/serializers.py:331
+#: karrot/activities/serializers.py:353
 msgid "Invalid recurrence rule."
 msgstr ""
 
-#: karrot/activities/serializers.py:333
+#: karrot/activities/serializers.py:355
 msgid "Only single recurrence rules are allowed."
 msgstr ""
 
-#: karrot/activities/serializers.py:415
+#: karrot/activities/serializers.py:451
 msgid "The pickup is not done yet"
 msgstr ""
 
-#: karrot/activities/serializers.py:417
+#: karrot/activities/serializers.py:453
 msgid "You aren't assigned to the pickup."
 msgstr ""
 
-#: karrot/activities/serializers.py:434
+#: karrot/activities/serializers.py:470
 msgid "Both comment and weight cannot be blank."
 msgstr ""
 
