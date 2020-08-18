@@ -29,7 +29,7 @@ from karrot.utils.mixins import PartialUpdateModelMixin
 
 class FeedbackPagination(CursorPagination):
     page_size = 10
-    ordering = '-id'
+    ordering = '-activity_date'
 
 
 class FeedbackViewSet(
@@ -65,7 +65,9 @@ class FeedbackViewSet(
         queryset = self.filter_queryset(self.get_queryset()) \
             .select_related('about') \
             .prefetch_related('about__activityparticipant_set', 'about__feedback_given_by') \
-            .annotate(timezone=F('about__place__group__timezone'))
+            .annotate(
+              timezone=F('about__place__group__timezone'),
+              activity_date=F('about__date__startswith'))
         feedback = self.paginate_queryset(queryset)
 
         activities = set()
