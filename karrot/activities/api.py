@@ -11,9 +11,9 @@ from rest_framework.viewsets import GenericViewSet
 
 from karrot.conversations.api import RetrieveConversationMixin
 from karrot.history.models import History, HistoryTypus
-from karrot.activities.filters import (ActivitiesFilter, ActivitySeriesFilter, FeedbackFilter)
+from karrot.activities.filters import (ActivitiesFilter, ActivitySeriesFilter, FeedbackFilter, ActivityTypeFilter)
 from karrot.activities.models import (
-    Activity as ActivityModel, ActivitySeries as ActivitySeriesModel, Feedback as FeedbackModel
+    Activity as ActivityModel, ActivitySeries as ActivitySeriesModel, Feedback as FeedbackModel, ActivityType
 )
 from karrot.activities.permissions import (
     IsUpcoming, HasNotJoinedActivity, HasJoinedActivity, IsEmptyActivity, IsNotFull, IsSameParticipant,
@@ -22,10 +22,24 @@ from karrot.activities.permissions import (
 from karrot.activities.serializers import (
     ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer, ActivityLeaveSerializer, FeedbackSerializer,
     ActivityUpdateSerializer, ActivitySeriesUpdateSerializer, ActivitySeriesHistorySerializer,
-    FeedbackExportSerializer, FeedbackExportRenderer
+    FeedbackExportSerializer, FeedbackExportRenderer, ActivityTypeSerializer
 )
 from karrot.places.models import PlaceStatus
 from karrot.utils.mixins import PartialUpdateModelMixin
+
+
+class ActivityTypeViewSet(
+        mixins.ListModelMixin,
+        viewsets.GenericViewSet,
+):
+    serializer_class = ActivityTypeSerializer
+    queryset = ActivityType.objects
+    filter_backends = (filters.DjangoFilterBackend, )
+    filterset_class = ActivityTypeFilter
+    permission_classes = (IsAuthenticated, )
+
+    def get_queryset(self):
+        return self.queryset.filter(group__members=self.request.user)
 
 
 class FeedbackPagination(CursorPagination):

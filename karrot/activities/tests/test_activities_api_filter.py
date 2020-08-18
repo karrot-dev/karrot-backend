@@ -9,7 +9,7 @@ from rest_framework.test import APITestCase
 from django.utils import timezone
 
 from karrot.groups.factories import GroupFactory
-from karrot.activities.factories import ActivityFactory, ActivitySeriesFactory, FeedbackFactory
+from karrot.activities.factories import ActivityFactory, ActivitySeriesFactory, FeedbackFactory, ActivityTypeFactory
 from karrot.activities.models import Activity as ActivityModel, to_range
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import UserFactory
@@ -25,18 +25,20 @@ class TestActivitydatesAPIFilter(APITestCase, ExtractPaginationMixin):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
-        self.activity = ActivityFactory(place=self.place)
+        self.activity_type = ActivityTypeFactory(group=self.group)
+        self.activity = ActivityFactory(typus=self.activity_type, place=self.place)
 
         # and another place + group + pick-update
         self.group2 = GroupFactory(members=[self.member])
         self.place2 = PlaceFactory(group=self.group2)
-        self.activity2 = ActivityFactory(place=self.place2)
+        self.activity_type2 = ActivityTypeFactory(group=self.group2)
+        self.activity2 = ActivityFactory(typus=self.activity_type2, place=self.place2)
 
         # an activity series
-        self.series = ActivitySeriesFactory(place=self.place)
+        self.series = ActivitySeriesFactory(typus=self.activity_type, place=self.place)
 
         # another activity series
-        self.series2 = ActivitySeriesFactory(place=self.place)
+        self.series2 = ActivitySeriesFactory(typus=self.activity_type, place=self.place)
 
     def test_filter_by_place(self):
         self.client.force_login(user=self.member)
@@ -98,40 +100,42 @@ class TestFeedbackPossibleFilter(APITestCase, ExtractPaginationMixin):
         self.member2 = UserFactory()
         self.group = GroupFactory(members=[self.member, self.member2])
         self.place = PlaceFactory(group=self.group)
+        self.activity_type = ActivityTypeFactory(group=self.group)
 
         # not member (anymore)
         self.group2 = GroupFactory(members=[])
         self.place2 = PlaceFactory(group=self.group2)
+        self.activity_type2 = ActivityTypeFactory(group=self.group2)
 
         self.activityFeedbackPossible = ActivityFactory(
-            place=self.place, participants=[
+            typus=self.activity_type, place=self.place, participants=[
                 self.member,
             ], date=self.oneWeekAgo
         )
 
         # now the issues where no feedback can be given
         self.activityUpcoming = ActivityFactory(
-            place=self.place, participants=[
+            typus=self.activity_type, place=self.place, participants=[
                 self.member,
             ]
         )
-        self.activityNotParticipant = ActivityFactory(place=self.place, date=self.oneWeekAgo)
-        self.activityTooLongAgo = ActivityFactory(place=self.place, date=self.tooLongAgo)
+        self.activityNotParticipant = ActivityFactory(typus=self.activity_type, place=self.place, date=self.oneWeekAgo)
+        self.activityTooLongAgo = ActivityFactory(typus=self.activity_type, place=self.place, date=self.tooLongAgo)
 
         self.activityFeedbackAlreadyGiven = ActivityFactory(
-            place=self.place, participants=[
+            typus=self.activity_type, place=self.place, participants=[
                 self.member,
             ], date=self.oneWeekAgo
         )
         self.feedback = FeedbackFactory(about=self.activityFeedbackAlreadyGiven, given_by=self.member)
 
         self.activityParticipantLeftGroup = ActivityFactory(
-            place=self.place2, participants=[
+            typus=self.activity_type2, place=self.place2, participants=[
                 self.member,
             ], date=self.oneWeekAgo
         )
         self.activityDoneByAnotherUser = ActivityFactory(
-            place=self.place, participants=[
+            typus=self.activity_type, place=self.place, participants=[
                 self.member2,
             ], date=self.oneWeekAgo
         )

@@ -4,10 +4,10 @@ from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
 
-
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('groups', '0042_auto_20200507_1258'),
         ('activities', '0018_activityparticipant_reminder_task_id'),
     ]
 
@@ -17,10 +17,13 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('created_at', models.DateTimeField(default=django.utils.timezone.now)),
+                ('group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='activity_types', to='groups.Group')),
                 ('name', models.CharField(max_length=80)),
-                ('colour', models.IntegerField()),
+                ('colour', models.CharField(max_length=6)),
                 ('icon', models.CharField(max_length=32)),
-                ('feedback_has_weight', models.BooleanField()),
+                ('feedback_icon', models.CharField(max_length=32)),
+                ('has_feedback', models.BooleanField(default=True)),
+                ('has_feedback_weight', models.BooleanField(default=True)),
             ],
             options={
                 'abstract': False,
@@ -30,5 +33,14 @@ class Migration(migrations.Migration):
             model_name='activity',
             name='typus',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='activities', to='activities.ActivityType'),
+        ),
+        migrations.AddField(
+            model_name='activityseries',
+            name='typus',
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='activity_series', to='activities.ActivityType'),
+        ),
+        migrations.AlterUniqueTogether(
+            name='activitytype',
+            unique_together={('group', 'name')},
         ),
     ]

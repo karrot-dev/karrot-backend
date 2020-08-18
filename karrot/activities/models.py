@@ -18,6 +18,19 @@ from karrot.activities.utils import match_activities_with_dates, rrule_between_d
 from karrot.places.models import PlaceStatus
 
 
+class ActivityType(BaseModel):
+    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='activity_types')
+    name = models.CharField(max_length=80)
+    colour = models.CharField(max_length=6)
+    icon = models.CharField(max_length=32)
+    feedback_icon = models.CharField(max_length=32)
+    has_feedback = models.BooleanField(default=True)
+    has_feedback_weight = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ('group', 'name')
+
+
 class ActivitySeriesQuerySet(models.QuerySet):
     @transaction.atomic
     def update_activities(self):
@@ -43,6 +56,12 @@ class ActivitySeries(BaseModel):
     description = models.TextField(blank=True)
     duration = DurationField(null=True)
 
+    typus = models.ForeignKey(
+        ActivityType,
+        related_name='activity_series',
+        on_delete=models.CASCADE,
+    )
+
     last_changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -52,6 +71,7 @@ class ActivitySeries(BaseModel):
 
     def create_activity(self, date):
         return self.activities.create(
+            typus=self.typus,
             date=CustomDateTimeTZRange(date, date + (self.duration or default_duration)),
             has_duration=self.duration is not None,
             max_participants=self.max_participants,
@@ -245,14 +265,6 @@ def default_activity_date_range():
 def to_range(date, **kwargs):
     duration = timedelta(**kwargs) if kwargs else default_duration
     return CustomDateTimeTZRange(date, date + duration)
-
-
-class ActivityType(BaseModel):
-    name = models.CharField(max_length=80)
-    colour = models.IntegerField()
-    icon = models.CharField(max_length=32)
-    feedback = models.BooleanField(default=True)
-    feedback_has_weight = models.BooleanField()
 
 
 class Activity(BaseModel, ConversationMixin):
