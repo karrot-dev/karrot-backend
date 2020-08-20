@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Q, Sum
+from django.db.models.functions import Coalesce
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, ModelChoiceFilter
 from rest_framework import views, status
 from rest_framework.mixins import ListModelMixin
@@ -52,7 +53,9 @@ class PlaceStatsViewSet(ListModelMixin, GenericViewSet):
             activity_done_count=Count('history', filter=Q(history__typus=HistoryTypus.ACTIVITY_DONE)),
             # filter for feedback_as_sum=True as this is possible to calculate here, query gets too hairy otherwise
             # all pickups since 2019-12-26 have this as true...
-            activity_feedback_weight=Sum('activities__feedback__weight', filter=Q(activities__feedback_as_sum=True))
+            activity_feedback_weight=Coalesce(
+                Sum('activities__feedback__weight', filter=Q(activities__feedback_as_sum=True)), 0
+            ),
         )
 
 

@@ -4,6 +4,10 @@ from unittest.mock import patch
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from karrot.activities.factories import ActivityFactory
+from karrot.groups.factories import GroupFactory
+from karrot.places.factories import PlaceFactory
+from karrot.users.factories import VerifiedUserFactory
 from karrot.utils.tests.fake import faker
 
 
@@ -86,3 +90,52 @@ class TestStatsInfoAPI(APITestCase):
         stats = generate_stats(n)
         response = self.client.post('/api/stats/', data={'stats': stats}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
+
+class TestPlaceStatsInfoAPI(APITestCase):
+    def setUp(self):
+        self.user = VerifiedUserFactory()
+        self.group = GroupFactory(members=[self.user])
+        self.place = PlaceFactory(group=self.group)
+
+    def test_with_no_activity(self):
+        self.client.force_login(user=self.user)
+        response = self.client.get('/api/stats/places/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual([dict(entry) for entry in response.data], [self.expected_entry()], response.data)
+
+    def test_join_and_leave_activity(self):
+        self.client.force_login(user=self.user)
+        activity = ActivityFactory(place=self.place)
+
+        # join activity
+        self.client.post(f'/api/activities/{activity.id}/add/')
+
+        # leave again, so soon!
+        self.client.post(f'/api/activities/{activity.id}/remove/')
+
+        response = self.client.get('/api/stats/places/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual([dict(entry) for entry in response.data], [
+            self.expected_entry({
+                'activity_join_count': 1,
+                'activity_leave_count': 1,
+                'activity_leave_late_count': 1,
+            })
+        ], response.data)
+
+    def expected_entry(self, data=None):
+        return {
+            'id': self.place.id,
+            'name': self.place.name,
+            'group': self.place.group.id,
+            'status': self.place.status,
+            'activity_join_count': 0,
+            'activity_leave_count': 0,
+            'activity_leave_late_count': 0,
+            'activity_done_count': 0,
+            'activity_feedback_weight': 0,
+            **(data if data else {}),
+        }

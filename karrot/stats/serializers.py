@@ -16,8 +16,15 @@ class PlaceStatsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Place
         fields = [
-            'id', 'name', 'group', 'status', 'activity_join_count', 'activity_leave_count',
-            'activity_leave_late_count', 'activity_done_count', 'activity_feedback_weight'
+            'id',
+            'name',
+            'group',
+            'status',
+            'activity_join_count',
+            'activity_leave_count',
+            'activity_leave_late_count',
+            'activity_done_count',
+            'activity_feedback_weight',
         ]
 
 
