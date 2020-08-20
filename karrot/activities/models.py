@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db import transaction
-from django.db.models import Count, Q, DurationField, F
+from django.db.models import Count, Q, DurationField, F, Case, When, Avg, FloatField, Sum
 from django.utils import timezone
 
 from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField
@@ -154,6 +154,15 @@ class ActivityQuerySet(models.QuerySet):
 
     def annotate_timezone(self):
         return self.annotate(timezone=F('place__group__timezone'))
+
+    def annotate_feedback_weight(self):
+        return self.annotate(
+            feedback_weight=Case(
+                When(feedback_as_sum=True, then=Sum('feedback__weight')),
+                default=Avg('feedback__weight'),
+                output_field=FloatField()
+            )
+        )
 
     def exclude_disabled(self):
         return self.filter(is_disabled=False)
