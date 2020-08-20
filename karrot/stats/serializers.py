@@ -11,18 +11,13 @@ class PlaceStatsSerializer(serializers.ModelSerializer):
     activity_leave_count = serializers.IntegerField()
     activity_leave_late_count = serializers.IntegerField()
     activity_done_count = serializers.IntegerField()
+    activity_feedback_weight = serializers.FloatField()
 
     class Meta:
         model = Place
         fields = [
-            'id',
-            'name',
-            'group',
-            'status',
-            'activity_join_count',
-            'activity_leave_count',
-            'activity_leave_late_count',
-            'activity_done_count',
+            'id', 'name', 'group', 'status', 'activity_join_count', 'activity_leave_count',
+            'activity_leave_late_count', 'activity_done_count', 'activity_feedback_weight'
         ]
 
 
