@@ -385,5 +385,9 @@ class Feedback(BaseModel):
     )
     comment = models.CharField(max_length=settings.DESCRIPTION_MAX_LENGTH, blank=True)
 
+    # just to store legacy values for when feedback_as_sum was False on activities... null otherwise
+    # I guess can remove it after a while...
+    weight_for_average = models.FloatField(null=True)
+
     class Meta:
         unique_together = ('about', 'given_by')
