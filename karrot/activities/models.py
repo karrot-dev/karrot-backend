@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db import transaction
-from django.db.models import Count, Q, DurationField, F, Case, When, Avg, FloatField, Sum
+from django.db.models import Avg, Count, DurationField, F, Q
 from django.utils import timezone
 
 from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField
@@ -156,13 +156,7 @@ class ActivityQuerySet(models.QuerySet):
         return self.annotate(timezone=F('place__group__timezone'))
 
     def annotate_feedback_weight(self):
-        return self.annotate(
-            feedback_weight=Case(
-                When(feedback_as_sum=True, then=Sum('feedback__weight')),
-                default=Avg('feedback__weight'),
-                output_field=FloatField()
-            )
-        )
+        return self.annotate(feedback_weight=Avg('feedback__weight'))
 
     def exclude_disabled(self):
         return self.filter(is_disabled=False)
@@ -291,10 +285,6 @@ class Activity(BaseModel, ConversationMixin):
     )
 
     is_done = models.BooleanField(default=False)
-
-    # If this activity has multiple feedback, should we take the sum or the average?
-    # Note that we need to tell the user if we change that default!
-    feedback_as_sum = models.BooleanField(default=True)
 
     @property
     def group(self):

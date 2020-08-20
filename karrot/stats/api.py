@@ -51,11 +51,7 @@ class PlaceStatsViewSet(ListModelMixin, GenericViewSet):
                 'history', filter=Q(history__in=History.objects.activity_left_late(hours=24))
             ),
             activity_done_count=Count('history', filter=Q(history__typus=HistoryTypus.ACTIVITY_DONE)),
-            # filter for feedback_as_sum=True as this is possible to calculate here, query gets too hairy otherwise
-            # all pickups since 2019-12-26 have this as true...
-            activity_feedback_weight=Coalesce(
-                Sum('activities__feedback__weight', filter=Q(activities__feedback_as_sum=True)), 0
-            ),
+            activity_feedback_weight=Coalesce(Sum('activities__feedback__weight'), 0),
         )
 
 
