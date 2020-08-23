@@ -1,7 +1,7 @@
 import random
 
-from factory import DjangoModelFactory, SubFactory
-from factory import LazyAttribute
+from factory import LazyAttribute, SubFactory
+from factory.django import DjangoModelFactory
 
 from karrot.subscriptions.models import PushSubscription, PushSubscriptionPlatform
 from karrot.users.factories import UserFactory

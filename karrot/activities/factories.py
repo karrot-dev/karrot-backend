@@ -3,7 +3,8 @@ from random import randint
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
-from factory import DjangoModelFactory, SubFactory, LazyFunction, LazyAttribute, post_generation
+from factory import SubFactory, LazyFunction, LazyAttribute, post_generation
+from factory.django import DjangoModelFactory
 
 from karrot.activities.models import (
     Activity as ActivityModel, ActivitySeries as ActivitySeriesModel, Feedback as FeedbackModel, to_range

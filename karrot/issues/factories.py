@@ -1,5 +1,6 @@
 from dateutil.relativedelta import relativedelta
-from factory import DjangoModelFactory, CREATE_STRATEGY, SubFactory, LazyAttribute, post_generation
+from factory import CREATE_STRATEGY, SubFactory, LazyAttribute, post_generation
+from factory.django import DjangoModelFactory
 from freezegun import freeze_time
 
 from karrot.groups.models import GroupMembership
