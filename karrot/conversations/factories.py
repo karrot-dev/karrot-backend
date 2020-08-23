@@ -1,4 +1,5 @@
-from factory import DjangoModelFactory, CREATE_STRATEGY, post_generation
+from factory import CREATE_STRATEGY, post_generation
+from factory.django import DjangoModelFactory
 
 from karrot.conversations.models import Conversation
 

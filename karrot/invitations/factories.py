@@ -1,12 +1,13 @@
-import factory
+from factory import Sequence, SubFactory
+from factory.django import DjangoModelFactory
 
 from karrot.utils.tests.fake import faker
 
 
-class InvitationFactory(factory.DjangoModelFactory):
+class InvitationFactory(DjangoModelFactory):
     class Meta:
         model = 'invitations.Invitation'
 
-    email = factory.Sequence(lambda n: str(n) + faker.email())
-    invited_by = factory.SubFactory('karrot.users.factories.UserFactory')
-    group = factory.SubFactory('karrot.groups.factories.GroupFactory')
+    email = Sequence(lambda n: str(n) + faker.email())
+    invited_by = SubFactory('karrot.users.factories.UserFactory')
+    group = SubFactory('karrot.groups.factories.GroupFactory')

@@ -1,5 +1,5 @@
-from factory import DjangoModelFactory, SubFactory, post_generation
-from factory import LazyAttribute
+from factory import LazyAttribute, SubFactory, post_generation
+from factory.django import DjangoModelFactory
 
 from karrot.groups.factories import GroupFactory
 from karrot.places.models import Place as PlaceModel

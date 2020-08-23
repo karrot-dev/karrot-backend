@@ -1,7 +1,8 @@
 import os
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from factory import DjangoModelFactory, post_generation, LazyAttribute, Sequence
+from factory import post_generation, LazyAttribute, Sequence
+from factory.django import DjangoModelFactory
 
 from karrot.groups import roles
 from karrot.groups.models import Group as GroupModel, GroupStatus, GroupNotificationType

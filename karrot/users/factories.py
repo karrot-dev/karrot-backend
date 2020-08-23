@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
-from factory import DjangoModelFactory, CREATE_STRATEGY, LazyAttribute, PostGeneration, Sequence
+from factory import CREATE_STRATEGY, LazyAttribute, PostGeneration, Sequence
+from factory.django import DjangoModelFactory
 
 from karrot.utils.tests.fake import faker
 
