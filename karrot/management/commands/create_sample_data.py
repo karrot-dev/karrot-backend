@@ -413,7 +413,6 @@ class Command(BaseCommand):
         if not Group.objects.filter(status=GroupStatus.PLAYGROUND.value).exists():
             group = Group.objects.order_by('?').first()
             group.status = GroupStatus.PLAYGROUND.value
-            group.is_open = True
             group.save()
 
         print_success('Done! You can login with any of those mail addresses and password {}'.format(default_password))
