@@ -41,9 +41,6 @@ def user_became_editor(sender, instance, **kwargs):
         },
     )
 
-    if membership.group.is_playground():
-        return
-
     for member in membership.group.members.exclude(id=membership.user_id):
         Notification.objects.create(
             type=NotificationType.USER_BECAME_EDITOR.value,
