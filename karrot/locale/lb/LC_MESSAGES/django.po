@@ -104,14 +104,14 @@ msgstr "Béid de Kommentar an d'Gewiicht kënnen net eidel sinn."
 #: karrot/activities/tasks.py:69
 #, python-format
 msgid "Upcoming %(activity_type)s"
-msgstr "%(activity_type)s, déi kommen"
+msgstr "Zukünfteg %(activity_type)s"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:6
 #: karrot/activities/templates/activity_notification.html.jinja2:227
 #: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s upcoming pickups"
-msgstr "Ofhuelungen, déi kommen, vu %(group_name)s"
+msgstr "Zukünfteg Ofhuelungen vu %(group_name)s"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:216
 #, python-format
