@@ -23,7 +23,7 @@ from karrot.notifications.api import NotificationViewSet
 from karrot.offers.api import OfferViewSet
 from karrot.activities.api import ActivityViewSet, ActivitySeriesViewSet, FeedbackViewSet
 from karrot.places.api import PlaceViewSet
-from karrot.stats.api import FrontendStatsView, PlaceStatsViewSet, ActivityHistoryStatsViewSet
+from karrot.stats.api import FrontendStatsView, ActivityHistoryStatsViewSet
 from karrot.status.api import StatusView
 from karrot.subscriptions.api import PushSubscriptionViewSet
 from karrot.template_previews import views as template_preview_views
@@ -79,7 +79,6 @@ router.register('feedback', FeedbackViewSet)
 router.register('unsubscribe', UnsubscribeViewSet, basename='unsubscribe')
 
 # Stats endpoints
-router.register('stats/places', PlaceStatsViewSet)
 router.register('stats/activity-history', ActivityHistoryStatsViewSet)
 
 urlpatterns = [
