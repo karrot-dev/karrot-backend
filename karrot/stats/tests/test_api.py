@@ -105,7 +105,7 @@ class TestPlaceStatsInfoAPI(APITestCase):
 
     def test_with_no_activity(self):
         self.client.force_login(user=self.user)
-        response = self.client.get('/api/stats/places/')
+        response = self.client.get('/api/stats/activity-history/')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 0, response.data)
         # self.assertEqual([dict(entry) for entry in response.data], [self.expected_entry()], response.data)
@@ -114,7 +114,7 @@ class TestPlaceStatsInfoAPI(APITestCase):
         self.date = to_range(timezone.now() + timedelta(days=33))
         self.just_before_the_activity_starts = self.date.start - timedelta(hours=1)
         self.after_the_activity_is_over = self.date.end + timedelta(hours=2)
-        self.activity = ActivityFactory(place=self.place, date=self.date)
+        self.activity = ActivityFactory(place=self.place, date=self.date, max_participants=1)
 
     def test_join_and_leave_activity_missed(self):
         self.setup_activity()
@@ -130,13 +130,13 @@ class TestPlaceStatsInfoAPI(APITestCase):
 
         with freeze_time(self.after_the_activity_is_over, tick=True):
             Activity.objects.process_finished_activities()
-            response = self.client.get('/api/stats/places/', {'group': self.group.id, 'user': self.user.id})
+            response = self.client.get('/api/stats/activity-history/', {'group': self.group.id, 'user': self.user.id})
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
             self.assertEqual(len(response.data), 1)
             self.assertEqual([dict(entry) for entry in response.data],
                              [self.expected_entry({
-                                 'activity_leave_count': 1,
-                                 'activity_leave_late_count': 1,
+                                 'leave_count': 1,
+                                 'leave_late_count': 1,
                              })], response.data)
 
     def test_activity_done(self):
@@ -148,7 +148,7 @@ class TestPlaceStatsInfoAPI(APITestCase):
 
         with freeze_time(self.after_the_activity_is_over, tick=True):
             Activity.objects.process_finished_activities()
-            response = self.client.get('/api/stats/places/', {'group': self.group.id, 'user': self.user.id})
+            response = self.client.get('/api/stats/activity-history/', {'group': self.group.id, 'user': self.user.id})
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
             self.assertEqual(len(response.data), 1, response.data)
 
@@ -172,20 +172,18 @@ class TestPlaceStatsInfoAPI(APITestCase):
 
         with freeze_time(self.after_the_activity_is_over, tick=True):
             Activity.objects.process_finished_activities()
-            response = self.client.get('/api/stats/places/', {'group': self.group.id, 'user': self.user.id})
+            response = self.client.get('/api/stats/activity-history/', {'group': self.group.id, 'user': self.user.id})
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
             # nothing returned! our secret is safe...
             self.assertEqual(len(response.data), 0, response.data)
 
     def expected_entry(self, data=None):
         return {
-            'id': self.place.id,
-            'name': self.place.name,
+            'place': self.place.id,
             'group': self.place.group.id,
-            'status': self.place.status,
-            'activity_done_count': 0,
-            'activity_leave_count': 0,
-            'activity_leave_late_count': 0,
-            'activity_feedback_weight': 0,
+            'done_count': 0,
+            'leave_count': 0,
+            'leave_late_count': 0,
+            'feedback_weight': 0,
             **(data if data else {}),
         }

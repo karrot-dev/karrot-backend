@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.db.models import Count, OuterRef, Q, Subquery, Sum
 from django.db.models.functions import Coalesce
@@ -15,7 +17,7 @@ from karrot.activities.models import Activity, Feedback
 from karrot.history.models import HistoryTypus, History
 from karrot.places.models import Place
 from karrot.stats import stats
-from karrot.stats.serializers import FrontendStatsSerializer, PlaceStatsSerializer
+from karrot.stats.serializers import FrontendStatsSerializer, PlaceStatsSerializer, ActivityHistoryStatsSerializer
 
 
 class StatsThrottle(UserRateThrottle):
@@ -51,6 +53,63 @@ class PlaceStatsFilter(FilterSet):
     class Meta:
         model = Place
         fields = ['group', 'user']
+
+
+def history_filter_user(qs, name, value):
+    if value:
+        qs = qs.filter(users__in=[value])
+    return qs
+
+
+class ActivityHistoryStatsFilter(FilterSet):
+    group = ModelChoiceFilter(queryset=groups_queryset)
+    user = ModelChoiceFilter(queryset=users_queryset, method=history_filter_user)
+    date = IsoDateTimeFromToRangeFilter(field_name='activity__date__startswith')
+
+    class Meta:
+        model = History
+        fields = ['group', 'user']
+
+
+class ActivityHistoryStatsViewSet(ListModelMixin, GenericViewSet):
+    serializer_class = ActivityHistoryStatsSerializer
+    queryset = History.objects
+    filter_backends = (DjangoFilterBackend, )
+    filterset_class = ActivityHistoryStatsFilter
+    permission_classes = (IsAuthenticated, )
+
+    def get_queryset(self):
+        user_id = self.request.query_params.get('user', None)
+
+        feedback_weight_filter = Q(typus=HistoryTypus.ACTIVITY_DONE)
+
+        if user_id:
+            feedback_weight_filter &= Q(activity__feedback__given_by=user_id)
+
+        return self.filter_queryset(super().get_queryset()) \
+            .annotate_activity_leave_seconds() \
+            .values('place', 'group') \
+            .filter(typus__in=[
+                HistoryTypus.ACTIVITY_DONE.value,
+                HistoryTypus.ACTIVITY_LEAVE.value,
+            ]) \
+            .annotate(
+                done_count=Count('activity', filter=Q(
+                    typus=HistoryTypus.ACTIVITY_DONE,
+                )),
+                leave_count=Count('activity', filter=Q(
+                    typus=HistoryTypus.ACTIVITY_LEAVE,
+                    activity__in=Activity.objects.done_not_full(),
+                )),
+                leave_late_count=Count('activity', filter=Q(
+                    typus=HistoryTypus.ACTIVITY_LEAVE,
+                    activity__in=Activity.objects.done_not_full(),
+                    activity_leave_seconds__lte=timedelta(hours=24).total_seconds()),
+                ),
+                feedback_weight=Coalesce(Sum('activity__feedback__weight', filter=feedback_weight_filter), 0)) \
+            .filter(
+                Q(done_count__gt=0) | Q(leave_count__gt=0) | Q(leave_late_count__gt=0) | Q(feedback_weight__gt=0)) \
+            .order_by('place__name')
 
 
 class PlaceStatsViewSet(ListModelMixin, GenericViewSet):
