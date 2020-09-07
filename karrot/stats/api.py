@@ -66,8 +66,8 @@ class ActivityHistoryStatsViewSet(ListModelMixin, GenericViewSet):
             .annotate_activity_leave_seconds() \
             .values('place', 'group') \
             .filter(typus__in=[
-                HistoryTypus.ACTIVITY_DONE.value,
-                HistoryTypus.ACTIVITY_LEAVE.value,
+                HistoryTypus.ACTIVITY_DONE,
+                HistoryTypus.ACTIVITY_LEAVE,
             ]) \
             .annotate(
                 done_count=Count('activity', filter=Q(

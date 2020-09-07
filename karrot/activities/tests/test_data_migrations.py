@@ -75,7 +75,7 @@ class TestConvertWeightIntoSumMigration(TestMigrations):
         self.feedback1_id = feedback1.id
         self.feedback2_id = feedback2.id
 
-    def test_foo(self):
+    def test_migration_of_average_to_sum(self):
         Activity = self.apps.get_model('activities', 'Activity')
         Feedback = self.apps.get_model('activities', 'Feedback')
         activity = Activity.objects.get(pk=self.activity_id)
