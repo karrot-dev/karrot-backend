@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Q, Sum
 from django.db.models.functions import Coalesce
@@ -80,7 +81,7 @@ class ActivityHistoryStatsViewSet(ListModelMixin, GenericViewSet):
                 leave_late_count=Count('activity', filter=Q(
                     typus=HistoryTypus.ACTIVITY_LEAVE,
                     activity__in=Activity.objects.done_not_full(),
-                    activity_leave_seconds__lte=timedelta(hours=24).total_seconds()),
+                    activity_leave_seconds__lte=timedelta(hours=settings.ACTIVITY_LEAVE_LATE_HOURS).total_seconds()),
                 ),
                 feedback_weight=Coalesce(Sum('activity__feedback__weight', filter=feedback_weight_filter), 0)) \
             .filter(
