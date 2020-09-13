@@ -6,7 +6,7 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from karrot.conversations.models import Conversation, ConversationParticipant
-from karrot.groups.factories import GroupFactory, PlaygroundGroupFactory
+from karrot.groups.factories import GroupFactory
 from karrot.groups.models import Group, get_default_notification_types
 from karrot.activities.factories import ActivityFactory
 from karrot.activities.models import to_range
@@ -33,15 +33,6 @@ class TestGroupModel(TestCase):
         conversation = Conversation.objects.get_for_target(group)
         conversation_participant = ConversationParticipant.objects.get(conversation=conversation, user=user)
         self.assertFalse(conversation_participant.muted)
-
-    def test_no_notifications_by_default_in_playground(self):
-        user = UserFactory()
-        group = PlaygroundGroupFactory()
-        membership = group.groupmembership_set.create(user=user)
-        self.assertEqual([], membership.notification_types)
-        conversation = Conversation.objects.get_for_target(group)
-        conversation_participant = ConversationParticipant.objects.get(conversation=conversation, user=user)
-        self.assertTrue(conversation_participant.muted)
 
     def test_uses_default_application_questions_if_not_specified(self):
         group = GroupFactory(application_questions='')

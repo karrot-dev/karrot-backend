@@ -1,4 +1,3 @@
-from django.core import mail
 from unittest.mock import patch
 
 from django.contrib.contenttypes.models import ContentType
@@ -6,8 +5,8 @@ from django.test import TestCase
 from django.utils import timezone
 
 from karrot.conversations.models import Conversation, ConversationParticipant
-from karrot.groups.factories import GroupFactory, PlaygroundGroupFactory
-from karrot.groups.models import GroupMembership, Trust
+from karrot.groups.factories import GroupFactory
+from karrot.groups.models import GroupMembership
 from karrot.users.factories import UserFactory
 
 
@@ -80,27 +79,3 @@ class TestSendStatistics(TestCase):
         membership.inactive_at = None
         membership.save()
         self.assertFalse(write_mock.called)
-
-
-class TestGroupPlaygroundReceivers(TestCase):
-    def setUp(self):
-        self.group = PlaygroundGroupFactory()
-
-    def test_playground_members_are_always_editors(self):
-        new_member = UserFactory()
-        mail.outbox = []
-
-        self.group.add_member(new_member)
-
-        self.assertTrue(self.group.is_editor(new_member))
-        # no email should be sent when joining playground
-        self.assertEqual(len(mail.outbox), 0)
-
-        # no email should be sent when giving trust
-        membership = GroupMembership.objects.get(group=self.group, user=new_member)
-        another_user = UserFactory()
-        self.group.add_member(another_user)
-        mail.outbox = []
-        Trust.objects.create(membership=membership, given_by=another_user)
-
-        self.assertEqual(len(mail.outbox), 0)
