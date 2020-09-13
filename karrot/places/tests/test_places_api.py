@@ -316,7 +316,6 @@ class TestPlaceStatisticsAPI(APITestCase):
                 date=one_day_ago,
                 participants=users,
                 is_done=True,
-                feedback_as_sum=False,
             ) for _ in range(3)
         ]
         feedback = [FeedbackFactory(about=choice(activities), given_by=u) for u in users]

@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db import transaction
-from django.db.models import Count, Q, DurationField, F
+from django.db.models import Avg, Count, DurationField, F, Q
 from django.utils import timezone
 
 from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField
@@ -155,6 +155,9 @@ class ActivityQuerySet(models.QuerySet):
     def annotate_timezone(self):
         return self.annotate(timezone=F('place__group__timezone'))
 
+    def annotate_feedback_weight(self):
+        return self.annotate(feedback_weight=Avg('feedback__weight'))
+
     def exclude_disabled(self):
         return self.filter(is_disabled=False)
 
@@ -170,6 +173,11 @@ class ActivityQuerySet(models.QuerySet):
 
     def done(self):
         return self.exclude_disabled().filter(date__startswith__lt=timezone.now()).exclude(participants=None)
+
+    def done_not_full(self):
+        return self.exclude_disabled() \
+            .annotate(participant_count=Count('participants')) \
+            .filter(date__startswith__lt=timezone.now(), participant_count__lt=F('max_participants'))
 
     def upcoming(self):
         return self.filter(date__startswith__gt=timezone.now())
@@ -283,10 +291,6 @@ class Activity(BaseModel, ConversationMixin):
 
     is_done = models.BooleanField(default=False)
 
-    # If this activity has multiple feedback, should we take the sum or the average?
-    # Note that we need to tell the user if we change that default!
-    feedback_as_sum = models.BooleanField(default=True)
-
     @property
     def group(self):
         return self.place.group
@@ -375,6 +379,10 @@ class Feedback(BaseModel):
                                            MaxValueValidator(10000.0)]
     )
     comment = models.CharField(max_length=settings.DESCRIPTION_MAX_LENGTH, blank=True)
+
+    # just to store legacy values for when feedback_as_sum was False on activities... null otherwise
+    # I guess can remove it after a while...
+    weight_for_average = models.FloatField(null=True)
 
     class Meta:
         unique_together = ('about', 'given_by')

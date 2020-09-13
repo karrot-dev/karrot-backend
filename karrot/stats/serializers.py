@@ -1,10 +1,35 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from karrot.history.models import History
+
 MAX_STATS = 50
 
 
-class StatsEntrySerializer(serializers.Serializer):
+class ActivityHistoryStatsSerializer(serializers.ModelSerializer):
+    # using the values('place, 'group') in the query doesn't seem to fit nicely with DRF model serializer
+    # so having to explicitly declare these fields here
+    place = serializers.IntegerField()
+    group = serializers.IntegerField()
+
+    done_count = serializers.IntegerField()
+    leave_count = serializers.IntegerField()
+    leave_late_count = serializers.IntegerField()
+    feedback_weight = serializers.FloatField()
+
+    class Meta:
+        model = History
+        fields = [
+            'place',
+            'group',
+            'done_count',
+            'leave_count',
+            'leave_late_count',
+            'feedback_weight',
+        ]
+
+
+class FrontendStatsEntrySerializer(serializers.Serializer):
     # timings
     ms = serializers.IntegerField()
     ms_resources = serializers.IntegerField()
@@ -24,8 +49,8 @@ class StatsEntrySerializer(serializers.Serializer):
     dev = serializers.BooleanField()
 
 
-class StatsSerializer(serializers.Serializer):
-    stats = StatsEntrySerializer(many=True)
+class FrontendStatsSerializer(serializers.Serializer):
+    stats = FrontendStatsEntrySerializer(many=True)
 
     def validate_stats(self, stats):
         if len(stats) > MAX_STATS:
