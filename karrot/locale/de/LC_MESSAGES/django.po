@@ -108,7 +108,7 @@ msgstr "Kommentar und Gewicht dürfen nicht beide leer sein."
 #: karrot/activities/tasks.py:69
 #, python-format
 msgid "Upcoming %(activity_type)s"
-msgstr ""
+msgstr "Bevorstehend  %(activity_type)s"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:6
 #: karrot/activities/templates/activity_notification.html.jinja2:227
@@ -120,7 +120,7 @@ msgstr "%(group_name)s, anstehende Abholungen"
 #: karrot/activities/templates/activity_notification.html.jinja2:216
 #, python-format
 msgid "%(empty_participants_count)s/%(max_participants)s remaining"
-msgstr ""
+msgstr "%(empty_participants_count)s/%(max_participants)s Verbleibende"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:231
 msgid "Tonight"
@@ -176,7 +176,7 @@ msgstr "Du kannst dies nur als Bewerber tun."
 
 #: karrot/applications/api.py:52
 msgid "Application is not pending anymore"
-msgstr ""
+msgstr "Bewerbung ist nicht mehr offen"
 
 #: karrot/applications/serializers.py:36
 msgid "Application is already pending"
@@ -499,6 +499,10 @@ msgid ""
 "<strong>editing permissions</strong>. For example, you can now modify your "
 "group, places and pickup dates, or create new ones."
 msgstr ""
+"Du hast genug Vertrauen von anderen Gruppenmitgliedern erhalten, um "
+"<strong>Bearbeitungsberechtigungen</strong> zu erhalten. Beispielsweise "
+"kannst du jetzt deine Gruppe, Orte und Abholtermine ändern oder neue "
+"erstellen."
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:215
 msgid "Use your power wisely!"
