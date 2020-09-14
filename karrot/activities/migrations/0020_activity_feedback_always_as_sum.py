@@ -12,17 +12,18 @@ def recalculate_weight(apps, schema_editor):
     Feedback.objects.filter(about__feedback_as_sum=False).update(weight_for_average=F('weight'))
 
     for activity in Activity.objects.filter(feedback_as_sum=False):
-        feedback_count = activity.feedback_set.count()
+        feedback_with_weight = activity.feedback_set.exclude(weight=None)
+        feedback_with_weight_count = feedback_with_weight.count()
 
-        if feedback_count > 0:
+        if feedback_with_weight_count > 0:
 
             # the average value is what we consider the total weight of the pickup
-            average = activity.feedback_set.aggregate(value=Avg('weight'))['value']
+            average = feedback_with_weight.aggregate(value=Avg('weight'))['value']
 
             # so now the weights are summed
             # we just pretend that each person just picked up an equal share of the weight
-            weight_per_participant = average / feedback_count
-            activity.feedback_set.update(weight=weight_per_participant)
+            weight_per_participant = average / feedback_with_weight_count
+            feedback_with_weight.update(weight=weight_per_participant)
 
     Activity.objects.filter(feedback_as_sum=False).update(feedback_as_sum=True)
 

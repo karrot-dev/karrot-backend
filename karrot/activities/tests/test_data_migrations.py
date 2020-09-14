@@ -62,26 +62,36 @@ class TestConvertWeightIntoSumMigration(TestMigrations):
         Feedback = apps.get_model('activities', 'Feedback')
         group = Group.objects.create(name=faker.name())
         place = Place.objects.create(name=faker.name(), group=group)
+        activity1 = Activity.objects.create(place=place, date=to_range(timezone.now()), feedback_as_sum=False)
+        activity2 = Activity.objects.create(place=place, date=to_range(timezone.now()), feedback_as_sum=False)
         user1 = User.objects.create()
         user2 = User.objects.create()
-        GroupMembership.objects.create(group=group, user=user1)
-        GroupMembership.objects.create(group=group, user=user2)
-        activity = Activity.objects.create(place=place, date=to_range(timezone.now()), feedback_as_sum=False)
-        ActivityParticipant.objects.create(activity=activity, user=user1)
-        ActivityParticipant.objects.create(activity=activity, user=user2)
-        feedback1 = Feedback.objects.create(given_by=user1, about=activity, weight=10)
-        feedback2 = Feedback.objects.create(given_by=user2, about=activity, weight=20)
-        self.activity_id = activity.id
+        user3 = User.objects.create()
+        for user in [user1, user2, user3]:
+            GroupMembership.objects.create(group=group, user=user)
+            ActivityParticipant.objects.create(activity=activity1, user=user)
+            ActivityParticipant.objects.create(activity=activity2, user=user)
+        feedback1 = Feedback.objects.create(given_by=user1, about=activity1, weight=10)
+        feedback2 = Feedback.objects.create(given_by=user2, about=activity1, weight=20)
+        feedback3 = Feedback.objects.create(given_by=user3, about=activity1)  # no weight!
+        for user in [user1, user2, user3]:
+            # and an activity with no weight feedback at all
+            Feedback.objects.create(given_by=user, about=activity2)
+        self.activity1_id = activity1.id
+        self.activity2_id = activity2.id
         self.feedback1_id = feedback1.id
         self.feedback2_id = feedback2.id
+        self.feedback3_id = feedback3.id
 
     def test_migration_of_average_to_sum(self):
         Activity = self.apps.get_model('activities', 'Activity')
         Feedback = self.apps.get_model('activities', 'Feedback')
-        activity = Activity.objects.get(pk=self.activity_id)
+        activity1 = Activity.objects.get(pk=self.activity1_id)
+        activity2 = Activity.objects.get(pk=self.activity2_id)
         feedback1 = Feedback.objects.get(pk=self.feedback1_id)
         feedback2 = Feedback.objects.get(pk=self.feedback2_id)
-        self.assertEqual(activity.feedback_set.count(), 2)
+        feedback3 = Feedback.objects.get(pk=self.feedback3_id)
+        self.assertEqual(activity1.feedback_set.count(), 3)
 
         # user1 claimed it was 10kg, user2 claimed 20kg, so in old logic we would call it 15kg (average)
         self.assertEqual(feedback1.weight_for_average, 10)
@@ -90,6 +100,10 @@ class TestConvertWeightIntoSumMigration(TestMigrations):
         # in new logic that 15kg was split between 2 people, so we would say 7.5kg each
         self.assertEqual(feedback1.weight, 7.5)
         self.assertEqual(feedback2.weight, 7.5)
+        self.assertEqual(feedback3.weight, None)  # still no weight
 
         # now we've converted it, this should be changed!
-        self.assertTrue(activity.feedback_as_sum)
+        self.assertTrue(activity1.feedback_as_sum)
+
+        self.assertEqual(activity2.feedback_set.exclude(weight=None).count(), 0)
+        self.assertEqual(activity2.feedback_set.filter(weight=None).count(), 3)
