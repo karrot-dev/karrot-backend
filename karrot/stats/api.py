@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Count, Q, Sum
 from django.db.models.functions import Coalesce
 from django_filters import IsoDateTimeFromToRangeFilter
-from django_filters.rest_framework import DjangoFilterBackend, FilterSet, ModelChoiceFilter
+from django_filters.rest_framework import DjangoFilterBackend, FilterSet, ModelChoiceFilter, ModelMultipleChoiceFilter
 from rest_framework import views, status
 from rest_framework.mixins import ListModelMixin
 from rest_framework.parsers import JSONParser
@@ -32,15 +32,9 @@ def users_queryset(request):
     return get_user_model().objects.filter(groups__in=request.user.groups.all())
 
 
-def history_filter_user(qs, name, value):
-    if value:
-        qs = qs.filter(users__in=[value])
-    return qs
-
-
 class ActivityHistoryStatsFilter(FilterSet):
     group = ModelChoiceFilter(queryset=groups_queryset)
-    user = ModelChoiceFilter(queryset=users_queryset, method=history_filter_user)
+    user = ModelMultipleChoiceFilter(queryset=users_queryset, field_name='users')
     date = IsoDateTimeFromToRangeFilter(field_name='activity__date__startswith')
 
     class Meta:
