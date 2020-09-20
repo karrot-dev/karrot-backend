@@ -14,7 +14,7 @@ def set_initial_activity_type(apps, schema_editor):
         # "task" type for all groups
         set_to_activity_type, _ = ActivityType.objects.get_or_create(
             group=group,
-            name='task',
+            name='task',  # TODO: should be translated... according to some logic... or manual? TBC
             defaults={
                 'colour': 2,
                 'icon': 'fa-flag',
@@ -28,7 +28,7 @@ def set_initial_activity_type(apps, schema_editor):
             # "pickup" type only for foodsaving groups
             set_to_activity_type, _ = ActivityType.objects.get_or_create(
                 group=group,
-                name='pickup',
+                name='pickup',  # TODO: should be translated... according to some logic... or manual? TBC
                 defaults={
                     'colour': 1,
                     'icon': 'fa-shopping-basket',
