@@ -54,7 +54,7 @@ django-timezone-field==4.0  # via -r requirements.in
 django-versatileimagefield==2.0  # via -r requirements.in
 django[argon2]==3.0.10    # via -r requirements.in, channels, django-anymail, django-cors-headers, django-dirtyfields, django-filter, django-influxdb-metrics, django-jinja, django-redis, django-rest-swagger, django-silk, django-timezone-field, djangorestframework
 djangorestframework-csv==2.1.0  # via -r requirements.in
-djangorestframework==3.11.1  # via -r requirements.in, django-rest-swagger, djangorestframework-csv
+djangorestframework==3.12.1  # via -r requirements.in, django-rest-swagger, djangorestframework-csv
 execnet==1.7.1            # via pytest-xdist
 face==20.1.1              # via glom
 factory-boy==3.0.1        # via -r requirements.in
@@ -74,7 +74,7 @@ huey==2.3.0               # via -r requirements.in
 hyperlink==20.0.1         # via twisted
 identify==1.5.5           # via pre-commit
 idna==2.10                # via hyperlink, requests, twisted
-importlib-metadata==1.7.0  # via -r requirements.in, flake8, markdown, pluggy, pre-commit, pytest, virtualenv
+importlib-metadata==1.7.0  # via -r requirements.in
 incremental==17.5.0       # via twisted
 git+https://github.com/influxdata/influxdb-python@cc41e290f690c4eb67f75c98fa9f027bdb6eb16b#egg=influxdbtld  # via django-influxdb-metrics
 iniconfig==1.0.1          # via pytest
