@@ -21,6 +21,7 @@ from karrot.places.models import PlaceStatus
 class ActivityType(BaseModel):
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='activity_types')
     name = models.CharField(max_length=80)
+    name_is_default = models.BooleanField(default=True)
     colour = models.CharField(max_length=6)
     icon = models.CharField(max_length=32)
     feedback_icon = models.CharField(max_length=32)
