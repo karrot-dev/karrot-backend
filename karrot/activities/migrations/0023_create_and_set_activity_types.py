@@ -16,8 +16,21 @@ def set_initial_activity_type(apps, schema_editor):
             group=group,
             name='task',  # TODO: should be translated... according to some logic... or manual? TBC
             defaults={
-                'colour': 2,
-                'icon': 'fa-flag',
+                'colour': '283593',
+                'icon': 'fas fa-check-square',
+                'feedback_icon': 'fas fa-reply',
+                'has_feedback': True,
+                'has_feedback_weight': False,
+            },
+        )
+
+        # "meeting" type for all groups too
+        ActivityType.objects.get_or_create(
+            group=group,
+            name='meeting',
+            defaults={
+                'colour': 'AD1457',
+                'icon': 'fas fa-handshake',
                 'feedback_icon': 'fa-reply',
                 'has_feedback': True,
                 'has_feedback_weight': False,
@@ -30,9 +43,9 @@ def set_initial_activity_type(apps, schema_editor):
                 group=group,
                 name='pickup',  # TODO: should be translated... according to some logic... or manual? TBC
                 defaults={
-                    'colour': 1,
-                    'icon': 'fa-shopping-basket',
-                    'feedback_icon': 'fa-balance-scale',
+                    'colour': '007700',
+                    'icon': 'fas fa-shopping-basket',
+                    'feedback_icon': 'fas fa-balance-scale',
                     'has_feedback': True,
                     'has_feedback_weight': True,
                 },

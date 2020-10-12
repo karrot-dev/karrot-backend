@@ -287,6 +287,9 @@ class Command(BaseCommand):
             print('created feedback: ', response.data)
             return response.data
 
+        def random_activity_type(group_id):
+            return ActivityType.objects.filter(group=group['id']).order_by('?').first()
+
         def create_done_activity(place, user_id, activity_type):
             activity = Activity.objects.create(
                 typus=activity_type,
@@ -311,16 +314,15 @@ class Command(BaseCommand):
             users.append(user)
             login_user(user['id'])
             group = make_group()
-            activity_type = ActivityType.objects.create(name='pickup', group_id=group['id'])
             groups.append(group)
             for _ in range(5):
                 place = make_place(group['id'])
-                make_series(place['id'], activity_type)
-                activity = make_activity(place['id'], activity_type)
+                make_series(place['id'], random_activity_type(group['id']))
+                activity = make_activity(place['id'], random_activity_type(group['id']))
                 join_activity(activity['id'])
                 print(group['conversation'])
                 make_message(group['conversation']['id'])
-                done_activity = create_done_activity(place['id'], user['id'], activity_type)
+                done_activity = create_done_activity(place['id'], user['id'], random_activity_type(group['id']))
                 make_feedback(done_activity.id, user['id'])
 
         # group members
