@@ -288,7 +288,10 @@ class Command(BaseCommand):
             return response.data
 
         def random_activity_type(group_id):
-            return ActivityType.objects.filter(group=group['id']).order_by('?').first()
+            return find_activity_type(group=group_id)
+
+        def find_activity_type(**filter_params):
+            return ActivityType.objects.filter(**filter_params).order_by('?').first()
 
         def create_done_activity(place, user_id, activity_type):
             activity = Activity.objects.create(
@@ -322,7 +325,10 @@ class Command(BaseCommand):
                 join_activity(activity['id'])
                 print(group['conversation'])
                 make_message(group['conversation']['id'])
-                done_activity = create_done_activity(place['id'], user['id'], random_activity_type(group['id']))
+                done_activity = create_done_activity(
+                    place['id'], user['id'],
+                    find_activity_type(group=group['id'], has_feedback=True, has_feedback_weight=True)
+                )
                 make_feedback(done_activity.id, user['id'])
 
         # group members
