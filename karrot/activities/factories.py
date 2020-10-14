@@ -3,8 +3,9 @@ from random import randint
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
-from factory import DjangoModelFactory, SubFactory, LazyFunction, LazyAttribute, post_generation, Sequence, \
+from factory import SubFactory, LazyFunction, LazyAttribute, post_generation, Sequence, \
     SelfAttribute
+from factory.django import DjangoModelFactory
 
 from karrot.activities.models import (
     Activity as ActivityModel, ActivitySeries as ActivitySeriesModel, Feedback as FeedbackModel, to_range, ActivityType
@@ -21,7 +22,7 @@ class ActivityTypeFactory(DjangoModelFactory):
     class Meta:
         model = ActivityType
 
-    name = Sequence(lambda n: ' '.join(['ActivityType', str(n), faker.name()]))
+    name = Sequence(lambda n: ' '.join(['ActivityType', str(n), faker.first_name()]))
 
 
 class ActivityFactory(DjangoModelFactory):

@@ -464,8 +464,23 @@ class FeedbackSerializer(serializers.ModelSerializer):
                 return None
             return getattr(self.instance, field)
 
+        activity_type = data.get('about', get_instance_attr('about')).typus
+
         comment = data.get('comment', get_instance_attr('comment'))
         weight = data.get('weight', get_instance_attr('weight'))
+
+        if not activity_type.has_feedback:
+            raise serializers.ValidationError(
+                _('You cannot give feedback to an activity of type %(activity_type)s.') %
+                {'activity_type': activity_type.name}
+            )
+
+        if weight is not None and not activity_type.has_feedback_weight:
+            raise serializers.ValidationError(
+                _('You cannot give weight feedback to an activity of type %(activity_type)s.') %
+                {'activity_type': activity_type.name}
+            )
+
         if (comment is None or comment == '') and weight is None:
             raise serializers.ValidationError(_('Both comment and weight cannot be blank.'))
         data['given_by'] = self.context['request'].user
