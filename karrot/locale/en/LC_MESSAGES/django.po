@@ -93,7 +93,17 @@ msgstr ""
 msgid "You aren't assigned to the pickup."
 msgstr ""
 
-#: karrot/activities/serializers.py:470
+#: karrot/activities/serializers.py:474
+#, python-format
+msgid "You cannot give feedback to an activity of type %(activity_type)s."
+msgstr ""
+
+#: karrot/activities/serializers.py:480
+#, python-format
+msgid "You cannot give weight feedback to an activity of type %(activity_type)s."
+msgstr ""
+
+#: karrot/activities/serializers.py:485
 msgid "Both comment and weight cannot be blank."
 msgstr ""
 
