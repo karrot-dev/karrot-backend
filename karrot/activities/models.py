@@ -165,6 +165,7 @@ class ActivitySeries(BaseModel):
 class ActivityQuerySet(models.QuerySet):
     def _feedback_possible_q(self, user):
         return Q(is_done=True) \
+               & Q(typus__has_feedback=True) \
                & Q(date__endswith__gte=timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)) \
                & Q(participants=user) \
                & ~Q(feedback__given_by=user)
@@ -341,6 +342,8 @@ class Activity(BaseModel, ConversationMixin):
         return pytz.timezone(value) if isinstance(value, str) else value
 
     def feedback_due(self):
+        if not self.typus.has_feedback:
+            return False
         due = self.date.end + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
         return due.astimezone(self.get_timezone())
 

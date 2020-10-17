@@ -288,7 +288,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         Member is allowed to see list of feedback
         """
         self.client.force_login(user=self.member)
-        with self.assertNumQueries(4):
+        with self.assertNumQueries(5):
             response = self.get_results(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         feedback = response.data['feedback']
