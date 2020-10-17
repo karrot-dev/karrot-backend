@@ -362,7 +362,7 @@ msgstr ""
 msgid "Playground"
 msgstr ""
 
-#: karrot/groups/serializers.py:141 karrot/groups/serializers.py:241
+#: karrot/groups/serializers.py:141 karrot/groups/serializers.py:242
 msgid "You cannot manage agreements"
 msgstr ""
 
@@ -370,7 +370,7 @@ msgstr ""
 msgid "Agreement is not for this group"
 msgstr ""
 
-#: karrot/groups/serializers.py:239
+#: karrot/groups/serializers.py:240
 msgid "You are not in this group"
 msgstr ""
 
