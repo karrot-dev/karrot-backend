@@ -199,8 +199,9 @@ class GroupDetailSerializer(GroupBaseSerializer):
 
         # create the initial activity types
         for name, options in default_activity_types.items():
-            options.pop('name')  # this holds the translated name, and we want the original
-            ActivityType.objects.create(name=name, group=group, name_is_default=True, **options)
+            options_copy = options.copy()
+            options_copy.pop('name')  # this holds the translated name, and we want the original
+            ActivityType.objects.create(name=name, group=group, name_is_default=True, **options_copy)
 
         History.objects.create(
             typus=HistoryTypus.GROUP_CREATE,
