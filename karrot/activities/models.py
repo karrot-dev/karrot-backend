@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrulestr
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils.translation import gettext as _
 from django.db import models
 from django.db import transaction
 from django.db.models import Avg, Count, DurationField, F, Q
@@ -30,6 +31,10 @@ class ActivityType(BaseModel):
 
     class Meta:
         unique_together = ('group', 'name')
+
+    def get_translated_name(self):
+        # the translations are collected via activity_types.py
+        return _(self.name) if self.name_is_default else self.name
 
 
 class ActivitySeriesQuerySet(models.QuerySet):

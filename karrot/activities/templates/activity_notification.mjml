@@ -90,7 +90,7 @@
                 <mj-text font-size="13px" line-height="18px" color="#777">
                     <p>
                         {% trans -%}You are receiving this because you are subscribed to
-                            <strong>Pickup notification</strong> emails for this group.{% endtrans %}
+                            <strong>Activity notification</strong> emails for this group.{% endtrans %}
                         <a href="{{ unsubscribe_url }}">{% trans %}Click here to unsubscribe{%  endtrans %}</a>.
                     </p>
                 </mj-text>

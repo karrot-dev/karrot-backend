@@ -171,7 +171,7 @@ class ActivityViewSet(
         RetrieveConversationMixin,
 ):
     """
-    Activity Dates
+    Activities
 
     list:
     Query parameters

@@ -16,24 +16,36 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.8.0\n"
 
+#: karrot/activities/activity_types.py:5
+msgid "Pickup"
+msgstr ""
+
+#: karrot/activities/activity_types.py:13
+msgid "Task"
+msgstr ""
+
+#: karrot/activities/activity_types.py:21
+msgid "Meeting"
+msgstr ""
+
 #: karrot/activities/permissions.py:7
-msgid "The pickup date is in the past."
+msgid "The activity is in the past."
 msgstr ""
 
 #: karrot/activities/permissions.py:18
-msgid "You can only delete empty pickup dates."
+msgid "You can only delete empty activities."
 msgstr ""
 
 #: karrot/activities/permissions.py:27
-msgid "You have not joined this pickup date."
+msgid "You have not joined this activity."
 msgstr ""
 
 #: karrot/activities/permissions.py:34
-msgid "You have already joined this pickup date."
+msgid "You have already joined this activity."
 msgstr ""
 
 #: karrot/activities/permissions.py:41
-msgid "Pickup date is already full."
+msgid "Activity is already full."
 msgstr ""
 
 #: karrot/activities/permissions.py:48
@@ -42,7 +54,7 @@ msgstr ""
 
 #: karrot/activities/permissions.py:57 karrot/activities/serializers.py:456
 #, python-format
-msgid "You can't give feedback for pickups more than %(days_number)s days ago."
+msgid "You can't give feedback for activities more than %(days_number)s days ago."
 msgstr ""
 
 #: karrot/activities/permissions.py:67 karrot/activities/serializers.py:139
@@ -74,7 +86,7 @@ msgid "Typus is not for this group."
 msgstr ""
 
 #: karrot/activities/serializers.py:216
-msgid "You can't move pickups that are part of a series."
+msgid "You can't move activities that are part of a series."
 msgstr ""
 
 #: karrot/activities/serializers.py:353
@@ -86,11 +98,11 @@ msgid "Only single recurrence rules are allowed."
 msgstr ""
 
 #: karrot/activities/serializers.py:451
-msgid "The pickup is not done yet"
+msgid "The activity is not done yet"
 msgstr ""
 
 #: karrot/activities/serializers.py:453
-msgid "You aren't assigned to the pickup."
+msgid "You aren't assigned to the activity."
 msgstr ""
 
 #: karrot/activities/serializers.py:474
@@ -107,7 +119,7 @@ msgstr ""
 msgid "Both comment and weight cannot be blank."
 msgstr ""
 
-#: karrot/activities/tasks.py:69
+#: karrot/activities/tasks.py:68
 #, python-format
 msgid "Upcoming %(activity_type)s"
 msgstr ""
@@ -281,28 +293,22 @@ msgstr ""
 msgid "You are not a participant in this thread"
 msgstr ""
 
-#: karrot/conversations/emails.py:204 karrot/conversations/emails.py:207
-#: karrot/subscriptions/tasks.py:71
-#, python-format
-msgid "Pickup %(date)s"
-msgstr ""
-
-#: karrot/conversations/emails.py:240
+#: karrot/conversations/emails.py:236
 #, python-format
 msgid "New message in your application to %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:244
+#: karrot/conversations/emails.py:240
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:266
+#: karrot/conversations/emails.py:262
 #, python-format
 msgid "New message in conflict resolution in %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:281
+#: karrot/conversations/emails.py:277
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr ""
@@ -356,7 +362,7 @@ msgstr ""
 msgid "Playground"
 msgstr ""
 
-#: karrot/groups/serializers.py:141 karrot/groups/serializers.py:240
+#: karrot/groups/serializers.py:141 karrot/groups/serializers.py:241
 msgid "You cannot manage agreements"
 msgstr ""
 
@@ -364,7 +370,7 @@ msgstr ""
 msgid "Agreement is not for this group"
 msgstr ""
 
-#: karrot/groups/serializers.py:238
+#: karrot/groups/serializers.py:239
 msgid "You are not in this group"
 msgstr ""
 

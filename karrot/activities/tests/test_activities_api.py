@@ -245,7 +245,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         self.activity.add_participant(u2)
         response = self.client.post(self.join_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
-        self.assertEqual(response.data['detail'], 'Pickup date is already full.')
+        self.assertEqual(response.data['detail'], 'Activity is already full.')
 
     def test_join_past_activity_fails(self):
         self.client.force_login(user=self.member)

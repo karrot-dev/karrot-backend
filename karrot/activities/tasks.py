@@ -48,10 +48,6 @@ def activity_reminder(participant_id):
 
         emoji = '⏰'
 
-        activity_type_name = activity.typus.name
-        if activity.typus.name_is_default:
-            activity_type_name = _(activity_type_name)  # the translations are collected via activity_types.py
-
         if is_today(activity.date.start):
             when = format_time(
                 activity.date.start,
@@ -69,7 +65,7 @@ def activity_reminder(participant_id):
 
         where = ', '.join(part for part in [activity.place.name, activity.place.address] if part)
 
-        title = _('Upcoming %(activity_type)s') % {'activity_type': activity_type_name}
+        title = _('Upcoming %(activity_type)s') % {'activity_type': activity.typus.get_translated_name()}
         title = f'{emoji} {title}!'
 
         body = Truncator(' / '.join(part for part in [when, where, activity.description] if part)).chars(num=1000)
