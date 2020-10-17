@@ -28,7 +28,7 @@ class TestActivitydatesAPIFilter(APITestCase, ExtractPaginationMixin):
         self.activity_type = ActivityTypeFactory(group=self.group)
         self.activity = ActivityFactory(typus=self.activity_type, place=self.place)
 
-        # and another place + group + pick-update
+        # and another place + group + activity
         self.group2 = GroupFactory(members=[self.member])
         self.place2 = PlaceFactory(group=self.group2)
         self.activity_type2 = ActivityTypeFactory(group=self.group2)

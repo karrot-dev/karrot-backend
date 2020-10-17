@@ -496,7 +496,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('You can\'t move pickups', response.data['date'][0])
+        self.assertIn('You can\'t move activities', response.data['date'][0])
 
     def test_cannot_change_activity_has_duration_in_a_series(self):
         self.client.force_login(user=self.member)

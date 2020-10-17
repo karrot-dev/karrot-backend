@@ -4,10 +4,10 @@ from django.utils.translation import gettext_lazy as _
 
 
 class IsUpcoming(permissions.BasePermission):
-    message = _('The pickup date is in the past.')
+    message = _('The activity is in the past.')
 
     def has_object_permission(self, request, view, obj):
-        # do allow GETs for pick-ups in the past
+        # do allow GETs for activities in the past
         if request.method in permissions.SAFE_METHODS:
             return True
         else:
@@ -15,7 +15,7 @@ class IsUpcoming(permissions.BasePermission):
 
 
 class IsEmptyActivity(permissions.BasePermission):
-    message = _('You can only delete empty pickup dates.')
+    message = _('You can only delete empty activities.')
 
     def has_object_permission(self, request, view, obj):
         if view.action == 'destroy':
@@ -24,21 +24,21 @@ class IsEmptyActivity(permissions.BasePermission):
 
 
 class HasJoinedActivity(permissions.BasePermission):
-    message = _('You have not joined this pickup date.')
+    message = _('You have not joined this activity.')
 
     def has_object_permission(self, request, view, obj):
         return obj.is_participant(request.user)
 
 
 class HasNotJoinedActivity(permissions.BasePermission):
-    message = _('You have already joined this pickup date.')
+    message = _('You have already joined this activity.')
 
     def has_object_permission(self, request, view, obj):
         return not obj.is_participant(request.user)
 
 
 class IsNotFull(permissions.BasePermission):
-    message = _('Pickup date is already full.')
+    message = _('Activity is already full.')
 
     def has_object_permission(self, request, view, obj):
         return not obj.is_full()
@@ -54,7 +54,7 @@ class IsSameParticipant(permissions.BasePermission):
 
 
 class IsRecentActivity(permissions.BasePermission):
-    message = _('You can\'t give feedback for pickups more than %(days_number)s days ago.') % \
+    message = _('You can\'t give feedback for activities more than %(days_number)s days ago.') % \
         {'days_number': settings.FEEDBACK_POSSIBLE_DAYS}
 
     def has_object_permission(self, request, view, obj):

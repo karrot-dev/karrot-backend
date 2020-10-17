@@ -14,16 +14,16 @@
 
                     <ul>
                         {% if activities_done_count > 0 %}
-                            <li>{% trans pickups_done_count=activities_done_count %}{{ pickups_done_count }} pickups were done{% endtrans %}</li>
+                            <li>{% trans activities_done_count=activities_done_count %}{{ activities_done_count }} activities were done{% endtrans %}</li>
                         {% else %}
-                            <li>{% trans %}no pickups were done{% endtrans %}</li>
+                            <li>{% trans %}no activities were done{% endtrans %}</li>
                         {% endif %}
 
                         {% if activities_missed_count > 0 %}
-                            <li>{% trans pickups_missed_count=activities_missed_count %}{{ pickups_missed_count }} pickups were missed{% endtrans %}</li>
+                            <li>{% trans activities_missed_count=activities_missed_count %}{{ activities_missed_count }} activities were missed{% endtrans %}</li>
                         {% else %}
                             {% if activities_done_count > 0 %}
-                                <li>{% trans %}no pickups were missed{% endtrans %}</li>
+                                <li>{% trans %}no activities were missed{% endtrans %}</li>
                             {% endif %}
                         {% endif %}
 
@@ -37,7 +37,7 @@
                         {% endif %}
 
                         {% if feedbacks|length > 0 %}
-                            <li>{% trans feedbacks_count=feedbacks|length %}{{ feedbacks_count }} pickup feedbacks were given{% endtrans %}</li>
+                            <li>{% trans feedbacks_count=feedbacks|length %}{{ feedbacks_count }} feedbacks were given{% endtrans %}</li>
                         {% else %}
                             <li>{% trans %}no feedback was given{% endtrans %}</li>
                         {% endif %}
@@ -52,7 +52,7 @@
                     {% if feedbacks|length > 0 %}
                         <div class="divider"></div>
                         <br>
-                        <h3>{% trans %}Pickup feedback{% endtrans %}</h3>
+                        <h3>{% trans %}Feedback{% endtrans %}</h3>
                         {% for feedback in feedbacks %}
                             <p class="feedback">
                                 <span class="message-author">{{ feedback.given_by.display_name }}</span>

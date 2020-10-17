@@ -54,7 +54,7 @@ class TestActivityReminderTask(TestCase):
             kwargs['click_action'],
         )
         self.assertIn(
-            'Upcoming pickup',
+            'Upcoming {}'.format(self.activity.typus.name),
             kwargs['fcm_options']['message_title'],
         )
         self.assertIn(

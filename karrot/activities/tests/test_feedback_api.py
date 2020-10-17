@@ -141,7 +141,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.member)
         response = self.client.post(self.url, self.feedback_post, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        self.assertEqual(response.data, {'about': ['You aren\'t assigned to the pickup.']})
+        self.assertEqual(response.data, {'about': ['You aren\'t assigned to the activity.']})
 
     def test_create_feedback_works_as_participant(self):
         """
@@ -191,7 +191,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.assertEqual(
             response.data, {
                 'about': [
-                    'You can\'t give feedback for pickups more than {} days ago.'.format(
+                    'You can\'t give feedback for activities more than {} days ago.'.format(
                         settings.FEEDBACK_POSSIBLE_DAYS
                     )
                 ]
@@ -363,7 +363,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.participant3)
         response = self.client.post(self.url, self.future_feedback_post)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        self.assertEqual(response.data, {'about': ['The pickup is not done yet']})
+        self.assertEqual(response.data, {'about': ['The activity is not done yet']})
 
     def test_patch_feedback_fails_as_non_user(self):
         """
@@ -427,7 +427,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
         self.assertEqual(
             response.data['detail'],
-            'You can\'t give feedback for pickups more than {} days ago.'.format(settings.FEEDBACK_POSSIBLE_DAYS)
+            'You can\'t give feedback for activities more than {} days ago.'.format(settings.FEEDBACK_POSSIBLE_DAYS)
         )
 
     def test_patch_feedback_to_remove_weight(self):

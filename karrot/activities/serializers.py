@@ -213,7 +213,7 @@ class ActivityUpdateSerializer(ActivitySerializer):
 
     def validate_date(self, date):
         if self.instance.series is not None and abs((self.instance.date.start - date.start).total_seconds()) > 1:
-            raise serializers.ValidationError(_('You can\'t move pickups that are part of a series.'))
+            raise serializers.ValidationError(_('You can\'t move activities that are part of a series.'))
         return super().validate_date(date)
 
     def validate_has_duration(self, has_duration):
@@ -448,12 +448,12 @@ class FeedbackSerializer(serializers.ModelSerializer):
         if not group.is_member(user):
             raise serializers.ValidationError('You are not member of the place\'s group.')
         if about.is_upcoming():
-            raise serializers.ValidationError(_('The pickup is not done yet'))
+            raise serializers.ValidationError(_('The activity is not done yet'))
         if not about.is_participant(user):
-            raise serializers.ValidationError(_('You aren\'t assigned to the pickup.'))
+            raise serializers.ValidationError(_('You aren\'t assigned to the activity.'))
         if not about.is_recent():
             raise serializers.ValidationError(
-                _('You can\'t give feedback for pickups more than %(days_number)s days ago.') %
+                _('You can\'t give feedback for activities more than %(days_number)s days ago.') %
                 {'days_number': settings.FEEDBACK_POSSIBLE_DAYS}
             )
         return about
