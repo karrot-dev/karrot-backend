@@ -9,6 +9,7 @@
 # Peter-Alexander Pöltl <pa78@gmx.at>, 2019
 # Tilmann Becker <tilmann.becker+github@gmail.com>, 2019
 # Sandro Eiler <sandro.eiler@posteo.de>, 2020
+# chandi <a.langecker@posteo.de>, 2020
 # 
 #, fuzzy
 msgid ""
@@ -16,7 +17,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
-"Last-Translator: Sandro Eiler <sandro.eiler@posteo.de>, 2020\n"
+"Last-Translator: chandi <a.langecker@posteo.de>, 2020\n"
 "Language-Team: German (https://www.transifex.com/yunity-1/teams/68631/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -47,7 +48,9 @@ msgstr "Dieser Abholtermin ist bereits voll."
 
 #: karrot/activities/permissions.py:48
 msgid "This feedback is given by another user."
-msgstr "Diese Rückmeldung wurde von einem anderen Benutzer abgegeben."
+msgstr ""
+"Diese Rückmeldung wurde von einem anderen Benutzer oder Benutzerin "
+"abgegeben."
 
 #: karrot/activities/permissions.py:57 karrot/activities/serializers.py:420
 #, python-format
@@ -172,7 +175,7 @@ msgstr "Du brauchst eine bestätigte E-Mail-Adresse."
 
 #: karrot/applications/api.py:44
 msgid "You need to be the applicant"
-msgstr "Du kannst dies nur als Bewerber tun."
+msgstr "Du kannst dies nur als Bewerber*in tun."
 
 #: karrot/applications/api.py:52
 msgid "Application is not pending anymore"
@@ -221,7 +224,7 @@ msgstr "%(user_name)s möchte %(group_name)s beitreten"
 
 #: karrot/applications/templates/new_application.html.jinja2:207
 msgid "Questions asked by your group"
-msgstr "Fragen an den Bewerber"
+msgstr "Fragen an die Bewerbenden"
 
 #: karrot/applications/templates/new_application.html.jinja2:212
 #, python-format
@@ -358,7 +361,7 @@ msgstr "Du kannst dir nicht selbst Vertrauen ausdrücken"
 
 #: karrot/groups/api.py:200
 msgid "You already gave trust to this user"
-msgstr "Du hast diesem Nutzer schon Vertrauen ausgedrückt"
+msgstr "Du hast diesem Nutzer oder Nutzerin schon Vertrauen ausgedrückt"
 
 #: karrot/groups/serializers.py:25
 msgid "Unknown timezone"
@@ -618,7 +621,7 @@ msgstr "Du bist kein Mitglied dieser Gruppe."
 
 #: karrot/invitations/serializers.py:33
 msgid "User is already member of group"
-msgstr "Benutzer ist bereits Mitglied der Gruppe"
+msgstr "Benutzer*in ist bereits Mitglied der Gruppe"
 
 #: karrot/invitations/serializers.py:41
 msgid "Email could not be sent"
@@ -674,11 +677,13 @@ msgstr "Thema kann nicht leer sein"
 
 #: karrot/issues/serializers.py:139
 msgid "Affected user is not part of that group"
-msgstr "Betroffener Nutzer ist nicht Teil dieser Gruppe"
+msgstr "Betroffener Nutzer oder Nutzerin ist nicht Teil dieser Gruppe"
 
 #: karrot/issues/serializers.py:141
 msgid "A conflict resolution about that user has already been started"
-msgstr "Ein Konfliktlösungsprozess mit diesem Nutzer wurde bereits gestartet"
+msgstr ""
+"Ein Konfliktlösungsprozess mit diesem Nutzer oder Nutzerin wurde bereits "
+"gestartet"
 
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:6
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:205
