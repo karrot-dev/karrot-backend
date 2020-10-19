@@ -43,7 +43,7 @@ jobs:
       LC_ALL: C.UTF-8
       LANG: C.UTF-8
     docker:
-      - image: karrot/python:2.3
+      - image: karrot/python:2.4
         environment:
           PGHOST: 127.0.0.1
       - image: circleci/postgres:11
