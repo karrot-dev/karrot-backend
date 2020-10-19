@@ -41,6 +41,7 @@ channels_redis
 more-itertools
 requests
 glom
+geoip2
 
 # dev PyPI dependencies
 pip-tools

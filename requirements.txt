@@ -8,13 +8,14 @@
 -e git+https://github.com/tiltec/django-influxdb-metrics@f8839571d522503870d79d72c686ca42f5326f9c#egg=django-influxdb-metrics  # via -r requirements.in
 -e git+https://github.com/tiltec/django-rest-swagger@d15dd9a#egg=django-rest-swagger  # via -r requirements.in
 -e git+https://github.com/tiltec/talon@80886cd#egg=talon  # via -r requirements.in
+aiohttp==3.6.3            # via geoip2
 aioredis==1.3.1           # via channels-redis
 apipkg==1.5               # via execnet
 appdirs==1.4.4            # via virtualenv
 argon2-cffi==20.1.0       # via django
 asgiref==3.2.10           # via channels, channels-redis, daphne, django
-async-timeout==3.0.1      # via aioredis
-attrs==20.2.0             # via automat, glom, pytest, service-identity, twisted
+async-timeout==3.0.1      # via aiohttp, aioredis
+attrs==20.2.0             # via aiohttp, automat, glom, pytest, service-identity, twisted
 autobahn==20.7.1          # via daphne
 autoflake==1.4            # via -r requirements.in
 automat==20.2.0           # via twisted
@@ -30,7 +31,7 @@ cffi==1.14.3              # via argon2-cffi, cryptography
 cfgv==3.2.0               # via pre-commit
 channels-redis==3.1.0     # via -r requirements.in
 channels==2.4.0           # via -r requirements.in, channels-redis
-chardet==3.0.4            # via requests, talon
+chardet==3.0.4            # via aiohttp, requests, talon
 click==7.1.2              # via pip-tools
 constantly==15.1.0        # via twisted
 coreapi==2.3.3            # via django-rest-swagger, openapi-codec
@@ -63,6 +64,7 @@ filelock==3.0.12          # via virtualenv
 flake8==3.8.4             # via -r requirements.in
 freezegun==1.0.0          # via -r requirements.in
 furl==2.1.0               # via -r requirements.in
+geoip2==4.1.0             # via -r requirements.in
 gevent==20.9.0            # via -r requirements.in
 glom==20.8.0              # via -r requirements.in
 gprof2dot==2019.11.30     # via django-silk
@@ -73,8 +75,8 @@ html5lib==1.1             # via talon
 huey==2.3.0               # via -r requirements.in
 hyperlink==20.0.1         # via twisted
 identify==1.5.5           # via pre-commit
-idna==2.10                # via hyperlink, requests, twisted
-importlib-metadata==2.0.0  # via -r requirements.in, flake8, markdown, pluggy, pre-commit, pytest, virtualenv
+idna==2.10                # via hyperlink, requests, twisted, yarl
+importlib-metadata==2.0.0  # via -r requirements.in
 incremental==17.5.0       # via twisted
 git+https://github.com/influxdata/influxdb-python@cc41e290f690c4eb67f75c98fa9f027bdb6eb16b#egg=influxdbtld  # via django-influxdb-metrics
 iniconfig==1.0.1          # via pytest
@@ -87,9 +89,11 @@ logging-tree==1.8.1       # via -r requirements.in
 lxml==4.5.2               # via talon
 markdown==3.2.2           # via -r requirements.in, pymdown-extensions
 markupsafe==1.1.1         # via jinja2
+maxminddb==2.0.3          # via geoip2
 mccabe==0.6.1             # via flake8
 more-itertools==8.5.0     # via -r requirements.in
 msgpack==1.0.0            # via channels-redis, influxdb
+multidict==4.7.6          # via aiohttp, yarl
 nodeenv==1.5.0            # via pre-commit
 openapi-codec==1.3.2      # via django-rest-swagger
 orderedmultidict==1.0.1   # via furl
@@ -132,7 +136,7 @@ raven==6.10.0             # via -r requirements.in
 redis==3.5.3              # via -r requirements.in, django-redis
 regex==2020.9.27          # via talon
 requests-mock==1.8.0      # via -r requirements.in
-requests==2.24.0          # via -r requirements.in, coreapi, django-anymail, django-silk, influxdb, pyfcm, requests-mock
+requests==2.24.0          # via -r requirements.in, coreapi, django-anymail, django-silk, geoip2, influxdb, pyfcm, requests-mock
 service-identity==18.1.0  # via twisted
 simplejson==3.17.2        # via django-rest-swagger
 six==1.15.0               # via argon2-cffi, automat, bleach, cryptography, django-anymail, django-enumfield, djangorestframework-csv, furl, html5lib, influxdb, orderedmultidict, packaging, pip-tools, pyopenssl, python-dateutil, requests-mock, talon, virtualenv
@@ -145,11 +149,12 @@ twisted[tls]==20.3.0      # via daphne
 txaio==20.4.1             # via autobahn
 unicodecsv==0.14.1        # via djangorestframework-csv
 uritemplate==3.0.1        # via coreapi
-urllib3==1.25.10          # via requests
+urllib3==1.25.10          # via geoip2, requests
 virtualenv==20.0.32       # via pre-commit
 wcwidth==0.2.5            # via prompt-toolkit
 webencodings==0.5.1       # via bleach, html5lib
 yapf==0.30.0              # via -r requirements.in
+yarl==1.5.1               # via aiohttp
 zipp==3.3.0               # via importlib-metadata
 zope.event==4.5.0         # via gevent
 zope.interface==5.1.2     # via gevent, twisted
