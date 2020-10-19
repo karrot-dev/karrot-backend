@@ -280,7 +280,7 @@ def get_client_ip(request):
         return request.META.get('REMOTE_ADDR')
 
 
-@lru_cache
+@lru_cache()
 def ip_to_lat_lon(ip):
     try:
         return geoip.lat_lon(ip)
