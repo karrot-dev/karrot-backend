@@ -334,23 +334,23 @@ msgstr ""
 msgid "You already gave trust to this user"
 msgstr ""
 
-#: karrot/groups/serializers.py:25
+#: karrot/groups/serializers.py:29
 msgid "Unknown timezone"
 msgstr ""
 
-#: karrot/groups/serializers.py:33
+#: karrot/groups/serializers.py:37
 msgid "Playground"
 msgstr ""
 
-#: karrot/groups/serializers.py:133 karrot/groups/serializers.py:228
+#: karrot/groups/serializers.py:137 karrot/groups/serializers.py:232
 msgid "You cannot manage agreements"
 msgstr ""
 
-#: karrot/groups/serializers.py:135
+#: karrot/groups/serializers.py:139
 msgid "Agreement is not for this group"
 msgstr ""
 
-#: karrot/groups/serializers.py:226
+#: karrot/groups/serializers.py:230
 msgid "You are not in this group"
 msgstr ""
 
