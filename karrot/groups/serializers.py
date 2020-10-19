@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 import pytz
 from django.conf import settings
 from django.contrib.gis.geoip2 import GeoIP2, GeoIP2Exception
@@ -269,8 +271,6 @@ except GeoIP2Exception as err:
     print('geoip functionality is not available')
     geoip = None
 
-CURRENT_LAT_LON_SESSION_KEY = 'geoip:current_lat_lon'
-
 
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -280,17 +280,26 @@ def get_client_ip(request):
         return request.META.get('REMOTE_ADDR')
 
 
+@lru_cache
+def ip_to_lat_lon(ip):
+    try:
+        return geoip.lat_lon(ip)
+    except AddressNotFoundError:
+        # we use "False" to mean we looked it up but couldn't find it
+        return False
+
+
 class DistanceField(Field):
     """
     Returns distance of the object from users current location.
     - the object must have latitude/longitude fields
     - the users location is detirmined via geoip if available
-    - if the user is authenticated the co-ordinates found are saved in the session.
+    - the geoip lookup is cached in an lru_cache
     - the return unit is km rounded to the nearest km
 
     It may return None under various conditions:
     - the GeoIP2 libary was not initialized (missing the files)
-    - there is no request context or session
+    - there is no request context
     - we cannot detirmine the IP address of the client
     - the IP address cannot be found in the database
     """
@@ -313,30 +322,11 @@ class DistanceField(Field):
         if not request:
             return None
 
-        is_authenticated = request.user.is_authenticated
+        client_ip = get_client_ip(request)
+        if not client_ip:
+            return None
 
-        current_lat_lon = None
-
-        if is_authenticated:
-            current_lat_lon = request.session.get(CURRENT_LAT_LON_SESSION_KEY, None)
-
-            # "False" means we already tried finding it, but failed, don't try again
-            if current_lat_lon is False:
-                return None
-
-        if current_lat_lon is None:
-            client_ip = get_client_ip(request)
-            if client_ip:
-                try:
-                    current_lat_lon = geoip.lat_lon(client_ip)
-                except AddressNotFoundError:
-                    # we use "False" to mean we looked it up but couldn't find it
-                    current_lat_lon = False
-
-            if is_authenticated:
-                # only modify session if we already have one
-                # this isn't worth creating a session for
-                request.session[CURRENT_LAT_LON_SESSION_KEY] = current_lat_lon
+        current_lat_lon = ip_to_lat_lon(client_ip)
 
         if not current_lat_lon:
             return None
