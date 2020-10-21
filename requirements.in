@@ -9,7 +9,7 @@
 # Common PyPI dependencies
 django[argon2]
 django-cors-headers
-django-enumfield==2.0.1
+django-enumfield
 django-extensions
 django-redis
 django-dirtyfields
