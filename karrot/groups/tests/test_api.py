@@ -68,6 +68,50 @@ class TestGroupsInfoAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
+class TestGroupsInfoGeoIPAPI(APITestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.member = UserFactory()
+        lat, lng = faker.latlng()
+        self.group = GroupFactory(members=[self.member], latitude=lat, longitude=lng)
+        self.url = '/api/groups-info/'
+        self.client_ip = '2003:d9:ef08:4a00:4b7a:7964:8a3c:a33e'
+
+    @patch('karrot.groups.serializers.geoip')
+    def test_returns_distance_via_geoip(self, geoip):
+        geoip.lat_lon.return_value = [float(val) for val in faker.latlng()]
+        response = self.client.get(self.url, HTTP_X_FORWARDED_FOR=self.client_ip)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        geoip.lat_lon.assert_called_with(self.client_ip)
+        self.assertIsNotNone(response.data[0]['distance'])
+
+    @patch('karrot.groups.serializers.geoip')
+    def test_returns_none_if_no_ip_address_provided(self, geoip):
+        geoip.lat_lon.return_value = [float(val) for val in faker.latlng()]
+        response = self.client.get(self.url, HTTP_X_FORWARDED_FOR=None, REMOTE_ADDR=None)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsNone(response.data[0]['distance'])
+
+    @patch('karrot.groups.serializers.geoip', None)
+    def test_returns_none_if_geoip_not_available(self):
+        response = self.client.get(self.url, HTTP_X_FORWARDED_FOR=self.client_ip)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsNone(response.data[0]['distance'])
+
+    @patch('karrot.groups.serializers.geoip')
+    def test_caches_geoip_lookup(self, geoip):
+        lat_lng = [float(val) for val in faker.latlng()]
+        geoip.lat_lon.return_value = lat_lng
+        self.client.force_login(user=self.user)
+        self.client.get(self.url)
+        geoip.lat_lon.assert_called()
+
+        # if we call again it should not look up the ip again
+        geoip.lat_lon.reset_mock()
+        self.client.get(self.url)
+        geoip.lat_lon.assert_not_called()
+
+
 class TestGroupsAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()

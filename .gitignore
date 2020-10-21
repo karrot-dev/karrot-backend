@@ -40,3 +40,6 @@ uploads
 
 # Mac files
 **/.DS_Store
+
+# Maxmind geoip data
+/maxmind-data/*.mmdb

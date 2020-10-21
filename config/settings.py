@@ -308,6 +308,8 @@ HUEY = {
     'immediate': True,
 }
 
+GEOIP_PATH = os.path.join(BASE_DIR, 'maxmind-data')
+
 # If you have the email_reply_trimmer_service running, set this to 'http://localhost:4567/trim' (or similar)
 # https://github.com/yunity/email_reply_trimmer_service
 EMAIL_REPLY_TRIMMER_URL = None
