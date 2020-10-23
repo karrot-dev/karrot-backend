@@ -357,23 +357,23 @@ msgstr "आप खुद को भरोसा नहीं दे सकते
 msgid "You already gave trust to this user"
 msgstr "आपने पहले ही इस उपयोगकर्ता को भरोसा दिया है"
 
-#: karrot/groups/serializers.py:25
+#: karrot/groups/serializers.py:31
 msgid "Unknown timezone"
 msgstr "अज्ञात समयक्षेत्र"
 
-#: karrot/groups/serializers.py:33
+#: karrot/groups/serializers.py:39
 msgid "Playground"
 msgstr "खेल-मैदान"
 
-#: karrot/groups/serializers.py:133 karrot/groups/serializers.py:228
+#: karrot/groups/serializers.py:139 karrot/groups/serializers.py:234
 msgid "You cannot manage agreements"
 msgstr "आप समझौतों का प्रबंधन नहीं कर सकते"
 
-#: karrot/groups/serializers.py:135
+#: karrot/groups/serializers.py:141
 msgid "Agreement is not for this group"
 msgstr "समझौता इस समूह के लिए नहीं है"
 
-#: karrot/groups/serializers.py:226
+#: karrot/groups/serializers.py:232
 msgid "You are not in this group"
 msgstr "आप इस समूह में नहीं हैं"
 

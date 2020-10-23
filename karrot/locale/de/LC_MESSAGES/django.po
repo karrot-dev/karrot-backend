@@ -363,23 +363,23 @@ msgstr "Du kannst dir nicht selbst Vertrauen ausdrücken"
 msgid "You already gave trust to this user"
 msgstr "Du hast diesem Nutzer oder Nutzerin schon Vertrauen ausgedrückt"
 
-#: karrot/groups/serializers.py:25
+#: karrot/groups/serializers.py:31
 msgid "Unknown timezone"
 msgstr "Unbekannte Zeitzone"
 
-#: karrot/groups/serializers.py:33
+#: karrot/groups/serializers.py:39
 msgid "Playground"
 msgstr "Spielplatz"
 
-#: karrot/groups/serializers.py:133 karrot/groups/serializers.py:228
+#: karrot/groups/serializers.py:139 karrot/groups/serializers.py:234
 msgid "You cannot manage agreements"
 msgstr "Du darfst die Vereinbarungen nicht ändern"
 
-#: karrot/groups/serializers.py:135
+#: karrot/groups/serializers.py:141
 msgid "Agreement is not for this group"
 msgstr "Vereinbarung gehört nicht zu dieser Gruppe."
 
-#: karrot/groups/serializers.py:226
+#: karrot/groups/serializers.py:232
 msgid "You are not in this group"
 msgstr "Du bist nicht Mitglied dieser Gruppe."
 

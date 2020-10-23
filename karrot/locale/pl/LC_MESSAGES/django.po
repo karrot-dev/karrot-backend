@@ -357,23 +357,23 @@ msgstr "Nie możesz udzielić sobie zaufania"
 msgid "You already gave trust to this user"
 msgstr "Już zaufałaś/-eś temu użytkownikowi"
 
-#: karrot/groups/serializers.py:25
+#: karrot/groups/serializers.py:31
 msgid "Unknown timezone"
 msgstr "Nieznana strefa czasowa"
 
-#: karrot/groups/serializers.py:33
+#: karrot/groups/serializers.py:39
 msgid "Playground"
 msgstr "Piaskownica"
 
-#: karrot/groups/serializers.py:133 karrot/groups/serializers.py:228
+#: karrot/groups/serializers.py:139 karrot/groups/serializers.py:234
 msgid "You cannot manage agreements"
 msgstr "Nie możesz zarządzać umowami"
 
-#: karrot/groups/serializers.py:135
+#: karrot/groups/serializers.py:141
 msgid "Agreement is not for this group"
 msgstr "Ta umowa nie jest dla tej grupy"
 
-#: karrot/groups/serializers.py:226
+#: karrot/groups/serializers.py:232
 msgid "You are not in this group"
 msgstr "Nie jesteś w tej grupie"
 
