@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.db.models import F
 from django_filters import rest_framework as filters
 from rest_framework import mixins
@@ -178,6 +179,10 @@ class ActivityViewSet(
             # because we have participants field in the serializer
             # only prefetch on read_only actions, otherwise there are caching problems when participants get added
             qs = qs.prefetch_related('activityparticipant_set', 'feedback_given_by')
+        if self.action == 'add':
+            # Lock activity when adding a participant
+            # This should prevent a race condition that would result in more participants than slots
+            qs = qs.select_for_update()
         return qs
 
     def get_serializer_class(self):
@@ -192,7 +197,9 @@ class ActivityViewSet(
         serializer_class=ActivityJoinSerializer
     )
     def add(self, request, pk=None):
-        return self.partial_update(request)
+        # Transaction needed by select_for_update
+        with transaction.atomic():
+            return self.partial_update(request)
 
     @action(
         detail=True,
