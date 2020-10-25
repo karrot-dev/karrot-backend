@@ -17,15 +17,23 @@ msgstr ""
 "Generated-By: Babel 2.8.0\n"
 
 #: karrot/activities/activity_types.py:5
-msgid "Pickup"
+msgid "Meeting"
 msgstr ""
 
 #: karrot/activities/activity_types.py:6
-msgid "Task"
+msgid "Pickup"
 msgstr ""
 
 #: karrot/activities/activity_types.py:7
-msgid "Meeting"
+msgid "Distribution"
+msgstr ""
+
+#: karrot/activities/activity_types.py:8
+msgid "Event"
+msgstr ""
+
+#: karrot/activities/activity_types.py:9
+msgid "Activity"
 msgstr ""
 
 #: karrot/activities/serializers.py:53
