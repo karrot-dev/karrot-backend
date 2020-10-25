@@ -16,10 +16,10 @@ from karrot.activities.activity_types import default_activity_types
 from karrot.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
     GroupNotificationType
 from karrot.history.models import History, HistoryTypus
+from karrot.activities.models import ActivityType
 from karrot.utils.misc import find_changed
 from karrot.utils.validators import prevent_reserved_names
 from . import roles
-from ..activities.models import ActivityType
 
 
 class TimezoneField(serializers.Field):
