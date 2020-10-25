@@ -1,8 +1,16 @@
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 
+# A list of translatable names that groups might use
+common_names = {
+    'Pickup': _('Pickup'),
+    'Task': _('Task'),
+    'Meeting': _('Meeting'),
+}
+
+# Default types that will be created for new groups
+# (in the future this would be more customizable)
 default_activity_types = {
     'Pickup': {
-        'name': _('Pickup'),
         'colour': '007700',
         'icon': 'fas fa-shopping-basket',
         'feedback_icon': 'fas fa-balance-scale',
@@ -10,7 +18,6 @@ default_activity_types = {
         'has_feedback_weight': True,
     },
     'Task': {
-        'name': _('Task'),
         'colour': '283593',
         'icon': 'fas fa-check-square',
         'feedback_icon': 'fas fa-reply',
@@ -18,7 +25,6 @@ default_activity_types = {
         'has_feedback_weight': False,
     },
     'Meeting': {
-        'name': _('Meeting'),
         'colour': 'AD1457',
         'icon': 'fas fa-handshake',
         'feedback_icon': 'fa-reply',
