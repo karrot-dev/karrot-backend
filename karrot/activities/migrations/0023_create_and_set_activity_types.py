@@ -16,7 +16,7 @@ def set_initial_activity_type(apps, schema_editor):
             group=group,
             name='Task',
             defaults={
-                'name_is_default': True,
+                'name_is_translatable': True,
                 'colour': '283593',
                 'icon': 'fas fa-check-square',
                 'feedback_icon': 'fas fa-reply',
@@ -30,7 +30,7 @@ def set_initial_activity_type(apps, schema_editor):
             group=group,
             name='Meeting',
             defaults={
-                'name_is_default': True,
+                'name_is_translatable': True,
                 'colour': 'AD1457',
                 'icon': 'fas fa-handshake',
                 'feedback_icon': 'fa-reply',
@@ -45,7 +45,7 @@ def set_initial_activity_type(apps, schema_editor):
                 group=group,
                 name='Pickup',
                 defaults={
-                    'name_is_default': True,
+                    'name_is_translatable': True,
                     'colour': '007700',
                     'icon': 'fas fa-shopping-basket',
                     'feedback_icon': 'fas fa-balance-scale',

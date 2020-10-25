@@ -1,7 +1,7 @@
 from django.utils.translation import gettext_lazy as _
 
 # A list of translatable names that groups might use
-common_names = {
+translatable_names = {
     'Pickup': _('Pickup'),
     'Task': _('Task'),
     'Meeting': _('Meeting'),

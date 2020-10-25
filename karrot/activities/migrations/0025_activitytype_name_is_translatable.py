@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='activitytype',
-            name='name_is_default',
+            name='name_is_translatable',
             field=models.BooleanField(default=True),
         ),
     ]

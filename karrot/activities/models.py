@@ -22,7 +22,7 @@ from karrot.places.models import PlaceStatus
 class ActivityType(BaseModel):
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='activity_types')
     name = models.CharField(max_length=80)
-    name_is_default = models.BooleanField(default=True)
+    name_is_translatable = models.BooleanField(default=True)
     colour = models.CharField(max_length=6)
     icon = models.CharField(max_length=32)
     feedback_icon = models.CharField(max_length=32)
@@ -34,7 +34,7 @@ class ActivityType(BaseModel):
 
     def get_translated_name(self):
         # the translations are collected via activity_types.py
-        return _(self.name) if self.name_is_default else self.name
+        return _(self.name) if self.name_is_translatable else self.name
 
 
 class ActivitySeriesQuerySet(models.QuerySet):
