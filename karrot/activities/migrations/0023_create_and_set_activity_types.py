@@ -2,6 +2,56 @@
 
 from django.db import migrations
 
+activity_types = {
+    'Meeting': {
+        'colour': 'AD1457',
+        'icon': 'fas fa-handshake',
+        'feedback_icon': 'fas fa-reply',
+        'has_feedback': True,
+        'has_feedback_weight': False,
+    },
+    'Pickup': {
+        'colour': '007700',
+        'icon': 'fas fa-shopping-basket',
+        'feedback_icon': 'fas fa-balance-scale',
+        'has_feedback': True,
+        'has_feedback_weight': True,
+    },
+    'Distribution': {
+        'colour': '1976D2',
+        'icon': 'fas fa-people-carry',
+        'feedback_icon': 'fas fa-reply',
+        'has_feedback': True,
+        'has_feedback_weight': False,
+    },
+    'Event': {
+        'colour': 'EF6C00',
+        'icon': 'fas fa-calendar-check',
+        'feedback_icon': 'fas fa-reply',
+        'has_feedback': True,
+        'has_feedback_weight': False,
+    },
+    'Activity': {
+        'colour': '283593',
+        'icon': 'fas fa-asterisk',
+        'feedback_icon': 'fas fa-reply',
+        'has_feedback': True,
+        'has_feedback_weight': False,
+    },
+}
+
+activity_types_for_theme = {
+    'foodsaving': activity_types.keys(), # everything!
+    'general': ['Meeting', 'Event', 'Activity'],
+    'bikekitchen': ['Meeting', 'Event', 'Activity'],
+}
+
+set_existing_activities_for_theme = {
+    'foodsaving': 'Pickup',
+    'general': 'Activity',
+    'bikekitchen': 'Activity',
+}
+
 
 def set_initial_activity_type(apps, schema_editor):
     Group = apps.get_model('groups', 'Group')
@@ -11,48 +61,15 @@ def set_initial_activity_type(apps, schema_editor):
 
     for group in Group.objects.all():
 
-        # "task" type for all groups
-        set_to_activity_type, _ = ActivityType.objects.get_or_create(
-            group=group,
-            name='Task',
-            defaults={
-                'name_is_translatable': True,
-                'colour': '283593',
-                'icon': 'fas fa-check-square',
-                'feedback_icon': 'fas fa-reply',
-                'has_feedback': True,
-                'has_feedback_weight': False,
-            },
-        )
-
-        # "meeting" type for all groups too
-        ActivityType.objects.get_or_create(
-            group=group,
-            name='Meeting',
-            defaults={
-                'name_is_translatable': True,
-                'colour': 'AD1457',
-                'icon': 'fas fa-handshake',
-                'feedback_icon': 'fa-reply',
-                'has_feedback': True,
-                'has_feedback_weight': False,
-            },
-        )
-
-        if group.theme == 'foodsaving':
-            # "pickup" type only for foodsaving groups
-            set_to_activity_type, _ = ActivityType.objects.get_or_create(
+        for name in activity_types_for_theme[group.theme]:
+            options = activity_types[name]
+            ActivityType.objects.get_or_create(
                 group=group,
-                name='Pickup',
-                defaults={
-                    'name_is_translatable': True,
-                    'colour': '007700',
-                    'icon': 'fas fa-shopping-basket',
-                    'feedback_icon': 'fas fa-balance-scale',
-                    'has_feedback': True,
-                    'has_feedback_weight': True,
-                },
+                name=name,
+                defaults=options,
             )
+
+        set_to_activity_type = group.activity_types.get(name=set_existing_activities_for_theme[group.theme])
 
         Activity.objects.filter(place__group=group).update(activity_type=set_to_activity_type.id)
         ActivitySeries.objects.filter(place__group=group).update(activity_type=set_to_activity_type.id)

@@ -107,3 +107,50 @@ class TestConvertWeightIntoSumMigration(TestMigrations):
 
         self.assertEqual(activity2.feedback_set.exclude(weight=None).count(), 0)
         self.assertEqual(activity2.feedback_set.filter(weight=None).count(), 3)
+
+
+class TestSetActivityTypes(TestMigrations):
+
+    migrate_from = [
+        ('groups', '0043_auto_20200717_1325'),
+        ('places', '0033_auto_20190130_1128'),
+        ('activities', '0022_add_activity_types'),
+    ]
+    migrate_to = [
+        ('activities', '0023_create_and_set_activity_types'),
+    ]
+
+    def setUpBeforeMigration(self, apps):
+        Group = apps.get_model('groups', 'Group')
+        Place = apps.get_model('places', 'Place')
+        Activity = apps.get_model('activities', 'Activity')
+        ActivitySeries = apps.get_model('activities', 'ActivitySeries')
+
+        for theme in ['foodsaving', 'bikekitchen', 'general']:
+            group = Group.objects.create(name=faker.name(), theme=theme)
+            place = Place.objects.create(name=faker.name(), group=group)
+            Activity.objects.create(place=place, date=to_range(timezone.now()))
+            ActivitySeries.objects.create(place=place, start_date=timezone.now())
+
+    def test_activity_types_are_created_and_set(self):
+        Activity = self.apps.get_model('activities', 'Activity')
+        ActivitySeries = self.apps.get_model('activities', 'ActivitySeries')
+        ActivityType = self.apps.get_model('activities', 'ActivityType')
+
+        def check_type(theme, type_name):
+            activity = Activity.objects.filter(place__group__theme=theme).first()
+            self.assertEqual(activity.activity_type.name, type_name)
+            series = ActivitySeries.objects.filter(place__group__theme=theme).first()
+            self.assertEqual(series.activity_type.name, type_name)
+
+        def check_available_types(theme, expected_type_names):
+            type_names = [t.name for t in ActivityType.objects.filter(group__theme=theme)]
+            self.assertEqual(type_names, expected_type_names)
+
+        check_available_types('foodsaving', ['Meeting', 'Pickup', 'Distribution', 'Event', 'Activity'])
+        check_available_types('bikekitchen', ['Meeting', 'Event', 'Activity'])
+        check_available_types('general', ['Meeting', 'Event', 'Activity'])
+
+        check_type('foodsaving', 'Pickup')
+        check_type('bikekitchen', 'Activity')
+        check_type('general', 'Activity')
