@@ -20,49 +20,12 @@ msgstr ""
 msgid "Pickup"
 msgstr ""
 
-#: karrot/activities/activity_types.py:13
+#: karrot/activities/activity_types.py:6
 msgid "Task"
 msgstr ""
 
-#: karrot/activities/activity_types.py:21
+#: karrot/activities/activity_types.py:7
 msgid "Meeting"
-msgstr ""
-
-#: karrot/activities/permissions.py:7
-msgid "The activity is in the past."
-msgstr ""
-
-#: karrot/activities/permissions.py:18
-msgid "You can only delete empty activities."
-msgstr ""
-
-#: karrot/activities/permissions.py:27
-msgid "You have not joined this activity."
-msgstr ""
-
-#: karrot/activities/permissions.py:34
-msgid "You have already joined this activity."
-msgstr ""
-
-#: karrot/activities/permissions.py:41
-msgid "Activity is already full."
-msgstr ""
-
-#: karrot/activities/permissions.py:48
-msgid "This feedback is given by another user."
-msgstr ""
-
-#: karrot/activities/permissions.py:57 karrot/activities/serializers.py:456
-#, python-format
-msgid "You can't give feedback for activities more than %(days_number)s days ago."
-msgstr ""
-
-#: karrot/activities/permissions.py:67 karrot/activities/serializers.py:139
-#: karrot/activities/serializers.py:340 karrot/applications/api.py:36
-#: karrot/groups/api.py:50 karrot/invitations/serializers.py:28
-#: karrot/issues/serializers.py:122 karrot/places/api.py:19
-#: karrot/places/serializers.py:80
-msgid "You need to be a group editor"
 msgstr ""
 
 #: karrot/activities/serializers.py:53
@@ -77,48 +40,6 @@ msgstr ""
 msgid "Must pass start value"
 msgstr ""
 
-#: karrot/activities/serializers.py:144
-msgid "The date should be in the future."
-msgstr ""
-
-#: karrot/activities/serializers.py:160 karrot/activities/serializers.py:368
-msgid "Typus is not for this group."
-msgstr ""
-
-#: karrot/activities/serializers.py:216
-msgid "You can't move activities that are part of a series."
-msgstr ""
-
-#: karrot/activities/serializers.py:353
-msgid "Invalid recurrence rule."
-msgstr ""
-
-#: karrot/activities/serializers.py:355
-msgid "Only single recurrence rules are allowed."
-msgstr ""
-
-#: karrot/activities/serializers.py:451
-msgid "The activity is not done yet"
-msgstr ""
-
-#: karrot/activities/serializers.py:453
-msgid "You aren't assigned to the activity."
-msgstr ""
-
-#: karrot/activities/serializers.py:474
-#, python-format
-msgid "You cannot give feedback to an activity of type %(activity_type)s."
-msgstr ""
-
-#: karrot/activities/serializers.py:480
-#, python-format
-msgid "You cannot give weight feedback to an activity of type %(activity_type)s."
-msgstr ""
-
-#: karrot/activities/serializers.py:485
-msgid "Both comment and weight cannot be blank."
-msgstr ""
-
 #: karrot/activities/tasks.py:68
 #, python-format
 msgid "Upcoming %(activity_type)s"
@@ -126,9 +47,8 @@ msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:6
 #: karrot/activities/templates/activity_notification.html.jinja2:227
-#: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
-msgid "%(group_name)s upcoming pickups"
+msgid "%(group_name)s upcoming activities"
 msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:216
@@ -141,7 +61,7 @@ msgid "Tonight"
 msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:235
-msgid "The day is not over, there are still pickups to be done!"
+msgid "The day is not over, there are still activities to be done!"
 msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:238
@@ -166,8 +86,8 @@ msgstr ""
 #: karrot/activities/templates/activity_notification.html.jinja2:311
 msgid ""
 "You are receiving this because you are subscribed to\n"
-"                            <strong>Pickup notification</strong> emails "
-"for this group."
+"                            <strong>Activity notification</strong> emails"
+" for this group."
 msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:313
@@ -179,8 +99,19 @@ msgstr ""
 msgid "Click here to unsubscribe"
 msgstr ""
 
+#: karrot/activities/templates/activity_notification.subject.jinja2:1
+#, python-format
+msgid "%(group_name)s upcoming pickups"
+msgstr ""
+
 #: karrot/applications/api.py:27
 msgid "You need to have a verified email address"
+msgstr ""
+
+#: karrot/applications/api.py:36 karrot/groups/api.py:50
+#: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
+#: karrot/places/api.py:19 karrot/places/serializers.py:80
+msgid "You need to be a group editor"
 msgstr ""
 
 #: karrot/applications/api.py:44
@@ -362,7 +293,7 @@ msgstr ""
 msgid "Playground"
 msgstr ""
 
-#: karrot/groups/serializers.py:141 karrot/groups/serializers.py:242
+#: karrot/groups/serializers.py:141 karrot/groups/serializers.py:240
 msgid "You cannot manage agreements"
 msgstr ""
 
@@ -370,7 +301,7 @@ msgstr ""
 msgid "Agreement is not for this group"
 msgstr ""
 
-#: karrot/groups/serializers.py:240
+#: karrot/groups/serializers.py:238
 msgid "You are not in this group"
 msgstr ""
 
@@ -395,20 +326,20 @@ msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:211
 #, python-format
-msgid "%(pickups_done_count)s pickups were done"
+msgid "%(activities_done_count)s activities were done"
 msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:213
-msgid "no pickups were done"
+msgid "no activities were done"
 msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:217
 #, python-format
-msgid "%(pickups_missed_count)s pickups were missed"
+msgid "%(activities_missed_count)s activities were missed"
 msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:220
-msgid "no pickups were missed"
+msgid "no activities were missed"
 msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:226
@@ -418,7 +349,7 @@ msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:234
 #, python-format
-msgid "%(feedbacks_count)s pickup feedbacks were given"
+msgid "%(feedbacks_count)s feedbacks were given"
 msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:236
@@ -435,7 +366,7 @@ msgid "no messages were sent"
 msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:249
-msgid "Pickup feedback"
+msgid "Feedback"
 msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:257
@@ -479,7 +410,7 @@ msgstr ""
 msgid ""
 "You've received enough trust from fellow group members to grant you "
 "<strong>editing permissions</strong>. For example, you can now modify "
-"your group, places and pickup dates, or create new ones."
+"your group, places and activities, or create new ones."
 msgstr ""
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:215
