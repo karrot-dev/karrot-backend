@@ -31,12 +31,12 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='activity',
-            name='typus',
+            name='activity_type',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='activities', to='activities.ActivityType'),
         ),
         migrations.AddField(
             model_name='activityseries',
-            name='typus',
+            name='activity_type',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='activity_series', to='activities.ActivityType'),
         ),
         migrations.AlterUniqueTogether(

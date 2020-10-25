@@ -68,7 +68,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
 
         # activity for type that doesn't accept feedback weight
         cls.activity_without_feedback_weight = ActivityFactory(
-            typus=activity_type_without_feedback_weight,
+            activity_type=activity_type_without_feedback_weight,
             place=cls.place,
             date=to_range(timezone.now() - relativedelta(days=1)),
             participants=[cls.participant, cls.participant2, cls.participant3],
@@ -76,7 +76,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
 
         # activity for type that doesn't accept feedback at all
         cls.activity_without_feedback = ActivityFactory(
-            typus=activity_type_without_feedback,
+            activity_type=activity_type_without_feedback,
             place=cls.place,
             date=to_range(timezone.now() - relativedelta(days=1)),
             participants=[cls.participant, cls.participant2, cls.participant3],
@@ -241,7 +241,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
             response.data, {
                 'non_field_errors': [
                     'You cannot give weight feedback to an activity of type {}.'.format(
-                        self.activity_without_feedback_weight.typus.name
+                        self.activity_without_feedback_weight.activity_type.name
                     )
                 ]
             }
@@ -261,7 +261,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
             response.data, {
                 'non_field_errors': [
                     'You cannot give feedback to an activity of type {}.'.format(
-                        self.activity_without_feedback.typus.name
+                        self.activity_without_feedback.activity_type.name
                     )
                 ]
             }

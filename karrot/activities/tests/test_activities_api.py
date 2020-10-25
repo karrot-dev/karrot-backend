@@ -26,7 +26,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         cls.group = GroupFactory(members=[cls.member, cls.second_member])
         cls.place = PlaceFactory(group=cls.group)
         cls.activity_type = ActivityTypeFactory(group=cls.group)
-        cls.activity = ActivityFactory(typus=cls.activity_type, place=cls.place)
+        cls.activity = ActivityFactory(activity_type=cls.activity_type, place=cls.place)
         cls.activity_url = cls.url + str(cls.activity.id) + '/'
         cls.join_url = cls.activity_url + 'add/'
         cls.leave_url = cls.activity_url + 'remove/'
@@ -37,7 +37,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
 
         # another activity for above place
         cls.activity_data = {
-            'typus': cls.activity_type.id,
+            'activity_type': cls.activity_type.id,
             'date': to_range(timezone.now() + relativedelta(days=2)).as_list(),
             'max_participants': 5,
             'place': cls.place.id
@@ -45,13 +45,13 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
 
         # past activity
         cls.past_activity_data = {
-            'typus': cls.activity_type.id,
+            'activity_type': cls.activity_type.id,
             'date': to_range(timezone.now() - relativedelta(days=1)).as_list(),
             'max_participants': 5,
             'place': cls.place.id
         }
         cls.past_activity = ActivityFactory(
-            typus=cls.activity_type, place=cls.place, date=to_range(timezone.now() - relativedelta(days=1))
+            activity_type=cls.activity_type, place=cls.place, date=to_range(timezone.now() - relativedelta(days=1))
         )
         cls.past_activity_url = cls.url + str(cls.past_activity.id) + '/'
         cls.past_join_url = cls.past_activity_url + 'add/'
@@ -232,7 +232,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
 
     def test_join_activity_without_max_participants_as_member(self):
         self.client.force_login(user=self.member)
-        p = ActivityFactory(typus=self.activity_type, max_participants=None, place=self.place)
+        p = ActivityFactory(activity_type=self.activity_type, max_participants=None, place=self.place)
         response = self.client.post('/api/activities/{}/add/'.format(p.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
@@ -441,8 +441,8 @@ class TestActivitiesListAPI(APITestCase, ExtractPaginationMixin):
         self.active_place = PlaceFactory(group=self.group, status='active')
         self.inactive_place = PlaceFactory(group=self.group, status='created')
 
-        ActivityFactory(typus=self.activity_type, place=self.active_place)
-        ActivityFactory(typus=self.activity_type, place=self.inactive_place)
+        ActivityFactory(activity_type=self.activity_type, place=self.active_place)
+        ActivityFactory(activity_type=self.activity_type, place=self.inactive_place)
 
     def test_list_activities_for_active_place(self):
         self.client.force_login(user=self.member)

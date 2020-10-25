@@ -157,7 +157,7 @@ class TestMessagePushNotificationTitles(TestCase):
 
         title = get_message_title(message, 'en')
         self.assertEqual(
-            title, '{} Sunday 9:00 PM / {}'.format(activity.typus.get_translated_name(), author.display_name)
+            title, '{} Sunday 9:00 PM / {}'.format(activity.activity_type.get_translated_name(), author.display_name)
         )
 
     def test_application_message_title(self):

@@ -79,7 +79,7 @@ class FeedbackViewSet(
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset()) \
             .select_related('about') \
-            .prefetch_related('about__typus', 'about__activityparticipant_set', 'about__feedback_given_by') \
+            .prefetch_related('about__activity_type', 'about__activityparticipant_set', 'about__feedback_given_by') \
             .annotate(
               timezone=F('about__place__group__timezone'),
               activity_date=F('about__date__startswith'))

@@ -127,7 +127,7 @@ class TestHistoryAPIWithExistingPlace(APITestCase, ExtractPaginationMixin):
         self.client.force_login(self.member)
         self.client.post(
             '/api/activities/', {
-                'typus': self.activity_type.id,
+                'activity_type': self.activity_type.id,
                 'date': to_range(timezone.now() + relativedelta(days=1)).as_list(),
                 'place': self.place.id
             },
@@ -140,7 +140,7 @@ class TestHistoryAPIWithExistingPlace(APITestCase, ExtractPaginationMixin):
         self.client.force_login(self.member)
         self.client.post(
             '/api/activity-series/', {
-                'typus': self.activity_type.id,
+                'activity_type': self.activity_type.id,
                 'start_date': timezone.now(),
                 'rule': 'FREQ=WEEKLY',
                 'place': self.place.id

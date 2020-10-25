@@ -87,7 +87,7 @@ class ActivitySerializer(serializers.ModelSerializer):
         model = ActivityModel
         fields = [
             'id',
-            'typus',
+            'activity_type',
             'date',
             'series',
             'place',
@@ -153,11 +153,11 @@ class ActivitySerializer(serializers.ModelSerializer):
                 return None
             return getattr(self.instance, field)
 
-        typus = data.get('typus', get_instance_attr('typus'))
+        activity_type = data.get('activity_type', get_instance_attr('activity_type'))
         place = data.get('place', get_instance_attr('place'))
 
-        if typus and place and typus.group_id != place.group_id:
-            raise serializers.ValidationError(_('Typus is not for this group.'))
+        if activity_type and place and activity_type.group_id != place.group_id:
+            raise serializers.ValidationError(_('ActivityType is not for this group.'))
 
         return data
 
@@ -294,7 +294,7 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
         model = ActivitySeriesModel
         fields = [
             'id',
-            'typus',
+            'activity_type',
             'max_participants',
             'place',
             'rule',
@@ -361,11 +361,11 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
                 return None
             return getattr(self.instance, field)
 
-        typus = data.get('typus', get_instance_attr('typus'))
+        activity_type = data.get('activity_type', get_instance_attr('activity_type'))
         place = data.get('place', get_instance_attr('place'))
 
-        if typus and place and typus.group_id != place.group_id:
-            raise serializers.ValidationError(_('Typus is not for this group.'))
+        if activity_type and place and activity_type.group_id != place.group_id:
+            raise serializers.ValidationError(_('ActivityType is not for this group.'))
 
         return data
 
@@ -464,7 +464,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
                 return None
             return getattr(self.instance, field)
 
-        activity_type = data.get('about', get_instance_attr('about')).typus
+        activity_type = data.get('about', get_instance_attr('about')).activity_type
 
         comment = data.get('comment', get_instance_attr('comment'))
         weight = data.get('weight', get_instance_attr('weight'))

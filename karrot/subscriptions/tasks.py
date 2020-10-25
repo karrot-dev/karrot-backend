@@ -67,7 +67,7 @@ def get_message_title(message, language):
                 tzinfo=timezone.get_current_timezone(),
             )
         short_date = '{} {}'.format(weekday, time)
-        short_name = '{} {}'.format(activity.typus.get_translated_name(), short_date)
+        short_name = '{} {}'.format(activity.activity_type.get_translated_name(), short_date)
         return '{} / {}'.format(short_name, author_name)
 
     if type == 'application':

@@ -54,8 +54,8 @@ def set_initial_activity_type(apps, schema_editor):
                 },
             )
 
-        Activity.objects.filter(place__group=group).update(typus=set_to_activity_type.id)
-        ActivitySeries.objects.filter(place__group=group).update(typus=set_to_activity_type.id)
+        Activity.objects.filter(place__group=group).update(activity_type=set_to_activity_type.id)
+        ActivitySeries.objects.filter(place__group=group).update(activity_type=set_to_activity_type.id)
 
 
 class Migration(migrations.Migration):

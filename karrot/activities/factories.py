@@ -37,7 +37,7 @@ class ActivityFactory(DjangoModelFactory):
             for user in participants:
                 self.add_participant(user)
 
-    typus = SubFactory(ActivityTypeFactory, group=SelfAttribute('..place.group'))
+    activity_type = SubFactory(ActivityTypeFactory, group=SelfAttribute('..place.group'))
     place = SubFactory(PlaceFactory)
     date = LazyFunction(in_one_day)
     max_participants = 5
@@ -47,7 +47,7 @@ class ActivitySeriesFactory(DjangoModelFactory):
     class Meta:
         model = ActivitySeriesModel
 
-    typus = SubFactory(ActivityTypeFactory, group=SelfAttribute('..place.group'))
+    activity_type = SubFactory(ActivityTypeFactory, group=SelfAttribute('..place.group'))
     place = SubFactory(PlaceFactory)
     start_date = LazyAttribute(lambda _: timezone.now().replace(second=0, microsecond=0) + relativedelta(minutes=15))
     rule = 'FREQ=WEEKLY'

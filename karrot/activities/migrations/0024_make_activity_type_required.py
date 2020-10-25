@@ -12,12 +12,12 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterField(
             model_name='activity',
-            name='typus',
+            name='activity_type',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='activities', to='activities.ActivityType'),
         ),
         migrations.AlterField(
             model_name='activityseries',
-            name='typus',
+            name='activity_type',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='activity_series', to='activities.ActivityType'),
         ),
     ]

@@ -47,7 +47,7 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
         )
         start_date = self.group.timezone.localize(datetime.now().replace(hour=20, minute=0))
         activity_series_data = {
-            'typus': self.activity_type.id,
+            'activity_type': self.activity_type.id,
             'max_participants': 5,
             'place': self.place.id,
             'rule': str(recurrence),
@@ -63,7 +63,7 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
         del response.data['start_date']
         del response.data['dates_preview']
         expected_series_data = {
-            'typus': self.activity_type.id,
+            'activity_type': self.activity_type.id,
             'max_participants': 5,
             'place': self.place.id,
             'rule': str(recurrence),
@@ -115,7 +115,7 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
             del _['feedback_due']
         for _ in dates_list:
             created_activities.append({
-                'typus': self.activity_type.id,
+                'activity_type': self.activity_type.id,
                 'max_participants': 5,
                 'series': series_id,
                 'participants': [],
@@ -136,7 +136,7 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
         )
         start_date = self.group.timezone.localize(datetime.now().replace(hour=20, minute=0))
         activity_series_data = {
-            'typus': self.activity_type.id,
+            'activity_type': self.activity_type.id,
             'max_participants': 5,
             'place': self.place.id,
             'rule': str(recurrence),

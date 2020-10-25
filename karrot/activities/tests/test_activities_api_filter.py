@@ -26,19 +26,19 @@ class TestActivitydatesAPIFilter(APITestCase, ExtractPaginationMixin):
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
         self.activity_type = ActivityTypeFactory(group=self.group)
-        self.activity = ActivityFactory(typus=self.activity_type, place=self.place)
+        self.activity = ActivityFactory(activity_type=self.activity_type, place=self.place)
 
         # and another place + group + activity
         self.group2 = GroupFactory(members=[self.member])
         self.place2 = PlaceFactory(group=self.group2)
         self.activity_type2 = ActivityTypeFactory(group=self.group2)
-        self.activity2 = ActivityFactory(typus=self.activity_type2, place=self.place2)
+        self.activity2 = ActivityFactory(activity_type=self.activity_type2, place=self.place2)
 
         # an activity series
-        self.series = ActivitySeriesFactory(typus=self.activity_type, place=self.place)
+        self.series = ActivitySeriesFactory(activity_type=self.activity_type, place=self.place)
 
         # another activity series
-        self.series2 = ActivitySeriesFactory(typus=self.activity_type, place=self.place)
+        self.series2 = ActivitySeriesFactory(activity_type=self.activity_type, place=self.place)
 
     def test_filter_by_place(self):
         self.client.force_login(user=self.member)
@@ -108,34 +108,38 @@ class TestFeedbackPossibleFilter(APITestCase, ExtractPaginationMixin):
         self.activity_type2 = ActivityTypeFactory(group=self.group2)
 
         self.activityFeedbackPossible = ActivityFactory(
-            typus=self.activity_type, place=self.place, participants=[
+            activity_type=self.activity_type, place=self.place, participants=[
                 self.member,
             ], date=self.oneWeekAgo
         )
 
         # now the issues where no feedback can be given
         self.activityUpcoming = ActivityFactory(
-            typus=self.activity_type, place=self.place, participants=[
+            activity_type=self.activity_type, place=self.place, participants=[
                 self.member,
             ]
         )
-        self.activityNotParticipant = ActivityFactory(typus=self.activity_type, place=self.place, date=self.oneWeekAgo)
-        self.activityTooLongAgo = ActivityFactory(typus=self.activity_type, place=self.place, date=self.tooLongAgo)
+        self.activityNotParticipant = ActivityFactory(
+            activity_type=self.activity_type, place=self.place, date=self.oneWeekAgo
+        )
+        self.activityTooLongAgo = ActivityFactory(
+            activity_type=self.activity_type, place=self.place, date=self.tooLongAgo
+        )
 
         self.activityFeedbackAlreadyGiven = ActivityFactory(
-            typus=self.activity_type, place=self.place, participants=[
+            activity_type=self.activity_type, place=self.place, participants=[
                 self.member,
             ], date=self.oneWeekAgo
         )
         self.feedback = FeedbackFactory(about=self.activityFeedbackAlreadyGiven, given_by=self.member)
 
         self.activityParticipantLeftGroup = ActivityFactory(
-            typus=self.activity_type2, place=self.place2, participants=[
+            activity_type=self.activity_type2, place=self.place2, participants=[
                 self.member,
             ], date=self.oneWeekAgo
         )
         self.activityDoneByAnotherUser = ActivityFactory(
-            typus=self.activity_type, place=self.place, participants=[
+            activity_type=self.activity_type, place=self.place, participants=[
                 self.member2,
             ], date=self.oneWeekAgo
         )

@@ -126,7 +126,7 @@ def feedback_possible(sender, instance, **kwargs):
             return
 
         # skip if the activity does not take feedback
-        if not activity.typus.has_feedback:
+        if not activity.activity_type.has_feedback:
             return
     else:
         # Activity is not saved yet and can't have any participants

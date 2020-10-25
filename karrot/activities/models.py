@@ -62,7 +62,7 @@ class ActivitySeries(BaseModel):
     description = models.TextField(blank=True)
     duration = DurationField(null=True)
 
-    typus = models.ForeignKey(
+    activity_type = models.ForeignKey(
         ActivityType,
         related_name='activity_series',
         on_delete=models.CASCADE,
@@ -77,7 +77,7 @@ class ActivitySeries(BaseModel):
 
     def create_activity(self, date):
         return self.activities.create(
-            typus=self.typus,
+            activity_type=self.activity_type,
             date=CustomDateTimeTZRange(date, date + (self.duration or default_duration)),
             has_duration=self.duration is not None,
             max_participants=self.max_participants,
@@ -165,7 +165,7 @@ class ActivitySeries(BaseModel):
 class ActivityQuerySet(models.QuerySet):
     def _feedback_possible_q(self, user):
         return Q(is_done=True) \
-               & Q(typus__has_feedback=True) \
+               & Q(activity_type__has_feedback=True) \
                & Q(date__endswith__gte=timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)) \
                & Q(participants=user) \
                & ~Q(feedback__given_by=user)
@@ -280,7 +280,7 @@ class Activity(BaseModel, ConversationMixin):
     class Meta:
         ordering = ['date']
 
-    typus = models.ForeignKey(
+    activity_type = models.ForeignKey(
         ActivityType,
         related_name='activities',
         on_delete=models.CASCADE,
@@ -342,7 +342,7 @@ class Activity(BaseModel, ConversationMixin):
         return pytz.timezone(value) if isinstance(value, str) else value
 
     def feedback_due(self):
-        if not self.typus.has_feedback:
+        if not self.activity_type.has_feedback:
             return False
         due = self.date.end + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
         return due.astimezone(self.get_timezone())

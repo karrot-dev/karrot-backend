@@ -201,7 +201,7 @@ class Command(BaseCommand):
         def make_series(place, activity_type):
             response = c.post(
                 '/api/activity-series/', {
-                    'typus': activity_type.id,
+                    'activity_type': activity_type.id,
                     'start_date': faker.date_time_between(start_date='now', end_date='+24h', tzinfo=pytz.utc),
                     'rule': 'FREQ=WEEKLY;BYDAY=MO,TU,SA',
                     'max_participants': 10,
@@ -238,7 +238,7 @@ class Command(BaseCommand):
             response = c.post(
                 '/api/activities/',
                 {
-                    'typus': activity_type.id,
+                    'activity_type': activity_type.id,
                     'date': date.as_list(),
                     'place': place,
                     'max_participants': 10
@@ -295,7 +295,7 @@ class Command(BaseCommand):
 
         def create_done_activity(place, user_id, activity_type):
             activity = Activity.objects.create(
-                typus=activity_type,
+                activity_type=activity_type,
                 date=to_range(faker.date_time_between(start_date='-9d', end_date='-1d', tzinfo=pytz.utc), minutes=30),
                 place_id=place,
                 max_participants=10,
