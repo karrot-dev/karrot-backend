@@ -1,4 +1,5 @@
 import datetime
+
 from django.utils import timezone
 from psycopg2.extras import DateTimeTZRange
 
@@ -145,7 +146,8 @@ class TestSetActivityTypes(TestMigrations):
 
         def check_available_types(theme, expected_type_names):
             type_names = [t.name for t in ActivityType.objects.filter(group__theme=theme)]
-            self.assertEqual(type_names, expected_type_names)
+            # assertCountEqual is confusingly named, it checks lists, ignoring order
+            self.assertCountEqual(type_names, expected_type_names)
 
         check_available_types('foodsaving', ['Meeting', 'Pickup', 'Distribution', 'Event', 'Activity'])
         check_available_types('bikekitchen', ['Meeting', 'Event', 'Activity'])
