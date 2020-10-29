@@ -41,7 +41,7 @@ activity_types = {
 }
 
 activity_types_for_theme = {
-    'foodsaving': activity_types.keys(), # everything!
+    'foodsaving': [name for name in activity_types.keys() if name != 'Activity'],
     'general': ['Meeting', 'Event', 'Activity'],
     'bikekitchen': ['Meeting', 'Event', 'Activity'],
 }

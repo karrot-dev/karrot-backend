@@ -149,7 +149,7 @@ class TestSetActivityTypes(TestMigrations):
             # assertCountEqual is confusingly named, it checks lists, ignoring order
             self.assertCountEqual(type_names, expected_type_names)
 
-        check_available_types('foodsaving', ['Meeting', 'Pickup', 'Distribution', 'Event', 'Activity'])
+        check_available_types('foodsaving', ['Meeting', 'Pickup', 'Distribution', 'Event'])
         check_available_types('bikekitchen', ['Meeting', 'Event', 'Activity'])
         check_available_types('general', ['Meeting', 'Event', 'Activity'])
 

@@ -40,11 +40,4 @@ default_activity_types = {
         'has_feedback': True,
         'has_feedback_weight': False,
     },
-    'Activity': {
-        'colour': '283593',
-        'icon': 'fas fa-asterisk',
-        'feedback_icon': 'fas fa-reply',
-        'has_feedback': True,
-        'has_feedback_weight': False,
-    },
 }
