@@ -14,7 +14,8 @@
                             <ul>
                                 {% for activity in activities %}
                                     <li>
-                                        {{ activity.date.start | time }} @
+                                        {{ activity.date.start | time }}
+                                        {{ activity.activity_type.get_translated_name() }} @
                                         <a href="{{ place_url(activity.place) }}">
                                             {{ activity.place.name }}
                                         </a>
