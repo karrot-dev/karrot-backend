@@ -10,7 +10,7 @@ from karrot.places.factories import PlaceFactory
 from karrot.activities.models import Feedback, to_range
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import UserFactory
-from karrot.activities.factories import ActivityFactory, FeedbackFactory
+from karrot.activities.factories import ActivityFactory, FeedbackFactory, ActivityTypeFactory
 
 
 class FeedbackTest(APITestCase, ExtractPaginationMixin):
@@ -34,6 +34,18 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
             participants=[cls.participant, cls.participant2, cls.participant3],
         )
 
+        activity_type_without_feedback_weight = ActivityTypeFactory(
+            group=cls.group,
+            has_feedback=True,
+            has_feedback_weight=False,
+        )
+
+        activity_type_without_feedback = ActivityTypeFactory(
+            group=cls.group,
+            has_feedback=False,
+            has_feedback_weight=False,
+        )
+
         # not a member of the group
         cls.user = UserFactory()
 
@@ -53,6 +65,22 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
             ]
         )
         cls.old_feedback = FeedbackFactory(about=cls.old_activity, given_by=cls.participant3)
+
+        # activity for type that doesn't accept feedback weight
+        cls.activity_without_feedback_weight = ActivityFactory(
+            activity_type=activity_type_without_feedback_weight,
+            place=cls.place,
+            date=to_range(timezone.now() - relativedelta(days=1)),
+            participants=[cls.participant, cls.participant2, cls.participant3],
+        )
+
+        # activity for type that doesn't accept feedback at all
+        cls.activity_without_feedback = ActivityFactory(
+            activity_type=activity_type_without_feedback,
+            place=cls.place,
+            date=to_range(timezone.now() - relativedelta(days=1)),
+            participants=[cls.participant, cls.participant2, cls.participant3],
+        )
 
         # create feedback for POST method
         cls.feedback_post = {'about': cls.past_activity.id, 'weight': 2, 'comment': 'asfjk'}
@@ -113,7 +141,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.member)
         response = self.client.post(self.url, self.feedback_post, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        self.assertEqual(response.data, {'about': ['You aren\'t assigned to the pickup.']})
+        self.assertEqual(response.data, {'about': ['You aren\'t assigned to the activity.']})
 
     def test_create_feedback_works_as_participant(self):
         """
@@ -163,7 +191,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.assertEqual(
             response.data, {
                 'about': [
-                    'You can\'t give feedback for pickups more than {} days ago.'.format(
+                    'You can\'t give feedback for activities more than {} days ago.'.format(
                         settings.FEEDBACK_POSSIBLE_DAYS
                     )
                 ]
@@ -197,6 +225,48 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(response.data, {'non_field_errors': ['Both comment and weight cannot be blank.']})
 
+    def test_weight_for_activity_that_does_not_accept_weight(self):
+        self.maxDiff = None
+        self.client.force_login(user=self.participant3)
+        response = self.client.post(
+            self.url, {
+                'about': self.activity_without_feedback_weight.id,
+                'comment': 'hello',
+                'weight': 200,
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(
+            response.data, {
+                'non_field_errors': [
+                    'You cannot give weight feedback to an activity of type {}.'.format(
+                        self.activity_without_feedback_weight.activity_type.name
+                    )
+                ]
+            }
+        )
+
+    def test_weight_for_activity_that_does_not_accept_feedback(self):
+        self.maxDiff = None
+        self.client.force_login(user=self.participant3)
+        response = self.client.post(
+            self.url, {
+                'about': self.activity_without_feedback.id,
+                'comment': 'hello',
+            }, format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(
+            response.data, {
+                'non_field_errors': [
+                    'You cannot give feedback to an activity of type {}.'.format(
+                        self.activity_without_feedback.activity_type.name
+                    )
+                ]
+            }
+        )
+
     def test_list_feedback_fails_as_non_user(self):
         """
         Non-User is NOT allowed to see list of feedback
@@ -218,7 +288,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         Member is allowed to see list of feedback
         """
         self.client.force_login(user=self.member)
-        with self.assertNumQueries(4):
+        with self.assertNumQueries(5):
             response = self.get_results(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         feedback = response.data['feedback']
@@ -293,7 +363,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.participant3)
         response = self.client.post(self.url, self.future_feedback_post)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        self.assertEqual(response.data, {'about': ['The pickup is not done yet']})
+        self.assertEqual(response.data, {'about': ['The activity is not done yet']})
 
     def test_patch_feedback_fails_as_non_user(self):
         """
@@ -357,7 +427,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
         self.assertEqual(
             response.data['detail'],
-            'You can\'t give feedback for pickups more than {} days ago.'.format(settings.FEEDBACK_POSSIBLE_DAYS)
+            'You can\'t give feedback for activities more than {} days ago.'.format(settings.FEEDBACK_POSSIBLE_DAYS)
         )
 
     def test_patch_feedback_to_remove_weight(self):

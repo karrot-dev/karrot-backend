@@ -15,10 +15,16 @@ from karrot.base.base_models import CustomDateTimeTZRange
 from karrot.history.models import History, HistoryTypus
 from karrot.activities import stats
 from karrot.activities.models import (
-    Activity as ActivityModel, Feedback as FeedbackModel, ActivitySeries as ActivitySeriesModel
+    Activity as ActivityModel, Feedback as FeedbackModel, ActivitySeries as ActivitySeriesModel, ActivityType
 )
 from karrot.utils.date_utils import csv_datetime
 from karrot.utils.misc import find_changed
+
+
+class ActivityTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ActivityType
+        fields = '__all__'
 
 
 class ActivityHistorySerializer(serializers.ModelSerializer):
@@ -81,6 +87,7 @@ class ActivitySerializer(serializers.ModelSerializer):
         model = ActivityModel
         fields = [
             'id',
+            'activity_type',
             'date',
             'series',
             'place',
@@ -129,16 +136,30 @@ class ActivitySerializer(serializers.ModelSerializer):
         if not place.group.is_editor(self.context['request'].user):
             if not place.group.is_member(self.context['request'].user):
                 raise PermissionDenied('You are not member of the place\'s group.')
-            raise PermissionDenied(_('You need to be a group editor'))
+            raise PermissionDenied('You need to be a group editor')
         return place
 
     def validate_date(self, date):
         if not date.start > timezone.now() + timedelta(minutes=10):
-            raise serializers.ValidationError(_('The date should be in the future.'))
+            raise serializers.ValidationError('The date should be in the future.')
         duration = date.end - date.start
         if duration < timedelta(seconds=1):
             raise serializers.ValidationError('Duration must be at least one second.')
         return date
+
+    def validate(self, data):
+        def get_instance_attr(field):
+            if self.instance is None:
+                return None
+            return getattr(self.instance, field)
+
+        activity_type = data.get('activity_type', get_instance_attr('activity_type'))
+        place = data.get('place', get_instance_attr('place'))
+
+        if activity_type and place and activity_type.group_id != place.group_id:
+            raise serializers.ValidationError('ActivityType is not for this group.')
+
+        return data
 
 
 class ActivityUpdateSerializer(ActivitySerializer):
@@ -192,7 +213,7 @@ class ActivityUpdateSerializer(ActivitySerializer):
 
     def validate_date(self, date):
         if self.instance.series is not None and abs((self.instance.date.start - date.start).total_seconds()) > 1:
-            raise serializers.ValidationError(_('You can\'t move pickups that are part of a series.'))
+            raise serializers.ValidationError('You can\'t move activities that are part of a series.')
         return super().validate_date(date)
 
     def validate_has_duration(self, has_duration):
@@ -273,6 +294,7 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
         model = ActivitySeriesModel
         fields = [
             'id',
+            'activity_type',
             'max_participants',
             'place',
             'rule',
@@ -315,7 +337,7 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
 
     def validate_place(self, place):
         if not place.group.is_editor(self.context['request'].user):
-            raise PermissionDenied(_('You need to be a group editor'))
+            raise PermissionDenied('You need to be a group editor')
         if not place.group.is_member(self.context['request'].user):
             raise serializers.ValidationError('You are not member of the place\'s group.')
         return place
@@ -328,10 +350,24 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
         try:
             rrule = dateutil.rrule.rrulestr(rule_string)
         except ValueError:
-            raise serializers.ValidationError(_('Invalid recurrence rule.'))
+            raise serializers.ValidationError('Invalid recurrence rule.')
         if not isinstance(rrule, dateutil.rrule.rrule):
-            raise serializers.ValidationError(_('Only single recurrence rules are allowed.'))
+            raise serializers.ValidationError('Only single recurrence rules are allowed.')
         return rule_string
+
+    def validate(self, data):
+        def get_instance_attr(field):
+            if self.instance is None:
+                return None
+            return getattr(self.instance, field)
+
+        activity_type = data.get('activity_type', get_instance_attr('activity_type'))
+        place = data.get('place', get_instance_attr('place'))
+
+        if activity_type and place and activity_type.group_id != place.group_id:
+            raise serializers.ValidationError('ActivityType is not for this group.')
+
+        return data
 
 
 class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
@@ -412,13 +448,14 @@ class FeedbackSerializer(serializers.ModelSerializer):
         if not group.is_member(user):
             raise serializers.ValidationError('You are not member of the place\'s group.')
         if about.is_upcoming():
-            raise serializers.ValidationError(_('The pickup is not done yet'))
+            raise serializers.ValidationError('The activity is not done yet')
         if not about.is_participant(user):
-            raise serializers.ValidationError(_('You aren\'t assigned to the pickup.'))
+            raise serializers.ValidationError('You aren\'t assigned to the activity.')
         if not about.is_recent():
             raise serializers.ValidationError(
-                _('You can\'t give feedback for pickups more than %(days_number)s days ago.') %
-                {'days_number': settings.FEEDBACK_POSSIBLE_DAYS}
+                'You can\'t give feedback for activities more than {} days ago.'.format(
+                    settings.FEEDBACK_POSSIBLE_DAYS
+                )
             )
         return about
 
@@ -428,10 +465,24 @@ class FeedbackSerializer(serializers.ModelSerializer):
                 return None
             return getattr(self.instance, field)
 
+        activity_type = data.get('about', get_instance_attr('about')).activity_type
+
         comment = data.get('comment', get_instance_attr('comment'))
         weight = data.get('weight', get_instance_attr('weight'))
+
+        if not activity_type.has_feedback:
+            raise serializers.ValidationError(
+                'You cannot give feedback to an activity of type {}.'.format(activity_type.name)
+            )
+
+        if weight is not None and not activity_type.has_feedback_weight:
+            raise serializers.ValidationError(
+                'You cannot give weight feedback to an activity of type {}.'.format(activity_type.name)
+            )
+
         if (comment is None or comment == '') and weight is None:
-            raise serializers.ValidationError(_('Both comment and weight cannot be blank.'))
+            raise serializers.ValidationError('Both comment and weight cannot be blank.')
+
         data['given_by'] = self.context['request'].user
         return data
 

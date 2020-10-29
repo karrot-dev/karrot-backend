@@ -156,7 +156,9 @@ class TestMessagePushNotificationTitles(TestCase):
         message = conversation.messages.create(author=author, content='bla')
 
         title = get_message_title(message, 'en')
-        self.assertEqual(title, 'Pickup Sunday 9:00 PM / {}'.format(author.display_name))
+        self.assertEqual(
+            title, '{} Sunday 9:00 PM / {}'.format(activity.activity_type.get_translated_name(), author.display_name)
+        )
 
     def test_application_message_title(self):
         author = UserFactory()

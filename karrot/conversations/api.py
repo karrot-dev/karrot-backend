@@ -161,6 +161,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
         activity_conversations = [item for item in conversations if item.target_type == activity_ct]
         activities = Activity.objects. \
             filter(id__in=[c.target_id for c in activity_conversations]). \
+            select_related('activity_type'). \
             prefetch_related('activityparticipant_set', 'feedback_given_by')
 
         applications_ct = ContentType.objects.get_for_model(Application)

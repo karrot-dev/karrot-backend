@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrulestr
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils.translation import gettext as _
 from django.db import models
 from django.db import transaction
 from django.db.models import Avg, Count, DurationField, F, Q
@@ -16,6 +17,24 @@ from karrot.history.models import History, HistoryTypus
 from karrot.activities import stats
 from karrot.activities.utils import match_activities_with_dates, rrule_between_dates_in_local_time
 from karrot.places.models import PlaceStatus
+
+
+class ActivityType(BaseModel):
+    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='activity_types')
+    name = models.CharField(max_length=80)
+    name_is_translatable = models.BooleanField(default=True)
+    colour = models.CharField(max_length=6)
+    icon = models.CharField(max_length=32)
+    feedback_icon = models.CharField(max_length=32)
+    has_feedback = models.BooleanField(default=True)
+    has_feedback_weight = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ('group', 'name')
+
+    def get_translated_name(self):
+        # the translations are collected via activity_types.py
+        return _(self.name) if self.name_is_translatable else self.name
 
 
 class ActivitySeriesQuerySet(models.QuerySet):
@@ -43,6 +62,12 @@ class ActivitySeries(BaseModel):
     description = models.TextField(blank=True)
     duration = DurationField(null=True)
 
+    activity_type = models.ForeignKey(
+        ActivityType,
+        related_name='activity_series',
+        on_delete=models.CASCADE,
+    )
+
     last_changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -52,6 +77,7 @@ class ActivitySeries(BaseModel):
 
     def create_activity(self, date):
         return self.activities.create(
+            activity_type=self.activity_type,
             date=CustomDateTimeTZRange(date, date + (self.duration or default_duration)),
             has_duration=self.duration is not None,
             max_participants=self.max_participants,
@@ -139,6 +165,7 @@ class ActivitySeries(BaseModel):
 class ActivityQuerySet(models.QuerySet):
     def _feedback_possible_q(self, user):
         return Q(is_done=True) \
+               & Q(activity_type__has_feedback=True) \
                & Q(date__endswith__gte=timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)) \
                & Q(participants=user) \
                & ~Q(feedback__given_by=user)
@@ -253,6 +280,12 @@ class Activity(BaseModel, ConversationMixin):
     class Meta:
         ordering = ['date']
 
+    activity_type = models.ForeignKey(
+        ActivityType,
+        related_name='activities',
+        on_delete=models.CASCADE,
+    )
+
     series = models.ForeignKey(
         'ActivitySeries',
         related_name='activities',
@@ -309,6 +342,8 @@ class Activity(BaseModel, ConversationMixin):
         return pytz.timezone(value) if isinstance(value, str) else value
 
     def feedback_due(self):
+        if not self.activity_type.has_feedback:
+            return False
         due = self.date.end + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
         return due.astimezone(self.get_timezone())
 

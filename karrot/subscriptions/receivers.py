@@ -309,7 +309,7 @@ def place_subscription_updated(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='places:place', payload=payload)
 
 
-# Activity Dates
+# Activities
 @receiver(post_save, sender=Activity)
 def send_activity_updates(sender, instance, **kwargs):
     activity = instance
@@ -342,7 +342,7 @@ def send_activity_participant_updates(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='activities:activity', payload=payload)
 
 
-# Activity Date Series
+# Activity Series
 @receiver(post_save, sender=ActivitySeries)
 def send_activity_series_updates(sender, instance, **kwargs):
     series = instance

@@ -201,12 +201,8 @@ def prepare_activity_conversation_message_notification(user, messages):
             long_date = '{} {}, {}'.format(weekday, time, date)
             short_date = '{} {}'.format(weekday, time)
 
-            reply_to_name = _('Pickup %(date)s') % {
-                'date': short_date,
-            }
-            conversation_name = _('Pickup %(date)s') % {
-                'date': long_date,
-            }
+            reply_to_name = '{} {}'.format(activity.activity_type.get_translated_name(), short_date)
+            conversation_name = '{} {}'.format(activity.activity_type.get_translated_name(), long_date)
 
         return prepare_message_notification(
             user,

@@ -13,7 +13,7 @@ from rest_framework.test import APITestCase
 
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupStatus
-from karrot.activities.factories import ActivitySeriesFactory
+from karrot.activities.factories import ActivitySeriesFactory, ActivityTypeFactory
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import UserFactory
@@ -36,6 +36,7 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
+        self.activity_type = ActivityTypeFactory(group=self.group)
 
     def test_create_and_get_recurring_series(self):
         self.maxDiff = None
@@ -46,6 +47,7 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
         )
         start_date = self.group.timezone.localize(datetime.now().replace(hour=20, minute=0))
         activity_series_data = {
+            'activity_type': self.activity_type.id,
             'max_participants': 5,
             'place': self.place.id,
             'rule': str(recurrence),
@@ -61,6 +63,7 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
         del response.data['start_date']
         del response.data['dates_preview']
         expected_series_data = {
+            'activity_type': self.activity_type.id,
             'max_participants': 5,
             'place': self.place.id,
             'rule': str(recurrence),
@@ -112,6 +115,7 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
             del _['feedback_due']
         for _ in dates_list:
             created_activities.append({
+                'activity_type': self.activity_type.id,
                 'max_participants': 5,
                 'series': series_id,
                 'participants': [],
@@ -132,6 +136,7 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
         )
         start_date = self.group.timezone.localize(datetime.now().replace(hour=20, minute=0))
         activity_series_data = {
+            'activity_type': self.activity_type.id,
             'max_participants': 5,
             'place': self.place.id,
             'rule': str(recurrence),
@@ -491,7 +496,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('You can\'t move pickups', response.data['date'][0])
+        self.assertIn('You can\'t move activities', response.data['date'][0])
 
     def test_cannot_change_activity_has_duration_in_a_series(self):
         self.client.force_login(user=self.member)

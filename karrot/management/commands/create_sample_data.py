@@ -12,7 +12,7 @@ from rest_framework.test import APIClient
 
 from karrot.groups.models import Group, GroupMembership, GroupStatus
 from karrot.groups.roles import GROUP_EDITOR
-from karrot.activities.models import Activity, ActivitySeries, to_range
+from karrot.activities.models import Activity, ActivitySeries, to_range, ActivityType
 from karrot.places.models import Place
 from karrot.users.models import User
 from karrot.utils.tests.fake import faker
@@ -74,7 +74,7 @@ class Command(BaseCommand):
 
         default_password = '123'
 
-        def make_user():
+        def make_user(verified=True):
             response = c.post(
                 '/api/auth/user/', {
                     'email': str(timezone.now().microsecond) + faker.email(),
@@ -86,8 +86,10 @@ class Command(BaseCommand):
             )
             if response.status_code != 201:
                 raise Exception('could not make user', response.data)
-            print('created user:', response.data['email'])
-            return response.data
+            user = response.data
+            User.objects.get(id=user['id']).verify_mail()
+            print('created user:', user['email'])
+            return user
 
         def make_group():
             response = c.post(
@@ -198,9 +200,10 @@ class Command(BaseCommand):
             print('modified place: ', place)
             return response.data
 
-        def make_series(place):
+        def make_series(place, activity_type):
             response = c.post(
                 '/api/activity-series/', {
+                    'activity_type': activity_type.id,
                     'start_date': faker.date_time_between(start_date='now', end_date='+24h', tzinfo=pytz.utc),
                     'rule': 'FREQ=WEEKLY;BYDAY=MO,TU,SA',
                     'max_participants': 10,
@@ -232,11 +235,12 @@ class Command(BaseCommand):
             print('deleted series: ', series)
             return response.data
 
-        def make_activity(place):
+        def make_activity(place, activity_type):
             date = to_range(faker.date_time_between(start_date='+2d', end_date='+7d', tzinfo=pytz.utc))
             response = c.post(
                 '/api/activities/',
                 {
+                    'activity_type': activity_type.id,
                     'date': date.as_list(),
                     'place': place,
                     'max_participants': 10
@@ -285,8 +289,15 @@ class Command(BaseCommand):
             print('created feedback: ', response.data)
             return response.data
 
-        def create_done_activity(place, user_id):
+        def random_activity_type(group_id):
+            return find_activity_type(group=group_id)
+
+        def find_activity_type(**filter_params):
+            return ActivityType.objects.filter(**filter_params).order_by('?').first()
+
+        def create_done_activity(place, user_id, activity_type):
             activity = Activity.objects.create(
+                activity_type=activity_type,
                 date=to_range(faker.date_time_between(start_date='-9d', end_date='-1d', tzinfo=pytz.utc), minutes=30),
                 place_id=place,
                 max_participants=10,
@@ -311,12 +322,15 @@ class Command(BaseCommand):
             groups.append(group)
             for _ in range(5):
                 place = make_place(group['id'])
-                make_series(place['id'])
-                activity = make_activity(place['id'])
+                make_series(place['id'], random_activity_type(group['id']))
+                activity = make_activity(place['id'], random_activity_type(group['id']))
                 join_activity(activity['id'])
                 print(group['conversation'])
                 make_message(group['conversation']['id'])
-                done_activity = create_done_activity(place['id'], user['id'])
+                done_activity = create_done_activity(
+                    place['id'], user['id'],
+                    find_activity_type(group=group['id'], has_feedback=True, has_feedback_weight=True)
+                )
                 make_feedback(done_activity.id, user['id'])
 
         # group members

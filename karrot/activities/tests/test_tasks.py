@@ -13,7 +13,7 @@ from karrot.activities import tasks
 from karrot.activities.factories import ActivityFactory
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
-from karrot.activities.models import Activity, to_range, ActivityParticipant
+from karrot.activities.models import ActivityParticipant, to_range
 from karrot.activities.tasks import daily_activity_notifications, fetch_activity_notification_data_for_group
 from karrot.places.factories import PlaceFactory
 from karrot.places.models import PlaceStatus
@@ -54,7 +54,7 @@ class TestActivityReminderTask(TestCase):
             kwargs['click_action'],
         )
         self.assertIn(
-            'Upcoming pickup',
+            'Upcoming {}'.format(self.activity.activity_type.name),
             kwargs['fcm_options']['message_title'],
         )
         self.assertIn(
@@ -90,7 +90,7 @@ class TestActivityNotificationTask(APITestCase):
     def create_empty_activity(self, delta, place=None):
         if place is None:
             place = self.place
-        return Activity.objects.create(
+        return ActivityFactory(
             place=place,
             date=to_range(timezone.localtime() + delta),
             max_participants=1,
@@ -99,7 +99,7 @@ class TestActivityNotificationTask(APITestCase):
     def create_not_full_activity(self, delta, place=None):
         if place is None:
             place = self.place
-        activity = Activity.objects.create(
+        activity = ActivityFactory(
             place=place,
             date=to_range(timezone.localtime() + delta),
             max_participants=2,
@@ -111,7 +111,7 @@ class TestActivityNotificationTask(APITestCase):
     def create_user_activity(self, delta, place=None, **kwargs):
         if place is None:
             place = self.place
-        activity = Activity.objects.create(
+        activity = ActivityFactory(
             place=place,
             date=to_range(timezone.localtime() + delta),
             **kwargs,
@@ -123,7 +123,7 @@ class TestActivityNotificationTask(APITestCase):
     def create_deleted_activity(self, delta, place=None):
         if place is None:
             place = self.place
-        return Activity.objects.create(
+        return ActivityFactory(
             place=place,
             date=to_range(timezone.localtime() + delta),
             max_participants=1,
@@ -133,7 +133,7 @@ class TestActivityNotificationTask(APITestCase):
     def create_disabled_activity(self, delta, place=None):
         if place is None:
             place = self.place
-        return Activity.objects.create(
+        return ActivityFactory(
             place=place,
             date=to_range(timezone.localtime() + delta),
             max_participants=1,

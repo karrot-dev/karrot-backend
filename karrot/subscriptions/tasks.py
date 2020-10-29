@@ -3,7 +3,6 @@ from itertools import groupby
 from babel.dates import format_date, format_time
 from django.utils import timezone, translation
 from django.utils.text import Truncator
-from django.utils.translation import gettext as _
 from furl import furl
 from huey.contrib.djhuey import db_task
 
@@ -68,9 +67,7 @@ def get_message_title(message, language):
                 tzinfo=timezone.get_current_timezone(),
             )
         short_date = '{} {}'.format(weekday, time)
-        short_name = _('Pickup %(date)s') % {
-            'date': short_date,
-        }
+        short_name = '{} {}'.format(activity.activity_type.get_translated_name(), short_date)
         return '{} / {}'.format(short_name, author_name)
 
     if type == 'application':

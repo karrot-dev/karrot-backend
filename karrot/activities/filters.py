@@ -1,7 +1,15 @@
 from django_filters import rest_framework as filters
 
 from karrot.base.filters import ISODateTimeRangeFromToRangeFilter
-from karrot.activities.models import Activity, ActivitySeries, Feedback
+from karrot.activities.models import Activity, ActivitySeries, Feedback, ActivityType
+
+
+class ActivityTypeFilter(filters.FilterSet):
+    group = filters.NumberFilter(field_name='group')
+
+    class Meta:
+        model = ActivityType
+        fields = ['group']
 
 
 class ActivitySeriesFilter(filters.FilterSet):

@@ -184,7 +184,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
         To keep historic activity infos, keep the user account but clear personal data.
         """
         # Removing group memberships emits pre_delete and post_delete signals,
-        # they are used to remove the user from pick-ups
+        # they are used to remove the user from activities
         for group in Group.objects.filter(members__in=[self]):
             GroupMembership.objects.filter(group=group, user=self).delete()
 

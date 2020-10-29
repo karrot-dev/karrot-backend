@@ -1,7 +1,7 @@
 <mjml>
     <mj-head>
         <mj-include path="../../base/templates/_base-head.mjml"/>
-        <mj-title>{% trans group_name=group.name %}{{ group_name }} upcoming pickups{% endtrans %}</mj-title>
+        <mj-title>{% trans group_name=group.name %}{{ group_name }} upcoming activities{% endtrans %}</mj-title>
     </mj-head>
     <mj-body>
         <mj-include path="../../base/templates/_header.mjml"/>
@@ -14,7 +14,8 @@
                             <ul>
                                 {% for activity in activities %}
                                     <li>
-                                        {{ activity.date.start | time }} @
+                                        {{ activity.date.start | time }}
+                                        {{ activity.activity_type.get_translated_name() }} @
                                         <a href="{{ place_url(activity.place) }}">
                                             {{ activity.place.name }}
                                         </a>
@@ -31,7 +32,7 @@
                         {% endif %}
                     {%- endmacro %}
 
-                    <h1>{% trans group_name=group.name %}{{ group_name }} upcoming pickups{% endtrans %}</h1>
+                    <h1>{% trans group_name=group.name %}{{ group_name }} upcoming activities{% endtrans %}</h1>
 
                     {% if has_activities_tonight %}
                         <h2>
@@ -39,7 +40,7 @@
                             {{ tonight_date | date }}
                         </h2>
 
-                        <p>{% trans %}The day is not over, there are still pickups to be done!{% endtrans %}</p>
+                        <p>{% trans %}The day is not over, there are still activities to be done!{% endtrans %}</p>
 
                         {% if tonight_user and tonight_user|length > 0 %}
                             {% trans %}You are signed up for{% endtrans %}:
@@ -90,7 +91,7 @@
                 <mj-text font-size="13px" line-height="18px" color="#777">
                     <p>
                         {% trans -%}You are receiving this because you are subscribed to
-                            <strong>Pickup notification</strong> emails for this group.{% endtrans %}
+                            <strong>Activity notification</strong> emails for this group.{% endtrans %}
                         <a href="{{ unsubscribe_url }}">{% trans %}Click here to unsubscribe{%  endtrans %}</a>.
                     </p>
                 </mj-text>

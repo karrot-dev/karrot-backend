@@ -47,7 +47,6 @@ def activity_reminder(participant_id):
             return
 
         emoji = '⏰'
-        activity_type = 'pickup'
 
         if is_today(activity.date.start):
             when = format_time(
@@ -66,7 +65,7 @@ def activity_reminder(participant_id):
 
         where = ', '.join(part for part in [activity.place.name, activity.place.address] if part)
 
-        title = _('Upcoming %(activity_type)s') % {'activity_type': activity_type}
+        title = _('Upcoming %(activity_type)s') % {'activity_type': activity.activity_type.get_translated_name()}
         title = f'{emoji} {title}!'
 
         body = Truncator(' / '.join(part for part in [when, where, activity.description] if part)).chars(num=1000)

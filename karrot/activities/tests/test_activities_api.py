@@ -8,7 +8,7 @@ from karrot.base.base_models import CustomDateTimeTZRange
 from karrot.conversations.models import ConversationNotificationStatus
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership, GroupStatus
-from karrot.activities.factories import ActivityFactory
+from karrot.activities.factories import ActivityFactory, ActivityTypeFactory
 from karrot.activities.models import to_range
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import ExtractPaginationMixin
@@ -25,7 +25,8 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         cls.second_member = UserFactory()
         cls.group = GroupFactory(members=[cls.member, cls.second_member])
         cls.place = PlaceFactory(group=cls.group)
-        cls.activity = ActivityFactory(place=cls.place)
+        cls.activity_type = ActivityTypeFactory(group=cls.group)
+        cls.activity = ActivityFactory(activity_type=cls.activity_type, place=cls.place)
         cls.activity_url = cls.url + str(cls.activity.id) + '/'
         cls.join_url = cls.activity_url + 'add/'
         cls.leave_url = cls.activity_url + 'remove/'
@@ -36,6 +37,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
 
         # another activity for above place
         cls.activity_data = {
+            'activity_type': cls.activity_type.id,
             'date': to_range(timezone.now() + relativedelta(days=2)).as_list(),
             'max_participants': 5,
             'place': cls.place.id
@@ -43,11 +45,14 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
 
         # past activity
         cls.past_activity_data = {
+            'activity_type': cls.activity_type.id,
             'date': to_range(timezone.now() - relativedelta(days=1)).as_list(),
             'max_participants': 5,
             'place': cls.place.id
         }
-        cls.past_activity = ActivityFactory(place=cls.place, date=to_range(timezone.now() - relativedelta(days=1)))
+        cls.past_activity = ActivityFactory(
+            activity_type=cls.activity_type, place=cls.place, date=to_range(timezone.now() - relativedelta(days=1))
+        )
         cls.past_activity_url = cls.url + str(cls.past_activity.id) + '/'
         cls.past_join_url = cls.past_activity_url + 'add/'
         cls.past_leave_url = cls.past_activity_url + 'remove/'
@@ -227,7 +232,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
 
     def test_join_activity_without_max_participants_as_member(self):
         self.client.force_login(user=self.member)
-        p = ActivityFactory(max_participants=None, place=self.place)
+        p = ActivityFactory(activity_type=self.activity_type, max_participants=None, place=self.place)
         response = self.client.post('/api/activities/{}/add/'.format(p.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
@@ -240,7 +245,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         self.activity.add_participant(u2)
         response = self.client.post(self.join_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
-        self.assertEqual(response.data['detail'], 'Pickup date is already full.')
+        self.assertEqual(response.data['detail'], 'Activity is already full.')
 
     def test_join_past_activity_fails(self):
         self.client.force_login(user=self.member)
@@ -432,11 +437,12 @@ class TestActivitiesListAPI(APITestCase, ExtractPaginationMixin):
         # activity for group with one member and one place
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
+        self.activity_type = ActivityTypeFactory(group=self.group)
         self.active_place = PlaceFactory(group=self.group, status='active')
         self.inactive_place = PlaceFactory(group=self.group, status='created')
 
-        ActivityFactory(place=self.active_place)
-        ActivityFactory(place=self.inactive_place)
+        ActivityFactory(activity_type=self.activity_type, place=self.active_place)
+        ActivityFactory(activity_type=self.activity_type, place=self.inactive_place)
 
     def test_list_activities_for_active_place(self):
         self.client.force_login(user=self.member)

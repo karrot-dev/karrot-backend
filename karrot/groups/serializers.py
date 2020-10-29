@@ -12,9 +12,11 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.fields import Field
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
+from karrot.activities.activity_types import default_activity_types
 from karrot.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
     GroupNotificationType
 from karrot.history.models import History, HistoryTypus
+from karrot.activities.models import ActivityType
 from karrot.utils.misc import find_changed
 from karrot.utils.validators import prevent_reserved_names
 from . import roles
@@ -194,6 +196,10 @@ class GroupDetailSerializer(GroupBaseSerializer):
         membership = GroupMembership.objects.create(group=group, user=user, roles=[roles.GROUP_EDITOR])
         membership.add_notification_types([GroupNotificationType.NEW_APPLICATION])
         membership.save()
+
+        # create the initial activity types
+        for name, options in default_activity_types.items():
+            ActivityType.objects.create(name=name, group=group, name_is_translatable=True, **options)
 
         History.objects.create(
             typus=HistoryTypus.GROUP_CREATE,

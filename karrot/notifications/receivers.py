@@ -124,6 +124,10 @@ def feedback_possible(sender, instance, **kwargs):
         old = Activity.objects.get(id=activity.id)
         if old.is_done == activity.is_done:
             return
+
+        # skip if the activity does not take feedback
+        if not activity.activity_type.has_feedback:
+            return
     else:
         # Activity is not saved yet and can't have any participants
         return
