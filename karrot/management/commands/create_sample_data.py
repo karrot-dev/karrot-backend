@@ -91,15 +91,16 @@ class Command(BaseCommand):
             print('created user:', user['email'])
             return user
 
-        def make_group():
+        def make_group(country_code='DE'):
+            lat, lng, city, country, timezone = faker.local_latlng(country_code=country_code)
             response = c.post(
                 '/api/groups/', {
-                    'name': 'Group ' + faker.city(),
+                    'name': 'Group ' + city,
                     'description': faker.text(),
                     'timezone': 'Europe/Berlin',
-                    'address': faker.street_address(),
-                    'latitude': faker.latitude(),
-                    'longitude': faker.longitude()
+                    'address': faker.street_address() + ', ' + city,
+                    'latitude': lat,
+                    'longitude': lng
                 }
             )
             if response.status_code != 201:
