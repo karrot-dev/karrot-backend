@@ -74,7 +74,7 @@ class Command(BaseCommand):
 
         default_password = '123'
 
-        def make_user():
+        def make_user(verified=True):
             response = c.post(
                 '/api/auth/user/', {
                     'email': str(timezone.now().microsecond) + faker.email(),
@@ -86,8 +86,10 @@ class Command(BaseCommand):
             )
             if response.status_code != 201:
                 raise Exception('could not make user', response.data)
-            print('created user:', response.data['email'])
-            return response.data
+            user = response.data
+            User.objects.get(id=user['id']).verify_mail()
+            print('created user:', user['email'])
+            return user
 
         def make_group():
             response = c.post(
