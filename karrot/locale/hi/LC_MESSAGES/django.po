@@ -22,138 +22,88 @@ msgstr ""
 "Language: hi\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: karrot/activities/permissions.py:7
-msgid "The pickup date is in the past."
-msgstr "पिकअप की तारीख अतीत में है |"
+#: karrot/activities/activity_types.py:5
+msgid "Meeting"
+msgstr ""
 
-#: karrot/activities/permissions.py:18
-msgid "You can only delete empty pickup dates."
-msgstr "आप केवल खाली पिकअप तिथियां हटा सकते हैं"
+#: karrot/activities/activity_types.py:6
+msgid "Pickup"
+msgstr ""
 
-#: karrot/activities/permissions.py:27
-msgid "You have not joined this pickup date."
-msgstr "आप इस पिकअप तारीख में शामिल नहीं हुए हैं।"
+#: karrot/activities/activity_types.py:7
+msgid "Distribution"
+msgstr ""
 
-#: karrot/activities/permissions.py:34
-msgid "You have already joined this pickup date."
-msgstr "आप पहले से ही इस पिकअप की तारीख में शामिल हो गए हैं।"
+#: karrot/activities/activity_types.py:8
+msgid "Event"
+msgstr ""
 
-#: karrot/activities/permissions.py:41
-msgid "Pickup date is already full."
-msgstr "पिकअप की तारीख पहले ही पूर्ण है।"
+#: karrot/activities/activity_types.py:9
+msgid "Activity"
+msgstr ""
 
-#: karrot/activities/permissions.py:48
-msgid "This feedback is given by another user."
-msgstr "यह प्रतिक्रिया अन्य उपयोगकर्ता द्वारा दी गई है।"
-
-#: karrot/activities/permissions.py:57 karrot/activities/serializers.py:420
-#, python-format
-msgid ""
-"You can't give feedback for pickups more than %(days_number)s days ago."
-msgstr "आप %(days_number)s दिन पहले पिकअप के लिए प्रतिक्रिया नहीं दे सकते।"
-
-#: karrot/activities/permissions.py:67 karrot/activities/serializers.py:132
-#: karrot/activities/serializers.py:318 karrot/applications/api.py:36
-#: karrot/groups/api.py:50 karrot/invitations/serializers.py:28
-#: karrot/issues/serializers.py:122 karrot/places/api.py:19
-#: karrot/places/serializers.py:80
-msgid "You need to be a group editor"
-msgstr "आपका समूह संपादक होना जरूरी है"
-
-#: karrot/activities/serializers.py:47
+#: karrot/activities/serializers.py:53
 msgid "Must be a list"
 msgstr "सूची होनी चाहिए"
 
-#: karrot/activities/serializers.py:48
+#: karrot/activities/serializers.py:54
 msgid "Must be a list with one or two values"
 msgstr "एक या दो मूल्यों वाली सूची होनी चाहिए"
 
-#: karrot/activities/serializers.py:49
+#: karrot/activities/serializers.py:55
 msgid "Must pass start value"
 msgstr "शुरुवाती राशि चाहिए"
 
-#: karrot/activities/serializers.py:137
-msgid "The date should be in the future."
-msgstr "तारीख भविष्य में होनी चाहिए।"
-
-#: karrot/activities/serializers.py:195
-msgid "You can't move pickups that are part of a series."
-msgstr ""
-"श्रृंखला का हिस्सा रहने वाले पिक अप को आप स्थानांतरित नहीं कर सकते हैं।"
-
-#: karrot/activities/serializers.py:331
-msgid "Invalid recurrence rule."
-msgstr "अमान्य पुनरावृत्ति नियम |"
-
-#: karrot/activities/serializers.py:333
-msgid "Only single recurrence rules are allowed."
-msgstr "केवल एकल पुनरावृत्ति नियमों की अनुमति है |"
-
-#: karrot/activities/serializers.py:415
-msgid "The pickup is not done yet"
-msgstr "पिकअप अभी तक नहीं किया गया है"
-
-#: karrot/activities/serializers.py:417
-msgid "You aren't assigned to the pickup."
-msgstr "आपको पिकअप को सौंपा नहीं गया है |"
-
-#: karrot/activities/serializers.py:434
-msgid "Both comment and weight cannot be blank."
-msgstr "टिप्पणी और वजन दोनों रिक्त नहीं हो सकते।"
-
-#: karrot/activities/tasks.py:69
+#: karrot/activities/tasks.py:68
 #, python-format
 msgid "Upcoming %(activity_type)s"
 msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:6
-#: karrot/activities/templates/activity_notification.html.jinja2:227
-#: karrot/activities/templates/activity_notification.subject.jinja2:1
+#: karrot/activities/templates/activity_notification.html.jinja2:228
 #, python-format
-msgid "%(group_name)s upcoming pickups"
-msgstr "%(group_name)s आगामी पिकअप"
+msgid "%(group_name)s upcoming activities"
+msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:216
+#: karrot/activities/templates/activity_notification.html.jinja2:217
 #, python-format
 msgid "%(empty_participants_count)s/%(max_participants)s remaining"
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:231
+#: karrot/activities/templates/activity_notification.html.jinja2:232
 msgid "Tonight"
 msgstr "आज रात"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:235
-msgid "The day is not over, there are still pickups to be done!"
-msgstr "दिन खत्म नहीं हुआ है, अभी भी पिकअप किए जाने बाकी हैं!"
+#: karrot/activities/templates/activity_notification.html.jinja2:236
+msgid "The day is not over, there are still activities to be done!"
+msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:238
-#: karrot/activities/templates/activity_notification.html.jinja2:266
+#: karrot/activities/templates/activity_notification.html.jinja2:239
+#: karrot/activities/templates/activity_notification.html.jinja2:267
 msgid "You are signed up for"
 msgstr "आप इन के लिए जुड़े हुए है "
 
-#: karrot/activities/templates/activity_notification.html.jinja2:243
-#: karrot/activities/templates/activity_notification.html.jinja2:271
+#: karrot/activities/templates/activity_notification.html.jinja2:244
+#: karrot/activities/templates/activity_notification.html.jinja2:272
 msgid "No-one is yet signed up for"
 msgstr "अभी तक कोई जुड़े नहीं है "
 
-#: karrot/activities/templates/activity_notification.html.jinja2:248
-#: karrot/activities/templates/activity_notification.html.jinja2:276
+#: karrot/activities/templates/activity_notification.html.jinja2:249
+#: karrot/activities/templates/activity_notification.html.jinja2:277
 msgid "There is still space available for"
 msgstr "अभी भी जगह उपलब्ध है"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:261
+#: karrot/activities/templates/activity_notification.html.jinja2:262
 msgid "Tomorrow"
 msgstr "आने वाला कल"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:311
+#: karrot/activities/templates/activity_notification.html.jinja2:312
 msgid ""
 "You are receiving this because you are subscribed to\n"
-"                            <strong>Pickup notification</strong> emails for this group."
+"                            <strong>Activity notification</strong> emails for this group."
 msgstr ""
-"आप इसे प्राप्त कर रहे हैं क्योंकि आपको इस समूह के लिए <strong>पिक अप "
-"सूचना</strong> ईमेल की सदस्यता दी गई है।"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:313
+#: karrot/activities/templates/activity_notification.html.jinja2:314
 #: karrot/applications/templates/new_application.html.jinja2:266
 #: karrot/groups/templates/group_summary.html.jinja2:310
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:255
@@ -162,9 +112,20 @@ msgstr ""
 msgid "Click here to unsubscribe"
 msgstr "सदस्यता समाप्त करने के लिए यहां क्लिक करें"
 
+#: karrot/activities/templates/activity_notification.subject.jinja2:1
+#, python-format
+msgid "%(group_name)s upcoming pickups"
+msgstr "%(group_name)s आगामी पिकअप"
+
 #: karrot/applications/api.py:27
 msgid "You need to have a verified email address"
 msgstr "आपके पास एक सत्यापित ईमेल पता होना जरूरी है"
+
+#: karrot/applications/api.py:36 karrot/groups/api.py:50
+#: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
+#: karrot/places/api.py:19 karrot/places/serializers.py:80
+msgid "You need to be a group editor"
+msgstr "आपका समूह संपादक होना जरूरी है"
 
 #: karrot/applications/api.py:44
 msgid "You need to be the applicant"
@@ -260,8 +221,8 @@ msgstr ""
 "%(site_name)s पर देखें</a>, या <a href=\"%(mute_url)s\">बातचीत को चुप "
 "करें</a>।"
 
-#: karrot/conversations/api.py:65 karrot/conversations/api.py:245
-#: karrot/conversations/api.py:414 karrot/conversations/serializers.py:177
+#: karrot/conversations/api.py:65 karrot/conversations/api.py:246
+#: karrot/conversations/api.py:415 karrot/conversations/serializers.py:177
 msgid "You are not in this conversation"
 msgstr "आप इस बातचीत में नहीं हैं |"
 
@@ -277,36 +238,30 @@ msgstr ""
 "आप संदेश के निर्माण के %(days_number)s दिन से अधिक समय बाद संदेश संपादित "
 "नहीं कर सकते।"
 
-#: karrot/conversations/api.py:343
+#: karrot/conversations/api.py:344
 msgid "Must be first in thread"
 msgstr "बातचीत में पहले होना चाहिए"
 
-#: karrot/conversations/api.py:346
+#: karrot/conversations/api.py:347
 msgid "You are not a participant in this thread"
 msgstr "आप इस बातचीत में भागीदार नहीं हैं"
 
-#: karrot/conversations/emails.py:204 karrot/conversations/emails.py:207
-#: karrot/subscriptions/tasks.py:71
-#, python-format
-msgid "Pickup %(date)s"
-msgstr "पिक अप %(date)s"
-
-#: karrot/conversations/emails.py:240
+#: karrot/conversations/emails.py:236
 #, python-format
 msgid "New message in your application to %(group_name)s"
 msgstr "%(group_name)s के लिए अपने आवेदन में नया संदेश"
 
-#: karrot/conversations/emails.py:244
+#: karrot/conversations/emails.py:240
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr "%(user_name)s से %(group_name)s के लिए आवेदन में नया संदेश"
 
-#: karrot/conversations/emails.py:266
+#: karrot/conversations/emails.py:262
 #, python-format
 msgid "New message in conflict resolution in %(group_name)s"
 msgstr "%(group_name)s में संघर्ष समाधान में नया संदेश"
 
-#: karrot/conversations/emails.py:281
+#: karrot/conversations/emails.py:277
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr "%(offer_name)s में %(group_name)s के लिए नया संदेश"
@@ -357,23 +312,23 @@ msgstr "आप खुद को भरोसा नहीं दे सकते
 msgid "You already gave trust to this user"
 msgstr "आपने पहले ही इस उपयोगकर्ता को भरोसा दिया है"
 
-#: karrot/groups/serializers.py:31
+#: karrot/groups/serializers.py:33
 msgid "Unknown timezone"
 msgstr "अज्ञात समयक्षेत्र"
 
-#: karrot/groups/serializers.py:39
+#: karrot/groups/serializers.py:41
 msgid "Playground"
 msgstr "खेल-मैदान"
 
-#: karrot/groups/serializers.py:139 karrot/groups/serializers.py:234
+#: karrot/groups/serializers.py:141 karrot/groups/serializers.py:240
 msgid "You cannot manage agreements"
 msgstr "आप समझौतों का प्रबंधन नहीं कर सकते"
 
-#: karrot/groups/serializers.py:141
+#: karrot/groups/serializers.py:143
 msgid "Agreement is not for this group"
 msgstr "समझौता इस समूह के लिए नहीं है"
 
-#: karrot/groups/serializers.py:232
+#: karrot/groups/serializers.py:238
 msgid "You are not in this group"
 msgstr "आप इस समूह में नहीं हैं"
 
@@ -403,21 +358,21 @@ msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:211
 #, python-format
-msgid "%(pickups_done_count)s pickups were done"
-msgstr "%(pickups_done_count)s पिकअप किए गए"
+msgid "%(activities_done_count)s activities were done"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:213
-msgid "no pickups were done"
-msgstr "कोई पिकअप नहीं किया गया"
+msgid "no activities were done"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:217
 #, python-format
-msgid "%(pickups_missed_count)s pickups were missed"
-msgstr "%(pickups_missed_count)s पिकअप छूट गए"
+msgid "%(activities_missed_count)s activities were missed"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:220
-msgid "no pickups were missed"
-msgstr "कोई पिकअप छूटा नहीं"
+msgid "no activities were missed"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:226
 #, python-format
@@ -426,8 +381,8 @@ msgstr "%(new_user_count)s लोग समूह में शामिल ह�
 
 #: karrot/groups/templates/group_summary.html.jinja2:234
 #, python-format
-msgid "%(feedbacks_count)s pickup feedbacks were given"
-msgstr "%(feedbacks_count)s पिक अप प्रतिक्रिया दिए गए"
+msgid "%(feedbacks_count)s feedbacks were given"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:236
 msgid "no feedback was given"
@@ -443,8 +398,8 @@ msgid "no messages were sent"
 msgstr "कोई संदेश नहीं भेजा गया था"
 
 #: karrot/groups/templates/group_summary.html.jinja2:249
-msgid "Pickup feedback"
-msgstr "पिक अप प्रतिक्रिया"
+msgid "Feedback"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:257
 #, python-format
@@ -493,7 +448,7 @@ msgstr "आपने %(group_name)s में संपादन की अन�
 msgid ""
 "You've received enough trust from fellow group members to grant you "
 "<strong>editing permissions</strong>. For example, you can now modify your "
-"group, places and pickup dates, or create new ones."
+"group, places and activities, or create new ones."
 msgstr ""
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:215

@@ -22,139 +22,88 @@ msgstr ""
 "Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
-#: karrot/activities/permissions.py:7
-msgid "The pickup date is in the past."
-msgstr "Datum vyzvednutí je v minulosti."
-
-#: karrot/activities/permissions.py:18
-msgid "You can only delete empty pickup dates."
-msgstr "Smazat lze pouze prázdná data vyzvednutí."
-
-#: karrot/activities/permissions.py:27
-msgid "You have not joined this pickup date."
-msgstr "Nepřipojili jste se k tomuto datu vyzvednutí."
-
-#: karrot/activities/permissions.py:34
-msgid "You have already joined this pickup date."
-msgstr "K tomuto datu vyzvednutí jste se již připojili."
-
-#: karrot/activities/permissions.py:41
-msgid "Pickup date is already full."
-msgstr "Datum vyzvednutí je již plné."
-
-#: karrot/activities/permissions.py:48
-msgid "This feedback is given by another user."
-msgstr "Tuto zpětnou vazbu poskytuje jiný uživatel."
-
-#: karrot/activities/permissions.py:57 karrot/activities/serializers.py:420
-#, python-format
-msgid ""
-"You can't give feedback for pickups more than %(days_number)s days ago."
+#: karrot/activities/activity_types.py:5
+msgid "Meeting"
 msgstr ""
-"Nemůžete poskytnout zpětnou vazbu na vyzvednutí které bylo před více než "
-"%(days_number)s dny."
 
-#: karrot/activities/permissions.py:67 karrot/activities/serializers.py:132
-#: karrot/activities/serializers.py:318 karrot/applications/api.py:36
-#: karrot/groups/api.py:50 karrot/invitations/serializers.py:28
-#: karrot/issues/serializers.py:122 karrot/places/api.py:19
-#: karrot/places/serializers.py:80
-msgid "You need to be a group editor"
-msgstr "Musíte být editorem skupiny"
+#: karrot/activities/activity_types.py:6
+msgid "Pickup"
+msgstr ""
 
-#: karrot/activities/serializers.py:47
+#: karrot/activities/activity_types.py:7
+msgid "Distribution"
+msgstr ""
+
+#: karrot/activities/activity_types.py:8
+msgid "Event"
+msgstr ""
+
+#: karrot/activities/activity_types.py:9
+msgid "Activity"
+msgstr ""
+
+#: karrot/activities/serializers.py:53
 msgid "Must be a list"
 msgstr "Musí to být seznam"
 
-#: karrot/activities/serializers.py:48
+#: karrot/activities/serializers.py:54
 msgid "Must be a list with one or two values"
 msgstr "Musí to být seznam s jednou nebo dvěma hodnotami"
 
-#: karrot/activities/serializers.py:49
+#: karrot/activities/serializers.py:55
 msgid "Must pass start value"
 msgstr "Musí předat počáteční hodnotu"
 
-#: karrot/activities/serializers.py:137
-msgid "The date should be in the future."
-msgstr "Datum by mělo být v budoucnosti."
-
-#: karrot/activities/serializers.py:195
-msgid "You can't move pickups that are part of a series."
-msgstr "Nemůžete přesouvat vyzvednutí, které jsou součástí série."
-
-#: karrot/activities/serializers.py:331
-msgid "Invalid recurrence rule."
-msgstr "Neplatné pravidlo opakování."
-
-#: karrot/activities/serializers.py:333
-msgid "Only single recurrence rules are allowed."
-msgstr "Povolena jsou pouze pravidla jednoho opakování."
-
-#: karrot/activities/serializers.py:415
-msgid "The pickup is not done yet"
-msgstr "Vyzvednutí ještě není dokončeno"
-
-#: karrot/activities/serializers.py:417
-msgid "You aren't assigned to the pickup."
-msgstr "K vyzvednutí nejste přiřazeni."
-
-#: karrot/activities/serializers.py:434
-msgid "Both comment and weight cannot be blank."
-msgstr "Komentář i váha nemohou být prázdné."
-
-#: karrot/activities/tasks.py:69
+#: karrot/activities/tasks.py:68
 #, python-format
 msgid "Upcoming %(activity_type)s"
 msgstr "Připravujeme %(activity_type)s"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:6
-#: karrot/activities/templates/activity_notification.html.jinja2:227
-#: karrot/activities/templates/activity_notification.subject.jinja2:1
+#: karrot/activities/templates/activity_notification.html.jinja2:228
 #, python-format
-msgid "%(group_name)s upcoming pickups"
-msgstr "%(group_name)s nadcházející vyzvednutí"
+msgid "%(group_name)s upcoming activities"
+msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:216
+#: karrot/activities/templates/activity_notification.html.jinja2:217
 #, python-format
 msgid "%(empty_participants_count)s/%(max_participants)s remaining"
 msgstr "%(empty_participants_count)sze%(max_participants)s zbývá"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:231
+#: karrot/activities/templates/activity_notification.html.jinja2:232
 msgid "Tonight"
 msgstr "Dnes večer"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:235
-msgid "The day is not over, there are still pickups to be done!"
-msgstr "Den ještě neskončil, stále je třeba provést vyzvednutí!"
+#: karrot/activities/templates/activity_notification.html.jinja2:236
+msgid "The day is not over, there are still activities to be done!"
+msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:238
-#: karrot/activities/templates/activity_notification.html.jinja2:266
+#: karrot/activities/templates/activity_notification.html.jinja2:239
+#: karrot/activities/templates/activity_notification.html.jinja2:267
 msgid "You are signed up for"
 msgstr "Jste přihlášeni"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:243
-#: karrot/activities/templates/activity_notification.html.jinja2:271
+#: karrot/activities/templates/activity_notification.html.jinja2:244
+#: karrot/activities/templates/activity_notification.html.jinja2:272
 msgid "No-one is yet signed up for"
 msgstr "Zatím nikdo není zaregistrován"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:248
-#: karrot/activities/templates/activity_notification.html.jinja2:276
+#: karrot/activities/templates/activity_notification.html.jinja2:249
+#: karrot/activities/templates/activity_notification.html.jinja2:277
 msgid "There is still space available for"
 msgstr "Stále existuje prostor pro"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:261
+#: karrot/activities/templates/activity_notification.html.jinja2:262
 msgid "Tomorrow"
 msgstr "Zítra"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:311
+#: karrot/activities/templates/activity_notification.html.jinja2:312
 msgid ""
 "You are receiving this because you are subscribed to\n"
-"                            <strong>Pickup notification</strong> emails for this group."
+"                            <strong>Activity notification</strong> emails for this group."
 msgstr ""
-"Toto jste obdrželi, protože jste přihlášeni k odběru\n"
-"e-mailových <strong>upozornění o vyzvednutí</strong> pro tuto skupinu."
 
-#: karrot/activities/templates/activity_notification.html.jinja2:313
+#: karrot/activities/templates/activity_notification.html.jinja2:314
 #: karrot/applications/templates/new_application.html.jinja2:266
 #: karrot/groups/templates/group_summary.html.jinja2:310
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:255
@@ -163,9 +112,20 @@ msgstr ""
 msgid "Click here to unsubscribe"
 msgstr "Klikněte zde pro odhlášení odběru"
 
+#: karrot/activities/templates/activity_notification.subject.jinja2:1
+#, python-format
+msgid "%(group_name)s upcoming pickups"
+msgstr "%(group_name)s nadcházející vyzvednutí"
+
 #: karrot/applications/api.py:27
 msgid "You need to have a verified email address"
 msgstr "Musíte mít ověřenou e-mailovou adresu"
+
+#: karrot/applications/api.py:36 karrot/groups/api.py:50
+#: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
+#: karrot/places/api.py:19 karrot/places/serializers.py:80
+msgid "You need to be a group editor"
+msgstr "Musíte být editorem skupiny"
 
 #: karrot/applications/api.py:44
 msgid "You need to be the applicant"
@@ -259,8 +219,8 @@ msgstr ""
 "jej na straně %(site_name)s</a>, nebo <a href=\"%(mute_url)s\">ignorujte "
 "konverzaci</a>."
 
-#: karrot/conversations/api.py:65 karrot/conversations/api.py:245
-#: karrot/conversations/api.py:414 karrot/conversations/serializers.py:177
+#: karrot/conversations/api.py:65 karrot/conversations/api.py:246
+#: karrot/conversations/api.py:415 karrot/conversations/serializers.py:177
 msgid "You are not in this conversation"
 msgstr "Nejste v této konverzaci"
 
@@ -275,36 +235,30 @@ msgid ""
 msgstr ""
 "Zprávu nelze upravovat déle než %(days_number)s dny po jejím vytvoření."
 
-#: karrot/conversations/api.py:343
+#: karrot/conversations/api.py:344
 msgid "Must be first in thread"
 msgstr "Musí být první v podprocesu"
 
-#: karrot/conversations/api.py:346
+#: karrot/conversations/api.py:347
 msgid "You are not a participant in this thread"
 msgstr "Nejste účastníkem tohoto vlákna"
 
-#: karrot/conversations/emails.py:204 karrot/conversations/emails.py:207
-#: karrot/subscriptions/tasks.py:71
-#, python-format
-msgid "Pickup %(date)s"
-msgstr "Vyzvednutí %(date)s"
-
-#: karrot/conversations/emails.py:240
+#: karrot/conversations/emails.py:236
 #, python-format
 msgid "New message in your application to %(group_name)s"
 msgstr "Nová zpráva k vaší žádosti o připojení k  %(group_name)s"
 
-#: karrot/conversations/emails.py:244
+#: karrot/conversations/emails.py:240
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr "Nová zpráva od %(user_name)s k žádosti o připojení do %(group_name)s"
 
-#: karrot/conversations/emails.py:266
+#: karrot/conversations/emails.py:262
 #, python-format
 msgid "New message in conflict resolution in %(group_name)s"
 msgstr "Nová zpráva při řešení konfliktů ve skupině %(group_name)s"
 
-#: karrot/conversations/emails.py:281
+#: karrot/conversations/emails.py:277
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr "Nová zpráva pro nabídku %(offer_name)s v  %(group_name)s"
@@ -356,23 +310,23 @@ msgstr "Nemůžete dát důvěru sám sobě"
 msgid "You already gave trust to this user"
 msgstr "Tomuto uživateli jste již důvěřovali"
 
-#: karrot/groups/serializers.py:31
+#: karrot/groups/serializers.py:33
 msgid "Unknown timezone"
 msgstr "Neznámé časové pásmo"
 
-#: karrot/groups/serializers.py:39
+#: karrot/groups/serializers.py:41
 msgid "Playground"
 msgstr "Playground"
 
-#: karrot/groups/serializers.py:139 karrot/groups/serializers.py:234
+#: karrot/groups/serializers.py:141 karrot/groups/serializers.py:240
 msgid "You cannot manage agreements"
 msgstr "Nemůžete spravovat dohody"
 
-#: karrot/groups/serializers.py:141
+#: karrot/groups/serializers.py:143
 msgid "Agreement is not for this group"
 msgstr "Dohoda není pro tuto skupinu"
 
-#: karrot/groups/serializers.py:232
+#: karrot/groups/serializers.py:238
 msgid "You are not in this group"
 msgstr "Nejste v této skupině"
 
@@ -402,21 +356,21 @@ msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:211
 #, python-format
-msgid "%(pickups_done_count)s pickups were done"
-msgstr "Bylo provedeno %(pickups_done_count)s vyzvednutí"
+msgid "%(activities_done_count)s activities were done"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:213
-msgid "no pickups were done"
-msgstr "Nebyly provedeny žádné vyzvednutí"
+msgid "no activities were done"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:217
 #, python-format
-msgid "%(pickups_missed_count)s pickups were missed"
-msgstr "%(pickups_missed_count)s vyzvednutí bylo zmeškáno"
+msgid "%(activities_missed_count)s activities were missed"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:220
-msgid "no pickups were missed"
-msgstr "nebyly zmeškány žádné vyzvednutí"
+msgid "no activities were missed"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:226
 #, python-format
@@ -425,8 +379,8 @@ msgstr "%(new_user_count)s lidí se připojilo ke skupině"
 
 #: karrot/groups/templates/group_summary.html.jinja2:234
 #, python-format
-msgid "%(feedbacks_count)s pickup feedbacks were given"
-msgstr "byly poskytnuty %(feedbacks_count)s zpětné vazby pro vyzvednutí"
+msgid "%(feedbacks_count)s feedbacks were given"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:236
 msgid "no feedback was given"
@@ -442,8 +396,8 @@ msgid "no messages were sent"
 msgstr "nebyly odeslány žádné zprávy"
 
 #: karrot/groups/templates/group_summary.html.jinja2:249
-msgid "Pickup feedback"
-msgstr "Zpětná vazba vyzvednutí"
+msgid "Feedback"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:257
 #, python-format
@@ -492,11 +446,8 @@ msgstr "Oprávnění k úpravám jste získali ve skupině %(group_name)s."
 msgid ""
 "You've received enough trust from fellow group members to grant you "
 "<strong>editing permissions</strong>. For example, you can now modify your "
-"group, places and pickup dates, or create new ones."
+"group, places and activities, or create new ones."
 msgstr ""
-"Od ostatních členů skupiny jste získali dostatečnou důvěru, abyste vám "
-"udělili <strong>oprávnění k úpravám</strong>. Nyní můžete například upravit "
-"svou skupinu, místa a data vyzvednutí nebo vytvořit nová."
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:215
 msgid "Use your power wisely!"

@@ -21,139 +21,88 @@ msgstr ""
 "Language: lb\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: karrot/activities/permissions.py:7
-msgid "The pickup date is in the past."
-msgstr "D'Ofhuelung ass an der Vergaangenheet"
-
-#: karrot/activities/permissions.py:18
-msgid "You can only delete empty pickup dates."
-msgstr "Du kanns just eidel Ofhuelungsdate läschen."
-
-#: karrot/activities/permissions.py:27
-msgid "You have not joined this pickup date."
-msgstr "Du bass net bäi dëser Ofhuelung derbäi."
-
-#: karrot/activities/permissions.py:34
-msgid "You have already joined this pickup date."
-msgstr "Du bass scho bäi dëser Ofhuelung derbäi."
-
-#: karrot/activities/permissions.py:41
-msgid "Pickup date is already full."
-msgstr "Dës Ofhuelung ass scho voll."
-
-#: karrot/activities/permissions.py:48
-msgid "This feedback is given by another user."
-msgstr "De Feedback gëtt vun engem anere Benotzer ginn."
-
-#: karrot/activities/permissions.py:57 karrot/activities/serializers.py:420
-#, python-format
-msgid ""
-"You can't give feedback for pickups more than %(days_number)s days ago."
+#: karrot/activities/activity_types.py:5
+msgid "Meeting"
 msgstr ""
-"Du kanns kee Feedback fir Ofhuelunge ginn, déi méi wéi %(days_number)s Deeg "
-"hier sinn."
 
-#: karrot/activities/permissions.py:67 karrot/activities/serializers.py:132
-#: karrot/activities/serializers.py:318 karrot/applications/api.py:36
-#: karrot/groups/api.py:50 karrot/invitations/serializers.py:28
-#: karrot/issues/serializers.py:122 karrot/places/api.py:19
-#: karrot/places/serializers.py:80
-msgid "You need to be a group editor"
-msgstr "Du muss eng Persoun sinn, déi beaarbechten duerf"
+#: karrot/activities/activity_types.py:6
+msgid "Pickup"
+msgstr ""
 
-#: karrot/activities/serializers.py:47
+#: karrot/activities/activity_types.py:7
+msgid "Distribution"
+msgstr ""
+
+#: karrot/activities/activity_types.py:8
+msgid "Event"
+msgstr ""
+
+#: karrot/activities/activity_types.py:9
+msgid "Activity"
+msgstr ""
+
+#: karrot/activities/serializers.py:53
 msgid "Must be a list"
 msgstr "Muss eng Lëscht sinn"
 
-#: karrot/activities/serializers.py:48
+#: karrot/activities/serializers.py:54
 msgid "Must be a list with one or two values"
 msgstr "Muss eng Lëscht mat een oder zwee Wäerter sinn"
 
-#: karrot/activities/serializers.py:49
+#: karrot/activities/serializers.py:55
 msgid "Must pass start value"
 msgstr "Ee Start-Wäert muss ugi ginn."
 
-#: karrot/activities/serializers.py:137
-msgid "The date should be in the future."
-msgstr "Den Datum muss an der Zukunft sinn."
-
-#: karrot/activities/serializers.py:195
-msgid "You can't move pickups that are part of a series."
-msgstr "Du kanns Ofhuelungen, déi Deel vun enger Serie sinn, net réckelen."
-
-#: karrot/activities/serializers.py:331
-msgid "Invalid recurrence rule."
-msgstr "Ongëlteg Widderhuelungs-Reegel."
-
-#: karrot/activities/serializers.py:333
-msgid "Only single recurrence rules are allowed."
-msgstr "Nëmmen eenzel Widderhuelungs-Reegele sinn erlaabt."
-
-#: karrot/activities/serializers.py:415
-msgid "The pickup is not done yet"
-msgstr "D'Ofhuelung ass nach net gemaach"
-
-#: karrot/activities/serializers.py:417
-msgid "You aren't assigned to the pickup."
-msgstr "Du bass bei der Ofhuelung net derbäi."
-
-#: karrot/activities/serializers.py:434
-msgid "Both comment and weight cannot be blank."
-msgstr "Béid de Kommentar an d'Gewiicht kënnen net eidel sinn."
-
-#: karrot/activities/tasks.py:69
+#: karrot/activities/tasks.py:68
 #, python-format
 msgid "Upcoming %(activity_type)s"
 msgstr "Zukünfteg %(activity_type)s"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:6
-#: karrot/activities/templates/activity_notification.html.jinja2:227
-#: karrot/activities/templates/activity_notification.subject.jinja2:1
+#: karrot/activities/templates/activity_notification.html.jinja2:228
 #, python-format
-msgid "%(group_name)s upcoming pickups"
-msgstr "Zukünfteg Ofhuelungen vu %(group_name)s"
+msgid "%(group_name)s upcoming activities"
+msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:216
+#: karrot/activities/templates/activity_notification.html.jinja2:217
 #, python-format
 msgid "%(empty_participants_count)s/%(max_participants)s remaining"
 msgstr "%(empty_participants_count)s/%(max_participants)s bleiwen"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:231
+#: karrot/activities/templates/activity_notification.html.jinja2:232
 msgid "Tonight"
 msgstr "Haut den Owend"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:235
-msgid "The day is not over, there are still pickups to be done!"
-msgstr "Den Dag ass net eriwwer, et ginn nach Ofhuelungen ze maachen!"
+#: karrot/activities/templates/activity_notification.html.jinja2:236
+msgid "The day is not over, there are still activities to be done!"
+msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:238
-#: karrot/activities/templates/activity_notification.html.jinja2:266
+#: karrot/activities/templates/activity_notification.html.jinja2:239
+#: karrot/activities/templates/activity_notification.html.jinja2:267
 msgid "You are signed up for"
 msgstr "Du bass ugemellt fir"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:243
-#: karrot/activities/templates/activity_notification.html.jinja2:271
+#: karrot/activities/templates/activity_notification.html.jinja2:244
+#: karrot/activities/templates/activity_notification.html.jinja2:272
 msgid "No-one is yet signed up for"
 msgstr "Nach keen ass ugemellt fir"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:248
-#: karrot/activities/templates/activity_notification.html.jinja2:276
+#: karrot/activities/templates/activity_notification.html.jinja2:249
+#: karrot/activities/templates/activity_notification.html.jinja2:277
 msgid "There is still space available for"
 msgstr "Et ass nach Platz fir"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:261
+#: karrot/activities/templates/activity_notification.html.jinja2:262
 msgid "Tomorrow"
 msgstr "Muer"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:311
+#: karrot/activities/templates/activity_notification.html.jinja2:312
 msgid ""
 "You are receiving this because you are subscribed to\n"
-"                            <strong>Pickup notification</strong> emails for this group."
+"                            <strong>Activity notification</strong> emails for this group."
 msgstr ""
-"Du kriss dëst well's du <strong>Benoriichtegungen iwwert "
-"d'Ofhuelungen</strong> per E-Mail fir dëse Grupp abonéiert hues."
 
-#: karrot/activities/templates/activity_notification.html.jinja2:313
+#: karrot/activities/templates/activity_notification.html.jinja2:314
 #: karrot/applications/templates/new_application.html.jinja2:266
 #: karrot/groups/templates/group_summary.html.jinja2:310
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:255
@@ -162,9 +111,20 @@ msgstr ""
 msgid "Click here to unsubscribe"
 msgstr "Klick hei fir dech ze desabonéieren"
 
+#: karrot/activities/templates/activity_notification.subject.jinja2:1
+#, python-format
+msgid "%(group_name)s upcoming pickups"
+msgstr "Zukünfteg Ofhuelungen vu %(group_name)s"
+
 #: karrot/applications/api.py:27
 msgid "You need to have a verified email address"
 msgstr "Du muss eng verifizéiert E-Mail-Adress hunn"
+
+#: karrot/applications/api.py:36 karrot/groups/api.py:50
+#: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
+#: karrot/places/api.py:19 karrot/places/serializers.py:80
+msgid "You need to be a group editor"
+msgstr "Du muss eng Persoun sinn, déi beaarbechten duerf"
 
 #: karrot/applications/api.py:44
 msgid "You need to be the applicant"
@@ -258,8 +218,8 @@ msgstr ""
 "%(site_name)s</a> oder <a href=\"%(mute_url)s\">schalt d'Ënnerhalung op "
 "stomm</a>."
 
-#: karrot/conversations/api.py:65 karrot/conversations/api.py:245
-#: karrot/conversations/api.py:414 karrot/conversations/serializers.py:177
+#: karrot/conversations/api.py:65 karrot/conversations/api.py:246
+#: karrot/conversations/api.py:415 karrot/conversations/serializers.py:177
 msgid "You are not in this conversation"
 msgstr "Du bass net an dëser Ënnerhalung"
 
@@ -275,36 +235,30 @@ msgstr ""
 "Du kanns eng Noriicht net méi wéi %(days_number)s Deeg no senger Erstellung "
 "beaarbechten."
 
-#: karrot/conversations/api.py:343
+#: karrot/conversations/api.py:344
 msgid "Must be first in thread"
 msgstr "Muss als éischt am Thread sinn"
 
-#: karrot/conversations/api.py:346
+#: karrot/conversations/api.py:347
 msgid "You are not a participant in this thread"
 msgstr "Du bass kee Member vun dëser Ënnerhalung"
 
-#: karrot/conversations/emails.py:204 karrot/conversations/emails.py:207
-#: karrot/subscriptions/tasks.py:71
-#, python-format
-msgid "Pickup %(date)s"
-msgstr "Ofhuelung %(date)s"
-
-#: karrot/conversations/emails.py:240
+#: karrot/conversations/emails.py:236
 #, python-format
 msgid "New message in your application to %(group_name)s"
 msgstr "Nei Noriicht op deng Bewerbung bei %(group_name)s"
 
-#: karrot/conversations/emails.py:244
+#: karrot/conversations/emails.py:240
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr "Nei Noriicht an der Bewerbung vum %(user_name)s bei %(group_name)s"
 
-#: karrot/conversations/emails.py:266
+#: karrot/conversations/emails.py:262
 #, python-format
 msgid "New message in conflict resolution in %(group_name)s"
 msgstr "Nei Noriicht am Konflikt-Léisungsprozess bei %(group_name)s"
 
-#: karrot/conversations/emails.py:281
+#: karrot/conversations/emails.py:277
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr "Nei Norricht fir d'Offer %(offer_name)s bei %(group_name)s"
@@ -355,23 +309,23 @@ msgstr "Du kanns dir selwer kee Vertraue ginn"
 msgid "You already gave trust to this user"
 msgstr "Du hues dësem Benotzer scho Vertraue ginn"
 
-#: karrot/groups/serializers.py:31
+#: karrot/groups/serializers.py:33
 msgid "Unknown timezone"
 msgstr "Onbekannten Zäitzon"
 
-#: karrot/groups/serializers.py:39
+#: karrot/groups/serializers.py:41
 msgid "Playground"
 msgstr "Spillplaz"
 
-#: karrot/groups/serializers.py:139 karrot/groups/serializers.py:234
+#: karrot/groups/serializers.py:141 karrot/groups/serializers.py:240
 msgid "You cannot manage agreements"
 msgstr "Du kanns Ofkommes net verwalten"
 
-#: karrot/groups/serializers.py:141
+#: karrot/groups/serializers.py:143
 msgid "Agreement is not for this group"
 msgstr "D'Ofkommes ass net fir dës Grupp"
 
-#: karrot/groups/serializers.py:232
+#: karrot/groups/serializers.py:238
 msgid "You are not in this group"
 msgstr "Du bass net an dëser Grupp"
 
@@ -401,21 +355,21 @@ msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:211
 #, python-format
-msgid "%(pickups_done_count)s pickups were done"
-msgstr "%(pickups_done_count)s Ofhuelunge goufe gemaach"
+msgid "%(activities_done_count)s activities were done"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:213
-msgid "no pickups were done"
-msgstr "keng Ofhuelunge goufe gemaach"
+msgid "no activities were done"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:217
 #, python-format
-msgid "%(pickups_missed_count)s pickups were missed"
-msgstr "%(pickups_missed_count)s Ofhuelunge goufe verpasst"
+msgid "%(activities_missed_count)s activities were missed"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:220
-msgid "no pickups were missed"
-msgstr "keng Ofhuelunge goufe verpasst"
+msgid "no activities were missed"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:226
 #, python-format
@@ -424,8 +378,8 @@ msgstr "%(new_user_count)s Leit sinn der Grupp bäigetrueden"
 
 #: karrot/groups/templates/group_summary.html.jinja2:234
 #, python-format
-msgid "%(feedbacks_count)s pickup feedbacks were given"
-msgstr "%(feedbacks_count)s Feedbacke goufe ginn"
+msgid "%(feedbacks_count)s feedbacks were given"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:236
 msgid "no feedback was given"
@@ -441,8 +395,8 @@ msgid "no messages were sent"
 msgstr "keng Noriichte goufe geschéckt"
 
 #: karrot/groups/templates/group_summary.html.jinja2:249
-msgid "Pickup feedback"
-msgstr "Feedback zur Ofhuelung"
+msgid "Feedback"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:257
 #, python-format
@@ -491,11 +445,8 @@ msgstr "Du duerfs elo beaarbechten an %(group_name)s!"
 msgid ""
 "You've received enough trust from fellow group members to grant you "
 "<strong>editing permissions</strong>. For example, you can now modify your "
-"group, places and pickup dates, or create new ones."
+"group, places and activities, or create new ones."
 msgstr ""
-"Du hues genuch Vertrauen vun anere Membere kritt, esou dass du elo "
-"<strong>beaarbechten</strong> duerfs. Zum Beispill kanns du elo deng Grupp, "
-"Platzen an Ofhuelungen veränneren oder neier erstellen."
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:215
 msgid "Use your power wisely!"
