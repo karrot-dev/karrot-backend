@@ -1,12 +1,8 @@
-from functools import lru_cache
-
 import pytz
 from django.conf import settings
-from django.contrib.gis.geoip2 import GeoIP2, GeoIP2Exception
 from django.contrib.gis.geos import Point
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
-from geoip2.errors import AddressNotFoundError
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.fields import Field
@@ -20,6 +16,7 @@ from karrot.activities.models import ActivityType
 from karrot.utils.misc import find_changed
 from karrot.utils.validators import prevent_reserved_names
 from . import roles
+from karrot.utils.geoip import geoip, get_client_ip, ip_to_lat_lon
 
 
 class TimezoneField(serializers.Field):
@@ -267,32 +264,6 @@ class AgreementAgreeSerializer(serializers.ModelSerializer):
         if not UserAgreement.objects.filter(user=user, agreement=instance).exists():
             UserAgreement.objects.create(user=user, agreement=instance)
         return instance
-
-
-try:
-    geoip = GeoIP2()
-    print('geoip functionality is available')
-except GeoIP2Exception as err:
-    print('GeoIP2 error', err)
-    print('geoip functionality is not available')
-    geoip = None
-
-
-def get_client_ip(request):
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        return x_forwarded_for.split(',')[0]
-    else:
-        return request.META.get('REMOTE_ADDR')
-
-
-@lru_cache()
-def ip_to_lat_lon(ip):
-    try:
-        return geoip.lat_lon(ip)
-    except AddressNotFoundError:
-        # we use "False" to mean we looked it up but couldn't find it
-        return False
 
 
 class DistanceField(Field):
