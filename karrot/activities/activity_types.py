@@ -28,7 +28,7 @@ default_activity_types = {
     },
     'Distribution': {
         'colour': '1976D2',
-        'icon': 'fas fa-people-carry',
+        'icon': 'fas fa-people-arrows',
         'feedback_icon': 'fas fa-reply',
         'has_feedback': True,
         'has_feedback_weight': False,
