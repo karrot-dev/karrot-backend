@@ -12,6 +12,10 @@ except GeoIP2Exception as err:
     geoip = None
 
 
+def geoip_is_available():
+    return geoip is not None
+
+
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
@@ -22,6 +26,8 @@ def get_client_ip(request):
 
 @lru_cache()
 def ip_to_lat_lon(ip):
+    if not geoip_is_available():
+        return None
     try:
         return geoip.lat_lon(ip)
     except AddressNotFoundError:

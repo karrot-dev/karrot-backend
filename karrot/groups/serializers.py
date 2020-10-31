@@ -16,7 +16,7 @@ from karrot.activities.models import ActivityType
 from karrot.utils.misc import find_changed
 from karrot.utils.validators import prevent_reserved_names
 from . import roles
-from karrot.utils.geoip import geoip, get_client_ip, ip_to_lat_lon
+from karrot.utils.geoip import geoip_is_available, get_client_ip, ip_to_lat_lon
 
 
 class TimezoneField(serializers.Field):
@@ -286,7 +286,7 @@ class DistanceField(Field):
         super().__init__(**kwargs)
 
     def to_representation(self, value):
-        if not geoip:
+        if not geoip_is_available():
             return None
 
         if not (hasattr(value, 'latitude') and hasattr(value, 'longitude')):

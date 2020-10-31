@@ -77,7 +77,7 @@ class TestGroupsInfoGeoIPAPI(APITestCase):
         self.url = '/api/groups-info/'
         self.client_ip = '2003:d9:ef08:4a00:4b7a:7964:8a3c:a33e'
 
-    @patch('karrot.groups.serializers.geoip')
+    @patch('karrot.utils.geoip.geoip')
     def test_returns_distance_via_geoip(self, geoip):
         geoip.lat_lon.return_value = [float(val) for val in faker.latlng()]
         response = self.client.get(self.url, HTTP_X_FORWARDED_FOR=self.client_ip)
@@ -85,20 +85,20 @@ class TestGroupsInfoGeoIPAPI(APITestCase):
         geoip.lat_lon.assert_called_with(self.client_ip)
         self.assertIsNotNone(response.data[0]['distance'])
 
-    @patch('karrot.groups.serializers.geoip')
+    @patch('karrot.utils.geoip.geoip')
     def test_returns_none_if_no_ip_address_provided(self, geoip):
         geoip.lat_lon.return_value = [float(val) for val in faker.latlng()]
         response = self.client.get(self.url, HTTP_X_FORWARDED_FOR=None, REMOTE_ADDR=None)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNone(response.data[0]['distance'])
 
-    @patch('karrot.groups.serializers.geoip', None)
+    @patch('karrot.utils.geoip.geoip', None)
     def test_returns_none_if_geoip_not_available(self):
         response = self.client.get(self.url, HTTP_X_FORWARDED_FOR=self.client_ip)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNone(response.data[0]['distance'])
 
-    @patch('karrot.groups.serializers.geoip')
+    @patch('karrot.utils.geoip.geoip')
     def test_caches_geoip_lookup(self, geoip):
         lat_lng = [float(val) for val in faker.latlng()]
         geoip.lat_lon.return_value = lat_lng

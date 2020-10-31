@@ -6,7 +6,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from karrot.bootstrap.serializers import BootstrapSerializer
 from karrot.groups.models import Group
-from karrot.utils.geoip import get_client_ip, ip_to_lat_lon
+from karrot.utils.geoip import get_client_ip, ip_to_lat_lon, geoip_is_available
 
 
 @dataclass
@@ -27,11 +27,12 @@ class BootstrapViewSet(GenericViewSet):
         user = request.user
         geo_data = None
 
-        client_ip = get_client_ip(request)
-        if client_ip:
-            lat_lng = ip_to_lat_lon(client_ip)
-            if lat_lng:
-                geo_data = GeoData(*lat_lng)
+        if geoip_is_available():
+            client_ip = get_client_ip(request)
+            if client_ip:
+                lat_lng = ip_to_lat_lon(client_ip)
+                if lat_lng:
+                    geo_data = GeoData(*lat_lng)
 
         data = BootstrapData(
             user=user if user.is_authenticated else None,
