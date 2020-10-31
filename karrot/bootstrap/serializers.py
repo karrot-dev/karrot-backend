@@ -1,9 +1,7 @@
 from rest_framework import serializers
 
 from karrot.groups.serializers import GroupPreviewSerializer
-from karrot.status.helpers import StatusSerializer
 from karrot.userauth.serializers import AuthUserSerializer
-from karrot.users.serializers import UserSerializer
 
 
 class GeoSerializer(serializers.Serializer):
@@ -12,8 +10,6 @@ class GeoSerializer(serializers.Serializer):
 
 
 class BootstrapSerializer(serializers.Serializer):
-    auth_user = AuthUserSerializer()
+    user = AuthUserSerializer()
     geoip = GeoSerializer()
-    users = UserSerializer(many=True)
-    status = StatusSerializer()
-    groups_info = GroupPreviewSerializer(many=True)
+    groups = GroupPreviewSerializer(many=True)
