@@ -2,6 +2,7 @@ from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter
 from channels.security import websocket
 from django.conf import settings
+from django.core.asgi import get_asgi_application
 
 from .consumers import WebsocketConsumer, TokenAuthMiddleware
 
@@ -23,11 +24,13 @@ def AllowedHostsAndFileOriginValidator(application):
 
 
 application = ProtocolTypeRouter({
+    'http':
+    get_asgi_application(),
     'websocket':
     AllowedHostsAndFileOriginValidator(
         AuthMiddlewareStack(
             TokenAuthMiddleware(
-                WebsocketConsumer,
+                WebsocketConsumer.as_asgi(),
             ),
         ),
     ),
