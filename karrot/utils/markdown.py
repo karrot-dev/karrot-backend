@@ -1,6 +1,6 @@
 import bleach
 import markdown
-from bleach_whitelist.bleach_whitelist import markdown_attrs, markdown_tags
+from bleach_allowlist import markdown_attrs, markdown_tags
 from django.utils.text import Truncator
 from markdown.extensions.nl2br import Nl2BrExtension
 from pymdownx.emoji import EmojiExtension, twemoji

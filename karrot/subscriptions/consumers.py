@@ -42,6 +42,13 @@ class TokenAuthMiddleware(BaseMiddleware):
             if user:
                 scope['user']._wrapped = user
 
+    async def __call__(self, scope, receive, send):
+        scope = dict(scope)
+        self.populate_scope(scope)
+        await self.resolve_scope(scope)
+
+        return await super().__call__(scope, receive, send)
+
 
 class WebsocketConsumer(JsonWebsocketConsumer):
     def connect(self):

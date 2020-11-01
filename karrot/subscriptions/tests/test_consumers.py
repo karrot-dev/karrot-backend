@@ -20,7 +20,7 @@ AsyncUserFactory = database_sync_to_async(UserFactory)
 
 class Communicator():
     async def __aenter__(self):
-        self.communicator = WebsocketCommunicator(WebsocketConsumer, '/')
+        self.communicator = WebsocketCommunicator(WebsocketConsumer.as_asgi(), '/')
         return self.communicator
 
     async def __aexit__(self, exc_type, exc, tb):
@@ -33,7 +33,7 @@ class TokenCommunicator():
         token = await database_sync_to_async(Token.objects.create)(user=user)
         encoded = b64encode(token.key.encode('ascii')).decode('ascii')
         self.communicator = WebsocketCommunicator(
-            TokenAuthMiddleware(WebsocketConsumer),
+            TokenAuthMiddleware(WebsocketConsumer.as_asgi()),
             '/',
             subprotocols=['karrot.token', 'karrot.token.value.{}'.format(encoded.rstrip('='))],
         )
@@ -146,7 +146,7 @@ class TestTokenAuth:
 @pytest.mark.django_db
 class TestAllowedOriginValidator:
     async def test_can_connect_with_file_origin(self):
-        application = AllowedHostsAndFileOriginValidator(WebsocketConsumer)
+        application = AllowedHostsAndFileOriginValidator(WebsocketConsumer.as_asgi())
         communicator = WebsocketCommunicator(application, '/', headers=[(b'origin', b'file:///')])
         connected, _ = await communicator.connect()
         assert connected
