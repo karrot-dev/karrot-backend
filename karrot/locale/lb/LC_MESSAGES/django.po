@@ -23,23 +23,23 @@ msgstr ""
 
 #: karrot/activities/activity_types.py:5
 msgid "Meeting"
-msgstr ""
+msgstr "Treffen"
 
 #: karrot/activities/activity_types.py:6
 msgid "Pickup"
-msgstr ""
+msgstr "Ofhuelung"
 
 #: karrot/activities/activity_types.py:7
 msgid "Distribution"
-msgstr ""
+msgstr "Verdeelung"
 
 #: karrot/activities/activity_types.py:8
 msgid "Event"
-msgstr ""
+msgstr "Veranstaltung"
 
 #: karrot/activities/activity_types.py:9
 msgid "Activity"
-msgstr ""
+msgstr "Aktivitéit"
 
 #: karrot/activities/serializers.py:53
 msgid "Must be a list"
@@ -62,7 +62,7 @@ msgstr "Zukünfteg %(activity_type)s"
 #: karrot/activities/templates/activity_notification.html.jinja2:228
 #, python-format
 msgid "%(group_name)s upcoming activities"
-msgstr ""
+msgstr "Zukünfteg Ofhuelungen vu %(group_name)s"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:217
 #, python-format
@@ -75,7 +75,7 @@ msgstr "Haut den Owend"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:236
 msgid "The day is not over, there are still activities to be done!"
-msgstr ""
+msgstr "Den Dag ass net eriwwer, et ginn nach Aktivitéiten ze maachen!"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:239
 #: karrot/activities/templates/activity_notification.html.jinja2:267
@@ -101,6 +101,8 @@ msgid ""
 "You are receiving this because you are subscribed to\n"
 "                            <strong>Activity notification</strong> emails for this group."
 msgstr ""
+"Du kriss dëst well's du <strong>Benoriichtegungen iwwert "
+"d'Aktivitéiten</strong> per E-Mail fir dëse Grupp abonéiert hues."
 
 #: karrot/activities/templates/activity_notification.html.jinja2:314
 #: karrot/applications/templates/new_application.html.jinja2:266
@@ -356,20 +358,20 @@ msgstr ""
 #: karrot/groups/templates/group_summary.html.jinja2:211
 #, python-format
 msgid "%(activities_done_count)s activities were done"
-msgstr ""
+msgstr "%(activities_done_count)s Aktivitéite goufe gemaach"
 
 #: karrot/groups/templates/group_summary.html.jinja2:213
 msgid "no activities were done"
-msgstr ""
+msgstr "keng Aktivitéite goufe gemaach"
 
 #: karrot/groups/templates/group_summary.html.jinja2:217
 #, python-format
 msgid "%(activities_missed_count)s activities were missed"
-msgstr ""
+msgstr "%(activities_missed_count)s Aktivitéite goufe verpasst"
 
 #: karrot/groups/templates/group_summary.html.jinja2:220
 msgid "no activities were missed"
-msgstr ""
+msgstr "keng Aktivitéite goufe verpasst"
 
 #: karrot/groups/templates/group_summary.html.jinja2:226
 #, python-format
@@ -379,7 +381,7 @@ msgstr "%(new_user_count)s Leit sinn der Grupp bäigetrueden"
 #: karrot/groups/templates/group_summary.html.jinja2:234
 #, python-format
 msgid "%(feedbacks_count)s feedbacks were given"
-msgstr ""
+msgstr "%(feedbacks_count)s Feedbacke goufe ginn"
 
 #: karrot/groups/templates/group_summary.html.jinja2:236
 msgid "no feedback was given"
@@ -396,7 +398,7 @@ msgstr "keng Noriichte goufe geschéckt"
 
 #: karrot/groups/templates/group_summary.html.jinja2:249
 msgid "Feedback"
-msgstr ""
+msgstr "Feedback"
 
 #: karrot/groups/templates/group_summary.html.jinja2:257
 #, python-format
@@ -447,6 +449,9 @@ msgid ""
 "<strong>editing permissions</strong>. For example, you can now modify your "
 "group, places and activities, or create new ones."
 msgstr ""
+"Du hues genuch Vertrauen vun anere Membere kritt, esou dass du elo "
+"<strong>beaarbechten</strong> duerfs. Zum Beispill kanns du elo deng Grupp, "
+"Platzen an Aktivitéite veränneren oder neier erstellen."
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:215
 msgid "Use your power wisely!"
