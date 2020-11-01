@@ -76,7 +76,7 @@ huey==2.3.0               # via -r requirements.in
 hyperlink==20.0.1         # via twisted
 identify==1.5.6           # via pre-commit
 idna==2.10                # via hyperlink, requests, twisted, yarl
-importlib-metadata==2.0.0  # via -r requirements.in, flake8, markdown, pluggy, pre-commit, pytest, virtualenv
+importlib-metadata==2.0.0  # via -r requirements.in
 incremental==17.5.0       # via twisted
 git+https://github.com/influxdata/influxdb-python@cc41e290f690c4eb67f75c98fa9f027bdb6eb16b#egg=influxdbtld  # via django-influxdb-metrics
 iniconfig==1.1.1          # via pytest
@@ -104,7 +104,7 @@ pickleshare==0.7.5        # via ipython
 pillow==8.0.1             # via django-versatileimagefield
 pip-tools==5.3.1          # via -r requirements.in
 pluggy==0.13.1            # via pytest
-pre-commit==2.7.1         # via -r requirements.in
+pre-commit==2.8.2         # via -r requirements.in
 prompt-toolkit==3.0.8     # via ipython
 psutil==5.7.3             # via python-server-metrics
 psycopg2-binary==2.8.6    # via -r requirements.in
@@ -147,7 +147,6 @@ toml==0.10.1              # via autopep8, pre-commit, pytest
 traitlets==5.0.5          # via ipython
 twisted[tls]==20.3.0      # via daphne
 txaio==20.4.1             # via autobahn
-typing-extensions==3.7.4.3  # via yarl
 unicodecsv==0.14.1        # via djangorestframework-csv
 uritemplate==3.0.1        # via coreapi
 urllib3==1.25.11          # via geoip2, requests
