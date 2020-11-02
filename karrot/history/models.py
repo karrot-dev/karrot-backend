@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from django.contrib.postgres.fields import JSONField
+from django.db.models import JSONField
 from django.db import models
 from django.db.models import IntegerField
 from django.db.models.expressions import RawSQL, When, Case
