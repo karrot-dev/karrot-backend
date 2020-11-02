@@ -7,6 +7,8 @@ def activity_tags(activity):
     tags = group_tags(activity.place.group)
     tags.update({
         'place': str(activity.place.id),
+        'type': str(activity.activity_type.id),
+        'type_name': activity.activity_type.name,
     })
     return tags
 
