@@ -7,6 +7,7 @@ translatable_names = {
     'Distribution': _('Distribution'),
     'Event': _('Event'),
     'Activity': _('Activity'),
+    'Task': _('Task'),
 }
 
 # Default types that will be created for new groups
