@@ -3,7 +3,7 @@ from django.utils import timezone
 from enum import Enum
 
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField
+from django.db.models import JSONField
 from django.db import models
 
 from karrot.base.base_models import BaseModel
