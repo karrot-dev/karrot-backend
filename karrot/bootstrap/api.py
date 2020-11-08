@@ -1,25 +1,9 @@
-from dataclasses import dataclass
-from typing import Optional
-
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from karrot.bootstrap.serializers import BootstrapSerializer
 from karrot.groups.models import Group
 from karrot.utils.geoip import get_client_ip, ip_to_lat_lon, geoip_is_available
-
-
-@dataclass
-class BootstrapData:
-    user: Optional[dict]
-    geoip: Optional[dict]
-    groups: Optional[list]
-
-
-@dataclass
-class GeoData:
-    lat: float
-    lng: float
 
 
 class BootstrapViewSet(GenericViewSet):
@@ -32,13 +16,13 @@ class BootstrapViewSet(GenericViewSet):
             if client_ip:
                 lat_lng = ip_to_lat_lon(client_ip)
                 if lat_lng:
-                    geo_data = GeoData(*lat_lng)
+                    geo_data = {'lat': lat_lng[0], 'lng': lat_lng[1]}
 
-        data = BootstrapData(
-            user=user if user.is_authenticated else None,
-            geoip=geo_data,
-            groups=Group.objects.prefetch_related('members'),
-        )
+        data = {
+            'user': user if user.is_authenticated else None,
+            'geoip': geo_data,
+            'groups': Group.objects.prefetch_related('members'),
+        }
 
         serializer = BootstrapSerializer(data, context=self.get_serializer_context())
         return Response(serializer.data)
