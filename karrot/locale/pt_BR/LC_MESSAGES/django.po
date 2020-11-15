@@ -44,6 +44,10 @@ msgstr ""
 msgid "Activity"
 msgstr ""
 
+#: karrot/activities/activity_types.py:10
+msgid "Task"
+msgstr ""
+
 #: karrot/activities/serializers.py:53
 msgid "Must be a list"
 msgstr ""

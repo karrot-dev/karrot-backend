@@ -24,11 +24,11 @@ msgstr ""
 
 #: karrot/activities/activity_types.py:5
 msgid "Meeting"
-msgstr ""
+msgstr "Setkání"
 
 #: karrot/activities/activity_types.py:6
 msgid "Pickup"
-msgstr ""
+msgstr "Vyzvednutí"
 
 #: karrot/activities/activity_types.py:7
 msgid "Distribution"
@@ -36,10 +36,14 @@ msgstr ""
 
 #: karrot/activities/activity_types.py:8
 msgid "Event"
-msgstr ""
+msgstr "Událost"
 
 #: karrot/activities/activity_types.py:9
 msgid "Activity"
+msgstr "Aktivita"
+
+#: karrot/activities/activity_types.py:10
+msgid "Task"
 msgstr ""
 
 #: karrot/activities/serializers.py:53
@@ -370,7 +374,7 @@ msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:220
 msgid "no activities were missed"
-msgstr ""
+msgstr "nebyly vynechány žádné aktivity"
 
 #: karrot/groups/templates/group_summary.html.jinja2:226
 #, python-format

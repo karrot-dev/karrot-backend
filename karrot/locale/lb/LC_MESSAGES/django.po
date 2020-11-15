@@ -41,6 +41,10 @@ msgstr "Veranstaltung"
 msgid "Activity"
 msgstr "Aktivitéit"
 
+#: karrot/activities/activity_types.py:10
+msgid "Task"
+msgstr "Aufgab"
+
 #: karrot/activities/serializers.py:53
 msgid "Must be a list"
 msgstr "Muss eng Lëscht sinn"
