@@ -329,6 +329,7 @@ class GroupPreviewSerializer(GroupBaseSerializer):
     photo_urls = VersatileImageFieldSerializer(sizes='group_logo', read_only=True, source='photo')
     distance = DistanceField()
     member_count = serializers.SerializerMethodField()
+    is_member = serializers.SerializerMethodField()
 
     class Meta:
         model = GroupModel
@@ -342,6 +343,7 @@ class GroupPreviewSerializer(GroupBaseSerializer):
             'longitude',
             'members',
             'member_count',
+            'is_member',
             'status',
             'theme',
             'is_open',
@@ -354,6 +356,10 @@ class GroupPreviewSerializer(GroupBaseSerializer):
 
     def get_member_count(self, group):
         return group.members.count()
+
+    def get_is_member(self, group):
+        user = self.context['request'].user if 'request' in self.context else None
+        return group.is_member(user) if user else False
 
 
 class GroupJoinSerializer(GroupBaseSerializer):

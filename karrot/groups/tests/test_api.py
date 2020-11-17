@@ -41,18 +41,21 @@ class TestGroupsInfoAPI(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('Hey there', response.data['application_questions'])
+        self.assertEqual(response.data['member_count'], 1)
 
     def test_retrieve_group_as_user(self):
         self.client.force_login(user=self.user)
         url = self.url + str(self.group.id) + '/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['is_member'], False)
 
     def test_retrieve_group_as_member(self):
         self.client.force_login(user=self.member)
         url = self.url + str(self.group.id) + '/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['is_member'], True)
 
     def test_group_image_redirect(self):
         # NOT logged in (as it needs to work in emails)
