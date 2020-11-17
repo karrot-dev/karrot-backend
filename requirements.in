@@ -42,6 +42,7 @@ more-itertools
 requests
 glom
 geoip2
+django-oauth-toolkit
 
 # dev PyPI dependencies
 pip-tools

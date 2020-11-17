@@ -120,6 +120,7 @@ INSTALLED_APPS = (
     'versatileimagefield',
     'huey.contrib.djhuey',
     'silk',
+    'oauth2_provider',
 )
 
 REST_FRAMEWORK = {
@@ -315,6 +316,11 @@ GEOIP_PATH = os.path.join(BASE_DIR, 'maxmind-data')
 # If you have the email_reply_trimmer_service running, set this to 'http://localhost:4567/trim' (or similar)
 # https://github.com/yunity/email_reply_trimmer_service
 EMAIL_REPLY_TRIMMER_URL = None
+
+OAUTH2_PROVIDER = {
+    # this is the list of available scopes
+    'SCOPES': {'karrot': 'main scope'}  # this description will/might appear in the login UI for the user
+}
 
 # NB: Keep this as the last line, and keep
 # local_settings.py out of version control

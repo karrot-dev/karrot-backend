@@ -107,7 +107,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('docs/', get_swagger_view()),
     path('api/anymail/', include('anymail.urls')),
-    re_path(r'^silk/', include('silk.urls', namespace='silk'))
+    re_path(r'^silk/', include('silk.urls', namespace='silk')),
+    path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 ]
 
 if settings.DEBUG:
