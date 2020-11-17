@@ -1,4 +1,5 @@
 import json
+from random import randint
 from unittest.mock import patch, call
 
 from dateutil.relativedelta import relativedelta
@@ -69,6 +70,14 @@ class TestGroupsInfoAPI(APITestCase):
         group = GroupFactory(members=[self.member])
         response = self.client.get('/api/groups-info/{}/photo/'.format(group.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_not_too_many_queries(self):
+        # add a few more users and groups to make it clearer to see if we have an n+1 scenario
+        for _ in range(randint(3, 5)):
+            GroupFactory().add_member(UserFactory())
+        self.client.force_login(user=self.user)
+        with self.assertNumQueries(3):
+            self.client.get(self.url)
 
 
 class TestGroupsInfoGeoIPAPI(APITestCase):
