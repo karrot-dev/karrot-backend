@@ -359,7 +359,7 @@ class GroupPreviewSerializer(GroupBaseSerializer):
 
     def get_is_member(self, group):
         user = self.context['request'].user if 'request' in self.context else None
-        return group.is_member(user) if user else False
+        return user in group.members.all() if user else False
 
 
 class GroupJoinSerializer(GroupBaseSerializer):
