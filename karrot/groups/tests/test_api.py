@@ -1,4 +1,5 @@
 import json
+from random import randint
 from unittest.mock import patch, call
 
 from dateutil.relativedelta import relativedelta
@@ -41,18 +42,21 @@ class TestGroupsInfoAPI(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('Hey there', response.data['application_questions'])
+        self.assertEqual(response.data['member_count'], 1)
 
     def test_retrieve_group_as_user(self):
         self.client.force_login(user=self.user)
         url = self.url + str(self.group.id) + '/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['is_member'], False)
 
     def test_retrieve_group_as_member(self):
         self.client.force_login(user=self.member)
         url = self.url + str(self.group.id) + '/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['is_member'], True)
 
     def test_group_image_redirect(self):
         # NOT logged in (as it needs to work in emails)
@@ -67,6 +71,14 @@ class TestGroupsInfoAPI(APITestCase):
         response = self.client.get('/api/groups-info/{}/photo/'.format(group.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_not_too_many_queries(self):
+        # add a few more users and groups to make it clearer to see if we have an n+1 scenario
+        for _ in range(randint(3, 5)):
+            GroupFactory().add_member(UserFactory())
+        self.client.force_login(user=self.user)
+        with self.assertNumQueries(3):
+            self.client.get(self.url)
+
 
 class TestGroupsInfoGeoIPAPI(APITestCase):
     def setUp(self):
@@ -77,7 +89,7 @@ class TestGroupsInfoGeoIPAPI(APITestCase):
         self.url = '/api/groups-info/'
         self.client_ip = '2003:d9:ef08:4a00:4b7a:7964:8a3c:a33e'
 
-    @patch('karrot.groups.serializers.geoip')
+    @patch('karrot.utils.geoip.geoip')
     def test_returns_distance_via_geoip(self, geoip):
         geoip.lat_lon.return_value = [float(val) for val in faker.latlng()]
         response = self.client.get(self.url, HTTP_X_FORWARDED_FOR=self.client_ip)
@@ -85,20 +97,20 @@ class TestGroupsInfoGeoIPAPI(APITestCase):
         geoip.lat_lon.assert_called_with(self.client_ip)
         self.assertIsNotNone(response.data[0]['distance'])
 
-    @patch('karrot.groups.serializers.geoip')
+    @patch('karrot.utils.geoip.geoip')
     def test_returns_none_if_no_ip_address_provided(self, geoip):
         geoip.lat_lon.return_value = [float(val) for val in faker.latlng()]
         response = self.client.get(self.url, HTTP_X_FORWARDED_FOR=None, REMOTE_ADDR=None)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNone(response.data[0]['distance'])
 
-    @patch('karrot.groups.serializers.geoip', None)
+    @patch('karrot.utils.geoip.geoip', None)
     def test_returns_none_if_geoip_not_available(self):
         response = self.client.get(self.url, HTTP_X_FORWARDED_FOR=self.client_ip)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNone(response.data[0]['distance'])
 
-    @patch('karrot.groups.serializers.geoip')
+    @patch('karrot.utils.geoip.geoip')
     def test_caches_geoip_lookup(self, geoip):
         lat_lng = [float(val) for val in faker.latlng()]
         geoip.lat_lon.return_value = lat_lng

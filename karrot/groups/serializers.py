@@ -1,12 +1,8 @@
-from functools import lru_cache
-
 import pytz
 from django.conf import settings
-from django.contrib.gis.geoip2 import GeoIP2, GeoIP2Exception
 from django.contrib.gis.geos import Point
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
-from geoip2.errors import AddressNotFoundError
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.fields import Field
@@ -20,6 +16,7 @@ from karrot.activities.models import ActivityType
 from karrot.utils.misc import find_changed
 from karrot.utils.validators import prevent_reserved_names
 from . import roles
+from karrot.utils.geoip import geoip_is_available, get_client_ip, ip_to_lat_lon
 
 
 class TimezoneField(serializers.Field):
@@ -269,32 +266,6 @@ class AgreementAgreeSerializer(serializers.ModelSerializer):
         return instance
 
 
-try:
-    geoip = GeoIP2()
-    print('geoip functionality is available')
-except GeoIP2Exception as err:
-    print('GeoIP2 error', err)
-    print('geoip functionality is not available')
-    geoip = None
-
-
-def get_client_ip(request):
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        return x_forwarded_for.split(',')[0]
-    else:
-        return request.META.get('REMOTE_ADDR')
-
-
-@lru_cache()
-def ip_to_lat_lon(ip):
-    try:
-        return geoip.lat_lon(ip)
-    except AddressNotFoundError:
-        # we use "False" to mean we looked it up but couldn't find it
-        return False
-
-
 class DistanceField(Field):
     """
     Returns distance of the object from users current location.
@@ -315,7 +286,7 @@ class DistanceField(Field):
         super().__init__(**kwargs)
 
     def to_representation(self, value):
-        if not geoip:
+        if not geoip_is_available():
             return None
 
         if not (hasattr(value, 'latitude') and hasattr(value, 'longitude')):
@@ -357,6 +328,8 @@ class GroupPreviewSerializer(GroupBaseSerializer):
     application_questions = serializers.SerializerMethodField()
     photo_urls = VersatileImageFieldSerializer(sizes='group_logo', read_only=True, source='photo')
     distance = DistanceField()
+    member_count = serializers.SerializerMethodField()
+    is_member = serializers.SerializerMethodField()
 
     class Meta:
         model = GroupModel
@@ -369,6 +342,8 @@ class GroupPreviewSerializer(GroupBaseSerializer):
             'latitude',
             'longitude',
             'members',
+            'member_count',
+            'is_member',
             'status',
             'theme',
             'is_open',
@@ -378,6 +353,13 @@ class GroupPreviewSerializer(GroupBaseSerializer):
 
     def get_application_questions(self, group):
         return group.get_application_questions_or_default()
+
+    def get_member_count(self, group):
+        return group.members.count()
+
+    def get_is_member(self, group):
+        user = self.context['request'].user if 'request' in self.context else None
+        return user in group.members.all() if user else False
 
 
 class GroupJoinSerializer(GroupBaseSerializer):

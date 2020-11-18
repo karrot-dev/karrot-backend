@@ -1,4 +1,6 @@
+from collections import defaultdict
 from django.db.models import F, Count, Q, Case, When, BooleanField
+from rest_framework import serializers
 
 from karrot.applications.models import ApplicationStatus
 from karrot.conversations.models import ConversationParticipant, ConversationThreadParticipant
@@ -83,3 +85,62 @@ def get_feedback_possible(user):
             )
         )
     ).values_list('id', 'feedback_possible')
+
+
+class StatusSerializer(serializers.Serializer):
+    unseen_conversation_count = serializers.SerializerMethodField()
+    unseen_thread_count = serializers.SerializerMethodField()
+    has_unread_conversations_or_threads = serializers.SerializerMethodField()
+    unseen_notification_count = serializers.IntegerField()
+    groups = serializers.SerializerMethodField()
+    places = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_unseen_conversation_count(data):
+        return data['conversations']['unseen_conversation_count']
+
+    @staticmethod
+    def get_unseen_thread_count(data):
+        return data['conversations']['unseen_thread_count']
+
+    @staticmethod
+    def get_has_unread_conversations_or_threads(data):
+        return data['conversations']['has_unread_conversations_or_threads']
+
+    @staticmethod
+    def get_groups(data):
+        conversations = data.get('conversations')
+        applications = data.get('applications')
+        feedback_possible = data.get('feedback_possible')
+        groups = defaultdict(dict)
+        for group_id, conversation_data in conversations['groups'].items():
+            groups[group_id] = {
+                **conversation_data,
+            }
+
+        for group_id, application_count in applications:
+            groups[group_id]['pending_application_count'] = application_count
+
+        for group_id, feedback_possible_count in feedback_possible:
+            groups[group_id]['feedback_possible_count'] = feedback_possible_count
+
+        return groups
+
+    @staticmethod
+    def get_places(data):
+        conversations = data.get('conversations')
+        places = {}
+        for place_id, conversation_data in conversations['places'].items():
+            places[place_id] = {
+                **conversation_data,
+            }
+        return places
+
+
+def status_data(user):
+    return {
+        'conversations': unread_conversations(user),
+        'applications': pending_applications(user),
+        'feedback_possible': get_feedback_possible(user),
+        'unseen_notification_count': unseen_notification_count(user),
+    }

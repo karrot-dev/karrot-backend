@@ -87,6 +87,7 @@ INSTALLED_APPS = (
     'karrot',
     'karrot.applications.ApplicationsConfig',
     'karrot.base.BaseConfig',
+    'karrot.bootstrap.BootstrapConfig',
     'karrot.community_feed.CommunityFeedConfig',
     'karrot.issues.IssuesConfig',
     'karrot.userauth.UserAuthConfig',
