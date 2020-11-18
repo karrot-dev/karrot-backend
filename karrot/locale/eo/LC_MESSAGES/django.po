@@ -23,27 +23,27 @@ msgstr ""
 
 #: karrot/activities/activity_types.py:5
 msgid "Meeting"
-msgstr ""
+msgstr "Renkontiĝo"
 
 #: karrot/activities/activity_types.py:6
 msgid "Pickup"
-msgstr ""
+msgstr "Savado"
 
 #: karrot/activities/activity_types.py:7
 msgid "Distribution"
-msgstr ""
+msgstr "Disdivido"
 
 #: karrot/activities/activity_types.py:8
 msgid "Event"
-msgstr ""
+msgstr "Evento"
 
 #: karrot/activities/activity_types.py:9
 msgid "Activity"
-msgstr ""
+msgstr "Activivaĵoj"
 
 #: karrot/activities/activity_types.py:10
 msgid "Task"
-msgstr ""
+msgstr "Taskoj"
 
 #: karrot/activities/serializers.py:53
 msgid "Must be a list"
@@ -60,18 +60,18 @@ msgstr "Ĝi devas meti komencan valoron"
 #: karrot/activities/tasks.py:68
 #, python-format
 msgid "Upcoming %(activity_type)s"
-msgstr ""
+msgstr "Venontaj %(activity_type)s"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:6
 #: karrot/activities/templates/activity_notification.html.jinja2:228
 #, python-format
 msgid "%(group_name)s upcoming activities"
-msgstr ""
+msgstr "%(group_name)s-aj venontaj aktivaĵoj"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:217
 #, python-format
 msgid "%(empty_participants_count)s/%(max_participants)s remaining"
-msgstr ""
+msgstr "Restas %(empty_participants_count)s/%(max_participants)s"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:232
 msgid "Tonight"
@@ -79,7 +79,7 @@ msgstr "Ĉivespere"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:236
 msgid "The day is not over, there are still activities to be done!"
-msgstr ""
+msgstr "La tago ne finiĝis, ankoraŭ restas aktivaĵoj por plenumi!"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:239
 #: karrot/activities/templates/activity_notification.html.jinja2:267
@@ -105,6 +105,8 @@ msgid ""
 "You are receiving this because you are subscribed to\n"
 "                            <strong>Activity notification</strong> emails for this group."
 msgstr ""
+"Vi ricevas tion ĉi ĉar vi abonis\n"
+"                            retmesaĝojn pri<strong>Aktivaĵaj sciigoj</strong> de tiu ĉi grupo."
 
 #: karrot/activities/templates/activity_notification.html.jinja2:314
 #: karrot/applications/templates/new_application.html.jinja2:266
@@ -354,20 +356,20 @@ msgstr "Bonan semajnfinon! Jen resumo de kio okazis en la grupo lastsemajne"
 #: karrot/groups/templates/group_summary.html.jinja2:211
 #, python-format
 msgid "%(activities_done_count)s activities were done"
-msgstr ""
+msgstr "%(activities_done_count)saktivaĵoj estas plenumitaj"
 
 #: karrot/groups/templates/group_summary.html.jinja2:213
 msgid "no activities were done"
-msgstr ""
+msgstr "Neniu aktivaĵo okazis"
 
 #: karrot/groups/templates/group_summary.html.jinja2:217
 #, python-format
 msgid "%(activities_missed_count)s activities were missed"
-msgstr ""
+msgstr "Oni maltrafis %(activities_missed_count)s aktivaĵojn"
 
 #: karrot/groups/templates/group_summary.html.jinja2:220
 msgid "no activities were missed"
-msgstr ""
+msgstr "Oni maltrafis neniun aktivaĵon"
 
 #: karrot/groups/templates/group_summary.html.jinja2:226
 #, python-format
@@ -377,7 +379,7 @@ msgstr "%(new_user_count)shomoj aliĝis la grupon"
 #: karrot/groups/templates/group_summary.html.jinja2:234
 #, python-format
 msgid "%(feedbacks_count)s feedbacks were given"
-msgstr ""
+msgstr "Oni komentis %(feedbacks_count)s-foje "
 
 #: karrot/groups/templates/group_summary.html.jinja2:236
 msgid "no feedback was given"
@@ -394,7 +396,7 @@ msgstr "neniu sendita mesaĝo"
 
 #: karrot/groups/templates/group_summary.html.jinja2:249
 msgid "Feedback"
-msgstr ""
+msgstr "Komentoj"
 
 #: karrot/groups/templates/group_summary.html.jinja2:257
 #, python-format
@@ -445,6 +447,9 @@ msgid ""
 "<strong>editing permissions</strong>. For example, you can now modify your "
 "group, places and activities, or create new ones."
 msgstr ""
+"Sufiĉe da anoj fidis vin por ke vi ricevu <strong>redaktpermesojn</strong>. "
+"Ekzemple, nun vi povas redakti la grupon, lokojn kaj aktivaĵojn aŭ krei "
+"novajn."
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:215
 msgid "Use your power wisely!"
