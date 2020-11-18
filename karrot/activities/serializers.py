@@ -45,10 +45,54 @@ class ActivityTypeSerializer(serializers.ModelSerializer):
             'updated_at',
         ]
 
+    def save(self, **kwargs):
+        if not self.instance:
+            return super().save(**kwargs)
+
+        activity_type = self.instance
+        changed_data = find_changed(activity_type, self.validated_data)
+        self._validated_data = changed_data
+        skip_update = len(self.validated_data.keys()) == 0
+        if skip_update:
+            return self.instance
+
+        before_data = ActivityTypeHistorySerializer(activity_type).data
+        activity_type = super().save(**kwargs)
+        after_data = ActivityTypeHistorySerializer(activity_type).data
+
+        if before_data != after_data:
+            History.objects.create(
+                typus=HistoryTypus.ACTIVITY_TYPE_MODIFY,
+                group=activity_type.group,
+                users=[self.context['request'].user],
+                payload={k: self.initial_data.get(k)
+                         for k in changed_data.keys()},
+                before=before_data,
+                after=after_data,
+            )
+        return activity_type
+
+    def create(self, validated_data):
+        activity_type = super().create(validated_data)
+        History.objects.create(
+            typus=HistoryTypus.ACTIVITY_TYPE_CREATE,
+            group=activity_type.group,
+            users=[self.context['request'].user],
+            payload=self.initial_data,
+            after=ActivityTypeHistorySerializer(activity_type).data,
+        )
+        return activity_type
+
 
 class ActivityHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ActivityModel
+        fields = '__all__'
+
+
+class ActivityTypeHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ActivityType
         fields = '__all__'
 
 

@@ -7,6 +7,7 @@ from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
 from karrot.activities.factories import ActivityFactory, ActivityTypeFactory
 from karrot.activities.models import to_range
+from karrot.history.models import History, HistoryTypus
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory
 
@@ -130,3 +131,28 @@ class TestActivitiesTypesAPI(APITestCase):
         activity.delete()
         response = self.client.delete(f'/api/activity-types/{activity_type.id}/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.data)
+
+    def test_adds_history_entry_on_create(self):
+        self.client.force_login(user=self.member)
+        response = self.client.post('/api/activity-types/', self.activity_type_data(), format='json')
+        history = History.objects.filter(typus=HistoryTypus.ACTIVITY_TYPE_CREATE).last()
+        self.assertEqual(history.after['id'], response.data['id'])
+
+    def test_adds_history_entry_on_modify(self):
+        self.client.force_login(user=self.member)
+        activity_type = self.activity_types[0]
+        response = self.client.patch(
+            f'/api/activity-types/{activity_type.id}/', {
+                'colour': 'ABABAB',
+            }, format='json'
+        )
+        history = History.objects.filter(typus=HistoryTypus.ACTIVITY_TYPE_MODIFY).last()
+        self.assertEqual(history.after['id'], response.data['id'])
+        self.assertEqual(history.payload, {'colour': 'ABABAB'})
+
+    def test_adds_history_entry_on_delete(self):
+        self.client.force_login(user=self.member)
+        activity_type = self.activity_types[0]
+        self.client.delete(f'/api/activity-types/{activity_type.id}/')
+        history = History.objects.filter(typus=HistoryTypus.ACTIVITY_TYPE_DELETE).last()
+        self.assertEqual(history.before['id'], activity_type.id)
