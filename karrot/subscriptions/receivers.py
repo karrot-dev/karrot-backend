@@ -30,8 +30,9 @@ from karrot.notifications.models import Notification, NotificationMeta
 from karrot.notifications.serializers import NotificationSerializer, NotificationMetaSerializer
 from karrot.offers.models import Offer, OfferStatus
 from karrot.offers.serializers import OfferSerializer
-from karrot.activities.models import Activity, ActivitySeries, Feedback, ActivityParticipant
-from karrot.activities.serializers import ActivitySerializer, ActivitySeriesSerializer, FeedbackSerializer
+from karrot.activities.models import Activity, ActivitySeries, Feedback, ActivityParticipant, ActivityType
+from karrot.activities.serializers import ActivitySerializer, ActivitySeriesSerializer, FeedbackSerializer, \
+    ActivityTypeSerializer
 from karrot.places.models import Place, PlaceSubscription
 from karrot.places.serializers import PlaceSerializer
 from karrot.status.helpers import unseen_notification_count, unread_conversations, pending_applications, \
@@ -359,6 +360,25 @@ def send_activity_series_delete(sender, instance, **kwargs):
     for subscription in ChannelSubscription.objects.recent().filter(user__in=series.place.group.members.all()
                                                                     ).distinct():
         send_in_channel(subscription.reply_channel, topic='activities:series_deleted', payload=payload)
+
+
+# Activity Type
+@receiver(post_save, sender=ActivityType)
+def send_activity_type_updates(sender, instance, **kwargs):
+    activity_type = instance
+    payload = ActivityTypeSerializer(activity_type).data
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=activity_type.group.members.all()
+                                                                    ).distinct():
+        send_in_channel(subscription.reply_channel, topic='activities:type', payload=payload)
+
+
+@receiver(pre_delete, sender=ActivityType)
+def send_activity_type_delete(sender, instance, **kwargs):
+    activity_type = instance
+    payload = ActivityTypeSerializer(activity_type).data
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=activity_type.group.members.all()
+                                                                    ).distinct():
+        send_in_channel(subscription.reply_channel, topic='activities:type_deleted', payload=payload)
 
 
 # Offer
