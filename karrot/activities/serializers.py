@@ -24,7 +24,26 @@ from karrot.utils.misc import find_changed
 class ActivityTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ActivityType
-        fields = '__all__'
+        fields = [
+            'id',
+            'name',
+            'name_is_translatable',
+            'colour',
+            'icon',
+            'has_feedback',
+            'has_feedback_weight',
+            'feedback_icon',
+            'status',
+            'group',
+            "created_at",
+            'updated_at',
+            'group',  # TODO: make it so you can only set this when creating... AND only for your own groups...
+        ]
+        read_only_fields = [
+            'id',
+            'created_at',
+            'updated_at',
+        ]
 
 
 class ActivityHistorySerializer(serializers.ModelSerializer):

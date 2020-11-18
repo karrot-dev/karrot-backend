@@ -17,7 +17,7 @@ from karrot.activities.models import (
 )
 from karrot.activities.permissions import (
     IsUpcoming, HasNotJoinedActivity, HasJoinedActivity, IsEmptyActivity, IsNotFull, IsSameParticipant,
-    IsRecentActivity, IsGroupEditor
+    IsRecentActivity, IsGroupEditor, TypeHasNoActivities, CannotChangeGroup
 )
 from karrot.activities.serializers import (
     ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer, ActivityLeaveSerializer, FeedbackSerializer,
@@ -29,14 +29,23 @@ from karrot.utils.mixins import PartialUpdateModelMixin
 
 
 class ActivityTypeViewSet(
+        mixins.CreateModelMixin,
+        mixins.RetrieveModelMixin,
+        PartialUpdateModelMixin,
         mixins.ListModelMixin,
+        mixins.DestroyModelMixin,
         viewsets.GenericViewSet,
 ):
     serializer_class = ActivityTypeSerializer
     queryset = ActivityType.objects
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = ActivityTypeFilter
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (
+        IsAuthenticated,
+        IsGroupEditor,
+        TypeHasNoActivities,
+        CannotChangeGroup,
+    )
 
     def get_queryset(self):
         return self.queryset.filter(group__members=self.request.user)
