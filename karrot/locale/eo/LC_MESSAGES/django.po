@@ -312,23 +312,23 @@ msgstr "Vi ne povas fidi vin mem"
 msgid "You already gave trust to this user"
 msgstr "Vi jam fidis tiun ĉi uzanton"
 
-#: karrot/groups/serializers.py:33
+#: karrot/groups/serializers.py:30
 msgid "Unknown timezone"
 msgstr "Nekonata horzono"
 
-#: karrot/groups/serializers.py:41
+#: karrot/groups/serializers.py:38
 msgid "Playground"
 msgstr "Relaksujo"
 
-#: karrot/groups/serializers.py:141 karrot/groups/serializers.py:240
+#: karrot/groups/serializers.py:138 karrot/groups/serializers.py:237
 msgid "You cannot manage agreements"
 msgstr "Vi ne povas agordi akordojn"
 
-#: karrot/groups/serializers.py:143
+#: karrot/groups/serializers.py:140
 msgid "Agreement is not for this group"
 msgstr "La akordo ne estas por tiu ĉi grupo"
 
-#: karrot/groups/serializers.py:238
+#: karrot/groups/serializers.py:235
 msgid "You are not in this group"
 msgstr "Vi ne estas en ĉi tiu grupo"
 

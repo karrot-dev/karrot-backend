@@ -320,23 +320,23 @@ msgstr "Tu ne peux pas donner ta confiance à toi-même"
 msgid "You already gave trust to this user"
 msgstr "Tu as déjà donné ta confiance à cette utilisateur "
 
-#: karrot/groups/serializers.py:33
+#: karrot/groups/serializers.py:30
 msgid "Unknown timezone"
 msgstr "Fuseau horaire inconnu"
 
-#: karrot/groups/serializers.py:41
+#: karrot/groups/serializers.py:38
 msgid "Playground"
 msgstr "Terrain de jeux"
 
-#: karrot/groups/serializers.py:141 karrot/groups/serializers.py:240
+#: karrot/groups/serializers.py:138 karrot/groups/serializers.py:237
 msgid "You cannot manage agreements"
 msgstr "Tu ne peux pas gérer les agréements"
 
-#: karrot/groups/serializers.py:143
+#: karrot/groups/serializers.py:140
 msgid "Agreement is not for this group"
 msgstr "L’agrément n'est pas pour ce groupe "
 
-#: karrot/groups/serializers.py:238
+#: karrot/groups/serializers.py:235
 msgid "You are not in this group"
 msgstr "Tu n'es pas dans ce groupe"
 

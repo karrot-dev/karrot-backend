@@ -315,23 +315,23 @@ msgstr "Du kanns dir selwer kee Vertraue ginn"
 msgid "You already gave trust to this user"
 msgstr "Du hues dësem Benotzer scho Vertraue ginn"
 
-#: karrot/groups/serializers.py:33
+#: karrot/groups/serializers.py:30
 msgid "Unknown timezone"
 msgstr "Onbekannten Zäitzon"
 
-#: karrot/groups/serializers.py:41
+#: karrot/groups/serializers.py:38
 msgid "Playground"
 msgstr "Spillplaz"
 
-#: karrot/groups/serializers.py:141 karrot/groups/serializers.py:240
+#: karrot/groups/serializers.py:138 karrot/groups/serializers.py:237
 msgid "You cannot manage agreements"
 msgstr "Du kanns Ofkommes net verwalten"
 
-#: karrot/groups/serializers.py:143
+#: karrot/groups/serializers.py:140
 msgid "Agreement is not for this group"
 msgstr "D'Ofkommes ass net fir dës Grupp"
 
-#: karrot/groups/serializers.py:238
+#: karrot/groups/serializers.py:235
 msgid "You are not in this group"
 msgstr "Du bass net an dëser Grupp"
 
