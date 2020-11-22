@@ -4,7 +4,7 @@
 -e git+https://github.com/tiltec/talon@80886cd#egg=talon
 
 # This includes a patch to use anymail with postal
--e git+https://github.com/tiltec/django-anymail@ccdb9018#egg=django-anymail
+-e git+https://github.com/tiltec/django-anymail@916580#egg=django-anymail
 
 # Common PyPI dependencies
 django[argon2]
