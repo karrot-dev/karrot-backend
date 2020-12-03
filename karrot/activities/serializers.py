@@ -22,6 +22,8 @@ from karrot.utils.misc import find_changed
 
 
 class ActivityTypeSerializer(serializers.ModelSerializer):
+    updated_message = serializers.CharField(write_only=True, required=False)
+
     class Meta:
         model = ActivityType
         fields = [
@@ -37,6 +39,7 @@ class ActivityTypeSerializer(serializers.ModelSerializer):
             'group',
             "created_at",
             'updated_at',
+            'updated_message',
             'group',  # TODO: make it so you can only set this when creating... AND only for your own groups...
         ]
         read_only_fields = [
@@ -48,6 +51,8 @@ class ActivityTypeSerializer(serializers.ModelSerializer):
     def save(self, **kwargs):
         if not self.instance:
             return super().save(**kwargs)
+
+        updated_message = self.validated_data.pop('updated_message', None)
 
         activity_type = self.instance
         changed_data = find_changed(activity_type, self.validated_data)
@@ -69,6 +74,7 @@ class ActivityTypeSerializer(serializers.ModelSerializer):
                          for k in changed_data.keys()},
                 before=before_data,
                 after=after_data,
+                message=updated_message,
             )
         return activity_type
 

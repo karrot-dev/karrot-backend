@@ -136,7 +136,7 @@ class TestActivitiesTypesAPI(APITestCase):
         self.client.force_login(user=self.member)
         response = self.client.post('/api/activity-types/', self.activity_type_data(), format='json')
         history = History.objects.filter(typus=HistoryTypus.ACTIVITY_TYPE_CREATE).last()
-        self.assertEqual(history.after['id'], response.data['id'])
+        self.assertEqual(history.after['id'], response.data['id'], response.data)
 
     def test_adds_history_entry_on_modify(self):
         self.client.force_login(user=self.member)
@@ -147,8 +147,22 @@ class TestActivitiesTypesAPI(APITestCase):
             }, format='json'
         )
         history = History.objects.filter(typus=HistoryTypus.ACTIVITY_TYPE_MODIFY).last()
-        self.assertEqual(history.after['id'], response.data['id'])
+        self.assertEqual(history.after['id'], response.data['id'], response.data)
         self.assertEqual(history.payload, {'colour': 'ABABAB'})
+
+    def test_adds_updated_reason_to_history(self):
+        self.client.force_login(user=self.member)
+        activity_type = self.activity_types[0]
+        response = self.client.patch(
+            f'/api/activity-types/{activity_type.id}/', {
+                'colour': 'ACABAB',
+                'updated_message': 'because it was a horrible colour before',
+            },
+            format='json'
+        )
+        history = History.objects.filter(typus=HistoryTypus.ACTIVITY_TYPE_MODIFY).last()
+        self.assertEqual(history.after['id'], response.data['id'])
+        self.assertEqual(history.message, 'because it was a horrible colour before')
 
     def test_adds_history_entry_on_delete(self):
         self.client.force_login(user=self.member)
