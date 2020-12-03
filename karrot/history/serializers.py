@@ -19,6 +19,8 @@ class HistorySerializer(serializers.ModelSerializer):
             'users',
             'payload',
             'message',
+            'before',
+            'after',
         ]
 
     typus = SerializerMethodField()
