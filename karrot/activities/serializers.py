@@ -105,11 +105,15 @@ class ActivityTypeHistorySerializer(serializers.ModelSerializer):
 class DateTimeFieldWithTimezone(DateTimeField):
     def get_attribute(self, instance):
         value = super().get_attribute(instance)
+        if value is None:
+            return None
         if hasattr(instance, 'timezone'):
             return value.astimezone(instance.timezone)
         return value
 
     def enforce_timezone(self, value):
+        if value is None:
+            return None
         if timezone.is_aware(value):
             return value
         return super().enforce_timezone(value)
@@ -177,7 +181,7 @@ class ActivitySerializer(serializers.ModelSerializer):
         ]
 
     participants = serializers.SerializerMethodField()
-    feedback_due = DateTimeFieldWithTimezone(read_only=True)
+    feedback_due = DateTimeFieldWithTimezone(read_only=True, allow_null=True)
 
     date = DateTimeRangeField()
 

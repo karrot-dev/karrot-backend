@@ -354,7 +354,7 @@ class Activity(BaseModel, ConversationMixin):
 
     def feedback_due(self):
         if not self.activity_type.has_feedback:
-            return False
+            return None
         due = self.date.end + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
         return due.astimezone(self.get_timezone())
 
