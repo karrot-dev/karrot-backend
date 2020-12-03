@@ -41,8 +41,8 @@ class HistoryTypus(enum.Enum):
     GROUP_DELETE_PHOTO = 23
     MEMBER_REMOVED = 24
     ACTIVITY_TYPE_CREATE = 25
-    ACTIVITY_TYPE_MODIFY = 25
-    ACTIVITY_TYPE_DELETE = 25
+    ACTIVITY_TYPE_MODIFY = 26
+    ACTIVITY_TYPE_DELETE = 27
 
 
 class HistoryQuerySet(models.QuerySet):
