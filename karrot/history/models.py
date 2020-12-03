@@ -100,6 +100,7 @@ class History(NicelyFormattedModel):
     payload = JSONField(null=True)
     before = JSONField(null=True)
     after = JSONField(null=True)
+    message = models.TextField(null=True)
 
     def __str__(self):
         return 'History {} - {} ({})'.format(self.date, HistoryTypus.name(self.typus), self.group)

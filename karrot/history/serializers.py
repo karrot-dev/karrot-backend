@@ -18,6 +18,7 @@ class HistorySerializer(serializers.ModelSerializer):
             'place',
             'users',
             'payload',
+            'message',
         ]
 
     typus = SerializerMethodField()
@@ -38,6 +39,7 @@ class HistoryExportSerializer(HistorySerializer):
             'activity',
             'users',
             'activity_date',
+            'message',
         ]
 
     activity_date = serializers.SerializerMethodField()
