@@ -5,7 +5,7 @@
 #    pip-compile
 #
 -e git+https://github.com/tiltec/django-anymail@916580#egg=django-anymail  # via -r requirements.in
--e git+https://github.com/tiltec/django-influxdb-metrics@f8839571d522503870d79d72c686ca42f5326f9c#egg=django-influxdb-metrics  # via -r requirements.in
+-e git+https://github.com/tiltec/django-influxdb-metrics@340bb59#egg=django-influxdb-metrics  # via -r requirements.in
 -e git+https://github.com/tiltec/django-rest-swagger@d15dd9a#egg=django-rest-swagger  # via -r requirements.in
 -e git+https://github.com/tiltec/talon@80886cd#egg=talon  # via -r requirements.in
 aiohttp==3.7.3            # via geoip2
