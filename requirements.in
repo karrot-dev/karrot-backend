@@ -1,7 +1,11 @@
-# These are not maintained anymore:
--e git+https://github.com/tiltec/django-influxdb-metrics@340bb59#egg=django-influxdb-metrics
+# This is not maintained anymore
 -e git+https://github.com/tiltec/django-rest-swagger@d15dd9a#egg=django-rest-swagger
+
+# Removes machine learning dependencies
 -e git+https://github.com/tiltec/talon@80886cd#egg=talon
+
+# Removes some fast-changing stats from tags in order to not overload influxdb
+-e git+https://github.com/tiltec/django-influxdb-metrics@1746b8e206#egg=django-influxdb-metrics
 
 # This includes a patch to use anymail with postal
 -e git+https://github.com/tiltec/django-anymail@916580#egg=django-anymail
