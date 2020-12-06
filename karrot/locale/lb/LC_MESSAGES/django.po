@@ -94,7 +94,7 @@ msgstr "Nach keen ass ugemellt fir"
 #: karrot/activities/templates/activity_notification.html.jinja2:249
 #: karrot/activities/templates/activity_notification.html.jinja2:277
 msgid "There is still space available for"
-msgstr "Et ass nach Platz fir"
+msgstr "Et ass nach Plaz fir"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:262
 msgid "Tomorrow"
@@ -455,7 +455,7 @@ msgid ""
 msgstr ""
 "Du hues genuch Vertrauen vun anere Membere kritt, esou dass du elo "
 "<strong>beaarbechten</strong> duerfs. Zum Beispill kanns du elo deng Grupp, "
-"Platzen an Aktivitéite veränneren oder neier erstellen."
+"Plazen an Aktivitéite veränneren oder neier erstellen."
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:215
 msgid "Use your power wisely!"
@@ -753,7 +753,7 @@ msgstr "Setz se net méi wéi %(count)s Wochen am Viraus"
 
 #: karrot/places/serializers.py:140
 msgid "You are already subscribed to this place"
-msgstr "Du hues dës Platz schonn abonéiert"
+msgstr "Du hues dës Plaz schonn abonéiert"
 
 #: karrot/userauth/api.py:94 karrot/userauth/serializers.py:94
 #: karrot/userauth/serializers.py:143 karrot/userauth/serializers.py:164
