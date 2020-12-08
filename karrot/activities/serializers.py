@@ -205,6 +205,11 @@ class ActivitySerializer(serializers.ModelSerializer):
         activity.place.group.refresh_active_status()
         return activity
 
+    def validate_activity_type(self, activity_type):
+        if activity_type.status != 'active':
+            raise serializers.ValidationError('You can only create activities for active types')
+        return activity_type
+
     def validate_place(self, place):
         if not place.group.is_editor(self.context['request'].user):
             if not place.group.is_member(self.context['request'].user):
@@ -407,6 +412,11 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
         )
         series.place.group.refresh_active_status()
         return series
+
+    def validate_activity_type(self, activity_type):
+        if activity_type.status != 'active':
+            raise serializers.ValidationError('You can only create series for active types')
+        return activity_type
 
     def validate_place(self, place):
         if not place.group.is_editor(self.context['request'].user):

@@ -51,7 +51,8 @@ class ActivityType(BaseModel, UpdatedAtMixin):
 class ActivitySeriesQuerySet(models.QuerySet):
     @transaction.atomic
     def update_activities(self):
-        for series in self.filter(place__status=PlaceStatus.ACTIVE.value):
+        for series in self.filter(activity_type__status=ActivityTypeStatus.ACTIVE.value,
+                                  place__status=PlaceStatus.ACTIVE.value):
             series.update_activities()
 
     def annotate_timezone(self):

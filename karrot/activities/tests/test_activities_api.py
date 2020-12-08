@@ -26,6 +26,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         cls.group = GroupFactory(members=[cls.member, cls.second_member])
         cls.place = PlaceFactory(group=cls.group)
         cls.activity_type = ActivityTypeFactory(group=cls.group)
+        cls.archived_activity_type = ActivityTypeFactory(group=cls.group, status='archived')
         cls.activity = ActivityFactory(activity_type=cls.activity_type, place=cls.place)
         cls.activity_url = cls.url + str(cls.activity.id) + '/'
         cls.join_url = cls.activity_url + 'add/'
@@ -73,6 +74,16 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.member)
         response = self.client.post(self.url, self.activity_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+
+    def test_create_activity_for_archived_type_fails(self):
+        self.client.force_login(user=self.member)
+        response = self.client.post(
+            self.url, {
+                **self.activity_data,
+                'activity_type': self.archived_activity_type.id,
+            }, format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_create_activity_as_group_member_activates_group(self):
         self.client.force_login(user=self.member)
