@@ -20,6 +20,7 @@ class TestActivitiesTypesAPI(APITestCase):
         self.group = GroupFactory(members=[self.member, self.non_editor_member])
         self.place = PlaceFactory(group=self.group)
         self.activity_types = [ActivityTypeFactory(group=self.group) for _ in range(3)]
+        self.activity_type = self.activity_types[0]
 
         # remove all roles
         GroupMembership.objects.filter(group=self.group, user=self.non_editor_member).update(roles=[])
@@ -86,31 +87,28 @@ class TestActivitiesTypesAPI(APITestCase):
 
     def test_can_modify(self):
         self.client.force_login(user=self.member)
-        activity_type = self.activity_types[0]
         response = self.client.patch(
-            f'/api/activity-types/{activity_type.id}/', {
+            f'/api/activity-types/{self.activity_type.id}/', {
                 'colour': 'ABABAB',
             }, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
-    def test_cannot_change_group(self):
-        self.client.force_login(user=self.member)
-        activity_type = self.activity_types[0]
-        other_group = GroupFactory()
+    def test_cannot_modify_if_not_editor(self):
+        self.client.force_login(user=self.non_editor_member)
         response = self.client.patch(
-            f'/api/activity-types/{activity_type.id}/', {
-                'group': other_group.id,
+            f'/api/activity-types/{self.activity_type.id}/', {
+                'colour': 'ABABAB',
             }, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
-    def test_cannot_modify_if_not_editor(self):
-        self.client.force_login(user=self.non_editor_member)
-        activity_type = self.activity_types[0]
+    def test_cannot_modify_group(self):
+        self.client.force_login(user=self.member)
+        other_group = GroupFactory()
         response = self.client.patch(
-            f'/api/activity-types/{activity_type.id}/', {
-                'colour': 'ABABAB',
+            f'/api/activity-types/{self.activity_type.id}/', {
+                'group': other_group.id,
             }, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
