@@ -40,7 +40,7 @@ class ActivityTypeSerializer(serializers.ModelSerializer):
             "created_at",
             'updated_at',
             'updated_message',
-            'group',  # TODO: make it so you can only set this when creating... AND only for your own groups...
+            'group',
         ]
         read_only_fields = [
             'id',
