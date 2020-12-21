@@ -424,7 +424,7 @@ msgstr ""
 #: karrot/groups/templates/group_summary.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s updates for the week of %(day)s"
-msgstr "%(group_name)s Neiegkeete vun der Woch vun %(day)s"
+msgstr "%(group_name)s Neiegkeete vun der Woch vum %(day)s"
 
 #: karrot/groups/templates/playground_public_description.nopreview.jinja2:1
 msgid ""
