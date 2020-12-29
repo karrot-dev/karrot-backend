@@ -65,7 +65,7 @@ flake8==3.8.4             # via -r requirements.in
 freezegun==1.0.0          # via -r requirements.in
 furl==2.1.0               # via -r requirements.in
 geoip2==4.1.0             # via -r requirements.in
-gevent==20.9.0            # via -r requirements.in
+gevent==20.12.0           # via -r requirements.in
 glom==20.11.0             # via -r requirements.in
 gprof2dot==2019.11.30     # via django-silk
 greenlet==0.4.17          # via gevent
@@ -83,7 +83,7 @@ iniconfig==1.1.1          # via pytest
 ipython-genutils==0.2.0   # via traitlets
 ipython==7.19.0           # via -r requirements.in
 itypes==1.2.0             # via coreapi
-jedi==0.17.2              # via ipython
+jedi==0.18.0              # via ipython
 jinja2==2.11.2            # via coreschema, django-jinja, django-silk
 logging-tree==1.8.1       # via -r requirements.in
 lxml==4.6.2               # via talon
@@ -98,7 +98,7 @@ nodeenv==1.5.0            # via pre-commit
 openapi-codec==1.3.2      # via django-rest-swagger
 orderedmultidict==1.0.1   # via furl
 packaging==20.8           # via bleach, pytest
-parso==0.7.1              # via jedi
+parso==0.8.1              # via jedi
 pexpect==4.8.0            # via ipython
 pickleshare==0.7.5        # via ipython
 pillow==8.0.1             # via django-versatileimagefield
@@ -118,7 +118,7 @@ pyfcm==1.5.1              # via -r requirements.in
 pyflakes==2.2.0           # via autoflake, flake8
 pygments==2.7.3           # via django-silk, ipython
 pyhamcrest==2.0.2         # via twisted
-pymdown-extensions==8.0.1  # via -r requirements.in
+pymdown-extensions==8.1   # via -r requirements.in
 pyopenssl==20.0.1         # via twisted
 pyparsing==2.4.7          # via packaging
 pytest-asyncio==0.14.0    # via -r requirements.in
@@ -130,7 +130,7 @@ pytest==6.2.1             # via pytest-asyncio, pytest-cov, pytest-django, pytes
 python-dateutil==2.8.1    # via django-silk, faker, freezegun, influxdb
 python-magic==0.4.18      # via django-versatileimagefield
 python-server-metrics==0.2.1  # via django-influxdb-metrics
-pytz==2020.4              # via -r requirements.in, babel, django, django-dirtyfields, django-silk, django-timezone-field, influxdb
+pytz==2020.5              # via -r requirements.in, babel, django, django-dirtyfields, django-silk, django-timezone-field, influxdb
 pyyaml==5.3.1             # via pre-commit
 raven==6.10.0             # via -r requirements.in
 redis==3.5.3              # via -r requirements.in, django-redis
