@@ -1,4 +1,5 @@
 from datetime import timedelta
+from enum import Enum
 
 import pytz
 from dateutil.relativedelta import relativedelta
@@ -11,7 +12,7 @@ from django.db import transaction
 from django.db.models import Avg, Count, DurationField, F, Q
 from django.utils import timezone
 
-from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField
+from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin
 from karrot.conversations.models import ConversationMixin
 from karrot.history.models import History, HistoryTypus
 from karrot.activities import stats
@@ -19,7 +20,12 @@ from karrot.activities.utils import match_activities_with_dates, rrule_between_d
 from karrot.places.models import PlaceStatus
 
 
-class ActivityType(BaseModel):
+class ActivityTypeStatus(Enum):
+    ACTIVE = 'active'
+    ARCHIVED = 'archived'
+
+
+class ActivityType(BaseModel, UpdatedAtMixin):
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='activity_types')
     name = models.CharField(max_length=80)
     name_is_translatable = models.BooleanField(default=True)
@@ -28,6 +34,11 @@ class ActivityType(BaseModel):
     feedback_icon = models.CharField(max_length=32)
     has_feedback = models.BooleanField(default=True)
     has_feedback_weight = models.BooleanField(default=True)
+    status = models.CharField(
+        default=ActivityTypeStatus.ACTIVE.value,
+        choices=[(status.value, status.value) for status in ActivityTypeStatus],
+        max_length=100,
+    )
 
     class Meta:
         unique_together = ('group', 'name')
@@ -40,7 +51,8 @@ class ActivityType(BaseModel):
 class ActivitySeriesQuerySet(models.QuerySet):
     @transaction.atomic
     def update_activities(self):
-        for series in self.filter(place__status=PlaceStatus.ACTIVE.value):
+        for series in self.filter(activity_type__status=ActivityTypeStatus.ACTIVE.value,
+                                  place__status=PlaceStatus.ACTIVE.value):
             series.update_activities()
 
     def annotate_timezone(self):
@@ -343,7 +355,7 @@ class Activity(BaseModel, ConversationMixin):
 
     def feedback_due(self):
         if not self.activity_type.has_feedback:
-            return False
+            return None
         due = self.date.end + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
         return due.astimezone(self.get_timezone())
 

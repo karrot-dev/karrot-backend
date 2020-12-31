@@ -40,6 +40,9 @@ class HistoryTypus(enum.Enum):
     GROUP_CHANGE_PHOTO = 22
     GROUP_DELETE_PHOTO = 23
     MEMBER_REMOVED = 24
+    ACTIVITY_TYPE_CREATE = 25
+    ACTIVITY_TYPE_MODIFY = 26
+    ACTIVITY_TYPE_DELETE = 27
 
 
 class HistoryQuerySet(models.QuerySet):
@@ -97,6 +100,7 @@ class History(NicelyFormattedModel):
     payload = JSONField(null=True)
     before = JSONField(null=True)
     after = JSONField(null=True)
+    message = models.TextField(null=True)
 
     def __str__(self):
         return 'History {} - {} ({})'.format(self.date, HistoryTypus.name(self.typus), self.group)
