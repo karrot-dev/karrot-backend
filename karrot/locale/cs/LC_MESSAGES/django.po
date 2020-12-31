@@ -32,7 +32,7 @@ msgstr "Vyzvednutí"
 
 #: karrot/activities/activity_types.py:7
 msgid "Distribution"
-msgstr ""
+msgstr "Distribuce"
 
 #: karrot/activities/activity_types.py:8
 msgid "Event"
@@ -44,7 +44,7 @@ msgstr "Aktivita"
 
 #: karrot/activities/activity_types.py:10
 msgid "Task"
-msgstr ""
+msgstr "Úkol"
 
 #: karrot/activities/serializers.py:53
 msgid "Must be a list"
@@ -67,7 +67,7 @@ msgstr "Připravujeme %(activity_type)s"
 #: karrot/activities/templates/activity_notification.html.jinja2:228
 #, python-format
 msgid "%(group_name)s upcoming activities"
-msgstr ""
+msgstr "nadcházející aktivity %(group_name)s"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:217
 #, python-format
@@ -80,7 +80,7 @@ msgstr "Dnes večer"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:236
 msgid "The day is not over, there are still activities to be done!"
-msgstr ""
+msgstr "Den ještě neskončil, zbývají ještě aktivity!"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:239
 #: karrot/activities/templates/activity_notification.html.jinja2:267
@@ -106,6 +106,8 @@ msgid ""
 "You are receiving this because you are subscribed to\n"
 "                            <strong>Activity notification</strong> emails for this group."
 msgstr ""
+"Toto dostáváte, protože jste přihlášeni k odběru\n"
+"                    E-mailů s <strong>upozorněním na aktivitu</strong> pro tuto skupinu."
 
 #: karrot/activities/templates/activity_notification.html.jinja2:314
 #: karrot/applications/templates/new_application.html.jinja2:266
@@ -361,16 +363,16 @@ msgstr ""
 #: karrot/groups/templates/group_summary.html.jinja2:211
 #, python-format
 msgid "%(activities_done_count)s activities were done"
-msgstr ""
+msgstr "%(activities_done_count)s aktivit bylo provedeno"
 
 #: karrot/groups/templates/group_summary.html.jinja2:213
 msgid "no activities were done"
-msgstr ""
+msgstr "nebyly provedeny žádné činnosti"
 
 #: karrot/groups/templates/group_summary.html.jinja2:217
 #, python-format
 msgid "%(activities_missed_count)s activities were missed"
-msgstr ""
+msgstr "%(activities_missed_count)s aktivit bylo zmeškáno"
 
 #: karrot/groups/templates/group_summary.html.jinja2:220
 msgid "no activities were missed"
@@ -384,7 +386,7 @@ msgstr "%(new_user_count)s lidí se připojilo ke skupině"
 #: karrot/groups/templates/group_summary.html.jinja2:234
 #, python-format
 msgid "%(feedbacks_count)s feedbacks were given"
-msgstr ""
+msgstr "bylo podáno %(feedbacks_count)s zpětných vazeb"
 
 #: karrot/groups/templates/group_summary.html.jinja2:236
 msgid "no feedback was given"
@@ -401,7 +403,7 @@ msgstr "nebyly odeslány žádné zprávy"
 
 #: karrot/groups/templates/group_summary.html.jinja2:249
 msgid "Feedback"
-msgstr ""
+msgstr "Zpětná vazba"
 
 #: karrot/groups/templates/group_summary.html.jinja2:257
 #, python-format
@@ -452,6 +454,9 @@ msgid ""
 "<strong>editing permissions</strong>. For example, you can now modify your "
 "group, places and activities, or create new ones."
 msgstr ""
+"Od ostatních členů skupiny jste získali dostatečnou důvěru, aby vám mohlo "
+"být uděleno <strong>oprávnění k úpravám</strong>. Nyní můžete například "
+"upravit svou skupinu, místa a aktivity nebo vytvořit nové."
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:215
 msgid "Use your power wisely!"
