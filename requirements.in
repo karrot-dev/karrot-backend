@@ -46,6 +46,10 @@ more-itertools
 requests
 glom
 geoip2
+starlette
+aiofiles
+shiv
+whitenoise
 
 # dev PyPI dependencies
 pip-tools

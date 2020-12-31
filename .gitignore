@@ -17,6 +17,7 @@ karrot/*/templates/*.html.jinja2
 *.pid
 mjml/node_modules
 grafana/config.py
+dist
 
 # IDE
 /.idea
@@ -43,3 +44,4 @@ uploads
 
 # Maxmind geoip data
 /maxmind-data/*.mmdb
+karrot.pyz
