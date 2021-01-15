@@ -325,7 +325,9 @@ class Activity(BaseModel, ConversationMixin):
     has_duration = models.BooleanField(default=False)
 
     description = models.TextField(blank=True)
+    require_approval = models.BooleanField(default=False)
     max_participants = models.PositiveIntegerField(null=True)
+    max_trial_participants = models.PositiveIntegerField(null=True)
     is_disabled = models.BooleanField(default=False)
     last_changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -411,6 +413,7 @@ class ActivityParticipant(BaseModel):
         on_delete=models.CASCADE,
     )
     reminder_task_id = models.TextField(null=True)  # stores a huey task id
+    is_trial = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'activities_activity_participants'
