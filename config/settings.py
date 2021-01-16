@@ -316,6 +316,10 @@ GEOIP_PATH = os.path.join(BASE_DIR, 'maxmind-data')
 # https://github.com/yunity/email_reply_trimmer_service
 EMAIL_REPLY_TRIMMER_URL = None
 
+SHELL_PLUS_IMPORTS = [
+    'from karrot.utils.shell_utils import *'
+]
+
 # NB: Keep this as the last line, and keep
 # local_settings.py out of version control
 try:

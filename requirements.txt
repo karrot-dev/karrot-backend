@@ -83,7 +83,7 @@ iniconfig==1.1.1          # via pytest
 ipython-genutils==0.2.0   # via traitlets
 ipython==7.19.0           # via -r requirements.in
 itypes==1.2.0             # via coreapi
-jedi==0.18.0              # via ipython
+jedi==0.17.2              # via -r requirements.in, ipython
 jinja2==2.11.2            # via coreschema, django-jinja, django-silk
 logging-tree==1.8.1       # via -r requirements.in
 lxml==4.6.2               # via talon

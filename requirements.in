@@ -51,6 +51,7 @@ geoip2
 pip-tools
 factory-boy
 ipython
+jedi==0.17.2 # https://github.com/ipython/ipython/issues/12740
 requests-mock
 tblib
 flake8
@@ -67,3 +68,4 @@ django-silk
 yapf
 importlib-metadata # for py3.7 compat
 pre-commit
+sqlparse # for pretty-printing SQL in shell
