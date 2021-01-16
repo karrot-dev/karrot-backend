@@ -180,8 +180,11 @@ class ActivitySerializer(serializers.ModelSerializer):
             'date',
             'series',
             'place',
+            'require_role',
             'max_participants',
+            'max_trial_participants',
             'participants',
+            'participants_next',
             'description',
             'feedback_due',
             'feedback_given_by',
@@ -192,14 +195,25 @@ class ActivitySerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id',
             'series',
-            'participants',
             'is_done',
         ]
 
-    participants = ActivityParticipantSerializer(source='activityparticipant_set', many=True)
+    # keep old field as before until frontend updated for compatability
+    participants = serializers.SerializerMethodField()
+    participants_next = ActivityParticipantSerializer(
+        read_only=True,
+        source='activityparticipant_set',
+        many=True,
+    )
     feedback_due = DateTimeFieldWithTimezone(read_only=True, allow_null=True)
 
     date = DateTimeRangeField()
+
+    def get_participants(self, activity):
+        # only return the non-trial participants here to keep it compatible.
+        # we filter for is_trial=False in python instead of using a filter because
+        # if we use a filter it won't use the prefetched data that we probably have available
+        return [c.user_id for c in activity.activityparticipant_set.all() if c.is_trial is False]
 
     def save(self, **kwargs):
         return super().save(last_changed_by=self.context['request'].user)

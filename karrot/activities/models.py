@@ -325,7 +325,7 @@ class Activity(BaseModel, ConversationMixin):
     has_duration = models.BooleanField(default=False)
 
     description = models.TextField(blank=True)
-    require_approval = models.BooleanField(default=False)
+    require_role = models.CharField(blank=True, max_length=100)
     max_participants = models.PositiveIntegerField(null=True)
     max_trial_participants = models.PositiveIntegerField(null=True)
     is_disabled = models.BooleanField(default=False)
@@ -364,22 +364,30 @@ class Activity(BaseModel, ConversationMixin):
     def is_upcoming(self):
         return self.date.start > timezone.now()
 
-    def is_full(self):
-        if not self.max_participants:
+    def is_full(self, *, trial):
+        max_participants = self.max_trial_participants if trial else self.max_participants
+        qs = self.participants.filter(activityparticipant__is_trial=trial)
+        if not max_participants:
             return False
-        return self.participants.count() >= self.max_participants
+        return qs.count() >= max_participants
 
     def is_participant(self, user):
         return self.participants.filter(id=user.id).exists()
 
-    def is_empty(self):
-        return self.participants.count() == 0
+    def is_empty(self, *, trial):
+        if trial is None:
+            qs = self.participants
+        else:
+            qs = self.participants.filter(activityparticipant__is_trial=trial)
+        return qs.count() == 0
 
     def is_recent(self):
         return self.date.start >= timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
-    def empty_participants_count(self):
-        return max(0, self.max_participants - self.participants.count())
+    def empty_participants_count(self, *, trial):
+        max_participants = self.max_trial_participants if trial else self.max_participants
+        qs = self.participants.filter(activityparticipant__is_trial=trial)
+        return max(0, max_participants - qs.count())
 
     def add_participant(self, user):
         participant, _ = ActivityParticipant.objects.get_or_create(

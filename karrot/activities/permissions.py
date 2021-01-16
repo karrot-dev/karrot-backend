@@ -21,7 +21,7 @@ class IsEmptyActivity(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         if view.action == 'destroy':
-            return obj.is_empty()
+            return obj.is_empty(trial=None)
         return True
 
 
@@ -43,7 +43,10 @@ class IsNotFull(permissions.BasePermission):
     message = 'Activity is already full.'
 
     def has_object_permission(self, request, view, obj):
-        return not obj.is_full()
+        if obj.require_role:
+            membership = request.user.groupmembership_set.get(group=obj.place.group)
+            return not obj.is_full(trial=obj.require_role not in membership.roles)
+        return not obj.is_full(trial=False)
 
 
 class IsSameParticipant(permissions.BasePermission):
