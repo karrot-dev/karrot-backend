@@ -337,7 +337,7 @@ class ActivityJoinSerializer(serializers.ModelSerializer):
         place = activity.place
         group = place.group
         membership = user.groupmembership_set.get(group=group)
-        trial = activity.require_role and activity.require_role not in membership.roles
+        trial = True if activity.require_role and activity.require_role not in membership.roles else False
         activity.add_participant(user, trial=trial)
 
         stats.activity_joined(activity)
