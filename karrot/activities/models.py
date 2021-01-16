@@ -9,7 +9,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext as _
 from django.db import models
 from django.db import transaction
-from django.db.models import Avg, Count, DurationField, F, Q
+from django.db.models import Avg, Count, DurationField, F, Q, CheckConstraint
 from django.utils import timezone
 
 from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin
@@ -291,6 +291,12 @@ class Activity(BaseModel, ConversationMixin):
 
     class Meta:
         ordering = ['date']
+        constraints = [
+            CheckConstraint(
+                check=Q(max_trial_participants=None) | ~Q(require_role=''),
+                name='only_trial_participants_if_require_role',
+            )
+        ]
 
     activity_type = models.ForeignKey(
         ActivityType,
@@ -367,7 +373,7 @@ class Activity(BaseModel, ConversationMixin):
     def is_full(self, *, trial):
         max_participants = self.max_trial_participants if trial else self.max_participants
         qs = self.participants.filter(activityparticipant__is_trial=trial)
-        if not max_participants:
+        if max_participants is None:
             return False
         return qs.count() >= max_participants
 
@@ -389,10 +395,11 @@ class Activity(BaseModel, ConversationMixin):
         qs = self.participants.filter(activityparticipant__is_trial=trial)
         return max(0, max_participants - qs.count())
 
-    def add_participant(self, user):
+    def add_participant(self, user, *, trial=False):
         participant, _ = ActivityParticipant.objects.get_or_create(
             activity=self,
             user=user,
+            is_trial=trial,
         )
         return participant
 

@@ -1,5 +1,6 @@
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
+from django.db import IntegrityError
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -9,7 +10,8 @@ from karrot.conversations.models import ConversationNotificationStatus
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership, GroupStatus
 from karrot.activities.factories import ActivityFactory, ActivityTypeFactory
-from karrot.activities.models import to_range
+from karrot.activities.models import to_range, ActivityParticipant
+from karrot.groups.roles import APPROVED
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import UserFactory
@@ -439,6 +441,95 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.activity.refresh_from_db()
         self.assertFalse(self.activity.is_done, False)
+
+
+class TestTrialActivitiesAPI(APITestCase):
+    def setUp(self):
+        self.member = UserFactory()
+        self.other_member = UserFactory()
+        self.group = GroupFactory(members=[self.member, self.other_member])
+        self.place = PlaceFactory(group=self.group, status='active')
+        self.approved_member = UserFactory()
+        self.group.groupmembership_set.create(
+            user=self.approved_member,
+            roles=[APPROVED],
+        )
+        self.activity = ActivityFactory(
+            place=self.place,
+            require_role=APPROVED,
+            max_trial_participants=1,
+        )
+
+    def test_cannot_join_if_requires_role_and_no_trials(self):
+        activity_with_no_trials = ActivityFactory(
+            place=self.place,
+            require_role=APPROVED,
+            max_trial_participants=0,
+        )
+        self.client.force_login(user=self.member)
+        response = self.client.post('/api/activities/{}/add/'.format(activity_with_no_trials.id))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+    def test_can_join_as_trial_participant(self):
+        self.client.force_login(user=self.member)
+        response = self.client.post('/api/activities/{}/add/'.format(self.activity.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        participant = ActivityParticipant.objects.get(activity=self.activity, user=self.member)
+        self.assertTrue(participant.is_trial)
+
+    def test_cannot_join_as_trial_participant_if_full(self):
+        self.activity.add_participant(self.member, trial=True)
+        self.client.force_login(user=self.other_member)
+        response = self.client.post('/api/activities/{}/add/'.format(self.activity.id))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+    def test_can_join_as_normal_participant_if_has_role(self):
+        self.client.force_login(user=self.approved_member)
+        response = self.client.post('/api/activities/{}/add/'.format(self.activity.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        participant = ActivityParticipant.objects.get(activity=self.activity, user=self.approved_member)
+        self.assertFalse(participant.is_trial)
+
+    def test_backwards_compatible_participants_api(self):
+        self.activity.add_participant(self.member, trial=True)
+        self.activity.add_participant(self.approved_member, trial=False)
+        self.client.force_login(user=self.member)
+        response = self.client.get('/api/activities/{}/'.format(self.activity.id))
+
+        # participants field only shows non-trial participant user ids
+        self.assertEqual(response.data['participants'], [self.approved_member.id])
+
+    def test_next_participants_api(self):
+        self.activity.add_participant(self.member, trial=True)
+        self.activity.add_participant(self.approved_member, trial=False)
+        self.client.force_login(user=self.member)
+        response = self.client.get('/api/activities/{}/'.format(self.activity.id))
+
+        # participants_next field shows participant object with user id and trial status
+        self.assertEqual(len(response.data['participants_next']), 2)
+        self.assertDictContainsSubset(
+            {
+                'user': self.member.id,
+                'is_trial': True,
+            },
+            response.data['participants_next'][0],
+        )
+        self.assertDictContainsSubset(
+            {
+                'user': self.approved_member.id,
+                'is_trial': False,
+            },
+            response.data['participants_next'][1],
+        )
+
+    def test_cannot_set_max_trial_collectors_without_required_role(self):
+        # all good
+        ActivityFactory(place=self.place, require_role='foo')
+        # looks lovely
+        ActivityFactory(place=self.place, require_role='bar', max_trial_participants=47)
+        with self.assertRaises(IntegrityError):
+            # uh oh! what would a trial participant be here? given no role is needed...
+            ActivityFactory(place=self.place, max_trial_participants=47)
 
 
 class TestActivitiesListAPI(APITestCase, ExtractPaginationMixin):

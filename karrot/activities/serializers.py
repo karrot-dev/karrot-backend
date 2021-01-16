@@ -334,21 +334,25 @@ class ActivityJoinSerializer(serializers.ModelSerializer):
 
     def update(self, activity, validated_data):
         user = self.context['request'].user
-        activity.add_participant(user)
+        place = activity.place
+        group = place.group
+        membership = user.groupmembership_set.get(group=group)
+        trial = activity.require_role and activity.require_role not in membership.roles
+        activity.add_participant(user, trial=trial)
 
         stats.activity_joined(activity)
 
         History.objects.create(
             typus=HistoryTypus.ACTIVITY_JOIN,
-            group=activity.place.group,
-            place=activity.place,
+            group=group,
+            place=place,
             activity=activity,
             users=[
                 user,
             ],
             payload=ActivitySerializer(instance=activity).data,
         )
-        activity.place.group.refresh_active_status()
+        group.refresh_active_status()
         return activity
 
 
