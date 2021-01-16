@@ -17,8 +17,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='activity',
-            name='require_approval',
-            field=models.BooleanField(default=False),
+            name='require_role',
+            field=models.CharField(blank=True, max_length=100),
         ),
         migrations.AddField(
             model_name='activityparticipant',
