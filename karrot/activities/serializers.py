@@ -15,7 +15,8 @@ from karrot.base.base_models import CustomDateTimeTZRange
 from karrot.history.models import History, HistoryTypus
 from karrot.activities import stats
 from karrot.activities.models import (
-    Activity as ActivityModel, Feedback as FeedbackModel, ActivitySeries as ActivitySeriesModel, ActivityType
+    Activity as ActivityModel, Feedback as FeedbackModel, ActivitySeries as ActivitySeriesModel, ActivityType,
+    ActivityParticipant
 )
 from karrot.utils.date_utils import csv_datetime
 from karrot.utils.misc import find_changed
@@ -155,6 +156,21 @@ class DateTimeRangeField(serializers.Field):
         return CustomDateTimeTZRange(lower, upper)
 
 
+class ActivityParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ActivityParticipant
+        fields = [
+            'user',
+            'is_trial',
+            'created_at',
+        ]
+        read_only_fields = [
+            'user',
+            'is_trial',
+            'created_at',
+        ]
+
+
 class ActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = ActivityModel
@@ -180,13 +196,10 @@ class ActivitySerializer(serializers.ModelSerializer):
             'is_done',
         ]
 
-    participants = serializers.SerializerMethodField()
+    participants = ActivityParticipantSerializer(source='activityparticipant_set', many=True)
     feedback_due = DateTimeFieldWithTimezone(read_only=True, allow_null=True)
 
     date = DateTimeRangeField()
-
-    def get_participants(self, activity):
-        return [c.user_id for c in activity.activityparticipant_set.all()]
 
     def save(self, **kwargs):
         return super().save(last_changed_by=self.context['request'].user)
