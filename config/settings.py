@@ -307,6 +307,11 @@ INFLUXDB_TIMEOUT = 5
 INFLUXDB_USE_CELERY = False
 INFLUXDB_USE_THREADING = True
 
+# prepended to API routes
+# useful to set differently if you want to mount the application
+# inside a router
+API_PREFIX = 'api/'
+
 HUEY = {
     'immediate': True,
 }

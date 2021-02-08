@@ -85,31 +85,33 @@ router.register('unsubscribe', UnsubscribeViewSet, basename='unsubscribe')
 # Stats endpoints
 router.register('stats/activity-history', ActivityHistoryStatsViewSet)
 
-# prefix = 'api/'
-prefix = ''
+
+def api_path(_path, *args, **kwargs):
+    return path(settings.API_PREFIX + _path, *args, **kwargs)
+
 
 urlpatterns = [
-    path(prefix + 'auth/token/', obtain_auth_token),
-    path(prefix + 'auth/logout/', LogoutView.as_view()),
-    path(prefix + 'auth/user/', AuthUserView.as_view()),
-    path(prefix + 'auth/user/request_delete/', RequestDeleteUserView.as_view()),
-    path(prefix + 'auth/user/failed_email_deliveries/', FailedEmailDeliveryView.as_view()),
-    path(prefix + 'auth/email/', ChangeMailView.as_view()),
-    path(prefix + 'auth/email/verify/', VerifyMailView.as_view()),
-    path(prefix + 'auth/email/resend_verification_code/', ResendMailVerificationCodeView.as_view()),
-    path(prefix + 'auth/password/', ChangePasswordView.as_view()),
-    path(prefix + 'auth/password/request_reset/', RequestResetPasswordView.as_view()),
-    path(prefix + 'auth/password/reset/', ResetPasswordView.as_view()),
-    path(prefix + 'unsubscribe/<token>/', TokenUnsubscribeView.as_view()),
-    path(prefix + 'auth/', AuthView.as_view()),
-    path(prefix + 'stats/', FrontendStatsView.as_view()),
-    path(prefix + 'status/', StatusView.as_view()),
+    api_path('auth/token/', obtain_auth_token),
+    api_path('auth/logout/', LogoutView.as_view()),
+    api_path('auth/user/', AuthUserView.as_view()),
+    api_path('auth/user/request_delete/', RequestDeleteUserView.as_view()),
+    api_path('auth/user/failed_email_deliveries/', FailedEmailDeliveryView.as_view()),
+    api_path('auth/email/', ChangeMailView.as_view()),
+    api_path('auth/email/verify/', VerifyMailView.as_view()),
+    api_path('auth/email/resend_verification_code/', ResendMailVerificationCodeView.as_view()),
+    api_path('auth/password/', ChangePasswordView.as_view()),
+    api_path('auth/password/request_reset/', RequestResetPasswordView.as_view()),
+    api_path('auth/password/reset/', ResetPasswordView.as_view()),
+    api_path('unsubscribe/<token>/', TokenUnsubscribeView.as_view()),
+    api_path('auth/', AuthView.as_view()),
+    api_path('stats/', FrontendStatsView.as_view()),
+    api_path('status/', StatusView.as_view()),
     path('', include((router.urls))),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('admin/docs/', include('django.contrib.admindocs.urls')),
     path('admin/', admin.site.urls),
     path('docs/', get_swagger_view()),
-    path(prefix + 'anymail/', include('anymail.urls')),
+    api_path('anymail/', include('anymail.urls')),
     re_path(r'^silk/', include('silk.urls', namespace='silk'))
 ]
 
