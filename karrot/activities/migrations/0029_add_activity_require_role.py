@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='activity',
-            name='max_trial_participants',
+            name='max_participants_without_role',
             field=models.PositiveIntegerField(null=True),
         ),
         migrations.AddField(
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='activityparticipant',
-            name='is_trial',
+            name='is_without_role',
             field=models.BooleanField(default=False),
         ),
     ]

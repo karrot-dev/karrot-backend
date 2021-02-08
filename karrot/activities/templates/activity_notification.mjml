@@ -22,11 +22,11 @@
                                         {# TODO maybe show if it requires a role or not... #}
                                         {% if show_empty_participants_count %}
                                             -
-                                            {% trans trimmed empty_participants_count=activity.empty_participants_count(trial=False),
+                                            {% trans trimmed empty_participants_count=activity.empty_participants_count(without_role=False),
                                                     max_participants=activity.max_participants %}
                                                 {{ empty_participants_count }}/{{ max_participants }} remaining
                                             {% endtrans %}
-                                            {# TODO maybe show the available trial slots remaining too #}
+                                            {# TODO maybe show the available slots without role remaining too #}
                                         {% endif %}
                                     </li>
                                 {% endfor %}

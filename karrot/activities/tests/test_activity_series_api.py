@@ -118,7 +118,7 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
             created_activities.append({
                 'activity_type': self.activity_type.id,
                 'max_participants': 5,
-                'max_trial_participants': None,
+                'max_participants_without_role': None,
                 'require_role': '',
                 'series': series_id,
                 'participants': [],

@@ -161,12 +161,12 @@ class ActivityParticipantSerializer(serializers.ModelSerializer):
         model = ActivityParticipant
         fields = [
             'user',
-            'is_trial',
+            'is_without_role',
             'created_at',
         ]
         read_only_fields = [
             'user',
-            'is_trial',
+            'is_without_role',
             'created_at',
         ]
 
@@ -182,7 +182,7 @@ class ActivitySerializer(serializers.ModelSerializer):
             'place',
             'require_role',
             'max_participants',
-            'max_trial_participants',
+            'max_participants_without_role',
             'participants',
             'participants_next',
             'description',
@@ -210,10 +210,10 @@ class ActivitySerializer(serializers.ModelSerializer):
     date = DateTimeRangeField()
 
     def get_participants(self, activity):
-        # only return the non-trial participants here to keep it compatible.
-        # we filter for is_trial=False in python instead of using a filter because
+        # only return the participants without role here to keep it compatible.
+        # we filter for is_without_role=False in python instead of using a filter because
         # if we use a filter it won't use the prefetched data that we probably have available
-        return [c.user_id for c in activity.activityparticipant_set.all() if c.is_trial is False]
+        return [c.user_id for c in activity.activityparticipant_set.all() if c.is_without_role is False]
 
     def save(self, **kwargs):
         return super().save(last_changed_by=self.context['request'].user)
@@ -337,8 +337,8 @@ class ActivityJoinSerializer(serializers.ModelSerializer):
         place = activity.place
         group = place.group
         membership = user.groupmembership_set.get(group=group)
-        trial = True if activity.require_role and activity.require_role not in membership.roles else False
-        activity.add_participant(user, trial=trial)
+        without_role = True if activity.require_role and activity.require_role not in membership.roles else False
+        activity.add_participant(user, without_role=without_role)
 
         stats.activity_joined(activity)
 

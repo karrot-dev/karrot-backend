@@ -6,12 +6,12 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('activities', '0029_add_trial_activities'),
+        ('activities', '0029_add_activity_require_role'),
     ]
 
     operations = [
         migrations.AddConstraint(
             model_name='activity',
-            constraint=models.CheckConstraint(check=models.Q(('max_trial_participants', None), models.Q(_negated=True, require_role=''), _connector='OR'), name='only_trial_participants_if_require_role'),
+            constraint=models.CheckConstraint(check=models.Q(('max_participants_without_role', None), models.Q(_negated=True, require_role=''), _connector='OR'), name='only_trial_participants_if_require_role'),
         ),
     ]
