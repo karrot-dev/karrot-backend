@@ -287,7 +287,7 @@ CHANNEL_LAYERS = {
     },
 }
 
-ASGI_APPLICATION = 'karrot.subscriptions.routing.application'
+ASGI_APPLICATION = 'config.asgi_app.application'
 
 # Default dummy settings, please override in local_settings.py
 DEFAULT_FROM_EMAIL = "testing@example.com"
@@ -306,11 +306,6 @@ INFLUXDB_TAGS_HOST = ''
 INFLUXDB_TIMEOUT = 5
 INFLUXDB_USE_CELERY = False
 INFLUXDB_USE_THREADING = True
-
-# prepended to API routes
-# useful to set differently if you want to mount the application
-# inside a router
-API_PREFIX = 'api/'
 
 HUEY = {
     'immediate': True,
