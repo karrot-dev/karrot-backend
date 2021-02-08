@@ -37,6 +37,7 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
         self.activity_type = ActivityTypeFactory(group=self.group)
+        self.archived_activity_type = ActivityTypeFactory(group=self.group, status='archived')
 
     def test_create_and_get_recurring_series(self):
         self.maxDiff = None
@@ -148,6 +149,26 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
         self.client.post(url, activity_series_data, format='json')
         self.group.refresh_from_db()
         self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)
+
+    def test_create_series_for_archived_type_fails(self):
+        url = '/api/activity-series/'
+        recurrence = rrule.rrule(
+            freq=rrule.WEEKLY,
+            byweekday=[0, 1]  # Monday and Tuesday
+        )
+        start_date = self.group.timezone.localize(datetime.now().replace(hour=20, minute=0))
+        self.client.force_login(user=self.member)
+        response = self.client.post(
+            url, {
+                'activity_type': self.archived_activity_type.id,
+                'max_participants': 5,
+                'place': self.place.id,
+                'rule': str(recurrence),
+                'start_date': start_date
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
 
 class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):

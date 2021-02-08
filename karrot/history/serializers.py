@@ -18,12 +18,24 @@ class HistorySerializer(serializers.ModelSerializer):
             'place',
             'users',
             'payload',
+            'message',
+            'after',
         ]
 
     typus = SerializerMethodField()
+    after = SerializerMethodField()
 
     def get_typus(self, obj):
         return HistoryTypus.name(obj.typus)
+
+    def get_after(self, obj):
+        # It's limited to these types as if we just generally return it we might send
+        # internal/private data back to the client. This is a bit of technical debt as
+        # we should rethink the history data a bit to ensure we always have what we need.
+        return obj.after if obj.typus in (
+            HistoryTypus.ACTIVITY_TYPE_CREATE,
+            HistoryTypus.ACTIVITY_TYPE_MODIFY,
+        ) else None
 
 
 class HistoryExportSerializer(HistorySerializer):
@@ -38,6 +50,7 @@ class HistoryExportSerializer(HistorySerializer):
             'activity',
             'users',
             'activity_date',
+            'message',
         ]
 
     activity_date = serializers.SerializerMethodField()

@@ -22,9 +22,72 @@ from karrot.utils.misc import find_changed
 
 
 class ActivityTypeSerializer(serializers.ModelSerializer):
+    updated_message = serializers.CharField(write_only=True, required=False)
+
     class Meta:
         model = ActivityType
-        fields = '__all__'
+        fields = [
+            'id',
+            'name',
+            'name_is_translatable',
+            'colour',
+            'icon',
+            'has_feedback',
+            'has_feedback_weight',
+            'feedback_icon',
+            'status',
+            'group',
+            "created_at",
+            'updated_at',
+            'updated_message',
+            'group',
+        ]
+        read_only_fields = [
+            'id',
+            'created_at',
+            'updated_at',
+        ]
+
+    def save(self, **kwargs):
+        if not self.instance:
+            return super().save(**kwargs)
+
+        updated_message = self.validated_data.pop('updated_message', None)
+
+        activity_type = self.instance
+        changed_data = find_changed(activity_type, self.validated_data)
+        self._validated_data = changed_data
+        skip_update = len(self.validated_data.keys()) == 0
+        if skip_update:
+            return self.instance
+
+        before_data = ActivityTypeHistorySerializer(activity_type).data
+        activity_type = super().save(**kwargs)
+        after_data = ActivityTypeHistorySerializer(activity_type).data
+
+        if before_data != after_data:
+            History.objects.create(
+                typus=HistoryTypus.ACTIVITY_TYPE_MODIFY,
+                group=activity_type.group,
+                users=[self.context['request'].user],
+                payload={k: self.initial_data.get(k)
+                         for k in changed_data.keys()},
+                before=before_data,
+                after=after_data,
+                message=updated_message,
+            )
+        return activity_type
+
+    def create(self, validated_data):
+        activity_type = super().create(validated_data)
+        History.objects.create(
+            typus=HistoryTypus.ACTIVITY_TYPE_CREATE,
+            group=activity_type.group,
+            users=[self.context['request'].user],
+            payload=self.initial_data,
+            after=ActivityTypeHistorySerializer(activity_type).data,
+        )
+        return activity_type
 
 
 class ActivityHistorySerializer(serializers.ModelSerializer):
@@ -33,14 +96,24 @@ class ActivityHistorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ActivityTypeHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ActivityType
+        fields = '__all__'
+
+
 class DateTimeFieldWithTimezone(DateTimeField):
     def get_attribute(self, instance):
         value = super().get_attribute(instance)
+        if value is None:
+            return None
         if hasattr(instance, 'timezone'):
             return value.astimezone(instance.timezone)
         return value
 
     def enforce_timezone(self, value):
+        if value is None:
+            return None
         if timezone.is_aware(value):
             return value
         return super().enforce_timezone(value)
@@ -108,7 +181,7 @@ class ActivitySerializer(serializers.ModelSerializer):
         ]
 
     participants = serializers.SerializerMethodField()
-    feedback_due = DateTimeFieldWithTimezone(read_only=True)
+    feedback_due = DateTimeFieldWithTimezone(read_only=True, allow_null=True)
 
     date = DateTimeRangeField()
 
@@ -131,6 +204,11 @@ class ActivitySerializer(serializers.ModelSerializer):
         )
         activity.place.group.refresh_active_status()
         return activity
+
+    def validate_activity_type(self, activity_type):
+        if activity_type.status != 'active':
+            raise serializers.ValidationError('You can only create activities for active types')
+        return activity_type
 
     def validate_place(self, place):
         if not place.group.is_editor(self.context['request'].user):
@@ -334,6 +412,11 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
         )
         series.place.group.refresh_active_status()
         return series
+
+    def validate_activity_type(self, activity_type):
+        if activity_type.status != 'active':
+            raise serializers.ValidationError('You can only create series for active types')
+        return activity_type
 
     def validate_place(self, place):
         if not place.group.is_editor(self.context['request'].user):
