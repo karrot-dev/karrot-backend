@@ -11,10 +11,11 @@ from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership, GroupStatus
 from karrot.activities.factories import ActivityFactory, ActivityTypeFactory
 from karrot.activities.models import to_range, ActivityParticipant
-from karrot.groups.roles import APPROVED
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import UserFactory
+
+APPROVED = 'approved'
 
 
 class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
