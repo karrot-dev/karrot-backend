@@ -346,7 +346,7 @@ MEDIA_URL = '/media/'
 ALLOWED_HOSTS = [s.strip() for s in options['ALLOWED_HOSTS'].split(',')] if options['ALLOWED_HOSTS'] else []
 CSRF_TRUSTED_ORIGINS = [s.strip() for s in options['CSRF_TRUSTED_ORIGINS'].split(',')] if options['CSRF_TRUSTED_ORIGINS'] else []
 
-INFLUXDB_HOST = options.get('INFLUXDB_HOST')
+INFLUXDB_HOST = options['INFLUXDB_HOST']
 
 INFLUXDB_DISABLED = not INFLUXDB_HOST
 
