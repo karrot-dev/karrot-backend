@@ -340,7 +340,7 @@ MEDIA_ROOT = options['FILE_UPLOAD_DIR']
 FILE_UPLOAD_PERMISSIONS = options['FILE_UPLOAD_PERMISSIONS']  # 0o640
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = options['FILE_UPLOAD_DIRECTORY_PERMISSIONS']  # 0o750
 
-STATIC_ROOT = './static/'
+STATIC_ROOT = './karrot/static/'
 MEDIA_URL = '/media/'
 
 ALLOWED_HOSTS = [s.strip() for s in options['ALLOWED_HOSTS'].split(',')] if options['ALLOWED_HOSTS'] else []
