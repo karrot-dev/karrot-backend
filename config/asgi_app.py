@@ -40,8 +40,8 @@ async def http_app(scope, receive, send):
         path = scope['path']
         # TODO: need to check some more paths here... maybe a regex?
         # TODO: maybe a seperate static_app needed if that is set.. for prod?
-        if path.startswith('/api/') or path.startswith('/docs/') or path.startswith('/api-auth/') or path.startswith(
-                '/static/'):
+
+        if any(path.startswith(prefix) for prefix in ('/api/', '/docs/', '/api-auth/', '/static/')):
             app = api_app
         elif path.startswith('/media'):
             scope['path'] = path[len('/media'):]
