@@ -18,6 +18,7 @@ karrot/*/templates/*.html.jinja2
 mjml/node_modules
 grafana/config.py
 dist
+.env
 
 # IDE
 /.idea

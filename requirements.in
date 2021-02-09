@@ -51,6 +51,7 @@ aiofiles
 shiv
 uvicorn[standard]
 python-dotenv
+click
 
 # dev PyPI dependencies
 pip-tools

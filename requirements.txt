@@ -87,6 +87,7 @@ chardet==3.0.4
     #   talon
 click==7.1.2
     # via
+    #   -r requirements.in
     #   pip-tools
     #   shiv
     #   uvicorn

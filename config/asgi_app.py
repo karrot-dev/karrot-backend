@@ -27,21 +27,31 @@ def AllowedHostsAndFileOriginValidator(application):
 
 api_app = get_asgi_application()
 media_app = StaticFiles(directory='./uploads')
-frontend_app = StaticFiles(directory='/code/karrot/karrot-frontend/dist/pwa/', html=True)
+
+if settings.FRONTEND_DIR:
+    frontend_app = StaticFiles(directory=settings.FRONTEND_DIR, html=True)
+else:
+    frontend_app = None
 
 
 async def http_app(scope, receive, send):
+    app = None
     if 'path' in scope:
         path = scope['path']
-        if path.startswith('/api'):
+        # TODO: need to check some more paths here... maybe a regex?
+        # TODO: maybe a seperate static_app needed if that is set.. for prod?
+        if path.startswith('/api') or path.startswith('/docs') or path.startswith('/static'):
             app = api_app
         elif path.startswith('/media'):
             scope['path'] = path[len('/media'):]
             app = media_app
         else:
             app = frontend_app
-        return await app(scope, receive, send)
-    raise Exception('invalid')
+
+    if not app:
+        raise Exception('invalid')
+
+    return await app(scope, receive, send)
 
 
 application = ProtocolTypeRouter({
