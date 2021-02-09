@@ -22,34 +22,49 @@ def setup(env_files=()):
 
 
 @click.group()
-def cli():
-    pass
+@click.option('env_files', '--env', help='path to env file', multiple=True)
+def cli(env_files):
+    setup(env_files)
 
 
-@click.command()
+@cli.command()
 def check():
-    setup()
     management.call_command("check")
 
 
-@click.command()
+@cli.command()
+def shell():
+    management.call_command("shell_plus")
+
+
+@cli.command()
+def dbshell():
+    management.call_command("dbshell")
+
+
+@cli.command()
 def migrate():
-    setup()
     management.call_command("migrate", interactive=False)
 
 
-@click.command()
-@click.option('env_files', '--env', help='path to env file', multiple=True)
-def config(env_files):
-    setup(env_files)
+@cli.command()
+def worker():
+    management.call_command("run_huey")
+
+
+@cli.command()
+def basedir():
+    print(settings.BASE_DIR)
+
+
+@cli.command()
+def config():
     for key, value in get_options().items():
         print(key + '=' + (value if value else ''))
 
 
-@click.command()
-@click.option('env_files', '--env', help='path to env file', multiple=True)
-def server(env_files):
-    setup(env_files)
+@cli.command()
+def server():
     server_uvicorn() if settings.LISTEN_SERVER == 'uvicorn' else server_daphne()
 
 
@@ -98,11 +113,6 @@ def server_daphne():
 
     CommandLineInterface().run(args)
 
-
-cli.add_command(check)
-cli.add_command(config)
-cli.add_command(migrate)
-cli.add_command(server)
 
 run = cli
 
