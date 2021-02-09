@@ -104,5 +104,7 @@ cli.add_command(config)
 cli.add_command(migrate)
 cli.add_command(server)
 
+run = cli
+
 if __name__ == '__main__':
-    cli()
+    run()

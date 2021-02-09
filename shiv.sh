@@ -9,5 +9,5 @@ site_packages=$(python3 -c 'import sysconfig; print(sysconfig.get_paths()["purel
 shiv --output-file=karrot.pyz \
      --site-packages="$site_packages" \
      --python="/usr/bin/env python3" \
-     --entry-point=config.asgi:run \
+     --entry-point=karrot.cli:run \
      --no-deps .

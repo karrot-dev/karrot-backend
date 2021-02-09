@@ -8,6 +8,13 @@ setup(
     author='Karrot Team',
     author_email='info@karrot.world',
     license='MIT',
-    packages=find_packages(include=['config', 'karrot', 'karrot.*']),
+    packages=find_packages(
+        include=['config', 'karrot', 'karrot.*'],
+        exclude=['config/local_settings'],  # doesn't work :(
+    ),
+    package_data={
+        'config': ['options.env'],
+        'karrot': ['*/templates/*.jinja2'],
+    },
     zip_safe=False
 )
