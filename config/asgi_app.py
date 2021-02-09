@@ -26,7 +26,14 @@ def AllowedHostsAndFileOriginValidator(application):
 
 
 api_app = get_asgi_application()
+api_prefixes = ['/api/', '/docs/', '/api-auth/']
 media_app = StaticFiles(directory=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    static_app = None
+    api_prefixes += ['/static/']
+else:
+    static_app = StaticFiles(directory=settings.STATIC_ROOT)
 
 if settings.FRONTEND_DIR:
     frontend_app = StaticFiles(directory=settings.FRONTEND_DIR, html=True)
@@ -38,14 +45,14 @@ async def http_app(scope, receive, send):
     app = None
     if 'path' in scope:
         path = scope['path']
-        # TODO: need to check some more paths here... maybe a regex?
-        # TODO: maybe a seperate static_app needed if that is set.. for prod?
-
-        if any(path.startswith(prefix) for prefix in ('/api/', '/docs/', '/api-auth/', '/static/')):
+        if any(path.startswith(prefix) for prefix in api_prefixes):
             app = api_app
         elif path.startswith('/media'):
             scope['path'] = path[len('/media'):]
             app = media_app
+        elif static_app and path.startswith('/static/'):
+            scope['path'] = path[len('/static'):]
+            app = static_app
         else:
             app = frontend_app
 
