@@ -49,7 +49,8 @@ geoip2
 starlette
 aiofiles
 shiv
-whitenoise
+uvicorn[standard]
+python-dotenv
 
 # dev PyPI dependencies
 pip-tools

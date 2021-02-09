@@ -4,166 +4,475 @@
 #
 #    pip-compile
 #
--e git+https://github.com/tiltec/django-anymail@916580#egg=django-anymail  # via -r requirements.in
--e git+https://github.com/tiltec/django-influxdb-metrics@1746b8e206#egg=django-influxdb-metrics  # via -r requirements.in
--e git+https://github.com/tiltec/django-rest-swagger@d15dd9a#egg=django-rest-swagger  # via -r requirements.in
--e git+https://github.com/tiltec/talon@80886cd#egg=talon  # via -r requirements.in
-aiofiles==0.6.0           # via -r requirements.in
-aiohttp==3.7.3            # via geoip2
-aioredis==1.3.1           # via channels-redis
-apipkg==1.5               # via execnet
-appdirs==1.4.4            # via virtualenv
-argon2-cffi==20.1.0       # via django
-asgiref==3.3.1            # via channels, channels-redis, daphne, django
-async-timeout==3.0.1      # via aiohttp, aioredis
-attrs==20.3.0             # via aiohttp, automat, glom, pytest, service-identity, twisted
-autobahn==20.12.3         # via daphne
-autoflake==1.4            # via -r requirements.in
-automat==20.2.0           # via twisted
-autopep8==1.5.4           # via -r requirements.in, django-silk
-babel==2.9.0              # via -r requirements.in
-backcall==0.2.0           # via ipython
-bleach-allowlist==1.0.3   # via -r requirements.in
-bleach==3.2.3             # via -r requirements.in
-boltons==20.2.1           # via face, glom
-cchardet==2.1.7           # via talon
-certifi==2020.12.5        # via requests
-cffi==1.14.4              # via argon2-cffi, cryptography
-cfgv==3.2.0               # via pre-commit
-channels-redis==3.2.0     # via -r requirements.in
-channels==3.0.3           # via -r requirements.in, channels-redis
-chardet==3.0.4            # via aiohttp, requests, talon
-click==7.1.2              # via pip-tools, shiv
-constantly==15.1.0        # via twisted
-coreapi==2.3.3            # via django-rest-swagger, openapi-codec
-coreschema==0.0.4         # via coreapi
-coverage==5.4             # via pytest-cov
-cryptography==3.3.1       # via autobahn, pyopenssl, service-identity
-cssselect==1.1.0          # via talon
-daphne==3.0.1             # via -r requirements.in, channels
-decorator==4.4.2          # via ipython, traitlets
-distlib==0.3.1            # via virtualenv
-django-cors-headers==3.7.0  # via -r requirements.in
-django-crispy-forms==1.11.0  # via -r requirements.in
-django-dirtyfields==1.5.0  # via -r requirements.in
-django-enumfield==2.0.2   # via -r requirements.in
-django-extensions==3.1.0  # via -r requirements.in
-django-filter==2.4.0      # via -r requirements.in
-django-jinja==2.7.0       # via -r requirements.in
-django-redis==4.12.1      # via -r requirements.in
-django-silk==4.1.0        # via -r requirements.in
-django-timezone-field==4.1.1  # via -r requirements.in
-django-versatileimagefield==2.0  # via -r requirements.in
-django[argon2]==3.1.5     # via -r requirements.in, channels, django-anymail, django-cors-headers, django-dirtyfields, django-filter, django-influxdb-metrics, django-jinja, django-redis, django-rest-swagger, django-silk, django-timezone-field, djangorestframework
-djangorestframework-csv==2.1.0  # via -r requirements.in
-djangorestframework==3.12.2  # via -r requirements.in, django-rest-swagger, djangorestframework-csv
-execnet==1.8.0            # via pytest-xdist
-face==20.1.1              # via glom
-factory-boy==3.2.0        # via -r requirements.in
-faker==5.8.0              # via factory-boy
-filelock==3.0.12          # via virtualenv
-flake8==3.8.4             # via -r requirements.in
-freezegun==1.1.0          # via -r requirements.in
-furl==2.1.0               # via -r requirements.in
-geoip2==4.1.0             # via -r requirements.in
-gevent==21.1.2            # via -r requirements.in
-glom==20.11.0             # via -r requirements.in
-gprof2dot==2019.11.30     # via django-silk
-greenlet==1.0.0           # via gevent
-hiredis==1.1.0            # via -r requirements.in, aioredis
-html2text==2020.1.16      # via -r requirements.in
-html5lib==1.1             # via talon
-huey==2.3.0               # via -r requirements.in
-hyperlink==21.0.0         # via autobahn, twisted
-identify==1.5.13          # via pre-commit
-idna==2.10                # via hyperlink, requests, twisted, yarl
-importlib-metadata==3.4.0  # via -r requirements.in, flake8, markdown, pluggy, pre-commit, pytest, virtualenv
-incremental==17.5.0       # via twisted
-influxdb==5.3.1           # via django-influxdb-metrics
-iniconfig==1.1.1          # via pytest
-ipython-genutils==0.2.0   # via traitlets
-ipython==7.19.0           # via -r requirements.in
-itypes==1.2.0             # via coreapi
-jedi==0.18.0              # via ipython
-jinja2==2.11.2            # via coreschema, django-jinja, django-silk
-logging-tree==1.8.1       # via -r requirements.in
-lxml==4.6.2               # via talon
-markdown==3.3.3           # via -r requirements.in, pymdown-extensions
-markupsafe==1.1.1         # via jinja2
-maxminddb==2.0.3          # via geoip2
-mccabe==0.6.1             # via flake8
-more-itertools==8.6.0     # via -r requirements.in
-msgpack==1.0.2            # via channels-redis, influxdb
-multidict==5.1.0          # via aiohttp, yarl
-nodeenv==1.5.0            # via pre-commit
-openapi-codec==1.3.2      # via django-rest-swagger
-orderedmultidict==1.0.1   # via furl
-packaging==20.9           # via bleach, pytest
-parso==0.8.1              # via jedi
-pexpect==4.8.0            # via ipython
-pickleshare==0.7.5        # via ipython
-pillow==8.1.0             # via django-versatileimagefield
-pip-tools==5.5.0          # via -r requirements.in
-pluggy==0.13.1            # via pytest
-pre-commit==2.10.0        # via -r requirements.in
-prompt-toolkit==3.0.14    # via ipython
-psutil==5.8.0             # via python-server-metrics
-psycopg2-binary==2.8.6    # via -r requirements.in
-ptyprocess==0.7.0         # via pexpect
-py==1.10.0                # via pytest, pytest-forked
-pyasn1-modules==0.2.8     # via service-identity
-pyasn1==0.4.8             # via pyasn1-modules, service-identity
-pycodestyle==2.6.0        # via autopep8, flake8
-pycparser==2.20           # via cffi
-pyfcm==1.5.1              # via -r requirements.in
-pyflakes==2.2.0           # via autoflake, flake8
-pygments==2.7.4           # via django-silk, ipython
-pyhamcrest==2.0.2         # via twisted
-pymdown-extensions==8.1.1  # via -r requirements.in
-pyopenssl==20.0.1         # via twisted
-pyparsing==2.4.7          # via packaging
-pytest-asyncio==0.14.0    # via -r requirements.in
-pytest-cov==2.11.1        # via -r requirements.in
-pytest-django==4.1.0      # via -r requirements.in
-pytest-forked==1.3.0      # via pytest-xdist
-pytest-xdist==2.2.0       # via -r requirements.in
-pytest==6.2.2             # via pytest-asyncio, pytest-cov, pytest-django, pytest-forked, pytest-xdist
-python-dateutil==2.8.1    # via django-silk, faker, freezegun, influxdb
-python-magic==0.4.18      # via django-versatileimagefield
-python-server-metrics==0.2.1  # via django-influxdb-metrics
-pytz==2020.5              # via -r requirements.in, babel, django, django-dirtyfields, django-silk, django-timezone-field, influxdb
-pyyaml==5.4.1             # via pre-commit
-raven==6.10.0             # via -r requirements.in
-redis==3.5.3              # via -r requirements.in, django-redis
-regex==2020.11.13         # via talon
-requests-mock==1.8.0      # via -r requirements.in
-requests==2.25.1          # via -r requirements.in, coreapi, django-anymail, django-silk, geoip2, influxdb, pyfcm, requests-mock
-service-identity==18.1.0  # via twisted
-shiv==0.4.0               # via -r requirements.in
-simplejson==3.17.2        # via django-rest-swagger
-six==1.15.0               # via argon2-cffi, automat, bleach, cryptography, django-enumfield, djangorestframework-csv, furl, html5lib, influxdb, orderedmultidict, pyopenssl, python-dateutil, requests-mock, talon, virtualenv
-sqlparse==0.4.1           # via django, django-silk
-starlette==0.14.1         # via -r requirements.in
-tblib==1.7.0              # via -r requirements.in
-text-unidecode==1.3       # via faker
-tld==0.12.5               # via django-influxdb-metrics
-toml==0.10.2              # via autopep8, pre-commit, pytest
-traitlets==4.3.3          # via ipython
-twisted[tls]==20.3.0      # via daphne
-txaio==20.12.1            # via autobahn
-typing-extensions==3.7.4.3  # via aiohttp
-unicodecsv==0.14.1        # via djangorestframework-csv
-uritemplate==3.0.1        # via coreapi
-urllib3==1.26.3           # via geoip2, requests
-virtualenv==20.4.0        # via pre-commit
-wcwidth==0.2.5            # via prompt-toolkit
-webencodings==0.5.1       # via bleach, html5lib
-whitenoise==5.2.0         # via -r requirements.in
-yapf==0.30.0              # via -r requirements.in
-yarl==1.6.3               # via aiohttp
-zipp==3.4.0               # via importlib-metadata
-zope.event==4.5.0         # via gevent
-zope.interface==5.2.0     # via gevent, twisted
+-e git+https://github.com/tiltec/django-anymail@916580#egg=django-anymail
+    # via -r requirements.in
+-e git+https://github.com/tiltec/django-influxdb-metrics@1746b8e206#egg=django-influxdb-metrics
+    # via -r requirements.in
+-e git+https://github.com/tiltec/django-rest-swagger@d15dd9a#egg=django-rest-swagger
+    # via -r requirements.in
+-e git+https://github.com/tiltec/talon@80886cd#egg=talon
+    # via -r requirements.in
+aiofiles==0.6.0
+    # via -r requirements.in
+aiohttp==3.7.3
+    # via geoip2
+aioredis==1.3.1
+    # via channels-redis
+apipkg==1.5
+    # via execnet
+appdirs==1.4.4
+    # via virtualenv
+argon2-cffi==20.1.0
+    # via django
+asgiref==3.3.1
+    # via
+    #   channels
+    #   channels-redis
+    #   daphne
+    #   django
+async-timeout==3.0.1
+    # via
+    #   aiohttp
+    #   aioredis
+attrs==20.3.0
+    # via
+    #   aiohttp
+    #   automat
+    #   glom
+    #   pytest
+    #   service-identity
+    #   twisted
+autobahn==20.12.3
+    # via daphne
+autoflake==1.4
+    # via -r requirements.in
+automat==20.2.0
+    # via twisted
+autopep8==1.5.4
+    # via
+    #   -r requirements.in
+    #   django-silk
+babel==2.9.0
+    # via -r requirements.in
+backcall==0.2.0
+    # via ipython
+bleach-allowlist==1.0.3
+    # via -r requirements.in
+bleach==3.2.3
+    # via -r requirements.in
+boltons==20.2.1
+    # via
+    #   face
+    #   glom
+cchardet==2.1.7
+    # via talon
+certifi==2020.12.5
+    # via requests
+cffi==1.14.4
+    # via
+    #   argon2-cffi
+    #   cryptography
+cfgv==3.2.0
+    # via pre-commit
+channels-redis==3.2.0
+    # via -r requirements.in
+channels==3.0.3
+    # via
+    #   -r requirements.in
+    #   channels-redis
+chardet==3.0.4
+    # via
+    #   aiohttp
+    #   requests
+    #   talon
+click==7.1.2
+    # via
+    #   pip-tools
+    #   shiv
+    #   uvicorn
+constantly==15.1.0
+    # via twisted
+coreapi==2.3.3
+    # via
+    #   django-rest-swagger
+    #   openapi-codec
+coreschema==0.0.4
+    # via coreapi
+coverage==5.4
+    # via pytest-cov
+cryptography==3.3.1
+    # via
+    #   autobahn
+    #   pyopenssl
+    #   service-identity
+cssselect==1.1.0
+    # via talon
+daphne==3.0.1
+    # via
+    #   -r requirements.in
+    #   channels
+decorator==4.4.2
+    # via
+    #   ipython
+    #   traitlets
+distlib==0.3.1
+    # via virtualenv
+django-cors-headers==3.7.0
+    # via -r requirements.in
+django-crispy-forms==1.11.0
+    # via -r requirements.in
+django-dirtyfields==1.5.0
+    # via -r requirements.in
+django-enumfield==2.0.2
+    # via -r requirements.in
+django-extensions==3.1.0
+    # via -r requirements.in
+django-filter==2.4.0
+    # via -r requirements.in
+django-jinja==2.7.0
+    # via -r requirements.in
+django-redis==4.12.1
+    # via -r requirements.in
+django-silk==4.1.0
+    # via -r requirements.in
+django-timezone-field==4.1.1
+    # via -r requirements.in
+django-versatileimagefield==2.0
+    # via -r requirements.in
+django[argon2]==3.1.5
+    # via
+    #   -r requirements.in
+    #   channels
+    #   django-anymail
+    #   django-cors-headers
+    #   django-dirtyfields
+    #   django-filter
+    #   django-influxdb-metrics
+    #   django-jinja
+    #   django-redis
+    #   django-rest-swagger
+    #   django-silk
+    #   django-timezone-field
+    #   djangorestframework
+djangorestframework-csv==2.1.0
+    # via -r requirements.in
+djangorestframework==3.12.2
+    # via
+    #   -r requirements.in
+    #   django-rest-swagger
+    #   djangorestframework-csv
+execnet==1.8.0
+    # via pytest-xdist
+face==20.1.1
+    # via glom
+factory-boy==3.2.0
+    # via -r requirements.in
+faker==5.8.0
+    # via factory-boy
+filelock==3.0.12
+    # via virtualenv
+flake8==3.8.4
+    # via -r requirements.in
+freezegun==1.1.0
+    # via -r requirements.in
+furl==2.1.0
+    # via -r requirements.in
+geoip2==4.1.0
+    # via -r requirements.in
+gevent==21.1.2
+    # via -r requirements.in
+glom==20.11.0
+    # via -r requirements.in
+gprof2dot==2019.11.30
+    # via django-silk
+greenlet==1.0.0
+    # via gevent
+h11==0.12.0
+    # via uvicorn
+hiredis==1.1.0
+    # via
+    #   -r requirements.in
+    #   aioredis
+html2text==2020.1.16
+    # via -r requirements.in
+html5lib==1.1
+    # via talon
+httptools==0.1.1
+    # via uvicorn
+huey==2.3.0
+    # via -r requirements.in
+hyperlink==21.0.0
+    # via
+    #   autobahn
+    #   twisted
+identify==1.5.13
+    # via pre-commit
+idna==2.10
+    # via
+    #   hyperlink
+    #   requests
+    #   twisted
+    #   yarl
+importlib-metadata==3.4.0
+    # via -r requirements.in
+incremental==17.5.0
+    # via twisted
+influxdb==5.3.1
+    # via django-influxdb-metrics
+iniconfig==1.1.1
+    # via pytest
+ipython-genutils==0.2.0
+    # via traitlets
+ipython==7.19.0
+    # via -r requirements.in
+itypes==1.2.0
+    # via coreapi
+jedi==0.18.0
+    # via ipython
+jinja2==2.11.2
+    # via
+    #   coreschema
+    #   django-jinja
+    #   django-silk
+logging-tree==1.8.1
+    # via -r requirements.in
+lxml==4.6.2
+    # via talon
+markdown==3.3.3
+    # via
+    #   -r requirements.in
+    #   pymdown-extensions
+markupsafe==1.1.1
+    # via jinja2
+maxminddb==2.0.3
+    # via geoip2
+mccabe==0.6.1
+    # via flake8
+more-itertools==8.6.0
+    # via -r requirements.in
+msgpack==1.0.2
+    # via
+    #   channels-redis
+    #   influxdb
+multidict==5.1.0
+    # via
+    #   aiohttp
+    #   yarl
+nodeenv==1.5.0
+    # via pre-commit
+openapi-codec==1.3.2
+    # via django-rest-swagger
+orderedmultidict==1.0.1
+    # via furl
+packaging==20.9
+    # via
+    #   bleach
+    #   pytest
+parso==0.8.1
+    # via jedi
+pexpect==4.8.0
+    # via ipython
+pickleshare==0.7.5
+    # via ipython
+pillow==8.1.0
+    # via django-versatileimagefield
+pip-tools==5.5.0
+    # via -r requirements.in
+pluggy==0.13.1
+    # via pytest
+pre-commit==2.10.0
+    # via -r requirements.in
+prompt-toolkit==3.0.14
+    # via ipython
+psutil==5.8.0
+    # via python-server-metrics
+psycopg2-binary==2.8.6
+    # via -r requirements.in
+ptyprocess==0.7.0
+    # via pexpect
+py==1.10.0
+    # via
+    #   pytest
+    #   pytest-forked
+pyasn1-modules==0.2.8
+    # via service-identity
+pyasn1==0.4.8
+    # via
+    #   pyasn1-modules
+    #   service-identity
+pycodestyle==2.6.0
+    # via
+    #   autopep8
+    #   flake8
+pycparser==2.20
+    # via cffi
+pyfcm==1.5.1
+    # via -r requirements.in
+pyflakes==2.2.0
+    # via
+    #   autoflake
+    #   flake8
+pygments==2.7.4
+    # via
+    #   django-silk
+    #   ipython
+pyhamcrest==2.0.2
+    # via twisted
+pymdown-extensions==8.1.1
+    # via -r requirements.in
+pyopenssl==20.0.1
+    # via twisted
+pyparsing==2.4.7
+    # via packaging
+pytest-asyncio==0.14.0
+    # via -r requirements.in
+pytest-cov==2.11.1
+    # via -r requirements.in
+pytest-django==4.1.0
+    # via -r requirements.in
+pytest-forked==1.3.0
+    # via pytest-xdist
+pytest-xdist==2.2.0
+    # via -r requirements.in
+pytest==6.2.2
+    # via
+    #   pytest-asyncio
+    #   pytest-cov
+    #   pytest-django
+    #   pytest-forked
+    #   pytest-xdist
+python-dateutil==2.8.1
+    # via
+    #   django-silk
+    #   faker
+    #   freezegun
+    #   influxdb
+python-dotenv==0.15.0
+    # via
+    #   -r requirements.in
+    #   uvicorn
+python-magic==0.4.18
+    # via django-versatileimagefield
+python-server-metrics==0.2.1
+    # via django-influxdb-metrics
+pytz==2020.5
+    # via
+    #   -r requirements.in
+    #   babel
+    #   django
+    #   django-dirtyfields
+    #   django-silk
+    #   django-timezone-field
+    #   influxdb
+pyyaml==5.4.1
+    # via
+    #   pre-commit
+    #   uvicorn
+raven==6.10.0
+    # via -r requirements.in
+redis==3.5.3
+    # via
+    #   -r requirements.in
+    #   django-redis
+regex==2020.11.13
+    # via talon
+requests-mock==1.8.0
+    # via -r requirements.in
+requests==2.25.1
+    # via
+    #   -r requirements.in
+    #   coreapi
+    #   django-anymail
+    #   django-silk
+    #   geoip2
+    #   influxdb
+    #   pyfcm
+    #   requests-mock
+service-identity==18.1.0
+    # via twisted
+shiv==0.4.0
+    # via -r requirements.in
+simplejson==3.17.2
+    # via django-rest-swagger
+six==1.15.0
+    # via
+    #   argon2-cffi
+    #   automat
+    #   bleach
+    #   cryptography
+    #   django-enumfield
+    #   djangorestframework-csv
+    #   furl
+    #   html5lib
+    #   influxdb
+    #   orderedmultidict
+    #   pyopenssl
+    #   python-dateutil
+    #   requests-mock
+    #   talon
+    #   traitlets
+    #   virtualenv
+sqlparse==0.4.1
+    # via
+    #   django
+    #   django-silk
+starlette==0.14.1
+    # via -r requirements.in
+tblib==1.7.0
+    # via -r requirements.in
+text-unidecode==1.3
+    # via faker
+tld==0.12.5
+    # via django-influxdb-metrics
+toml==0.10.2
+    # via
+    #   autopep8
+    #   pre-commit
+    #   pytest
+traitlets==4.3.3
+    # via ipython
+twisted[tls]==20.3.0
+    # via daphne
+txaio==20.12.1
+    # via autobahn
+typing-extensions==3.7.4.3
+    # via aiohttp
+unicodecsv==0.14.1
+    # via djangorestframework-csv
+uritemplate==3.0.1
+    # via coreapi
+urllib3==1.26.3
+    # via
+    #   geoip2
+    #   requests
+uvicorn[standard]==0.13.3
+    # via -r requirements.in
+uvloop==0.14.0
+    # via uvicorn
+virtualenv==20.4.0
+    # via pre-commit
+watchgod==0.6
+    # via uvicorn
+wcwidth==0.2.5
+    # via prompt-toolkit
+webencodings==0.5.1
+    # via
+    #   bleach
+    #   html5lib
+websockets==8.1
+    # via uvicorn
+yapf==0.30.0
+    # via -r requirements.in
+yarl==1.6.3
+    # via aiohttp
+zipp==3.4.0
+    # via importlib-metadata
+zope.event==4.5.0
+    # via gevent
+zope.interface==5.2.0
+    # via
+    #   gevent
+    #   twisted
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
