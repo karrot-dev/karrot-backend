@@ -27,6 +27,7 @@ aliases:
         env/bin/pip install --upgrade pip
         env/bin/pip install --upgrade pip-tools
         PIP_EXISTS_ACTION=w env/bin/pip-sync requirements*.txt
+        echo "export PATH=$(pwd)/env/bin:$PATH" >> $BASH_ENV
 
   - &add-token-to-remote
     run:
@@ -60,7 +61,6 @@ jobs:
       - run:
           name: setup
           command: |
-            echo "export PATH=$(pwd)/env/bin:$PATH" >> $BASH_ENV
             cp config/ci.env .env
             (cd mjml && yarn)
             mjml/convert
