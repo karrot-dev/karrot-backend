@@ -64,19 +64,18 @@ async def http_app(scope, receive, send):
                 for key in keep_headers:
                     if key in r.headers:
                         headers[key] = r.headers[key]
-                print('headers are', r.headers)
                 response = Response(
                     r.content,
                     status_code=r.status_code,
                     headers=headers,
                     media_type=r.headers['content-type'],
                 )
-                await response(scope, receive, send)
+                return await response(scope, receive, send)
         else:
             app = frontend_app
 
     if not app:
-        raise Exception('invalid')
+        raise Exception('invalid request for ' + path)
 
     return await app(scope, receive, send)
 
