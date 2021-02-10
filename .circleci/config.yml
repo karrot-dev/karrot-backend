@@ -60,7 +60,7 @@ jobs:
       - run:
           name: setup
           command: |
-            cp config/local_settings.py.ci config/local_settings.py
+            cp config/ci.env .env
             (cd mjml && yarn)
             mjml/convert
       - run:
@@ -90,7 +90,6 @@ jobs:
       - run:
           name: build
           command: |
-            rm config/local_settings.py
             ./scripts/build
       - store_artifacts:
           path: karrot-backend
