@@ -1,8 +1,10 @@
+import httpx
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter
 from channels.security import websocket
 from django.conf import settings
 from django.core.asgi import get_asgi_application
+from starlette.responses import Response
 
 from starlette.staticfiles import StaticFiles
 
@@ -53,6 +55,23 @@ async def http_app(scope, receive, send):
         elif static_app and path.startswith('/static/'):
             scope['path'] = path[len('/static'):]
             app = static_app
+        elif path.startswith('/community_proxy/'):
+            async with httpx.AsyncClient() as client:
+                proxy_url = 'https://community.foodsaving.world' + path[len('/community_proxy'):]
+                r = await client.get(proxy_url)
+                keep_headers = ['cache-control', 'last-modified']
+                headers = {}
+                for key in keep_headers:
+                    if key in r.headers:
+                        headers[key] = r.headers[key]
+                print('headers are', r.headers)
+                response = Response(
+                    r.content,
+                    status_code=r.status_code,
+                    headers=headers,
+                    media_type=r.headers['content-type'],
+                )
+                await response(scope, receive, send)
         else:
             app = frontend_app
 

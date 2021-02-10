@@ -67,7 +67,9 @@ boltons==20.2.1
 cchardet==2.1.7
     # via talon
 certifi==2020.12.5
-    # via requests
+    # via
+    #   httpx
+    #   requests
 cffi==1.14.4
     # via
     #   argon2-cffi
@@ -189,7 +191,9 @@ gprof2dot==2019.11.30
 greenlet==1.0.0
     # via gevent
 h11==0.12.0
-    # via uvicorn
+    # via
+    #   httpcore
+    #   uvicorn
 hiredis==1.1.0
     # via
     #   -r requirements.in
@@ -198,8 +202,12 @@ html2text==2020.1.16
     # via -r requirements.in
 html5lib==1.1
     # via talon
+httpcore==0.12.3
+    # via httpx
 httptools==0.1.1
     # via uvicorn
+httpx==0.16.1
+    # via -r requirements.in
 huey==2.3.0
     # via -r requirements.in
 hyperlink==21.0.0
@@ -212,6 +220,7 @@ idna==2.10
     # via
     #   hyperlink
     #   requests
+    #   rfc3986
     #   twisted
     #   yarl
 importlib-metadata==3.4.0
@@ -389,6 +398,8 @@ requests==2.25.1
     #   influxdb
     #   pyfcm
     #   requests-mock
+rfc3986[idna2008]==1.4.0
+    # via httpx
 service-identity==18.1.0
     # via twisted
 shiv==0.4.0
@@ -413,6 +424,10 @@ six==1.15.0
     #   talon
     #   traitlets
     #   virtualenv
+sniffio==1.2.0
+    # via
+    #   httpcore
+    #   httpx
 sqlparse==0.4.1
     # via
     #   django

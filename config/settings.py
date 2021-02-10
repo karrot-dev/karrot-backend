@@ -415,48 +415,49 @@ LISTEN_CONCURRENCY = int(options['LISTEN_CONCURRENCY'])
 # https://github.com/yunity/email_reply_trimmer_service
 EMAIL_REPLY_TRIMMER_URL = options['EMAIL_REPLY_TRIMMER_URL']
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s '
-                      '%(process)d %(thread)d %(message)s'
+if MODE == 'prod':
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'verbose': {
+                'format': '%(levelname)s %(asctime)s %(module)s '
+                          '%(process)d %(thread)d %(message)s'
+            },
         },
-    },
-    'handlers': {
-        'sentry': {
-            'level': 'WARNING',
-            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
-        },
-        'console': {
-            'level': 'WARNING',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose'
-        }
+        'handlers': {
+            'sentry': {
+                'level': 'WARNING',
+                'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+            },
+            'console': {
+                'level': 'WARNING',
+                'class': 'logging.StreamHandler',
+                'formatter': 'verbose'
+            }
 
-    },
-    'loggers': {
-        'raven': {
-            'level': 'WARNING',
-            'handlers': ['console'],
-            'propagate': False,
         },
-        'sentry.errors': {
-            'level': 'WARNING',
-            'handlers': ['console'],
-            'propagate': False,
+        'loggers': {
+            'raven': {
+                'level': 'WARNING',
+                'handlers': ['console'],
+                'propagate': False,
+            },
+            'sentry.errors': {
+                'level': 'WARNING',
+                'handlers': ['console'],
+                'propagate': False,
+            },
+            'django': {  # Disable django admin email logging by overriding
+                'level': 'ERROR',
+                'handlers': ['sentry'],
+            },
         },
-        'django': {  # Disable django admin email logging by overriding
+        'root': {  # log everything unconfigured as error
             'level': 'ERROR',
             'handlers': ['sentry'],
         },
-    },
-    'root': {  # log everything unconfigured as error
-        'level': 'ERROR',
-        'handlers': ['sentry'],
-    },
-}
+    }
 
 # NB: Keep this as the last line, and keep
 # local_settings.py out of version control

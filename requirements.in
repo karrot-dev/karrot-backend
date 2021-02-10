@@ -52,6 +52,7 @@ shiv
 uvicorn[standard]
 python-dotenv
 click
+httpx
 
 # dev PyPI dependencies
 pip-tools
