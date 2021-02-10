@@ -11,8 +11,6 @@ fi
 # see https://stackoverflow.com/a/46071447
 site_packages=$(python3 -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
 
-./manage.py collectstatic --noinput
-
 shiv --output-file=karrot-backend \
      --site-packages="$site_packages" \
      --python="/usr/bin/env python3" \

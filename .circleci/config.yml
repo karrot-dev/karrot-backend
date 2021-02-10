@@ -60,20 +60,20 @@ jobs:
       - run:
           name: setup
           command: |
+            echo "export PATH=$(pwd)/env/bin:$PATH" >> $BASH_ENV
             cp config/ci.env .env
             (cd mjml && yarn)
             mjml/convert
       - run:
           name: flake8
-          command: env/bin/flake8 ./
+          command: flake8 ./
       - run:
           name: no missing migrations?
-          command: env/bin/python manage.py makemigrations --dry-run --check --no-input
+          command: python manage.py makemigrations --dry-run --check --no-input
       - run:
           name: no missing makemessages?
           command: |
             set -xe
-            source env/bin/activate
             python manage.py makemessages
             git add .
             git diff --staged --exit-code
@@ -81,15 +81,16 @@ jobs:
           name: run tests
           command: |
             mkdir -p test-reports
-            env/bin/pytest -n 4 --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
+            pytest -n 4 --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
       - run:
           name: upload coverage
           command: |
-            env/bin/pip install codecov
-            env/bin/codecov
+            pip install codecov
+            codecov
       - run:
           name: build
           command: |
+            python manage.py collectstatic --noinput
             ./scripts/build
       - store_artifacts:
           path: karrot-backend
