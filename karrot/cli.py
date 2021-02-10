@@ -2,10 +2,12 @@ import os
 
 import click
 import uvicorn
+from click import pass_context
 from daphne.cli import CommandLineInterface
 from django.core import management
 from django.conf import settings
 import django
+from django.core.management import execute_from_command_line
 from dotenv import load_dotenv
 
 from config.options import get_options
@@ -27,45 +29,57 @@ def cli(env_files):
     setup(env_files)
 
 
-@cli.command()
-def check():
-    management.call_command("check")
+@cli.command(help='run a web server')
+def server():
+    server_uvicorn() if settings.LISTEN_SERVER == 'uvicorn' else server_daphne()
 
 
-@cli.command()
-def shell():
-    management.call_command("shell_plus")
-
-
-@cli.command()
-def dbshell():
-    management.call_command("dbshell")
-
-
-@cli.command()
-def migrate():
-    management.call_command("migrate", interactive=False)
-
-
-@cli.command()
+@cli.command(help='run a huey worker')
 def worker():
     management.call_command("run_huey")
 
 
-@cli.command()
+@cli.command(help='alias for django "check" command')
+def check():
+    management.call_command("check")
+
+
+@cli.command(help='alias for django "shell_plus" command')
+def shell():
+    management.call_command("shell_plus")
+
+
+@cli.command(help='alias for django "dbshell" command')
+def dbshell():
+    management.call_command("dbshell")
+
+
+@cli.command(
+    help='run a django manage.py command', context_settings=dict(
+        ignore_unknown_options=True,
+        allow_extra_args=True,
+    )
+)
+@pass_context
+def manage(ctx):
+    print('running manage', ctx.args)
+    execute_from_command_line(['', *ctx.args])
+
+
+@cli.command(help='alias for django "migrate" command')
+def migrate():
+    management.call_command("migrate", interactive=False)
+
+
+@cli.command(help='print the working directory')
 def basedir():
     print(settings.BASE_DIR)
 
 
-@cli.command()
+@cli.command(help='show the effective config')
 def config():
     for key, value in get_options().items():
         print(key + '=' + (value if value else ''))
-
-
-@cli.command()
-def server():
-    server_uvicorn() if settings.LISTEN_SERVER == 'uvicorn' else server_daphne()
 
 
 def server_uvicorn():
@@ -91,12 +105,13 @@ def server_uvicorn():
 
 
 def server_daphne():
-    args = [
-        '--ws-protocol',
-        'karrot.token',
-        '--proxy-headers',
-    ]
-    # TODO: maybe warn if settings.LISTEN_CONCURRENCY is set.. as it's unsupported here
+    args = []
+    args += ['--ws-protocol', 'karrot.token']
+    args += ['--proxy-headers']
+
+    if settings.LISTEN_CONCURRENCY > 1:
+        raise Exception('LISTEN_CONCURRENCY cannot be above 1 if using daphne')
+
     if settings.LISTEN_FD:
         args += ['--fd', settings.LISTEN_FD]
 

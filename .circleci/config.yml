@@ -87,6 +87,10 @@ jobs:
           command: |
             env/bin/pip install codecov
             env/bin/codecov
+      - run:
+          name: build
+          command: |
+            ./shiv.sh
       - store_test_results:
           path: test-reports
       - store_artifacts:
