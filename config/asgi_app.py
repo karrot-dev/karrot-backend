@@ -43,6 +43,25 @@ else:
     frontend_app = None
 
 
+async def community_proxy(scope, receive, send):
+    async with httpx.AsyncClient() as client:
+        path = scope['path']
+        proxy_url = 'https://community.foodsaving.world' + path[len('/community_proxy'):]
+        r = await client.get(proxy_url)
+        keep_headers = ['cache-control', 'last-modified']
+        headers = {}
+        for key in keep_headers:
+            if key in r.headers:
+                headers[key] = r.headers[key]
+        response = Response(
+            r.content,
+            status_code=r.status_code,
+            headers=headers,
+            media_type=r.headers['content-type'],
+        )
+        return await response(scope, receive, send)
+
+
 async def http_app(scope, receive, send):
     app = None
     if 'path' in scope:
@@ -56,26 +75,12 @@ async def http_app(scope, receive, send):
             scope['path'] = path[len('/static'):]
             app = static_app
         elif path.startswith('/community_proxy/'):
-            async with httpx.AsyncClient() as client:
-                proxy_url = 'https://community.foodsaving.world' + path[len('/community_proxy'):]
-                r = await client.get(proxy_url)
-                keep_headers = ['cache-control', 'last-modified']
-                headers = {}
-                for key in keep_headers:
-                    if key in r.headers:
-                        headers[key] = r.headers[key]
-                response = Response(
-                    r.content,
-                    status_code=r.status_code,
-                    headers=headers,
-                    media_type=r.headers['content-type'],
-                )
-                return await response(scope, receive, send)
+            app = community_proxy
         else:
             app = frontend_app
 
     if not app:
-        raise Exception('invalid request for ' + path)
+        raise Exception('invalid request')
 
     return await app(scope, receive, send)
 
