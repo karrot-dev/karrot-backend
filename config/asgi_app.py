@@ -68,7 +68,7 @@ async def http_app(scope, receive, send):
         path = scope['path']
         if any(path.startswith(prefix) for prefix in api_prefixes):
             app = api_app
-        elif path.startswith('/media'):
+        elif path.startswith('/media/'):
             scope['path'] = path[len('/media'):]
             app = media_app
         elif static_app and path.startswith('/static/'):
