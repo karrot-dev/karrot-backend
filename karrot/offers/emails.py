@@ -12,7 +12,7 @@ def prepare_new_offer_notification_email(user, offer):
     reply_to_name = offer.user.display_name
 
     local_part = make_local_part(conversation, user)
-    reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
+    reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.EMAIL_REPLIES_DOMAIN)))
     from_email = formataddr((offer.user.display_name, settings.DEFAULT_FROM_EMAIL))
 
     unsubscribe_url = new_offer_unsubscribe_url(user, offer)
