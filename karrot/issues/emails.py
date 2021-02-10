@@ -14,7 +14,7 @@ def prepare_new_conflict_resolution_email_to_affected_user(issue):
     reply_to_name = created_by.display_name
 
     local_part = make_local_part(conversation, user)
-    reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.EMAIL_REPLIES_DOMAIN)))
+    reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.EMAIL_REPLY_DOMAIN)))
     from_email = formataddr((created_by.display_name, settings.DEFAULT_FROM_EMAIL))
 
     this_issue_url = issue_url(issue)
@@ -46,7 +46,7 @@ def prepare_new_conflict_resolution_email(user, issue):
     reply_to_name = created_by.display_name
 
     local_part = make_local_part(conversation, user)
-    reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.EMAIL_REPLIES_DOMAIN)))
+    reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.EMAIL_REPLY_DOMAIN)))
     from_email = formataddr((created_by.display_name, settings.DEFAULT_FROM_EMAIL))
 
     unsubscribe_url = conflict_resolution_unsubscribe_url(user, issue)

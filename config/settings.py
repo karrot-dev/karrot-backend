@@ -231,7 +231,7 @@ CACHES = {
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
 
-EMAIL_REPLIES_DOMAIN = options['EMAIL_REPLIES_DOMAIN']
+EMAIL_REPLY_DOMAIN = options['EMAIL_REPLY_DOMAIN']
 
 EMAIL_BACKEND_NAME = options['EMAIL_BACKEND']
 

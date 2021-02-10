@@ -49,7 +49,7 @@ def prepare_thread_message_notification(user, messages):
     conversation_name = thread_text_beginning
 
     local_part = make_local_part(conversation, user, thread)
-    reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.EMAIL_REPLIES_DOMAIN)))
+    reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.EMAIL_REPLY_DOMAIN)))
     from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
     unsubscribe_url = thread_unsubscribe_url(user, group, thread)
@@ -120,7 +120,7 @@ def prepare_message_notification(
         thread = first_message if conversation.target and conversation.target.conversation_supports_threads else None
 
         local_part = make_local_part(conversation, user, thread)
-        reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.EMAIL_REPLIES_DOMAIN)))
+        reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.EMAIL_REPLY_DOMAIN)))
         from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
         unsubscribe_url = conversation_unsubscribe_url(user, group=group, conversation=conversation)

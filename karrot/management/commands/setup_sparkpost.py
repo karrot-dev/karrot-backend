@@ -66,7 +66,7 @@ class Command(BaseCommand):
     def setup_relay_webhook(self, s):
         # create inbound domain with best effort, ignore failures
         response = s.post(
-            'https://api.sparkpost.com/api/v1/inbound-domains', json={'domain': settings.EMAIL_REPLIES_DOMAIN}
+            'https://api.sparkpost.com/api/v1/inbound-domains', json={'domain': settings.EMAIL_REPLY_DOMAIN}
         )
         self.log_response(response)
 
@@ -81,21 +81,21 @@ class Command(BaseCommand):
         relay_webhooks = response.json()
         existing_relay = None
         for w in relay_webhooks['results']:
-            if w['match']['domain'] == settings.EMAIL_REPLIES_DOMAIN:
+            if w['match']['domain'] == settings.EMAIL_REPLY_DOMAIN:
                 existing_relay = w
 
         relay_webhook_data = {
-            "name": settings.EMAIL_REPLIES_DOMAIN + ' relay',
+            "name": settings.EMAIL_REPLY_DOMAIN + ' relay',
             "target": settings.HOSTNAME + "/api/webhooks/incoming_email/",
             "auth_token": settings.SPARKPOST_RELAY_SECRET,
             "match": {
-                "domain": settings.EMAIL_REPLIES_DOMAIN
+                "domain": settings.EMAIL_REPLY_DOMAIN
             }
         }
         if existing_relay is None:
             print(
                 'WARNING: creating a new relay webhook for {}. '
-                'Please check on sparkpost.com if there are unused ones.'.format(settings.EMAIL_REPLIES_DOMAIN)
+                'Please check on sparkpost.com if there are unused ones.'.format(settings.EMAIL_REPLY_DOMAIN)
             )
             response = s.post('https://api.sparkpost.com/api/v1/relay-webhooks', json=relay_webhook_data)
             self.log_response(response)
