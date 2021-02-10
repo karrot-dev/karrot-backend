@@ -93,7 +93,7 @@ jobs:
             python manage.py collectstatic --noinput
             ./scripts/build
       - store_artifacts:
-          path: karrot-backend
+          path: karrot-backend.pyz
       - store_test_results:
           path: test-reports
       - store_artifacts:
