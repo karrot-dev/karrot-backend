@@ -19,4 +19,5 @@ if __name__ == "__main__":
         # "." prefix and "_lock" suffix are present on lock files which we also want to remove
         test_path = re.sub('_lock$', '', re.sub(r'^\.', '', path.name))
         if test_path.startswith(f"{name}_") and not test_path.endswith(build_id):
+            print('shiv cleanup', path)
             shutil.rmtree(path) if os.path.isdir(path) else os.remove(path)
