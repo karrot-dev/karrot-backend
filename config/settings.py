@@ -254,8 +254,11 @@ PASSWORD_HASHERS = [
 
 VERSATILEIMAGEFIELD_SETTINGS = {
     'image_key_post_processor': 'versatileimagefield.processors.md5',
-    # https://github.com/respondcreate/django-versatileimagefield/issues/24#issuecomment-160674807
-    'create_images_on_demand': is_dev,
+    # TODO: implement the proper way of auto creating images
+    # See https://django-versatileimagefield.readthedocs.io/en/latest/improving_performance.html#auto-creating-sets-of-images-on-post-save
+    # I previously had it locally set to False to not get exceptions for missing images
+    # See https://github.com/respondcreate/django-versatileimagefield/issues/24#issuecomment-160674807
+    'create_images_on_demand': True,
 }
 
 VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
