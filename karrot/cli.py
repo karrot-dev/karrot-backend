@@ -115,6 +115,9 @@ def server_daphne():
     if settings.LISTEN_FD:
         args += ['--fd', settings.LISTEN_FD]
 
+    if settings.LISTEN_ENDPOINT:
+        args += ['--endpoint', settings.LISTEN_ENDPOINT]
+
     if settings.LISTEN_HOST:
         args += ['--bind', settings.LISTEN_HOST]
 

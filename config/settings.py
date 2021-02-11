@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import redis
-import raven
 
 from dotenv import load_dotenv
 
@@ -338,9 +337,11 @@ HOSTNAME = options['SITE_URL']
 SITE_NAME = options['SITE_NAME']
 MEDIA_ROOT = options['FILE_UPLOAD_DIR']
 
-# might need to parse these values into a number... TODO: check them
-FILE_UPLOAD_PERMISSIONS = options['FILE_UPLOAD_PERMISSIONS']  # 0o640
-FILE_UPLOAD_DIRECTORY_PERMISSIONS = options['FILE_UPLOAD_DIRECTORY_PERMISSIONS']  # 0o750
+if options['FILE_UPLOAD_PERMISSIONS']:
+    FILE_UPLOAD_PERMISSIONS = int(options['FILE_UPLOAD_PERMISSIONS'], 8)  # e.g. 0o640
+
+if options['FILE_UPLOAD_DIRECTORY_PERMISSIONS']:
+    FILE_UPLOAD_DIRECTORY_PERMISSIONS = int(options['FILE_UPLOAD_DIRECTORY_PERMISSIONS'], 8)  # e.g. 0o750
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'karrot', 'static')
 MEDIA_URL = '/media/'
@@ -363,12 +364,13 @@ INFLUXDB_USE_CELERY = False
 INFLUXDB_USE_THREADING = True
 
 SENTRY_DSN = options['SENTRY_DSN']
+SENTRY_RELEASE = options['SENTRY_RELEASE']
 
+# TODO: fix! should not use release if not set...
 if SENTRY_DSN:
-    RAVEN_CONFIG = {
-        'dsn': SENTRY_DSN,
-        'release': raven.fetch_git_sha(os.path.dirname(os.pardir)),
-    }
+    RAVEN_CONFIG = { 'dsn': SENTRY_DSN }
+    if SENTRY_RELEASE:
+        RAVEN_CONFIG['release'] = SENTRY_RELEASE
 
 SECRET_KEY = options['SECRET_KEY']
 FCM_SERVER_KEY = options['FCM_SERVER_KEY']
