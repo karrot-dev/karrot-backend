@@ -91,9 +91,9 @@ jobs:
           name: build
           command: |
             export FILENAME="karrot-backend-$(echo ${CIRCLE_TAG:-$CIRCLE_BRANCH} | sed 's/[^a-zA-Z0-9-]/-/g').pyz"
-            export DESTINATION="/var/www/karrot-dev-deploy/artifacts/"
+            export DESTINATION="/var/www/karrot-download/www/"
             ./scripts/build "$FILENAME"
-            rsync -e "ssh -o StrictHostKeyChecking=no" -av "$FILENAME" "karrot-dev-deploy@yuca.yunity.org:$DESTINATION"
+            rsync -e "ssh -o StrictHostKeyChecking=no" -av "$FILENAME" "karrot-download@yuca.yunity.org:$DESTINATION"
       - store_test_results:
           path: test-reports
       - store_artifacts:
