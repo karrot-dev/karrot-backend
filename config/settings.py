@@ -411,8 +411,11 @@ LISTEN_SOCKET = options['LISTEN_SOCKET']
 
 LISTEN_SERVER = options['LISTEN_SERVER']
 
-# how many workers (for uvicorn at least)
+# how many workers (uvicorn)
 LISTEN_CONCURRENCY = int(options['LISTEN_CONCURRENCY'])
+
+# twisted endpoint (for daphne)
+LISTEN_ENDPOINT = options['LISTEN_ENDPOINT']
 
 
 # If you have the email_reply_trimmer_service running, set this to 'http://localhost:4567/trim' (or similar)
