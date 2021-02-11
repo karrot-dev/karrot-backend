@@ -90,10 +90,9 @@ jobs:
       - run:
           name: build
           command: |
-            python manage.py collectstatic --noinput
-            ./scripts/build
-      - store_artifacts:
-          path: karrot-backend.pyz
+            export FILENAME="karrot-backend-${CIRCLE_TAG:-$CIRCLE_BRANCH}.pyz"
+            ./scripts/build "$FILENAME"
+            rsync -av "$FILENAME" karrot-dev-deploy@yuca.yunity.org:/var/www/karrot-dev-deploy/artifacts/
       - store_test_results:
           path: test-reports
       - store_artifacts:

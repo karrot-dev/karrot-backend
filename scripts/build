@@ -7,11 +7,17 @@ if test -f config/local_settings.py; then
   exit 1
 fi
 
+output_filename="${1:-karrot-backend.pyz}"
+
+echo "building $output_filename"
+
 # get path to site packages dir
 # see https://stackoverflow.com/a/46071447
 site_packages=$(python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
 
-shiv --output-file=karrot-backend.pyz \
+python manage.py collectstatic --noinput
+
+shiv --output-file="$output_filename" \
      --site-packages="$site_packages" \
      --python="/usr/bin/env python3" \
      --entry-point=karrot.cli:run \
