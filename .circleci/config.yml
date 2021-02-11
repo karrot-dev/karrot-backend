@@ -90,7 +90,7 @@ jobs:
       - run:
           name: build
           command: |
-            export FILENAME="karrot-backend-${CIRCLE_TAG:-$CIRCLE_BRANCH}.pyz"
+            export FILENAME="karrot-backend-$(echo ${CIRCLE_TAG:-$CIRCLE_BRANCH} | sed 's/[^a-zA-Z0-9-]/-/g').pyz"
             ./scripts/build "$FILENAME"
             rsync -av "$FILENAME" karrot-dev-deploy@yuca.yunity.org:/var/www/karrot-dev-deploy/artifacts/
       - store_test_results:
