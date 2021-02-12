@@ -25,7 +25,7 @@ def get_mapped_files():
             mapped_file = os.listdir(f"/proc/{pid}/map_files")
             for mapped_file_name in mapped_file:
                 files.add(os.readlink(f"/proc/{pid}/map_files/{mapped_file_name}"))
-        except PermissionError:
+        except (PermissionError, FileNotFoundError):
             pass
 
     return files
@@ -43,6 +43,6 @@ if __name__ == "__main__":
         if test_path.startswith(f"{name}_") and not test_path.endswith(build_id):
             try:
                 shutil.rmtree(path) if os.path.isdir(path) else os.remove(path)
-            except FileNotFoundError:
+            except (PermissionError, FileNotFoundError):
                 # might have been removed by another instance starting up
                 continue
