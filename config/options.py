@@ -1,5 +1,6 @@
 import os
 
+import raven
 from dotenv import dotenv_values
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -7,6 +8,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def get_defaults():
     return dotenv_values(os.path.join(BASE_DIR, 'config', 'options.env'))
+
+
+def get_git_rev():
+    try:
+        return raven.fetch_git_sha(os.path.dirname(os.pardir))
+    except raven.exceptions.InvalidGitRepository:
+        pass
+    revision_file = os.path.join(BASE_DIR, 'karrot', 'COMMIT')
+    if os.path.exists(revision_file):
+        with open(revision_file, 'r') as f:
+            return f.read().strip()
 
 
 def get_options():
@@ -34,5 +46,10 @@ def get_options():
 
     if not options['GEOIP_PATH']:
         options['GEOIP_PATH'] = 'maxmind-data' if is_dev else '/var/lib/GeoIP'
+
+    if options['SENTRY_RELEASE_USE_GIT_REV'] and not options['SENTRY_RELEASE']:
+        rev = get_git_rev()
+        if rev:
+            options['SENTRY_RELEASE'] = rev
 
     return options

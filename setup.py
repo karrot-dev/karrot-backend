@@ -14,7 +14,7 @@ setup(
     ),
     package_data={
         'config': ['options.env'],
-        'karrot': ['*/templates/*.jinja2'],
+        'karrot': ['*/templates/*.jinja2', 'COMMIT'],
     },
     include_package_data=True,
     zip_safe=False

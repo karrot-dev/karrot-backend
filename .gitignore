@@ -19,6 +19,7 @@ mjml/node_modules
 grafana/config.py
 .env
 *.pyz
+karrot/COMMIT
 
 # IDE
 /.idea
