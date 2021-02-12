@@ -369,7 +369,6 @@ INFLUXDB_USE_THREADING = True
 SENTRY_DSN = options['SENTRY_DSN']
 SENTRY_RELEASE = options['SENTRY_RELEASE']
 
-# TODO: fix! should not use release if not set...
 if SENTRY_DSN:
     RAVEN_CONFIG = { 'dsn': SENTRY_DSN }
     if SENTRY_RELEASE:
