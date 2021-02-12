@@ -1,14 +1,20 @@
+import email
+import time
+
 import httpx
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter
 from channels.security import websocket
 from django.conf import settings
 from django.core.asgi import get_asgi_application
+from starlette.datastructures import MutableHeaders
 from starlette.responses import Response
 
 from starlette.staticfiles import StaticFiles
 
 from karrot.subscriptions.consumers import WebsocketConsumer, TokenAuthMiddleware
+
+ONE_YEAR = 60 * 60 * 24 * 365
 
 
 class OriginValidatorThatAllowsFileUrls(websocket.OriginValidator):
@@ -27,11 +33,50 @@ def AllowedHostsAndFileOriginValidator(application):
     return OriginValidatorThatAllowsFileUrls(application, allowed_hosts)
 
 
+def http_date(epoch_time):
+    return email.utils.formatdate(epoch_time, usegmt=True)
+
+
+class ExpiresMax:
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope['type'] != 'http':
+            return await self.app(scope, receive, send)
+
+        # Borrowing from:
+        # https://github.com/florimondmanca/asgi-caches/blob/master/src/asgi_caches/utils/cache.py
+        # From section 14.12 of RFC2616:
+        # "HTTP/1.1 servers SHOULD NOT send Expires dates more than
+        # one year in the future."
+        max_age = ONE_YEAR
+
+        async def send_cached(message):
+            # borrowing from https://github.com/encode/starlette/blob/master/starlette/middleware/cors.py
+            if message["type"] != "http.response.start":
+                return await send(message)
+            message.setdefault("headers", [])
+            headers = MutableHeaders(scope=message)
+            headers.update({
+                'Cache-Control': f'max-age={max_age}',
+                'Expires': http_date(time.time() + max_age),
+            })
+            await send(message)
+
+        return await self.app(scope, receive, send_cached)
+
+
+def cached(app):
+    return ExpiresMax(app) if app else None
+
+
 api_app = get_asgi_application()
 api_prefixes = ['/api/', '/docs/', '/api-auth/']
 media_app = StaticFiles(directory=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
+    # in DEBUG mode they are served by the main api app via config/urls.py
     static_app = None
     api_prefixes += ['/static/']
 else:
@@ -41,6 +86,12 @@ if settings.FRONTEND_DIR:
     frontend_app = StaticFiles(directory=settings.FRONTEND_DIR, html=True)
 else:
     frontend_app = None
+
+enable_static_cache = not settings.DEBUG
+
+if enable_static_cache:
+    media_app = cached(media_app)
+    frontend_app = cached(frontend_app)
 
 
 async def community_proxy(scope, receive, send):
