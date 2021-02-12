@@ -1,4 +1,5 @@
 import email
+import re
 import time
 
 import httpx
@@ -35,6 +36,29 @@ def AllowedHostsAndFileOriginValidator(application):
 
 def http_date(epoch_time):
     return email.utils.formatdate(epoch_time, usegmt=True)
+
+
+class CommunityProxy:
+    def __init__(self, proxy_url):
+        self.proxy_url = re.sub(r'/$', '', proxy_url)  # no trailing slash
+
+    async def __call__(self, scope, receive, send):
+        async with httpx.AsyncClient() as client:
+            path = scope['path']
+            proxy_url = self.proxy_url + path[len('/community_proxy'):]
+            r = await client.get(proxy_url)
+            keep_headers = ['cache-control', 'last-modified']
+            headers = {}
+            for key in keep_headers:
+                if key in r.headers:
+                    headers[key] = r.headers[key]
+            response = Response(
+                r.content,
+                status_code=r.status_code,
+                headers=headers,
+                media_type=r.headers['content-type'],
+            )
+            return await response(scope, receive, send)
 
 
 class ExpiresMax:
@@ -87,6 +111,11 @@ if settings.FRONTEND_DIR:
 else:
     frontend_app = None
 
+if settings.PROXY_DISCOURSE_URL:
+    community_proxy = CommunityProxy(settings.PROXY_DISCOURSE_URL)
+else:
+    community_proxy = None
+
 enable_static_cache = not settings.DEBUG
 
 if enable_static_cache:
@@ -94,26 +123,7 @@ if enable_static_cache:
     frontend_app = cached(frontend_app)
 
 
-async def community_proxy(scope, receive, send):
-    async with httpx.AsyncClient() as client:
-        path = scope['path']
-        proxy_url = 'https://community.foodsaving.world' + path[len('/community_proxy'):]
-        r = await client.get(proxy_url)
-        keep_headers = ['cache-control', 'last-modified']
-        headers = {}
-        for key in keep_headers:
-            if key in r.headers:
-                headers[key] = r.headers[key]
-        response = Response(
-            r.content,
-            status_code=r.status_code,
-            headers=headers,
-            media_type=r.headers['content-type'],
-        )
-        return await response(scope, receive, send)
-
-
-async def http_app(scope, receive, send):
+async def http_router(scope, receive, send):
     app = None
     if 'path' in scope:
         path = scope['path']
@@ -125,7 +135,7 @@ async def http_app(scope, receive, send):
         elif static_app and path.startswith('/static/'):
             scope['path'] = path[len('/static'):]
             app = static_app
-        elif path.startswith('/community_proxy/'):
+        elif settings.PROXY_DISCOURSE_URL and path.startswith('/community_proxy/'):
             app = community_proxy
         else:
             app = frontend_app
@@ -138,7 +148,7 @@ async def http_app(scope, receive, send):
 
 application = ProtocolTypeRouter({
     'http':
-    http_app,
+    http_router,
     'websocket':
     AllowedHostsAndFileOriginValidator(
         AuthMiddlewareStack(
