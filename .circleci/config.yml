@@ -27,7 +27,7 @@ aliases:
         env/bin/pip install --upgrade pip
         env/bin/pip install --upgrade pip-tools
         PIP_EXISTS_ACTION=w env/bin/pip-sync <(sed 's/^-e //g' requirements.txt)
-        echo "export PATH=$(pwd)/env/bin:$PATH" >> $BASH_ENV
+        echo "source env/bin/activate" >> $BASH_ENV
 
   - &add-token-to-remote
     run:
