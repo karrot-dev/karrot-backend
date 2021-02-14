@@ -196,7 +196,7 @@ jobs:
             git config user.name "CircleCI"
             git branch --delete --force $BRANCH || true
             git checkout -b $BRANCH
-            pip-compile --upgrade
+            pip-compile --upgrade --no-annotate
             git add requirements.txt
             pushd mjml
             yarn upgrade --latest
@@ -209,7 +209,7 @@ jobs:
 
             Good morning, I found some fresh dependencies for you!
 
-            This Pull Request contains updates done by \`pip-compile --upgrade\` and
+            This Pull Request contains updates done by \`pip-compile --upgrade --no-annotate\` and
             in \`mjml\`, \`yarn upgrade --latest\`.
 
             Please check the changes before merging and consider trying out the branch locally to verify if it works.
