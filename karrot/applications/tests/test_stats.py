@@ -40,9 +40,10 @@ class TestApplicationStats(TestCase):
 
     @patch('karrot.applications.stats.write_points')
     def test_application_status_update(self, write_points):
+        write_points.reset_mock()
+
         two_hours_ago = timezone.now() - relativedelta(hours=2)
 
-        write_points.reset_mock()
         application = ApplicationFactory(group=GroupFactory(), user=UserFactory(), created_at=two_hours_ago)
 
         write_points.assert_called_with([{

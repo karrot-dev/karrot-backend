@@ -11,12 +11,29 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import redis
+
+from dotenv import load_dotenv
+
 from karrot.groups import themes
+from config.options import get_options
+
+load_dotenv()
+
+options = get_options()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Karrot constants
+
+MODE = options['MODE']
+
+if MODE not in ('dev', 'prod',):
+    raise Exception('MODE must be one of dev|prod, not {}'.format(MODE))
+
+is_dev = MODE == 'dev'
+
+DEBUG = is_dev
 
 # Generic
 DESCRIPTION_MAX_LENGTH = 100000
@@ -65,7 +82,9 @@ CONVERSATION_CLOSED_DAYS = 7
 VOTING_DURATION_DAYS = 7
 VOTING_DUE_SOON_HOURS = 12
 
-KARROT_LOGO = 'https://user-images.githubusercontent.com/31616/36565633-517373a4-1821-11e8-9948-5bf6887c667e.png'
+KARROT_LOGO = options['SITE_LOGO']
+
+ASGI_APPLICATION = 'config.asgi_app.application'
 
 # Django configuration
 INSTALLED_APPS = (
@@ -181,12 +200,26 @@ TEMPLATES = [
     },
 ]
 
-REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': options['DATABASE_NAME'],
+        'USER': options['DATABASE_USER'],
+        'PASSWORD': options['DATABASE_PASSWORD'],
+        'HOST': options['DATABASE_HOST'],
+        'PORT': options['DATABASE_PORT'],
+    }
+}
+
+REDIS_HOST = options['REDIS_HOST']
+REDIS_PORT = options['REDIS_PORT']
+REDIS_DB = options['REDIS_DB']
+REDIS_URL = "redis://{}:{}/{}".format(REDIS_HOST, REDIS_PORT, REDIS_DB)
 
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://{}:6379/0".format(REDIS_HOST),
+        "LOCATION": REDIS_URL,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
@@ -196,10 +229,19 @@ CACHES = {
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
 
-WSGI_APPLICATION = 'config.wsgi.application'
+EMAIL_REPLY_DOMAIN = options['EMAIL_REPLY_DOMAIN']
 
-# don't send out email by default, override in local_settings.py
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND_NAME = options['EMAIL_BACKEND']
+
+if EMAIL_BACKEND_NAME == 'postal':
+    EMAIL_BACKEND = 'anymail.backends.postal.EmailBackend'
+    ANYMAIL = {
+        'POSTAL_API_URL': options['POSTAL_API_URL'],
+        'POSTAL_API_KEY': options['POSTAL_API_KEY'],
+        'POSTAL_WEBHOOK_KEY': options['POSTAL_WEBHOOK_KEY'],
+    }
+else:  # console is default anyway
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.Argon2PasswordHasher',
@@ -211,6 +253,11 @@ PASSWORD_HASHERS = [
 
 VERSATILEIMAGEFIELD_SETTINGS = {
     'image_key_post_processor': 'versatileimagefield.processors.md5',
+    # TODO: implement the proper way of auto creating images
+    # See https://django-versatileimagefield.readthedocs.io/en/latest/improving_performance.html#auto-creating-sets-of-images-on-post-save
+    # I previously had it locally set to False to not get exceptions for missing images
+    # See https://github.com/respondcreate/django-versatileimagefield/issues/24#issuecomment-160674807
+    'create_images_on_demand': True,
 }
 
 VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
@@ -280,47 +327,151 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [(REDIS_HOST, 6379)],
-            "capacity": 150,
+            "hosts": [REDIS_URL],
         },
     },
 }
 
-ASGI_APPLICATION = 'karrot.subscriptions.routing.application'
+FRONTEND_DIR = options['FRONTEND_DIR']
 
-# Default dummy settings, please override in local_settings.py
-DEFAULT_FROM_EMAIL = "testing@example.com"
-SPARKPOST_RELAY_DOMAIN = 'replies.karrot.localhost'
-HOSTNAME = 'http://localhost:8000'
-SITE_NAME = 'karrot local development'
-MEDIA_ROOT = './uploads/'
+PROXY_DISCOURSE_URL = options['PROXY_DISCOURSE_URL']
+
+DEFAULT_FROM_EMAIL = options['EMAIL_FROM']
+HOSTNAME = options['SITE_URL']
+SITE_NAME = options['SITE_NAME']
+MEDIA_ROOT = options['FILE_UPLOAD_DIR']
+
+if options['FILE_UPLOAD_PERMISSIONS']:
+    FILE_UPLOAD_PERMISSIONS = int(options['FILE_UPLOAD_PERMISSIONS'], 8)  # e.g. 0o640
+
+if options['FILE_UPLOAD_DIRECTORY_PERMISSIONS']:
+    FILE_UPLOAD_DIRECTORY_PERMISSIONS = int(options['FILE_UPLOAD_DIRECTORY_PERMISSIONS'], 8)  # e.g. 0o750
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'karrot', 'static')
 MEDIA_URL = '/media/'
-INFLUXDB_DISABLED = True
-INFLUXDB_HOST = ''
-INFLUXDB_PORT = ''
-INFLUXDB_USER = ''
-INFLUXDB_PASSWORD = ''
-INFLUXDB_DATABASE = ''
-INFLUXDB_TAGS_HOST = ''
+
+ALLOWED_HOSTS = [s.strip() for s in options['ALLOWED_HOSTS'].split(',')] if options['ALLOWED_HOSTS'] else []
+CSRF_TRUSTED_ORIGINS = [s.strip() for s in options['CSRF_TRUSTED_ORIGINS'].split(',')] if options['CSRF_TRUSTED_ORIGINS'] else []
+
+INFLUXDB_HOST = options['INFLUXDB_HOST']
+
+INFLUXDB_DISABLED = not INFLUXDB_HOST
+
+INFLUXDB_HOST = INFLUXDB_HOST
+INFLUXDB_PORT = options['INFLUXDB_PORT']
+INFLUXDB_USER = options['INFLUXDB_USER']
+INFLUXDB_PASSWORD = options['INFLUXDB_PASSWORD']
+INFLUXDB_DATABASE = options['INFLUXDB_NAME']
+INFLUXDB_TAGS_HOST = options['INFLUXDB_HOST_TAG']
 INFLUXDB_TIMEOUT = 5
 INFLUXDB_USE_CELERY = False
 INFLUXDB_USE_THREADING = True
 
-HUEY = {
-    'immediate': True,
-}
+SENTRY_DSN = options['SENTRY_DSN']
+SENTRY_RELEASE = options['SENTRY_RELEASE']
 
-GEOIP_PATH = os.path.join(BASE_DIR, 'maxmind-data')
+if SENTRY_DSN:
+    RAVEN_CONFIG = { 'dsn': SENTRY_DSN }
+    if SENTRY_RELEASE:
+        RAVEN_CONFIG['release'] = SENTRY_RELEASE
+
+SECRET_KEY = options['SECRET_KEY']
+FCM_SERVER_KEY = options['FCM_SERVER_KEY']
+ADMIN_CHAT_WEBHOOK = options['ADMIN_CHAT_WEBHOOK']
+
+WORKER_IMMEDIATE = options['WORKER_IMMEDIATE'] == 'true'
+WORKER_COUNT = int(options['WORKER_COUNT'])
+
+if WORKER_IMMEDIATE:
+    HUEY = {
+        'immediate': True,
+    }
+else:
+    pool = redis.ConnectionPool.from_url(REDIS_URL)
+    HUEY = {
+        "immediate": False,
+        "connection": {
+            "connection_pool": pool,
+        },
+        "consumer": {
+            "workers": WORKER_COUNT,
+            "worker_type": "thread",
+        },
+    }
+
+GEOIP_PATH = options['GEOIP_PATH']
+
+# binding options if running server
+# listen on file descriptor
+LISTEN_FD = options['LISTEN_FD']
+
+# listen on host and port
+LISTEN_HOST = options['LISTEN_HOST']
+LISTEN_PORT = options['LISTEN_PORT']
+
+# listen on unix socket
+LISTEN_SOCKET = options['LISTEN_SOCKET']
+
+LISTEN_SERVER = options['LISTEN_SERVER']
+
+# how many workers (uvicorn)
+LISTEN_CONCURRENCY = int(options['LISTEN_CONCURRENCY'])
+
+# twisted endpoint (for daphne)
+LISTEN_ENDPOINT = options['LISTEN_ENDPOINT']
+
 
 # If you have the email_reply_trimmer_service running, set this to 'http://localhost:4567/trim' (or similar)
 # https://github.com/yunity/email_reply_trimmer_service
-EMAIL_REPLY_TRIMMER_URL = None
+EMAIL_REPLY_TRIMMER_URL = options['EMAIL_REPLY_TRIMMER_URL']
+
+if MODE == 'prod':
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'verbose': {
+                'format': '%(levelname)s %(asctime)s %(module)s '
+                          '%(process)d %(thread)d %(message)s'
+            },
+        },
+        'handlers': {
+            'sentry': {
+                'level': 'WARNING',
+                'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+            },
+            'console': {
+                'level': 'WARNING',
+                'class': 'logging.StreamHandler',
+                'formatter': 'verbose'
+            }
+
+        },
+        'loggers': {
+            'raven': {
+                'level': 'WARNING',
+                'handlers': ['console'],
+                'propagate': False,
+            },
+            'sentry.errors': {
+                'level': 'WARNING',
+                'handlers': ['console'],
+                'propagate': False,
+            },
+            'django': {  # Disable django admin email logging by overriding
+                'level': 'ERROR',
+                'handlers': ['sentry'],
+            },
+        },
+        'root': {  # log everything unconfigured as error
+            'level': 'ERROR',
+            'handlers': ['sentry'],
+        },
+    }
 
 # NB: Keep this as the last line, and keep
 # local_settings.py out of version control
 try:
     from .local_settings import *  # noqa
 except ImportError:
-    raise Exception(
-        "config/local_settings.py is missing! Copy the provided example file and adapt it to your own config."
-    )
+    pass

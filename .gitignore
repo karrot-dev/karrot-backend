@@ -17,6 +17,9 @@ karrot/*/templates/*.html.jinja2
 *.pid
 mjml/node_modules
 grafana/config.py
+.env
+*.pyz
+karrot/COMMIT
 
 # IDE
 /.idea

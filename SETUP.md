@@ -157,7 +157,7 @@ In particular, before you launch your backend for the very first time you will n
 pip-tools is used to manage requirements. To use the latest possible requirements, do:
 
 - `pip install pip-tools`
-- `pip-compile --upgrade`
+- `pip-compile --upgrade --no-annotate`
 
 ## Speed up testing
 
