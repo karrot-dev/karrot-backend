@@ -25,7 +25,6 @@ def on_request_finished(sender, **kwargs):
 def flush_stats():
     global batch_count
     if len(batch) > 0:
-        print('writing batch!', len(batch), 'points from', batch_count, 'batches')
         actually_write_points(batch)
         batch_count = 0
         batch.clear()
