@@ -240,6 +240,19 @@ if EMAIL_BACKEND_NAME == 'postal':
         'POSTAL_API_KEY': options['POSTAL_API_KEY'],
         'POSTAL_WEBHOOK_KEY': options['POSTAL_WEBHOOK_KEY'],
     }
+elif EMAIL_BACKEND_NAME == 'smtp':
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = options['SMTP_HOST']
+    if options['SMTP_PORT']:
+        EMAIL_PORT = int(options['SMTP_PORT'])
+    EMAIL_HOST_USER = options['SMTP_USER']
+    EMAIL_HOST_PASSWORD = options['SMTP_PASSWORD']
+    if options['SMTP_USE_TLS']:
+        EMAIL_USE_TLS = True if options['SMTP_USE_TLS'] == 'true' else False
+    if options['SMTP_USE_SSL']:
+        EMAIL_USE_SSL = True if options['SMTP_USE_SSL'] == 'true' else False
+    EMAIL_SSL_KEYFILE = options['SMTP_SSL_KEYFILE']
+    EMAIL_SSL_CERTFILE = options['SMTP_SSL_CERTFILE']
 else:  # console is default anyway
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
