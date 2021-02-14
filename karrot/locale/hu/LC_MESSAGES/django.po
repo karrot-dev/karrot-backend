@@ -3,12 +3,16 @@
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
 # 
+# Translators:
+# K M <signin.km@gmail.com>, 2021
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
+"Last-Translator: K M <signin.km@gmail.com>, 2021\n"
 "Language-Team: Hungarian (https://www.transifex.com/yunity-1/teams/68631/hu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -31,15 +35,15 @@ msgstr ""
 
 #: karrot/activities/activity_types.py:8
 msgid "Event"
-msgstr ""
+msgstr "Esemény"
 
 #: karrot/activities/activity_types.py:9
 msgid "Activity"
-msgstr ""
+msgstr "Tevékenység"
 
 #: karrot/activities/activity_types.py:10
 msgid "Task"
-msgstr ""
+msgstr "Feladat"
 
 #: karrot/activities/serializers.py:126
 msgid "Must be a list"
@@ -94,13 +98,15 @@ msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:220
 msgid "Tomorrow"
-msgstr ""
+msgstr "Holnap"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:261
 msgid ""
 "You are receiving this because you are subscribed to\n"
 "                            <strong>Activity notification</strong> emails for this group."
 msgstr ""
+"Azért kaptad ezt az emailt, mert feliratkoztál ennek a csoportnak a \n"
+"<strong>Tevékenység értesítéseire</strong>"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:263
 #: karrot/applications/templates/new_application.html.jinja2:215
@@ -109,7 +115,7 @@ msgstr ""
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:211
 #: karrot/offers/templates/new_offer.html.jinja2:224
 msgid "Click here to unsubscribe"
-msgstr ""
+msgstr "Kattints ide a leiratkozáshoz"
 
 #: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
@@ -118,17 +124,17 @@ msgstr ""
 
 #: karrot/applications/api.py:27
 msgid "You need to have a verified email address"
-msgstr ""
+msgstr "Megerősített email cím szükséges"
 
 #: karrot/applications/api.py:36 karrot/groups/api.py:50
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
 #: karrot/places/api.py:19 karrot/places/serializers.py:80
 msgid "You need to be a group editor"
-msgstr ""
+msgstr "Csoport szerkesztőnek kell lenned"
 
 #: karrot/applications/api.py:44
 msgid "You need to be the applicant"
-msgstr ""
+msgstr "Jelentkezőnek kell lenned"
 
 #: karrot/applications/api.py:52
 msgid "Application is not pending anymore"
@@ -140,18 +146,18 @@ msgstr ""
 
 #: karrot/applications/serializers.py:41
 msgid "You are already member of the group"
-msgstr ""
+msgstr "Már tagja vagy a csoportnak"
 
 #: karrot/applications/serializers.py:43
 msgid "You cannot apply to open groups"
-msgstr ""
+msgstr "Nem tudsz nyílt csoportokba jelentkezni"
 
 #: karrot/applications/templates/application_accepted.html.jinja2:6
 #: karrot/applications/templates/application_accepted.html.jinja2:163
 #: karrot/applications/templates/application_accepted.subject.jinja2:1
 #, python-format
 msgid "Your application to join %(group_name)s was accepted"
-msgstr ""
+msgstr "A jelentkezésed %(group_name)s csoportba el lett fogadva"
 
 #: karrot/applications/templates/application_accepted.html.jinja2:180
 #: karrot/groups/templates/user_became_editor.html.jinja2:186
@@ -159,14 +165,14 @@ msgstr ""
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:184
 #, python-format
 msgid "Visit %(group_name)s"
-msgstr ""
+msgstr "%(group_name)s meglátogatása"
 
 #: karrot/applications/templates/application_declined.html.jinja2:6
 #: karrot/applications/templates/application_declined.html.jinja2:163
 #: karrot/applications/templates/application_declined.subject.jinja2:1
 #, python-format
 msgid "Your application to join %(group_name)s was declined"
-msgstr ""
+msgstr "A jelentkezésed %(group_name)s csoportba el lett utasítva"
 
 #: karrot/applications/templates/new_application.html.jinja2:6
 #: karrot/applications/templates/new_application.html.jinja2:163
@@ -174,6 +180,7 @@ msgstr ""
 #, python-format
 msgid "%(user_name)s wants to join %(group_name)s"
 msgstr ""
+"%(user_name)s felhasználó csatlakozni szeretne %(group_name)s csoportba"
 
 #: karrot/applications/templates/new_application.html.jinja2:165
 msgid "Questions asked by your group"
@@ -189,11 +196,11 @@ msgstr ""
 #: karrot/applications/templates/new_application.html.jinja2:172
 #, python-format
 msgid "Answers from %(user_name)s"
-msgstr ""
+msgstr "Válaszok %(user_name)s felhasználótól"
 
 #: karrot/applications/templates/new_application.html.jinja2:188
 msgid "View applications"
-msgstr ""
+msgstr "Jelentkezések megtekintése"
 
 #: karrot/applications/templates/new_application.html.jinja2:214
 msgid ""
@@ -290,19 +297,19 @@ msgstr ""
 
 #: karrot/groups/api.py:43
 msgid "You cannot give trust to yourself"
-msgstr ""
+msgstr "Nem adhatsz bizalmat magadnak"
 
 #: karrot/groups/api.py:200
 msgid "You already gave trust to this user"
-msgstr ""
+msgstr "Már bizalmat adtál ennek a felhasználónak"
 
 #: karrot/groups/serializers.py:30
 msgid "Unknown timezone"
-msgstr ""
+msgstr "Ismeretlen időzóna"
 
 #: karrot/groups/serializers.py:38
 msgid "Playground"
-msgstr ""
+msgstr "Játszótér"
 
 #: karrot/groups/serializers.py:138 karrot/groups/serializers.py:237
 msgid "You cannot manage agreements"
@@ -314,7 +321,7 @@ msgstr ""
 
 #: karrot/groups/serializers.py:235
 msgid "You are not in this group"
-msgstr ""
+msgstr "Nem vagy benne ebben a csoportban"
 
 #: karrot/groups/templates/default_application_questions.nopreview.jinja2:1
 msgid ""
@@ -322,6 +329,9 @@ msgid ""
 "and your motivation. Please tell us how you got to know about us and what "
 "you wish to do here!"
 msgstr ""
+"Halihó! Mielőtt csatlakoznál a csoportunkhoz, szeretnénk egy kicsit "
+"megismerni téged és a motivációdat. Kérünk mond el honnan tudsz rólunk és "
+"mit szeretnél csinálni itt!"
 
 #: karrot/groups/templates/group_summary.html.jinja2:6
 #: karrot/groups/templates/group_summary.html.jinja2:163
@@ -378,7 +388,7 @@ msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:207
 msgid "Feedback"
-msgstr ""
+msgstr "Visszajelzés"
 
 #: karrot/groups/templates/group_summary.html.jinja2:215
 #, python-format
@@ -811,21 +821,21 @@ msgstr ""
 
 #: karrot/users/templates/changemail_success.html.jinja2:6
 msgid "Your email address changed"
-msgstr ""
+msgstr "Az email címed megváltozott"
 
 #: karrot/users/templates/changemail_success.html.jinja2:163
 #, python-format
 msgid "Your email address on %(site_name)s changed!"
-msgstr ""
+msgstr "Az email címed a %(site_name)s-ön megváltozott!"
 
 #: karrot/users/templates/changemail_success.html.jinja2:171
 #, python-format
 msgid "Your new email address is %(new_email)s."
-msgstr ""
+msgstr "Az új email címed %(new_email)s"
 
 #: karrot/users/templates/changemail_success.subject.jinja2:1
 msgid "Your email address changed!"
-msgstr ""
+msgstr "Az email címed megváltozott!"
 
 #: karrot/users/templates/passwordreset_request.html.jinja2:6
 #: karrot/users/templates/passwordreset_request.subject.jinja2:1
@@ -839,42 +849,44 @@ msgstr ""
 
 #: karrot/users/templates/passwordreset_request.html.jinja2:171
 msgid "Did you forget your password? No problem!"
-msgstr ""
+msgstr "Elfelejtetted a jelszavad? Semmi gond!"
 
 #: karrot/users/templates/passwordreset_request.html.jinja2:172
 msgid "Click this link to change it:"
-msgstr ""
+msgstr "Kattints erre a linkre, hogy megváltoztasd:"
 
 #: karrot/users/templates/passwordreset_request.html.jinja2:184
 msgid "Change password"
-msgstr ""
+msgstr "Jelszó megváltoztatása"
 
 #: karrot/users/templates/passwordreset_success.html.jinja2:6
 #: karrot/users/templates/passwordreset_success.subject.jinja2:1
 msgid "New password set!"
-msgstr ""
+msgstr "Új jelszó sikeresen beállítva!"
 
 #: karrot/users/templates/passwordreset_success.html.jinja2:163
 #, python-format
 msgid "You set a new password for %(site_name)s"
-msgstr ""
+msgstr "Új jelszót állítottál be %(site_name)s részére"
 
 #: karrot/users/templates/passwordreset_success.html.jinja2:171
 msgid "Your password has been successfully changed!"
-msgstr ""
+msgstr "A jelszavad sikeresen megváltozott!"
 
 #: karrot/users/templates/signup.html.jinja2:163
 #, python-format
 msgid "Thank you for signing up to %(site_name)s"
-msgstr ""
+msgstr "Köszönjük, hogy regisztráltál a %(site_name)s-re"
 
 #: karrot/users/templates/signup.html.jinja2:195
 msgid ""
 "You can safely ignore this message if it wasn't you who signed up at our "
 "service using this email address."
 msgstr ""
+"Ha nem te regisztráltál a szolgáltatásunkra ezzel az email címmel, akkor "
+"nyugodtan figyelmen kívül hagyhatod ezt az üzenetet."
 
 #: karrot/utils/validators.py:8
 #, python-format
 msgid "%(value)s is a reserved name"
-msgstr ""
+msgstr "A %(value)s név foglalt."
