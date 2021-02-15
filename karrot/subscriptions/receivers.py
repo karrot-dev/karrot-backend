@@ -7,6 +7,7 @@ from django.contrib.auth import user_logged_out
 from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
+from huey.contrib.djhuey import task
 
 from karrot.applications.models import Application
 from karrot.applications.serializers import ApplicationSerializer
@@ -333,14 +334,103 @@ def send_activity_deleted(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='activities:activity_deleted', payload=payload)
 
 
-@receiver(post_save, sender=ActivityParticipant)
-@receiver(post_delete, sender=ActivityParticipant)
-def send_activity_participant_updates(sender, instance, **kwargs):
-    activity = instance.activity
-    payload = ActivitySerializer(activity).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=activity.place.group.members.all()
-                                                                    ).distinct():
-        send_in_channel(subscription.reply_channel, topic='activities:activity', payload=payload)
+# @receiver(post_save, sender=ActivityParticipant)
+# @receiver(post_delete, sender=ActivityParticipant)
+# @on_transaction_commit
+# def send_activity_participant_updates(sender, instance, **kwargs):
+#     activity = instance.activity
+#     send_activity_participant_updates_background(activity.id)
+
+
+class SubscriptionHandler:
+    signals = None
+    model = None
+    topic = None
+    payload_serializer = None
+
+    def get_payload(self, instance, **kwargs):
+        if not self.payload_serializer:
+            raise Exception('no payload_serializer')
+        return self.payload_serializer(instance).data
+
+    def get_users(self, instance, **kwargs):
+        raise Exception('please implement!')
+
+    def send(self, instance):
+        payload = self.get_payload(instance)
+        users = self.get_users(instance)
+        for subscription in ChannelSubscription.objects.recent().filter(user__in=users).distinct():
+            send_in_channel(subscription.reply_channel, topic=self.topic, payload=payload)
+
+
+def register(handler: SubscriptionHandler):
+    @task(name=f"{handler.__class__.__module__}.{handler.__class__.__name__}")
+    def run_task(instance, **kwargs):
+        print('running foo task!!!', instance.id, kwargs)
+        # instance = sender.objects.get(pk=id)
+        # handler.send(instance)
+        payload = handler.get_payload(instance, **kwargs)
+        users = handler.get_users(instance, **kwargs)
+        for subscription in ChannelSubscription.objects.recent().filter(user__in=users).distinct():
+            send_in_channel(subscription.reply_channel, topic=handler.topic, payload=payload)
+
+    @on_transaction_commit
+    def my_receiver(sender, instance, **ignored_kwargs):
+        # hmm don't *really* want to serializer the instance into huey
+        # but can't handle deleted events otherwise...
+        kwargs = {}
+        run_task(instance, **kwargs)
+
+    for signal in handler.signals:
+        signal.connect(my_receiver, sender=handler.model, weak=False)
+
+
+class ActivityParticipantChange(SubscriptionHandler):
+    signals = (
+        post_save,
+        post_delete,
+    )
+    model = ActivityParticipant
+    topic = 'activities:activity'
+
+    def get_payload(self, participant, **kwargs):
+        return ActivitySerializer(participant.activity).data
+
+    def get_users(self, participant, **kwargs):
+        return participant.activity.place.group.members.all()
+
+
+register(ActivityParticipantChange())
+
+
+def send_to_subscribers(*, topic, payload, users=None, user=None):
+    if not users and not user:
+        raise Exception('must specify at least one of user|users')
+    q = Q()
+    if users:
+        q = q | Q(user__in=users)
+    if user:
+        q = q | Q(user=user)
+    for subscription in ChannelSubscription.objects.recent().filter(q).distinct():
+        send_in_channel(subscription.reply_channel, topic=topic, payload=payload)
+
+
+# @my_thing(
+#     signals=[post_save, post_delete],
+#     sender=ActivityParticipant,
+# )
+# def activity_participant_change(participant):
+#     send_to_subscribers(
+#         topic='activities:activity',
+#         payload=ActivitySerializer(participant.activity).data,
+#         users=participant.activity.place.group.members.all()
+#     )
+
+# @task()
+# def send_activity_participant_updates_background(activity_id):
+#     activity = Activity.objects.get(pk=activity_id)
+#     payload = ActivitySerializer(activity).data
+#     send_to_subscriptions(topic='activities:activity', payload=payload, users=activity.place.group.members.all())
 
 
 # Activity Series
@@ -353,13 +443,50 @@ def send_activity_series_updates(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='activities:series', payload=payload)
 
 
-@receiver(pre_delete, sender=ActivitySeries)
-def send_activity_series_delete(sender, instance, **kwargs):
-    series = instance
-    payload = ActivitySeriesSerializer(series).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=series.place.group.members.all()
-                                                                    ).distinct():
-        send_in_channel(subscription.reply_channel, topic='activities:series_deleted', payload=payload)
+class ActivitySeriesSave(SubscriptionHandler):
+    signals = (post_save, )
+    model = ActivitySeries
+    topic = 'activities:series'
+    payload_serializer = ActivitySeriesSerializer
+
+    def get_users(self, series, **kwargs):
+        return series.place.group.members.all()
+
+
+register(ActivitySeriesSave())
+
+# @receiver(pre_delete, sender=ActivitySeries)
+# def send_activity_series_delete(sender, instance, **kwargs):
+#     series = instance
+#     payload = ActivitySeriesSerializer(series).data
+#     for subscription in ChannelSubscription.objects.recent().filter(user__in=series.place.group.members.all()
+#                                                                     ).distinct():
+#         send_in_channel(subscription.reply_channel, topic='activities:series_deleted', payload=payload)
+
+
+class ActivitySeriesDelete(SubscriptionHandler):
+    signals = (post_delete, )
+    model = ActivitySeries
+    topic = 'activities:series_deleted'
+    payload_serializer = ActivitySeriesSerializer
+
+    def get_users(self, series, **kwargs):
+        return series.place.group.members.all()
+
+
+register(ActivitySeriesDelete())
+
+#
+# class ActivityTypeChanges(SubscriptionHandler):
+#     model = ActivityType
+#     payload_serializer = ActivityTypeSerializer
+#     signals_map = {
+#         post_save: 'activities:type',
+#         post_delete: 'activities:type_deleted',
+#     }
+#
+#     def get_users(self, series, **kwargs):
+#         return series.place.group.members.all()
 
 
 # Activity Type
