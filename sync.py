@@ -25,6 +25,10 @@ def header(val):
     print('\n', yellow('★'), green(val), '\n')
 
 
+def in_docker():
+    return subprocess.run(['grep', 'docker', '/proc/1/cgroup'], stdout=subprocess.DEVNULL).returncode == 0
+
+
 environ = os.environ.copy()
 
 # do not prompt if dependency source already exists, just wipe and get the required version
@@ -54,10 +58,16 @@ if process_mjml:
     header("Generating new templates")
     subprocess.run(['./mjml/convert'], env=environ, check=True)
 
-header("Installing pre-commit hooks")
-hook_types = ['pre-commit', 'pre-push']
+if in_docker():
+    header("Not installing pre-commit hooks")
+    print('This is because it appears I am running in a docker environment.')
+    print('I am assuming you will be doing all your git stuff outside of the docker environment.')
+    print('This means you should also setup the python environment outside of docker if you want to use the hooks.')
+else:
+    header("Installing pre-commit hooks")
+    hook_types = ['pre-commit', 'pre-push']
 
-for t in hook_types:
-    subprocess.run(['pre-commit', 'install', '--hook-type', t], env=environ, check=True)
+    for t in hook_types:
+        subprocess.run(['pre-commit', 'install', '--hook-type', t], env=environ, check=True)
 
 header('All done ☺')
