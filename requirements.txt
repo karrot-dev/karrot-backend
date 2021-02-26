@@ -9,7 +9,7 @@
 -e git+https://github.com/tiltec/django-rest-swagger@d15dd9a#egg=django-rest-swagger
 -e git+https://github.com/tiltec/talon@80886cd#egg=talon
 aiofiles==0.6.0
-aiohttp==3.7.3
+aiohttp==3.7.4
 aioredis==1.3.1
 apipkg==1.5
 appdirs==1.4.4
