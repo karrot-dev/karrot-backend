@@ -38,9 +38,6 @@ karrot/COMMIT
 # Static build of frontend (obtained via command)
 karrot/frontend/static/*
 
-# Media files
-uploads
-
 # Mac files
 **/.DS_Store
 
