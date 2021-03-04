@@ -5,7 +5,7 @@ from django.db.models import Count
 from django.utils import timezone
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task
-from influxdb_metrics.loader import write_points
+from karrot.utils.influxdb_utils import write_points
 from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from config import settings

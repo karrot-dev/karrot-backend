@@ -125,6 +125,7 @@ INSTALLED_APPS = (
     'karrot.notifications.NotificationsConfig',
     'karrot.stats',
     'karrot.status.StatusConfig',
+    'karrot.utils',
 
     # Django packages
     'django_extensions',

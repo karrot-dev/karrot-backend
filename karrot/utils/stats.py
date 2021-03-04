@@ -1,4 +1,4 @@
-from influxdb_metrics.loader import write_points
+from karrot.utils.influxdb_utils import write_points
 
 
 def email_sent(recipient_count, category):
