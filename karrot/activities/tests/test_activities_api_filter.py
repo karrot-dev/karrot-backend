@@ -10,7 +10,7 @@ from django.utils import timezone
 
 from karrot.groups.factories import GroupFactory
 from karrot.activities.factories import ActivityFactory, ActivitySeriesFactory, FeedbackFactory, ActivityTypeFactory
-from karrot.activities.models import Activity as ActivityModel, to_range
+from karrot.activities.models import Activity as ActivityModel, to_range, ActivityParticipant
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import UserFactory
 from karrot.places.factories import PlaceFactory
@@ -131,7 +131,15 @@ class TestFeedbackPossibleFilter(APITestCase, ExtractPaginationMixin):
                 self.member,
             ], date=self.oneWeekAgo
         )
+
         self.feedback = FeedbackFactory(about=self.activityFeedbackAlreadyGiven, given_by=self.member)
+
+        self.activityFeedbackDismissed = ActivityFactory(
+            activity_type=self.activity_type, place=self.place, participants=[
+                self.member,
+            ], date=self.oneWeekAgo
+        )
+        self.activityFeedbackDismissed.activityparticipant_set.filter(user=self.member).update(feedback_dismissed=True)
 
         self.activityParticipantLeftGroup = ActivityFactory(
             activity_type=self.activity_type2, place=self.place2, participants=[

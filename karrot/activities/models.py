@@ -180,7 +180,8 @@ class ActivityQuerySet(models.QuerySet):
                & Q(activity_type__has_feedback=True) \
                & Q(date__endswith__gte=timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)) \
                & Q(participants=user) \
-               & ~Q(feedback__given_by=user)
+               & ~Q(feedback__given_by=user) \
+               & Q(activityparticipant__feedback_dismissed=False)
 
     def only_feedback_possible(self, user):
         return self.filter(self._feedback_possible_q(user))
@@ -410,6 +411,7 @@ class ActivityParticipant(BaseModel):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
+    feedback_dismissed = models.BooleanField(default=False)
     reminder_task_id = models.TextField(null=True)  # stores a huey task id
 
     class Meta:
