@@ -1,6 +1,6 @@
 from django.db.models import Count
 from django.utils import timezone
-from influxdb_metrics.loader import write_points
+from karrot.utils.influxdb_utils import write_points
 
 from karrot.groups.stats import group_tags
 

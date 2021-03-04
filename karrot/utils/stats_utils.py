@@ -1,6 +1,6 @@
 from timeit import default_timer
 
-from influxdb_metrics.loader import write_points
+from karrot.utils.influxdb_utils import write_points
 
 
 def periodic_task(name, seconds=None, extra_fields=None):
