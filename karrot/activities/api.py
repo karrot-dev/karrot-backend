@@ -8,12 +8,13 @@ from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+from rest_framework import status
 
 from karrot.conversations.api import RetrieveConversationMixin
 from karrot.history.models import History, HistoryTypus
 from karrot.activities.filters import (ActivitiesFilter, ActivitySeriesFilter, FeedbackFilter, ActivityTypeFilter)
 from karrot.activities.models import (
-    Activity as ActivityModel, ActivitySeries as ActivitySeriesModel, Feedback as FeedbackModel, ActivityType
+    Activity as ActivityModel, ActivitySeries as ActivitySeriesModel, Feedback as FeedbackModel, ActivityType, ActivityParticipant
 )
 from karrot.activities.permissions import (
     IsUpcoming, HasNotJoinedActivity, HasJoinedActivity, IsEmptyActivity, IsNotFull, IsSameParticipant,
@@ -252,3 +253,12 @@ class ActivityViewSet(
     def conversation(self, request, pk=None):
         """Get conversation ID of this activity"""
         return self.retrieve_conversation(request, pk)
+
+    @action(detail=True,
+            methods=['POST'])
+    def dismiss(self, request, pk=None):
+        activity_participant = ActivityParticipant.objects.get(activity_id=pk, user_id=self.request.user.id)
+        activity_participant.feedback_dismissed = True
+        activity_participant.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
