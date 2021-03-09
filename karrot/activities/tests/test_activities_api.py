@@ -32,6 +32,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         cls.join_url = cls.activity_url + 'add/'
         cls.leave_url = cls.activity_url + 'remove/'
         cls.conversation_url = cls.activity_url + 'conversation/'
+        cls.dismiss_feedback_url = cls.activity_url + 'dismiss_feedback/'
 
         # not a member of the group
         cls.user = UserFactory()
@@ -305,6 +306,15 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         self.past_activity.add_participant(self.member)
         response = self.client.post(self.past_leave_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+    def test_dismiss_feedback(self):
+        response = self.client.post(self.dismiss_feedback_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+    def test_dismiss_feedback_as_user(self):
+        self.client.force_login(user=self.user)
+        response = self.client.post(self.dismiss_feedback_url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
     def test_get_conversation_as_participant(self):
         self.client.force_login(user=self.member)
