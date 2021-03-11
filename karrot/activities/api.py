@@ -18,10 +18,10 @@ from karrot.activities.models import (
 )
 from karrot.activities.permissions import (
     IsUpcoming, HasNotJoinedActivity, HasJoinedActivity, IsEmptyActivity, IsNotFull, IsSameParticipant,
-    IsRecentActivity, IsGroupEditor, TypeHasNoActivities, CannotChangeGroup
+    IsRecentActivity, IsGroupEditor, TypeHasNoActivities, CannotChangeGroup, IsNotUpcoming
 )
 from karrot.activities.serializers import (
-    ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer, ActivityLeaveSerializer, FeedbackSerializer,
+    ActivityDismissFeedbackSerializer, ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer, ActivityLeaveSerializer, FeedbackSerializer,
     ActivityUpdateSerializer, ActivitySeriesUpdateSerializer, ActivitySeriesHistorySerializer,
     FeedbackExportSerializer, FeedbackExportRenderer, ActivityTypeSerializer, ActivityTypeHistorySerializer
 )
@@ -257,14 +257,9 @@ class ActivityViewSet(
     @action(
         detail=True,
         methods=['POST'],
-        # permission_classes=(IsAuthenticated, HasJoinedActivity)
+        permission_classes=(IsAuthenticated, HasJoinedActivity, IsNotUpcoming),
+        serializer_class=ActivityDismissFeedbackSerializer
     )
     def dismiss_feedback(self, request, pk=None):
-        try:
-            activity_participant = ActivityParticipant.objects.get(activity_id=pk, user_id=self.request.user.id)
-        except:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        activity_participant.feedback_dismissed = True
-        activity_participant.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return self.partial_update(request)
 

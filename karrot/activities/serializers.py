@@ -348,6 +348,30 @@ class ActivityLeaveSerializer(serializers.ModelSerializer):
         return activity
 
 
+class ActivityDismissFeedbackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ActivityModel
+        fields = []
+
+    def update(self, activity, validated_data):
+        user = self.context['request'].user
+        activity.dismiss_feedback(user)
+
+        # TODO: Test the stats, history and group refresh.
+        stats.feedback_dismissed(activity)
+
+        History.objects.create(
+            typus=HistoryTypus.FEEDBACK_DISMISSED,
+            group=activity.place.group,
+            place=activity.place,
+            activity=activity,
+            users=[user],
+            payload=ActivitySerializer(instance=activity).data,
+        )
+        activity.place.group.refresh_active_status()
+        return activity
+
+
 class DurationInSecondsField(Field):
     default_error_messages = {}
 

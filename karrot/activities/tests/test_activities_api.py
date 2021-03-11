@@ -58,6 +58,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         cls.past_activity_url = cls.url + str(cls.past_activity.id) + '/'
         cls.past_join_url = cls.past_activity_url + 'add/'
         cls.past_leave_url = cls.past_activity_url + 'remove/'
+        cls.past_dismiss_feedback_url = cls.past_activity_url + 'dismiss_feedback/'
 
     def setUp(self):
         self.group.refresh_from_db()
@@ -315,6 +316,23 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.user)
         response = self.client.post(self.dismiss_feedback_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
+
+    def test_dismiss_feedback_as_member(self):
+        self.client.force_login(user=self.member)
+        self.past_activity.add_participant(self.member)
+        response = self.client.post(self.past_dismiss_feedback_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+    def test_dismiss_feedback_for_upcoming_activity_as_member(self):
+        self.client.force_login(user=self.member)
+        self.activity.add_participant(self.member)
+        response = self.client.post(self.dismiss_feedback_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+    def test_dismiss_feedback_not_participated_as_member(self):
+        self.client.force_login(user=self.member)
+        response = self.client.post(self.past_dismiss_feedback_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_get_conversation_as_participant(self):
         self.client.force_login(user=self.member)

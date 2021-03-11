@@ -15,6 +15,12 @@ class IsUpcoming(permissions.BasePermission):
         else:
             return obj.is_upcoming()
 
+class IsNotUpcoming(permissions.BasePermission):
+    message = 'The activity is not in the past.'
+
+    def has_object_permission(self, request, view, obj):
+        return not obj.is_upcoming()
+
 
 class IsEmptyActivity(permissions.BasePermission):
     message = 'You can only delete empty activities.'

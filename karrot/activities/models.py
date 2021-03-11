@@ -393,6 +393,14 @@ class Activity(BaseModel, ConversationMixin):
             user=user,
         ).delete()
 
+    def dismiss_feedback(self, user):
+        activity_participant = ActivityParticipant.objects.get(
+            activity=self,
+            user=user,
+        )
+        activity_participant.feedback_dismissed = True
+        activity_participant.save()
+
     def save(self, *args, **kwargs):
         if not self.has_duration:
             # reset duration to default if activity has no explicit duration
