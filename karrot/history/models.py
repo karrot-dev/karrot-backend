@@ -43,7 +43,10 @@ class HistoryTypus(enum.Enum):
     ACTIVITY_TYPE_CREATE = 25
     ACTIVITY_TYPE_MODIFY = 26
     ACTIVITY_TYPE_DELETE = 27
-    USER_LOST_EDITOR_ROLE = 18
+    USER_LOST_EDITOR_ROLE = 28
+    PLACE_TYPE_CREATE = 29
+    PLACE_TYPE_MODIFY = 30
+    PLACE_TYPE_DELETE = 31
 
 
 class HistoryQuerySet(models.QuerySet):

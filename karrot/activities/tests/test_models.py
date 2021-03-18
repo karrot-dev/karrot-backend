@@ -11,7 +11,7 @@ from karrot.activities.factories import ActivityFactory, \
     ActivitySeriesFactory
 from karrot.activities.models import Feedback, Activity, ActivitySeries, to_range
 from karrot.places.factories import PlaceFactory
-from karrot.places.models import PlaceStatus
+from karrot.places.models import PlaceStatusOld
 from karrot.users.factories import UserFactory
 
 
@@ -49,7 +49,7 @@ class TestActivitySeriesModel(TestCase):
         self.place = PlaceFactory()
 
     def test_create_all_activities_inactive_places(self):
-        self.place.status = PlaceStatus.ARCHIVED.value
+        self.place.status = PlaceStatusOld.ARCHIVED.value
         self.place.save()
 
         start_date = self.place.group.timezone.localize(datetime.now().replace(2017, 3, 18, 15, 0, 0, 0))
@@ -133,7 +133,7 @@ class TestProcessFinishedActivities(TestCase):
 
     def test_disables_past_activities_of_inactive_places(self):
         place = self.activity.place
-        place.status = PlaceStatus.ARCHIVED.value
+        place.status = PlaceStatusOld.ARCHIVED.value
         place.save()
         Activity.objects.process_finished_activities()
 
@@ -142,7 +142,7 @@ class TestProcessFinishedActivities(TestCase):
         self.assertTrue(Activity.objects.first().is_disabled)
 
         # do not process activity again if places gets active
-        place.status = PlaceStatus.ACTIVE.value
+        place.status = PlaceStatusOld.ACTIVE.value
         place.save()
         Activity.objects.process_finished_activities()
 

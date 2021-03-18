@@ -10,7 +10,7 @@ from karrot.activities import stats, tasks
 from karrot.activities.models import Activity, Feedback, ActivityParticipant
 from karrot.conversations.models import Conversation
 from karrot.groups.models import GroupMembership
-from karrot.places.models import Place, PlaceStatus
+from karrot.places.models import Place, PlaceStatusOld
 
 
 @receiver(pre_delete, sender=GroupMembership)
@@ -100,7 +100,7 @@ def update_activity_series_when_place_changes(sender, instance, **kwargs):
         return
 
     old = Place.objects.get(id=place.id)
-    place_became_active = old.status != place.status and place.status == PlaceStatus.ACTIVE.value
+    place_became_active = old.status != place.status and place.status == PlaceStatusOld.ACTIVE.value
     weeks_in_advance_changed = old.weeks_in_advance != place.weeks_in_advance
     if place_became_active or weeks_in_advance_changed:
         for series in place.series.all():

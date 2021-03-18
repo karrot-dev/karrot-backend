@@ -11,7 +11,7 @@ from karrot.activities import stats
 from karrot.activities.emails import prepare_activity_notification_email
 from karrot.activities.models import Activity, ActivitySeries, ActivityParticipant
 from karrot.groups.models import Group, GroupMembership, GroupNotificationType
-from karrot.places.models import PlaceStatus
+from karrot.places.models import PlaceStatusOld
 from karrot.subscriptions.models import PushSubscription
 from karrot.subscriptions.tasks import notify_subscribers_by_device
 from karrot.users.models import User
@@ -130,7 +130,7 @@ def fetch_activity_notification_data_for_group(group):
     not_full = {'num_participants__gt': 0, 'num_participants__lt': F('max_participants')}
 
     activities = Activity.objects.exclude_disabled().annotate_num_participants().filter(
-        place__status=PlaceStatus.ACTIVE.value,
+        place__status=PlaceStatusOld.ACTIVE.value,
         place__group=group,
     ).order_by('date')
 

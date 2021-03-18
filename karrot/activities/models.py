@@ -17,7 +17,7 @@ from karrot.conversations.models import ConversationMixin
 from karrot.history.models import History, HistoryTypus
 from karrot.activities import stats
 from karrot.activities.utils import match_activities_with_dates, rrule_between_dates_in_local_time
-from karrot.places.models import PlaceStatus
+from karrot.places.models import PlaceStatusOld
 
 
 class ActivityTypeStatus(Enum):
@@ -52,7 +52,7 @@ class ActivitySeriesQuerySet(models.QuerySet):
     @transaction.atomic
     def update_activities(self):
         for series in self.filter(activity_type__status=ActivityTypeStatus.ACTIVE.value,
-                                  place__status=PlaceStatus.ACTIVE.value):
+                                  place__status=PlaceStatusOld.ACTIVE.value):
             series.update_activities()
 
     def annotate_timezone(self):

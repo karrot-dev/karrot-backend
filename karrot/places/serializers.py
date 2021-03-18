@@ -5,8 +5,78 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
 from karrot.history.models import History, HistoryTypus
-from karrot.places.models import Place as PlaceModel, PlaceStatus, PlaceSubscription
+from karrot.places.models import Place as PlaceModel, PlaceSubscription, PlaceType
 from karrot.utils.misc import find_changed
+
+
+class PlaceTypeHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlaceType
+        fields = '__all__'
+
+
+class PlaceTypeSerializer(serializers.ModelSerializer):
+    updated_message = serializers.CharField(write_only=True, required=False)
+
+    class Meta:
+        model = PlaceType
+        fields = [
+            'id',
+            'name',
+            'name_is_translatable',
+            'icon',
+            'status',
+            'group',
+            "created_at",
+            'updated_at',
+            'updated_message',
+        ]
+        read_only_fields = [
+            'id',
+            'created_at',
+            'updated_at',
+        ]
+
+    def save(self, **kwargs):
+        if not self.instance:
+            return super().save(**kwargs)
+
+        updated_message = self.validated_data.pop('updated_message', None)
+
+        place_type = self.instance
+        changed_data = find_changed(place_type, self.validated_data)
+        self._validated_data = changed_data
+        skip_update = len(self.validated_data.keys()) == 0
+        if skip_update:
+            return self.instance
+
+        before_data = PlaceTypeHistorySerializer(place_type).data
+        place_type = super().save(**kwargs)
+        after_data = PlaceTypeHistorySerializer(place_type).data
+
+        if before_data != after_data:
+            History.objects.create(
+                typus=HistoryTypus.PLACE_TYPE_MODIFY,
+                group=place_type.group,
+                users=[self.context['request'].user],
+                payload={k: self.initial_data.get(k)
+                         for k in changed_data.keys()},
+                before=before_data,
+                after=after_data,
+                message=updated_message,
+            )
+        return place_type
+
+    def create(self, validated_data):
+        place_type = super().create(validated_data)
+        History.objects.create(
+            typus=HistoryTypus.PLACE_TYPE_CREATE,
+            group=place_type.group,
+            users=[self.context['request'].user],
+            payload=self.initial_data,
+            after=PlaceTypeHistorySerializer(place_type).data,
+        )
+        return place_type
 
 
 class PlaceHistorySerializer(serializers.ModelSerializer):
@@ -30,6 +100,7 @@ class PlaceSerializer(serializers.ModelSerializer):
             'status',
             'is_subscribed',
             'subscribers',
+            'place_type',
         ]
         extra_kwargs = {
             'name': {
@@ -45,9 +116,9 @@ class PlaceSerializer(serializers.ModelSerializer):
             'subscribers',
         ]
 
-    status = serializers.ChoiceField(
-        choices=[status.value for status in PlaceStatus], default=PlaceModel.DEFAULT_STATUS
-    )
+    # status = serializers.ChoiceField(
+    #     choices=[status.value for status in PlaceStatusOld], default=PlaceModel.DEFAULT_STATUS
+    # )
     is_subscribed = serializers.SerializerMethodField()
 
     def get_is_subscribed(self, place):

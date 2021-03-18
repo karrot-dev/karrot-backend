@@ -1,27 +1,58 @@
 from django.db.models import Count, Q, Sum
-from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
-from rest_framework import mixins, permissions, status
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from karrot.conversations.api import RetrieveConversationMixin
 from karrot.activities.models import Activity
-from karrot.places.models import Place as PlaceModel, PlaceSubscription
-from karrot.places.serializers import PlaceSerializer, PlaceUpdateSerializer, PlaceSubscriptionSerializer
+from karrot.activities.permissions import CannotChangeGroup
+from karrot.conversations.api import RetrieveConversationMixin
+from karrot.history.models import History, HistoryTypus
+from karrot.places.filters import PlaceTypeFilter
+from karrot.places.models import Place as PlaceModel, PlaceSubscription, PlaceType
+from karrot.places.permissions import TypeHasNoPlaces, IsGroupEditor
+from karrot.places.serializers import PlaceSerializer, PlaceUpdateSerializer, PlaceSubscriptionSerializer, \
+    PlaceTypeSerializer, PlaceTypeHistorySerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
 
 
-class IsGroupEditor(permissions.BasePermission):
-    message = _('You need to be a group editor')
+class PlaceTypeViewSet(
+        mixins.CreateModelMixin,
+        mixins.RetrieveModelMixin,
+        PartialUpdateModelMixin,
+        mixins.ListModelMixin,
+        mixins.DestroyModelMixin,
+        viewsets.GenericViewSet,
+):
+    serializer_class = PlaceTypeSerializer
+    queryset = PlaceType.objects
+    filter_backends = (filters.DjangoFilterBackend, )
+    filterset_class = PlaceTypeFilter
+    permission_classes = (
+        IsAuthenticated,
+        IsGroupEditor,
+        TypeHasNoPlaces,
+        CannotChangeGroup,
+    )
 
-    def has_object_permission(self, request, view, obj):
-        if view.action == 'partial_update':
-            return obj.group.is_editor(request.user)
-        return True
+    def get_queryset(self):
+        return self.queryset.filter(group__members=self.request.user)
+
+    def perform_destroy(self, place_type):
+        data = self.get_serializer(place_type).data
+        History.objects.create(
+            typus=HistoryTypus.PLACE_TYPE_DELETE,
+            group=place_type.group,
+            users=[
+                self.request.user,
+            ],
+            payload=data,
+            before=PlaceTypeHistorySerializer(place_type).data,
+        )
+        super().perform_destroy(place_type)
 
 
 class PlaceViewSet(
