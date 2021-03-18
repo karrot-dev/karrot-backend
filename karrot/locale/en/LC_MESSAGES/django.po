@@ -122,7 +122,7 @@ msgstr ""
 
 #: karrot/applications/api.py:36 karrot/groups/api.py:50
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
-#: karrot/places/api.py:19 karrot/places/serializers.py:80
+#: karrot/places/serializers.py:151
 msgid "You need to be a group editor"
 msgstr ""
 
@@ -537,7 +537,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr ""
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
-#: karrot/offers/serializers.py:91 karrot/places/serializers.py:78
+#: karrot/offers/serializers.py:91 karrot/places/serializers.py:149
 msgid "You are not a member of this group."
 msgstr ""
 
@@ -703,16 +703,24 @@ msgid ""
 "%(site_name)s</a>, or <a href=\"%(mute_url)s\">mute the conversation</a>."
 msgstr ""
 
-#: karrot/places/serializers.py:85
+#: karrot/places/place_types.py:5
+msgid "Store"
+msgstr ""
+
+#: karrot/places/place_types.py:6
+msgid "Place"
+msgstr ""
+
+#: karrot/places/serializers.py:156
 msgid "Set at least one week in advance"
 msgstr ""
 
-#: karrot/places/serializers.py:88
+#: karrot/places/serializers.py:159
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr ""
 
-#: karrot/places/serializers.py:140
+#: karrot/places/serializers.py:211
 msgid "You are already subscribed to this place"
 msgstr ""
 
