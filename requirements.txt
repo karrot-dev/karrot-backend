@@ -106,7 +106,7 @@ packaging==20.9
 parso==0.8.1
 pexpect==4.8.0
 pickleshare==0.7.5
-pillow==8.1.0
+pillow==8.1.1
 pip-tools==5.5.0
 pluggy==0.13.1
 pre-commit==2.10.1
