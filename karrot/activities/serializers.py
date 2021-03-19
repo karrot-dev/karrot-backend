@@ -169,6 +169,7 @@ class ActivitySerializer(serializers.ModelSerializer):
             'description',
             'feedback_due',
             'feedback_given_by',
+            'feedback_dismissed_by',
             'is_disabled',
             'has_duration',
             'is_done',
@@ -181,12 +182,16 @@ class ActivitySerializer(serializers.ModelSerializer):
         ]
 
     participants = serializers.SerializerMethodField()
+    feedback_dismissed_by = serializers.SerializerMethodField()
     feedback_due = DateTimeFieldWithTimezone(read_only=True, allow_null=True)
 
     date = DateTimeRangeField()
 
     def get_participants(self, activity):
         return [c.user_id for c in activity.activityparticipant_set.all()]
+
+    def get_feedback_dismissed_by(self, activity):
+        return [c.user_id for c in activity.activityparticipant_set.all() if c.feedback_dismissed]
 
     def save(self, **kwargs):
         return super().save(last_changed_by=self.context['request'].user)
