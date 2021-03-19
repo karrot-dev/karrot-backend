@@ -118,7 +118,7 @@ class Place(BaseModel, LocationModel, ConversationMixin):
         return 'Place {} ({})'.format(self.name, self.group)
 
     def is_active(self):
-        return self.status == 'active'
+        return self.status.category == 'active'
 
     @property
     def conversation_supports_threads(self):

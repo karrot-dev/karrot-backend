@@ -9,7 +9,7 @@ translatable_names = {
 
 # Default types that will be created for new groups
 # (in the future this would be more customizable)
-default_activity_types = {
+default_place_types = {
     'Store': {
         'icon': 'fas fa-shopping-cart',
     },

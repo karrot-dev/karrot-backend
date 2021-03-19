@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
 from karrot.history.models import HistoryTypus, History
-from karrot.places.factories import PlaceFactory, PlaceTypeFactory
+from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import UserFactory
 from karrot.utils.tests.fake import faker
@@ -17,8 +17,7 @@ class TestPlaceTypesAPI(APITestCase, ExtractPaginationMixin):
         self.non_member = UserFactory()
         self.group = GroupFactory(members=[self.member, self.non_editor_member])
         self.place = PlaceFactory(group=self.group)
-        self.place_types = [PlaceTypeFactory(group=self.group) for _ in range(3)]
-        self.place_type = self.place_types[0]
+        self.place_type = self.group.place_types.first()
 
         # remove all roles
         GroupMembership.objects.filter(group=self.group, user=self.non_editor_member).update(roles=[])
@@ -26,7 +25,7 @@ class TestPlaceTypesAPI(APITestCase, ExtractPaginationMixin):
     def test_can_list(self):
         self.client.force_login(user=self.member)
         response = self.client.get('/api/place-types/')
-        self.assertEqual(len(response.data), len(self.place_types) + 1)  # 1 is a default one that comes for free!
+        self.assertEqual(len(response.data), self.group.place_types.count())
 
     def test_can_create(self):
         self.client.force_login(user=self.member)

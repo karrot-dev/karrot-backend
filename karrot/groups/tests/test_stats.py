@@ -97,9 +97,9 @@ class TestGroupStats(TestCase):
     def test_group_places_stats(self):
         group = GroupFactory()
 
-        [PlaceFactory(group=group, status='active') for _ in range(3)]
-        [PlaceFactory(group=group, status='negotiating') for _ in range(7)]
-        [PlaceFactory(group=group, status='archived') for _ in range(10)]
+        [PlaceFactory(group=group, status=group.place_statuses.get(name='Active')) for _ in range(3)]
+        [PlaceFactory(group=group, status=group.place_statuses.get(name='Negotiating')) for _ in range(7)]
+        [PlaceFactory(group=group, status=group.place_statuses.get(name='Archived')) for _ in range(10)]
 
         points = stats.get_group_places_stats(group)
 

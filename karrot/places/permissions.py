@@ -26,8 +26,11 @@ class IsGroupEditor(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if view.action == 'create':
-            group = Group.objects.filter(id=request.data['group'], members=request.user).first()
-            return group.is_editor(request.user) if group else False
+            if 'group' in request.data:
+                group = Group.objects.filter(id=request.data['group'], members=request.user).first()
+                return group.is_editor(request.user) if group else False
+            else:
+                return False
         return True
 
     def has_object_permission(self, request, view, obj):

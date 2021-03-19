@@ -47,6 +47,7 @@ def add_standard_place_statuses(apps, schema_editor):
 
     for group in Group.objects.all():
         for status in [status.value for status in PlaceStatusOld]:
+            options = options[status]
             status_next, _ = PlaceStatus.objects.get_or_create(
                 group=group,
                 name=status.capitalize(),

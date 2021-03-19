@@ -89,7 +89,14 @@ class TestHistoryAPIWithExistingGroup(APITestCase, ExtractPaginationMixin):
 
     def test_create_place(self):
         self.client.force_login(self.member)
-        self.client.post('/api/places/', {'name': 'xyzabc', 'group': self.group.id})
+        self.client.post(
+            '/api/places/', {
+                'name': 'xyzabc',
+                'group': self.group.id,
+                'place_type': self.group.place_types.first().id,
+                'status': self.group.place_statuses.first().id
+            }
+        )
         response = self.get_results(history_url)
         self.assertEqual(response.data[0]['typus'], 'STORE_CREATE')
 
@@ -281,7 +288,7 @@ class TestHistoryAPIActivityForInactivePlace(APITestCase, ExtractPaginationMixin
     def setUp(self):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
-        self.place = PlaceFactory(group=self.group, status='archived')
+        self.place = PlaceFactory(group=self.group, status=self.group.place_statuses.get(name='Archived'))
         self.activity = ActivityFactory(place=self.place, date=to_range(timezone.now() - relativedelta(days=1)))
         self.activity.add_participant(self.member)
 

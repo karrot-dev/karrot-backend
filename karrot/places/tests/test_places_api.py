@@ -14,7 +14,6 @@ from karrot.groups.models import GroupStatus
 from karrot.activities.factories import ActivitySeriesFactory, ActivityFactory, FeedbackFactory
 from karrot.activities.models import to_range
 from karrot.places.factories import PlaceFactory
-from karrot.places.models import PlaceStatusOld
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import UserFactory
 from karrot.utils.tests.fake import faker
@@ -42,7 +41,9 @@ class TestPlacesAPI(APITestCase, ExtractPaginationMixin):
             'group': cls.group.id,
             'address': faker.address(),
             'latitude': faker.latitude(),
-            'longitude': faker.longitude()
+            'longitude': faker.longitude(),
+            'status': cls.group.place_statuses.get(name='Created').id,
+            'place_type': cls.group.place_types.get(name='Store').id,
         }
 
         # another group
@@ -77,7 +78,8 @@ class TestPlacesAPI(APITestCase, ExtractPaginationMixin):
         self.group.status = GroupStatus.INACTIVE.value
         self.group.save()
         self.client.force_login(user=self.member)
-        self.client.post(self.url, self.place_data, format='json')
+        response = self.client.post(self.url, self.place_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.group.refresh_from_db()
         self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)
 
@@ -149,7 +151,9 @@ class TestPlacesAPI(APITestCase, ExtractPaginationMixin):
 
     def test_valid_status(self):
         self.client.force_login(user=self.member)
-        response = self.client.patch(self.place_url, {'status': 'active'}, format='json')
+        response = self.client.patch(
+            self.place_url, {'status': self.group.place_statuses.get(name='Active').id}, format='json'
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_invalid_status(self):
@@ -283,11 +287,13 @@ class TestPlaceChangesActivitySeriesAPI(APITestCase, ExtractPaginationMixin):
         self.assertIn('Do not set more than', response.data['weeks_in_advance'][0])
 
     def test_set_place_active_status_updates_activities(self):
-        self.place.status = PlaceStatusOld.ARCHIVED.value
+        self.place.status = self.group.place_statuses.get(name='Archived')
         self.place.save()
         self.place.activities.all().delete()
         self.client.force_login(user=self.member)
-        response = self.client.patch(self.place_url, {'status': PlaceStatusOld.ACTIVE.value}, format='json')
+        response = self.client.patch(
+            self.place_url, {'status': self.group.place_statuses.get(name='Active').id}, format='json'
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreater(self.place.activities.count(), 0)
 

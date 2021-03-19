@@ -2,6 +2,8 @@ from collections import defaultdict
 
 from django.db.models import Count
 from django.utils import timezone
+
+from karrot.places.models import PlaceStatus
 from karrot.utils.influxdb_utils import write_points
 
 
@@ -164,7 +166,9 @@ def get_group_places_stats(group):
 
     for entry in group.places.values('status').annotate(count=Count('status')):
         # record one value per place status too
-        fields['count_status_{}'.format(entry['status'])] = entry['count']
+        status = PlaceStatus.objects.get(id=entry['status'])
+        status_value = status.name.lower()  # keep it compatible with existing data
+        fields['count_status_{}'.format(status_value)] = entry['count']
 
     return [{
         'measurement': 'karrot.group.places',

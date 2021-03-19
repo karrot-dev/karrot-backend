@@ -5,7 +5,7 @@ from rest_framework.test import APITestCase
 
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
-from karrot.activities.factories import ActivityFactory, ActivityTypeFactory
+from karrot.activities.factories import ActivityFactory
 from karrot.activities.models import to_range
 from karrot.history.models import History, HistoryTypus
 from karrot.places.factories import PlaceFactory
@@ -19,7 +19,7 @@ class TestActivitiesTypesAPI(APITestCase):
         self.non_member = UserFactory()
         self.group = GroupFactory(members=[self.member, self.non_editor_member])
         self.place = PlaceFactory(group=self.group)
-        self.activity_types = [ActivityTypeFactory(group=self.group) for _ in range(3)]
+        self.activity_types = list(self.group.activity_types.all())
         self.activity_type = self.activity_types[0]
 
         # remove all roles
@@ -52,7 +52,7 @@ class TestActivitiesTypesAPI(APITestCase):
     def test_can_list(self):
         self.client.force_login(user=self.member)
         response = self.client.get('/api/activity-types/')
-        self.assertEqual(len(response.data), 3)
+        self.assertEqual(len(response.data), 4)
 
     def test_can_create(self):
         self.client.force_login(user=self.member)

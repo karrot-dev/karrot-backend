@@ -16,7 +16,6 @@ from karrot.groups.models import GroupMembership
 from karrot.activities.models import ActivityParticipant, to_range
 from karrot.activities.tasks import daily_activity_notifications, fetch_activity_notification_data_for_group
 from karrot.places.factories import PlaceFactory
-from karrot.places.models import PlaceStatusOld
 from karrot.subscriptions.models import PushSubscription, PushSubscriptionPlatform
 from karrot.users.factories import VerifiedUserFactory, UserFactory
 from karrot.utils.frontend_urls import place_url
@@ -72,7 +71,7 @@ class TestActivityNotificationTask(APITestCase):
         cls.group = GroupFactory(members=[cls.user, cls.other_user, cls.non_verified_user])
         cls.place = PlaceFactory(group=cls.group, subscribers=[cls.user, cls.other_user, cls.non_verified_user])
 
-        cls.declined_place = PlaceFactory(group=cls.group, status=PlaceStatusOld.DECLINED.value)
+        cls.declined_place = PlaceFactory(group=cls.group, status=cls.group.place_statuses.get(name='Declined'))
 
         # unsubscribe other_user from notifications
         GroupMembership.objects.filter(group=cls.group, user=cls.other_user).update(notification_types=[])

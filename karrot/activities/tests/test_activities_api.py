@@ -494,8 +494,8 @@ class TestActivitiesListAPI(APITestCase, ExtractPaginationMixin):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.activity_type = ActivityTypeFactory(group=self.group)
-        self.active_place = PlaceFactory(group=self.group, status='active')
-        self.inactive_place = PlaceFactory(group=self.group, status='created')
+        self.active_place = PlaceFactory(group=self.group, status=self.group.place_statuses.get(name='Active'))
+        self.inactive_place = PlaceFactory(group=self.group, status=self.group.place_statuses.get(name='Created'))
 
         ActivityFactory(activity_type=self.activity_type, place=self.active_place)
         ActivityFactory(activity_type=self.activity_type, place=self.inactive_place)
