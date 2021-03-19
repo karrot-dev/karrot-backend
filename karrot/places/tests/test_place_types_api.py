@@ -3,6 +3,7 @@ from rest_framework.test import APITestCase
 
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
+from karrot.history.models import HistoryTypus, History
 from karrot.places.factories import PlaceFactory, PlaceTypeFactory
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import UserFactory
@@ -100,6 +101,42 @@ class TestPlaceTypesAPI(APITestCase, ExtractPaginationMixin):
         place.delete()
         response = self.client.delete(f'/api/place-types/{self.place_type.id}/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.data)
+
+    def test_adds_history_entry_on_create(self):
+        self.client.force_login(user=self.member)
+        response = self.client.post('/api/place-types/', self.place_type_data(), format='json')
+        history = History.objects.filter(typus=HistoryTypus.PLACE_TYPE_CREATE).last()
+        self.assertEqual(history.after['id'], response.data['id'], response.data)
+
+    def test_adds_history_entry_on_modify(self):
+        self.client.force_login(user=self.member)
+        response = self.client.patch(
+            f'/api/place-types/{self.place_type.id}/', {
+                'icon': 'fas fa-changed',
+            }, format='json'
+        )
+        history = History.objects.filter(typus=HistoryTypus.PLACE_TYPE_MODIFY).last()
+        self.assertEqual(history.after['id'], response.data['id'], response.data)
+        self.assertEqual(history.payload, {'icon': 'fas fa-changed'})
+
+    def test_adds_updated_reason_to_history(self):
+        self.client.force_login(user=self.member)
+        response = self.client.patch(
+            f'/api/place-types/{self.place_type.id}/', {
+                'icon': 'fas fa-changed',
+                'updated_message': 'because it was a horrible icon before',
+            },
+            format='json'
+        )
+        history = History.objects.filter(typus=HistoryTypus.PLACE_TYPE_MODIFY).last()
+        self.assertEqual(history.after['id'], response.data['id'])
+        self.assertEqual(history.message, 'because it was a horrible icon before')
+
+    def test_adds_history_entry_on_delete(self):
+        self.client.force_login(user=self.member)
+        self.client.delete(f'/api/place-types/{self.place_type.id}/')
+        history = History.objects.filter(typus=HistoryTypus.PLACE_TYPE_DELETE).last()
+        self.assertEqual(history.before['id'], self.place_type.id)
 
     def place_type_data(self, extra=None):
         if extra is None:
