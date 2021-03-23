@@ -362,17 +362,8 @@ class ActivityDismissFeedbackSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         activity.dismiss_feedback(user)
 
-        # TODO: Test the stats, history and group refresh.
         stats.feedback_dismissed(activity)
 
-        History.objects.create(
-            typus=HistoryTypus.FEEDBACK_DISMISSED,
-            group=activity.place.group,
-            place=activity.place,
-            activity=activity,
-            users=[user],
-            payload=ActivitySerializer(instance=activity).data,
-        )
         activity.place.group.refresh_active_status()
         return activity
 
