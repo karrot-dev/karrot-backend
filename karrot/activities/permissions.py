@@ -15,6 +15,7 @@ class IsUpcoming(permissions.BasePermission):
         else:
             return obj.is_upcoming()
 
+
 class IsNotUpcoming(permissions.BasePermission):
     message = 'The activity is not in the past.'
 

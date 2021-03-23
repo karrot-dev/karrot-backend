@@ -20,9 +20,10 @@ from karrot.activities.permissions import (
     IsRecentActivity, IsGroupEditor, TypeHasNoActivities, CannotChangeGroup, IsNotUpcoming
 )
 from karrot.activities.serializers import (
-    ActivityDismissFeedbackSerializer, ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer, ActivityLeaveSerializer, FeedbackSerializer,
-    ActivityUpdateSerializer, ActivitySeriesUpdateSerializer, ActivitySeriesHistorySerializer,
-    FeedbackExportSerializer, FeedbackExportRenderer, ActivityTypeSerializer, ActivityTypeHistorySerializer
+    ActivityDismissFeedbackSerializer, ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer,
+    ActivityLeaveSerializer, FeedbackSerializer, ActivityUpdateSerializer, ActivitySeriesUpdateSerializer,
+    ActivitySeriesHistorySerializer, FeedbackExportSerializer, FeedbackExportRenderer, ActivityTypeSerializer,
+    ActivityTypeHistorySerializer
 )
 from karrot.places.models import PlaceStatus
 from karrot.utils.mixins import PartialUpdateModelMixin
