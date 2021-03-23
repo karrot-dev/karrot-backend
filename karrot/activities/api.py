@@ -13,7 +13,7 @@ from karrot.conversations.api import RetrieveConversationMixin
 from karrot.history.models import History, HistoryTypus
 from karrot.activities.filters import (ActivitiesFilter, ActivitySeriesFilter, FeedbackFilter, ActivityTypeFilter)
 from karrot.activities.models import (
-    Activity as ActivityModel, ActivitySeries as ActivitySeriesModel, Feedback as FeedbackModel, ActivityType, ActivityParticipant
+    Activity as ActivityModel, ActivitySeries as ActivitySeriesModel, Feedback as FeedbackModel, ActivityType
 )
 from karrot.activities.permissions import (
     IsUpcoming, HasNotJoinedActivity, HasJoinedActivity, IsEmptyActivity, IsNotFull, IsSameParticipant,
