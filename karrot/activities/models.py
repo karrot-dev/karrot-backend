@@ -399,6 +399,7 @@ class Activity(BaseModel, ConversationMixin):
             user=user,
         )
         activity_participant.feedback_dismissed = True
+        # TODO Is this save necessary?
         activity_participant.save()
 
     def save(self, *args, **kwargs):
