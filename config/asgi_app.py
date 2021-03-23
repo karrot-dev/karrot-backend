@@ -2,6 +2,7 @@ from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter
 from django.conf import settings
 from django.core.asgi import get_asgi_application
+from starlette.responses import Response
 
 from starlette.staticfiles import StaticFiles
 
@@ -34,6 +35,8 @@ if enable_static_cache:
     media_app = cached(media_app)
     frontend_app = cached(frontend_app)
 
+not_found = Response('not found', status_code=404, media_type='text/plain')
+
 
 async def http_router(scope, receive, send):
     app = None
@@ -53,7 +56,7 @@ async def http_router(scope, receive, send):
             app = frontend_app
 
     if not app:
-        raise Exception('invalid request')
+        app = not_found
 
     return await app(scope, receive, send)
 
