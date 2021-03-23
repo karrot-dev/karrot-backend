@@ -10,7 +10,7 @@ from django.utils import timezone
 
 from karrot.groups.factories import GroupFactory
 from karrot.activities.factories import ActivityFactory, ActivitySeriesFactory, FeedbackFactory, ActivityTypeFactory
-from karrot.activities.models import Activity as ActivityModel, to_range, ActivityParticipant
+from karrot.activities.models import Activity as ActivityModel, to_range
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import UserFactory
 from karrot.places.factories import PlaceFactory
