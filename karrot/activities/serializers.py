@@ -1,5 +1,6 @@
 import dateutil.rrule
-from datetime import timedelta
+from datetime import timedelta, datetime
+from pytz import UTC
 
 from django.conf import settings
 from django.db import transaction
@@ -7,7 +8,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.fields import DateTimeField, Field
+from rest_framework.fields import DateTimeField, Field, CharField
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework_csv.renderers import CSVRenderer
 
@@ -298,6 +299,78 @@ class ActivityUpdateSerializer(ActivitySerializer):
         if self.instance.series is not None and has_duration != self.instance.has_duration:
             raise serializers.ValidationError('You cannot modify the duration of activities that are part of a series')
         return has_duration
+
+
+class ICSDateTimeField(DateTimeField):
+    """date time serializer which conforms to the iCalendar format specifications"""
+    date_format = '%Y%m%dT%H%M%SZ'
+
+    def __init__(self, *args, **kwargs):
+        super(ICSDateTimeField, self).__init__(*args, format=self.date_format, default_timezone=UTC, **kwargs)
+
+
+class ActivityICSSerializer(serializers.ModelSerializer):
+    """serializes an activity to the ICS format, in conjunction with the ICSEventRenderer.
+
+    details of the allowed fields:
+    https://www.kanzaki.com/docs/ical/vevent.html"""
+    class Meta:
+        model = ActivityModel
+        fields = [
+            'uid', 'dtstamp', 'summary', 'description', 'dtstart', 'dtend', 'transp', 'categories', 'location', 'geo'
+        ]
+
+    # date of generation of the ICS representation of the event
+    dtstamp = serializers.SerializerMethodField()
+    # unique id, of the form uid@domain.com
+    uid = serializers.SerializerMethodField()
+
+    # title (short description)
+    summary = serializers.SerializerMethodField()
+    # longer description
+    description = CharField()
+
+    # start date
+    dtstart = ICSDateTimeField(source='date.start')
+    # end date
+    dtend = ICSDateTimeField(source='date.end')
+    # opaque (busy)
+    transp = serializers.SerializerMethodField()
+    # comma-separated list of categories this activity is part of
+    categories = serializers.SerializerMethodField()
+
+    # where this activity happens (text description)
+    location = serializers.SerializerMethodField()
+    # latitude and longitude of the location (such as "37.386013;-122.082932")
+    geo = serializers.SerializerMethodField()
+
+    def get_dtstamp(self, activity):
+        return datetime.now().strftime(ICSDateTimeField.date_format)
+
+    def get_uid(self, activity):
+        request = self.context.get('request')
+        domain = 'karrot'
+        if request and request.META.get('HTTP_HOST'):
+            domain = request.META.get('HTTP_HOST')
+        return 'activity_{}@{}'.format(activity.id, domain)
+
+    def get_summary(self, activity):
+        return '{}: {}'.format(activity.activity_type.name, activity.place.name)
+
+    def get_transp(self, activity):
+        return 'OPAQUE'
+
+    def get_categories(self, activity):
+        # The ',' sign is used to specify multiple categories,
+        # so we need to replace it by something else.
+        return activity.activity_type.name.replace(',', ';')
+
+    def get_location(self, activity):
+        return activity.place.name
+
+    def get_geo(self, activity):
+        place = activity.place
+        return '{};{}'.format(place.latitude, place.longitude)
 
 
 class ActivityJoinSerializer(serializers.ModelSerializer):

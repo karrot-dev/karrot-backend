@@ -440,6 +440,20 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         self.activity.refresh_from_db()
         self.assertFalse(self.activity.is_done, False)
 
+    def test_export_ics_logged_out(self):
+        response = self.client.get('/api/activities-ics/{id}/'.format(id=self.activity.id))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+    def test_export_ics_not_group_member(self):
+        self.client.force_login(user=self.user)
+        response = self.client.get('/api/activities-ics/{id}/'.format(id=self.activity.id))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
+
+    def test_export_ics_logged_in(self):
+        self.client.force_login(user=self.member)
+        response = self.client.get('/api/activities-ics/{id}/'.format(id=self.activity.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
 
 class TestActivitiesListAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):

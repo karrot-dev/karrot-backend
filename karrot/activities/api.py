@@ -22,8 +22,10 @@ from karrot.activities.permissions import (
 from karrot.activities.serializers import (
     ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer, ActivityLeaveSerializer, FeedbackSerializer,
     ActivityUpdateSerializer, ActivitySeriesUpdateSerializer, ActivitySeriesHistorySerializer,
-    FeedbackExportSerializer, FeedbackExportRenderer, ActivityTypeSerializer, ActivityTypeHistorySerializer
+    FeedbackExportSerializer, FeedbackExportRenderer, ActivityTypeSerializer, ActivityTypeHistorySerializer,
+    ActivityICSSerializer
 )
+from karrot.activities.renderers import ICSCalendarRenderer
 from karrot.places.models import PlaceStatus
 from karrot.utils.mixins import PartialUpdateModelMixin
 
@@ -252,3 +254,22 @@ class ActivityViewSet(
     def conversation(self, request, pk=None):
         """Get conversation ID of this activity"""
         return self.retrieve_conversation(request, pk)
+
+
+class ActivityICSViewSet(mixins.RetrieveModelMixin, GenericViewSet):
+    serializer_class = ActivityICSSerializer
+    renderer_classes = (ICSCalendarRenderer, )
+    queryset = ActivityModel.objects
+    filter_backends = (filters.DjangoFilterBackend, )
+    filterset_class = ActivitiesFilter
+    permission_classes = (IsAuthenticated, )
+
+    def get_queryset(self):
+        return self.queryset.filter(place__group__members=self.request.user)
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        """specify a filename for the downloaded file"""
+        super(ActivityICSViewSet, self).finalize_response(request, response, *args, **kwargs)
+        if isinstance(response, Response) and response.accepted_renderer.format == 'ics':
+            response['content-disposition'] = 'attachment; filename=invite.ics'
+        return response
