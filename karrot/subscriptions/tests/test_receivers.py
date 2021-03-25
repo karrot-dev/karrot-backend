@@ -24,7 +24,7 @@ from karrot.notifications.models import Notification
 from karrot.offers.factories import OfferFactory
 from karrot.activities.factories import FeedbackFactory, ActivityFactory, \
     ActivitySeriesFactory
-from karrot.activities.models import Activity, ActivityParticipant, to_range
+from karrot.activities.models import Activity, to_range
 from karrot.places.factories import PlaceFactory
 from karrot.subscriptions.models import ChannelSubscription, \
     PushSubscription, PushSubscriptionPlatform
@@ -933,14 +933,15 @@ class FinishedActivityReceiverTest(WSTestCase):
         status_messages = messages_by_topic['status']
         self.assertEqual(len(status_messages), 2)
         self.assertEqual(status_messages[1]['payload'], {'groups': {self.group.id: {'feedback_possible_count': 1}}})
-        
+
         self.activity.dismiss_feedback(self.member)
-        
+
         messages_by_topic = client.messages_by_topic
 
         status_messages = messages_by_topic['status']
         self.assertEqual(len(status_messages), 3)
         self.assertEqual(status_messages[2]['payload'], {'groups': {self.group.id: {'feedback_possible_count': 0}}})
+
 
 class UserReceiverTest(WSTestCase):
     def setUp(self):
