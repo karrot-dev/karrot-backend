@@ -191,6 +191,7 @@ class ActivitySerializer(serializers.ModelSerializer):
         return [c.user_id for c in activity.activityparticipant_set.all()]
 
     def get_feedback_dismissed_by(self, activity):
+        # we are filtering in python to make use of prefetched data
         return [c.user_id for c in activity.activityparticipant_set.all() if c.feedback_dismissed]
 
     def save(self, **kwargs):
