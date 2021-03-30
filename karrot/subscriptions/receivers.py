@@ -634,14 +634,7 @@ def feedback_saved(sender, instance, created, **kwargs):
 
     user = feedback.given_by
 
-    groups = defaultdict(dict)
-    for group_id, count in get_feedback_possible(user):
-        groups[group_id]['feedback_possible_count'] = count
-
-    payload = {'groups': groups}
-
-    for subscription in ChannelSubscription.objects.recent().filter(user=user):
-        send_in_channel(subscription.reply_channel, topic='status', payload=payload)
+    send_feedback_possible_count(user)
 
 
 @receiver(post_save, sender=ActivityParticipant)
@@ -650,7 +643,12 @@ def activity_participant_saved(sender, instance, **kwargs):
 
     user = activity_participant.user
 
+    send_feedback_possible_count(user)
+
+
+def send_feedback_possible_count(user):
     groups = defaultdict(dict)
+
     for group_id, count in get_feedback_possible(user):
         groups[group_id]['feedback_possible_count'] = count
 
