@@ -91,7 +91,7 @@ itypes==1.2.0
 jedi==0.18.0
 jinja2==2.11.3
 logging-tree==1.8.1
-lxml==4.6.2
+lxml==4.6.3
 markdown==3.3.4
 markupsafe==1.1.1
 maxminddb==2.0.3
