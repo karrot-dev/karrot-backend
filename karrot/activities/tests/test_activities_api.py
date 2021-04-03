@@ -441,17 +441,20 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         self.assertFalse(self.activity.is_done, False)
 
     def test_export_ics_logged_out(self):
-        response = self.client.get('/api/activities-ics/{id}/'.format(id=self.activity.id))
+        response = self.client.get('/api/activities/{id}/ics/'.format(id=self.activity.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_export_ics_not_group_member(self):
         self.client.force_login(user=self.user)
-        response = self.client.get('/api/activities-ics/{id}/'.format(id=self.activity.id))
+        response = self.client.get('/api/activities/{id}/ics/'.format(id=self.activity.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
     def test_export_ics_logged_in(self):
         self.client.force_login(user=self.member)
-        response = self.client.get('/api/activities-ics/{id}/'.format(id=self.activity.id))
+        # first, join the activity to make sure it has an attendee
+        response = self.client.post(self.join_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        response = self.client.get('/api/activities/{id}/ics/'.format(id=self.activity.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
 

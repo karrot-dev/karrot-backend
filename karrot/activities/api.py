@@ -255,21 +255,13 @@ class ActivityViewSet(
         """Get conversation ID of this activity"""
         return self.retrieve_conversation(request, pk)
 
-
-class ActivityICSViewSet(mixins.RetrieveModelMixin, GenericViewSet):
-    serializer_class = ActivityICSSerializer
-    renderer_classes = (ICSCalendarRenderer, )
-    queryset = ActivityModel.objects
-    filter_backends = (filters.DjangoFilterBackend, )
-    filterset_class = ActivitiesFilter
-    permission_classes = (IsAuthenticated, )
-
-    def get_queryset(self):
-        return self.queryset.filter(place__group__members=self.request.user)
-
-    def finalize_response(self, request, response, *args, **kwargs):
-        """specify a filename for the downloaded file"""
-        super(ActivityICSViewSet, self).finalize_response(request, response, *args, **kwargs)
-        if isinstance(response, Response) and response.accepted_renderer.format == 'ics':
-            response['content-disposition'] = 'attachment; filename=invite.ics'
+    @action(
+        detail=True,
+        methods=['GET'],
+        renderer_classes=(ICSCalendarRenderer, ),
+        serializer_class=ActivityICSSerializer,
+    )
+    def ics(self, request, pk=None):
+        response = self.retrieve(request)
+        response['content-disposition'] = 'attachment; filename=activity-{id}.ics'.format(id=pk)
         return response

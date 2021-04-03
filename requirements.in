@@ -53,6 +53,7 @@ uvicorn[standard]
 python-dotenv
 click
 httpx
+icalendar
 
 # dev PyPI dependencies
 pip-tools

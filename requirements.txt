@@ -79,6 +79,7 @@ httptools==0.1.1
 httpx==0.16.1
 huey==2.3.0
 hyperlink==21.0.0
+icalendar==4.0.7
 identify==1.6.1
 idna==2.10
 importlib-metadata==3.7.0

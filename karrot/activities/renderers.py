@@ -1,5 +1,6 @@
 from rest_framework import renderers
 from rest_framework.utils.serializer_helpers import ReturnDict
+from icalendar import Calendar, Event
 
 
 class ICSCalendarRenderer(renderers.BaseRenderer):
@@ -20,25 +21,17 @@ class ICSCalendarRenderer(renderers.BaseRenderer):
         else:
             results = data
 
-        lines = [
-            'BEGIN:VCALENDAR',
-            'VERSION:2.0',
-            'PRODID:-//Karrot//EN',
-        ]
-        lines += [self.render_vevent(vevent) for vevent in results]
-        lines += ['END:VCALENDAR']
-        # CRLF is required by the specs
-        return '\r\n'.join(lines)
+        calendar = Calendar()
+        calendar['version'] = '2.0'
+        calendar['prodid'] = '-//Karrot//EN'
+        for vevent in results:
+            calendar.add_component(self.render_vevent(vevent))
+        return calendar.to_ical()
 
     def render_vevent(self, vevent):
         """renders a single event"""
-        lines = [
-            'BEGIN:VEVENT',
-        ]
-        lines += [
-            '{}:{}'.format(key.upper().replace('_', '-'), value.replace('\n', '\\n')) for key, value in vevent.items()
-        ]
-        lines += [
-            'END:VEVENT',
-        ]
-        return '\r\n'.join(lines)
+        event = Event()
+        for key, value in vevent.items():
+            if value is not None:
+                event.add(key, value)
+        return event

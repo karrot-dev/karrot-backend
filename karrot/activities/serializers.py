@@ -1,7 +1,8 @@
 import dateutil.rrule
 from datetime import timedelta, datetime
-from pytz import UTC
 
+from icalendar import vCalAddress, vText
+from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
@@ -301,14 +302,6 @@ class ActivityUpdateSerializer(ActivitySerializer):
         return has_duration
 
 
-class ICSDateTimeField(DateTimeField):
-    """date time serializer which conforms to the iCalendar format specifications"""
-    date_format = '%Y%m%dT%H%M%SZ'
-
-    def __init__(self, *args, **kwargs):
-        super(ICSDateTimeField, self).__init__(*args, format=self.date_format, default_timezone=UTC, **kwargs)
-
-
 class ActivityICSSerializer(serializers.ModelSerializer):
     """serializes an activity to the ICS format, in conjunction with the ICSEventRenderer.
 
@@ -317,7 +310,8 @@ class ActivityICSSerializer(serializers.ModelSerializer):
     class Meta:
         model = ActivityModel
         fields = [
-            'uid', 'dtstamp', 'summary', 'description', 'dtstart', 'dtend', 'transp', 'categories', 'location', 'geo'
+            'uid', 'dtstamp', 'summary', 'description', 'dtstart', 'dtend', 'transp', 'categories', 'location', 'geo',
+            'attendee'
         ]
 
     # date of generation of the ICS representation of the event
@@ -331,9 +325,9 @@ class ActivityICSSerializer(serializers.ModelSerializer):
     description = CharField()
 
     # start date
-    dtstart = ICSDateTimeField(source='date.start')
+    dtstart = DateTimeField(source='date.start', format=None)
     # end date
-    dtend = ICSDateTimeField(source='date.end')
+    dtend = DateTimeField(source='date.end', format=None)
     # opaque (busy)
     transp = serializers.SerializerMethodField()
     # comma-separated list of categories this activity is part of
@@ -344,8 +338,11 @@ class ActivityICSSerializer(serializers.ModelSerializer):
     # latitude and longitude of the location (such as "37.386013;-122.082932")
     geo = serializers.SerializerMethodField()
 
+    # participants' names and email addresses
+    attendee = serializers.SerializerMethodField()
+
     def get_dtstamp(self, activity):
-        return datetime.now().strftime(ICSDateTimeField.date_format)
+        return datetime.now()
 
     def get_uid(self, activity):
         request = self.context.get('request')
@@ -361,16 +358,24 @@ class ActivityICSSerializer(serializers.ModelSerializer):
         return 'OPAQUE'
 
     def get_categories(self, activity):
-        # The ',' sign is used to specify multiple categories,
-        # so we need to replace it by something else.
-        return activity.activity_type.name.replace(',', ';')
+        return [activity.activity_type.name]
 
     def get_location(self, activity):
         return activity.place.name
 
     def get_geo(self, activity):
         place = activity.place
-        return '{};{}'.format(place.latitude, place.longitude)
+        return (place.latitude, place.longitude) if place.latitude is not None else None
+
+    def get_attendee(self, activity):
+        attendees = []
+        for attendee in get_user_model().objects.filter(activityparticipant__activity=activity):
+            address = vCalAddress(attendee.email)
+            address.params['cn'] = vText(attendee.get_full_name())
+            address.params['role'] = vText('REQ-PARTICIPANT')
+            address.params['partstat'] = vText('ACCEPTED')
+            attendees.append(address)
+        return attendees
 
 
 class ActivityJoinSerializer(serializers.ModelSerializer):
