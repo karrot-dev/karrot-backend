@@ -63,7 +63,7 @@ class TestApplicationStats(TestCase):
 
         self.assertEqual(len(write_points.mock_calls), 1)
 
-        point = write_points.call_args.args[0][0]
+        point = write_points.call_args[0][0][0]
 
         expected_seconds = 60 * 60 * 2
         # can take a little longer to run sometimes...
