@@ -63,13 +63,13 @@ class TestApplicationStats(TestCase):
 
         self.assertEqual(len(write_points.mock_calls), 1)
 
-        point = write_points.mock_calls[0].args[0][0]
+        point = write_points.call_args.args[0][0]
 
         expected_seconds = 60 * 60 * 2
         # can take a little longer to run sometimes...
         expected_seconds_range = range(expected_seconds, expected_seconds + 3)
 
-        self.assertEquals(point['measurement'], 'karrot.events')
+        self.assertEqual(point['measurement'], 'karrot.events')
         self.assertEqual(
             point['tags'], {
                 'group': str(application.group.id),
