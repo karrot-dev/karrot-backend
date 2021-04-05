@@ -9,12 +9,13 @@ setup(
     author_email='info@karrot.world',
     license='AGPL',
     packages=find_packages(
-        include=['config', 'karrot', 'karrot.*']
+        include=['config', 'karrot', 'karrot.*'],
     ),
     package_data={
         'config': ['options.env'],
         'karrot': ['*/templates/*.jinja2', 'COMMIT'],
     },
     include_package_data=True,
+    exclude_package_data={"config": ["local_settings"]},
     zip_safe=False
 )
