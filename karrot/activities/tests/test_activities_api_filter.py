@@ -91,8 +91,8 @@ class TestActivitydatesAPIFilter(APITestCase, ExtractPaginationMixin):
 class TestFeedbackPossibleFilter(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.url = '/api/activities/'
-        self.oneWeekAgo = to_range(timezone.now() - relativedelta(weeks=1))
-        self.tooLongAgo = to_range(
+        self.one_week_ago = to_range(timezone.now() - relativedelta(weeks=1))
+        self.too_long_ago = to_range(
             timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS + 1), minutes=30
         )
 
@@ -107,41 +107,50 @@ class TestFeedbackPossibleFilter(APITestCase, ExtractPaginationMixin):
         self.place2 = PlaceFactory(group=self.group2)
         self.activity_type2 = ActivityTypeFactory(group=self.group2)
 
-        self.activityFeedbackPossible = ActivityFactory(
+        self.activity_feedback_possible = ActivityFactory(
             activity_type=self.activity_type, place=self.place, participants=[
                 self.member,
-            ], date=self.oneWeekAgo
+            ], date=self.one_week_ago
         )
 
         # now the issues where no feedback can be given
-        self.activityUpcoming = ActivityFactory(
+        self.activity_upcoming = ActivityFactory(
             activity_type=self.activity_type, place=self.place, participants=[
                 self.member,
             ]
         )
-        self.activityNotParticipant = ActivityFactory(
-            activity_type=self.activity_type, place=self.place, date=self.oneWeekAgo
+        self.activity_not_participant = ActivityFactory(
+            activity_type=self.activity_type, place=self.place, date=self.one_week_ago
         )
-        self.activityTooLongAgo = ActivityFactory(
-            activity_type=self.activity_type, place=self.place, date=self.tooLongAgo
+        self.activity_too_long_ago = ActivityFactory(
+            activity_type=self.activity_type, place=self.place, date=self.too_long_ago
         )
 
-        self.activityFeedbackAlreadyGiven = ActivityFactory(
+        self.activity_feedback_already_given = ActivityFactory(
             activity_type=self.activity_type, place=self.place, participants=[
                 self.member,
-            ], date=self.oneWeekAgo
+            ], date=self.one_week_ago
         )
-        self.feedback = FeedbackFactory(about=self.activityFeedbackAlreadyGiven, given_by=self.member)
 
-        self.activityParticipantLeftGroup = ActivityFactory(
+        self.feedback = FeedbackFactory(about=self.activity_feedback_already_given, given_by=self.member)
+
+        self.activity_feedback_dismissed = ActivityFactory(
+            activity_type=self.activity_type, place=self.place, participants=[
+                self.member,
+            ], date=self.one_week_ago
+        )
+        self.activity_feedback_dismissed.activityparticipant_set.filter(
+            user=self.member).update(feedback_dismissed=True)
+
+        self.activity_participant_left_group = ActivityFactory(
             activity_type=self.activity_type2, place=self.place2, participants=[
                 self.member,
-            ], date=self.oneWeekAgo
+            ], date=self.one_week_ago
         )
-        self.activityDoneByAnotherUser = ActivityFactory(
+        self.activity_done_by_another_user = ActivityFactory(
             activity_type=self.activity_type, place=self.place, participants=[
                 self.member2,
-            ], date=self.oneWeekAgo
+            ], date=self.one_week_ago
         )
 
         ActivityModel.objects.process_finished_activities()
@@ -151,4 +160,4 @@ class TestFeedbackPossibleFilter(APITestCase, ExtractPaginationMixin):
         response = self.get_results(self.url, {'feedback_possible': True})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]['id'], self.activityFeedbackPossible.id)
+        self.assertEqual(response.data[0]['id'], self.activity_feedback_possible.id)

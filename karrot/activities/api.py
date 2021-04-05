@@ -17,12 +17,13 @@ from karrot.activities.models import (
 )
 from karrot.activities.permissions import (
     IsUpcoming, HasNotJoinedActivity, HasJoinedActivity, IsEmptyActivity, IsNotFull, IsSameParticipant,
-    IsRecentActivity, IsGroupEditor, TypeHasNoActivities, CannotChangeGroup
+    IsRecentActivity, IsGroupEditor, TypeHasNoActivities, CannotChangeGroup, IsNotUpcoming
 )
 from karrot.activities.serializers import (
-    ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer, ActivityLeaveSerializer, FeedbackSerializer,
-    ActivityUpdateSerializer, ActivitySeriesUpdateSerializer, ActivitySeriesHistorySerializer,
-    FeedbackExportSerializer, FeedbackExportRenderer, ActivityTypeSerializer, ActivityTypeHistorySerializer
+    ActivityDismissFeedbackSerializer, ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer,
+    ActivityLeaveSerializer, FeedbackSerializer, ActivityUpdateSerializer, ActivitySeriesUpdateSerializer,
+    ActivitySeriesHistorySerializer, FeedbackExportSerializer, FeedbackExportRenderer, ActivityTypeSerializer,
+    ActivityTypeHistorySerializer
 )
 from karrot.places.models import PlaceStatus
 from karrot.utils.mixins import PartialUpdateModelMixin
@@ -252,3 +253,13 @@ class ActivityViewSet(
     def conversation(self, request, pk=None):
         """Get conversation ID of this activity"""
         return self.retrieve_conversation(request, pk)
+
+    @action(
+        detail=True,
+        methods=['POST'],
+        permission_classes=(IsAuthenticated, HasJoinedActivity, IsNotUpcoming),
+        serializer_class=ActivityDismissFeedbackSerializer
+    )
+    def dismiss_feedback(self, request, pk=None):
+        return self.partial_update(request)
+
