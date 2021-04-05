@@ -9,8 +9,7 @@ setup(
     author_email='info@karrot.world',
     license='AGPL',
     packages=find_packages(
-        include=['config', 'karrot', 'karrot.*'],
-        exclude=['config/local_settings'],  # doesn't work :(
+        include=['config', 'karrot', 'karrot.*']
     ),
     package_data={
         'config': ['options.env'],
