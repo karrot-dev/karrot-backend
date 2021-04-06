@@ -20,10 +20,10 @@ from karrot.activities.permissions import (
     IsRecentActivity, IsGroupEditor, TypeHasNoActivities, CannotChangeGroup, IsNotUpcoming
 )
 from karrot.activities.serializers import (
-    ActivityDismissFeedbackSerializer, ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer, ActivityLeaveSerializer,
-    FeedbackSerializer, ActivityUpdateSerializer, ActivitySeriesUpdateSerializer, ActivitySeriesHistorySerializer,
-    FeedbackExportSerializer, FeedbackExportRenderer, ActivityTypeSerializer, ActivityTypeHistorySerializer,
-    ActivityICSSerializer
+    ActivityDismissFeedbackSerializer, ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer,
+    ActivityLeaveSerializer, FeedbackSerializer, ActivityUpdateSerializer, ActivitySeriesUpdateSerializer,
+    ActivitySeriesHistorySerializer, FeedbackExportSerializer, FeedbackExportRenderer, ActivityTypeSerializer,
+    ActivityTypeHistorySerializer, ActivityICSSerializer
 )
 from karrot.activities.renderers import ICSCalendarRenderer
 from karrot.places.models import PlaceStatus
@@ -263,7 +263,7 @@ class ActivityViewSet(
     )
     def dismiss_feedback(self, request, pk=None):
         return self.partial_update(request)
-      
+
     @action(
         detail=True,
         methods=['GET'],
@@ -274,4 +274,3 @@ class ActivityViewSet(
         response = self.retrieve(request)
         response['content-disposition'] = 'attachment; filename=activity-{id}.ics'.format(id=pk)
         return response
-
