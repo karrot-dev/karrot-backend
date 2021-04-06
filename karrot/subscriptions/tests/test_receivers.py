@@ -921,6 +921,27 @@ class FinishedActivityReceiverTest(WSTestCase):
 
         self.assertEqual(len(client.messages), 4, client.messages)
 
+    def test_receive_dismissed_feedback(self):
+        self.activity.date = to_range(timezone.now() - relativedelta(days=1))
+        self.activity.save()
+
+        client = self.connect_as(self.member)
+        Activity.objects.process_finished_activities()
+
+        messages_by_topic = client.messages_by_topic
+
+        status_messages = messages_by_topic['status']
+        self.assertEqual(len(status_messages), 2)
+        self.assertEqual(status_messages[1]['payload'], {'groups': {self.group.id: {'feedback_possible_count': 1}}})
+
+        self.activity.dismiss_feedback(self.member)
+
+        messages_by_topic = client.messages_by_topic
+
+        status_messages = messages_by_topic['status']
+        self.assertEqual(len(status_messages), 3)
+        self.assertEqual(status_messages[2]['payload'], {'groups': {self.group.id: {'feedback_possible_count': 0}}})
+
 
 class UserReceiverTest(WSTestCase):
     def setUp(self):

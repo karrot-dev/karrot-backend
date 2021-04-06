@@ -33,6 +33,16 @@ def activity_left(activity):
     }])
 
 
+def feedback_dismissed(activity):
+    write_points([{
+        'measurement': 'karrot.events',
+        'tags': activity_tags(activity),
+        'fields': {
+            'feedback_dismissed': 1
+        },
+    }])
+
+
 def activity_done(activity):
     participants_count = activity.participants.count()
     fields = {
