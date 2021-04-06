@@ -10,12 +10,12 @@ setup(
     license='AGPL',
     packages=find_packages(
         include=['config', 'karrot', 'karrot.*'],
-        exclude=['config/local_settings'],  # doesn't work :(
     ),
     package_data={
         'config': ['options.env'],
         'karrot': ['*/templates/*.jinja2', 'COMMIT'],
     },
     include_package_data=True,
+    exclude_package_data={"config": ["local_settings"]},
     zip_safe=False
 )
