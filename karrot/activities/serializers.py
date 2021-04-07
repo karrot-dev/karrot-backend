@@ -1,13 +1,15 @@
 import dateutil.rrule
-from datetime import timedelta
+from datetime import timedelta, datetime
 
+from icalendar import vCalAddress, vText
+from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.fields import DateTimeField, Field
+from rest_framework.fields import DateTimeField, Field, CharField
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework_csv.renderers import CSVRenderer
 
@@ -304,6 +306,82 @@ class ActivityUpdateSerializer(ActivitySerializer):
         if self.instance.series is not None and has_duration != self.instance.has_duration:
             raise serializers.ValidationError('You cannot modify the duration of activities that are part of a series')
         return has_duration
+
+
+class ActivityICSSerializer(serializers.ModelSerializer):
+    """serializes an activity to the ICS format, in conjunction with the ICSEventRenderer.
+
+    details of the allowed fields:
+    https://www.kanzaki.com/docs/ical/vevent.html"""
+    class Meta:
+        model = ActivityModel
+        fields = [
+            'uid', 'dtstamp', 'summary', 'description', 'dtstart', 'dtend', 'transp', 'categories', 'location', 'geo',
+            'attendee'
+        ]
+
+    # date of generation of the ICS representation of the event
+    dtstamp = serializers.SerializerMethodField()
+    # unique id, of the form uid@domain.com
+    uid = serializers.SerializerMethodField()
+
+    # title (short description)
+    summary = serializers.SerializerMethodField()
+    # longer description
+    description = CharField()
+
+    # start date
+    dtstart = DateTimeField(source='date.start', format=None)
+    # end date
+    dtend = DateTimeField(source='date.end', format=None)
+    # opaque (busy)
+    transp = serializers.SerializerMethodField()
+    # comma-separated list of categories this activity is part of
+    categories = serializers.SerializerMethodField()
+
+    # where this activity happens (text description)
+    location = serializers.SerializerMethodField()
+    # latitude and longitude of the location (such as "37.386013;-122.082932")
+    geo = serializers.SerializerMethodField()
+
+    # participants' names and email addresses
+    attendee = serializers.SerializerMethodField()
+
+    def get_dtstamp(self, activity):
+        return datetime.now()
+
+    def get_uid(self, activity):
+        request = self.context.get('request')
+        domain = 'karrot'
+        if request and request.META.get('HTTP_HOST'):
+            domain = request.META.get('HTTP_HOST')
+        return 'activity_{}@{}'.format(activity.id, domain)
+
+    def get_summary(self, activity):
+        return '{}: {}'.format(activity.activity_type.name, activity.place.name)
+
+    def get_transp(self, activity):
+        return 'OPAQUE'
+
+    def get_categories(self, activity):
+        return [activity.activity_type.name]
+
+    def get_location(self, activity):
+        return activity.place.name
+
+    def get_geo(self, activity):
+        place = activity.place
+        return (place.latitude, place.longitude) if place.latitude is not None else None
+
+    def get_attendee(self, activity):
+        attendees = []
+        for attendee in get_user_model().objects.filter(activityparticipant__activity=activity):
+            address = vCalAddress(attendee.email)
+            address.params['cn'] = vText(attendee.get_full_name())
+            address.params['role'] = vText('REQ-PARTICIPANT')
+            address.params['partstat'] = vText('ACCEPTED')
+            attendees.append(address)
+        return attendees
 
 
 class ActivityJoinSerializer(serializers.ModelSerializer):
