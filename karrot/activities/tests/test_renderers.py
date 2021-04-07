@@ -23,10 +23,17 @@ class ICSCalendarRendererTest(TestCase):
         },
                                 serializer=None)
         self.expected_output = '\r\n'.join([
-            "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Karrot//EN", "BEGIN:VEVENT",
-            "DTSTART;VALUE=DATE-TIME:20210319T170000Z", "DTEND;VALUE=DATE-TIME:20210319T180000Z",
+            "BEGIN:VCALENDAR",
+            "VERSION:2.0",
+            "PRODID:-//Karrot//EN",
+            "BEGIN:VEVENT",
+            "DTSTART;VALUE=DATE-TIME:20210319T170000Z",
+            "DTEND;VALUE=DATE-TIME:20210319T180000Z",
             "ATTENDEE;CN=\"Mary Smith\";ROLE=REQ-PARTICIPANT:MAILTO:marysmith@example.com",
-            "DESCRIPTION:Hello\\nWorld!", "TRANSP:OPAQUE", "END:VEVENT", "END:VCALENDAR"
+            "DESCRIPTION:Hello\\nWorld!",
+            "TRANSP:OPAQUE",
+            "END:VEVENT",
+            "END:VCALENDAR",
         ])
         self.renderer_context = {'response': Response()}
 
