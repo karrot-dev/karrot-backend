@@ -77,7 +77,7 @@ class ActivityHistoryStatsViewSet(ListModelMixin, GenericViewSet):
                     activity__in=Activity.objects.done_not_full(),
                     activity_leave_seconds__lte=timedelta(hours=settings.ACTIVITY_LEAVE_LATE_HOURS).total_seconds()),
                 ),
-                feedback_weight=Coalesce(Sum('activity__feedback__weight', filter=feedback_weight_filter), 0)) \
+                feedback_weight=Coalesce(Sum('activity__feedback__weight', filter=feedback_weight_filter), 0.0)) \
             .filter(
                 Q(done_count__gt=0) | Q(leave_count__gt=0) | Q(leave_late_count__gt=0) | Q(feedback_weight__gt=0)) \
             .order_by('place__name')
