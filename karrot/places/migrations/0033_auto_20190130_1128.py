@@ -11,7 +11,7 @@ def add_place_subscriptions(apps, schema_editor):
     Only adds users who signed up for activities three weeks ago or later
     """
     app_config = apps.get_app_config('places')
-    app_config.models_module = app_config.models_module or True
+    setattr(app_config, 'models_module', getattr(app_config, 'models_module', True))
     create_contenttypes(app_config)
 
     User = apps.get_model('users', 'User')
