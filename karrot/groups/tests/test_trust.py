@@ -152,6 +152,32 @@ class TestTrustAPI(APITestCase):
             ).exists()
         )
 
+    def test_trust_can_be_revoked(self):
+        membership = GroupMembership.objects.get(user=self.member2, group=self.group)
+        Trust.objects.create(membership=membership, given_by=self.member1)
+        self.client.force_login(user=self.member1)
+
+        url = reverse('group-revoke-trust', args=(self.group.id, self.member2.id))
+        response = self.client.post(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(
+            Trust.objects.filter(
+                membership__group=self.group,
+                membership__user=self.member2,
+                given_by=self.member1,
+            ).exists()
+        )
+
+    def test_trust_that_has_not_been_given_cannot_be_revoked(self):
+        GroupMembership.objects.get(user=self.member2, group=self.group)
+        self.client.force_login(user=self.member1)
+
+        url = reverse('group-revoke-trust', args=(self.group.id, self.member2.id))
+        response = self.client.post(url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
 
 class TestTrustList(APITestCase):
     def setUp(self):
