@@ -89,12 +89,32 @@ def trust_given(group):
     }])
 
 
+def trust_revoked(group):
+    write_points([{
+        'measurement': 'karrot.events',
+        'tags': group_tags(group),
+        'fields': {
+            'trust_revoked': 1
+        },
+    }])
+
+
 def member_became_editor(group):
     write_points([{
         'measurement': 'karrot.events',
         'tags': group_tags(group),
         'fields': {
             'member_became_editor': 1
+        },
+    }])
+
+
+def editor_became_member(group):
+    write_points([{
+        'measurement': 'karrot.events',
+        'tags': group_tags(group),
+        'fields': {
+            'editor_became_member': 1
         },
     }])
 
