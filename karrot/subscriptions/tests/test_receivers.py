@@ -18,6 +18,7 @@ from karrot.conversations.models import ConversationMessage, \
     ConversationMessageReaction, ConversationNotificationStatus
 from karrot.groups import roles
 from karrot.groups.factories import GroupFactory
+from karrot.groups.models import Trust, GroupMembership
 from karrot.invitations.models import Invitation
 from karrot.issues.factories import IssueFactory, vote_for_further_discussion
 from karrot.notifications.models import Notification
@@ -1136,3 +1137,22 @@ class GroupConversationReceiverPushTests(TransactionTestCase):
         self.assertEqual(list(kwargs['subscriptions']), [self.subscription])
         self.assertEqual(kwargs['fcm_options']['message_title'], self.group.name + ' / ' + self.author.display_name)
         self.assertEqual(kwargs['fcm_options']['message_body'], self.content)
+
+
+class TrustReceiverTest(WSTestCase):
+
+    def test_revoke_trust(self):
+        trust_receiver = UserFactory()
+        trust_giver = UserFactory()
+        group = GroupFactory(members=[trust_giver, trust_receiver])
+
+        client = self.connect_as(trust_giver)
+
+        membership = GroupMembership.objects.get(user=trust_receiver, group=group)
+        trust = Trust.objects.create(membership=membership, given_by=trust_giver)
+
+        trust.delete()
+
+        responses = client.messages_by_topic.get('groups:group_detail')
+        self.assertEqual(responses[0]['payload']['memberships'][trust_receiver.id]['trusted_by'], [trust_giver.id])
+        self.assertEqual(responses[1]['payload']['memberships'][trust_receiver.id]['trusted_by'], [])
