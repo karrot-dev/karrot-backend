@@ -141,6 +141,7 @@ def prepare_user_became_editor_email(user, group):
         stats_category='user_became_editor',
     )
 
+
 def prepare_user_lost_editor_role_email(user, group):
     return prepare_email(
         template='user_lost_editor_role',
