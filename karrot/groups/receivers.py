@@ -96,7 +96,7 @@ def trust_revoked(sender, instance, **kwargs):
         membership.save()
 
         History.objects.create(
-            typus=HistoryTypus.EDITOR_BECAME_MEMBER,
+            typus=HistoryTypus.USER_LOST_EDITOR_ROLE,
             group=membership.group,
             users=[membership.user],
             payload={
@@ -106,7 +106,7 @@ def trust_revoked(sender, instance, **kwargs):
 
         prepare_user_lost_editor_role_email(user=membership.user, group=membership.group).send()
 
-        stats.editor_became_member(membership.group)
+        stats.user_lost_editor_role(membership.group)
 
     stats.trust_revoked(membership.group)
 

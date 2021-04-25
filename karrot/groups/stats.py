@@ -109,12 +109,12 @@ def member_became_editor(group):
     }])
 
 
-def editor_became_member(group):
+def user_lost_editor_role(group):
     write_points([{
         'measurement': 'karrot.events',
         'tags': group_tags(group),
         'fields': {
-            'editor_became_member': 1
+            'user_lost_editor_role': 1
         },
     }])
 

@@ -43,7 +43,7 @@ class HistoryTypus(enum.Enum):
     ACTIVITY_TYPE_CREATE = 25
     ACTIVITY_TYPE_MODIFY = 26
     ACTIVITY_TYPE_DELETE = 27
-    EDITOR_BECAME_MEMBER = 18
+    USER_LOST_EDITOR_ROLE = 18
 
 
 class HistoryQuerySet(models.QuerySet):
