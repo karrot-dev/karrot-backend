@@ -110,6 +110,7 @@ def trust_revoked(sender, instance, **kwargs):
 
     stats.trust_revoked(membership.group)
 
+
 @receiver(pre_delete, sender=GroupMembership)
 def remove_trust(sender, instance, **kwargs):
     membership = instance
