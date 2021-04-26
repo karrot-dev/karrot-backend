@@ -50,15 +50,15 @@ msgstr "Actividad"
 msgid "Task"
 msgstr "Tarea"
 
-#: karrot/activities/serializers.py:126
+#: karrot/activities/serializers.py:128
 msgid "Must be a list"
 msgstr "Tiene que haber una lista"
 
-#: karrot/activities/serializers.py:127
+#: karrot/activities/serializers.py:129
 msgid "Must be a list with one or two values"
 msgstr "Tiene que haber una lista con uno o dos valores"
 
-#: karrot/activities/serializers.py:128
+#: karrot/activities/serializers.py:130
 msgid "Must pass start value"
 msgstr "Tiene que pasar un valor inicial"
 
