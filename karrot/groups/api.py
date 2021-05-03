@@ -201,14 +201,7 @@ class GroupViewSet(
 
         return Response(data={})
 
-    @action(
-        detail=True,
-        methods=['POST'],
-        permission_classes=(IsAuthenticated, IsOtherUser),
-        url_name='revoke-trust',
-        url_path='users/(?P<user_id>[^/.]+)/revoketrust',
-        serializer_class=EmptySerializer
-    )
+    @trust_user.mapping.delete
     def revoke_trust(self, request, pk, user_id):
         """revoke trust for a user in a group"""
         self.check_permissions(request)

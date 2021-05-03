@@ -176,8 +176,8 @@ class TestTrustAPI(APITestCase):
         Trust.objects.create(membership=membership, given_by=self.member1)
         self.client.force_login(user=self.member1)
 
-        url = reverse('group-revoke-trust', args=(self.group.id, self.member2.id))
-        response = self.client.post(url)
+        url = reverse('group-trust-user', args=(self.group.id, self.member2.id))
+        response = self.client.delete(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(
@@ -192,8 +192,8 @@ class TestTrustAPI(APITestCase):
         GroupMembership.objects.get(user=self.member2, group=self.group)
         self.client.force_login(user=self.member1)
 
-        url = reverse('group-revoke-trust', args=(self.group.id, self.member2.id))
-        response = self.client.post(url)
+        url = reverse('group-trust-user', args=(self.group.id, self.member2.id))
+        response = self.client.delete(url)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
