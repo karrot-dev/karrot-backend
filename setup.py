@@ -8,9 +8,7 @@ setup(
     author='Karrot Team',
     author_email='info@karrot.world',
     license='AGPL',
-    packages=find_packages(
-        include=['config', 'karrot', 'karrot.*'],
-    ),
+    packages=find_packages(include=['config', 'karrot', 'karrot.*'], ),
     package_data={
         'config': ['options.env'],
         'karrot': ['*/templates/*.jinja2', 'COMMIT'],
