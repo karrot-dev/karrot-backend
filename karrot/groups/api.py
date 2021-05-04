@@ -201,6 +201,23 @@ class GroupViewSet(
 
         return Response(data={})
 
+    @trust_user.mapping.delete
+    def revoke_trust(self, request, pk, user_id):
+        """revoke trust for a user in a group"""
+        self.check_permissions(request)
+        membership = get_object_or_404(GroupMembership.objects, group=pk, user=user_id)
+        self.check_object_permissions(request, membership)
+        try:
+            trust = Trust.objects.get(
+                membership=membership,
+                given_by=self.request.user,
+            )
+            trust.delete()
+
+            return Response(data={})
+        except Trust.DoesNotExist:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
     @action(
         detail=True,
         methods=['PUT', 'DELETE'],

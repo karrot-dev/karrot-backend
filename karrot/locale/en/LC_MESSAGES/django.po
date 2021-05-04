@@ -156,6 +156,7 @@ msgstr ""
 #: karrot/applications/templates/application_accepted.html.jinja2:186
 #: karrot/groups/templates/user_became_editor.html.jinja2:192
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:192
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:188
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:190
 #, python-format
 msgid "Visit %(group_name)s"
@@ -431,6 +432,7 @@ msgstr ""
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:218
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:218
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:214
 #, python-format
 msgid ""
 "You are receiving this because you are a member of "
@@ -439,6 +441,7 @@ msgstr ""
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:219
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:219
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:215
 #, python-format
 msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
 msgstr ""
@@ -466,6 +469,19 @@ msgstr ""
 #: karrot/groups/templates/user_inactive_in_group.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s is missing you!"
+msgstr ""
+
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:6
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:170
+#: karrot/groups/templates/user_lost_editor_role.subject.jinja2:1
+#, python-format
+msgid "You lost editing permissions in %(group_name)s!"
+msgstr ""
+
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:173
+msgid ""
+"You've don't have enough trust from fellow group members anymore to grant"
+" you <strong>editing permissions</strong>."
 msgstr ""
 
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:170

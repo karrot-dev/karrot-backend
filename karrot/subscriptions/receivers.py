@@ -268,6 +268,7 @@ def send_application_updates(sender, instance, **kwargs):
 
 # Trust
 @receiver(post_save, sender=Trust)
+@receiver(post_delete, sender=Trust)
 def send_trust_updates(sender, instance, **kwargs):
     send_group_updates(sender, instance.membership.group)
 

@@ -2,12 +2,12 @@ import json
 
 import requests
 from django.conf import settings
-from django.db.models.signals import post_save, pre_delete
+from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
 
 from karrot.conversations.models import Conversation
 from karrot.groups import roles, stats
-from karrot.groups.emails import prepare_user_became_editor_email
+from karrot.groups.emails import prepare_user_became_editor_email, prepare_user_lost_editor_role_email
 from karrot.groups.models import Group, GroupMembership, Trust
 from karrot.history.models import History, HistoryTypus
 from karrot.utils import frontend_urls
@@ -83,6 +83,32 @@ def trust_given(sender, instance, created, **kwargs):
         stats.member_became_editor(membership.group)
 
     stats.trust_given(membership.group)
+
+
+@receiver(post_delete, sender=Trust)
+def trust_revoked(sender, instance, **kwargs):
+    membership = instance.membership
+    relevant_trust = Trust.objects.filter(membership=membership)
+    trust_threshold = membership.group.trust_threshold_for_newcomer()
+
+    if relevant_trust.count() < trust_threshold and roles.GROUP_EDITOR in membership.roles:
+        membership.remove_roles([roles.GROUP_EDITOR])
+        membership.save()
+
+        History.objects.create(
+            typus=HistoryTypus.USER_LOST_EDITOR_ROLE,
+            group=membership.group,
+            users=[membership.user],
+            payload={
+                'threshold': trust_threshold,
+            },
+        )
+
+        prepare_user_lost_editor_role_email(user=membership.user, group=membership.group).send()
+
+        stats.user_lost_editor_role(membership.group)
+
+    stats.trust_revoked(membership.group)
 
 
 @receiver(pre_delete, sender=GroupMembership)
