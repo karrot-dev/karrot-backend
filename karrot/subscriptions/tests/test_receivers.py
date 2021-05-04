@@ -1140,7 +1140,6 @@ class GroupConversationReceiverPushTests(TransactionTestCase):
 
 
 class TrustReceiverTest(WSTestCase):
-
     def test_revoke_trust(self):
         trust_receiver = UserFactory()
         trust_giver = UserFactory()
