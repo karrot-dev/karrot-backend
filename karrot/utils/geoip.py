@@ -25,6 +25,17 @@ def get_client_ip(request):
 
 
 @lru_cache()
+def ip_to_city(ip):
+    if not geoip_is_available():
+        return None
+    try:
+        return geoip.city(ip)
+    except AddressNotFoundError:
+        # we use "False" to mean we looked it up but couldn't find it
+        return False
+
+
+@lru_cache()
 def ip_to_lat_lon(ip):
     if not geoip_is_available():
         return None

@@ -26,10 +26,18 @@ class TestBootstrapAPI(APITestCase):
     @patch('karrot.utils.geoip.geoip')
     def test_with_geoip(self, geoip):
         lat_lng = [float(val) for val in faker.latlng()]
-        geoip.lat_lon.return_value = lat_lng
+        city = {'latitude': lat_lng[0], 'longitude': lat_lng[1], 'country_code': 'AA', 'time_zone': 'Europe/Berlin'}
+        geoip.city.return_value = city
         response = self.client.get(self.url, HTTP_X_FORWARDED_FOR=self.client_ip)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['geoip'], {'lat': lat_lng[0], 'lng': lat_lng[1]})
+        self.assertEqual(
+            dict(response.data['geoip']), {
+                'lat': city['latitude'],
+                'lng': city['longitude'],
+                'country_code': city['country_code'],
+                'timezone': city['time_zone'],
+            }
+        )
 
     def test_when_logged_in(self):
         self.client.force_login(user=self.user)
