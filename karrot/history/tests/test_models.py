@@ -39,8 +39,6 @@ class HistoryQuerySetTests(TestCase):
 
 class HistoryTypusTests(TestCase):
     def test_typus_ids_are_unique(self):
-        list_of_all_history_typus = [item[1] for item in HistoryTypus.__members__.items()]
-        self.assertEqual(
-            len(list_of_all_history_typus), len(set(list_of_all_history_typus)),
-            "Values of HistoryTypus are not unique"
-        )
+        # see https://stackoverflow.com/questions/31537316/python-enums-with-duplicate-values
+        # for why __members__ is used
+        self.assertEqual(len(HistoryTypus), len(HistoryTypus.__members__), "Values of HistoryTypus are not unique")
