@@ -31,8 +31,7 @@ def ip_to_city(ip):
     try:
         return geoip.city(ip)
     except AddressNotFoundError:
-        # we use "False" to mean we looked it up but couldn't find it
-        return False
+        return None
 
 
 @lru_cache()
@@ -42,5 +41,4 @@ def ip_to_lat_lon(ip):
     try:
         return geoip.lat_lon(ip)
     except AddressNotFoundError:
-        # we use "False" to mean we looked it up but couldn't find it
-        return False
+        return None
