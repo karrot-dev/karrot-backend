@@ -35,3 +35,12 @@ class HistoryQuerySetTests(TestCase):
         self.assertEqual(annotated.activity_leave_seconds, leave_seconds_before_activity)
         self.assertEqual(History.objects.activity_left_late(seconds=leave_seconds_before_activity).count(), 1)
         self.assertEqual(History.objects.activity_left_late(seconds=leave_seconds_before_activity - 1).count(), 0)
+
+
+class HistoryTypusTests(TestCase):
+    def test_typus_ids_are_unique(self):
+        list_of_all_history_typus = list(map(lambda tuple: tuple[1], HistoryTypus.__members__.items()))
+        self.assertEqual(
+            len(list_of_all_history_typus), len(set(list_of_all_history_typus)),
+            "Values of HistoryTypus are not unique"
+        )
