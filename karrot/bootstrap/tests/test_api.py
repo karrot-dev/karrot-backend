@@ -1,5 +1,6 @@
 from unittest.mock import ANY, patch
 
+from geoip2.errors import AddressNotFoundError
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -38,6 +39,13 @@ class TestBootstrapAPI(APITestCase):
                 'timezone': city['time_zone'],
             }
         )
+
+    @patch('karrot.utils.geoip.geoip')
+    def test_without_geoip(self, geoip):
+        geoip.city.side_effect = AddressNotFoundError
+        response = self.client.get(self.url, HTTP_X_FORWARDED_FOR=self.client_ip)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsNone(response.data['geoip'])
 
     def test_when_logged_in(self):
         self.client.force_login(user=self.user)
