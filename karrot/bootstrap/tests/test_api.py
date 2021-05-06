@@ -6,6 +6,7 @@ from rest_framework.test import APITestCase
 
 from karrot.groups.factories import GroupFactory
 from karrot.users.factories import UserFactory
+from karrot.utils.geoip import ip_to_city
 from karrot.utils.tests.fake import faker
 
 
@@ -16,6 +17,7 @@ class TestBootstrapAPI(APITestCase):
         self.group = GroupFactory(members=[self.member], application_questions='')
         self.url = '/api/bootstrap/'
         self.client_ip = '2003:d9:ef08:4a00:4b7a:7964:8a3c:a33e'
+        ip_to_city.cache_clear()  # prevent getting cached mock values
 
     def test_as_anon(self):
         response = self.client.get(self.url)
