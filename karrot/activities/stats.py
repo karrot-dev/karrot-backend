@@ -1,4 +1,4 @@
-from influxdb_metrics.loader import write_points
+from karrot.utils.influxdb_utils import write_points
 
 from karrot.groups.stats import group_tags
 
@@ -29,6 +29,16 @@ def activity_left(activity):
         'tags': activity_tags(activity),
         'fields': {
             'activity_left': 1
+        },
+    }])
+
+
+def feedback_dismissed(activity):
+    write_points([{
+        'measurement': 'karrot.events',
+        'tags': activity_tags(activity),
+        'fields': {
+            'feedback_dismissed': 1
         },
     }])
 

@@ -46,6 +46,14 @@ more-itertools
 requests
 glom
 geoip2
+starlette
+aiofiles
+shiv
+uvicorn[standard]
+python-dotenv
+click
+httpx
+icalendar
 
 # dev PyPI dependencies
 pip-tools

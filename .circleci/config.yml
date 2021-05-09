@@ -26,7 +26,8 @@ aliases:
         test -d env/bin || virtualenv -p python3 env
         env/bin/pip install --upgrade pip
         env/bin/pip install --upgrade pip-tools
-        PIP_EXISTS_ACTION=w env/bin/pip-sync requirements*.txt
+        PIP_EXISTS_ACTION=w env/bin/pip-sync <(sed 's/^-e //g' requirements.txt)
+        echo "source env/bin/activate" >> $BASH_ENV
 
   - &add-token-to-remote
     run:
@@ -60,20 +61,19 @@ jobs:
       - run:
           name: setup
           command: |
-            cp config/local_settings.py.ci config/local_settings.py
+            cp config/ci.env .env
             (cd mjml && yarn)
             mjml/convert
       - run:
           name: flake8
-          command: env/bin/flake8 ./
+          command: flake8 ./
       - run:
           name: no missing migrations?
-          command: env/bin/python manage.py makemigrations --dry-run --check --no-input
+          command: python manage.py makemigrations --dry-run --check --no-input
       - run:
           name: no missing makemessages?
           command: |
             set -xe
-            source env/bin/activate
             python manage.py makemessages
             git add .
             git diff --staged --exit-code
@@ -81,12 +81,24 @@ jobs:
           name: run tests
           command: |
             mkdir -p test-reports
-            env/bin/pytest -n 4 --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
+            pytest -n 4 --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
       - run:
           name: upload coverage
           command: |
-            env/bin/pip install codecov
-            env/bin/codecov
+            pip install codecov
+            codecov
+      - run:
+          name: build
+          environment:
+            RSYNC_DESTINATION: 'karrot-download@yuca.yunity.org:/var/www/karrot-download/www/'
+          command: |
+            if [[ "$CIRCLE_BRANCH" = "master" ]] || [[ "$CIRCLE_BRANCH" = "production" ]]; then
+              export FILENAME="karrot-backend-$(echo ${CIRCLE_TAG:-$CIRCLE_BRANCH} | sed 's/[^a-zA-Z0-9.-]/-/g').pyz"
+              ./scripts/build "$FILENAME"
+              rsync -e "ssh -o StrictHostKeyChecking=no" -av "$FILENAME" "$RSYNC_DESTINATION"
+            else
+              echo "Skipping build for ${CIRCLE_TAG:-$CIRCLE_BRANCH}"
+            fi
       - store_test_results:
           path: test-reports
       - store_artifacts:
@@ -184,7 +196,7 @@ jobs:
             git config user.name "CircleCI"
             git branch --delete --force $BRANCH || true
             git checkout -b $BRANCH
-            pip-compile --upgrade
+            pip-compile --upgrade --no-annotate
             git add requirements.txt
             pushd mjml
             yarn upgrade --latest
@@ -197,7 +209,7 @@ jobs:
 
             Good morning, I found some fresh dependencies for you!
 
-            This Pull Request contains updates done by \`pip-compile --upgrade\` and
+            This Pull Request contains updates done by \`pip-compile --upgrade --no-annotate\` and
             in \`mjml\`, \`yarn upgrade --latest\`.
 
             Please check the changes before merging and consider trying out the branch locally to verify if it works.

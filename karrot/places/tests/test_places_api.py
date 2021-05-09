@@ -1,5 +1,4 @@
 from copy import deepcopy
-from itertools import groupby
 from operator import attrgetter
 from random import choice
 
@@ -322,11 +321,7 @@ class TestPlaceStatisticsAPI(APITestCase):
 
         # calculate weight from feedback
         feedback.sort(key=attrgetter('about.id'))
-        weight = 0
-        for _, fs in groupby(feedback, key=attrgetter('about.id')):
-            len_list = [f.weight for f in fs]
-            weight += float(sum(len_list)) / len(len_list)
-        weight = round(weight)
+        weight = float(sum(f.weight for f in feedback))
 
         response = self.client.get('/api/places/{}/statistics/'.format(place.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)

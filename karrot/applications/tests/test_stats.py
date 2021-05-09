@@ -40,9 +40,10 @@ class TestApplicationStats(TestCase):
 
     @patch('karrot.applications.stats.write_points')
     def test_application_status_update(self, write_points):
+        write_points.reset_mock()
+
         two_hours_ago = timezone.now() - relativedelta(hours=2)
 
-        write_points.reset_mock()
         application = ApplicationFactory(group=GroupFactory(), user=UserFactory(), created_at=two_hours_ago)
 
         write_points.assert_called_with([{
@@ -60,16 +61,22 @@ class TestApplicationStats(TestCase):
         application.status = 'accepted'
         application.save()
 
-        write_points.assert_called_with([{
-            'measurement': 'karrot.events',
-            'tags': {
+        self.assertEqual(len(write_points.mock_calls), 1)
+
+        point = write_points.call_args[0][0][0]
+
+        expected_seconds = 60 * 60 * 2
+        # can take a little longer to run sometimes...
+        expected_seconds_range = range(expected_seconds, expected_seconds + 3)
+
+        self.assertEqual(point['measurement'], 'karrot.events')
+        self.assertEqual(
+            point['tags'], {
                 'group': str(application.group.id),
                 'group_status': application.group.status,
                 'application_status': application.status,
-            },
-            'fields': {
-                'application_accepted': 1,
-                'application_alive_seconds': 60 * 60 * 2,
-                'application_accepted_alive_seconds': 60 * 60 * 2,
-            },
-        }])
+            }
+        )
+        self.assertEqual(point['fields']['application_accepted'], 1)
+        self.assertIn(point['fields']['application_alive_seconds'], expected_seconds_range)
+        self.assertIn(point['fields']['application_accepted_alive_seconds'], expected_seconds_range)

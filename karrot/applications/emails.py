@@ -13,7 +13,7 @@ def prepare_new_application_notification_email(user, application):
     reply_to_name = applicant.display_name
 
     local_part = make_local_part(conversation, user)
-    reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.SPARKPOST_RELAY_DOMAIN)))
+    reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.EMAIL_REPLY_DOMAIN)))
     from_email = formataddr((applicant.display_name, settings.DEFAULT_FROM_EMAIL))
 
     unsubscribe_url = new_application_unsubscribe_url(user, application)

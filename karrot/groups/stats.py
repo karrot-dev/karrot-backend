@@ -2,7 +2,7 @@ from collections import defaultdict
 
 from django.db.models import Count
 from django.utils import timezone
-from influxdb_metrics.loader import write_points
+from karrot.utils.influxdb_utils import write_points
 
 
 def group_tags(group):
@@ -89,12 +89,32 @@ def trust_given(group):
     }])
 
 
+def trust_revoked(group):
+    write_points([{
+        'measurement': 'karrot.events',
+        'tags': group_tags(group),
+        'fields': {
+            'trust_revoked': 1
+        },
+    }])
+
+
 def member_became_editor(group):
     write_points([{
         'measurement': 'karrot.events',
         'tags': group_tags(group),
         'fields': {
             'member_became_editor': 1
+        },
+    }])
+
+
+def user_lost_editor_role(group):
+    write_points([{
+        'measurement': 'karrot.events',
+        'tags': group_tags(group),
+        'fields': {
+            'user_lost_editor_role': 1
         },
     }])
 

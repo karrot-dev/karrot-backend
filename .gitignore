@@ -2,6 +2,7 @@
 **/__pycache__/
 .pytest_cache
 env
+venv
 myvenv
 test-results
 .coverage
@@ -17,6 +18,9 @@ karrot/*/templates/*.html.jinja2
 *.pid
 mjml/node_modules
 grafana/config.py
+.env
+*.pyz
+karrot/COMMIT
 
 # IDE
 /.idea
@@ -34,9 +38,6 @@ grafana/config.py
 
 # Static build of frontend (obtained via command)
 karrot/frontend/static/*
-
-# Media files
-uploads
 
 # Mac files
 **/.DS_Store

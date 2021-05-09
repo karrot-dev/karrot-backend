@@ -3,7 +3,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from karrot.bootstrap.serializers import BootstrapSerializer
 from karrot.groups.models import Group
-from karrot.utils.geoip import get_client_ip, ip_to_lat_lon, geoip_is_available
+from karrot.utils.geoip import geoip_is_available, get_client_ip, ip_to_city
 
 
 class BootstrapViewSet(GenericViewSet):
@@ -14,9 +14,14 @@ class BootstrapViewSet(GenericViewSet):
         if geoip_is_available():
             client_ip = get_client_ip(request)
             if client_ip:
-                lat_lng = ip_to_lat_lon(client_ip)
-                if lat_lng:
-                    geo_data = {'lat': lat_lng[0], 'lng': lat_lng[1]}
+                city = ip_to_city(client_ip)
+                if city:
+                    geo_data = {
+                        'lat': city.get('latitude', None),
+                        'lng': city.get('longitude', None),
+                        'country_code': city.get('country_code', None),
+                        'timezone': city.get('time_zone', None),
+                    }
 
         data = {
             'user': user if user.is_authenticated else None,

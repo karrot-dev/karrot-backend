@@ -126,6 +126,7 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
                 'place': self.place.id,
                 'description': '',
                 'feedback_given_by': [],
+                'feedback_dismissed_by': [],
                 'is_disabled': False,
                 'has_duration': False,
                 'is_done': False,

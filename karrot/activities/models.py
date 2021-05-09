@@ -9,7 +9,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext as _
 from django.db import models
 from django.db import transaction
-from django.db.models import Avg, Count, DurationField, F, Q, CheckConstraint
+from django.db.models import Count, DurationField, F, Q, Sum, CheckConstraint
 from django.utils import timezone
 
 from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin
@@ -180,7 +180,8 @@ class ActivityQuerySet(models.QuerySet):
                & Q(activity_type__has_feedback=True) \
                & Q(date__endswith__gte=timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)) \
                & Q(participants=user) \
-               & ~Q(feedback__given_by=user)
+               & ~Q(feedback__given_by=user) \
+               & Q(activityparticipant__feedback_dismissed=False)
 
     def only_feedback_possible(self, user):
         return self.filter(self._feedback_possible_q(user))
@@ -195,7 +196,7 @@ class ActivityQuerySet(models.QuerySet):
         return self.annotate(timezone=F('place__group__timezone'))
 
     def annotate_feedback_weight(self):
-        return self.annotate(feedback_weight=Avg('feedback__weight'))
+        return self.annotate(feedback_weight=Sum('feedback__weight'))
 
     def exclude_disabled(self):
         return self.filter(is_disabled=False)
@@ -409,6 +410,14 @@ class Activity(BaseModel, ConversationMixin):
             user=user,
         ).delete()
 
+    def dismiss_feedback(self, user):
+        activity_participant = ActivityParticipant.objects.get(
+            activity=self,
+            user=user,
+        )
+        activity_participant.feedback_dismissed = True
+        activity_participant.save()
+
     def save(self, *args, **kwargs):
         if not self.has_duration:
             # reset duration to default if activity has no explicit duration
@@ -427,6 +436,7 @@ class ActivityParticipant(BaseModel):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
+    feedback_dismissed = models.BooleanField(default=False)
     reminder_task_id = models.TextField(null=True)  # stores a huey task id
     is_without_role = models.BooleanField(default=False)
 

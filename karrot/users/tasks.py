@@ -1,6 +1,6 @@
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task
-from influxdb_metrics.loader import write_points
+from karrot.utils.influxdb_utils import write_points
 
 from karrot.users.stats import get_users_stats, get_user_language_stats
 from karrot.utils import stats_utils

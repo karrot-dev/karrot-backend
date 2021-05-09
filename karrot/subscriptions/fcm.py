@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 fcm = None
 
-if hasattr(settings, 'FCM_SERVER_KEY'):
+if hasattr(settings, 'FCM_SERVER_KEY') and settings.FCM_SERVER_KEY:
     fcm = FCMNotification(api_key=settings.FCM_SERVER_KEY)
 else:
     logger.warning('Please configure FCM_SERVER_KEY in your settings to use push messaging')
