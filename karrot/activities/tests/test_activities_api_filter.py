@@ -139,8 +139,8 @@ class TestFeedbackPossibleFilter(APITestCase, ExtractPaginationMixin):
                 self.member,
             ], date=self.one_week_ago
         )
-        self.activity_feedback_dismissed.activityparticipant_set.filter(
-            user=self.member).update(feedback_dismissed=True)
+        self.activity_feedback_dismissed.activityparticipant_set.filter(user=self.member
+                                                                        ).update(feedback_dismissed=True)
 
         self.activity_participant_left_group = ActivityFactory(
             activity_type=self.activity_type2, place=self.place2, participants=[
