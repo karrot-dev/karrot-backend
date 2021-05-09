@@ -485,6 +485,15 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.get('/api/activities/{id}/ics/'.format(id=self.activity.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
+    def test_export_ics_activities_logged_out(self):
+        response = self.get_results('/api/activities/ics/')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED, response.data)
+
+    def test_export_ics_activities_as_group_member(self):
+        self.client.force_login(user=self.member)
+        response = self.get_results('/api/activities/ics/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
 
 class TestActivitiesListAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):
