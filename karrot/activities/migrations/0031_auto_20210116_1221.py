@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('activities', '0029_add_activity_require_role'),
+        ('activities', '0030_add_activity_require_role'),
     ]
 
     operations = [

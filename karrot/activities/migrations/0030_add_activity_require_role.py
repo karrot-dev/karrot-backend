@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('activities', '0028_add_activity_type_updated_at'),
+        ('activities', '0029_activityparticipant_feedback_dismissed'),
     ]
 
     operations = [
