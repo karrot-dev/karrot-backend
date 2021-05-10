@@ -7,7 +7,7 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from karrot.activities.factories import ActivityFactory
+from karrot.activities.factories import ActivityFactory, ActivityTypeFactory
 from karrot.activities.models import to_range, Activity, Feedback
 from karrot.groups.factories import GroupFactory
 from karrot.places.factories import PlaceFactory
@@ -285,6 +285,35 @@ class TestActivityHistoryStatsAPI(APITestCase):
                                  'feedback_count': 2,
                                  'feedback_weight': 3.6,
                              })], response.data)
+
+    def test_activity_type_filter(self):
+        self.setup_activity()
+        other_activity_type = ActivityTypeFactory(group=self.group)
+        self.client.force_login(user=self.user)
+        self.client.post(f'/api/activities/{self.activity.id}/add/')
+        with freeze_time(self.after_the_activity_is_over, tick=True):
+            Activity.objects.process_finished_activities()
+
+            # filter by matching activity type id
+            response = self.client.get(
+                '/api/stats/activity-history/', {
+                    'group': self.group.id,
+                    'activity_type': self.activity.activity_type.id
+                }
+            )
+            self.assertEqual(len(response.data), 1, response.data)
+            self.assertEqual([dict(entry) for entry in response.data], [self.expected_entry({
+                'done_count': 1,
+            })], response.data)
+
+            # or a different one...
+            response = self.client.get(
+                '/api/stats/activity-history/', {
+                    'group': self.group.id,
+                    'activity_type': other_activity_type.id
+                }
+            )
+            self.assertEqual(len(response.data), 0, response.data)
 
     def expected_entry(self, data=None):
         return {

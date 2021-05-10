@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import GenericViewSet
 
-from karrot.activities.models import Activity
+from karrot.activities.models import Activity, ActivityType
 from karrot.history.models import HistoryTypus, History
 from karrot.stats import stats
 from karrot.stats.serializers import FrontendStatsSerializer, ActivityHistoryStatsSerializer
@@ -32,14 +32,19 @@ def users_queryset(request):
     return get_user_model().objects.filter(groups__in=request.user.groups.all())
 
 
+def activity_type_queryset(request):
+    return ActivityType.objects.filter(group__in=request.user.groups.all())
+
+
 class ActivityHistoryStatsFilter(FilterSet):
     group = ModelChoiceFilter(queryset=groups_queryset)
     user = ModelMultipleChoiceFilter(queryset=users_queryset, field_name='users')
     date = IsoDateTimeFromToRangeFilter(field_name='activity__date__startswith')
+    activity_type = ModelChoiceFilter(queryset=activity_type_queryset, field_name='activity__activity_type')
 
     class Meta:
         model = History
-        fields = ['group', 'user']
+        fields = ['group', 'activity_type', 'user']
 
 
 class ActivityHistoryStatsViewSet(ListModelMixin, GenericViewSet):
