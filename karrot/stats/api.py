@@ -62,11 +62,15 @@ class ActivityHistoryStatsViewSet(ListModelMixin, GenericViewSet):
             .values('place', 'group') \
             .filter(typus__in=[
                 HistoryTypus.ACTIVITY_DONE,
+                HistoryTypus.ACTIVITY_MISSED,
                 HistoryTypus.ACTIVITY_LEAVE,
             ]) \
             .annotate(
                 done_count=Count('activity', filter=Q(
                     typus=HistoryTypus.ACTIVITY_DONE,
+                )),
+                missed_count=Count('activity', filter=Q(
+                    typus=HistoryTypus.ACTIVITY_MISSED,
                 )),
                 leave_count=Count('activity', filter=Q(
                     typus=HistoryTypus.ACTIVITY_LEAVE,
@@ -79,7 +83,11 @@ class ActivityHistoryStatsViewSet(ListModelMixin, GenericViewSet):
                 ),
                 feedback_weight=Coalesce(Sum('activity__feedback__weight', filter=feedback_weight_filter), 0.0)) \
             .filter(
-                Q(done_count__gt=0) | Q(leave_count__gt=0) | Q(leave_late_count__gt=0) | Q(feedback_weight__gt=0)) \
+                Q(done_count__gt=0) |
+                Q(missed_count__gt=0) |
+                Q(leave_count__gt=0) |
+                Q(leave_late_count__gt=0) |
+                Q(feedback_weight__gt=0)) \
             .order_by('place__name')
 
 

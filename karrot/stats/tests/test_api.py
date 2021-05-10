@@ -115,6 +115,19 @@ class TestActivityHistoryStatsAPI(APITestCase):
         self.after_the_activity_is_over = self.date.end + timedelta(hours=2)
         self.activity = ActivityFactory(place=self.place, date=self.date, max_participants=max_participants)
 
+    def test_activity_missed(self):
+        # only relevant when there is no user
+        self.setup_activity()
+        self.client.force_login(user=self.user)
+        with freeze_time(self.after_the_activity_is_over, tick=True):
+            Activity.objects.process_finished_activities()
+            response = self.client.get('/api/stats/activity-history/', {'group': self.group.id})
+            self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+            self.assertEqual(len(response.data), 1)
+            self.assertEqual([dict(entry) for entry in response.data], [self.expected_entry({
+                'missed_count': 1,
+            })], response.data)
+
     def test_join_and_leave_activity_missed(self):
         self.setup_activity()
         self.client.force_login(user=self.user)
@@ -210,6 +223,7 @@ class TestActivityHistoryStatsAPI(APITestCase):
             'place': self.place.id,
             'group': self.place.group.id,
             'done_count': 0,
+            'missed_count': 0,
             'leave_count': 0,
             'leave_late_count': 0,
             'feedback_weight': 0,

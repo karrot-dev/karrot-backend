@@ -13,6 +13,7 @@ class ActivityHistoryStatsSerializer(serializers.ModelSerializer):
     group = serializers.IntegerField()
 
     done_count = serializers.IntegerField()
+    missed_count = serializers.IntegerField()
     leave_count = serializers.IntegerField()
     leave_late_count = serializers.IntegerField()
     feedback_weight = serializers.FloatField()
@@ -23,6 +24,7 @@ class ActivityHistoryStatsSerializer(serializers.ModelSerializer):
             'place',
             'group',
             'done_count',
+            'missed_count',
             'leave_count',
             'leave_late_count',
             'feedback_weight',
