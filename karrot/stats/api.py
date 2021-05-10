@@ -52,10 +52,10 @@ class ActivityHistoryStatsViewSet(ListModelMixin, GenericViewSet):
     def get_queryset(self):
         user_id = self.request.query_params.get('user', None)
 
-        feedback_weight_filter = Q(typus=HistoryTypus.ACTIVITY_DONE)
+        feedback_filter = Q(typus=HistoryTypus.ACTIVITY_DONE)
 
         if user_id:
-            feedback_weight_filter &= Q(activity__feedback__given_by=user_id)
+            feedback_filter &= Q(activity__feedback__given_by=user_id)
 
         return self.filter_queryset(super().get_queryset()) \
             .annotate_activity_leave_seconds() \
@@ -66,27 +66,29 @@ class ActivityHistoryStatsViewSet(ListModelMixin, GenericViewSet):
                 HistoryTypus.ACTIVITY_LEAVE,
             ]) \
             .annotate(
-                done_count=Count('activity', filter=Q(
+                done_count=Count('activity', distinct=True, filter=Q(
                     typus=HistoryTypus.ACTIVITY_DONE,
                 )),
-                missed_count=Count('activity', filter=Q(
+                missed_count=Count('activity', distinct=True, filter=Q(
                     typus=HistoryTypus.ACTIVITY_MISSED,
                 )),
-                leave_count=Count('activity', filter=Q(
+                leave_count=Count('activity', distinct=True, filter=Q(
                     typus=HistoryTypus.ACTIVITY_LEAVE,
                     activity__in=Activity.objects.done_not_full(),
                 )),
-                leave_late_count=Count('activity', filter=Q(
+                leave_late_count=Count('activity', distinct=True, filter=Q(
                     typus=HistoryTypus.ACTIVITY_LEAVE,
                     activity__in=Activity.objects.done_not_full(),
                     activity_leave_seconds__lte=timedelta(hours=settings.ACTIVITY_LEAVE_LATE_HOURS).total_seconds()),
                 ),
-                feedback_weight=Coalesce(Sum('activity__feedback__weight', filter=feedback_weight_filter), 0.0)) \
+                feedback_count=Count('activity__feedback', filter=feedback_filter),
+                feedback_weight=Coalesce(Sum('activity__feedback__weight', filter=feedback_filter), 0.0)) \
             .filter(
                 Q(done_count__gt=0) |
                 Q(missed_count__gt=0) |
                 Q(leave_count__gt=0) |
                 Q(leave_late_count__gt=0) |
+                Q(feedback_count__gt=0) |
                 Q(feedback_weight__gt=0)) \
             .order_by('place__name')
 
