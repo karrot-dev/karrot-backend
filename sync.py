@@ -25,8 +25,16 @@ def header(val):
     print('\n', yellow('★'), green(val), '\n')
 
 
-def in_docker():
-    return subprocess.run(['grep', 'docker', '/proc/1/cgroup'], stdout=subprocess.DEVNULL).returncode == 0
+def in_container():
+    # recent docker versions create a file /.dockerenv
+    if os.path.isfile("/.dockerenv"):
+        return True
+    # podman creates /run/.containerenv
+    if os.path.isfile("/run/.containerenv"):
+        return True
+    # docker used to have "docker" in its cgroup name, so fall back to this
+    with open("/proc/1/cgroup", "r") as f:
+        return "docker" in f.read()
 
 
 environ = os.environ.copy()
@@ -58,7 +66,7 @@ if process_mjml:
     header("Generating new templates")
     subprocess.run(['./mjml/convert'], env=environ, check=True)
 
-if in_docker():
+if in_container():
     header("Not installing pre-commit hooks")
     print('This is because it appears I am running in a docker environment.')
     print('I am assuming you will be doing all your git stuff outside of the docker environment.')
