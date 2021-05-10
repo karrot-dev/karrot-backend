@@ -11,19 +11,13 @@ BACKEND_REVISION = get_git_rev()
 
 
 def get_config_data():
-    fcm_client_config = {}
-
-    for key in (
-            'api_key',
-            'messaging_sender_id',
-            'project_id',
-            'app_id',
-    ):
-        attr = f'FCM_CLIENT_{key.upper()}'
-        fcm_client_config[key] = getattr(settings, attr) if hasattr(settings, attr) else None
-
     return {
-        'fcm': fcm_client_config,
+        'fcm': {
+            'api_key': getattr(settings, 'FCM_CLIENT_API_KEY', None),
+            'messaging_sender_id': getattr(settings, 'FCM_CLIENT_MESSAGING_SENDER_ID', None),
+            'project_id': getattr(settings, 'FCM_CLIENT_PROJECT_ID', None),
+            'app_id': getattr(settings, 'FCM_CLIENT_APP_ID', None),
+        },
         'sentry': {
             'dsn': settings.SENTRY_CLIENT_DSN,
         },
