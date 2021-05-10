@@ -16,6 +16,8 @@ class ActivityHistoryStatsSerializer(serializers.ModelSerializer):
     missed_count = serializers.IntegerField()
     leave_count = serializers.IntegerField()
     leave_late_count = serializers.IntegerField()
+    leave_missed_count = serializers.IntegerField()
+    leave_missed_late_count = serializers.IntegerField()
     feedback_count = serializers.IntegerField()
     feedback_weight = serializers.FloatField()
 
@@ -28,6 +30,8 @@ class ActivityHistoryStatsSerializer(serializers.ModelSerializer):
             'missed_count',
             'leave_count',
             'leave_late_count',
+            'leave_missed_count',
+            'leave_missed_late_count',
             'feedback_count',
             'feedback_weight',
         ]

@@ -74,16 +74,24 @@ class ActivityHistoryStatsViewSet(ListModelMixin, GenericViewSet):
                 )),
                 leave_count=Count('activity', distinct=True, filter=Q(
                     typus=HistoryTypus.ACTIVITY_LEAVE,
-                    activity__in=Activity.objects.done_not_full(),
                 )),
                 leave_late_count=Count('activity', distinct=True, filter=Q(
                     typus=HistoryTypus.ACTIVITY_LEAVE,
-                    activity__in=Activity.objects.done_not_full(),
+                    activity_leave_seconds__lte=timedelta(hours=settings.ACTIVITY_LEAVE_LATE_HOURS).total_seconds()),
+                ),
+                leave_missed_count=Count('activity', distinct=True, filter=Q(
+                    typus=HistoryTypus.ACTIVITY_LEAVE,
+                    activity__in=Activity.objects.missed(),
+                )),
+                leave_missed_late_count=Count('activity', distinct=True, filter=Q(
+                    typus=HistoryTypus.ACTIVITY_LEAVE,
+                    activity__in=Activity.objects.missed(),
                     activity_leave_seconds__lte=timedelta(hours=settings.ACTIVITY_LEAVE_LATE_HOURS).total_seconds()),
                 ),
                 feedback_count=Count('activity__feedback', filter=feedback_filter),
                 feedback_weight=Coalesce(Sum('activity__feedback__weight', filter=feedback_filter), 0.0)) \
             .filter(
+                # don't need to check the leave_missed_* ones here, as the leave_* ones will be >0 in those cases
                 Q(done_count__gt=0) |
                 Q(missed_count__gt=0) |
                 Q(leave_count__gt=0) |
