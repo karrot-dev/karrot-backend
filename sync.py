@@ -8,6 +8,7 @@ from os.path import dirname, realpath, join
 import pkgutil
 
 process_mjml = '--no-mjml' not in sys.argv[1:]
+install_hooks = '--no-hooks' not in sys.argv[1:]
 
 
 def color(num):
@@ -19,22 +20,14 @@ def color(num):
 
 green = color(92)
 yellow = color(93)
+grey = color(90)
 
 
-def header(val):
-    print('\n', yellow('★'), green(val), '\n')
-
-
-def in_container():
-    # recent docker versions create a file /.dockerenv
-    if os.path.isfile("/.dockerenv"):
-        return True
-    # podman creates /run/.containerenv
-    if os.path.isfile("/run/.containerenv"):
-        return True
-    # docker used to have "docker" in its cgroup name, so fall back to this
-    with open("/proc/1/cgroup", "r") as f:
-        return "docker" in f.read()
+def header(val, greyed=False):
+    if greyed:
+        print('\n', grey('★'), grey(val))
+    else:
+        print('\n', yellow('★'), green(val), '\n')
 
 
 environ = os.environ.copy()
@@ -65,17 +58,16 @@ if process_mjml:
 
     header("Generating new templates")
     subprocess.run(['./mjml/convert'], env=environ, check=True)
-
-if in_container():
-    header("Not installing pre-commit hooks")
-    print('This is because it appears I am running in a docker environment.')
-    print('I am assuming you will be doing all your git stuff outside of the docker environment.')
-    print('This means you should also setup the python environment outside of docker if you want to use the hooks.')
 else:
+    header("Skipped mjml processing", greyed=True)
+
+if install_hooks:
     header("Installing pre-commit hooks")
     hook_types = ['pre-commit', 'pre-push']
 
     for t in hook_types:
         subprocess.run(['pre-commit', 'install', '--hook-type', t], env=environ, check=True)
+else:
+    header("Skipped hook installation", greyed=True)
 
 header('All done ☺')
