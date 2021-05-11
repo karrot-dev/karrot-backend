@@ -13,7 +13,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_swagger.views import get_swagger_view
 
 from karrot.applications.api import ApplicationViewSet
-from karrot.bootstrap.api import BootstrapViewSet
+from karrot.bootstrap.api import BootstrapViewSet, ConfigViewSet
 from karrot.community_feed.api import CommunityFeedViewSet
 from karrot.conversations.api import ConversationMessageViewSet, ConversationViewSet
 from karrot.groups.api import GroupViewSet, AgreementViewSet, GroupInfoViewSet
@@ -36,6 +36,7 @@ from karrot.users.api import UserViewSet, UserInfoViewSet
 
 router = DefaultRouter()
 
+router.register('config', ConfigViewSet, basename='config')
 router.register('bootstrap', BootstrapViewSet, basename='bootstrap')
 
 router.register('groups', GroupViewSet)

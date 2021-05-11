@@ -1,5 +1,6 @@
 from unittest.mock import ANY, patch
 
+from django.test import override_settings
 from geoip2.errors import AddressNotFoundError
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -8,6 +9,34 @@ from karrot.groups.factories import GroupFactory
 from karrot.users.factories import UserFactory
 from karrot.utils.geoip import ip_to_city
 from karrot.utils.tests.fake import faker
+
+OVERRIDE_SETTINGS = {
+    'SENTRY_CLIENT_DSN': faker.name(),
+    'FCM_CLIENT_API_KEY': faker.name(),
+    'FCM_CLIENT_MESSAGING_SENDER_ID': faker.name(),
+    'FCM_CLIENT_PROJECT_ID': faker.name(),
+    'FCM_CLIENT_APP_ID': faker.name(),
+}
+
+
+@override_settings(**OVERRIDE_SETTINGS)
+class TestConfigAPI(APITestCase):
+    def test_config(self):
+        response = self.client.get('/api/config/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data, {
+                'fcm': {
+                    'api_key': OVERRIDE_SETTINGS['FCM_CLIENT_API_KEY'],
+                    'messaging_sender_id': OVERRIDE_SETTINGS['FCM_CLIENT_MESSAGING_SENDER_ID'],
+                    'project_id': OVERRIDE_SETTINGS['FCM_CLIENT_PROJECT_ID'],
+                    'app_id': OVERRIDE_SETTINGS['FCM_CLIENT_APP_ID'],
+                },
+                'sentry': {
+                    'dsn': OVERRIDE_SETTINGS['SENTRY_CLIENT_DSN'],
+                },
+            }, response.data
+        )
 
 
 class TestBootstrapAPI(APITestCase):
@@ -22,6 +51,8 @@ class TestBootstrapAPI(APITestCase):
     def test_as_anon(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['server'], ANY)
+        self.assertEqual(response.data['config'], ANY)
         self.assertEqual(response.data['user'], None)
         self.assertEqual(response.data['geoip'], None)
         self.assertEqual(response.data['groups'], ANY)

@@ -8,6 +8,7 @@ from os.path import dirname, realpath, join
 import pkgutil
 
 process_mjml = '--no-mjml' not in sys.argv[1:]
+install_hooks = '--no-hooks' not in sys.argv[1:]
 
 
 def color(num):
@@ -19,10 +20,14 @@ def color(num):
 
 green = color(92)
 yellow = color(93)
+grey = color(90)
 
 
-def header(val):
-    print('\n', yellow('★'), green(val), '\n')
+def header(val, greyed=False):
+    if greyed:
+        print('\n', grey('★'), grey(val))
+    else:
+        print('\n', yellow('★'), green(val), '\n')
 
 
 environ = os.environ.copy()
@@ -53,11 +58,16 @@ if process_mjml:
 
     header("Generating new templates")
     subprocess.run(['./mjml/convert'], env=environ, check=True)
+else:
+    header("Skipped mjml processing", greyed=True)
 
-header("Installing pre-commit hooks")
-hook_types = ['pre-commit', 'pre-push']
+if install_hooks:
+    header("Installing pre-commit hooks")
+    hook_types = ['pre-commit', 'pre-push']
 
-for t in hook_types:
-    subprocess.run(['pre-commit', 'install', '--hook-type', t], env=environ, check=True)
+    for t in hook_types:
+        subprocess.run(['pre-commit', 'install', '--hook-type', t], env=environ, check=True)
+else:
+    header("Skipped hook installation", greyed=True)
 
 header('All done ☺')
