@@ -53,12 +53,13 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, RetrievePriv
 
         groups = self.request.user.groups.all()
         is_applicant_of_group = Q(application__group__in=groups)
-        has_left_group = Q(
-            history__group__in=groups,
-            history__typus=HistoryTypus.GROUP_LEAVE,
+        has_left_group = (
+            Q(history__group__in=groups) & Q(history__typus=HistoryTypus.GROUP_LEAVE)
         )
 
-        return self.queryset.filter(is_member_of_group | is_applicant_of_group | is_self | has_left_group).distinct()
+        return self.queryset.filter(
+            is_member_of_group | is_applicant_of_group | is_self | has_left_group
+        ).distinct()
 
 
 class UserPagination(CursorPagination):

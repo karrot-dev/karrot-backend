@@ -81,6 +81,17 @@ class TestUsersAPI(APITestCase):
         response = self.client.get('/api/users/{}/conversation/'.format(self.user.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_retrive_user_profile_works_when_user_left_group(self):
+        self.group.remove_member(self.user2)
+        self.another_common_group.remove_member(self.user2)
+        self.client.force_login(user=self.user)
+        url = f"{self.url}{self.user2.id}/profile/"
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['email'], self.user2.email)
+
 
 class TestPublicUserProfilesAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):
