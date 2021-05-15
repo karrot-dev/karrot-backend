@@ -277,9 +277,12 @@ class TestNotificationReceivers(TestCase):
             process_expired_votings()
 
         notifications = Notification.objects.order_by('type')
-        self.assertEqual(notifications.count(), 3)
+        # Extra notifications are created when the user left the group.
+        self.assertEqual(notifications.count(), 5)
         self.assertEqual([n.type for n in notifications], [
             NotificationType.CONFLICT_RESOLUTION_DECIDED.value,
             NotificationType.CONFLICT_RESOLUTION_DECIDED.value,
             NotificationType.CONFLICT_RESOLUTION_YOU_WERE_REMOVED.value,
+            NotificationType.MEMBER_LEFT.value,
+            NotificationType.MEMBER_LEFT.value,
         ])

@@ -188,8 +188,19 @@ def new_member(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=GroupMembership)
 def group_member_removed(sender, instance, **kwargs):
-    """Remove notification when leaving group"""
+    """Remove notification when leaving group."""
     membership = instance
+
+    for user in membership.group.members.all():
+        Notification.objects.create(
+            user=user,
+            type=NotificationType.MEMBER_LEFT.value,
+            context={
+                'group': membership.group_id,
+                'user': membership.user_id,
+                'added_by': membership.added_by_id,
+            },
+        )
 
     types_to_keep = [
         NotificationType.CONFLICT_RESOLUTION_YOU_WERE_REMOVED.value,

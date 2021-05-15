@@ -19,6 +19,7 @@ class NotificationType(Enum):
     FEEDBACK_POSSIBLE = 'feedback_possible'
     NEW_PLACE = 'new_place'
     NEW_MEMBER = 'new_member'
+    MEMBER_LEFT = 'member_left'
     INVITATION_ACCEPTED = 'invitation_accepted'
     ACTIVITY_UPCOMING = 'activity_upcoming'
     ACTIVITY_DISABLED = 'activity_disabled'
