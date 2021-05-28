@@ -88,7 +88,7 @@ class TestActivitydatesAPIFilter(APITestCase, ExtractPaginationMixin):
         self.assertEqual(len(response.data), selected_activities.count())
 
 
-class TestFeedbackPossibleFilter(APITestCase, ExtractPaginationMixin):
+class TestCustomActivityFilters(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.url = '/api/activities/'
         self.one_week_ago = to_range(timezone.now() - relativedelta(weeks=1))
@@ -123,7 +123,7 @@ class TestFeedbackPossibleFilter(APITestCase, ExtractPaginationMixin):
             activity_type=self.activity_type, place=self.place, date=self.one_week_ago
         )
         self.activity_too_long_ago = ActivityFactory(
-            activity_type=self.activity_type, place=self.place, date=self.too_long_ago
+            activity_type=self.activity_type, place=self.place, date=self.too_long_ago, participants=[self.member]
         )
 
         self.activity_feedback_already_given = ActivityFactory(
@@ -161,3 +161,22 @@ class TestFeedbackPossibleFilter(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['id'], self.activity_feedback_possible.id)
+
+    def test_filter_joined(self):
+        self.client.force_login(user=self.member)
+        response = self.get_results(self.url, {'joined': True})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual({activity['id']
+                          for activity in response.data}, {
+                              self.activity_feedback_possible.id, self.activity_upcoming.id,
+                              self.activity_too_long_ago.id, self.activity_feedback_already_given.id,
+                              self.activity_feedback_dismissed.id
+                          })
+
+    def test_filter_not_joined(self):
+        self.client.force_login(user=self.member)
+        response = self.get_results(self.url, {'joined': False})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual({activity['id']
+                          for activity in response.data},
+                         {self.activity_not_participant.id, self.activity_done_by_another_user.id})

@@ -3,6 +3,7 @@ from django.db.models import F
 from django_filters import rest_framework as filters
 from rest_framework import mixins
 from rest_framework import viewsets
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.decorators import action
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
@@ -209,7 +210,6 @@ class ActivityViewSet(
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = ActivitiesFilter
     permission_classes = (IsAuthenticated, IsUpcoming, IsGroupEditor, IsEmptyActivity)
-    pagination_class = ActivityPagination
 
     def get_queryset(self):
         qs = self.queryset.filter(place__group__members=self.request.user, place__status=PlaceStatus.ACTIVE.value)
@@ -269,8 +269,33 @@ class ActivityViewSet(
         methods=['GET'],
         renderer_classes=(ICSCalendarRenderer, ),
         serializer_class=ActivityICSSerializer,
+        url_path='ics'
     )
-    def ics(self, request, pk=None):
+    def ics_detail(self, request, pk=None):
         response = self.retrieve(request)
-        response['content-disposition'] = 'attachment; filename=activity-{id}.ics'.format(id=pk)
+        filename = 'activity-{pk}.ics'.format(pk=pk)
+        response['content-disposition'] = 'attachment; filename={filename}'.format(filename=filename)
         return response
+
+    @action(
+        detail=False,
+        methods=['GET'],
+        renderer_classes=(ICSCalendarRenderer, ),
+        serializer_class=ActivityICSSerializer,
+        url_path='ics',
+        authentication_classes=[BasicAuthentication, SessionAuthentication]
+    )
+    def ics_list(self, request):
+        response = self.list(request)
+        filename = 'activities.ics'
+        response['content-disposition'] = 'attachment; filename={filename}'.format(filename=filename)
+        return response
+
+    @property
+    def paginator(self):
+        """
+        Disables pagination for ICS views
+        """
+        if not hasattr(self, '_paginator'):
+            self._paginator = ActivityPagination() if self.action != 'ics_list' else None
+        return self._paginator
