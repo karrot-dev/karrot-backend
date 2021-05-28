@@ -1,0 +1,34 @@
+<mjml>
+    <mj-head>
+        <mj-include path="../../base/templates/_base-head.mjml"/>
+        <mj-title>{% trans %}You lost editing permissions in {{ group_name }}!{% endtrans %}</mj-title>
+    </mj-head>
+    <mj-body>
+        <mj-include path="../../base/templates/_header.mjml"/>
+        <mj-section>
+            <mj-column>
+                <mj-text>
+                    <h1>
+                        {% trans %}You lost editing permissions in {{ group_name }}!{% endtrans %}
+                    </h1>
+                    <p>
+                        {% trans trimmed %}
+                            You've don't have enough trust from fellow group members anymore to grant you <strong>editing permissions</strong>.
+                        {% endtrans %}
+                    </p>
+                </mj-text>
+                <mj-button href="{{ group_url }}">
+                    {% trans %}Visit {{ group_name }}{% endtrans %}
+                </mj-button>
+                <mj-divider/>
+                <mj-text font-size="13px" line-height="18px" color="#777">
+                    <p>
+                        {% trans %}You are receiving this because you are a member of <strong>{{ group_name }}</strong>.{% endtrans %}
+                        {% trans %}You can leave the group from the <a href="{{ group_url }}">group page</a>.{% endtrans %}
+                    </p>
+                </mj-text>
+            </mj-column>
+        </mj-section>
+        <mj-include path="../../base/templates/_footer.mjml"/>
+    </mj-body>
+</mjml>

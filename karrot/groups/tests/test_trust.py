@@ -82,6 +82,25 @@ class TestTrustReceiver(TestCase):
         self.assertEqual(len(mail.outbox), 0)
         self.assertEqual(History.objects.filter(typus=HistoryTypus.MEMBER_BECAME_EDITOR).count(), 0)
 
+    def test_editor_loses_editor_role(self):
+        editor1 = UserFactory()
+        editor2 = UserFactory()
+        group = GroupFactory(members=[editor1, editor2], newcomers=[])
+        two_days_ago = timezone.now() - relativedelta(days=2)
+        GroupMembership.objects.filter(group=group).update(created_at=two_days_ago)
+        membership = GroupMembership.objects.get(user=editor1, group=group)
+        trust = Trust.objects.create(membership=membership, given_by=editor2)
+
+        mail.outbox = []
+
+        trust.delete()
+
+        self.assertFalse(group.is_editor(editor1))
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('You lost editing permissions', mail.outbox[0].subject)
+
+        self.assertEqual(History.objects.filter(typus=HistoryTypus.USER_LOST_EDITOR_ROLE).count(), 1)
+
     def test_remove_trust_when_giver_leaves_group(self):
         editor = UserFactory()
         newcomer = UserFactory()
@@ -151,6 +170,32 @@ class TestTrustAPI(APITestCase):
                 given_by=self.member1,
             ).exists()
         )
+
+    def test_trust_can_be_revoked(self):
+        membership = GroupMembership.objects.get(user=self.member2, group=self.group)
+        Trust.objects.create(membership=membership, given_by=self.member1)
+        self.client.force_login(user=self.member1)
+
+        url = reverse('group-trust-user', args=(self.group.id, self.member2.id))
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(
+            Trust.objects.filter(
+                membership__group=self.group,
+                membership__user=self.member2,
+                given_by=self.member1,
+            ).exists()
+        )
+
+    def test_trust_that_has_not_been_given_cannot_be_revoked(self):
+        GroupMembership.objects.get(user=self.member2, group=self.group)
+        self.client.force_login(user=self.member1)
+
+        url = reverse('group-trust-user', args=(self.group.id, self.member2.id))
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class TestTrustList(APITestCase):

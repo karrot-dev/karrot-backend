@@ -45,15 +45,15 @@ msgstr "Activivaĵoj"
 msgid "Task"
 msgstr "Taskoj"
 
-#: karrot/activities/serializers.py:126
+#: karrot/activities/serializers.py:128
 msgid "Must be a list"
 msgstr "Ĝi devas esti listo"
 
-#: karrot/activities/serializers.py:127
+#: karrot/activities/serializers.py:129
 msgid "Must be a list with one or two values"
 msgstr "Ĝi devas esti listo kun unu aŭ du valoroj"
 
-#: karrot/activities/serializers.py:128
+#: karrot/activities/serializers.py:130
 msgid "Must pass start value"
 msgstr "Ĝi devas meti komencan valoron"
 

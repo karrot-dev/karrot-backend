@@ -45,15 +45,15 @@ msgstr "Tevékenység"
 msgid "Task"
 msgstr "Feladat"
 
-#: karrot/activities/serializers.py:126
+#: karrot/activities/serializers.py:128
 msgid "Must be a list"
 msgstr "Ennek listának kell lennie"
 
-#: karrot/activities/serializers.py:127
+#: karrot/activities/serializers.py:129
 msgid "Must be a list with one or two values"
 msgstr "Egy vagy kétértékes listának kell lennie"
 
-#: karrot/activities/serializers.py:128
+#: karrot/activities/serializers.py:130
 msgid "Must pass start value"
 msgstr "Többnek kell lennie mint a kiindulási értéknek"
 
