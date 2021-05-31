@@ -271,8 +271,8 @@ class TestConversationThreadsAPI(APITestCase):
 
         response = self.client.get('/api/messages/?thread={}'.format(another_thread.id), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # self.assertEqual(len(response.data['results']), n + 1)
         self.assertEqual([m['id'] for m in response.data['results']], [another_thread.id] + [m.id for m in replies])
+        self.assertEqual(len(response.data['results']), n + 1)
 
     def test_list_my_recently_active_threads(self):
         most_recent_thread = self.conversation.messages.create(author=self.user, content='my own thread')
