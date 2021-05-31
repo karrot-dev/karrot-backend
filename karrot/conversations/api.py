@@ -260,7 +260,6 @@ class ConversationMessageFilter(filters.FilterSet):
 
 class ConversationMessageViewSet(
         mixins.CreateModelMixin,
-        mixins.ListModelMixin,
         mixins.RetrieveModelMixin,
         PartialUpdateModelMixin,
         GenericViewSet,
@@ -291,32 +290,27 @@ class ConversationMessageViewSet(
     def get_queryset(self):
         if self.action in ('partial_update', 'thread'):
             return self.queryset
-        qs = self.queryset \
-            .with_conversation_access(self.request.user) \
-            .annotate_replies_count() \
-            .annotate_unread_replies_count_for(self.request.user)
-
-        if self.action == 'my_threads':
-            return qs.only_threads_with_user(self.request.user) \
-                .prefetch_related('participants', 'latest_message')
-
-        if self.request.query_params.get('thread', None):
-            return qs.only_threads_and_replies()
-
-        return qs.exclude_replies()
+        return self.queryset.with_conversation_access(self.request.user).distinct()
 
     def list(self, request, *args, **kwargs):
-        # Workaround to avoid extremely slow cases: split up query
+        # Workaround to avoid extremely slow cases
+        # https://github.com/yunity/karrot-frontend/issues/2369
+        # Split up query in two parts:
         # 1. get message ids, including costly access control
-        # 2. get data, including costly annotations
-        queryset = self.filter_queryset(ConversationMessage.objects.with_conversation_access(request.user)).only('id')
-        message_ids = [m.id for m in self.paginate_queryset(queryset)]
+        queryset = ConversationMessage.objects.with_conversation_access(request.user).values('id').distinct()
+        if self.request.query_params.get('thread', None):
+            queryset = queryset.only_threads_and_replies()
+        else:
+            queryset = queryset.exclude_replies()
+        queryset = self.filter_queryset(queryset)
+        message_ids = [m['id'] for m in self.paginate_queryset(queryset)]
 
+        # 2. get data, including costly annotations
         messages = ConversationMessage.objects\
             .filter(id__in=message_ids)\
             .annotate_replies_count()\
             .annotate_unread_replies_count_for(request.user)\
-            .order_by(MessagePagination.ordering)\
+            .order_by(self.pagination_class.ordering)\
             .prefetch_related('reactions', 'participants', 'images')
 
         serializer = self.get_serializer(messages, many=True)
@@ -334,7 +328,12 @@ class ConversationMessageViewSet(
         )
     )
     def my_threads(self, request):
-        queryset = self.filter_queryset(self.get_queryset())
+        queryset = ConversationMessage.objects.distinct() \
+            .only_threads_with_user(self.request.user) \
+            .annotate_replies_count() \
+            .annotate_unread_replies_count_for(request.user) \
+            .prefetch_related('participants', 'latest_message')
+        queryset = self.filter_queryset(queryset)
         paginator = ThreadPagination()
 
         threads = list(paginator.paginate_queryset(queryset, request, view=self))

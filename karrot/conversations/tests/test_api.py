@@ -108,7 +108,7 @@ class TestConversationsAPI(APITestCase):
 
     def test_list_messages(self):
         self.client.force_login(user=self.participant1)
-        with self.assertNumQueries(6):
+        with self.assertNumQueries(7):
             response = self.client.get('/api/messages/?conversation={}'.format(self.conversation1.id), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 1)
@@ -267,11 +267,12 @@ class TestConversationThreadsAPI(APITestCase):
         self.client.force_login(user=self.user)
         another_thread = self.conversation.messages.create(author=self.user, content='my own thread')
         n = 5
-        [self.create_reply(thread=another_thread) for _ in range(n)]
+        replies = [self.create_reply(thread=another_thread) for _ in range(n)]
 
         response = self.client.get('/api/messages/?thread={}'.format(another_thread.id), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['results']), n + 1)
+        # self.assertEqual(len(response.data['results']), n + 1)
+        self.assertEqual([m['id'] for m in response.data['results']], [another_thread.id] + [m.id for m in replies])
 
     def test_list_my_recently_active_threads(self):
         most_recent_thread = self.conversation.messages.create(author=self.user, content='my own thread')
