@@ -300,13 +300,27 @@ class ConversationMessageViewSet(
             return qs.only_threads_with_user(self.request.user) \
                 .prefetch_related('participants', 'latest_message')
 
-        if self.action == 'list':
-            qs = qs.prefetch_related('reactions', 'participants', 'images')
-
         if self.request.query_params.get('thread', None):
             return qs.only_threads_and_replies()
 
         return qs.exclude_replies()
+
+    def list(self, request, *args, **kwargs):
+        # Workaround to avoid extremely slow cases: split up query
+        # 1. get message ids, including costly access control
+        # 2. get data, including costly annotations
+        queryset = self.filter_queryset(ConversationMessage.objects.with_conversation_access(request.user)).only('id')
+        message_ids = [m.id for m in self.paginate_queryset(queryset)]
+
+        messages = ConversationMessage.objects\
+            .filter(id__in=message_ids)\
+            .annotate_replies_count()\
+            .annotate_unread_replies_count_for(request.user)\
+            .order_by(MessagePagination.ordering)\
+            .prefetch_related('reactions', 'participants', 'images')
+
+        serializer = self.get_serializer(messages, many=True)
+        return self.get_paginated_response(serializer.data)
 
     @action(
         detail=False,
