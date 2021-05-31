@@ -214,7 +214,7 @@ msgid ""
 msgstr ""
 
 #: karrot/conversations/api.py:65 karrot/conversations/api.py:246
-#: karrot/conversations/api.py:415 karrot/conversations/serializers.py:177
+#: karrot/conversations/api.py:429 karrot/conversations/serializers.py:177
 msgid "You are not in this conversation"
 msgstr ""
 
@@ -229,11 +229,11 @@ msgid ""
 "creation."
 msgstr ""
 
-#: karrot/conversations/api.py:344
+#: karrot/conversations/api.py:358
 msgid "Must be first in thread"
 msgstr ""
 
-#: karrot/conversations/api.py:347
+#: karrot/conversations/api.py:361
 msgid "You are not a participant in this thread"
 msgstr ""
 
