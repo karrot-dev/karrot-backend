@@ -212,7 +212,8 @@ class ActivityQuerySet(models.QuerySet):
         return self.exclude_disabled().filter(date__startswith__lt=timezone.now(), participants=None)
 
     def done(self):
-        return self.exclude_disabled().filter(date__startswith__lt=timezone.now()).exclude(participants=None)
+        return self.exclude_disabled().filter(date__startswith__lt=timezone.now())\
+            .annotate_num_participants().filter(num_participants__gt=0)
 
     def done_not_full(self):
         return self.exclude_disabled() \
