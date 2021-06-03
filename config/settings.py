@@ -208,9 +208,11 @@ DATABASES = {
         'USER': options['DATABASE_USER'],
         'PASSWORD': options['DATABASE_PASSWORD'],
         'HOST': options['DATABASE_HOST'],
-        'PORT': options['DATABASE_PORT'],
+        'PORT': options['DATABASE_PORT']
     }
 }
+
+REQUEST_DATABASE_TIMEOUT_MILLISECONDS = int(options['REQUEST_DATABASE_TIMEOUT_SECONDS']) * 1000
 
 REDIS_HOST = options['REDIS_HOST']
 REDIS_PORT = options['REDIS_PORT']
@@ -442,6 +444,7 @@ LISTEN_CONCURRENCY = int(options['LISTEN_CONCURRENCY'])
 # twisted endpoint (for daphne)
 LISTEN_ENDPOINT = options['LISTEN_ENDPOINT']
 
+REQUEST_TIMEOUT_SECONDS = int(options['REQUEST_TIMEOUT_SECONDS'])
 
 # If you have the email_reply_trimmer_service running, set this to 'http://localhost:4567/trim' (or similar)
 # https://github.com/yunity/email_reply_trimmer_service
