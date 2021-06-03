@@ -198,7 +198,6 @@ def group_member_removed(sender, instance, **kwargs):
             context={
                 'group': membership.group_id,
                 'user': membership.user_id,
-                'added_by': membership.added_by_id,
             },
         )
 

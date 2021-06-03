@@ -1,5 +1,8 @@
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+from django.utils import timezone
 from rest_framework import filters
 from rest_framework import mixins
 from rest_framework.decorators import action
@@ -47,6 +50,7 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, RetrievePriv
         return self.retrieve_private_conversation(request, pk)
 
     def get_queryset(self):
+        sixty_days_ago = timezone.now() - timedelta(days=60)
         is_member_of_group = Q(groups__in=self.request.user.groups.all())
 
         is_self = Q(id=self.request.user.id)
@@ -54,7 +58,9 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, RetrievePriv
         groups = self.request.user.groups.all()
         is_applicant_of_group = Q(application__group__in=groups)
         has_left_group = (
-            Q(history__group__in=groups) & Q(history__typus=HistoryTypus.GROUP_LEAVE)
+            Q(history__group__in=groups)
+            & Q(history__typus=HistoryTypus.GROUP_LEAVE)
+            & Q(history__date__gte=sixty_days_ago)
         )
 
         return self.queryset.filter(
