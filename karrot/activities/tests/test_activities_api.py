@@ -119,7 +119,8 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
 
     def test_list_activities_as_group_member(self):
         self.client.force_login(user=self.member)
-        response = self.get_results(self.url)
+        with self.assertNumQueries(4):
+            response = self.get_results(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 2)
 
@@ -134,7 +135,8 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
 
     def test_retrieve_activities_as_group_member(self):
         self.client.force_login(user=self.member)
-        response = self.client.get(self.activity_url)
+        with self.assertNumQueries(4):
+            response = self.client.get(self.activity_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_patch_activity(self):
