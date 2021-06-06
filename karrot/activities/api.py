@@ -213,10 +213,10 @@ class ActivityViewSet(
 
     def get_queryset(self):
         qs = self.queryset.filter(place__group__members=self.request.user, place__status=PlaceStatus.ACTIVE.value)
-        if self.action == 'list':
+        if self.action in ('retrieve', 'list'):
             # because we have participants field in the serializer
             # only prefetch on read_only actions, otherwise there are caching problems when participants get added
-            qs = qs.prefetch_related('activityparticipant_set', 'feedback_given_by')
+            qs = qs.select_related('activity_type').prefetch_related('activityparticipant_set', 'feedback_given_by')
         if self.action == 'add':
             # Lock activity when adding a participant
             # This should prevent a race condition that would result in more participants than slots
