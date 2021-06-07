@@ -86,6 +86,8 @@ KARROT_LOGO = options['SITE_LOGO']
 
 ASGI_APPLICATION = 'config.asgi_app.application'
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 # Django configuration
 INSTALLED_APPS = (
     # Should be loaded first
