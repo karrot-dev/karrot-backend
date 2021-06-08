@@ -7,8 +7,8 @@
 # Removes some fast-changing stats from tags in order to not overload influxdb
 -e git+https://github.com/tiltec/django-influxdb-metrics@1746b8e206#egg=django-influxdb-metrics
 
-# This includes a patch to use anymail with postal
--e git+https://github.com/tiltec/django-anymail@46571a5#egg=django-anymail
+# This includes a patch to use anymail with postal, can switch once officially released
+-e git+https://github.com/anymail/django-anymail@e90c10b#egg=django-anymail
 
 # Common PyPI dependencies
 django[argon2]
