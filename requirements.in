@@ -2,6 +2,9 @@
 -e git+https://github.com/tiltec/django-rest-swagger@d15dd9a#egg=django-rest-swagger
 
 # Removes machine learning dependencies
+# Zulip maintains their own fork:
+# https://github.com/zulip/zulip/blob/61e1e38a00f4ef9fe4c1a302b93ce059646c62a6/requirements/common.in#L60-L61
+# Might hopefully get merged eventually: https://github.com/mailgun/talon/pull/200
 -e git+https://github.com/tiltec/talon@80886cd#egg=talon
 
 # Removes some fast-changing stats from tags in order to not overload influxdb
