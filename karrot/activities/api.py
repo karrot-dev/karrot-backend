@@ -210,6 +210,7 @@ class ActivityViewSet(
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = ActivitiesFilter
     permission_classes = (IsAuthenticated, IsUpcoming, IsGroupEditor, IsEmptyActivity)
+    pagination_class = ActivityPagination
 
     def get_queryset(self):
         qs = self.queryset.filter(place__group__members=self.request.user, place__status=PlaceStatus.ACTIVE.value)
@@ -283,19 +284,11 @@ class ActivityViewSet(
         renderer_classes=(ICSCalendarRenderer, ),
         serializer_class=ActivityICSSerializer,
         url_path='ics',
-        authentication_classes=[BasicAuthentication, SessionAuthentication]
+        authentication_classes=[BasicAuthentication, SessionAuthentication],
+        pagination_class=None
     )
     def ics_list(self, request):
         response = self.list(request)
         filename = 'activities.ics'
         response['content-disposition'] = 'attachment; filename={filename}'.format(filename=filename)
         return response
-
-    @property
-    def paginator(self):
-        """
-        Disables pagination for ICS views
-        """
-        if not hasattr(self, '_paginator'):
-            self._paginator = ActivityPagination() if self.action != 'ics_list' else None
-        return self._paginator
