@@ -136,7 +136,6 @@ INSTALLED_APPS = (
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'anymail',
-    'influxdb_metrics',
     'timezone_field',
     'django_jinja',
     'versatileimagefield',
@@ -157,7 +156,7 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = (
     'silk.middleware.SilkyMiddleware',
-    'influxdb_metrics.middleware.InfluxDBRequestMiddleware',
+    'karrot.utils.influxdb_middleware.InfluxDBRequestMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -380,9 +379,7 @@ INFLUXDB_PORT = options['INFLUXDB_PORT']
 INFLUXDB_USER = options['INFLUXDB_USER']
 INFLUXDB_PASSWORD = options['INFLUXDB_PASSWORD']
 INFLUXDB_DATABASE = options['INFLUXDB_NAME']
-INFLUXDB_TAGS_HOST = options['INFLUXDB_HOST_TAG']
 INFLUXDB_TIMEOUT = 5
-INFLUXDB_USE_CELERY = False
 INFLUXDB_USE_THREADING = True
 
 SENTRY_DSN = options['SENTRY_DSN']

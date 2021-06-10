@@ -7,9 +7,6 @@
 # Might hopefully get merged eventually: https://github.com/mailgun/talon/pull/200
 -e git+https://github.com/tiltec/talon@80886cd#egg=talon
 
-# Removes some fast-changing stats from tags in order to not overload influxdb
--e git+https://github.com/tiltec/django-influxdb-metrics@1746b8e206#egg=django-influxdb-metrics
-
 # This includes a patch to use anymail with postal, can switch once officially released
 -e git+https://github.com/anymail/django-anymail@e90c10b#egg=django-anymail
 
@@ -57,6 +54,7 @@ python-dotenv
 click
 httpx
 icalendar
+influxdb
 
 # dev PyPI dependencies
 pip-tools
