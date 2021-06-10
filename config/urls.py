@@ -8,9 +8,9 @@ from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import path, re_path, include
 from django.views.static import serve
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
-from rest_framework_swagger.views import get_swagger_view
 
 from karrot.applications.api import ApplicationViewSet
 from karrot.bootstrap.api import BootstrapViewSet, ConfigViewSet
@@ -106,7 +106,8 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('admin/docs/', include('django.contrib.admindocs.urls')),
     path('admin/', admin.site.urls),
-    path('docs/', get_swagger_view()),
+    path('docs/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/anymail/', include('anymail.urls')),
     re_path(r'^silk/', include('silk.urls', namespace='silk'))
 ]

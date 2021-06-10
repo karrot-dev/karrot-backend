@@ -134,7 +134,7 @@ INSTALLED_APPS = (
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_framework_swagger',
+    'drf_spectacular',
     'anymail',
     'timezone_field',
     'django_jinja',
@@ -151,7 +151,13 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ),
     'EXCEPTION_HANDLER': 'karrot.utils.misc.custom_exception_handler',
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Karrot API',
+    'DESCRIPTION': '_could link to rocket chat or community forum here_',
+    'VERSION': '0.1',
 }
 
 MIDDLEWARE = (
