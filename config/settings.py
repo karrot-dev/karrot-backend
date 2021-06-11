@@ -156,7 +156,12 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Karrot API',
-    'DESCRIPTION': '_could link to rocket chat or community forum here_',
+    'DESCRIPTION': """
+Welcome to our API documentation!
+
+Check out our code on [GitHub](https://github.com/yunity/karrot-frontend)
+and talk with us on the [Foodsaving Worldwide Rocketchat](https://chat.foodsaving.world)!
+    """,
     'VERSION': '0.1',
     'SCHEMA_PATH_PREFIX': '/api/',
     'SWAGGER_UI_FAVICON_HREF': '/favicon.ico',
