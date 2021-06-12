@@ -111,6 +111,7 @@ pip-tools==6.1.0
 pluggy==0.13.1
 pre-commit==2.12.1
 prompt-toolkit==3.0.18
+psutil==5.8.0
 psycopg2-binary==2.8.6
 ptyprocess==0.7.0
 py==1.10.0

@@ -74,3 +74,4 @@ django-silk
 yapf
 importlib-metadata # for py3.7 compat
 pre-commit
+psutil
