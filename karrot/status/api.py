@@ -8,6 +8,7 @@ from karrot.status.helpers import status_data, \
 
 class StatusView(views.APIView):
     permission_classes = (IsAuthenticated, )
+    serializer_class = StatusSerializer  # for OpenAPI generation with drf-spectacular
 
     @staticmethod
     def get(request, **kwargs):

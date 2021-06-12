@@ -53,7 +53,7 @@ django-versatileimagefield==2.0
 django[argon2]==3.2
 djangorestframework-csv==2.1.0
 djangorestframework==3.12.4
-drf-spectacular==0.17.0
+drf-spectacular==0.17.1
 execnet==1.8.0
 face==20.1.1
 factory-boy==3.2.0

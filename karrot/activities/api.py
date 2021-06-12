@@ -197,13 +197,6 @@ class ActivityViewSet(
 ):
     """
     Activities
-
-    list:
-    Query parameters
-    - `?series` - filter by activity series id
-    - `?place` - filter by place id
-    - `?group` - filter by group id
-    - `?date_min=<from_date>`&`date_max=<to_date>` - filter by date, can also either give either date_min or date_max
     """
     serializer_class = ActivitySerializer
     queryset = ActivityModel.objects

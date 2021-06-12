@@ -1,3 +1,5 @@
+from typing import List
+
 import dateutil.rrule
 from datetime import timedelta, datetime
 
@@ -121,7 +123,7 @@ class DateTimeFieldWithTimezone(DateTimeField):
         return super().enforce_timezone(value)
 
 
-class DateTimeRangeField(serializers.Field):
+class DateTimeRangeField(serializers.ListField):
     child = DateTimeFieldWithTimezone()
 
     default_error_messages = {
@@ -189,10 +191,10 @@ class ActivitySerializer(serializers.ModelSerializer):
 
     date = DateTimeRangeField()
 
-    def get_participants(self, activity):
+    def get_participants(self, activity) -> List[int]:
         return [c.user_id for c in activity.activityparticipant_set.all()]
 
-    def get_feedback_dismissed_by(self, activity):
+    def get_feedback_dismissed_by(self, activity) -> List[int]:
         # we are filtering in python to make use of prefetched data
         return [c.user_id for c in activity.activityparticipant_set.all() if c.feedback_dismissed]
 

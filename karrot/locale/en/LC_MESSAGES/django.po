@@ -40,15 +40,15 @@ msgstr ""
 msgid "Task"
 msgstr ""
 
-#: karrot/activities/serializers.py:128
+#: karrot/activities/serializers.py:130
 msgid "Must be a list"
 msgstr ""
 
-#: karrot/activities/serializers.py:129
+#: karrot/activities/serializers.py:131
 msgid "Must be a list with one or two values"
 msgstr ""
 
-#: karrot/activities/serializers.py:130
+#: karrot/activities/serializers.py:132
 msgid "Must pass start value"
 msgstr ""
 
@@ -716,7 +716,7 @@ msgstr ""
 msgid "You are already subscribed to this place"
 msgstr ""
 
-#: karrot/userauth/api.py:94 karrot/userauth/serializers.py:94
+#: karrot/userauth/api.py:98 karrot/userauth/serializers.py:94
 #: karrot/userauth/serializers.py:143 karrot/userauth/serializers.py:164
 #: karrot/userauth/serializers.py:194 karrot/userauth/serializers.py:216
 msgid "We could not send you an e-mail."

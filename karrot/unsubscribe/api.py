@@ -8,6 +8,7 @@ from karrot.unsubscribe.serializers import TokenUnsubscribeSerializer, Unsubscri
 
 class TokenUnsubscribeView(views.APIView):
     permission_classes = (AllowAny, )
+    serializer_class = TokenUnsubscribeSerializer  # for OpenAPI generation with drf-spectacular
 
     @staticmethod
     def post(request, token):
