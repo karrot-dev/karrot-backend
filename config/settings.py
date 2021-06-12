@@ -134,7 +134,7 @@ INSTALLED_APPS = (
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_framework_swagger',
+    'drf_spectacular',
     'anymail',
     'timezone_field',
     'django_jinja',
@@ -151,7 +151,25 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ),
     'EXCEPTION_HANDLER': 'karrot.utils.misc.custom_exception_handler',
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Karrot API',
+    'DESCRIPTION': """
+Welcome to our API documentation!
+
+Check out our code on [GitHub](https://github.com/yunity/karrot-frontend)
+and talk with us on the [Foodsaving Worldwide Rocketchat](https://chat.foodsaving.world)!
+    """,
+    'VERSION': '0.1',
+    'SCHEMA_PATH_PREFIX': '/api/',
+    'SWAGGER_UI_FAVICON_HREF': '/favicon.ico',
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'defaultModelsExpandDepth': 0,
+        'docExpansion': 'none',
+    },
 }
 
 MIDDLEWARE = (

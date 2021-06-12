@@ -1,4 +1,3 @@
-import coreapi
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
@@ -7,6 +6,8 @@ from django.http import Http404
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework.decorators import action
@@ -16,7 +17,6 @@ from rest_framework.pagination import CursorPagination
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
-from rest_framework.schemas import ManualSchema
 from rest_framework.viewsets import GenericViewSet
 
 from karrot.applications.models import Application
@@ -316,16 +316,16 @@ class ConversationMessageViewSet(
         serializer = self.get_serializer(messages, many=True)
         return self.get_paginated_response(serializer.data)
 
+    @extend_schema(
+        description='Lists threads the user has participated in',
+        parameters=[
+            OpenApiParameter('group', OpenApiTypes.INT, OpenApiParameter.QUERY),
+            OpenApiParameter('conversation', OpenApiTypes.INT, OpenApiParameter.QUERY),
+            OpenApiParameter('exclude_read', OpenApiTypes.BOOL, OpenApiParameter.QUERY),
+        ]
+    )
     @action(
         detail=False,
-        schema=ManualSchema(
-            description='Lists threads the user has participated in',
-            fields=[
-                coreapi.Field('group', location='query'),
-                coreapi.Field('conversation', location='query'),
-                coreapi.Field('exclude_read', location='query'),
-            ]
-        )
     )
     def my_threads(self, request):
         queryset = ConversationMessage.objects.distinct() \
