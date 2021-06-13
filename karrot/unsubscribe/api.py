@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema
 from rest_framework import views, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -11,6 +12,9 @@ class TokenUnsubscribeView(views.APIView):
     serializer_class = TokenUnsubscribeSerializer  # for OpenAPI generation with drf-spectacular
 
     @staticmethod
+    @extend_schema(
+        operation_id='token_unsubscribe',
+    )
     def post(request, token):
         """
         Receive unauthenticated but signed unsubscribe requests

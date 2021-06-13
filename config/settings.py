@@ -170,6 +170,11 @@ and talk with us on the [Foodsaving Worldwide Rocketchat](https://chat.foodsavin
         'defaultModelsExpandDepth': 0,
         'docExpansion': 'none',
     },
+    'ENUM_NAME_OVERRIDES': {
+        'PlaceStatusEnum': 'karrot.places.models.PlaceStatus.choices',
+        'GroupStatusEnum': 'karrot.groups.models.GroupStatus.choices',
+        'ActivityTypeStatusEnum': 'karrot.activities.models.ActivityTypeStatus.choices',
+    },
 }
 
 MIDDLEWARE = (

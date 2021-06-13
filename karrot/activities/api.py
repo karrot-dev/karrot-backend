@@ -1,6 +1,8 @@
 from django.db import transaction
 from django.db.models import F
 from django_filters import rest_framework as filters
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema
 from rest_framework import mixins
 from rest_framework import viewsets
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
@@ -258,6 +260,7 @@ class ActivityViewSet(
     def dismiss_feedback(self, request, pk=None):
         return self.partial_update(request)
 
+    @extend_schema(responses=OpenApiTypes.STR)
     @action(
         detail=True,
         methods=['GET'],
@@ -271,6 +274,7 @@ class ActivityViewSet(
         response['content-disposition'] = 'attachment; filename={filename}'.format(filename=filename)
         return response
 
+    @extend_schema(operation_id='activities_ics_list', responses=OpenApiTypes.STR)
     @action(
         detail=False,
         methods=['GET'],

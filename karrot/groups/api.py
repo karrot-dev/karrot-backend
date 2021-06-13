@@ -3,6 +3,8 @@ from django.http import HttpResponseRedirect, Http404
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework.decorators import action
@@ -178,6 +180,7 @@ class GroupViewSet(
         stats.group_activity(membership.group)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @extend_schema(parameters=[OpenApiParameter('user_id', OpenApiTypes.INT, OpenApiParameter.PATH)])
     @action(
         detail=True,
         methods=['POST'],
@@ -201,7 +204,15 @@ class GroupViewSet(
 
         return Response(data={})
 
-    @trust_user.mapping.delete
+    @extend_schema(parameters=[OpenApiParameter('user_id', OpenApiTypes.INT, OpenApiParameter.PATH)])
+    @action(
+        detail=True,
+        methods=['DELETE'],
+        permission_classes=(IsAuthenticated, IsOtherUser),
+        url_name='trust-user',
+        url_path='users/(?P<user_id>[^/.]+)/trust',
+        serializer_class=EmptySerializer
+    )
     def revoke_trust(self, request, pk, user_id):
         """revoke trust for a user in a group"""
         self.check_permissions(request)
@@ -218,6 +229,7 @@ class GroupViewSet(
         except Trust.DoesNotExist:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
+    @extend_schema(parameters=[OpenApiParameter('notification_type', OpenApiTypes.STR, OpenApiParameter.PATH)])
     @action(
         detail=True,
         methods=['PUT', 'DELETE'],

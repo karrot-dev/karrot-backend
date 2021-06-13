@@ -1,5 +1,3 @@
-from enum import Enum
-
 from django.conf import settings
 from django.db import models
 
@@ -7,7 +5,7 @@ from karrot.base.base_models import BaseModel, LocationModel
 from karrot.conversations.models import ConversationMixin
 
 
-class PlaceStatus(Enum):
+class PlaceStatus(models.TextChoices):
     CREATED = 'created'
     NEGOTIATING = 'negotiating'
     ACTIVE = 'active'
