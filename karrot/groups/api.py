@@ -205,14 +205,7 @@ class GroupViewSet(
         return Response(data={})
 
     @extend_schema(parameters=[OpenApiParameter('user_id', OpenApiTypes.INT, OpenApiParameter.PATH)])
-    @action(
-        detail=True,
-        methods=['DELETE'],
-        permission_classes=(IsAuthenticated, IsOtherUser),
-        url_name='trust-user',
-        url_path='users/(?P<user_id>[^/.]+)/trust',
-        serializer_class=EmptySerializer
-    )
+    @trust_user.mapping.delete
     def revoke_trust(self, request, pk, user_id):
         """revoke trust for a user in a group"""
         self.check_permissions(request)
