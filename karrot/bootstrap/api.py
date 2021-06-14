@@ -55,7 +55,7 @@ class BootstrapViewSet(GenericViewSet):
             'config': get_config_data(),
             'user': user if user.is_authenticated else None,
             'geoip': geo_data,
-            'groups': Group.objects.prefetch_related('members'),
+            'groups': Group.objects.annotate_member_count().annotate_is_user_member(user),
         }
 
         serializer = BootstrapSerializer(data, context=self.get_serializer_context())

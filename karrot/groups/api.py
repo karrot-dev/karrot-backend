@@ -68,11 +68,18 @@ class GroupInfoViewSet(
     - `?search` - search in name and public description
     - `?include_empty` - set to False to exclude empty groups without members
     """
-    queryset = GroupModel.objects.prefetch_related('members')
+    queryset = GroupModel.objects
     filter_backends = (SearchFilter, filters.DjangoFilterBackend)
     filterset_class = GroupsInfoFilter
     search_fields = ('name', 'public_description')
     serializer_class = GroupPreviewSerializer
+
+    def get_queryset(self):
+        qs = self.queryset
+        if self.action == 'list':
+            qs = qs.annotate_member_count().annotate_is_user_member(self.request.user)
+
+        return qs
 
     @action(
         detail=True,

@@ -522,18 +522,21 @@ class GroupMembershipReceiverTests(WSTestCase):
         self.assertIn(self.user.id, response['payload']['memberships'].keys())
 
         response = member_client.messages_by_topic.get('groups:group_preview')[0]
-        self.assertIn(self.user.id, response['payload']['members'])
+        self.assertTrue(response['payload']['is_member'])
+        self.assertEqual(2, response['payload']['member_count'])
         self.assertNotIn('memberships', response['payload'])
 
         response = joining_client.messages_by_topic.get('groups:group_detail')[0]
         self.assertIn(self.user.id, response['payload']['members'])
 
         response = joining_client.messages_by_topic.get('groups:group_preview')[0]
-        self.assertIn(self.user.id, response['payload']['members'])
+        self.assertTrue(response['payload']['is_member'])
+        self.assertEqual(2, response['payload']['member_count'])
 
         self.assertNotIn('groups:group_detail', nonmember_client.messages_by_topic.keys())
         response = nonmember_client.messages_by_topic.get('groups:group_preview')[0]
-        self.assertIn(self.user.id, response['payload']['members'])
+        self.assertFalse(response['payload']['is_member'])
+        self.assertEqual(2, response['payload']['member_count'])
         self.assertNotIn('memberships', response['payload'])
 
     def test_receive_group_leave_as_leaving_user(self):
@@ -544,7 +547,7 @@ class GroupMembershipReceiverTests(WSTestCase):
         self.group.remove_member(self.member)
 
         response = client.messages_by_topic.get('groups:group_preview')[0]
-        self.assertNotIn(self.user.id, response['payload']['members'])
+        self.assertFalse(response['payload']['is_member'])
         self.assertNotIn('memberships', response['payload'])
         self.assertEqual([m['topic'] for m in client.messages], [
             'history:history',

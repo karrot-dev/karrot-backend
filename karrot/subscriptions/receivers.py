@@ -211,8 +211,8 @@ def send_group_detail(group, user=None):
 
 
 def send_group_preview(group):
-    preview_payload = GroupPreviewSerializer(group).data
     for subscription in ChannelSubscription.objects.recent():
+        preview_payload = GroupPreviewSerializer(group, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic='groups:group_preview', payload=preview_payload)
 
 
