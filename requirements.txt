@@ -4,7 +4,6 @@
 #
 #    pip-compile --no-annotate
 #
--e git+https://github.com/anymail/django-anymail@e90c10b#egg=django-anymail
 -e git+https://github.com/tiltec/talon@80886cd#egg=talon
 aiofiles==0.7.0
 aiohttp==3.7.4.post0
@@ -40,6 +39,7 @@ cssselect==1.1.0
 daphne==3.0.2
 decorator==5.0.9
 distlib==0.3.2
+django-anymail==8.4
 django-cors-headers==3.7.0
 django-crispy-forms==1.12.0
 django-dirtyfields==1.7.0

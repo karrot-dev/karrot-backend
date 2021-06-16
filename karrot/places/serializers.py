@@ -45,12 +45,10 @@ class PlaceSerializer(serializers.ModelSerializer):
             'subscribers',
         ]
 
-    status = serializers.ChoiceField(
-        choices=[status.value for status in PlaceStatus], default=PlaceModel.DEFAULT_STATUS
-    )
+    status = serializers.ChoiceField(choices=PlaceStatus.choices, default=PlaceModel.DEFAULT_STATUS)
     is_subscribed = serializers.SerializerMethodField()
 
-    def get_is_subscribed(self, place):
+    def get_is_subscribed(self, place) -> bool:
         return any(u == self.context['request'].user for u in place.subscribers.all())
 
     def save(self, **kwargs):

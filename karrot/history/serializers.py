@@ -1,4 +1,6 @@
 from django.utils.dateparse import parse_datetime
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 from rest_framework_csv.renderers import CSVRenderer
@@ -25,9 +27,11 @@ class HistorySerializer(serializers.ModelSerializer):
     typus = SerializerMethodField()
     after = SerializerMethodField()
 
+    @extend_schema_field(OpenApiTypes.STR)
     def get_typus(self, obj):
         return HistoryTypus.name(obj.typus)
 
+    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_after(self, obj):
         # It's limited to these types as if we just generally return it we might send
         # internal/private data back to the client. This is a bit of technical debt as
@@ -57,6 +61,7 @@ class HistoryExportSerializer(HistorySerializer):
     date = serializers.SerializerMethodField()
     users = serializers.SerializerMethodField()
 
+    @extend_schema_field(OpenApiTypes.DATETIME)
     def get_activity_date(self, history):
         # Try to get start date of activity
         if history.payload is None:
@@ -73,11 +78,13 @@ class HistoryExportSerializer(HistorySerializer):
 
         return csv_datetime(date.astimezone(group.timezone))
 
+    @extend_schema_field(OpenApiTypes.DATETIME)
     def get_date(self, history):
         group = history.group
 
         return csv_datetime(history.date.astimezone(group.timezone))
 
+    @extend_schema_field(OpenApiTypes.STR)
     def get_users(self, history):
         user_ids = [str(u.id) for u in history.users.all()]
         return ','.join(user_ids)

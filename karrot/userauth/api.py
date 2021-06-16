@@ -13,9 +13,12 @@ from karrot.userauth.permissions import MailIsNotVerified
 from karrot.userauth.serializers import AuthLoginSerializer, AuthUserSerializer, \
     ChangePasswordSerializer, RequestResetPasswordSerializer, ChangeMailSerializer, \
     VerificationCodeSerializer, ResetPasswordSerializer, FailedEmailDeliverySerializer
+from karrot.utils.serializers import EmptySerializer
 
 
 class LogoutView(views.APIView):
+    serializer_class = EmptySerializer  # for OpenAPI generation with drf-spectacular
+
     def post(self, request, **kwargs):
         """ Log out """
         logout(request)
@@ -83,6 +86,7 @@ class AuthUserView(generics.GenericAPIView):
 
 class RequestDeleteUserView(views.APIView):
     permission_classes = (IsAuthenticated, )
+    serializer_class = EmptySerializer  # for OpenAPI generation with drf-spectacular
 
     def post(self, request):
         """
@@ -115,6 +119,7 @@ class VerifyMailView(generics.GenericAPIView):
 
 class ResendMailVerificationCodeView(views.APIView):
     permission_classes = (IsAuthenticated, MailIsNotVerified)
+    serializer_class = EmptySerializer  # for OpenAPI generation with drf-spectacular
 
     def post(self, request):
         """

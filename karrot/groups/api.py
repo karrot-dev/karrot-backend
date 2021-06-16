@@ -3,6 +3,8 @@ from django.http import HttpResponseRedirect, Http404
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework.decorators import action
@@ -18,10 +20,10 @@ from karrot.groups import stats
 from karrot.groups.filters import GroupsFilter, GroupsInfoFilter
 from karrot.groups.models import Agreement, Group as GroupModel, GroupMembership, Trust
 from karrot.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer, GroupJoinSerializer, \
-    GroupLeaveSerializer, TimezonesSerializer, EmptySerializer, \
-    GroupMembershipInfoSerializer, \
+    GroupLeaveSerializer, TimezonesSerializer, GroupMembershipInfoSerializer, \
     AgreementSerializer, AgreementAgreeSerializer, GroupMembershipAddNotificationTypeSerializer, \
     GroupMembershipRemoveNotificationTypeSerializer
+from karrot.utils.serializers import EmptySerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
 
 
@@ -185,6 +187,7 @@ class GroupViewSet(
         stats.group_activity(membership.group)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @extend_schema(parameters=[OpenApiParameter('user_id', OpenApiTypes.INT, OpenApiParameter.PATH)])
     @action(
         detail=True,
         methods=['POST'],
@@ -208,6 +211,7 @@ class GroupViewSet(
 
         return Response(data={})
 
+    @extend_schema(parameters=[OpenApiParameter('user_id', OpenApiTypes.INT, OpenApiParameter.PATH)])
     @trust_user.mapping.delete
     def revoke_trust(self, request, pk, user_id):
         """revoke trust for a user in a group"""
@@ -225,6 +229,7 @@ class GroupViewSet(
         except Trust.DoesNotExist:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
+    @extend_schema(parameters=[OpenApiParameter('notification_type', OpenApiTypes.STR, OpenApiParameter.PATH)])
     @action(
         detail=True,
         methods=['PUT', 'DELETE'],

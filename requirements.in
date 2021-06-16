@@ -4,9 +4,6 @@
 # Might hopefully get merged eventually: https://github.com/mailgun/talon/pull/200
 -e git+https://github.com/tiltec/talon@80886cd#egg=talon
 
-# This includes a patch to use anymail with postal, can switch once officially released
--e git+https://github.com/anymail/django-anymail@e90c10b#egg=django-anymail
-
 # Common PyPI dependencies
 django[argon2]
 django-cors-headers
@@ -26,6 +23,7 @@ pytz
 django-filter
 django-crispy-forms
 django-timezone-field
+django-anymail
 raven
 furl
 pyfcm
