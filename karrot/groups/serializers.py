@@ -404,10 +404,6 @@ class TimezonesSerializer(serializers.Serializer):
     all_timezones = serializers.ListField(child=serializers.CharField(), read_only=True)
 
 
-class EmptySerializer(serializers.Serializer):
-    pass
-
-
 class GroupMembershipAddNotificationTypeSerializer(serializers.Serializer):
     notification_type = serializers.ChoiceField(
         choices=[(choice, choice) for choice in (

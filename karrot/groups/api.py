@@ -20,10 +20,10 @@ from karrot.groups import stats
 from karrot.groups.filters import GroupsFilter, GroupsInfoFilter
 from karrot.groups.models import Agreement, Group as GroupModel, GroupMembership, Trust
 from karrot.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer, GroupJoinSerializer, \
-    GroupLeaveSerializer, TimezonesSerializer, EmptySerializer, \
-    GroupMembershipInfoSerializer, \
+    GroupLeaveSerializer, TimezonesSerializer, GroupMembershipInfoSerializer, \
     AgreementSerializer, AgreementAgreeSerializer, GroupMembershipAddNotificationTypeSerializer, \
     GroupMembershipRemoveNotificationTypeSerializer
+from karrot.utils.serializers import EmptySerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
 
 
