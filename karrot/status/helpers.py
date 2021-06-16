@@ -1,5 +1,7 @@
 from collections import defaultdict
 from django.db.models import F, Count, Q, Case, When, BooleanField
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from karrot.applications.models import ApplicationStatus
@@ -96,18 +98,22 @@ class StatusSerializer(serializers.Serializer):
     places = serializers.SerializerMethodField()
 
     @staticmethod
+    @extend_schema_field(OpenApiTypes.INT)
     def get_unseen_conversation_count(data):
         return data['conversations']['unseen_conversation_count']
 
     @staticmethod
+    @extend_schema_field(OpenApiTypes.INT)
     def get_unseen_thread_count(data):
         return data['conversations']['unseen_thread_count']
 
     @staticmethod
+    @extend_schema_field(OpenApiTypes.BOOL)
     def get_has_unread_conversations_or_threads(data):
         return data['conversations']['has_unread_conversations_or_threads']
 
     @staticmethod
+    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_groups(data):
         conversations = data.get('conversations')
         applications = data.get('applications')
@@ -127,6 +133,7 @@ class StatusSerializer(serializers.Serializer):
         return groups
 
     @staticmethod
+    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_places(data):
         conversations = data.get('conversations')
         places = {}

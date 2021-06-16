@@ -1,5 +1,4 @@
 from datetime import timedelta
-from enum import Enum
 
 import pytz
 from dateutil.relativedelta import relativedelta
@@ -20,7 +19,7 @@ from karrot.activities.utils import match_activities_with_dates, rrule_between_d
 from karrot.places.models import PlaceStatus
 
 
-class ActivityTypeStatus(Enum):
+class ActivityTypeStatus(models.TextChoices):
     ACTIVE = 'active'
     ARCHIVED = 'archived'
 
@@ -36,7 +35,7 @@ class ActivityType(BaseModel, UpdatedAtMixin):
     has_feedback_weight = models.BooleanField(default=True)
     status = models.CharField(
         default=ActivityTypeStatus.ACTIVE.value,
-        choices=[(status.value, status.value) for status in ActivityTypeStatus],
+        choices=ActivityTypeStatus.choices,
         max_length=100,
     )
 

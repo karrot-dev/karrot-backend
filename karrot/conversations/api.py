@@ -384,6 +384,7 @@ class ConversationMessageViewSet(
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    @extend_schema(parameters=[OpenApiParameter('name', OpenApiTypes.STR, OpenApiParameter.PATH)])
     @action(
         detail=True,
         methods=('DELETE', ),

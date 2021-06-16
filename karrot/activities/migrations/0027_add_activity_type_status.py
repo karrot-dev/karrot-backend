@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='activitytype',
             name='status',
-            field=models.CharField(choices=[('active', 'active'), ('archived', 'archived')], default='active', max_length=100),
+            field=models.CharField(choices=[('active', 'Active'), ('archived', 'Archived')], default='active', max_length=100),
         ),
     ]

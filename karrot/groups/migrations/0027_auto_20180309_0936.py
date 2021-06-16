@@ -17,6 +17,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='group',
             name='status',
-            field=models.CharField(choices=[('active', 'active'), ('inactive', 'inactive'), ('playground', 'playground')], default='active', max_length=100),
+            field=models.CharField(choices=[('active', 'Active'), ('inactive', 'Inactive'), ('playground', 'Playground')], default='active', max_length=100),
         ),
     ]

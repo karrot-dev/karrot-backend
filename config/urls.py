@@ -98,7 +98,7 @@ urlpatterns = [
     path('api/auth/password/', ChangePasswordView.as_view()),
     path('api/auth/password/request_reset/', RequestResetPasswordView.as_view()),
     path('api/auth/password/reset/', ResetPasswordView.as_view()),
-    path('api/unsubscribe/<token>/', TokenUnsubscribeView.as_view()),
+    path('api/unsubscribe/<str:token>/', TokenUnsubscribeView.as_view()),
     path('api/auth/', AuthView.as_view()),
     path('api/stats/', FrontendStatsView.as_view()),
     path('api/status/', StatusView.as_view()),

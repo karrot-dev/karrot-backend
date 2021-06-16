@@ -21,13 +21,13 @@ class EmailEvent(BaseModel):
     version = models.IntegerField()
 
     @property
-    def reason(self):
+    def reason(self) -> str:
         if self.version == 2:
             return self.payload['payload']['output']
         return self.payload.get('reason')
 
     @property
-    def subject(self):
+    def subject(self) -> str:
         if self.version == 2:
             return self.payload['payload']['message']['subject']
         return self.payload.get('subject')

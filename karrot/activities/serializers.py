@@ -1,6 +1,10 @@
+from typing import List
+
 import dateutil.rrule
 from datetime import timedelta, datetime
 
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from icalendar import vCalAddress, vText
 from django.contrib.auth import get_user_model
 from django.conf import settings
@@ -121,7 +125,7 @@ class DateTimeFieldWithTimezone(DateTimeField):
         return super().enforce_timezone(value)
 
 
-class DateTimeRangeField(serializers.Field):
+class DateTimeRangeField(serializers.ListField):
     child = DateTimeFieldWithTimezone()
 
     default_error_messages = {
@@ -189,10 +193,10 @@ class ActivitySerializer(serializers.ModelSerializer):
 
     date = DateTimeRangeField()
 
-    def get_participants(self, activity):
+    def get_participants(self, activity) -> List[int]:
         return [c.user_id for c in activity.activityparticipant_set.all()]
 
-    def get_feedback_dismissed_by(self, activity):
+    def get_feedback_dismissed_by(self, activity) -> List[int]:
         # we are filtering in python to make use of prefetched data
         return [c.user_id for c in activity.activityparticipant_set.all() if c.feedback_dismissed]
 
@@ -447,6 +451,7 @@ class ActivityDismissFeedbackSerializer(serializers.ModelSerializer):
         return activity
 
 
+@extend_schema_field(OpenApiTypes.INT)
 class DurationInSecondsField(Field):
     default_error_messages = {}
 
@@ -621,7 +626,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
         feedback.about.place.group.refresh_active_status()
         return feedback
 
-    def get_is_editable(self, feedback):
+    def get_is_editable(self, feedback) -> bool:
         return feedback.about.is_recent() and feedback.given_by_id == self.context['request'].user.id
 
     def validate_about(self, about):
@@ -687,15 +692,18 @@ class FeedbackExportSerializer(FeedbackSerializer):
     about_place = serializers.SerializerMethodField()
     created_at = serializers.SerializerMethodField()
 
+    @extend_schema_field(OpenApiTypes.DATETIME)
     def get_about_date(self, feedback):
         activity = feedback.about
         group = activity.place.group
 
         return csv_datetime(activity.date.start.astimezone(group.timezone))
 
+    @extend_schema_field(OpenApiTypes.INT)
     def get_about_place(self, feedback):
         return feedback.about.place_id
 
+    @extend_schema_field(OpenApiTypes.DATETIME)
     def get_created_at(self, feedback):
         activity = feedback.about
         group = activity.place.group

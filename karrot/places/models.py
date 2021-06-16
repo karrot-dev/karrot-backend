@@ -1,5 +1,3 @@
-from enum import Enum
-
 from django.conf import settings
 from django.db import models
 
@@ -7,7 +5,7 @@ from karrot.base.base_models import BaseModel, LocationModel
 from karrot.conversations.models import ConversationMixin
 
 
-class PlaceStatus(Enum):
+class PlaceStatus(models.TextChoices):
     CREATED = 'created'
     NEGOTIATING = 'negotiating'
     ACTIVE = 'active'
@@ -25,7 +23,7 @@ class Place(BaseModel, LocationModel, ConversationMixin):
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH)
     description = models.TextField(blank=True)
     weeks_in_advance = models.PositiveIntegerField(default=4)
-    status = models.CharField(max_length=20, default=DEFAULT_STATUS)
+    status = models.CharField(choices=PlaceStatus.choices, max_length=20, default=DEFAULT_STATUS)
 
     subscribers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
