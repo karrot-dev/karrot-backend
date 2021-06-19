@@ -51,15 +51,15 @@ msgstr "Aktivität"
 msgid "Task"
 msgstr "Aufgabe"
 
-#: karrot/activities/serializers.py:128
+#: karrot/activities/serializers.py:132
 msgid "Must be a list"
 msgstr "Muss eine Liste sein"
 
-#: karrot/activities/serializers.py:129
+#: karrot/activities/serializers.py:133
 msgid "Must be a list with one or two values"
 msgstr "Muss eine Liste mit einem oder zwei Werten sein"
 
-#: karrot/activities/serializers.py:130
+#: karrot/activities/serializers.py:134
 msgid "Must pass start value"
 msgstr "Muss einen Startwert enthalten"
 
@@ -132,9 +132,9 @@ msgstr "%(group_name)s, anstehende Abholungen"
 msgid "You need to have a verified email address"
 msgstr "Du brauchst eine bestätigte E-Mail-Adresse."
 
-#: karrot/applications/api.py:36 karrot/groups/api.py:50
+#: karrot/applications/api.py:36 karrot/groups/api.py:52
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
-#: karrot/places/api.py:19 karrot/places/serializers.py:80
+#: karrot/places/api.py:19 karrot/places/serializers.py:78
 msgid "You need to be a group editor"
 msgstr "Du brauchst Bearbeitungsrechte für diese Gruppe."
 
@@ -233,7 +233,7 @@ msgstr ""
 "stummschalten</a>."
 
 #: karrot/conversations/api.py:65 karrot/conversations/api.py:246
-#: karrot/conversations/api.py:428 karrot/conversations/serializers.py:177
+#: karrot/conversations/api.py:429 karrot/conversations/serializers.py:186
 msgid "You are not in this conversation"
 msgstr "Du bist nicht Teil dieser Unterhaltung"
 
@@ -277,7 +277,7 @@ msgstr "Neue Nachricht bei Konfliktlösung in %(group_name)s"
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr "Neue Nachricht für Angebot %(offer_name)s in %(group_name)s"
 
-#: karrot/conversations/serializers.py:179
+#: karrot/conversations/serializers.py:188
 msgid "This conversation has been closed"
 msgstr "Diese Unterhaltung wurde beendet"
 
@@ -307,39 +307,39 @@ msgstr ""
 "Antworten auf %(site_name)s besuchen</a> oder <a "
 "href=\"%(mute_url)s\">weitere Antworten stummschalten</a>."
 
-#: karrot/groups/api.py:29
+#: karrot/groups/api.py:31
 msgid "You are already a member."
 msgstr "Du bist bereits Mitglied."
 
-#: karrot/groups/api.py:36
+#: karrot/groups/api.py:38
 msgid "You can only join open groups."
 msgstr "Du kannst nur offenen Gruppen direkt beitreten."
 
-#: karrot/groups/api.py:43
+#: karrot/groups/api.py:45
 msgid "You cannot give trust to yourself"
 msgstr "Du kannst dir nicht selbst Vertrauen ausdrücken"
 
-#: karrot/groups/api.py:200
+#: karrot/groups/api.py:203
 msgid "You already gave trust to this user"
 msgstr "Du hast diesem Nutzer oder Nutzerin schon Vertrauen ausgedrückt"
 
-#: karrot/groups/serializers.py:30
+#: karrot/groups/serializers.py:35
 msgid "Unknown timezone"
 msgstr "Unbekannte Zeitzone"
 
-#: karrot/groups/serializers.py:38
+#: karrot/groups/serializers.py:43
 msgid "Playground"
 msgstr "Spielplatz"
 
-#: karrot/groups/serializers.py:138 karrot/groups/serializers.py:237
+#: karrot/groups/serializers.py:152 karrot/groups/serializers.py:252
 msgid "You cannot manage agreements"
 msgstr "Du darfst die Vereinbarungen nicht ändern"
 
-#: karrot/groups/serializers.py:140
+#: karrot/groups/serializers.py:154
 msgid "Agreement is not for this group"
 msgstr "Vereinbarung gehört nicht zu dieser Gruppe."
 
-#: karrot/groups/serializers.py:235
+#: karrot/groups/serializers.py:250
 msgid "You are not in this group"
 msgstr "Du bist nicht Mitglied dieser Gruppe."
 
@@ -589,7 +589,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "Eine Einladung wurde bereits an diese E-Mail-Adresse versendet"
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
-#: karrot/offers/serializers.py:91 karrot/places/serializers.py:78
+#: karrot/offers/serializers.py:91 karrot/places/serializers.py:76
 msgid "You are not a member of this group."
 msgstr "Du bist kein Mitglied dieser Gruppe."
 
@@ -771,20 +771,20 @@ msgstr ""
 " %(site_name)s</a>, oder <a href=\"%(mute_url)s\">schalte die Unterhaltung "
 "stumm</a>."
 
-#: karrot/places/serializers.py:85
+#: karrot/places/serializers.py:83
 msgid "Set at least one week in advance"
 msgstr "Mindestens eine Woche im Voraus einstellen."
 
-#: karrot/places/serializers.py:88
+#: karrot/places/serializers.py:86
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr "Nicht mehr als %(count)s Wochen im Voraus setzen"
 
-#: karrot/places/serializers.py:140
+#: karrot/places/serializers.py:138
 msgid "You are already subscribed to this place"
 msgstr "Du hast diesen Ort bereits abonniert"
 
-#: karrot/userauth/api.py:94 karrot/userauth/serializers.py:94
+#: karrot/userauth/api.py:98 karrot/userauth/serializers.py:94
 #: karrot/userauth/serializers.py:143 karrot/userauth/serializers.py:164
 #: karrot/userauth/serializers.py:194 karrot/userauth/serializers.py:216
 msgid "We could not send you an e-mail."
