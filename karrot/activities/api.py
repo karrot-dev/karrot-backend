@@ -185,7 +185,7 @@ class ActivityPagination(CursorPagination):
     frontend assumptions of getting all upcoming activities per group.
     Could be reduced and add pagination handling in frontend when speed becomes an issue"""
     # TODO: create an index on 'date' for increased speed
-    page_size = 400
+    page_size = 800
     ordering = 'date'
 
 
