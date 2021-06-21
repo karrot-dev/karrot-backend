@@ -1,5 +1,4 @@
 from datetime import timedelta
-from enum import Enum
 
 import pytz
 from dateutil.relativedelta import relativedelta
@@ -9,7 +8,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext as _
 from django.db import models
 from django.db import transaction
-from django.db.models import Avg, Count, DurationField, F, Q
+from django.db.models import Count, DurationField, F, Q, Sum
 from django.utils import timezone
 
 from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin
@@ -20,7 +19,7 @@ from karrot.activities.utils import match_activities_with_dates, rrule_between_d
 from karrot.places.models import PlaceStatusCategory
 
 
-class ActivityTypeStatus(Enum):
+class ActivityTypeStatus(models.TextChoices):
     ACTIVE = 'active'
     ARCHIVED = 'archived'
 
@@ -36,7 +35,7 @@ class ActivityType(BaseModel, UpdatedAtMixin):
     has_feedback_weight = models.BooleanField(default=True)
     status = models.CharField(
         default=ActivityTypeStatus.ACTIVE.value,
-        choices=[(status.value, status.value) for status in ActivityTypeStatus],
+        choices=ActivityTypeStatus.choices,
         max_length=100,
     )
 
@@ -196,7 +195,7 @@ class ActivityQuerySet(models.QuerySet):
         return self.annotate(timezone=F('place__group__timezone'))
 
     def annotate_feedback_weight(self):
-        return self.annotate(feedback_weight=Avg('feedback__weight'))
+        return self.annotate(feedback_weight=Sum('feedback__weight'))
 
     def exclude_disabled(self):
         return self.filter(is_disabled=False)
@@ -212,7 +211,8 @@ class ActivityQuerySet(models.QuerySet):
         return self.exclude_disabled().filter(date__startswith__lt=timezone.now(), participants=None)
 
     def done(self):
-        return self.exclude_disabled().filter(date__startswith__lt=timezone.now()).exclude(participants=None)
+        return self.exclude_disabled().filter(date__startswith__lt=timezone.now())\
+            .annotate_num_participants().filter(num_participants__gt=0)
 
     def done_not_full(self):
         return self.exclude_disabled() \

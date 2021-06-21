@@ -7,18 +7,17 @@ from karrot.users.factories import UserFactory
 class TestSwaggerAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
-        self.url = '/docs/'
 
-    def test_swagger_coreapi(self):
+    def test_swagger_openapi(self):
         self.client.force_login(user=self.user)
-        response = self.client.get(self.url)
-        self.assertEqual(response.accepted_media_type, 'application/coreapi+json')
+        response = self.client.get('/docs/schema/')
+        self.assertEqual(response.accepted_media_type, 'application/vnd.oai.openapi')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('agreements', response.data)
-        self.assertIn('groups', response.data)
+        self.assertIn('/api/agreements/', response.data['paths'])
+        self.assertIn('/api/groups/', response.data['paths'])
 
     def test_swagger_html(self):
         self.client.force_login(user=self.user)
-        response = self.client.get(self.url, HTTP_ACCEPT='text/html')
+        response = self.client.get('/docs/')
         self.assertEqual(response.accepted_media_type, 'text/html')
         self.assertEqual(response.status_code, status.HTTP_200_OK)

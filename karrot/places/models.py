@@ -1,5 +1,3 @@
-from enum import Enum
-
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext as _
@@ -8,7 +6,7 @@ from karrot.base.base_models import BaseModel, LocationModel, UpdatedAtMixin
 from karrot.conversations.models import ConversationMixin
 
 
-class PlaceStatusOld(Enum):
+class PlaceStatusOld(models.TextChoices):
     CREATED = 'created'
     NEGOTIATING = 'negotiating'
     ACTIVE = 'active'
@@ -16,7 +14,7 @@ class PlaceStatusOld(Enum):
     ARCHIVED = 'archived'
 
 
-class PlaceStatusCategory(Enum):
+class PlaceStatusCategory(models.TextChoices):
     """
     Maybe this is too confusing! ... the status having a type! we have PlaceStatusType and PlaceTypeStatus :)
     Ah, I renamed it to PlaceStatusCategory to try and make it less confusing...
@@ -54,7 +52,7 @@ class PlaceStatus(BaseModel, UpdatedAtMixin):
     # is_archived = models.BooleanField(default=True) or maybe need a special one that the user cannot set...
 
 
-class PlaceTypeStatus(Enum):
+class PlaceTypeStatus(models.TextChoices):
     ACTIVE = 'active'
     ARCHIVED = 'archived'
 
@@ -89,7 +87,7 @@ class Place(BaseModel, LocationModel, ConversationMixin):
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH)
     description = models.TextField(blank=True)
     weeks_in_advance = models.PositiveIntegerField(default=4)
-    status_old = models.CharField(max_length=20, default=DEFAULT_STATUS)
+    status_old = models.CharField(choices=PlaceStatusOld.choices, max_length=20, default=DEFAULT_STATUS)
 
     status = models.ForeignKey(
         PlaceStatus,

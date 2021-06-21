@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='place',
             name='status',
-            field=models.CharField(default='created', max_length=20),
+            field=models.CharField(choices=[('created', 'Created'), ('negotiating', 'Negotiating'), ('active', 'Active'), ('declined', 'Declined'), ('archived', 'Archived')], default='created', max_length=20),
         ),
     ]

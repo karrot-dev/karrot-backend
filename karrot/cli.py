@@ -109,6 +109,9 @@ def server_daphne():
     args += ['--ws-protocol', 'karrot.token']
     args += ['--proxy-headers']
 
+    if settings.REQUEST_TIMEOUT_SECONDS:
+        args += ['--http-timeout', str(settings.REQUEST_TIMEOUT_SECONDS)]
+
     if settings.LISTEN_CONCURRENCY > 1:
         raise Exception('LISTEN_CONCURRENCY cannot be above 1 if using daphne')
 

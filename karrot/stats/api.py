@@ -86,6 +86,7 @@ class ActivityHistoryStatsViewSet(ListModelMixin, GenericViewSet):
 class FrontendStatsView(views.APIView):
     throttle_classes = [StatsThrottle]
     parser_classes = [JSONParser]
+    serializer_class = FrontendStatsSerializer  # for OpenAPI generation with drf-spectacular
 
     @staticmethod
     def post(request, **kwargs):

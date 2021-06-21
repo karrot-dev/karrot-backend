@@ -1,4 +1,3 @@
-import coreapi
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
@@ -7,6 +6,8 @@ from django.http import Http404
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework.decorators import action
@@ -16,7 +17,6 @@ from rest_framework.pagination import CursorPagination
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
-from rest_framework.schemas import ManualSchema
 from rest_framework.viewsets import GenericViewSet
 
 from karrot.applications.models import Application
@@ -260,7 +260,6 @@ class ConversationMessageFilter(filters.FilterSet):
 
 class ConversationMessageViewSet(
         mixins.CreateModelMixin,
-        mixins.ListModelMixin,
         mixins.RetrieveModelMixin,
         PartialUpdateModelMixin,
         GenericViewSet,
@@ -291,36 +290,50 @@ class ConversationMessageViewSet(
     def get_queryset(self):
         if self.action in ('partial_update', 'thread'):
             return self.queryset
-        qs = self.queryset \
-            .with_conversation_access(self.request.user) \
-            .annotate_replies_count() \
-            .annotate_unread_replies_count_for(self.request.user)
+        return self.queryset.with_conversation_access(self.request.user).distinct()
 
-        if self.action == 'my_threads':
-            return qs.only_threads_with_user(self.request.user) \
-                .prefetch_related('participants', 'latest_message')
-
-        if self.action == 'list':
-            qs = qs.prefetch_related('reactions', 'participants', 'images')
-
+    def list(self, request, *args, **kwargs):
+        # Workaround to avoid extremely slow cases
+        # https://github.com/yunity/karrot-frontend/issues/2369
+        # Split up query in two parts:
+        # 1. get message ids, including costly access control
+        queryset = ConversationMessage.objects.with_conversation_access(request.user).values('id').distinct()
         if self.request.query_params.get('thread', None):
-            return qs.only_threads_and_replies()
+            queryset = queryset.only_threads_and_replies()
+        else:
+            queryset = queryset.exclude_replies()
+        queryset = self.filter_queryset(queryset)
+        message_ids = [m['id'] for m in self.paginate_queryset(queryset)]
 
-        return qs.exclude_replies()
+        # 2. get data, including costly annotations
+        messages = ConversationMessage.objects\
+            .filter(id__in=message_ids)\
+            .annotate_replies_count()\
+            .annotate_unread_replies_count_for(request.user)\
+            .order_by(self.pagination_class.ordering)\
+            .prefetch_related('reactions', 'participants', 'images')
 
+        serializer = self.get_serializer(messages, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    @extend_schema(
+        description='Lists threads the user has participated in',
+        parameters=[
+            OpenApiParameter('group', OpenApiTypes.INT, OpenApiParameter.QUERY),
+            OpenApiParameter('conversation', OpenApiTypes.INT, OpenApiParameter.QUERY),
+            OpenApiParameter('exclude_read', OpenApiTypes.BOOL, OpenApiParameter.QUERY),
+        ]
+    )
     @action(
         detail=False,
-        schema=ManualSchema(
-            description='Lists threads the user has participated in',
-            fields=[
-                coreapi.Field('group', location='query'),
-                coreapi.Field('conversation', location='query'),
-                coreapi.Field('exclude_read', location='query'),
-            ]
-        )
     )
     def my_threads(self, request):
-        queryset = self.filter_queryset(self.get_queryset())
+        queryset = ConversationMessage.objects.distinct() \
+            .only_threads_with_user(self.request.user) \
+            .annotate_replies_count() \
+            .annotate_unread_replies_count_for(request.user) \
+            .prefetch_related('participants', 'latest_message')
+        queryset = self.filter_queryset(queryset)
         paginator = ThreadPagination()
 
         threads = list(paginator.paginate_queryset(queryset, request, view=self))
@@ -371,6 +384,7 @@ class ConversationMessageViewSet(
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    @extend_schema(parameters=[OpenApiParameter('name', OpenApiTypes.STR, OpenApiParameter.PATH)])
     @action(
         detail=True,
         methods=('DELETE', ),
