@@ -370,9 +370,8 @@ class GroupPreviewSerializer(GroupBaseSerializer):
         return group.get_application_questions_or_default()
 
     def get_member_count(self, group) -> int:
-        annotated = getattr(group, 'member_count', None)
-        if annotated is not None:
-            return annotated
+        if hasattr(group, 'member_count'):
+            return group.member_count
 
         return group.members.count()
 
@@ -381,9 +380,8 @@ class GroupPreviewSerializer(GroupBaseSerializer):
         if not user or user.is_anonymous:
             return False
 
-        annotated = getattr(group, 'is_user_member', None)
-        if annotated is not None:
-            return annotated
+        if hasattr(group, 'is_user_member'):
+            return group.is_user_member
 
         return user in group.members.all()
 
