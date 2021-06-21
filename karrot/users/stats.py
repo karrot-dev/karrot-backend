@@ -14,6 +14,9 @@ def get_users_stats():
     active_users = User.objects.filter(groupmembership__in=GroupMembership.objects.active(), deleted=False).distinct()
     active_membership_count = GroupMembership.objects.active().count()
     active_users_count = active_users.count()
+    active_memberships_per_active_user_avg = (
+        active_membership_count / active_users_count if active_users_count > 0 else 0
+    )
 
     fields = {
         'active_count': active_users_count,
@@ -22,7 +25,7 @@ def get_users_stats():
         'active_with_mobile_number_count': active_users.exclude(mobile_number='').count(),
         'active_with_description_count': active_users.exclude(description='').count(),
         'active_with_photo_count': active_users.exclude(photo='').count(),
-        'active_memberships_per_active_user_avg': active_membership_count / active_users_count,
+        'active_memberships_per_active_user_avg': active_memberships_per_active_user_avg,
         'no_membership_count': User.objects.filter(groupmembership=None, deleted=False).count(),
         'deleted_count': User.objects.filter(deleted=True).count(),
     }
