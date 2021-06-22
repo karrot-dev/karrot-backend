@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import GenericViewSet
 
-from karrot.activities.models import Activity
+from karrot.activities.models import Activity, ActivityType
 from karrot.history.models import HistoryTypus, History
 from karrot.stats import stats
 from karrot.stats.serializers import FrontendStatsSerializer, ActivityHistoryStatsSerializer
@@ -32,14 +32,19 @@ def users_queryset(request):
     return get_user_model().objects.filter(groups__in=request.user.groups.all())
 
 
+def activity_type_queryset(request):
+    return ActivityType.objects.filter(group__in=request.user.groups.all())
+
+
 class ActivityHistoryStatsFilter(FilterSet):
     group = ModelChoiceFilter(queryset=groups_queryset)
     user = ModelMultipleChoiceFilter(queryset=users_queryset, field_name='users')
     date = IsoDateTimeFromToRangeFilter(field_name='activity__date__startswith')
+    activity_type = ModelChoiceFilter(queryset=activity_type_queryset, field_name='activity__activity_type')
 
     class Meta:
         model = History
-        fields = ['group', 'user']
+        fields = ['group', 'activity_type', 'user']
 
 
 class ActivityHistoryStatsViewSet(ListModelMixin, GenericViewSet):
@@ -52,34 +57,52 @@ class ActivityHistoryStatsViewSet(ListModelMixin, GenericViewSet):
     def get_queryset(self):
         user_id = self.request.query_params.get('user', None)
 
-        feedback_weight_filter = Q(typus=HistoryTypus.ACTIVITY_DONE)
+        feedback_filter = Q(typus=HistoryTypus.ACTIVITY_DONE)
 
         if user_id:
-            feedback_weight_filter &= Q(activity__feedback__given_by=user_id)
+            feedback_filter &= Q(activity__feedback__given_by=user_id)
 
         return self.filter_queryset(super().get_queryset()) \
             .annotate_activity_leave_seconds() \
             .values('place', 'group') \
             .filter(typus__in=[
                 HistoryTypus.ACTIVITY_DONE,
+                HistoryTypus.ACTIVITY_MISSED,
                 HistoryTypus.ACTIVITY_LEAVE,
             ]) \
             .annotate(
-                done_count=Count('activity', filter=Q(
+                done_count=Count('activity', distinct=True, filter=Q(
                     typus=HistoryTypus.ACTIVITY_DONE,
                 )),
-                leave_count=Count('activity', filter=Q(
-                    typus=HistoryTypus.ACTIVITY_LEAVE,
-                    activity__in=Activity.objects.done_not_full(),
+                missed_count=Count('activity', distinct=True, filter=Q(
+                    typus=HistoryTypus.ACTIVITY_MISSED,
                 )),
-                leave_late_count=Count('activity', filter=Q(
+                leave_count=Count('activity', distinct=True, filter=Q(
                     typus=HistoryTypus.ACTIVITY_LEAVE,
-                    activity__in=Activity.objects.done_not_full(),
+                )),
+                leave_late_count=Count('activity', distinct=True, filter=Q(
+                    typus=HistoryTypus.ACTIVITY_LEAVE,
                     activity_leave_seconds__lte=timedelta(hours=settings.ACTIVITY_LEAVE_LATE_HOURS).total_seconds()),
                 ),
-                feedback_weight=Coalesce(Sum('activity__feedback__weight', filter=feedback_weight_filter), 0.0)) \
+                leave_missed_count=Count('activity', distinct=True, filter=Q(
+                    typus=HistoryTypus.ACTIVITY_LEAVE,
+                    activity__in=Activity.objects.missed(),
+                )),
+                leave_missed_late_count=Count('activity', distinct=True, filter=Q(
+                    typus=HistoryTypus.ACTIVITY_LEAVE,
+                    activity__in=Activity.objects.missed(),
+                    activity_leave_seconds__lte=timedelta(hours=settings.ACTIVITY_LEAVE_LATE_HOURS).total_seconds()),
+                ),
+                feedback_count=Count('activity__feedback', filter=feedback_filter),
+                feedback_weight=Coalesce(Sum('activity__feedback__weight', filter=feedback_filter), 0.0)) \
             .filter(
-                Q(done_count__gt=0) | Q(leave_count__gt=0) | Q(leave_late_count__gt=0) | Q(feedback_weight__gt=0)) \
+                # don't need to check the leave_missed_* ones here, as the leave_* ones will be >0 in those cases
+                Q(done_count__gt=0) |
+                Q(missed_count__gt=0) |
+                Q(leave_count__gt=0) |
+                Q(leave_late_count__gt=0) |
+                Q(feedback_count__gt=0) |
+                Q(feedback_weight__gt=0)) \
             .order_by('place__name')
 
 
