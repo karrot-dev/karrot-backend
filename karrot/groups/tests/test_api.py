@@ -26,15 +26,20 @@ class TestGroupsInfoAPI(APITestCase):
         self.user = UserFactory()
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member], application_questions='')
+        GroupFactory(application_questions='')
         self.url = '/api/groups-info/'
 
     def test_list_groups_as_anon(self):
-        response = self.client.get(self.url)
+        with self.assertNumQueries(1):
+            response = self.client.get(self.url)
+        self.assertEqual(len(response.data), 2)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_list_groups_as_user(self):
         self.client.force_login(user=self.user)
-        response = self.client.get(self.url)
+        with self.assertNumQueries(2):
+            response = self.client.get(self.url)
+        self.assertEqual(len(response.data), 2)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_retrieve_group_as_anon(self):
@@ -76,7 +81,7 @@ class TestGroupsInfoAPI(APITestCase):
         for _ in range(randint(3, 5)):
             GroupFactory().add_member(UserFactory())
         self.client.force_login(user=self.user)
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(2):
             self.client.get(self.url)
 
 

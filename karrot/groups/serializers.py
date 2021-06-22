@@ -357,7 +357,6 @@ class GroupPreviewSerializer(GroupBaseSerializer):
             'address',
             'latitude',
             'longitude',
-            'members',
             'member_count',
             'is_member',
             'status',
@@ -371,11 +370,20 @@ class GroupPreviewSerializer(GroupBaseSerializer):
         return group.get_application_questions_or_default()
 
     def get_member_count(self, group) -> int:
+        if hasattr(group, 'member_count'):
+            return group.member_count
+
         return group.members.count()
 
     def get_is_member(self, group) -> bool:
         user = self.context['request'].user if 'request' in self.context else None
-        return user in group.members.all() if user else False
+        if not user or user.is_anonymous:
+            return False
+
+        if hasattr(group, 'is_user_member'):
+            return group.is_user_member
+
+        return user in group.members.all()
 
 
 class GroupJoinSerializer(GroupBaseSerializer):

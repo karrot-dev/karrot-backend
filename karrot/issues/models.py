@@ -134,10 +134,10 @@ class Voting(BaseModel):
         return self.expires_at < timezone.now()
 
     def participant_count(self) -> int:
-        count = getattr(self, '_participant_count', None)
-        if count is None:
-            count = get_user_model().objects.filter(votes_given__option__voting=self).distinct().count()
-        return count
+        if hasattr(self, '_participant_count'):
+            return self._participant_count
+
+        return get_user_model().objects.filter(votes_given__option__voting=self).distinct().count()
 
     def create_options(self):
         options = [

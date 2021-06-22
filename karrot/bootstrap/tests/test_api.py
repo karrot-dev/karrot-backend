@@ -49,7 +49,8 @@ class TestBootstrapAPI(APITestCase):
         ip_to_city.cache_clear()  # prevent getting cached mock values
 
     def test_as_anon(self):
-        response = self.client.get(self.url)
+        with self.assertNumQueries(1):
+            response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['server'], ANY)
         self.assertEqual(response.data['config'], ANY)
@@ -82,6 +83,7 @@ class TestBootstrapAPI(APITestCase):
 
     def test_when_logged_in(self):
         self.client.force_login(user=self.user)
-        response = self.client.get(self.url)
+        with self.assertNumQueries(2):
+            response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['user']['id'], self.user.id)

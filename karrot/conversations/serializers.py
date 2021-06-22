@@ -85,13 +85,14 @@ class ConversationThreadSerializer(serializers.ModelSerializer):
         return participant.thread.replies_count
 
     def get_unread_reply_count(self, participant) -> int:
-        count = getattr(participant.thread, 'unread_replies_count', None)
-        if count is None:
-            messages = participant.thread.thread_messages.only_replies()
-            if participant.seen_up_to_id:
-                messages = messages.filter(id__gt=participant.seen_up_to_id)
-            return messages.count()
-        return count
+        thread = participant.thread
+        if hasattr(thread, 'unread_replies_count'):
+            return thread.unread_replies_count
+
+        messages = thread.thread_messages.only_replies()
+        if participant.seen_up_to_id:
+            messages = messages.filter(id__gt=participant.seen_up_to_id)
+        return messages.count()
 
     def validate_seen_up_to(self, seen_up_to):
         if not self.instance.thread.thread_messages.filter(id=seen_up_to.id).exists():
@@ -267,9 +268,9 @@ class ConversationSerializer(serializers.ModelSerializer):
     updated_at = serializers.SerializerMethodField()
 
     def get_unread_message_count(self, participant) -> int:
-        annotated = getattr(participant, 'unread_message_count', None)
-        if annotated is not None:
-            return annotated
+        if hasattr(participant, 'unread_message_count'):
+            return participant.unread_message_count
+
         messages = participant.conversation.messages.exclude_replies()
         if participant.seen_up_to_id:
             messages = messages.filter(id__gt=participant.seen_up_to_id)
