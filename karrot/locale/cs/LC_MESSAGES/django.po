@@ -227,7 +227,7 @@ msgstr ""
 "konverzaci</a>."
 
 #: karrot/conversations/api.py:65 karrot/conversations/api.py:246
-#: karrot/conversations/api.py:429 karrot/conversations/serializers.py:186
+#: karrot/conversations/api.py:429 karrot/conversations/serializers.py:187
 msgid "You are not in this conversation"
 msgstr "Nejste v této konverzaci"
 
@@ -270,7 +270,7 @@ msgstr "Nová zpráva při řešení konfliktů ve skupině %(group_name)s"
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr "Nová zpráva pro nabídku %(offer_name)s v  %(group_name)s"
 
-#: karrot/conversations/serializers.py:188
+#: karrot/conversations/serializers.py:189
 msgid "This conversation has been closed"
 msgstr "Tato konverzace byla ukončena"
 
@@ -313,7 +313,7 @@ msgstr "Můžete se připojit pouze k otevřeným skupinám."
 msgid "You cannot give trust to yourself"
 msgstr "Nemůžete dát důvěru sám sobě"
 
-#: karrot/groups/api.py:203
+#: karrot/groups/api.py:210
 msgid "You already gave trust to this user"
 msgstr "Tomuto uživateli jste již důvěřovali"
 
