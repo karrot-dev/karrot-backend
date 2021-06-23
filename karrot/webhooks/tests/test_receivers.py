@@ -1,4 +1,5 @@
 import os
+import uuid
 
 from anymail.inbound import AnymailInboundMessage
 from anymail.signals import AnymailInboundEvent, EventType, AnymailTrackingEvent
@@ -101,7 +102,7 @@ class TestEmailTrackingStatus(APITestCase):
         tracking_received(
             sender=None,
             event=AnymailTrackingEvent(
-                event_id=4,
+                event_id=uuid.uuid4(),
                 event_type=EventType.BOUNCED,
                 recipient='spam@example.com',
                 esp_event={},
