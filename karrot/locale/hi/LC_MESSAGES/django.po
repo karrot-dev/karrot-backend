@@ -227,7 +227,7 @@ msgstr ""
 "करें</a>।"
 
 #: karrot/conversations/api.py:65 karrot/conversations/api.py:246
-#: karrot/conversations/api.py:429 karrot/conversations/serializers.py:186
+#: karrot/conversations/api.py:429 karrot/conversations/serializers.py:187
 msgid "You are not in this conversation"
 msgstr "आप इस बातचीत में नहीं हैं |"
 
@@ -271,7 +271,7 @@ msgstr "%(group_name)s में संघर्ष समाधान में
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr "%(offer_name)s में %(group_name)s के लिए नया संदेश"
 
-#: karrot/conversations/serializers.py:188
+#: karrot/conversations/serializers.py:189
 msgid "This conversation has been closed"
 msgstr "यह बातचीत बंद कर दी गई है"
 
@@ -313,7 +313,7 @@ msgstr "आप केवल खुले समूहों में शाम�
 msgid "You cannot give trust to yourself"
 msgstr "आप खुद को भरोसा नहीं दे सकते"
 
-#: karrot/groups/api.py:203
+#: karrot/groups/api.py:210
 msgid "You already gave trust to this user"
 msgstr "आपने पहले ही इस उपयोगकर्ता को भरोसा दिया है"
 

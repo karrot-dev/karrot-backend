@@ -217,7 +217,7 @@ msgid ""
 msgstr ""
 
 #: karrot/conversations/api.py:65 karrot/conversations/api.py:246
-#: karrot/conversations/api.py:429 karrot/conversations/serializers.py:186
+#: karrot/conversations/api.py:429 karrot/conversations/serializers.py:187
 msgid "You are not in this conversation"
 msgstr ""
 
@@ -259,7 +259,7 @@ msgstr ""
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/serializers.py:188
+#: karrot/conversations/serializers.py:189
 msgid "This conversation has been closed"
 msgstr ""
 
@@ -297,7 +297,7 @@ msgstr ""
 msgid "You cannot give trust to yourself"
 msgstr ""
 
-#: karrot/groups/api.py:203
+#: karrot/groups/api.py:210
 msgid "You already gave trust to this user"
 msgstr ""
 

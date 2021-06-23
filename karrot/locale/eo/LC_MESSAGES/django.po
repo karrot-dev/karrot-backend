@@ -226,7 +226,7 @@ msgstr ""
 "konversacion </a>."
 
 #: karrot/conversations/api.py:65 karrot/conversations/api.py:246
-#: karrot/conversations/api.py:429 karrot/conversations/serializers.py:186
+#: karrot/conversations/api.py:429 karrot/conversations/serializers.py:187
 msgid "You are not in this conversation"
 msgstr "Vi ne estas en tiu ĉi konversacio"
 
@@ -268,7 +268,7 @@ msgstr "Nova mesaĝo pri problemsolvado en %(group_name)s"
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr "Nova mesaĝo por oferto %(offer_name)s en %(group_name)s"
 
-#: karrot/conversations/serializers.py:188
+#: karrot/conversations/serializers.py:189
 msgid "This conversation has been closed"
 msgstr "La konversacio fermiĝis"
 
@@ -309,7 +309,7 @@ msgstr "Vi nur povas aliĝi malfermajn grupon."
 msgid "You cannot give trust to yourself"
 msgstr "Vi ne povas fidi vin mem"
 
-#: karrot/groups/api.py:203
+#: karrot/groups/api.py:210
 msgid "You already gave trust to this user"
 msgstr "Vi jam fidis tiun ĉi uzanton"
 

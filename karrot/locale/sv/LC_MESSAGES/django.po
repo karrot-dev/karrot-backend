@@ -225,7 +225,7 @@ msgstr ""
 "konversationen </a>."
 
 #: karrot/conversations/api.py:65 karrot/conversations/api.py:246
-#: karrot/conversations/api.py:429 karrot/conversations/serializers.py:186
+#: karrot/conversations/api.py:429 karrot/conversations/serializers.py:187
 msgid "You are not in this conversation"
 msgstr "Du är inte med i den här konversationen"
 
@@ -269,7 +269,7 @@ msgstr "Nytt meddelande i konfliktlösning i %(group_name)s"
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr "Nytt meddelande om erbjudande %(offer_name)s i %(group_name)s"
 
-#: karrot/conversations/serializers.py:188
+#: karrot/conversations/serializers.py:189
 msgid "This conversation has been closed"
 msgstr "Denna konversation har avslutats"
 
@@ -311,7 +311,7 @@ msgstr "Du kan bara gå med i öppna grupper."
 msgid "You cannot give trust to yourself"
 msgstr "Du kan inte visa förtroende för dig själv"
 
-#: karrot/groups/api.py:203
+#: karrot/groups/api.py:210
 msgid "You already gave trust to this user"
 msgstr "Du har redan visat förtroende för den här användaren"
 
