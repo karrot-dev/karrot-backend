@@ -16,7 +16,7 @@ class TestUserStats(TestCase):
     def test_user_stats(self):
         self.maxDiff = None
 
-        # avoid test flakyness: remove leftover users from other tests
+        # avoid test flakiness: remove leftover users from other tests (???)
         get_user_model().objects.all().delete()
 
         def update_member_activity(user, **kwargs):
@@ -109,6 +109,9 @@ class TestUserStats(TestCase):
         )
 
     def test_user_stats_with_no_active_users(self):
+        # avoid test flakiness: remove leftover users from other tests (???)
+        get_user_model().objects.all().delete()
+
         points = stats.get_users_stats()
 
         self.assertEqual(
