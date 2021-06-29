@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import TextField, DateTimeField, QuerySet, Count, Q, F
+from django.db.models import TextField, DateTimeField, QuerySet, Count, Q, F, Exists, OuterRef, Value
 from django.db.models.manager import BaseManager
 from django.template.loader import render_to_string
 from django.utils import timezone as tz, timezone
@@ -52,6 +52,15 @@ class GroupQuerySet(models.QuerySet):
                 )
             )
         )
+
+    def annotate_member_count(self):
+        return self.annotate(member_count=Count('groupmembership'))
+
+    def annotate_is_user_member(self, user):
+        if not user or user.is_anonymous:
+            return self.annotate(is_user_member=Value(False))
+        member = GroupMembership.objects.filter(user=user, group=OuterRef('pk'))
+        return self.annotate(is_user_member=Exists(member))
 
 
 class GroupManager(BaseManager.from_queryset(GroupQuerySet)):

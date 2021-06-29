@@ -30,7 +30,8 @@ def notify_subscribers(subscriptions, fcm_options):
     success_subscriptions = [subscriptions[i] for i in success_indices]
     failure_subscriptions = [subscriptions[i] for i in failure_indices]
 
-    stats.pushed_via_subscription(success_subscriptions, failure_subscriptions)
+    if success_subscriptions or failure_subscriptions:
+        stats.pushed_via_subscription(success_subscriptions, failure_subscriptions)
 
 
 def _notify_multiple_devices(**kwargs):
@@ -50,6 +51,15 @@ def _notify_multiple_devices(**kwargs):
 
     # check for invalid tokens and remove any corresponding push subscriptions
     indexed_results = list(enumerate(response['results']))
+
+    # for some reason, the number of results sometimes doesn't match the number of registration ids given
+    # I don't know how to continue with token cleanup and stats reporting in this case
+    if len(tokens) != len(indexed_results):
+        sentry_client.captureMessage('FCM results count does not match registration_id count', extra=response)
+
+        # to prevent further processing, return empty arrays as success and failure indices
+        return [], []
+
     cleanup_tokens = [
         tokens[i] for (i, result) in indexed_results if result.get('error') in
         ('InvalidRegistration', 'NotRegistered', 'MismatchSenderId', 'InvalidApnsCredential')

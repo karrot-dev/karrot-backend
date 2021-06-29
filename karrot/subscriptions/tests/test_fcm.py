@@ -134,3 +134,30 @@ class FCMNotifySubscribersTests(TestCase):
                 },
             },
         ])
+
+    @patch('karrot.subscriptions.stats.write_points')
+    @patch('karrot.subscriptions.fcm.fcm')
+    def test_prevent_cleanup_and_stats_if_result_count_does_not_match(self, mock_fcm, write_points):
+        # we give it one subscription, and it gives us two responses!?
+        subscription = PushSubscriptionFactory()
+
+        mock_fcm.notify_multiple_devices.return_value = {
+            'results': [
+                # not sure if this is can be a real FCM response, but let's just assume the worst case...
+                {
+                    'error': 'InvalidRegistration'
+                },
+                {
+                    'message_id': '123'
+                },
+            ],
+        }
+
+        mock_fcm.notify_subscribers([subscription], {
+            'message_title': 'title',
+            'message_body': '...',
+        })
+
+        write_points.assert_not_called()
+
+        self.assertEqual(PushSubscription.objects.count(), 1)

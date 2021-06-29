@@ -211,8 +211,8 @@ def send_group_detail(group, user=None):
 
 
 def send_group_preview(group):
-    preview_payload = GroupPreviewSerializer(group).data
     for subscription in ChannelSubscription.objects.recent():
+        preview_payload = GroupPreviewSerializer(group, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic='groups:group_preview', payload=preview_payload)
 
 
@@ -244,15 +244,44 @@ def send_group_membership_updates(sender, instance, created, **kwargs):
         # notification types are only visible to one user
         send_group_detail(group, user=membership.user)
 
+
+@receiver(post_save, sender=GroupMembership)
+@on_transaction_commit
+def send_group_membership_updates_on_commit(sender, instance, created, **kwargs):
+    membership = instance
+    group = membership.group
+
     if created:
         send_group_preview(group)
+        for subscription in ChannelSubscription.objects.recent().filter(user__in=group.members.all()):
+            send_in_channel(
+                subscription.reply_channel,
+                topic='groups:user_joined',
+                payload={
+                    'user_id': membership.user_id,
+                    'group_id': group.id,
+                }
+            )
 
 
 @receiver(post_delete, sender=GroupMembership)
+@on_transaction_commit
 def send_group_member_left(sender, instance, **kwargs):
-    group = instance.group
+    membership = instance
+    group = membership.group
+
     send_group_detail(group)
     send_group_preview(group)
+    for subscription in ChannelSubscription.objects.recent().filter(Q(user__in=group.members.all()) |
+                                                                    Q(user_id=membership.user_id)):
+        send_in_channel(
+            subscription.reply_channel,
+            topic='groups:user_left',
+            payload={
+                'user_id': membership.user_id,
+                'group_id': group.id,
+            }
+        )
 
 
 # Applications
