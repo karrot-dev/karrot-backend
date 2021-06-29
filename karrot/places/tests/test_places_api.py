@@ -41,7 +41,9 @@ class TestPlacesAPI(APITestCase, ExtractPaginationMixin):
             'group': cls.group.id,
             'address': faker.address(),
             'latitude': faker.latitude(),
-            'longitude': faker.longitude()
+            'longitude': faker.longitude(),
+            'status': 'created',
+            'place_type': cls.group.place_types.get(name='Store').id,
         }
 
         # another group
@@ -76,7 +78,8 @@ class TestPlacesAPI(APITestCase, ExtractPaginationMixin):
         self.group.status = GroupStatus.INACTIVE.value
         self.group.save()
         self.client.force_login(user=self.member)
-        self.client.post(self.url, self.place_data, format='json')
+        response = self.client.post(self.url, self.place_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.group.refresh_from_db()
         self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)
 

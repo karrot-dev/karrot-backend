@@ -12,10 +12,13 @@ from django.utils import timezone as tz, timezone
 from timezone_field import TimeZoneField
 from versatileimagefield.fields import VersatileImageField
 
+from karrot.activities.activity_types import default_activity_types
 from karrot.base.base_models import BaseModel, LocationModel
 from karrot.conversations.models import ConversationMixin
 from karrot.history.models import History, HistoryTypus
-from karrot.activities.models import Activity
+from karrot.activities.models import Activity, ActivityType
+from karrot.places.models import PlaceType
+from karrot.places.place_types import default_place_types
 from karrot.utils import markdown
 from karrot.groups import roles, themes
 
@@ -193,6 +196,16 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
 
     def welcome_message_rendered(self, **kwargs):
         return markdown.render(self.welcome_message, **kwargs)
+
+    def create_default_types(self):
+
+        # activity types
+        for name, options in default_activity_types.items():
+            ActivityType.objects.get_or_create(name=name, group=self, defaults=options)
+
+        # place types
+        for name, options in default_place_types.items():
+            PlaceType.objects.get_or_create(name=name, group=self, defaults=options)
 
 
 class Agreement(BaseModel):
