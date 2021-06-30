@@ -8,7 +8,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext as _
 from django.db import models
 from django.db import transaction
-from django.db.models import Count, DurationField, F, Q, Sum, CheckConstraint
+from django.db.models import Count, DurationField, F, Q, Sum, CheckConstraint, Value, Case, When
 from django.utils import timezone
 
 from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin
@@ -189,7 +189,20 @@ class ActivityQuerySet(models.QuerySet):
         return self.filter(~self._feedback_possible_q(user))
 
     def annotate_num_participants(self):
-        return self.annotate(num_participants=Count('participants'))
+        return self.annotate(
+            num_participants=Count('activityparticipant', filter=Q(activityparticipant__role=F('require_role')))
+        )
+
+    def annotate_num_open_participants(self):
+        return self.annotate(
+            num_open_participants=Case(
+                When(
+                    condition=~Q(require_role=None),
+                    then=Count('activityparticipant', filter=~Q(activityparticipant__role=F('require_role')))
+                ),
+                default=Value(0)
+            )
+        )
 
     def annotate_timezone(self):
         return self.annotate(timezone=F('place__group__timezone'))
