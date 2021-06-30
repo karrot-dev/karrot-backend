@@ -63,11 +63,6 @@ msgstr ""
 msgid "%(group_name)s upcoming activities"
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:182
-#, python-format
-msgid "%(empty_participants_count)s/%(max_participants)s remaining"
-msgstr ""
-
 #: karrot/activities/templates/activity_notification.html.jinja2:198
 msgid "Tonight"
 msgstr ""
