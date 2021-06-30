@@ -214,11 +214,6 @@ class ActivityQuerySet(models.QuerySet):
         return self.exclude_disabled().filter(date__startswith__lt=timezone.now())\
             .annotate_num_participants().filter(num_participants__gt=0)
 
-    def done_not_full(self):
-        return self.exclude_disabled() \
-            .annotate(participant_count=Count('participants')) \
-            .filter(date__startswith__lt=timezone.now(), participant_count__lt=F('max_participants'))
-
     def upcoming(self):
         return self.filter(date__startswith__gt=timezone.now())
 
