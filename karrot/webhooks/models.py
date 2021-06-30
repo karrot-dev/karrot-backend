@@ -15,19 +15,23 @@ class EmailEvent(BaseModel):
     objects = EmailEventQuerySet.as_manager()
 
     id = models.BigAutoField(primary_key=True)
+    event_id = models.TextField(null=True)
     address = models.TextField()
     event = models.CharField(max_length=255)
     payload = JSONField()
     version = models.IntegerField()
 
+    class Meta:
+        indexes = [models.Index(fields=['event_id'])]
+
     @property
-    def reason(self):
+    def reason(self) -> str:
         if self.version == 2:
             return self.payload['payload']['output']
         return self.payload.get('reason')
 
     @property
-    def subject(self):
+    def subject(self) -> str:
         if self.version == 2:
             return self.payload['payload']['message']['subject']
         return self.payload.get('subject')

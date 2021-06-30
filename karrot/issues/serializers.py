@@ -58,12 +58,12 @@ class OptionSerializer(serializers.ModelSerializer):
     sum_score = serializers.SerializerMethodField()
     your_score = serializers.SerializerMethodField()
 
-    def get_sum_score(self, option):
+    def get_sum_score(self, option) -> int:
         if not option.voting.is_expired():
             return None
         return option.sum_score
 
-    def get_your_score(self, option):
+    def get_your_score(self, option) -> int:
         if hasattr(option, 'your_votes'):
             try:
                 vote = next(v for v in option.your_votes if v.option_id == option.id)

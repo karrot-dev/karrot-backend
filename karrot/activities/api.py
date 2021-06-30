@@ -1,8 +1,11 @@
 from django.db import transaction
 from django.db.models import F
 from django_filters import rest_framework as filters
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema
 from rest_framework import mixins
 from rest_framework import viewsets
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.decorators import action
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
@@ -182,7 +185,7 @@ class ActivityPagination(CursorPagination):
     frontend assumptions of getting all upcoming activities per group.
     Could be reduced and add pagination handling in frontend when speed becomes an issue"""
     # TODO: create an index on 'date' for increased speed
-    page_size = 400
+    page_size = 800
     ordering = 'date'
 
 
@@ -196,13 +199,6 @@ class ActivityViewSet(
 ):
     """
     Activities
-
-    list:
-    Query parameters
-    - `?series` - filter by activity series id
-    - `?place` - filter by place id
-    - `?group` - filter by group id
-    - `?date_min=<from_date>`&`date_max=<to_date>` - filter by date, can also either give either date_min or date_max
     """
     serializer_class = ActivitySerializer
     queryset = ActivityModel.objects
@@ -213,10 +209,10 @@ class ActivityViewSet(
 
     def get_queryset(self):
         qs = self.queryset.filter(place__group__members=self.request.user, place__status=PlaceStatus.ACTIVE.value)
-        if self.action == 'list':
+        if self.action in ('retrieve', 'list'):
             # because we have participants field in the serializer
             # only prefetch on read_only actions, otherwise there are caching problems when participants get added
-            qs = qs.prefetch_related('activityparticipant_set', 'feedback_given_by')
+            qs = qs.select_related('activity_type').prefetch_related('activityparticipant_set', 'feedback_given_by')
         if self.action == 'add':
             # Lock activity when adding a participant
             # This should prevent a race condition that would result in more participants than slots
@@ -264,13 +260,32 @@ class ActivityViewSet(
     def dismiss_feedback(self, request, pk=None):
         return self.partial_update(request)
 
+    @extend_schema(responses=OpenApiTypes.STR)
     @action(
         detail=True,
         methods=['GET'],
         renderer_classes=(ICSCalendarRenderer, ),
         serializer_class=ActivityICSSerializer,
+        url_path='ics'
     )
-    def ics(self, request, pk=None):
+    def ics_detail(self, request, pk=None):
         response = self.retrieve(request)
-        response['content-disposition'] = 'attachment; filename=activity-{id}.ics'.format(id=pk)
+        filename = 'activity-{pk}.ics'.format(pk=pk)
+        response['content-disposition'] = 'attachment; filename={filename}'.format(filename=filename)
+        return response
+
+    @extend_schema(operation_id='activities_ics_list', responses=OpenApiTypes.STR)
+    @action(
+        detail=False,
+        methods=['GET'],
+        renderer_classes=(ICSCalendarRenderer, ),
+        serializer_class=ActivityICSSerializer,
+        url_path='ics',
+        authentication_classes=[BasicAuthentication, SessionAuthentication],
+        pagination_class=None
+    )
+    def ics_list(self, request):
+        response = self.list(request)
+        filename = 'activities.ics'
+        response['content-disposition'] = 'attachment; filename={filename}'.format(filename=filename)
         return response

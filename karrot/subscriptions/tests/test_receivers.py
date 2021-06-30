@@ -8,7 +8,7 @@ from unittest.mock import patch
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.test import TestCase, TransactionTestCase
+from django.test import TestCase
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 
@@ -135,20 +135,7 @@ class WSTestCase(TestCase):
         return client
 
 
-class WSTransactionTestCase(TransactionTestCase):
-    def setUp(self):
-        super().setUp()
-        self.send_in_channel_patcher = patch('karrot.subscriptions.receivers.send_in_channel')
-        self.send_in_channel_mock = self.send_in_channel_patcher.start()
-        self.addCleanup(self.send_in_channel_patcher.stop)
-
-    def connect_as(self, user):
-        client = WSClient(self.send_in_channel_mock)
-        client.connect_as(user)
-        return client
-
-
-class ConversationReceiverTests(WSTransactionTestCase):
+class ConversationReceiverTests(WSTestCase):
     def test_receives_messages(self):
         self.maxDiff = None
         user = UserFactory()
@@ -162,7 +149,8 @@ class ConversationReceiverTests(WSTransactionTestCase):
         author_client = self.connect_as(author)
 
         # add a message to the conversation
-        message = ConversationMessage.objects.create(conversation=conversation, content='yay', author=author)
+        with self.captureOnCommitCallbacks(execute=True):
+            message = ConversationMessage.objects.create(conversation=conversation, content='yay', author=author)
 
         # hopefully they receive it!
         ws_messages = client.messages_by_topic
@@ -197,14 +185,15 @@ class ConversationReceiverTests(WSTransactionTestCase):
         )
 
         # author should get message & updated conversations object too
-        response = author_client.messages[0]
+        author_messages = author_client.messages_by_topic
+        response = author_messages['conversations:message'][0]
         parse_dates(response)
         self.assertEqual(response, make_conversation_message_broadcast(message, is_editable=True))
 
         # Author receives more recent `update_at` time,
         # because their `seen_up_to` status is set after sending the message.
         author_participant = conversation.conversationparticipant_set.get(user=author)
-        response = author_client.messages[1]
+        response = author_messages['conversations:conversation'][0]
         parse_dates(response)
         del response['payload']['participants']
         self.assertEqual(
@@ -293,7 +282,7 @@ class ConversationReceiverTests(WSTransactionTestCase):
         )
 
 
-class ConversationThreadReceiverTests(WSTransactionTestCase):
+class ConversationThreadReceiverTests(WSTestCase):
     def test_receives_messages(self):
         self.maxDiff = None
         op_user = UserFactory()  # op: original post
@@ -306,12 +295,13 @@ class ConversationThreadReceiverTests(WSTransactionTestCase):
         op_client = self.connect_as(op_user)
         author_client = self.connect_as(author)
 
-        reply = ConversationMessage.objects.create(
-            conversation=conversation,
-            thread=thread,
-            content='really yay?',
-            author=author,
-        )
+        with self.captureOnCommitCallbacks(execute=True):
+            reply = ConversationMessage.objects.create(
+                conversation=conversation,
+                thread=thread,
+                content='really yay?',
+                author=author,
+            )
 
         op_messages = op_client.messages_by_topic
 
@@ -357,13 +347,14 @@ class ConversationThreadReceiverTests(WSTransactionTestCase):
         )
 
         # reply author should get message too
-        response = author_client.messages[0]
+        author_messages = author_client.messages_by_topic
+        response = author_messages['conversations:message'][0]
         parse_dates(response)
         self.assertEqual(response, make_conversation_message_broadcast(reply, is_editable=True, thread=thread.id))
 
         # Author receives more recent `update_at` time,
         # because their `seen_up_to` status is set after sending the message.
-        response = author_client.messages[1]
+        response = author_messages['conversations:message'][1]
         parse_dates(response)
         self.assertEqual(
             response,
@@ -411,7 +402,7 @@ class ConversationThreadReceiverTests(WSTransactionTestCase):
         )
 
 
-class ConversationMessageReactionReceiverTests(WSTransactionTestCase):
+class ConversationMessageReactionReceiverTests(WSTestCase):
     def test_receive_reaction_update(self):
         self.maxDiff = None
         author, user, reaction_user = [UserFactory() for _ in range(3)]
@@ -422,11 +413,12 @@ class ConversationMessageReactionReceiverTests(WSTransactionTestCase):
         client = self.connect_as(user)
 
         # create reaction
-        ConversationMessageReaction.objects.create(
-            message=message,
-            user=reaction_user,
-            name='carrot',
-        )
+        with self.captureOnCommitCallbacks(execute=True):
+            ConversationMessageReaction.objects.create(
+                message=message,
+                user=reaction_user,
+                name='carrot',
+            )
 
         # check if conversation update was received
         response = client.messages[0]
@@ -457,7 +449,8 @@ class ConversationMessageReactionReceiverTests(WSTransactionTestCase):
         # login and connect
         client = self.connect_as(user)
 
-        reaction.delete()
+        with self.captureOnCommitCallbacks(execute=True):
+            reaction.delete()
 
         # check if conversation update was received
         response = client.messages[0]
@@ -515,46 +508,89 @@ class GroupMembershipReceiverTests(WSTestCase):
         joining_client = self.connect_as(self.user)
         nonmember_client = self.connect_as(UserFactory())
 
-        self.group.add_member(self.user)
+        with self.captureOnCommitCallbacks(execute=True):
+            self.group.add_member(self.user)
+
+        self.assertEqual([m['topic'] for m in member_client.messages], [
+            'groups:group_detail',
+            'conversations:conversation',
+            'notifications:notification',
+            'status',
+            'history:history',
+            'groups:group_preview',
+            'groups:user_joined',
+        ])
+
+        self.assertEqual(
+            [m['topic'] for m in joining_client.messages],
+            [
+                'groups:group_detail',
+                'conversations:conversation',
+                'conversations:conversation',  # TODO: seems unnecessary!
+                'history:history',
+                'groups:group_preview',
+                'groups:user_joined',
+            ]
+        )
+
+        self.assertEqual([m['topic'] for m in nonmember_client.messages], [
+            'groups:group_preview',
+        ])
 
         response = member_client.messages_by_topic.get('groups:group_detail')[0]
         self.assertIn(self.user.id, response['payload']['members'])
         self.assertIn(self.user.id, response['payload']['memberships'].keys())
 
         response = member_client.messages_by_topic.get('groups:group_preview')[0]
-        self.assertIn(self.user.id, response['payload']['members'])
+        self.assertTrue(response['payload']['is_member'])
+        self.assertEqual(2, response['payload']['member_count'])
         self.assertNotIn('memberships', response['payload'])
 
         response = joining_client.messages_by_topic.get('groups:group_detail')[0]
         self.assertIn(self.user.id, response['payload']['members'])
 
         response = joining_client.messages_by_topic.get('groups:group_preview')[0]
-        self.assertIn(self.user.id, response['payload']['members'])
+        self.assertTrue(response['payload']['is_member'])
+        self.assertEqual(2, response['payload']['member_count'])
 
         self.assertNotIn('groups:group_detail', nonmember_client.messages_by_topic.keys())
         response = nonmember_client.messages_by_topic.get('groups:group_preview')[0]
-        self.assertIn(self.user.id, response['payload']['members'])
+        self.assertFalse(response['payload']['is_member'])
+        self.assertEqual(2, response['payload']['member_count'])
         self.assertNotIn('memberships', response['payload'])
 
     def test_receive_group_leave_as_leaving_user(self):
+        self.group.add_member(self.user)
         # Clean up notifications from group setup, to prevent notification_deleted messages
         Notification.objects.all().delete()
-        client = self.connect_as(self.member)
+        leave_client = self.connect_as(self.member)
+        stay_client = self.connect_as(self.user)
 
-        self.group.remove_member(self.member)
+        with self.captureOnCommitCallbacks(execute=True):
+            self.group.remove_member(self.member)
 
-        response = client.messages_by_topic.get('groups:group_preview')[0]
-        self.assertNotIn(self.user.id, response['payload']['members'])
-        self.assertNotIn('memberships', response['payload'])
-        self.assertEqual([m['topic'] for m in client.messages], [
+        self.assertEqual([m['topic'] for m in leave_client.messages], [
             'history:history',
             'conversations:leave',
             'conversations:conversation',
             'status',
             'groups:group_preview',
+            'groups:user_left',
         ])
 
-        status_messages = client.messages_by_topic['status']
+        self.assertEqual([m['topic'] for m in stay_client.messages], [
+            'history:history',
+            'conversations:conversation',
+            'groups:group_detail',
+            'groups:group_preview',
+            'groups:user_left',
+        ])
+
+        response = leave_client.messages_by_topic.get('groups:group_preview')[0]
+        self.assertFalse(response['payload']['is_member'])
+        self.assertNotIn('memberships', response['payload'])
+
+        status_messages = leave_client.messages_by_topic['status']
         self.assertEqual(len(status_messages), 1, status_messages)
         self.assertEqual(
             status_messages[0]['payload'], {
@@ -577,14 +613,14 @@ class GroupMembershipReceiverTests(WSTestCase):
         membership.add_roles([roles.GROUP_EDITOR])
         membership.save()
 
-        response = client.messages_by_topic.get('groups:group_detail')[0]
-        self.assertIn(roles.GROUP_EDITOR, response['payload']['memberships'][self.user.id]['roles'])
-
         self.assertEqual([m['topic'] for m in client.messages], [
             'notifications:notification',
             'status',
             'groups:group_detail',
         ])
+
+        response = client.messages_by_topic.get('groups:group_detail')[0]
+        self.assertIn(roles.GROUP_EDITOR, response['payload']['memberships'][self.user.id]['roles'])
 
 
 class ApplicationReceiverTests(WSTestCase):
@@ -1054,7 +1090,7 @@ class IssueReceiverTest(WSTestCase):
 
 
 @patch('karrot.subscriptions.tasks.notify_subscribers')
-class ReceiverPushTests(TransactionTestCase):
+class ReceiverPushTests(TestCase):
     def setUp(self):
         self.user = UserFactory()
         self.author = UserFactory()
@@ -1074,7 +1110,10 @@ class ReceiverPushTests(TransactionTestCase):
 
     def test_sends_to_push_subscribers(self, notify_subscribers):
         # add a message to the conversation
-        ConversationMessage.objects.create(conversation=self.conversation, content=self.content, author=self.author)
+        with self.captureOnCommitCallbacks(execute=True):
+            ConversationMessage.objects.create(
+                conversation=self.conversation, content=self.content, author=self.author
+            )
 
         self.assertEqual(notify_subscribers.call_count, 2)
         kwargs = notify_subscribers.call_args_list[0][1]
@@ -1083,10 +1122,13 @@ class ReceiverPushTests(TransactionTestCase):
         self.assertEqual(kwargs['fcm_options']['message_body'], self.content)
 
     def test_send_push_notification_if_active_channel_subscription(self, notify_subscribers):
-        # add a channel subscription
-        ChannelSubscription.objects.create(user=self.user, reply_channel='foo')
-        # add a message to the conversation
-        ConversationMessage.objects.create(conversation=self.conversation, content=self.content, author=self.author)
+        with self.captureOnCommitCallbacks(execute=True):
+            # add a channel subscription
+            ChannelSubscription.objects.create(user=self.user, reply_channel='foo')
+            # add a message to the conversation
+            ConversationMessage.objects.create(
+                conversation=self.conversation, content=self.content, author=self.author
+            )
 
         kwargs = notify_subscribers.call_args_list[0][1]
         self.assertEqual(len(kwargs['subscriptions']), 1)
@@ -1094,11 +1136,14 @@ class ReceiverPushTests(TransactionTestCase):
         self.assertEqual(len(kwargs['subscriptions']), 0)
 
     def test_send_push_notification_if_channel_subscription_is_away(self, notify_subscribers):
-        # add a channel subscription to prevent the push being sent
-        ChannelSubscription.objects.create(user=self.user, reply_channel='foo', away_at=timezone.now())
+        with self.captureOnCommitCallbacks(execute=True):
+            # add a channel subscription to prevent the push being sent
+            ChannelSubscription.objects.create(user=self.user, reply_channel='foo', away_at=timezone.now())
 
-        # add a message to the conversation
-        ConversationMessage.objects.create(conversation=self.conversation, content=self.content, author=self.author)
+            # add a message to the conversation
+            ConversationMessage.objects.create(
+                conversation=self.conversation, content=self.content, author=self.author
+            )
 
         self.assertEqual(notify_subscribers.call_count, 2)
         kwargs = notify_subscribers.call_args_list[0][1]
@@ -1108,7 +1153,7 @@ class ReceiverPushTests(TransactionTestCase):
 
 
 @patch('karrot.subscriptions.tasks.notify_subscribers')
-class GroupConversationReceiverPushTests(TransactionTestCase):
+class GroupConversationReceiverPushTests(TestCase):
     def setUp(self):
         self.group = GroupFactory()
         self.user = UserFactory()
@@ -1129,8 +1174,11 @@ class GroupConversationReceiverPushTests(TransactionTestCase):
         )
 
     def test_sends_to_push_subscribers(self, notify_subscribers):
-        # add a message to the conversation
-        ConversationMessage.objects.create(conversation=self.conversation, content=self.content, author=self.author)
+        with self.captureOnCommitCallbacks(execute=True):
+            # add a message to the conversation
+            ConversationMessage.objects.create(
+                conversation=self.conversation, content=self.content, author=self.author
+            )
 
         self.assertEqual(notify_subscribers.call_count, 2)
         kwargs = notify_subscribers.call_args_list[0][1]

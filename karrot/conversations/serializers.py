@@ -1,5 +1,9 @@
+from typing import List
+
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.fields import DateTimeField
@@ -12,6 +16,7 @@ from karrot.conversations.models import (
 )
 
 
+@extend_schema_field(OpenApiTypes.STR)
 class EmojiField(serializers.Field):
     """Emoji field is normalized and validated here"""
     def to_representation(self, obj):
@@ -65,25 +70,29 @@ class ConversationThreadSerializer(serializers.ModelSerializer):
             'unread_reply_count',
         ]
 
-    is_participant = serializers.ReadOnlyField(default=True)
+    is_participant = serializers.SerializerMethodField()
     participants = serializers.SerializerMethodField()
     reply_count = serializers.SerializerMethodField()
     unread_reply_count = serializers.SerializerMethodField()
 
-    def get_participants(self, participant):
+    def get_is_participant(self, _) -> bool:
+        return True
+
+    def get_participants(self, participant) -> List[int]:
         return [participants.user_id for participants in participant.thread.participants.all()]
 
-    def get_reply_count(self, participant):
+    def get_reply_count(self, participant) -> int:
         return participant.thread.replies_count
 
-    def get_unread_reply_count(self, participant):
-        count = getattr(participant.thread, 'unread_replies_count', None)
-        if count is None:
-            messages = participant.thread.thread_messages.only_replies()
-            if participant.seen_up_to_id:
-                messages = messages.filter(id__gt=participant.seen_up_to_id)
-            return messages.count()
-        return count
+    def get_unread_reply_count(self, participant) -> int:
+        thread = participant.thread
+        if hasattr(thread, 'unread_replies_count'):
+            return thread.unread_replies_count
+
+        messages = thread.thread_messages.only_replies()
+        if participant.seen_up_to_id:
+            messages = messages.filter(id__gt=participant.seen_up_to_id)
+        return messages.count()
 
     def validate_seen_up_to(self, seen_up_to):
         if not self.instance.thread.thread_messages.filter(id=seen_up_to.id).exists():
@@ -156,6 +165,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
     thread_meta = serializers.SerializerMethodField()
     images = ConversationMessageImageSerializer(many=True, default=list)
 
+    @extend_schema_field(ConversationThreadSerializer)
     def get_thread_meta(self, message):
         if not message.is_first_in_thread():
             return None
@@ -169,7 +179,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
     reactions = ConversationMessageReactionSerializer(many=True, read_only=True)
     is_editable = serializers.SerializerMethodField()
 
-    def get_is_editable(self, message):
+    def get_is_editable(self, message) -> bool:
         return message.is_recent() and message.author_id == self.context['request'].user.id
 
     def validate_conversation(self, conversation):
@@ -257,15 +267,16 @@ class ConversationSerializer(serializers.ModelSerializer):
     unread_message_count = serializers.SerializerMethodField()
     updated_at = serializers.SerializerMethodField()
 
-    def get_unread_message_count(self, participant):
-        annotated = getattr(participant, 'unread_message_count', None)
-        if annotated is not None:
-            return annotated
+    def get_unread_message_count(self, participant) -> int:
+        if hasattr(participant, 'unread_message_count'):
+            return participant.unread_message_count
+
         messages = participant.conversation.messages.exclude_replies()
         if participant.seen_up_to_id:
             messages = messages.filter(id__gt=participant.seen_up_to_id)
         return messages.count()
 
+    @extend_schema_field(OpenApiTypes.DATETIME)
     def get_updated_at(self, participant):
         if participant.updated_at > participant.conversation.updated_at:
             date = participant.updated_at

@@ -16,7 +16,7 @@ class TestUserStats(TestCase):
     def test_user_stats(self):
         self.maxDiff = None
 
-        # avoid test flakyness: remove leftover users from other tests
+        # avoid test flakiness: remove leftover users from other tests (???)
         get_user_model().objects.all().delete()
 
         def update_member_activity(user, **kwargs):
@@ -105,5 +105,35 @@ class TestUserStats(TestCase):
                 'count_activity_active_30d': 2,
                 'count_activity_active_60d': 3,
                 'count_activity_active_90d': 4,
+            }
+        )
+
+    def test_user_stats_with_no_active_users(self):
+        # avoid test flakiness: remove leftover users from other tests (???)
+        get_user_model().objects.all().delete()
+
+        points = stats.get_users_stats()
+
+        self.assertEqual(
+            points, {
+                'active_count': 0,
+                'active_unverified_count': 0,
+                'active_with_location_count': 0,
+                'active_with_mobile_number_count': 0,
+                'active_with_description_count': 0,
+                'active_with_photo_count': 0,
+                'active_memberships_per_active_user_avg': 0,
+                'no_membership_count': 0,
+                'deleted_count': 0,
+                'count_active_1d': 0,
+                'count_active_7d': 0,
+                'count_active_30d': 0,
+                'count_active_60d': 0,
+                'count_active_90d': 0,
+                'count_activity_active_1d': 0,
+                'count_activity_active_7d': 0,
+                'count_activity_active_30d': 0,
+                'count_activity_active_60d': 0,
+                'count_activity_active_90d': 0,
             }
         )

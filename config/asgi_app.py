@@ -2,12 +2,25 @@ from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter
 from django.conf import settings
 from django.core.asgi import get_asgi_application
+from django.db.backends.signals import connection_created
+from django.dispatch import receiver
 from starlette.responses import Response
 
 from starlette.staticfiles import StaticFiles
 
 from karrot.utils.asgi_utils import CommunityProxy, AllowedHostsAndFileOriginValidator, cached
 from karrot.subscriptions.consumers import WebsocketConsumer, TokenAuthMiddleware
+
+
+@receiver(connection_created)
+def setup_postgres(connection, **kwargs):
+    """Set the statement timeout here, as it's only for web requests"""
+    if connection.vendor != 'postgresql':
+        return
+
+    with connection.cursor() as cursor:
+        cursor.execute("SET statement_timeout TO {};".format(settings.REQUEST_DATABASE_TIMEOUT_MILLISECONDS))
+
 
 api_app = get_asgi_application()
 api_prefixes = ['/api/', '/docs/', '/api-auth/']

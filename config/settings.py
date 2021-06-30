@@ -86,6 +86,8 @@ KARROT_LOGO = options['SITE_LOGO']
 
 ASGI_APPLICATION = 'config.asgi_app.application'
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 # Django configuration
 INSTALLED_APPS = (
     # Should be loaded first
@@ -132,9 +134,8 @@ INSTALLED_APPS = (
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_framework_swagger',
+    'drf_spectacular',
     'anymail',
-    'influxdb_metrics',
     'timezone_field',
     'django_jinja',
     'versatileimagefield',
@@ -150,12 +151,35 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ),
     'EXCEPTION_HANDLER': 'karrot.utils.misc.custom_exception_handler',
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Karrot API',
+    'DESCRIPTION': """
+Welcome to our API documentation!
+
+Check out our code on [GitHub](https://github.com/yunity/karrot-frontend)
+and talk with us on the [Foodsaving Worldwide Rocketchat](https://chat.foodsaving.world)!
+    """,
+    'VERSION': '0.1',
+    'SCHEMA_PATH_PREFIX': '/api/',
+    'SWAGGER_UI_FAVICON_HREF': '/favicon.ico',
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'defaultModelsExpandDepth': 0,
+        'docExpansion': 'none',
+    },
+    'ENUM_NAME_OVERRIDES': {
+        'PlaceStatusEnum': 'karrot.places.models.PlaceStatus.choices',
+        'GroupStatusEnum': 'karrot.groups.models.GroupStatus.choices',
+        'ActivityTypeStatusEnum': 'karrot.activities.models.ActivityTypeStatus.choices',
+    },
 }
 
 MIDDLEWARE = (
     'silk.middleware.SilkyMiddleware',
-    'influxdb_metrics.middleware.InfluxDBRequestMiddleware',
+    'karrot.utils.influxdb_middleware.InfluxDBRequestMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -208,9 +232,11 @@ DATABASES = {
         'USER': options['DATABASE_USER'],
         'PASSWORD': options['DATABASE_PASSWORD'],
         'HOST': options['DATABASE_HOST'],
-        'PORT': options['DATABASE_PORT'],
+        'PORT': options['DATABASE_PORT']
     }
 }
+
+REQUEST_DATABASE_TIMEOUT_MILLISECONDS = int(options['REQUEST_DATABASE_TIMEOUT_SECONDS']) * 1000
 
 REDIS_HOST = options['REDIS_HOST']
 REDIS_PORT = options['REDIS_PORT']
@@ -376,12 +402,11 @@ INFLUXDB_PORT = options['INFLUXDB_PORT']
 INFLUXDB_USER = options['INFLUXDB_USER']
 INFLUXDB_PASSWORD = options['INFLUXDB_PASSWORD']
 INFLUXDB_DATABASE = options['INFLUXDB_NAME']
-INFLUXDB_TAGS_HOST = options['INFLUXDB_HOST_TAG']
 INFLUXDB_TIMEOUT = 5
-INFLUXDB_USE_CELERY = False
 INFLUXDB_USE_THREADING = True
 
 SENTRY_DSN = options['SENTRY_DSN']
+SENTRY_CLIENT_DSN = options['SENTRY_CLIENT_DSN']
 SENTRY_RELEASE = options['SENTRY_RELEASE']
 
 if SENTRY_DSN:
@@ -391,6 +416,13 @@ if SENTRY_DSN:
 
 SECRET_KEY = options['SECRET_KEY']
 FCM_SERVER_KEY = options['FCM_SERVER_KEY']
+
+FCM_CLIENT_MESSAGING_SENDER_ID = options['FCM_CLIENT_MESSAGING_SENDER_ID']
+FCM_CLIENT_API_KEY = options['FCM_CLIENT_API_KEY']
+FCM_CLIENT_PROJECT_ID = options['FCM_CLIENT_PROJECT_ID']
+FCM_CLIENT_APP_ID = options['FCM_CLIENT_APP_ID']
+
+
 ADMIN_CHAT_WEBHOOK = options['ADMIN_CHAT_WEBHOOK']
 
 WORKER_IMMEDIATE = options['WORKER_IMMEDIATE'] == 'true'
@@ -434,6 +466,7 @@ LISTEN_CONCURRENCY = int(options['LISTEN_CONCURRENCY'])
 # twisted endpoint (for daphne)
 LISTEN_ENDPOINT = options['LISTEN_ENDPOINT']
 
+REQUEST_TIMEOUT_SECONDS = int(options['REQUEST_TIMEOUT_SECONDS'])
 
 # If you have the email_reply_trimmer_service running, set this to 'http://localhost:4567/trim' (or similar)
 # https://github.com/yunity/email_reply_trimmer_service

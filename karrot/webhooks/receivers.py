@@ -15,7 +15,7 @@ from karrot.webhooks.utils import parse_local_part, notify_about_rejected_email,
 @receiver(tracking)
 def tracking_received(sender, event, esp_name, **kwargs):
     EmailEvent.objects.update_or_create(
-        id=event.event_id,
+        event_id=event.event_id,
         defaults={
             'address': event.recipient,
             'event': event.event_type,
