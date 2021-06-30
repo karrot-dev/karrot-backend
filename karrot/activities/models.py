@@ -294,8 +294,8 @@ class Activity(BaseModel, ConversationMixin):
         ordering = ['date']
         constraints = [
             CheckConstraint(
-                check=Q(max_participants_without_role=None) | ~Q(require_role=''),
-                name='only_trial_participants_if_require_role',
+                check=Q(max_open_participants=None) | ~Q(require_role=None),
+                name='only_open_participants_if_require_role',
             )
         ]
 
@@ -332,9 +332,9 @@ class Activity(BaseModel, ConversationMixin):
     has_duration = models.BooleanField(default=False)
 
     description = models.TextField(blank=True)
-    require_role = models.CharField(blank=True, max_length=100)
+    require_role = models.CharField(null=True, blank=False, max_length=100)
     max_participants = models.PositiveIntegerField(null=True)
-    max_participants_without_role = models.PositiveIntegerField(null=True)
+    max_open_participants = models.PositiveIntegerField(null=True)
     is_disabled = models.BooleanField(default=False)
     last_changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -371,36 +371,33 @@ class Activity(BaseModel, ConversationMixin):
     def is_upcoming(self):
         return self.date.start > timezone.now()
 
-    def is_full(self, *, without_role):
-        max_participants = self.max_participants_without_role if without_role else self.max_participants
-        qs = self.participants.filter(activityparticipant__is_without_role=without_role)
-        if max_participants is None:
-            return False
-        return qs.count() >= max_participants
-
     def is_participant(self, user):
         return self.participants.filter(id=user.id).exists()
-
-    def is_empty(self, *, without_role):
-        if without_role is None:
-            qs = self.participants
-        else:
-            qs = self.participants.filter(activityparticipant__is_without_role=without_role)
-        return qs.count() == 0
 
     def is_recent(self):
         return self.date.start >= timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
-    def empty_participants_count(self, *, without_role):
-        max_participants = self.max_participants_without_role if without_role else self.max_participants
-        qs = self.participants.filter(activityparticipant__is_without_role=without_role)
+    def empty_participants_count(self, *, role):
+        max_participants = self.max_participants_for_role(role)
+        qs = self.participants.filter(activityparticipant__role=role)
         return max(0, max_participants - qs.count())
 
-    def add_participant(self, user, *, without_role=False):
+    def max_participants_for_role(self, role):
+        if self.require_role:
+            if role == self.require_role:
+                return self.max_participants
+            else:
+                return self.max_open_participants
+        elif role:
+            raise Exception('activity does not require role')  # TODO: or return 0, or max_participants?
+        else:
+            return self.max_participants
+
+    def add_participant(self, user, role=None):
         participant, _ = ActivityParticipant.objects.get_or_create(
             activity=self,
             user=user,
-            is_without_role=without_role,
+            role=role,
         )
         return participant
 
@@ -438,7 +435,7 @@ class ActivityParticipant(BaseModel):
     )
     feedback_dismissed = models.BooleanField(default=False)
     reminder_task_id = models.TextField(null=True)  # stores a huey task id
-    is_without_role = models.BooleanField(default=False)
+    role = models.CharField(null=True, blank=False, max_length=100)
 
     class Meta:
         db_table = 'activities_activity_participants'

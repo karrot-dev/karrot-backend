@@ -12,17 +12,17 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='activity',
-            name='max_participants_without_role',
+            name='max_open_participants',
             field=models.PositiveIntegerField(null=True),
         ),
         migrations.AddField(
             model_name='activity',
             name='require_role',
-            field=models.CharField(blank=True, max_length=100),
+            field=models.CharField(null=True, blank=False, max_length=100),
         ),
         migrations.AddField(
             model_name='activityparticipant',
-            name='is_without_role',
-            field=models.BooleanField(default=False),
+            name='role',
+            field=models.CharField(null=True, blank=False, max_length=100),
         ),
     ]

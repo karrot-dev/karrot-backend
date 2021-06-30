@@ -167,12 +167,12 @@ class ActivityParticipantSerializer(serializers.ModelSerializer):
         model = ActivityParticipant
         fields = [
             'user',
-            'is_without_role',
+            'role',
             'created_at',
         ]
         read_only_fields = [
             'user',
-            'is_without_role',
+            'role',
             'created_at',
         ]
 
@@ -188,7 +188,7 @@ class ActivitySerializer(serializers.ModelSerializer):
             'place',
             'require_role',
             'max_participants',
-            'max_participants_without_role',
+            'max_open_participants',
             'participants',
             'participants_next',
             'description',
@@ -218,7 +218,8 @@ class ActivitySerializer(serializers.ModelSerializer):
     date = DateTimeRangeField()
 
     def get_participants(self, activity) -> List[int]:
-        return [c.user_id for c in activity.activityparticipant_set.all() if c.is_without_role is False]
+        # this is to mirror existing API (open participants will be ignored)
+        return [c.user_id for c in activity.activityparticipant_set.all() if c.role == activity.require_role]
 
     def get_feedback_dismissed_by(self, activity) -> List[int]:
         # we are filtering in python to make use of prefetched data
@@ -415,15 +416,17 @@ class ActivityICSSerializer(serializers.ModelSerializer):
 class ActivityJoinSerializer(serializers.ModelSerializer):
     class Meta:
         model = ActivityModel
-        fields = []
+        fields = [
+            'role',
+        ]
+
+    role = CharField(write_only=True)
 
     def update(self, activity, validated_data):
         user = self.context['request'].user
         place = activity.place
         group = place.group
-        membership = user.groupmembership_set.get(group=group)
-        without_role = True if activity.require_role and activity.require_role not in membership.roles else False
-        activity.add_participant(user, without_role=without_role)
+        activity.add_participant(user, validated_data.get('role', None))
 
         stats.activity_joined(activity)
 

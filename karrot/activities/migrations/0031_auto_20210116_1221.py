@@ -12,6 +12,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddConstraint(
             model_name='activity',
-            constraint=models.CheckConstraint(check=models.Q(('max_participants_without_role', None), models.Q(_negated=True, require_role=''), _connector='OR'), name='only_trial_participants_if_require_role'),
+            constraint=models.CheckConstraint(check=models.Q(('max_open_participants', None), models.Q(_negated=True, require_role=None), _connector='OR'), name='only_open_participants_if_require_role'),
         ),
     ]

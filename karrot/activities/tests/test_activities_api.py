@@ -514,14 +514,14 @@ class TestActivitiesWithRequiredRolesAPI(APITestCase):
         self.activity = ActivityFactory(
             place=self.place,
             require_role=APPROVED,
-            max_participants_without_role=1,
+            max_open_participants=1,
         )
 
     def test_cannot_join_if_requires_role_and_none_without_role(self):
         activity = ActivityFactory(
             place=self.place,
             require_role=APPROVED,
-            max_participants_without_role=0,
+            max_open_participants=0,
         )
         self.client.force_login(user=self.member)
         response = self.client.post('/api/activities/{}/add/'.format(activity.id))
@@ -532,24 +532,24 @@ class TestActivitiesWithRequiredRolesAPI(APITestCase):
         response = self.client.post('/api/activities/{}/add/'.format(self.activity.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         participant = ActivityParticipant.objects.get(activity=self.activity, user=self.member)
-        self.assertTrue(participant.is_without_role)
+        self.assertEqual(participant.role, None)
 
     def test_cannot_join_as_participant_without_role_if_full(self):
-        self.activity.add_participant(self.member, without_role=True)
+        self.activity.add_participant(self.member, role=None)
         self.client.force_login(user=self.other_member)
         response = self.client.post('/api/activities/{}/add/'.format(self.activity.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_can_join_as_normal_participant_if_has_role(self):
         self.client.force_login(user=self.approved_member)
-        response = self.client.post('/api/activities/{}/add/'.format(self.activity.id))
+        response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'role': APPROVED})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         participant = ActivityParticipant.objects.get(activity=self.activity, user=self.approved_member)
-        self.assertFalse(participant.is_without_role)
+        self.assertEqual(participant.role, APPROVED)
 
     def test_backwards_compatible_participants_api(self):
-        self.activity.add_participant(self.member, without_role=True)
-        self.activity.add_participant(self.approved_member)
+        self.activity.add_participant(self.member, role=None)
+        self.activity.add_participant(self.approved_member, role=APPROVED)
         self.client.force_login(user=self.member)
         response = self.client.get('/api/activities/{}/'.format(self.activity.id))
 
@@ -557,8 +557,8 @@ class TestActivitiesWithRequiredRolesAPI(APITestCase):
         self.assertEqual(response.data['participants'], [self.approved_member.id])
 
     def test_next_participants_api(self):
-        self.activity.add_participant(self.member, without_role=True)
-        self.activity.add_participant(self.approved_member)
+        self.activity.add_participant(self.member, role=None)
+        self.activity.add_participant(self.approved_member, role=APPROVED)
         self.client.force_login(user=self.member)
         response = self.client.get('/api/activities/{}/'.format(self.activity.id))
 
@@ -567,14 +567,14 @@ class TestActivitiesWithRequiredRolesAPI(APITestCase):
         self.assertDictContainsSubset(
             {
                 'user': self.member.id,
-                'is_without_role': True,
+                'role': None,
             },
             response.data['participants_next'][0],
         )
         self.assertDictContainsSubset(
             {
                 'user': self.approved_member.id,
-                'is_without_role': False,
+                'role': APPROVED,
             },
             response.data['participants_next'][1],
         )
@@ -583,10 +583,10 @@ class TestActivitiesWithRequiredRolesAPI(APITestCase):
         # all good
         ActivityFactory(place=self.place, require_role='foo')
         # looks lovely
-        ActivityFactory(place=self.place, require_role='bar', max_participants_without_role=47)
+        ActivityFactory(place=self.place, require_role='bar', max_open_participants=47)
         with self.assertRaises(IntegrityError):
             # uh oh! what would a participant without role be here? given no role is needed...
-            ActivityFactory(place=self.place, max_participants_without_role=47)
+            ActivityFactory(place=self.place, max_open_participants=47)
 
 
 class TestActivitiesListAPI(APITestCase, ExtractPaginationMixin):
