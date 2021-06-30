@@ -8,7 +8,6 @@ from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadReque
 from django.template.loader import render_to_string
 from django.template.utils import get_app_template_dirs
 from django.utils import timezone
-from django.views.decorators.clickjacking import xframe_options_exempt
 
 import karrot.applications.emails
 import karrot.issues.emails
@@ -238,7 +237,6 @@ class Handlers:
 handlers = Handlers()
 
 
-@xframe_options_exempt
 def list_templates(request):
     template_dirs = [str(path) for path in get_app_template_dirs('templates') if re.match(r'.*/karrot/.*', str(path))]
 
@@ -284,7 +282,6 @@ def list_templates(request):
     )
 
 
-@xframe_options_exempt
 def show_template(request):
     name = request.GET.get('name')
     format = request.GET.get('format', 'html')

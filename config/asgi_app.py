@@ -24,6 +24,10 @@ def setup_postgres(connection, **kwargs):
 
 api_app = get_asgi_application()
 api_prefixes = ['/api/', '/docs/', '/api-auth/']
+
+if settings.DEBUG:
+    api_prefixes.append('/_templates')
+
 media_app = StaticFiles(directory=settings.MEDIA_ROOT)
 
 frontend_app = None

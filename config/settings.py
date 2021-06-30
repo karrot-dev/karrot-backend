@@ -352,6 +352,10 @@ CORS_ORIGIN_WHITELIST = []
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
+if DEBUG:
+    # this is primarily to enable the /_templates pages to work properly
+    X_FRAME_OPTIONS = 'SAMEORIGIN'
+
 SESSION_COOKIE_HTTPONLY = True
 
 AUTH_USER_MODEL = 'users.User'
