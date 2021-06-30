@@ -218,8 +218,7 @@ class ActivitySerializer(serializers.ModelSerializer):
     date = DateTimeRangeField()
 
     def get_participants(self, activity) -> List[int]:
-        # this is to mirror existing API (open participants will be ignored)
-        return [c.user_id for c in activity.activityparticipant_set.all() if c.role == activity.require_role]
+        return [c.user_id for c in activity.activityparticipant_set.all()]
 
     def get_feedback_dismissed_by(self, activity) -> List[int]:
         # we are filtering in python to make use of prefetched data

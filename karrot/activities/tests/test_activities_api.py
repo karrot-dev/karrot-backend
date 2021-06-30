@@ -566,7 +566,7 @@ class TestActivitiesWithRequiredRolesAPI(APITestCase):
         response = self.client.get('/api/activities/{}/'.format(self.activity.id))
 
         # participants field only shows participants without roles user ids
-        self.assertEqual(response.data['participants'], [self.approved_member.id])
+        self.assertEqual(response.data['participants'], [self.member.id, self.approved_member.id])
 
     def test_next_participants_api(self):
         self.activity.add_participant(self.member, role=None)
