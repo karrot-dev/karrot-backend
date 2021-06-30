@@ -40,15 +40,15 @@ msgstr ""
 msgid "Task"
 msgstr ""
 
-#: karrot/activities/serializers.py:132
+#: karrot/activities/serializers.py:133
 msgid "Must be a list"
 msgstr ""
 
-#: karrot/activities/serializers.py:133
+#: karrot/activities/serializers.py:134
 msgid "Must be a list with one or two values"
 msgstr ""
 
-#: karrot/activities/serializers.py:134
+#: karrot/activities/serializers.py:135
 msgid "Must pass start value"
 msgstr ""
 
@@ -102,7 +102,7 @@ msgid ""
 " for this group."
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:269
+#: karrot/activities/templates/activity_notification.html.jinja2:271
 #: karrot/applications/templates/new_application.html.jinja2:223
 #: karrot/groups/templates/group_summary.html.jinja2:265
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:212
