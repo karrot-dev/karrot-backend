@@ -20,14 +20,14 @@
                                             {{ activity.place.name }}
                                         </a>
                                         {# TODO maybe show if it requires a role or not... #}
-                                        {% if show_empty_participants_count %}
-                                            -
-                                            {% trans trimmed empty_participants_count=activity.empty_participants_count(role=activity.require_role),
-                                                    max_participants=activity.max_participants %}
-                                                {{ empty_participants_count }}/{{ max_participants }} remaining
-                                            {% endtrans %}
+{#                                        {% if show_empty_participants_count %}#}
+{#                                            -#}
+{#                                            {% trans trimmed empty_participants_count=activity.empty_participants_count(role=activity.require_role),#}
+{#                                                    max_participants=activity.max_participants %}#}
+{#                                                {{ empty_participants_count }}/{{ max_participants }} remaining#}
+{#                                            {% endtrans %}#}
                                             {# TODO maybe show the available slots without role remaining too #}
-                                        {% endif %}
+{#                                        {% endif %}#}
                                     </li>
                                 {% endfor %}
                             </ul>

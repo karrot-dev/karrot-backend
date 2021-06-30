@@ -19,8 +19,8 @@ from karrot.activities.models import (
     Activity as ActivityModel, ActivitySeries as ActivitySeriesModel, Feedback as FeedbackModel, ActivityType
 )
 from karrot.activities.permissions import (
-    IsUpcoming, HasNotJoinedActivity, HasJoinedActivity, IsEmptyActivity, IsNotFull, IsSameParticipant,
-    IsRecentActivity, IsGroupEditor, TypeHasNoActivities, CannotChangeGroup, IsNotUpcoming
+    IsUpcoming, HasNotJoinedActivity, HasJoinedActivity, IsEmptyActivity, IsSameParticipant, IsRecentActivity,
+    IsGroupEditor, TypeHasNoActivities, CannotChangeGroup, IsNotUpcoming
 )
 from karrot.activities.serializers import (
     ActivityDismissFeedbackSerializer, ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer,
@@ -227,7 +227,7 @@ class ActivityViewSet(
     @action(
         detail=True,
         methods=['POST'],
-        permission_classes=(IsAuthenticated, IsUpcoming, HasNotJoinedActivity, IsNotFull),
+        permission_classes=(IsAuthenticated, IsUpcoming, HasNotJoinedActivity),
         serializer_class=ActivityJoinSerializer
     )
     def add(self, request, pk=None):

@@ -426,6 +426,24 @@ class ActivityJoinSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         place = activity.place
         group = place.group
+
+        role = validated_data.get('role', None)
+
+        # check the role is OK
+        if activity.require_role:
+            if role:
+                if role != activity.require_role:
+                    raise PermissionDenied('Invalid role for this activity.')
+
+                if not group.is_member_with_role(user, activity.require_role):
+                    raise PermissionDenied('You do not have the required role.')
+        elif role:
+            raise serializers.ValidationError('This activity does not require a role.')
+
+        # check there is space available
+        if activity.is_full_for(role):
+            raise PermissionDenied('Activity is already full.')
+
         activity.add_participant(user, validated_data.get('role', None))
 
         stats.activity_joined(activity)

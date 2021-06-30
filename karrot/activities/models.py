@@ -377,10 +377,17 @@ class Activity(BaseModel, ConversationMixin):
     def is_recent(self):
         return self.date.start >= timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
-    def empty_participants_count(self, *, role):
+    # def empty_participants_count(self, *, role):
+    #     max_participants = self.max_participants_for_role(role)
+    #     qs = self.participants.filter(activityparticipant__role=role)
+    #     return max(0, max_participants - qs.count())
+
+    def is_full_for(self, role):
         max_participants = self.max_participants_for_role(role)
-        qs = self.participants.filter(activityparticipant__role=role)
-        return max(0, max_participants - qs.count())
+        return (
+            max_participants is not None
+            and self.participants.filter(activityparticipant__role=role).count() >= max_participants
+        )
 
     def max_participants_for_role(self, role):
         if self.require_role:

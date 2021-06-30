@@ -46,28 +46,6 @@ class HasNotJoinedActivity(permissions.BasePermission):
         return not obj.is_participant(request.user)
 
 
-class IsNotFull(permissions.BasePermission):
-    message = 'Activity is already full.'
-
-    def has_object_permission(self, request, view, obj):
-        if obj.require_role:
-            membership = request.user.groupmembership_set.get(group=obj.place.group)
-            if obj.require_role in membership.roles:
-                max_participants = obj.max_participants
-                role = obj.require_role
-            else:
-                max_participants = obj.max_open_participants
-                role = None
-        else:
-            max_participants = obj.max_participants
-            role = None
-
-        if max_participants is None:
-            return True
-        qs = obj.participants.filter(activityparticipant__role=role)
-        return qs.count() < max_participants
-
-
 class IsSameParticipant(permissions.BasePermission):
     message = 'This feedback is given by another user.'
 

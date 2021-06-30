@@ -517,7 +517,7 @@ class TestActivitiesWithRequiredRolesAPI(APITestCase):
             max_open_participants=1,
         )
 
-    def test_cannot_join_if_requires_role_and_none_without_role(self):
+    def test_cannot_join_open_slot_if_none_available(self):
         activity = ActivityFactory(
             place=self.place,
             require_role=APPROVED,
@@ -540,12 +540,24 @@ class TestActivitiesWithRequiredRolesAPI(APITestCase):
         response = self.client.post('/api/activities/{}/add/'.format(self.activity.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
-    def test_can_join_as_normal_participant_if_has_role(self):
+    def test_can_join_with_role(self):
         self.client.force_login(user=self.approved_member)
         response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'role': APPROVED})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         participant = ActivityParticipant.objects.get(activity=self.activity, user=self.approved_member)
         self.assertEqual(participant.role, APPROVED)
+
+    def test_cannot_join_if_missing_role(self):
+        self.client.force_login(user=self.member)
+        response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'role': APPROVED})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+    def test_cannot_join_with_a_different_role(self):
+        self.client.force_login(user=self.approved_member)
+        response = self.client.post(
+            '/api/activities/{}/add/'.format(self.activity.id), {'role': 'somerandomotherrole'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_backwards_compatible_participants_api(self):
         self.activity.add_participant(self.member, role=None)
