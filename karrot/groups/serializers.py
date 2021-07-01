@@ -293,7 +293,7 @@ class DistanceField(Field):
     It may return None under various conditions:
     - the GeoIP2 libary was not initialized (missing the files)
     - there is no request context
-    - we cannot detirmine the IP address of the client
+    - we cannot determine the IP address of the client
     - the IP address cannot be found in the database
     """
     def __init__(self, **kwargs):

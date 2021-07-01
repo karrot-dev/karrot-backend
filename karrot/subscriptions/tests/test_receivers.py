@@ -463,9 +463,10 @@ class GroupReceiverTests(WSTestCase):
         super().setUp()
         self.member = UserFactory()
         self.user = UserFactory()
-        self.group = GroupFactory(members=[self.member])
+        self.group = GroupFactory(members=[self.member], latitude=48.0, longitude=12.0)
 
-    def test_receive_group_changes(self):
+    @patch('karrot.utils.geoip.geoip')
+    def test_receive_group_changes(self, geoip):
         client = self.connect_as(self.member)
 
         name = faker.name()
