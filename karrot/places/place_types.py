@@ -4,8 +4,8 @@ from django.utils.translation import gettext_lazy as _
 translatable_names = {
     'Unspecified': _('Unspecified'),
     'Store': _('Store'),
-    'Sharing point': _('Sharing point'),
-    'Meeting place': _('Meeting place'),
+    'Sharing Point': _('Sharing Point'),
+    'Meeting Place': _('Meeting Place'),
     'Restaurant': _('Restaurant'),
     'Market': _('Market'),
 }

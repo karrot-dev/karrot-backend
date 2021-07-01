@@ -704,11 +704,27 @@ msgid ""
 msgstr ""
 
 #: karrot/places/place_types.py:5
-msgid "Store"
+msgid "Unspecified"
 msgstr ""
 
 #: karrot/places/place_types.py:6
-msgid "Place"
+msgid "Store"
+msgstr ""
+
+#: karrot/places/place_types.py:7
+msgid "Sharing Point"
+msgstr ""
+
+#: karrot/places/place_types.py:8
+msgid "Meeting Place"
+msgstr ""
+
+#: karrot/places/place_types.py:9
+msgid "Restaurant"
+msgstr ""
+
+#: karrot/places/place_types.py:10
+msgid "Market"
 msgstr ""
 
 #: karrot/places/serializers.py:154
