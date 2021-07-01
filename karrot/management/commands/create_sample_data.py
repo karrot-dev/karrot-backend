@@ -181,7 +181,7 @@ class Command(BaseCommand):
                     'latitude': faker.latitude(),
                     'longitude': faker.longitude(),
                     'status': 'active',
-                    'place_type': PlaceType.objects.get(group=group, name='Store').id,
+                    'place_type': PlaceType.objects.filter(group=group).first().id,
                 }
             )
             if response.status_code != 201:

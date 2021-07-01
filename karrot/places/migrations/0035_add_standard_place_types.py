@@ -8,22 +8,13 @@ def add_standard_place_types(apps, schema_editor):
 
     for group in Group.objects.all():
 
-        if group.theme == 'foodsaving':
-            place_type, _ = PlaceType.objects.get_or_create(
-                group=group,
-                name='Store',
-                defaults={
-                    'icon': 'fas fa-shopping-cart'
-                },
-            )
-        else:
-            place_type, _ = PlaceType.objects.get_or_create(
-                group=group,
-                name='Place',  # what is a good generic name? Location, Place, ..., ?
-                defaults={
-                    'icon': 'fas fa-dot-circle'
-                },
-            )
+        place_type, _ = PlaceType.objects.get_or_create(
+            group=group,
+            name='Unspecified',
+            defaults={
+                'icon': 'fas fa-map-marker',
+            },
+        )
 
         Place.objects.filter(group=group).update(place_type=place_type.id)
 
