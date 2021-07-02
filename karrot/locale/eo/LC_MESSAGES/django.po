@@ -4,7 +4,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
 # 
 # Translators:
-# Carlos Pesquera Alonso <fydus@hotmail.com>, 2020
+# Carlos Pesquera Alonso <fydus@hotmail.com>, 2021
 # 
 #, fuzzy
 msgid ""
@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
-"Last-Translator: Carlos Pesquera Alonso <fydus@hotmail.com>, 2020\n"
+"Last-Translator: Carlos Pesquera Alonso <fydus@hotmail.com>, 2021\n"
 "Language-Team: Esperanto (https://www.transifex.com/yunity-1/teams/68631/eo/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -505,13 +505,15 @@ msgstr "Vi mankas al%(group_name)s!"
 #: karrot/groups/templates/user_lost_editor_role.subject.jinja2:1
 #, python-format
 msgid "You lost editing permissions in %(group_name)s!"
-msgstr ""
+msgstr "Vi perdis redaktpermesojn en %(group_name)s!"
 
 #: karrot/groups/templates/user_lost_editor_role.html.jinja2:173
 msgid ""
 "You've don't have enough trust from fellow group members anymore to grant "
 "you <strong>editing permissions</strong>."
 msgstr ""
+"Ne sufiĉe da anoj fidas vin por ke vi daŭre havu "
+"<strong>redaktpermesojn</strong>."
 
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:170
 msgid "Hey, we're really missing you!"
