@@ -4,13 +4,15 @@ from babel.dates import format_date, format_time
 from django.utils import timezone, translation
 from django.utils.text import Truncator
 from furl import furl
-from huey.contrib.djhuey import db_task
+from huey import crontab
+from huey.contrib.djhuey import db_task, db_periodic_task
 
 from karrot.applications.models import ApplicationStatus
 from karrot.groups.models import GroupMembership, GroupNotificationType
 from karrot.subscriptions.fcm import notify_subscribers
-from karrot.subscriptions.models import PushSubscription, PushSubscriptionPlatform
-from karrot.utils import frontend_urls
+from karrot.subscriptions.models import PushSubscription, PushSubscriptionPlatform, ChannelSubscription
+from karrot.utils import frontend_urls, stats_utils
+from karrot.utils.stats_utils import timer
 
 
 @db_task()
@@ -196,3 +198,12 @@ def notify_subscribers_by_device(subscriptions, *, click_action, fcm_options):
             'click_action': click_action,
         }
     )
+
+
+@db_periodic_task(crontab(hour='*/24', minute=35))  # every 24 hours
+def delete_old_channel_subscriptions():
+    with timer() as t:
+        # delete old channel subscriptions after some minutes of inactivity
+        ChannelSubscription.objects.old().delete()
+
+    stats_utils.periodic_task('subscriptions__delete_old_channel_subscriptions', seconds=t.elapsed_seconds)

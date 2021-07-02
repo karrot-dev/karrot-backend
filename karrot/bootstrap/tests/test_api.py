@@ -48,6 +48,9 @@ class TestBootstrapAPI(APITestCase):
         self.client_ip = '2003:d9:ef08:4a00:4b7a:7964:8a3c:a33e'
         ip_to_city.cache_clear()  # prevent getting cached mock values
 
+    def tearDown(self):
+        ip_to_city.cache_clear()
+
     def test_as_anon(self):
         with self.assertNumQueries(1):
             response = self.client.get(self.url)
