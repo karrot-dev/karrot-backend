@@ -1,7 +1,7 @@
+import sentry_sdk
 from anymail.exceptions import AnymailAPIError
 from django.contrib.auth import get_user_model
 from huey.contrib.djhuey import db_task
-from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from karrot.applications.emails import prepare_new_application_notification_email, \
     prepare_application_accepted_email, prepare_application_declined_email
@@ -23,7 +23,7 @@ def notify_members_about_new_application(application):
         try:
             prepare_new_application_notification_email(user, application).send()
         except AnymailAPIError:
-            sentry_client.captureException()
+            sentry_sdk.capture_exception()
 
 
 @db_task()

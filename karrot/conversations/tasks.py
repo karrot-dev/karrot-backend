@@ -1,3 +1,4 @@
+import sentry_sdk
 from anymail.exceptions import AnymailAPIError
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -5,7 +6,6 @@ from django.db.models import Q, F
 from django.utils import timezone
 from huey import crontab
 from huey.contrib.djhuey import db_task, db_periodic_task
-from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from karrot.conversations.emails import (
     prepare_conversation_message_notification,
@@ -59,7 +59,7 @@ def send_and_mark(participant, message, email):
     try:
         email.send()
     except AnymailAPIError:
-        sentry_client.captureException()
+        sentry_sdk.capture_exception()
     else:
         participant.notified_up_to = message
         participant.save()

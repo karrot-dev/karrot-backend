@@ -137,12 +137,12 @@ python-dotenv==0.18.0
 python-magic==0.4.24
 pytz==2021.1
 pyyaml==5.4.1
-raven==6.10.0
 redis==3.5.3
 regex==2021.7.6
 requests==2.25.1
 requests-mock==1.9.3
 rfc3986[idna2008]==1.5.0
+sentry-sdk==1.1.0
 service-identity==21.1.0
 shiv==0.5.2
 six==1.16.0

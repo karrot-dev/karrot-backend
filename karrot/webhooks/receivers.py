@@ -1,9 +1,9 @@
 import binascii
 
+import sentry_sdk
 from anymail.signals import tracking, inbound
 from django.contrib.auth import get_user_model
 from django.dispatch import receiver
-from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from karrot.conversations.models import ConversationMessage, Conversation
 from karrot.utils.email_utils import generate_plaintext_from_html
@@ -34,7 +34,7 @@ def inbound_received(sender, event, esp_name, **kwargs):
     try:
         conversation_id, user_id, thread_id = parse_local_part(local_part)
     except (UnicodeDecodeError, binascii.Error):
-        sentry_client.captureException()
+        sentry_sdk.capture_exception()
         return
     user = get_user_model().objects.get(id=user_id)
 

@@ -12,8 +12,10 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import redis
+import sentry_sdk
 
 from dotenv import load_dotenv
+from sentry_sdk.integrations.django import DjangoIntegration
 
 from karrot.groups import themes
 from config.options import get_options
@@ -92,7 +94,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 INSTALLED_APPS = (
     # Should be loaded first
     'channels',
-    'raven.contrib.django.raven_compat',
 
     # core Django
     'django.contrib.admin',
@@ -410,9 +411,13 @@ SENTRY_CLIENT_DSN = options['SENTRY_CLIENT_DSN']
 SENTRY_RELEASE = options['SENTRY_RELEASE']
 
 if SENTRY_DSN:
-    RAVEN_CONFIG = { 'dsn': SENTRY_DSN }
-    if SENTRY_RELEASE:
-        RAVEN_CONFIG['release'] = SENTRY_RELEASE
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=0.1,
+        send_default_pii=False,
+        release=SENTRY_RELEASE,
+    )
 
 SECRET_KEY = options['SECRET_KEY']
 FCM_SERVER_KEY = options['FCM_SERVER_KEY']
@@ -483,10 +488,6 @@ if MODE == 'prod':
             },
         },
         'handlers': {
-            'sentry': {
-                'level': 'WARNING',
-                'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
-            },
             'console': {
                 'level': 'WARNING',
                 'class': 'logging.StreamHandler',
@@ -495,12 +496,7 @@ if MODE == 'prod':
 
         },
         'loggers': {
-            'raven': {
-                'level': 'WARNING',
-                'handlers': ['console'],
-                'propagate': False,
-            },
-            'sentry.errors': {
+            'sentry_sdk.errors': {
                 'level': 'WARNING',
                 'handlers': ['console'],
                 'propagate': False,

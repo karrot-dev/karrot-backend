@@ -2,11 +2,11 @@ import logging
 from base64 import b32decode, b32encode
 
 import requests
+import sentry_sdk
 import talon
 from anymail.exceptions import AnymailAPIError
 from django.conf import settings
 from django.core import signing
-from raven.contrib.django.raven_compat.models import client as sentry_client
 from talon import quotations
 
 from karrot.webhooks import stats
@@ -43,7 +43,7 @@ def trim_with_discourse(text):
         ).json()
     except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
         logger.warning('EMAIL_REPLY_TRIMMER_URL not accessible at ' + settings.EMAIL_REPLY_TRIMMER_URL + ', skipping.')
-        sentry_client.captureException()
+        sentry_sdk.capture_exception()
         trimmed = text
     else:
         trimmed = response['trimmed']
@@ -76,5 +76,5 @@ def notify_about_rejected_email(user, content):
     try:
         prepare_incoming_email_rejected_email(user, content).send()
     except AnymailAPIError:
-        sentry_client.captureException()
+        sentry_sdk.capture_exception()
     stats.incoming_email_rejected()

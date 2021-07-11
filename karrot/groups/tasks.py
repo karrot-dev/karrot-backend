@@ -1,16 +1,15 @@
-from anymail.exceptions import AnymailAPIError
 from datetime import timedelta
+
+import sentry_sdk
+from anymail.exceptions import AnymailAPIError
 from dateutil.relativedelta import relativedelta
 from django.db.models import Count
 from django.utils import timezone
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task
-from karrot.utils.influxdb_utils import write_points
-from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from config import settings
 from karrot.applications.stats import get_application_stats
-from karrot.issues.stats import get_issue_stats
 from karrot.groups.emails import (
     prepare_user_inactive_in_group_email, prepare_group_summary_data, calculate_group_summary_dates,
     prepare_group_summary_emails, prepare_user_removal_from_group_email
@@ -19,7 +18,9 @@ from karrot.groups.models import Group, GroupStatus
 from karrot.groups.models import GroupMembership
 from karrot.groups.stats import get_group_members_stats, get_group_places_stats, group_summary_email
 from karrot.history.models import History, HistoryTypus
+from karrot.issues.stats import get_issue_stats
 from karrot.utils import stats_utils
+from karrot.utils.influxdb_utils import write_points
 from karrot.utils.stats_utils import timer
 
 
@@ -137,7 +138,7 @@ def send_summary_emails():
                             email_count += 1
                             email_recipient_count += len(email.to)
                         except AnymailAPIError:
-                            sentry_client.captureException()
+                            sentry_sdk.capture_exception()
 
                 # we save this even if some of the email sending fails, no retries right now basically...
                 # we also save if no emails were sent due to missing activity, to not try again over and over.
