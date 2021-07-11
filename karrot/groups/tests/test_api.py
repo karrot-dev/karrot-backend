@@ -17,6 +17,7 @@ from karrot.activities.factories import ActivityFactory
 from karrot.activities.models import to_range
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory
+from karrot.utils.geoip import ip_to_lat_lon
 from karrot.utils.tests.fake import faker
 from karrot.utils.tests.images import image_path
 
@@ -93,6 +94,9 @@ class TestGroupsInfoGeoIPAPI(APITestCase):
         self.group = GroupFactory(members=[self.member], latitude=lat, longitude=lng)
         self.url = '/api/groups-info/'
         self.client_ip = '2003:d9:ef08:4a00:4b7a:7964:8a3c:a33e'
+
+    def tearDown(self):
+        ip_to_lat_lon.cache_clear()
 
     @patch('karrot.utils.geoip.geoip')
     def test_returns_distance_via_geoip(self, geoip):

@@ -57,7 +57,17 @@ class WebsocketConsumer(JsonWebsocketConsumer):
         if 'user' in self.scope:
             user = self.scope['user']
             if not user.is_anonymous:
-                ChannelSubscription.objects.create(user=user, reply_channel=self.channel_name)
+                # scope['client'] may contain client ip address
+                # https://github.com/django/asgiref/blob/e8797d47f4006e4e817fda507ec1eacfed4faf60/specs/www.rst
+                client = []
+                if 'client' in self.scope:
+                    client = self.scope['client']
+
+                client_ip = None
+                if client and len(client) > 0:
+                    client_ip = client[0]
+
+                ChannelSubscription.objects.create(user=user, reply_channel=self.channel_name, client_ip=client_ip)
 
                 if 'karrot.token' in self.scope['subprotocols']:
                     subprotocol = 'karrot.token'
