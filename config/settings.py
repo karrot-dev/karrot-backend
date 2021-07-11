@@ -16,6 +16,7 @@ import sentry_sdk
 
 from dotenv import load_dotenv
 from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
 
 from karrot.groups import themes
 from config.options import get_options
@@ -413,7 +414,7 @@ SENTRY_RELEASE = options['SENTRY_RELEASE']
 if SENTRY_DSN:
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration()],
+        integrations=[DjangoIntegration(), RedisIntegration()],
         traces_sample_rate=0.1,
         send_default_pii=False,
         release=SENTRY_RELEASE,
