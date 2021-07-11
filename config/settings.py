@@ -501,10 +501,6 @@ if MODE == 'prod':
                 'handlers': ['console'],
                 'propagate': False,
             },
-            'django': {  # Disable django admin email logging by overriding
-                'level': 'ERROR',
-                'handlers': ['sentry'],
-            },
         },
         'root': {  # log everything unconfigured as error
             'level': 'ERROR',
