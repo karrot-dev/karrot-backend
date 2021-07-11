@@ -477,37 +477,6 @@ REQUEST_TIMEOUT_SECONDS = int(options['REQUEST_TIMEOUT_SECONDS'])
 # https://github.com/yunity/email_reply_trimmer_service
 EMAIL_REPLY_TRIMMER_URL = options['EMAIL_REPLY_TRIMMER_URL']
 
-if MODE == 'prod':
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'verbose': {
-                'format': '%(levelname)s %(asctime)s %(module)s '
-                          '%(process)d %(thread)d %(message)s'
-            },
-        },
-        'handlers': {
-            'console': {
-                'level': 'WARNING',
-                'class': 'logging.StreamHandler',
-                'formatter': 'verbose'
-            }
-
-        },
-        'loggers': {
-            'sentry_sdk.errors': {
-                'level': 'WARNING',
-                'handlers': ['console'],
-                'propagate': False,
-            },
-        },
-        'root': {  # log everything unconfigured as error
-            'level': 'ERROR',
-            'handlers': ['sentry'],
-        },
-    }
-
 # NB: Keep this as the last line, and keep
 # local_settings.py out of version control
 try:
