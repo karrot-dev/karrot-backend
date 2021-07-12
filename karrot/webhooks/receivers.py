@@ -29,13 +29,21 @@ def tracking_received(sender, event, esp_name, **kwargs):
 def inbound_received(sender, event, esp_name, **kwargs):
     incoming_message = event.message
 
-    # check local part of reply-to and extract conversation and user (fail if they don't exist)
-    local_part = incoming_message.to[0].username
-    try:
-        conversation_id, user_id, thread_id = parse_local_part(local_part)
-    except (UnicodeDecodeError, binascii.Error):
-        sentry_sdk.capture_exception()
+    # check local part of reply-to and extract conversation and user ids
+    conversation_id, user_id, thread_id = None, None, None
+    for to in incoming_message.to:
+        local_part = to.username
+        try:
+            conversation_id, user_id, thread_id = parse_local_part(local_part)
+            # stop after first valid recipient
+            break
+        except (UnicodeDecodeError, binascii.Error):
+            sentry_sdk.capture_exception()
+
+    if user_id is None:
+        # no valid recipient found
         return
+
     user = get_user_model().objects.get(id=user_id)
 
     thread = None
