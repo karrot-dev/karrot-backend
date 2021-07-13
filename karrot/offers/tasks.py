@@ -1,7 +1,7 @@
+import sentry_sdk
 from anymail.exceptions import AnymailAPIError
 from django.contrib.auth import get_user_model
 from huey.contrib.djhuey import db_task
-from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from karrot.groups.models import GroupMembership, GroupNotificationType
 from karrot.offers.emails import prepare_new_offer_notification_email
@@ -19,4 +19,4 @@ def notify_members_about_new_offer(offer):
         try:
             prepare_new_offer_notification_email(user, offer).send()
         except AnymailAPIError:
-            sentry_client.captureException()
+            sentry_sdk.capture_exception()

@@ -18,7 +18,7 @@ class CleanupChannelCommandTests(TestCase):
         self.assertIsNotNone(ChannelSubscription.objects.get(pk=self.subscription.id))
 
     def test_deletes_old_entries(self):
-        self.set_lastseen_ago_in_minutes(10)
+        self.set_lastseen_ago_in_minutes(35)
         call_command('cleanup_channel_subscriptions')
         with self.assertRaises(ChannelSubscription.DoesNotExist):
             self.assertIsNone(ChannelSubscription.objects.get(pk=self.subscription.id))
