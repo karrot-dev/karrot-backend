@@ -3,6 +3,7 @@ import binascii
 import sentry_sdk
 from anymail.signals import tracking, inbound
 from django.contrib.auth import get_user_model
+from django.core.signing import BadSignature
 from django.dispatch import receiver
 
 from karrot.conversations.models import ConversationMessage, Conversation
@@ -37,7 +38,7 @@ def inbound_received(sender, event, esp_name, **kwargs):
             conversation_id, user_id, thread_id = parse_local_part(local_part)
             # stop after first valid recipient
             break
-        except (UnicodeDecodeError, binascii.Error):
+        except (UnicodeDecodeError, binascii.Error, BadSignature):
             sentry_sdk.capture_exception()
 
     if user_id is None:
