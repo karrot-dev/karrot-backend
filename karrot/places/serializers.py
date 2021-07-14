@@ -6,7 +6,6 @@ from rest_framework.exceptions import PermissionDenied
 
 from karrot.history.models import History, HistoryTypus
 from karrot.places.models import Place as PlaceModel, PlaceSubscription, PlaceType, PlaceStatus
-from karrot.places.place_types import default_place_types
 from karrot.utils.misc import find_changed
 
 
@@ -157,8 +156,7 @@ class PlaceSerializer(serializers.ModelSerializer):
         if not self.instance and not attrs.get('place_type'):
             """creating place without place type, we'll provide a default"""
             group = attrs.get('group')
-            place_type_name = next(iter(default_place_types))
-            attrs['place_type'] = group.place_types.get(name=place_type_name)
+            attrs['place_type'] = group.place_types.get(name='Unspecified')
         return attrs
 
     def validate_group(self, group):
