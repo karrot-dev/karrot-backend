@@ -528,6 +528,7 @@ class TestActivitiesWithRequiredRolesAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_can_join_as_participant_without_role(self):
+        self.activity.add_participant(self.approved_member, is_open=False)  # need at least one non-open participant
         self.client.force_login(user=self.member)
         response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'open': True})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
@@ -550,6 +551,11 @@ class TestActivitiesWithRequiredRolesAPI(APITestCase):
     def test_cannot_join_if_missing_role(self):
         self.client.force_login(user=self.member)
         response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'open': False})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+    def test_cannot_have_only_open_participants(self):
+        self.client.force_login(user=self.member)
+        response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'open': True})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_backwards_compatible_participants_api(self):

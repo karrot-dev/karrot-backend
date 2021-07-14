@@ -440,6 +440,9 @@ class ActivityJoinSerializer(serializers.ModelSerializer):
         if activity.is_full(is_open):
             raise PermissionDenied('Activity is already full.')
 
+        if is_open and activity.participants.filter(activityparticipant__is_open=False).count() == 0:
+            raise PermissionDenied('Cannot have only open participants.')
+
         activity.add_participant(user, is_open)
 
         stats.activity_joined(activity)
