@@ -58,9 +58,14 @@ class GroupMembershipInfoSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'roles', 'added_by']
 
     active = serializers.SerializerMethodField()
+    trusted_by = serializers.SerializerMethodField()
 
     def get_active(self, membership):
         return membership.inactive_at is None
+
+    def get_trusted_by(self, membership):
+        # make it mean what the old trusted_by field meant: user ids that trusted them for editor role
+        return [t.given_by_id for t in membership.trust_set.all() if t.role == GROUP_EDITOR]
 
 
 class GroupHistorySerializer(GroupBaseSerializer):

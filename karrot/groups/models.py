@@ -291,7 +291,6 @@ class GroupMembership(BaseModel, DirtyFieldsMixin):
         null=True,
         related_name='groupmembership_added',
     )
-    trusted_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='membership', through='Trust')
     roles = ArrayField(TextField(), default=list)
     lastseen_at = DateTimeField(default=tz.now)
     inactive_at = DateTimeField(null=True)

@@ -140,7 +140,8 @@ class GroupViewSet(
             qs = qs.annotate_yesterdays_member_count().prefetch_related(
                 'members',
                 'groupmembership_set',
-                'groupmembership_set__trusted_by',
+                'groupmembership_set__trust_set',
+                'groupmembership_set__trust_set__given_by',
             )
 
         if self.action != 'join':
