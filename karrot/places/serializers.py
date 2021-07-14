@@ -118,6 +118,9 @@ class PlaceSerializer(serializers.ModelSerializer):
                 'trim_whitespace': False,
                 'max_length': settings.DESCRIPTION_MAX_LENGTH,
             },
+            'place_type': {
+                'required': False,
+            },
         }
         read_only_fields = [
             'id',
@@ -126,11 +129,6 @@ class PlaceSerializer(serializers.ModelSerializer):
 
     status = serializers.ChoiceField(choices=PlaceStatus.choices, default=PlaceModel.DEFAULT_STATUS)
     is_subscribed = serializers.SerializerMethodField()
-
-    def __init__(self, *args, **kwargs):
-        super(PlaceSerializer, self).__init__(*args, **kwargs)
-        # override the field definition so we can provide a default option
-        self.fields['place_type'].required = False
 
     def get_is_subscribed(self, place) -> bool:
         return any(u == self.context['request'].user for u in place.subscribers.all())
