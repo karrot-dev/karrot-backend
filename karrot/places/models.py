@@ -25,7 +25,7 @@ class PlaceType(BaseModel, UpdatedAtMixin):
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='place_types')
     name = models.CharField(max_length=80)
     name_is_translatable = models.BooleanField(default=True)
-    icon = models.CharField(max_length=32)
+    icon = models.CharField(max_length=100)
     status = models.CharField(
         choices=PlaceTypeStatus.choices,
         max_length=100,
