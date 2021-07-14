@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='activityparticipant',
-            name='role',
-            field=models.CharField(null=True, blank=False, max_length=100),
+            name='is_open',
+            field=models.BooleanField(default=False),
         ),
     ]

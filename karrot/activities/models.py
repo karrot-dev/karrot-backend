@@ -8,7 +8,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext as _
 from django.db import models
 from django.db import transaction
-from django.db.models import Count, DurationField, F, Q, Sum, CheckConstraint, Value, Case, When
+from django.db.models import CheckConstraint, Count, DurationField, F, Q, Sum
 from django.utils import timezone
 
 from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin
@@ -190,18 +190,12 @@ class ActivityQuerySet(models.QuerySet):
 
     def annotate_num_participants(self):
         return self.annotate(
-            num_participants=Count('activityparticipant', filter=Q(activityparticipant__role=F('require_role')))
+            num_participants=Count('activityparticipant', filter=Q(activityparticipant__is_open=False))
         )
 
     def annotate_num_open_participants(self):
         return self.annotate(
-            num_open_participants=Case(
-                When(
-                    condition=~Q(require_role=None),
-                    then=Count('activityparticipant', filter=~Q(activityparticipant__role=F('require_role')))
-                ),
-                default=Value(0)
-            )
+            num_participants=Count('activityparticipant', filter=Q(activityparticipant__is_open=True))
         )
 
     def annotate_timezone(self):
@@ -385,34 +379,20 @@ class Activity(BaseModel, ConversationMixin):
     def is_recent(self):
         return self.date.start >= timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
-    # def empty_participants_count(self, *, role):
-    #     max_participants = self.max_participants_for_role(role)
-    #     qs = self.participants.filter(activityparticipant__role=role)
-    #     return max(0, max_participants - qs.count())
-
-    def is_full_for(self, role):
-        max_participants = self.max_participants_for_role(role)
+    def is_full(self, is_open):
+        if is_open and not self.require_role:
+            raise Exception('Activity does not support open participants')
+        max_participants = self.max_open_participants if is_open else self.max_participants
         return (
             max_participants is not None
-            and self.participants.filter(activityparticipant__role=role).count() >= max_participants
+            and self.participants.filter(activityparticipant__is_open=is_open).count() >= max_participants
         )
 
-    def max_participants_for_role(self, role):
-        if self.require_role:
-            if role == self.require_role:
-                return self.max_participants
-            else:
-                return self.max_open_participants
-        elif role:
-            raise Exception('activity does not require role')  # TODO: or return 0, or max_participants?
-        else:
-            return self.max_participants
-
-    def add_participant(self, user, role=None):
+    def add_participant(self, user, is_open=False):
         participant, _ = ActivityParticipant.objects.get_or_create(
             activity=self,
             user=user,
-            role=role,
+            is_open=is_open,
         )
         return participant
 
@@ -450,7 +430,7 @@ class ActivityParticipant(BaseModel):
     )
     feedback_dismissed = models.BooleanField(default=False)
     reminder_task_id = models.TextField(null=True)  # stores a huey task id
-    role = models.CharField(null=True, blank=False, max_length=100)
+    is_open = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'activities_activity_participants'

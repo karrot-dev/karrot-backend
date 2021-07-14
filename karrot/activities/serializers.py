@@ -13,7 +13,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.fields import DateTimeField, Field, CharField
+from rest_framework.fields import DateTimeField, Field, CharField, BooleanField
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework_csv.renderers import CSVRenderer
 
@@ -167,12 +167,12 @@ class ActivityParticipantSerializer(serializers.ModelSerializer):
         model = ActivityParticipant
         fields = [
             'user',
-            'role',
+            'is_open',
             'created_at',
         ]
         read_only_fields = [
             'user',
-            'role',
+            'is_open',
             'created_at',
         ]
 
@@ -218,7 +218,7 @@ class ActivitySerializer(serializers.ModelSerializer):
     date = DateTimeRangeField()
 
     def get_participants(self, activity) -> List[int]:
-        return [c.user_id for c in activity.activityparticipant_set.all()]
+        return [c.user_id for c in activity.activityparticipant_set.all() if not c.is_open]
 
     def get_feedback_dismissed_by(self, activity) -> List[int]:
         # we are filtering in python to make use of prefetched data
@@ -416,34 +416,31 @@ class ActivityJoinSerializer(serializers.ModelSerializer):
     class Meta:
         model = ActivityModel
         fields = [
-            'role',
+            'open',
         ]
 
-    role = CharField(write_only=True)
+    open = BooleanField(write_only=True, default=False)
 
     def update(self, activity, validated_data):
         user = self.context['request'].user
         place = activity.place
         group = place.group
 
-        role = validated_data.get('role', None)
+        is_open = validated_data.get('open', False)
 
         # check the role is OK
         if activity.require_role:
-            if role:
-                if role != activity.require_role:
-                    raise PermissionDenied('Invalid role for this activity.')
-
+            if not is_open:
                 if not group.is_member_with_role(user, activity.require_role):
                     raise PermissionDenied('You do not have the required role.')
-        elif role:
-            raise serializers.ValidationError('This activity does not require a role.')
+        elif is_open:
+            raise serializers.ValidationError('This activity does not allow open participants.')
 
         # check there is space available
-        if activity.is_full_for(role):
+        if activity.is_full(is_open):
             raise PermissionDenied('Activity is already full.')
 
-        activity.add_participant(user, validated_data.get('role', None))
+        activity.add_participant(user, is_open)
 
         stats.activity_joined(activity)
 

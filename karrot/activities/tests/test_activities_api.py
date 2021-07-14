@@ -529,48 +529,41 @@ class TestActivitiesWithRequiredRolesAPI(APITestCase):
 
     def test_can_join_as_participant_without_role(self):
         self.client.force_login(user=self.member)
-        response = self.client.post('/api/activities/{}/add/'.format(self.activity.id))
+        response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'open': True})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         participant = ActivityParticipant.objects.get(activity=self.activity, user=self.member)
-        self.assertEqual(participant.role, None)
+        self.assertEqual(participant.is_open, True)
 
     def test_cannot_join_as_participant_without_role_if_full(self):
-        self.activity.add_participant(self.member, role=None)
+        self.activity.add_participant(self.member, is_open=True)
         self.client.force_login(user=self.other_member)
         response = self.client.post('/api/activities/{}/add/'.format(self.activity.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
-    def test_can_join_with_role(self):
+    def test_can_join_specifiying_is_open(self):
         self.client.force_login(user=self.approved_member)
-        response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'role': APPROVED})
+        response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'open': False})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         participant = ActivityParticipant.objects.get(activity=self.activity, user=self.approved_member)
-        self.assertEqual(participant.role, APPROVED)
+        self.assertEqual(participant.is_open, False)
 
     def test_cannot_join_if_missing_role(self):
         self.client.force_login(user=self.member)
-        response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'role': APPROVED})
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
-
-    def test_cannot_join_with_a_different_role(self):
-        self.client.force_login(user=self.approved_member)
-        response = self.client.post(
-            '/api/activities/{}/add/'.format(self.activity.id), {'role': 'somerandomotherrole'}
-        )
+        response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'open': False})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_backwards_compatible_participants_api(self):
-        self.activity.add_participant(self.member, role=None)
-        self.activity.add_participant(self.approved_member, role=APPROVED)
+        self.activity.add_participant(self.member, is_open=True)
+        self.activity.add_participant(self.approved_member, is_open=False)
         self.client.force_login(user=self.member)
         response = self.client.get('/api/activities/{}/'.format(self.activity.id))
 
-        # participants field only shows participants without roles user ids
-        self.assertEqual(response.data['participants'], [self.member.id, self.approved_member.id])
+        # participants field doesn't show open participants
+        self.assertEqual(response.data['participants'], [self.approved_member.id])
 
     def test_next_participants_api(self):
-        self.activity.add_participant(self.member, role=None)
-        self.activity.add_participant(self.approved_member, role=APPROVED)
+        self.activity.add_participant(self.member, is_open=True)
+        self.activity.add_participant(self.approved_member, is_open=False)
         self.client.force_login(user=self.member)
         response = self.client.get('/api/activities/{}/'.format(self.activity.id))
 
@@ -579,14 +572,14 @@ class TestActivitiesWithRequiredRolesAPI(APITestCase):
         self.assertDictContainsSubset(
             {
                 'user': self.member.id,
-                'role': None,
+                'is_open': True,
             },
             response.data['participants_next'][0],
         )
         self.assertDictContainsSubset(
             {
                 'user': self.approved_member.id,
-                'role': APPROVED,
+                'is_open': False,
             },
             response.data['participants_next'][1],
         )
