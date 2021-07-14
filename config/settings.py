@@ -12,8 +12,11 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import redis
+import sentry_sdk
 
 from dotenv import load_dotenv
+from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
 
 from karrot.groups import themes
 from config.options import get_options
@@ -92,7 +95,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 INSTALLED_APPS = (
     # Should be loaded first
     'channels',
-    'raven.contrib.django.raven_compat',
 
     # core Django
     'django.contrib.admin',
@@ -410,13 +412,19 @@ INFLUXDB_TIMEOUT = 5
 INFLUXDB_USE_THREADING = True
 
 SENTRY_DSN = options['SENTRY_DSN']
+SENTRY_ENVIRONMENT = options['SENTRY_ENVIRONMENT']
 SENTRY_CLIENT_DSN = options['SENTRY_CLIENT_DSN']
 SENTRY_RELEASE = options['SENTRY_RELEASE']
 
 if SENTRY_DSN:
-    RAVEN_CONFIG = { 'dsn': SENTRY_DSN }
-    if SENTRY_RELEASE:
-        RAVEN_CONFIG['release'] = SENTRY_RELEASE
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration(), RedisIntegration()],
+        traces_sample_rate=0.1,
+        send_default_pii=False,
+        release=SENTRY_RELEASE,
+        environment=SENTRY_ENVIRONMENT,
+    )
 
 SECRET_KEY = options['SECRET_KEY']
 FCM_SERVER_KEY = options['FCM_SERVER_KEY']
@@ -475,50 +483,6 @@ REQUEST_TIMEOUT_SECONDS = int(options['REQUEST_TIMEOUT_SECONDS'])
 # If you have the email_reply_trimmer_service running, set this to 'http://localhost:4567/trim' (or similar)
 # https://github.com/yunity/email_reply_trimmer_service
 EMAIL_REPLY_TRIMMER_URL = options['EMAIL_REPLY_TRIMMER_URL']
-
-if MODE == 'prod':
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'verbose': {
-                'format': '%(levelname)s %(asctime)s %(module)s '
-                          '%(process)d %(thread)d %(message)s'
-            },
-        },
-        'handlers': {
-            'sentry': {
-                'level': 'WARNING',
-                'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
-            },
-            'console': {
-                'level': 'WARNING',
-                'class': 'logging.StreamHandler',
-                'formatter': 'verbose'
-            }
-
-        },
-        'loggers': {
-            'raven': {
-                'level': 'WARNING',
-                'handlers': ['console'],
-                'propagate': False,
-            },
-            'sentry.errors': {
-                'level': 'WARNING',
-                'handlers': ['console'],
-                'propagate': False,
-            },
-            'django': {  # Disable django admin email logging by overriding
-                'level': 'ERROR',
-                'handlers': ['sentry'],
-            },
-        },
-        'root': {  # log everything unconfigured as error
-            'level': 'ERROR',
-            'handlers': ['sentry'],
-        },
-    }
 
 SHELL_PLUS_IMPORTS = [
     'from karrot.utils.shell_utils import *'

@@ -13,7 +13,7 @@
                     </h1>
                     <p>
                         {% trans trimmed %}
-                            You've don't have enough trust from fellow group members anymore to grant you <strong>editing permissions</strong>.
+                            You don't have enough trust from fellow group members anymore to grant you <strong>editing permissions</strong>.
                         {% endtrans %}
                     </p>
                 </mj-text>

@@ -1,11 +1,11 @@
 import json
 
+import sentry_sdk
 from asgiref.sync import async_to_sync
 from channels.exceptions import ChannelFull
 from channels.layers import get_channel_layer
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
-from raven.contrib.django.models import client as sentry_client
 
 from karrot.subscriptions import stats
 
@@ -26,17 +26,18 @@ def send_in_channel(channel, topic, payload):
     except ChannelFull:
         # TODO investigate this more
         # maybe this means the subscription is invalid now?
-        sentry_client.captureException()
+        sentry_sdk.capture_exception()
     except RuntimeError:
         # TODO investigate this more (but let the code continue in the meantime...)
-        sentry_client.captureException()
+        sentry_sdk.capture_exception()
     else:
         stats.pushed_via_websocket(topic)
 
 
 class MockRequest:
-    def __init__(self, user=None):
+    def __init__(self, user=None, META=None):
         self.user = user or AnonymousUser()
+        self.META = META or {}
 
     def build_absolute_uri(self, path):
         return settings.HOSTNAME + path

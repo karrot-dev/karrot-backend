@@ -24,7 +24,7 @@ django-filter
 django-crispy-forms
 django-timezone-field
 django-anymail
-raven
+sentry-sdk
 furl
 pyfcm
 django-versatileimagefield

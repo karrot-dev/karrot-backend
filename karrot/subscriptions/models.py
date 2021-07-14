@@ -9,7 +9,7 @@ from karrot.base.base_models import BaseModel
 
 class ChannelSubscriptionQuerySet(models.QuerySet):
     def old(self):
-        return self.filter(lastseen_at__lt=timezone.now() - relativedelta(minutes=5))
+        return self.filter(lastseen_at__lt=timezone.now() - relativedelta(minutes=30))
 
     def recent(self):
         return self.filter(lastseen_at__gt=timezone.now() - relativedelta(seconds=20))
@@ -23,6 +23,7 @@ class ChannelSubscription(BaseModel):
     reply_channel = models.TextField()  # django channels channel
     lastseen_at = models.DateTimeField(default=timezone.now, null=True)
     away_at = models.DateTimeField(null=True)
+    client_ip = models.GenericIPAddressField(null=True)
 
 
 class PushSubscriptionPlatform(Enum):

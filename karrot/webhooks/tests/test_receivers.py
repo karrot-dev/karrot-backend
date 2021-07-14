@@ -20,10 +20,10 @@ class TestEmailReplyReceiver(APITestCase):
         self.conversation = ConversationFactory()
         self.conversation.join(self.user)
 
-    def make_message(self, reply_token=None, text='message body', html=None):
+    def make_message(self, reply_token=None, text='message body', html=None, to=None):
         reply_token = reply_token or make_local_part(self.conversation, self.user)
         return AnymailInboundMessage.construct(
-            to='{}@example.com'.format(reply_token),
+            to=to or '{}@example.com'.format(reply_token),
             text=text,
             html=html,
         )
@@ -40,6 +40,22 @@ class TestEmailReplyReceiver(APITestCase):
 
     def test_receive_incoming_email(self):
         inbound_message = self.make_message()
+        self.send_message(inbound_message)
+
+        self.assertEqual(self.conversation.messages.count(), 1)
+        message = ConversationMessage.objects.first()
+        self.assertEqual(message.received_via, 'email')
+        self.assertEqual('message body', message.content)
+
+        incoming_email = IncomingEmail.objects.first()
+        self.assertEqual(incoming_email.user, self.user)
+        self.assertEqual(incoming_email.payload['text'], inbound_message.text)
+        self.assertEqual(incoming_email.message, message)
+
+    def test_receive_incoming_email_ignores_invalid_to(self):
+        real_to = '{}@example.com'.format(make_local_part(self.conversation, self.user))
+        to = f'noreply@example.com, {real_to}, invalid@asdf.com'
+        inbound_message = self.make_message(to=to)
         self.send_message(inbound_message)
 
         self.assertEqual(self.conversation.messages.count(), 1)

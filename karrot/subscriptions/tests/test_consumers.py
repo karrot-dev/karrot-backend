@@ -88,6 +88,15 @@ class TestConsumer:
             response = await communicator.receive_json_from()
             assert response == {'message': 'hey! whaatsup?'}
 
+    async def test_saves_client_ip(self):
+        async with Communicator() as communicator:
+            user = await AsyncUserFactory()
+            communicator.scope['user'] = user
+            communicator.scope['client'] = ('2.2.2.2', '5555')
+            await communicator.connect()
+            subscription = (await get_subscription(user=user))[0]
+            assert subscription.client_ip == '2.2.2.2'
+
     async def test_updates_lastseen(self):
         async with Communicator() as communicator:
             user = await AsyncUserFactory()

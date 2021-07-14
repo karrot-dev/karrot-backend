@@ -517,7 +517,7 @@ msgstr "Du hues d'Recht fir ze beaarbechten an %(group_name)s verluer!"
 
 #: karrot/groups/templates/user_lost_editor_role.html.jinja2:173
 msgid ""
-"You've don't have enough trust from fellow group members anymore to grant "
+"You don't have enough trust from fellow group members anymore to grant "
 "you <strong>editing permissions</strong>."
 msgstr ""
 "Du hues net méi genuch Vertraue vun anere Membere fir <strong>beaarbechten "

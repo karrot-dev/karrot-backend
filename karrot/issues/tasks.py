@@ -1,15 +1,15 @@
+import sentry_sdk
 from anymail.exceptions import AnymailAPIError
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task, db_task
-from raven.contrib.django.raven_compat.models import client as sentry_client
 
+from karrot.groups.models import GroupNotificationType, GroupMembership
 from karrot.issues.emails import prepare_new_conflict_resolution_email, \
     prepare_conflict_resolution_continued_email, prepare_new_conflict_resolution_email_to_affected_user, \
     prepare_conflict_resolution_continued_email_to_affected_user
 from karrot.issues.models import Voting, IssueStatus
-from karrot.groups.models import GroupNotificationType, GroupMembership
 from karrot.utils import stats_utils
 from karrot.utils.stats_utils import timer
 
@@ -46,7 +46,7 @@ def send_or_report_error(email):
     try:
         email.send()
     except AnymailAPIError:
-        sentry_client.captureException()
+        sentry_sdk.capture_exception()
 
 
 @db_task()

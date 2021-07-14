@@ -30,6 +30,7 @@ from karrot.places.factories import PlaceFactory
 from karrot.subscriptions.models import ChannelSubscription, \
     PushSubscription, PushSubscriptionPlatform
 from karrot.users.factories import UserFactory, VerifiedUserFactory
+from karrot.utils.geoip import ip_to_lat_lon
 from karrot.utils.tests.fake import faker
 from karrot.utils.tests.images import image_path
 
@@ -93,9 +94,9 @@ class WSClient:
         self.send_in_channel_mock = send_in_channel_mock
         self.reply_channel = None
 
-    def connect_as(self, user):
+    def connect_as(self, user, client_ip='1.2.3.4'):
         self.reply_channel = generate_channel_name()
-        ChannelSubscription.objects.create(user=user, reply_channel=self.reply_channel)
+        ChannelSubscription.objects.create(user=user, reply_channel=self.reply_channel, client_ip=client_ip)
 
     def call_args(self):
         def normalize_call_args(channel, topic, payload):
@@ -463,14 +464,18 @@ class GroupReceiverTests(WSTestCase):
         super().setUp()
         self.member = UserFactory()
         self.user = UserFactory()
-        self.group = GroupFactory(members=[self.member])
+        self.group = GroupFactory(members=[self.member], latitude=48.0, longitude=12.0)
 
-    def test_receive_group_changes(self):
+    @patch('karrot.utils.geoip.geoip')
+    def test_receive_group_changes(self, geoip):
+        geoip.lat_lon.return_value = [49.0, 13.0]
         client = self.connect_as(self.member)
 
         name = faker.name()
         self.group.name = name
         self.group.save()
+
+        ip_to_lat_lon.cache_clear()
 
         response = client.messages_by_topic.get('groups:group_detail')[0]
         self.assertEqual(response['payload']['name'], name)
@@ -478,6 +483,7 @@ class GroupReceiverTests(WSTestCase):
 
         response = client.messages_by_topic.get('groups:group_preview')[0]
         self.assertEqual(response['payload']['name'], name)
+        self.assertEqual(response['payload']['distance'], 141)
         self.assertTrue('description' not in response['payload'])
 
         self.assertEqual(len(client.messages), 2)
