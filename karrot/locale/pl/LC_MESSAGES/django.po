@@ -515,7 +515,7 @@ msgstr "Straciłaś/-eś uprawnienia do edycji w %(group_name)s!"
 
 #: karrot/groups/templates/user_lost_editor_role.html.jinja2:173
 msgid ""
-"You've don't have enough trust from fellow group members anymore to grant "
+"You don't have enough trust from fellow group members anymore to grant "
 "you <strong>editing permissions</strong>."
 msgstr ""
 "Nie masz już wystarczającego zaufania od innych członków grupy, aby przyznać"
