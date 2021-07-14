@@ -1,10 +1,14 @@
-from django_filters import rest_framework as filters
+from django_filters import rest_framework as filters, ModelChoiceFilter
 
 from karrot.places.models import PlaceType
 
 
+def groups_queryset(request):
+    return request.user.groups.all()
+
+
 class PlaceTypeFilter(filters.FilterSet):
-    group = filters.NumberFilter(field_name='group')
+    group = ModelChoiceFilter(queryset=groups_queryset)
 
     class Meta:
         model = PlaceType
