@@ -13,7 +13,7 @@ from rest_framework.fields import Field
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from karrot.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
-    GroupNotificationType
+    GroupNotificationType, Trust
 from karrot.history.models import History, HistoryTypus
 from karrot.utils.misc import find_changed
 from karrot.utils.validators import prevent_reserved_names
@@ -54,11 +54,13 @@ class GroupMembershipInfoSerializer(serializers.ModelSerializer):
             'roles',
             'active',
             'trusted_by',
+            'trust',
         )
-        read_only_fields = ['created_at', 'roles', 'added_by']
+        read_only_fields = ['created_at', 'roles', 'added_by', 'trust']
 
     active = serializers.SerializerMethodField()
     trusted_by = serializers.SerializerMethodField()
+    trust = serializers.SerializerMethodField()
 
     def get_active(self, membership):
         return membership.inactive_at is None
@@ -66,6 +68,20 @@ class GroupMembershipInfoSerializer(serializers.ModelSerializer):
     def get_trusted_by(self, membership):
         # make it mean what the old trusted_by field meant: user ids that trusted them for editor role
         return [t.given_by_id for t in membership.trust_set.all() if t.role == GROUP_EDITOR]
+
+    @extend_schema_field(OpenApiTypes.OBJECT)
+    def get_trust(self, membership):
+        return [GroupMembershipTrustSerializer(t).data for t in membership.trust_set.all()]
+
+
+class GroupMembershipTrustSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Trust
+        fields = (
+            'given_by',
+            'role',
+            'created_at',
+        )
 
 
 class GroupHistorySerializer(GroupBaseSerializer):
