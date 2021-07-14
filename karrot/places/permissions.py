@@ -1,7 +1,5 @@
 from rest_framework import permissions
 
-from karrot.groups.models import Group
-
 
 class TypeHasNoPlaces(permissions.BasePermission):
     message = 'You cannot delete a type which has places'
@@ -23,15 +21,6 @@ class CannotChangeGroup(permissions.BasePermission):
 
 class IsGroupEditor(permissions.BasePermission):
     message = 'You need to be a group editor'
-
-    def has_permission(self, request, view):
-        if view.action == 'create':
-            if 'group' in request.data:
-                group = Group.objects.filter(id=request.data['group'], members=request.user).first()
-                return group.is_editor(request.user) if group else False
-            else:
-                return False
-        return True
 
     def has_object_permission(self, request, view, obj):
         if view.action in ('partial_update', 'destroy'):

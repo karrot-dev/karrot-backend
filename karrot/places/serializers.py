@@ -38,6 +38,13 @@ class PlaceTypeSerializer(serializers.ModelSerializer):
             'updated_at',
         ]
 
+    def validate_group(self, group):
+        if not group.is_member(self.context['request'].user):
+            raise PermissionDenied('You are not a member of this group.')
+        if not group.is_editor(self.context['request'].user):
+            raise PermissionDenied('You need to be a group editor')
+        return group
+
     def save(self, **kwargs):
         if not self.instance:
             return super().save(**kwargs)
@@ -158,9 +165,9 @@ class PlaceSerializer(serializers.ModelSerializer):
 
     def validate_group(self, group):
         if not group.is_member(self.context['request'].user):
-            raise PermissionDenied(_('You are not a member of this group.'))
+            raise PermissionDenied('You are not a member of this group.')
         if not group.is_editor(self.context['request'].user):
-            raise PermissionDenied(_('You need to be a group editor'))
+            raise PermissionDenied('You need to be a group editor')
         return group
 
     def validate_weeks_in_advance(self, w):
