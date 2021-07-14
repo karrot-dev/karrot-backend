@@ -66,12 +66,22 @@ class ActivitySeriesManager(models.Manager.from_queryset(ActivitySeriesQuerySet)
 class ActivitySeries(BaseModel):
     objects = ActivitySeriesManager()
 
+    class Meta:
+        constraints = [
+            CheckConstraint(
+                check=Q(max_open_participants=None) | ~Q(require_role=None),
+                name='series_only_open_participants_if_require_role',
+            )
+        ]
+
     place = models.ForeignKey('places.Place', related_name='series', on_delete=models.CASCADE)
     max_participants = models.PositiveIntegerField(blank=True, null=True)
+    max_open_participants = models.PositiveIntegerField(null=True)
     rule = models.TextField()
     start_date = models.DateTimeField()
     description = models.TextField(blank=True)
     duration = DurationField(null=True)
+    require_role = models.CharField(null=True, blank=False, max_length=100)
 
     activity_type = models.ForeignKey(
         ActivityType,
@@ -92,6 +102,8 @@ class ActivitySeries(BaseModel):
             date=CustomDateTimeTZRange(date, date + (self.duration or default_duration)),
             has_duration=self.duration is not None,
             max_participants=self.max_participants,
+            max_open_participants=self.max_open_participants,
+            require_role=self.require_role,
             series=self,
             place=self.place,
             description=self.description,

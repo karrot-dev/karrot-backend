@@ -523,6 +523,8 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
             'id',
             'activity_type',
             'max_participants',
+            'max_open_participants',
+            'require_role',
             'place',
             'rule',
             'start_date',
