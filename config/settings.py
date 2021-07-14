@@ -408,6 +408,7 @@ INFLUXDB_TIMEOUT = 5
 INFLUXDB_USE_THREADING = True
 
 SENTRY_DSN = options['SENTRY_DSN']
+SENTRY_ENVIRONMENT = options['SENTRY_ENVIRONMENT']
 SENTRY_CLIENT_DSN = options['SENTRY_CLIENT_DSN']
 SENTRY_RELEASE = options['SENTRY_RELEASE']
 
@@ -418,6 +419,7 @@ if SENTRY_DSN:
         traces_sample_rate=0.1,
         send_default_pii=False,
         release=SENTRY_RELEASE,
+        environment=SENTRY_ENVIRONMENT,
     )
 
 SECRET_KEY = options['SECRET_KEY']
