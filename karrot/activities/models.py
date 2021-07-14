@@ -391,6 +391,9 @@ class Activity(BaseModel, ConversationMixin):
     def is_recent(self):
         return self.date.start >= timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
+    def empty_participants_count(self):
+        return self.max_participants - self.participants.filter(activityparticipant__is_open=False).count()
+
     def is_full(self, is_open):
         if is_open and not self.require_role:
             raise Exception('Activity does not support open participants')
