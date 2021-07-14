@@ -726,16 +726,16 @@ msgstr ""
 msgid "Market"
 msgstr ""
 
-#: karrot/places/serializers.py:173
+#: karrot/places/serializers.py:171
 msgid "Set at least one week in advance"
 msgstr ""
 
-#: karrot/places/serializers.py:176
+#: karrot/places/serializers.py:174
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr ""
 
-#: karrot/places/serializers.py:228
+#: karrot/places/serializers.py:226
 msgid "You are already subscribed to this place"
 msgstr ""
 
