@@ -6,6 +6,7 @@ from rest_framework.exceptions import PermissionDenied
 
 from karrot.history.models import History, HistoryTypus
 from karrot.places.models import Place as PlaceModel, PlaceSubscription, PlaceType, PlaceStatus
+from karrot.places.place_types import default_place_types
 from karrot.utils.misc import find_changed
 
 
@@ -119,6 +120,11 @@ class PlaceSerializer(serializers.ModelSerializer):
     status = serializers.ChoiceField(choices=PlaceStatus.choices, default=PlaceModel.DEFAULT_STATUS)
     is_subscribed = serializers.SerializerMethodField()
 
+    def __init__(self, *args, **kwargs):
+        super(PlaceSerializer, self).__init__(*args, **kwargs)
+        # override the field definition so we can provide a default option
+        self.fields['place_type'].required = False
+
     def get_is_subscribed(self, place) -> bool:
         return any(u == self.context['request'].user for u in place.subscribers.all())
 
@@ -141,6 +147,14 @@ class PlaceSerializer(serializers.ModelSerializer):
         )
         place.group.refresh_active_status()
         return place
+
+    def validate(self, attrs):
+        if not self.instance and not attrs.get('place_type'):
+            """creating place without place type, we'll provide a default"""
+            group = attrs.get('group')
+            place_type_name = next(iter(default_place_types))
+            attrs['place_type'] = group.place_types.get(name=place_type_name)
+        return attrs
 
     def validate_group(self, group):
         if not group.is_member(self.context['request'].user):
