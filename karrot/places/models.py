@@ -36,7 +36,7 @@ class PlaceType(BaseModel, UpdatedAtMixin):
         unique_together = ('group', 'name')
 
     def get_translated_name(self):
-        # the translations are collected via activity_types.py
+        # the translations are collected via place_types.py
         return _(self.name) if self.name_is_translatable else self.name
 
 
