@@ -159,6 +159,8 @@ class ActivitySeries(BaseModel):
         if old:
             description_changed = old.description != self.description
             max_participants_changed = old.max_participants != self.max_participants
+            max_open_participants_changed = old.max_open_participants != self.max_open_participants
+            require_role_changed = old.require_role != self.require_role
             duration_changed = old.duration != self.duration
             if description_changed or max_participants_changed or duration_changed:
                 for activity in self.activities.upcoming():
@@ -166,6 +168,10 @@ class ActivitySeries(BaseModel):
                         activity.description = self.description
                     if max_participants_changed and old.max_participants == activity.max_participants:
                         activity.max_participants = self.max_participants
+                    if max_open_participants_changed and old.max_open_participants == activity.max_open_participants:
+                        activity.max_open_participants = self.max_open_participants
+                    if require_role_changed and old.require_role == activity.require_role:
+                        activity.require_role = self.require_role
                     if duration_changed:
                         if self.duration:
                             activity.has_duration = True
