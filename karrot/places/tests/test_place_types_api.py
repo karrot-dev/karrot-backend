@@ -96,7 +96,7 @@ class TestPlaceTypesAPI(APITestCase, ExtractPaginationMixin):
         place = PlaceFactory(place_type=self.place_type)
         response = self.client.delete(f'/api/place-types/{self.place_type.id}/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
-        # make sure we can delete it if we get rid of the activity
+        # make sure we can delete it if we get rid of the place
         place.delete()
         response = self.client.delete(f'/api/place-types/{self.place_type.id}/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.data)
