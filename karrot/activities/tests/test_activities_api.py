@@ -540,7 +540,7 @@ class TestActivitiesWithRequiredRolesAPI(APITestCase):
         response = self.client.post('/api/activities/{}/add/'.format(self.activity.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
-    def test_can_join_specifiying_is_open(self):
+    def test_can_join_specifying_is_open(self):
         self.client.force_login(user=self.approved_member)
         response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'open': False})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
