@@ -15,6 +15,7 @@ from versatileimagefield.fields import VersatileImageField
 from karrot.activities.activity_types import default_activity_types
 from karrot.base.base_models import BaseModel, LocationModel
 from karrot.conversations.models import ConversationMixin
+from karrot.groups.roles import GROUP_EDITOR
 from karrot.history.models import History, HistoryTypus
 from karrot.activities.models import Activity, ActivityType
 from karrot.places.models import PlaceType
@@ -325,6 +326,7 @@ class GroupMembership(BaseModel, DirtyFieldsMixin):
 class Trust(BaseModel):
     membership = models.ForeignKey('groups.GroupMembership', on_delete=models.CASCADE)
     given_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='trust_given')
+    role = models.CharField(max_length=100, default=GROUP_EDITOR)
 
     class Meta:
-        unique_together = (('membership', 'given_by'), )
+        unique_together = (('membership', 'given_by', 'role'), )

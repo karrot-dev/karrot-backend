@@ -19,6 +19,7 @@ from karrot.utils.misc import find_changed
 from karrot.utils.validators import prevent_reserved_names
 from . import roles
 from karrot.utils.geoip import geoip_is_available, get_client_ip, ip_to_lat_lon
+from .roles import GROUP_EDITOR
 
 
 @extend_schema_field(OpenApiTypes.STR)
@@ -276,6 +277,10 @@ class AgreementAgreeSerializer(serializers.ModelSerializer):
         if not UserAgreement.objects.filter(user=user, agreement=instance).exists():
             UserAgreement.objects.create(user=user, agreement=instance)
         return instance
+
+
+class TrustUserSerializer(serializers.Serializer):
+    role = serializers.CharField(default=GROUP_EDITOR)  # default so it works with non-trust-for-role aware frontend
 
 
 @extend_schema_field(OpenApiTypes.INT)

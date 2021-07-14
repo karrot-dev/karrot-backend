@@ -22,7 +22,7 @@ from karrot.groups.models import Agreement, Group as GroupModel, GroupMembership
 from karrot.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer, GroupJoinSerializer, \
     GroupLeaveSerializer, TimezonesSerializer, GroupMembershipInfoSerializer, \
     AgreementSerializer, AgreementAgreeSerializer, GroupMembershipAddNotificationTypeSerializer, \
-    GroupMembershipRemoveNotificationTypeSerializer
+    GroupMembershipRemoveNotificationTypeSerializer, TrustUserSerializer
 from karrot.utils.serializers import EmptySerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
 
@@ -194,7 +194,7 @@ class GroupViewSet(
         permission_classes=(IsAuthenticated, IsOtherUser),
         url_name='trust-user',
         url_path='users/(?P<user_id>[^/.]+)/trust',
-        serializer_class=EmptySerializer
+        serializer_class=TrustUserSerializer
     )
     def trust_user(self, request, pk, user_id):
         """trust the user in a group"""
@@ -202,9 +202,13 @@ class GroupViewSet(
         membership = get_object_or_404(GroupMembership.objects, group=pk, user=user_id)
         self.check_object_permissions(request, membership)
 
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
         trust, created = Trust.objects.get_or_create(
             membership=membership,
             given_by=self.request.user,
+            role=serializer.data['role'],
         )
         if not created:
             raise ValidationError(_('You already gave trust to this user'))
