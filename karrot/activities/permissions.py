@@ -1,9 +1,6 @@
 from django.conf import settings
 from rest_framework import permissions
 
-from karrot.groups.models import Group
-from karrot.places.models import Place
-
 
 class IsUpcoming(permissions.BasePermission):
     message = 'The activity is in the past.'
@@ -73,16 +70,6 @@ class IsRecentActivity(permissions.BasePermission):
 
 class IsGroupEditor(permissions.BasePermission):
     message = 'You need to be a group editor'
-
-    def has_permission(self, request, view):
-        if view.action == 'create':
-            if 'group' in request.data:
-                group = Group.objects.filter(id=request.data['group'], members=request.user).first()
-                return group.is_editor(request.user) if group else False
-            elif 'place' in request.data:
-                place = Place.objects.filter(id=request.data['place'], group__members=request.user).first()
-                return place.group.is_editor(request.user) if place else False
-        return True
 
     def has_object_permission(self, request, view, obj):
         if view.action in ('partial_update', 'destroy'):

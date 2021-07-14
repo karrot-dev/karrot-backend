@@ -43,6 +43,11 @@ class GroupFactory(DjangoModelFactory):
                 self.photo = upload
                 self.save()
 
+    @post_generation
+    def add_default_types(self, created, extracted, **kwargs):
+        # this feels like abusing the factory system as this is not actually a field, but hey ho!
+        self.create_default_types()
+
     name = Sequence(lambda n: ' '.join(['Group', str(n), faker.name()]))
     description = LazyAttribute(lambda x: faker.sentence(nb_words=40))
     public_description = LazyAttribute(lambda x: faker.sentence(nb_words=20))

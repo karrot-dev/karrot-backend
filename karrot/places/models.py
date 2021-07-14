@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.db import models
+from django.utils.translation import gettext as _
 
-from karrot.base.base_models import BaseModel, LocationModel
+from karrot.base.base_models import BaseModel, LocationModel, UpdatedAtMixin
 from karrot.conversations.models import ConversationMixin
 
 
@@ -11,6 +12,32 @@ class PlaceStatus(models.TextChoices):
     ACTIVE = 'active'
     DECLINED = 'declined'
     ARCHIVED = 'archived'
+
+
+class PlaceTypeStatus(models.TextChoices):
+    ACTIVE = 'active'
+    ARCHIVED = 'archived'
+
+
+class PlaceType(BaseModel, UpdatedAtMixin):
+    DEFAULT_STATUS = PlaceTypeStatus.ACTIVE.value
+
+    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='place_types')
+    name = models.CharField(max_length=80)
+    name_is_translatable = models.BooleanField(default=True)
+    icon = models.CharField(max_length=100)
+    status = models.CharField(
+        choices=PlaceTypeStatus.choices,
+        max_length=100,
+        default=DEFAULT_STATUS,
+    )
+
+    class Meta:
+        unique_together = ('group', 'name')
+
+    def get_translated_name(self):
+        # the translations are collected via place_types.py
+        return _(self.name) if self.name_is_translatable else self.name
 
 
 class Place(BaseModel, LocationModel, ConversationMixin):
@@ -24,6 +51,12 @@ class Place(BaseModel, LocationModel, ConversationMixin):
     description = models.TextField(blank=True)
     weeks_in_advance = models.PositiveIntegerField(default=4)
     status = models.CharField(choices=PlaceStatus.choices, max_length=20, default=DEFAULT_STATUS)
+
+    place_type = models.ForeignKey(
+        PlaceType,
+        related_name='places',
+        on_delete=models.CASCADE,
+    )
 
     subscribers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
