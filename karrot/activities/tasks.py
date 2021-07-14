@@ -1,6 +1,6 @@
 from babel.dates import format_time, format_datetime
 from dateutil.relativedelta import relativedelta
-from django.db.models import F, QuerySet
+from django.db.models import F, QuerySet, Q
 from django.utils import timezone, translation
 from django.utils.text import Truncator
 from django.utils.translation import gettext as _
@@ -129,7 +129,7 @@ def fetch_activity_notification_data_for_group(group):
     empty = {'num_participants': 0}
     not_full = {'num_participants__gt': 0, 'num_participants__lt': F('max_participants')}
 
-    activities = Activity.objects.exclude_disabled().annotate_num_participants().filter(
+    group_activities = Activity.objects.exclude_disabled().annotate_num_participants().filter(
         place__status=PlaceStatus.ACTIVE.value,
         place__group=group,
     ).order_by('date')
@@ -143,22 +143,30 @@ def fetch_activity_notification_data_for_group(group):
     )
 
     for user in users:
-        subscribed_places_activities = activities.filter(place__placesubscription__user=user)
+        membership = group.groupmembership_set.get(user=user)
 
-        tonight_empty = subscribed_places_activities.filter(**tonight, **empty)
-        tomorrow_empty = subscribed_places_activities.filter(**tomorrow, **empty)
-        base_tonight_not_full = subscribed_places_activities.filter(**tonight, **not_full)
-        base_tomorrow_not_full = subscribed_places_activities.filter(**tomorrow, **not_full)
+        activities = group_activities.filter(
+            # either where it doesn't require a role, or the user has the required role
+            Q(require_role=None) | Q(require_role__in=membership.roles)
+        ).filter(
+            # only the places they subscribed to
+            place__placesubscription__user=user,
+        )
+
+        tonight_empty = activities.filter(**tonight, **empty)
+        tomorrow_empty = activities.filter(**tomorrow, **empty)
+        base_tonight_not_full = activities.filter(**tonight, **not_full)
+        base_tomorrow_not_full = activities.filter(**tomorrow, **not_full)
 
         has_empty_activities = any(v.count() > 0 for v in [tonight_empty, tomorrow_empty])
 
-        user_activities = Activity.objects.filter(
+        joined_activities = Activity.objects.filter(
             place__group=group,
             participants__in=[user],
         ).order_by('date')
 
-        tonight_user = user_activities.filter(**tonight)
-        tomorrow_user = user_activities.filter(**tomorrow)
+        tonight_user = joined_activities.filter(**tonight)
+        tomorrow_user = joined_activities.filter(**tomorrow)
 
         tonight_not_full = base_tonight_not_full.exclude(participants__in=[user])
         tomorrow_not_full = base_tomorrow_not_full.exclude(participants__in=[user])
