@@ -29,8 +29,8 @@ class ActivityType(BaseModel, UpdatedAtMixin):
     name = models.CharField(max_length=80)
     name_is_translatable = models.BooleanField(default=True)
     colour = models.CharField(max_length=6)
-    icon = models.CharField(max_length=32)
-    feedback_icon = models.CharField(max_length=32)
+    icon = models.CharField(max_length=100)
+    feedback_icon = models.CharField(max_length=100)
     has_feedback = models.BooleanField(default=True)
     has_feedback_weight = models.BooleanField(default=True)
     status = models.CharField(

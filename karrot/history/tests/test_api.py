@@ -89,7 +89,13 @@ class TestHistoryAPIWithExistingGroup(APITestCase, ExtractPaginationMixin):
 
     def test_create_place(self):
         self.client.force_login(self.member)
-        self.client.post('/api/places/', {'name': 'xyzabc', 'group': self.group.id})
+        self.client.post(
+            '/api/places/', {
+                'name': 'xyzabc',
+                'group': self.group.id,
+                'place_type': self.group.place_types.first().id,
+            }
+        )
         response = self.get_results(history_url)
         self.assertEqual(response.data[0]['typus'], 'STORE_CREATE')
 

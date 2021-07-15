@@ -1,12 +1,16 @@
-from django_filters import rest_framework as filters
+from django_filters import rest_framework as filters, ModelChoiceFilter
 from django.db.models import Q
 
 from karrot.base.filters import ISODateTimeRangeFromToRangeFilter
 from karrot.activities.models import Activity, ActivitySeries, Feedback, ActivityType
 
 
+def groups_queryset(request):
+    return request.user.groups.all()
+
+
 class ActivityTypeFilter(filters.FilterSet):
-    group = filters.NumberFilter(field_name='group')
+    group = ModelChoiceFilter(queryset=groups_queryset)
 
     class Meta:
         model = ActivityType

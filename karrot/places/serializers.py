@@ -5,8 +5,85 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
 from karrot.history.models import History, HistoryTypus
-from karrot.places.models import Place as PlaceModel, PlaceStatus, PlaceSubscription
+from karrot.places.models import Place as PlaceModel, PlaceSubscription, PlaceType, PlaceStatus
 from karrot.utils.misc import find_changed
+
+
+class PlaceTypeHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlaceType
+        fields = '__all__'
+
+
+class PlaceTypeSerializer(serializers.ModelSerializer):
+    updated_message = serializers.CharField(write_only=True, required=False)
+
+    class Meta:
+        model = PlaceType
+        fields = [
+            'id',
+            'name',
+            'name_is_translatable',
+            'icon',
+            'status',
+            'group',
+            "created_at",
+            'updated_at',
+            'updated_message',
+        ]
+        read_only_fields = [
+            'id',
+            'created_at',
+            'updated_at',
+        ]
+
+    def validate_group(self, group):
+        if not group.is_member(self.context['request'].user):
+            raise PermissionDenied('You are not a member of this group.')
+        if not group.is_editor(self.context['request'].user):
+            raise PermissionDenied('You need to be a group editor')
+        return group
+
+    def save(self, **kwargs):
+        if not self.instance:
+            return super().save(**kwargs)
+
+        updated_message = self.validated_data.pop('updated_message', None)
+
+        place_type = self.instance
+        changed_data = find_changed(place_type, self.validated_data)
+        self._validated_data = changed_data
+        skip_update = len(self.validated_data.keys()) == 0
+        if skip_update:
+            return self.instance
+
+        before_data = PlaceTypeHistorySerializer(place_type).data
+        place_type = super().save(**kwargs)
+        after_data = PlaceTypeHistorySerializer(place_type).data
+
+        if before_data != after_data:
+            History.objects.create(
+                typus=HistoryTypus.PLACE_TYPE_MODIFY,
+                group=place_type.group,
+                users=[self.context['request'].user],
+                payload={k: self.initial_data.get(k)
+                         for k in changed_data.keys()},
+                before=before_data,
+                after=after_data,
+                message=updated_message,
+            )
+        return place_type
+
+    def create(self, validated_data):
+        place_type = super().create(validated_data)
+        History.objects.create(
+            typus=HistoryTypus.PLACE_TYPE_CREATE,
+            group=place_type.group,
+            users=[self.context['request'].user],
+            payload=self.initial_data,
+            after=PlaceTypeHistorySerializer(place_type).data,
+        )
+        return place_type
 
 
 class PlaceHistorySerializer(serializers.ModelSerializer):
@@ -30,6 +107,7 @@ class PlaceSerializer(serializers.ModelSerializer):
             'status',
             'is_subscribed',
             'subscribers',
+            'place_type',
         ]
         extra_kwargs = {
             'name': {
@@ -38,6 +116,9 @@ class PlaceSerializer(serializers.ModelSerializer):
             'description': {
                 'trim_whitespace': False,
                 'max_length': settings.DESCRIPTION_MAX_LENGTH,
+            },
+            'place_type': {
+                'required': False,
             },
         }
         read_only_fields = [
@@ -71,11 +152,18 @@ class PlaceSerializer(serializers.ModelSerializer):
         place.group.refresh_active_status()
         return place
 
+    def validate(self, attrs):
+        if not self.instance and not attrs.get('place_type'):
+            """creating place without place type, we'll provide a default"""
+            group = attrs.get('group')
+            attrs['place_type'] = group.place_types.get(name='Unspecified')
+        return attrs
+
     def validate_group(self, group):
         if not group.is_member(self.context['request'].user):
-            raise PermissionDenied(_('You are not a member of this group.'))
+            raise PermissionDenied('You are not a member of this group.')
         if not group.is_editor(self.context['request'].user):
-            raise PermissionDenied(_('You need to be a group editor'))
+            raise PermissionDenied('You need to be a group editor')
         return group
 
     def validate_weeks_in_advance(self, w):
