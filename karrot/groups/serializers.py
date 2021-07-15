@@ -300,7 +300,7 @@ class AgreementAgreeSerializer(serializers.ModelSerializer):
         return instance
 
 
-class TrustUserSerializer(serializers.Serializer):
+class TrustActionSerializer(serializers.Serializer):
     role = serializers.CharField(default=GROUP_EDITOR)  # default so it works with non-trust-for-role aware frontend
 
 

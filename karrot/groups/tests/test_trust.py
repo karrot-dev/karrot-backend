@@ -208,6 +208,33 @@ class TestTrustAPI(APITestCase):
             ).exists()
         )
 
+    def test_trust_can_be_revoked_for_role(self):
+        membership = GroupMembership.objects.get(user=self.member2, group=self.group)
+        Trust.objects.create(membership=membership, given_by=self.member1, role=GROUP_EDITOR)
+        Trust.objects.create(membership=membership, given_by=self.member1, role='anewrole')
+        self.client.force_login(user=self.member1)
+
+        url = reverse('group-trust-user', args=(self.group.id, self.member2.id))
+        response = self.client.delete(url, {'role': 'anewrole'})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(
+            Trust.objects.filter(
+                membership__group=self.group,
+                membership__user=self.member2,
+                given_by=self.member1,
+                role='anewrole',
+            ).exists()
+        )
+        self.assertTrue(
+            Trust.objects.filter(
+                membership__group=self.group,
+                membership__user=self.member2,
+                given_by=self.member1,
+                role=GROUP_EDITOR,
+            ).exists()
+        )
+
     def test_trust_that_has_not_been_given_cannot_be_revoked(self):
         GroupMembership.objects.get(user=self.member2, group=self.group)
         self.client.force_login(user=self.member1)
