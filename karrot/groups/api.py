@@ -8,7 +8,6 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, BasePermission
@@ -202,18 +201,9 @@ class GroupViewSet(
         self.check_permissions(request)
         membership = get_object_or_404(GroupMembership.objects, group=pk, user=user_id)
         self.check_object_permissions(request, membership)
-
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(membership, data=request.data)
         serializer.is_valid(raise_exception=True)
-
-        trust, created = Trust.objects.get_or_create(
-            membership=membership,
-            given_by=self.request.user,
-            role=serializer.data['role'],
-        )
-        if not created:
-            raise ValidationError(_('You already gave trust to this user'))
-
+        self.perform_update(serializer)
         return Response(data={})
 
     @extend_schema(parameters=[OpenApiParameter('user_id', OpenApiTypes.INT, OpenApiParameter.PATH)])
@@ -223,18 +213,10 @@ class GroupViewSet(
         self.check_permissions(request)
         membership = get_object_or_404(GroupMembership.objects, group=pk, user=user_id)
         self.check_object_permissions(request, membership)
-
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(membership, data=request.data)
         serializer.is_valid(raise_exception=True)
-
         try:
-            trust = Trust.objects.get(
-                membership=membership,
-                given_by=self.request.user,
-                role=serializer.data['role'],
-            )
-            trust.delete()
-
+            self.perform_update(serializer)
             return Response(data={})
         except Trust.DoesNotExist:
             return Response(status=status.HTTP_403_FORBIDDEN)

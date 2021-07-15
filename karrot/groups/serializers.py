@@ -302,8 +302,40 @@ class AgreementAgreeSerializer(serializers.ModelSerializer):
         return instance
 
 
-class TrustActionSerializer(serializers.Serializer):
-    role = serializers.CharField(default=GROUP_EDITOR)  # default so it works with non-trust-for-role aware frontend
+class TrustActionSerializer(serializers.ModelSerializer):
+    """Responsible for both creating and destroying trust"""
+    class Meta:
+        model = GroupMembership
+        fields = ('role', )
+
+    # default so it works with non-trust-for-role aware frontend
+    role = serializers.CharField(default=GROUP_EDITOR)
+
+    def validate_role(self, role):
+        group = self.instance.group
+        role_names = [r['name'] for r in group.roles]
+        if role not in role_names:
+            raise ValidationError(f'Invalid role "{role}" for group, available roles are {role_names}')
+        return role
+
+    def update(self, membership, validated_data):
+        request = self.context['request']
+        user = request.user
+        params = dict(
+            membership=membership,
+            given_by=user,
+            role=validated_data['role'],
+        )
+
+        if request.method == 'POST':
+            trust, created = Trust.objects.get_or_create(**params)
+            if not created:
+                raise ValidationError('You already gave trust to this user')
+
+        elif request.method == 'DELETE':
+            Trust.objects.get(**params).delete()
+
+        return membership
 
 
 @extend_schema_field(OpenApiTypes.INT)

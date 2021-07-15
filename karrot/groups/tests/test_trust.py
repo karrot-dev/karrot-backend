@@ -1,4 +1,4 @@
-from unittest.mock import ANY
+from unittest.mock import ANY, patch, PropertyMock
 
 from dateutil.relativedelta import relativedelta
 from django.core import mail
@@ -9,7 +9,7 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
 
 from karrot.groups.factories import GroupFactory
-from karrot.groups.models import GroupMembership, Trust
+from karrot.groups.models import GroupMembership, Trust, Group
 from karrot.groups.roles import GROUP_EDITOR
 from karrot.history.models import History, HistoryTypus
 from karrot.users.factories import UserFactory
@@ -140,7 +140,7 @@ class TestTrustAPI(APITestCase):
         url = reverse('group-trust-user', args=(self.group.id, self.member2.id))
         response = self.client.post(url)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertTrue(
             Trust.objects.filter(
                 membership__group=self.group,
@@ -150,19 +150,21 @@ class TestTrustAPI(APITestCase):
             ).exists()
         )
 
-    def test_give_trust_for_role(self):
+    @patch.object(Group, 'roles', new_callable=PropertyMock)
+    def test_give_trust_for_role(self, roles):
+        roles.return_value = [{'name': GROUP_EDITOR}, {'name': 'someotherrole'}]
         self.client.force_login(user=self.member1)
 
         url = reverse('group-trust-user', args=(self.group.id, self.member2.id))
-        response = self.client.post(url, {'role': 'somerole'})
+        response = self.client.post(url, {'role': 'someotherrole'})
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertTrue(
             Trust.objects.filter(
                 membership__group=self.group,
                 membership__user=self.member2,
                 given_by=self.member1,
-                role='somerole',
+                role='someotherrole',
             ).exists()
         )
 
@@ -199,7 +201,7 @@ class TestTrustAPI(APITestCase):
         url = reverse('group-trust-user', args=(self.group.id, self.member2.id))
         response = self.client.delete(url)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertFalse(
             Trust.objects.filter(
                 membership__group=self.group,
@@ -208,22 +210,24 @@ class TestTrustAPI(APITestCase):
             ).exists()
         )
 
-    def test_trust_can_be_revoked_for_role(self):
+    @patch.object(Group, 'roles', new_callable=PropertyMock)
+    def test_trust_can_be_revoked_for_role(self, roles):
+        roles.return_value = [{'name': GROUP_EDITOR}, {'name': 'someotherrole'}]
         membership = GroupMembership.objects.get(user=self.member2, group=self.group)
         Trust.objects.create(membership=membership, given_by=self.member1, role=GROUP_EDITOR)
-        Trust.objects.create(membership=membership, given_by=self.member1, role='anewrole')
+        Trust.objects.create(membership=membership, given_by=self.member1, role='someotherrole')
         self.client.force_login(user=self.member1)
 
         url = reverse('group-trust-user', args=(self.group.id, self.member2.id))
-        response = self.client.delete(url, {'role': 'anewrole'})
+        response = self.client.delete(url, {'role': 'someotherrole'})
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertFalse(
             Trust.objects.filter(
                 membership__group=self.group,
                 membership__user=self.member2,
                 given_by=self.member1,
-                role='anewrole',
+                role='someotherrole',
             ).exists()
         )
         self.assertTrue(

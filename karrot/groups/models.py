@@ -119,7 +119,7 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
 
     @property
     def roles(self):
-        return [{'name': GROUP_EDITOR}]
+        return [{'name': GROUP_EDITOR}]  # valid roles for the group
 
     def __str__(self):
         return 'Group {}'.format(self.name)
