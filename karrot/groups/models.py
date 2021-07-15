@@ -117,6 +117,10 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
     def conversation_supports_threads(self):
         return True
 
+    @property
+    def roles(self):
+        return [{'name': GROUP_EDITOR}]
+
     def __str__(self):
         return 'Group {}'.format(self.name)
 
