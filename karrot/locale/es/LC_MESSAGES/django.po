@@ -50,15 +50,15 @@ msgstr "Actividad"
 msgid "Task"
 msgstr "Tarea"
 
-#: karrot/activities/serializers.py:132
+#: karrot/activities/serializers.py:139
 msgid "Must be a list"
 msgstr "Tiene que haber una lista"
 
-#: karrot/activities/serializers.py:133
+#: karrot/activities/serializers.py:140
 msgid "Must be a list with one or two values"
 msgstr "Tiene que haber una lista con uno o dos valores"
 
-#: karrot/activities/serializers.py:134
+#: karrot/activities/serializers.py:141
 msgid "Must pass start value"
 msgstr "Tiene que pasar un valor inicial"
 
@@ -133,7 +133,6 @@ msgstr "Necesitas verificar tu dirección de correo electrónico"
 
 #: karrot/applications/api.py:36 karrot/groups/api.py:52
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
-#: karrot/places/api.py:19 karrot/places/serializers.py:78
 msgid "You need to be a group editor"
 msgstr "Necesitas ser editora grupal"
 
@@ -321,23 +320,23 @@ msgstr "No puede depositar confianza a una misma"
 msgid "You already gave trust to this user"
 msgstr "Ya has confiado en dicho usuario"
 
-#: karrot/groups/serializers.py:35
+#: karrot/groups/serializers.py:33
 msgid "Unknown timezone"
 msgstr "Zona horaria desconocida"
 
-#: karrot/groups/serializers.py:43
+#: karrot/groups/serializers.py:41
 msgid "Playground"
 msgstr "Zona de relax"
 
-#: karrot/groups/serializers.py:152 karrot/groups/serializers.py:252
+#: karrot/groups/serializers.py:150 karrot/groups/serializers.py:249
 msgid "You cannot manage agreements"
 msgstr "No puedes gestionar acuerdos"
 
-#: karrot/groups/serializers.py:154
+#: karrot/groups/serializers.py:152
 msgid "Agreement is not for this group"
 msgstr "El acuerdo no es para este grupo"
 
-#: karrot/groups/serializers.py:250
+#: karrot/groups/serializers.py:247
 msgid "You are not in this group"
 msgstr "No eres miembro de este grupo"
 
@@ -522,11 +521,9 @@ msgstr "¡Has perdido los permisos de edición en %(group_name)s!"
 
 #: karrot/groups/templates/user_lost_editor_role.html.jinja2:173
 msgid ""
-"You don't have enough trust from fellow group members anymore to grant "
-"you <strong>editing permissions</strong>."
+"You don't have enough trust from fellow group members anymore to grant you "
+"<strong>editing permissions</strong>."
 msgstr ""
-"No tienes suficiente confianza de la gente de tu grupo para seguir teniendo "
-"<strong>permisos de edición</strong>."
 
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:170
 msgid "Hey, we're really missing you!"
@@ -589,7 +586,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "Ya se envió una invitación a este correo electrónico. "
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
-#: karrot/offers/serializers.py:91 karrot/places/serializers.py:76
+#: karrot/offers/serializers.py:91
 msgid "You are not a member of this group."
 msgstr "No eres un miembro de este grupo"
 
@@ -767,16 +764,40 @@ msgstr ""
 "Responder a este correo directamente, <a href=\"%(offer_url)s\">verlo en "
 "%(site_name)s</a>, o <a href=\"%(mute_url)s\">silenciar la conversación</a>."
 
-#: karrot/places/serializers.py:83
+#: karrot/places/place_types.py:5
+msgid "Unspecified"
+msgstr ""
+
+#: karrot/places/place_types.py:6
+msgid "Store"
+msgstr ""
+
+#: karrot/places/place_types.py:7
+msgid "Sharing Point"
+msgstr ""
+
+#: karrot/places/place_types.py:8
+msgid "Meeting Place"
+msgstr ""
+
+#: karrot/places/place_types.py:9
+msgid "Restaurant"
+msgstr ""
+
+#: karrot/places/place_types.py:10
+msgid "Market"
+msgstr ""
+
+#: karrot/places/serializers.py:171
 msgid "Set at least one week in advance"
 msgstr "Establecer al menos con una semana de anticipación"
 
-#: karrot/places/serializers.py:86
+#: karrot/places/serializers.py:174
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr "No organices con más de %(count)ssemanas de adelanto"
 
-#: karrot/places/serializers.py:138
+#: karrot/places/serializers.py:226
 msgid "You are already subscribed to this place"
 msgstr "Ya estás suscrita a este lugar"
 
