@@ -46,15 +46,15 @@ msgstr ""
 msgid "Task"
 msgstr ""
 
-#: karrot/activities/serializers.py:132
+#: karrot/activities/serializers.py:139
 msgid "Must be a list"
 msgstr "सूची होनी चाहिए"
 
-#: karrot/activities/serializers.py:133
+#: karrot/activities/serializers.py:140
 msgid "Must be a list with one or two values"
 msgstr "एक या दो मूल्यों वाली सूची होनी चाहिए"
 
-#: karrot/activities/serializers.py:134
+#: karrot/activities/serializers.py:141
 msgid "Must pass start value"
 msgstr "शुरुवाती राशि चाहिए"
 
@@ -127,7 +127,6 @@ msgstr "आपके पास एक सत्यापित ईमेल प�
 
 #: karrot/applications/api.py:36 karrot/groups/api.py:52
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
-#: karrot/places/api.py:19 karrot/places/serializers.py:78
 msgid "You need to be a group editor"
 msgstr "आपका समूह संपादक होना जरूरी है"
 
@@ -317,23 +316,23 @@ msgstr "आप खुद को भरोसा नहीं दे सकते
 msgid "You already gave trust to this user"
 msgstr "आपने पहले ही इस उपयोगकर्ता को भरोसा दिया है"
 
-#: karrot/groups/serializers.py:35
+#: karrot/groups/serializers.py:33
 msgid "Unknown timezone"
 msgstr "अज्ञात समयक्षेत्र"
 
-#: karrot/groups/serializers.py:43
+#: karrot/groups/serializers.py:41
 msgid "Playground"
 msgstr "खेल-मैदान"
 
-#: karrot/groups/serializers.py:152 karrot/groups/serializers.py:252
+#: karrot/groups/serializers.py:150 karrot/groups/serializers.py:249
 msgid "You cannot manage agreements"
 msgstr "आप समझौतों का प्रबंधन नहीं कर सकते"
 
-#: karrot/groups/serializers.py:154
+#: karrot/groups/serializers.py:152
 msgid "Agreement is not for this group"
 msgstr "समझौता इस समूह के लिए नहीं है"
 
-#: karrot/groups/serializers.py:250
+#: karrot/groups/serializers.py:247
 msgid "You are not in this group"
 msgstr "आप इस समूह में नहीं हैं"
 
@@ -514,8 +513,8 @@ msgstr ""
 
 #: karrot/groups/templates/user_lost_editor_role.html.jinja2:173
 msgid ""
-"You don't have enough trust from fellow group members anymore to grant "
-"you <strong>editing permissions</strong>."
+"You don't have enough trust from fellow group members anymore to grant you "
+"<strong>editing permissions</strong>."
 msgstr ""
 
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:170
@@ -575,7 +574,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "इस ई-मेल पते पर एक आमंत्रण पहले ही भेज दिया गया है |"
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
-#: karrot/offers/serializers.py:91 karrot/places/serializers.py:76
+#: karrot/offers/serializers.py:91
 msgid "You are not a member of this group."
 msgstr "आप इस समूह के सदस्य नहीं हैं।"
 
@@ -752,16 +751,40 @@ msgstr ""
 "सीधे इस ईमेल का उत्तर दें, इसे <a href=\"%(offer_url)s\">%(site_name)s पर "
 "देखें</a>, या <a href=\"%(mute_url)s\">बातचीत को चुप करें</a>।"
 
-#: karrot/places/serializers.py:83
+#: karrot/places/place_types.py:5
+msgid "Unspecified"
+msgstr ""
+
+#: karrot/places/place_types.py:6
+msgid "Store"
+msgstr ""
+
+#: karrot/places/place_types.py:7
+msgid "Sharing Point"
+msgstr ""
+
+#: karrot/places/place_types.py:8
+msgid "Meeting Place"
+msgstr ""
+
+#: karrot/places/place_types.py:9
+msgid "Restaurant"
+msgstr ""
+
+#: karrot/places/place_types.py:10
+msgid "Market"
+msgstr ""
+
+#: karrot/places/serializers.py:171
 msgid "Set at least one week in advance"
 msgstr "कम से कम एक हफ्ते पहले सेट करें |"
 
-#: karrot/places/serializers.py:86
+#: karrot/places/serializers.py:174
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr "%(count)s सप्ताह से अधिक पहले से सेट न करें"
 
-#: karrot/places/serializers.py:138
+#: karrot/places/serializers.py:226
 msgid "You are already subscribed to this place"
 msgstr "आप इस स्थान पर पहले से ही सदस्य हैं"
 
