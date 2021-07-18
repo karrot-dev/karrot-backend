@@ -140,14 +140,6 @@ jobs:
       - slack/status:
           fail_only: true
 
-  deploy-foodsharing-taiwan:
-    <<: *defaults
-    steps:
-      - checkout
-      - run: ./deploy.sh foodsharing-taiwan
-      - slack/status:
-          fail_only: true
-
   update-locales:
     <<: *defaults
     steps:
@@ -237,13 +229,6 @@ workflows:
           requires:
             - test
       - deploy-karrot-world:
-          filters:
-            branches:
-              only:
-                - production
-          requires:
-            - test
-      - deploy-foodsharing-taiwan:
           filters:
             branches:
               only:
