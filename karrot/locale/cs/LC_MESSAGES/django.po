@@ -760,27 +760,27 @@ msgstr ""
 
 #: karrot/places/place_types.py:5
 msgid "Unspecified"
-msgstr ""
+msgstr "Neurčeno"
 
 #: karrot/places/place_types.py:6
 msgid "Store"
-msgstr ""
+msgstr "Obchod"
 
 #: karrot/places/place_types.py:7
 msgid "Sharing Point"
-msgstr ""
+msgstr "Bod sdílení"
 
 #: karrot/places/place_types.py:8
 msgid "Meeting Place"
-msgstr ""
+msgstr "Místo setkání"
 
 #: karrot/places/place_types.py:9
 msgid "Restaurant"
-msgstr ""
+msgstr "Restaurace"
 
 #: karrot/places/place_types.py:10
 msgid "Market"
-msgstr ""
+msgstr "Tržiště"
 
 #: karrot/places/serializers.py:171
 msgid "Set at least one week in advance"
