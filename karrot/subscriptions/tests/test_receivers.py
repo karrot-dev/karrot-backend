@@ -29,6 +29,7 @@ from karrot.activities.models import Activity, to_range
 from karrot.places.factories import PlaceFactory
 from karrot.subscriptions.models import ChannelSubscription, \
     PushSubscription, PushSubscriptionPlatform
+from karrot.tests.utils import run_deferred_tasks
 from karrot.users.factories import UserFactory, VerifiedUserFactory
 from karrot.utils.geoip import ip_to_lat_lon
 from karrot.utils.tests.fake import faker
@@ -150,7 +151,7 @@ class ConversationReceiverTests(WSTestCase):
         author_client = self.connect_as(author)
 
         # add a message to the conversation
-        with self.captureOnCommitCallbacks(execute=True):
+        with run_deferred_tasks(self):
             message = ConversationMessage.objects.create(conversation=conversation, content='yay', author=author)
 
         # hopefully they receive it!
@@ -213,7 +214,9 @@ class ConversationReceiverTests(WSTestCase):
         # login and connect
         client = self.connect_as(user)
 
-        conversation.leave(user)
+        with run_deferred_tasks(self):
+            conversation.leave(user)
+
         messages = client.messages_by_topic
         self.assertEqual(len(messages['conversations:leave']), 1, messages['conversations:leave'])
         self.assertEqual(messages['conversations:leave'][0]['payload'], {'id': conversation.id})
@@ -238,7 +241,8 @@ class ConversationReceiverTests(WSTestCase):
         # login and connect
         client = self.connect_as(user)
 
-        conversation.join(joining_user)
+        with run_deferred_tasks(self):
+            conversation.join(joining_user)
 
         response = client.messages[0]
 
@@ -255,7 +259,8 @@ class ConversationReceiverTests(WSTestCase):
         # login and connect
         client = self.connect_as(user)
 
-        conversation.leave(leaving_user)
+        with run_deferred_tasks(self):
+            conversation.leave(leaving_user)
 
         response = client.messages_by_topic['conversations:conversation'][0]
         self.assertEqual(response['payload']['participants'], [user.id])
@@ -267,8 +272,9 @@ class ConversationReceiverTests(WSTestCase):
         participant = conversation.conversationparticipant_set.get(user=user)
         client = self.connect_as(user)
 
-        participant.seen_up_to = message
-        participant.save()
+        with run_deferred_tasks(self):
+            participant.seen_up_to = message
+            participant.save()
 
         messages = client.messages_by_topic
         self.assertEqual(len(messages['status']), 1, messages['status'])
@@ -296,7 +302,7 @@ class ConversationThreadReceiverTests(WSTestCase):
         op_client = self.connect_as(op_user)
         author_client = self.connect_as(author)
 
-        with self.captureOnCommitCallbacks(execute=True):
+        with run_deferred_tasks(self):
             reply = ConversationMessage.objects.create(
                 conversation=conversation,
                 thread=thread,
@@ -387,8 +393,9 @@ class ConversationThreadReceiverTests(WSTestCase):
         participant = thread.participants.get(user=op_author)
         client = self.connect_as(op_author)
 
-        participant.seen_up_to = reply
-        participant.save()
+        with run_deferred_tasks(self):
+            participant.seen_up_to = reply
+            participant.save()
 
         messages = client.messages_by_topic
         self.assertEqual(len(messages['status']), 1, messages['status'])
@@ -414,7 +421,7 @@ class ConversationMessageReactionReceiverTests(WSTestCase):
         client = self.connect_as(user)
 
         # create reaction
-        with self.captureOnCommitCallbacks(execute=True):
+        with run_deferred_tasks(self):
             ConversationMessageReaction.objects.create(
                 message=message,
                 user=reaction_user,
@@ -450,7 +457,7 @@ class ConversationMessageReactionReceiverTests(WSTestCase):
         # login and connect
         client = self.connect_as(user)
 
-        with self.captureOnCommitCallbacks(execute=True):
+        with run_deferred_tasks(self):
             reaction.delete()
 
         # check if conversation update was received
@@ -472,8 +479,9 @@ class GroupReceiverTests(WSTestCase):
         client = self.connect_as(self.member)
 
         name = faker.name()
-        self.group.name = name
-        self.group.save()
+        with run_deferred_tasks(self):
+            self.group.name = name
+            self.group.save()
 
         ip_to_lat_lon.cache_clear()
 
@@ -492,8 +500,9 @@ class GroupReceiverTests(WSTestCase):
         client = self.connect_as(self.user)
 
         name = faker.name()
-        self.group.name = name
-        self.group.save()
+        with run_deferred_tasks(self):
+            self.group.name = name
+            self.group.save()
 
         response = client.messages_by_topic.get('groups:group_preview')[0]
         self.assertEqual(response['payload']['name'], name)
@@ -514,17 +523,17 @@ class GroupMembershipReceiverTests(WSTestCase):
         joining_client = self.connect_as(self.user)
         nonmember_client = self.connect_as(UserFactory())
 
-        with self.captureOnCommitCallbacks(execute=True):
+        with run_deferred_tasks(self):
             self.group.add_member(self.user)
 
         self.assertEqual([m['topic'] for m in member_client.messages], [
             'groups:group_detail',
+            'groups:group_preview',
+            'groups:user_joined',
             'conversations:conversation',
             'notifications:notification',
             'status',
             'history:history',
-            'groups:group_preview',
-            'groups:user_joined',
         ])
 
         self.assertEqual(
@@ -572,7 +581,7 @@ class GroupMembershipReceiverTests(WSTestCase):
         leave_client = self.connect_as(self.member)
         stay_client = self.connect_as(self.user)
 
-        with self.captureOnCommitCallbacks(execute=True):
+        with run_deferred_tasks(self):
             self.group.remove_member(self.member)
 
         self.assertEqual([m['topic'] for m in leave_client.messages], [
@@ -616,8 +625,9 @@ class GroupMembershipReceiverTests(WSTestCase):
         membership = self.group.add_member(self.user)
         client = self.connect_as(self.member)
 
-        membership.add_roles([roles.GROUP_EDITOR])
-        membership.save()
+        with run_deferred_tasks(self):
+            membership.add_roles([roles.GROUP_EDITOR])
+            membership.save()
 
         self.assertEqual([m['topic'] for m in client.messages], [
             'notifications:notification',
@@ -640,7 +650,8 @@ class ApplicationReceiverTests(WSTestCase):
     def test_member_receives_application_create(self):
         client = self.connect_as(self.member)
 
-        application = ApplicationFactory(user=self.user, group=self.group)
+        with run_deferred_tasks(self):
+            application = ApplicationFactory(user=self.user, group=self.group)
 
         messages = client.messages_by_topic['applications:update']
         self.assertEqual(len(messages), 1)
@@ -657,7 +668,8 @@ class ApplicationReceiverTests(WSTestCase):
         # mark notification as read
         meta = self.member.notificationmeta
         meta.marked_at = timezone.now()
-        meta.save()
+        with run_deferred_tasks(self):
+            meta.save()
 
         messages = client.messages_by_topic['status']
         self.assertEqual(len(messages), 1, messages)
@@ -668,8 +680,9 @@ class ApplicationReceiverTests(WSTestCase):
 
         client = self.connect_as(self.member)
 
-        application.status = 'accepted'
-        application.save()
+        with run_deferred_tasks(self):
+            application.status = 'accepted'
+            application.save()
 
         messages = client.messages_by_topic['applications:update']
         self.assertEqual(len(messages), 1)
@@ -689,8 +702,9 @@ class ApplicationReceiverTests(WSTestCase):
 
         client = self.connect_as(self.user)
 
-        application.status = 'accepted'
-        application.save()
+        with run_deferred_tasks(self):
+            application.status = 'accepted'
+            application.save()
 
         messages = client.messages_by_topic['applications:update']
         self.assertEqual(len(messages), 1)
@@ -712,7 +726,8 @@ class InvitationReceiverTests(WSTestCase):
     def test_receive_invitation_updates(self):
         client = self.connect_as(self.member)
 
-        invitation = Invitation.objects.create(email='bla@bla.com', group=self.group, invited_by=self.member)
+        with run_deferred_tasks(self):
+            invitation = Invitation.objects.create(email='bla@bla.com', group=self.group, invited_by=self.member)
 
         response = client.messages_by_topic.get('invitations:invitation')[0]
         self.assertEqual(response['payload']['email'], invitation.email)
@@ -726,7 +741,8 @@ class InvitationReceiverTests(WSTestCase):
         client = self.connect_as(self.member)
 
         id = invitation.id
-        invitation.accept(user)
+        with run_deferred_tasks(self):
+            invitation.accept(user)
 
         response = next(r for r in client.messages if r['topic'] == 'invitations:invitation_accept')
         self.assertEqual(response['payload']['id'], id)
@@ -744,7 +760,8 @@ class PlaceReceiverTests(WSTestCase):
 
         name = faker.name()
         self.place.name = name
-        self.place.save()
+        with run_deferred_tasks(self):
+            self.place.save()
 
         response = client.messages_by_topic.get('places:place')[0]
         self.assertEqual(response['payload']['name'], name)
@@ -765,15 +782,17 @@ class ActivityReceiverTests(WSTestCase):
 
         # change property
         date = to_range(faker.future_datetime(end_date='+30d', tzinfo=timezone.utc))
-        self.activity.date = date
-        self.activity.save()
+        with run_deferred_tasks(self):
+            self.activity.date = date
+            self.activity.save()
 
         response = client.messages_by_topic.get('activities:activity')[0]
         self.assertEqual(parse(response['payload']['date'][0]), date.start)
 
         # join
         client = self.connect_as(self.member)
-        self.activity.add_participant(self.member)
+        with run_deferred_tasks(self):
+            self.activity.add_participant(self.member)
 
         response = client.messages_by_topic.get('activities:activity')[0]
         self.assertEqual(response['payload']['participants'], [self.member.id])
@@ -783,7 +802,8 @@ class ActivityReceiverTests(WSTestCase):
 
         # leave
         client = self.connect_as(self.member)
-        self.activity.remove_participant(self.member)
+        with run_deferred_tasks(self):
+            self.activity.remove_participant(self.member)
 
         response = client.messages_by_topic.get('activities:activity')[0]
         self.assertEqual(response['payload']['participants'], [])
@@ -794,8 +814,10 @@ class ActivityReceiverTests(WSTestCase):
         self.activity.add_participant(self.member)
         Notification.objects.all().delete()
         client = self.connect_as(self.member)
-        self.activity.is_done = True
-        self.activity.save()
+
+        with run_deferred_tasks(self):
+            self.activity.is_done = True
+            self.activity.save()
 
         messages = client.messages_by_topic
         self.assertEqual(len(messages['status']), 2, messages['status'])
@@ -808,10 +830,11 @@ class ActivityReceiverTests(WSTestCase):
         client = self.connect_as(self.member)
 
         activity_id = self.activity.id
-        self.activity.delete()
+        with run_deferred_tasks(self):
+            self.activity.delete()
 
         response = client.messages_by_topic.get('activities:activity_deleted')[0]
-        self.assertEqual(response['payload']['id'], activity_id)
+        self.assertEqual(response['payload']['id'], activity_id, response)
 
         self.assertEqual(len(client.messages), 1)
 
@@ -832,7 +855,8 @@ class ActivitySeriesReceiverTests(WSTestCase):
 
         date = faker.future_datetime(end_date='+30d', tzinfo=timezone.utc) + relativedelta(months=2)
         self.series.start_date = date
-        self.series.save()
+        with run_deferred_tasks(self):
+            self.series.save()
 
         response = client.messages_by_topic.get('activities:series')[0]
         self.assertEqual(parse(response['payload']['start_date']), date)
@@ -843,10 +867,12 @@ class ActivitySeriesReceiverTests(WSTestCase):
         client = self.connect_as(self.member)
 
         id = self.series.id
-        self.series.delete()
+        with run_deferred_tasks(self):
+            print('delete!')
+            self.series.delete()
 
         response = client.messages_by_topic.get('activities:series_deleted')[0]
-        self.assertEqual(response['payload']['id'], id)
+        self.assertEqual(response['payload']['id'], id, response)
 
         self.assertEqual(len(client.messages), 1)
 
@@ -862,8 +888,10 @@ class OfferReceiverTests(WSTestCase):
     def test_receive_offer_changes(self):
         client = self.connect_as(self.member)
 
-        self.offer.name = faker.name()
-        self.offer.save()
+        with run_deferred_tasks(self):
+            self.offer.name = faker.name()
+            self.offer.save()
+
         response = client.messages_by_topic.get('offers:offer')[0]
         self.assertEqual(response['payload']['name'], self.offer.name)
         self.assertEqual(len(client.messages), 1)
@@ -872,7 +900,8 @@ class OfferReceiverTests(WSTestCase):
         client = self.connect_as(self.member)
 
         id = self.offer.id
-        self.offer.delete()
+        with run_deferred_tasks(self):
+            self.offer.delete()
 
         response = client.messages_by_topic.get('offers:offer_deleted')[0]
         self.assertEqual(response['payload']['id'], id)
@@ -882,7 +911,8 @@ class OfferReceiverTests(WSTestCase):
         client = self.connect_as(self.other_member)
 
         id = self.offer.id
-        self.offer.archive()
+        with run_deferred_tasks(self):
+            self.offer.archive()
 
         response = client.messages_by_topic.get('offers:offer_deleted')[0]
         self.assertEqual(response['payload']['id'], id)
@@ -894,7 +924,8 @@ class OfferReceiverTests(WSTestCase):
         client.reset_messages()  # otherwise we have various conversation related messages
 
         id = self.offer.id
-        self.offer.archive()
+        with run_deferred_tasks(self):
+            self.offer.archive()
 
         response = client.messages_by_topic.get('offers:offer')[0]
         self.assertEqual(response['payload']['id'], id)
@@ -912,7 +943,8 @@ class FeedbackReceiverTests(WSTestCase):
     def test_receive_feedback_changes(self):
         client = self.connect_as(self.member)
 
-        feedback = FeedbackFactory(given_by=self.member, about=self.activity)
+        with run_deferred_tasks(self):
+            feedback = FeedbackFactory(given_by=self.member, about=self.activity)
 
         response = client.messages_by_topic.get('feedback:feedback')[0]
         self.assertEqual(response['payload']['weight'], feedback.weight)
@@ -947,7 +979,8 @@ class FinishedActivityReceiverTest(WSTestCase):
         Notification.objects.all().delete()
 
         client = self.connect_as(self.member)
-        Activity.objects.process_finished_activities()
+        with run_deferred_tasks(self):
+            Activity.objects.process_finished_activities()
 
         messages_by_topic = client.messages_by_topic
 
@@ -969,7 +1002,9 @@ class FinishedActivityReceiverTest(WSTestCase):
         self.activity.save()
 
         client = self.connect_as(self.member)
-        Activity.objects.process_finished_activities()
+
+        with run_deferred_tasks(self):
+            Activity.objects.process_finished_activities()
 
         messages_by_topic = client.messages_by_topic
 
@@ -977,13 +1012,15 @@ class FinishedActivityReceiverTest(WSTestCase):
         self.assertEqual(len(status_messages), 2)
         self.assertEqual(status_messages[1]['payload'], {'groups': {self.group.id: {'feedback_possible_count': 1}}})
 
-        self.activity.dismiss_feedback(self.member)
+        client.reset_messages()
+        with run_deferred_tasks(self):
+            self.activity.dismiss_feedback(self.member)
 
         messages_by_topic = client.messages_by_topic
 
         status_messages = messages_by_topic['status']
-        self.assertEqual(len(status_messages), 3)
-        self.assertEqual(status_messages[2]['payload'], {'groups': {self.group.id: {'feedback_possible_count': 0}}})
+        self.assertEqual(len(status_messages), 1)
+        self.assertEqual(status_messages[0]['payload'], {'groups': {self.group.id: {'feedback_possible_count': 0}}})
 
 
 class UserReceiverTest(WSTestCase):
@@ -1004,8 +1041,9 @@ class UserReceiverTest(WSTestCase):
         client = self.connect_as(self.member)
 
         name = faker.name()
-        self.member.display_name = name
-        self.member.save()
+        with run_deferred_tasks(self):
+            self.member.display_name = name
+            self.member.save()
 
         response = client.messages_by_topic.get('auth:user')[0]
         self.assertEqual(response['payload']['display_name'], name)
@@ -1018,8 +1056,9 @@ class UserReceiverTest(WSTestCase):
         client = self.connect_as(self.member)
 
         name = faker.name()
-        self.other_member.display_name = name
-        self.other_member.save()
+        with run_deferred_tasks(self):
+            self.other_member.display_name = name
+            self.other_member.save()
 
         response = client.messages_by_topic.get('users:user')[0]
         self.assertEqual(response['payload']['display_name'], name)
@@ -1034,8 +1073,9 @@ class UserReceiverTest(WSTestCase):
         client = self.connect_as(self.member)
 
         name = faker.name()
-        self.other_member.display_name = name
-        self.other_member.save()
+        with run_deferred_tasks(self):
+            self.other_member.display_name = name
+            self.other_member.save()
 
         self.assertEqual(len(client.messages), 1)
         self.assertIn('users:user', client.messages_by_topic.keys())
@@ -1056,7 +1096,8 @@ class IssueReceiverTest(WSTestCase):
         group = GroupFactory(members=[member, member2])
 
         client = self.connect_as(member)
-        IssueFactory(group=group, affected_user=member2, created_by=member)
+        with run_deferred_tasks(self):
+            IssueFactory(group=group, affected_user=member2, created_by=member)
 
         messages = client.messages_by_topic
         self.assertIn('issues:issue', messages)
@@ -1074,7 +1115,8 @@ class IssueReceiverTest(WSTestCase):
         issue = IssueFactory(group=group, affected_user=member2, created_by=member)
 
         client = self.connect_as(member)
-        vote_for_further_discussion(voting=issue.latest_voting(), user=member)
+        with run_deferred_tasks(self):
+            vote_for_further_discussion(voting=issue.latest_voting(), user=member)
 
         messages = client.messages_by_topic
         self.assertEqual(len(client.messages), 1)
@@ -1088,7 +1130,8 @@ class IssueReceiverTest(WSTestCase):
         vote_for_further_discussion(voting=issue.latest_voting(), user=member)
 
         client = self.connect_as(member)
-        issue.latest_voting().delete_votes(user=member)
+        with run_deferred_tasks(self):
+            issue.latest_voting().delete_votes(user=member)
 
         messages = client.messages_by_topic
         self.assertEqual(len(client.messages), 1)
@@ -1116,7 +1159,7 @@ class ReceiverPushTests(TestCase):
 
     def test_sends_to_push_subscribers(self, notify_subscribers):
         # add a message to the conversation
-        with self.captureOnCommitCallbacks(execute=True):
+        with run_deferred_tasks(self):
             ConversationMessage.objects.create(
                 conversation=self.conversation, content=self.content, author=self.author
             )
@@ -1128,7 +1171,7 @@ class ReceiverPushTests(TestCase):
         self.assertEqual(kwargs['fcm_options']['message_body'], self.content)
 
     def test_send_push_notification_if_active_channel_subscription(self, notify_subscribers):
-        with self.captureOnCommitCallbacks(execute=True):
+        with run_deferred_tasks(self):
             # add a channel subscription
             ChannelSubscription.objects.create(user=self.user, reply_channel='foo')
             # add a message to the conversation
@@ -1142,7 +1185,7 @@ class ReceiverPushTests(TestCase):
         self.assertEqual(len(kwargs['subscriptions']), 0)
 
     def test_send_push_notification_if_channel_subscription_is_away(self, notify_subscribers):
-        with self.captureOnCommitCallbacks(execute=True):
+        with run_deferred_tasks(self):
             # add a channel subscription to prevent the push being sent
             ChannelSubscription.objects.create(user=self.user, reply_channel='foo', away_at=timezone.now())
 
@@ -1180,7 +1223,7 @@ class GroupConversationReceiverPushTests(TestCase):
         )
 
     def test_sends_to_push_subscribers(self, notify_subscribers):
-        with self.captureOnCommitCallbacks(execute=True):
+        with run_deferred_tasks(self):
             # add a message to the conversation
             ConversationMessage.objects.create(
                 conversation=self.conversation, content=self.content, author=self.author
@@ -1202,9 +1245,10 @@ class TrustReceiverTest(WSTestCase):
         client = self.connect_as(trust_giver)
 
         membership = GroupMembership.objects.get(user=trust_receiver, group=group)
-        trust = Trust.objects.create(membership=membership, given_by=trust_giver)
 
-        trust.delete()
+        with run_deferred_tasks(self):
+            trust = Trust.objects.create(membership=membership, given_by=trust_giver)
+            trust.delete()
 
         responses = client.messages_by_topic.get('groups:group_detail')
         self.assertEqual(responses[0]['payload']['memberships'][trust_receiver.id]['trusted_by'], [trust_giver.id])

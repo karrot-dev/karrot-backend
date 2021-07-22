@@ -59,3 +59,9 @@ def execute_scheduled_tasks_immediately():
     yield
 
     disconnect_signal(task_scheduled_handler)
+
+
+@contextmanager
+def run_deferred_tasks(self):
+    with execute_scheduled_tasks_immediately(), self.captureOnCommitCallbacks(execute=True):
+        yield

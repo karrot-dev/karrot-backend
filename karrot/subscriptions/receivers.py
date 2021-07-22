@@ -6,7 +6,6 @@ from django.conf import settings
 from django.contrib.auth import user_logged_out
 from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete, post_delete
-from django.dispatch import receiver
 
 from karrot.applications.models import Application
 from karrot.applications.serializers import ApplicationSerializer
@@ -39,14 +38,12 @@ from karrot.status.helpers import unseen_notification_count, unread_conversation
     get_feedback_possible
 from karrot.subscriptions import tasks
 from karrot.subscriptions.models import ChannelSubscription
-from karrot.subscriptions.utils import send_in_channel, MockRequest
+from karrot.subscriptions.utils import send_in_channel, MockRequest, receiver_transaction_task
 from karrot.userauth.serializers import AuthUserSerializer
 from karrot.users.serializers import UserSerializer
-from karrot.utils.misc import on_transaction_commit
 
 
-@receiver(post_save, sender=ConversationMessage)
-@on_transaction_commit
+@receiver_transaction_task(post_save, sender=ConversationMessage)
 def send_messages(sender, instance, created, **kwargs):
     """When there is a message in a conversation we need to send it to any subscribed participants."""
     message = instance
@@ -92,7 +89,7 @@ def send_messages(sender, instance, created, **kwargs):
         send_in_channel(subscription.reply_channel, topic, payload)
 
 
-@receiver(post_save, sender=ConversationParticipant)
+@receiver_transaction_task(post_save, sender=ConversationParticipant)
 def send_conversation_update(sender, instance, **kwargs):
     # Update conversations object for user after updating their participation
     # (important for seen_up_to and unread_message_count)
@@ -105,7 +102,7 @@ def send_conversation_update(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic, payload)
 
 
-@receiver(post_save, sender=ConversationMeta)
+@receiver_transaction_task(post_save, sender=ConversationMeta)
 def conversation_meta_saved(sender, instance, **kwargs):
     meta = instance
     payload = ConversationMetaSerializer(meta).data
@@ -113,8 +110,7 @@ def conversation_meta_saved(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='conversations:meta', payload=payload)
 
 
-@receiver(post_save, sender=ConversationThreadParticipant)
-@on_transaction_commit
+@receiver_transaction_task(post_save, sender=ConversationThreadParticipant)
 def send_thread_update(sender, instance, created, **kwargs):
     # Update thread object for user after updating their participation
     # (important for seen_up_to and unread_message_count)
@@ -132,9 +128,7 @@ def send_thread_update(sender, instance, created, **kwargs):
         send_in_channel(subscription.reply_channel, topic, payload)
 
 
-@receiver(post_save, sender=ConversationMessageReaction)
-@receiver(post_delete, sender=ConversationMessageReaction)
-@on_transaction_commit
+@receiver_transaction_task([post_save, post_delete], sender=ConversationMessageReaction)
 def send_reaction_update(sender, instance, **kwargs):
     reaction = instance
     message = reaction.message
@@ -148,7 +142,7 @@ def send_reaction_update(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic, payload)
 
 
-@receiver(post_save, sender=ConversationParticipant)
+@receiver_transaction_task(post_save, sender=ConversationParticipant)
 def send_participant_joined(sender, instance, created, **kwargs):
     """Notify other participants when someone joins"""
     if not created:
@@ -166,7 +160,7 @@ def send_participant_joined(sender, instance, created, **kwargs):
         send_in_channel(subscription.reply_channel, topic, payload)
 
 
-@receiver(pre_delete, sender=ConversationParticipant)
+@receiver_transaction_task(pre_delete, sender=ConversationParticipant)
 def remove_participant(sender, instance, **kwargs):
     """When a user is removed from a conversation we will notify them."""
 
@@ -176,7 +170,7 @@ def remove_participant(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='conversations:leave', payload={'id': conversation.id})
 
 
-@receiver(post_delete, sender=ConversationParticipant)
+@receiver_transaction_task(post_delete, sender=ConversationParticipant)
 def send_participant_left(sender, instance, **kwargs):
     """Notify conversation participants when someone leaves"""
     conversation = instance.conversation
@@ -221,7 +215,7 @@ def send_group_preview(group):
         send_in_channel(subscription.reply_channel, topic='groups:group_preview', payload=preview_payload)
 
 
-@receiver(post_save, sender=Group)
+@receiver_transaction_task(post_save, sender=Group)
 def send_group_updates(sender, instance, **kwargs):
     group = instance
 
@@ -235,7 +229,7 @@ def send_group_updates(sender, instance, **kwargs):
 
 
 # GroupMembership
-@receiver(post_save, sender=GroupMembership)
+@receiver_transaction_task(post_save, sender=GroupMembership)
 def send_group_membership_updates(sender, instance, created, **kwargs):
     membership = instance
     group = membership.group
@@ -250,8 +244,7 @@ def send_group_membership_updates(sender, instance, created, **kwargs):
         send_group_detail(group, user=membership.user)
 
 
-@receiver(post_save, sender=GroupMembership)
-@on_transaction_commit
+@receiver_transaction_task(post_save, sender=GroupMembership)
 def send_group_membership_updates_on_commit(sender, instance, created, **kwargs):
     membership = instance
     group = membership.group
@@ -269,8 +262,7 @@ def send_group_membership_updates_on_commit(sender, instance, created, **kwargs)
             )
 
 
-@receiver(post_delete, sender=GroupMembership)
-@on_transaction_commit
+@receiver_transaction_task(post_delete, sender=GroupMembership)
 def send_group_member_left(sender, instance, **kwargs):
     membership = instance
     group = membership.group
@@ -290,7 +282,7 @@ def send_group_member_left(sender, instance, **kwargs):
 
 
 # Applications
-@receiver(post_save, sender=Application)
+@receiver_transaction_task(post_save, sender=Application)
 def send_application_updates(sender, instance, **kwargs):
     application = instance
     group = application.group
@@ -301,14 +293,13 @@ def send_application_updates(sender, instance, **kwargs):
 
 
 # Trust
-@receiver(post_save, sender=Trust)
-@receiver(post_delete, sender=Trust)
+@receiver_transaction_task([post_save, post_delete], sender=Trust)
 def send_trust_updates(sender, instance, **kwargs):
     send_group_updates(sender, instance.membership.group)
 
 
 # Invitations
-@receiver(post_save, sender=Invitation)
+@receiver_transaction_task(post_save, sender=Invitation)
 def send_invitation_updates(sender, instance, **kwargs):
     invitation = instance
     payload = InvitationSerializer(invitation).data
@@ -317,7 +308,7 @@ def send_invitation_updates(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='invitations:invitation', payload=payload)
 
 
-@receiver(pre_delete, sender=Invitation)
+@receiver_transaction_task(pre_delete, sender=Invitation)
 def send_invitation_accept(sender, instance, **kwargs):
     invitation = instance
     payload = InvitationSerializer(invitation).data
@@ -327,7 +318,7 @@ def send_invitation_accept(sender, instance, **kwargs):
 
 
 # Place
-@receiver(post_save, sender=Place)
+@receiver_transaction_task(post_save, sender=Place)
 def send_place_updates(sender, instance, **kwargs):
     place = instance
     for subscription in ChannelSubscription.objects.recent().filter(user__in=place.group.members.all()).distinct():
@@ -335,8 +326,7 @@ def send_place_updates(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='places:place', payload=payload)
 
 
-@receiver(post_save, sender=PlaceSubscription)
-@receiver(post_delete, sender=PlaceSubscription)
+@receiver_transaction_task([post_save, post_delete], sender=PlaceSubscription)
 def place_subscription_updated(sender, instance, **kwargs):
     place = instance.place
     user = instance.user
@@ -346,7 +336,7 @@ def place_subscription_updated(sender, instance, **kwargs):
 
 
 # Activities
-@receiver(post_save, sender=Activity)
+@receiver_transaction_task(post_save, sender=Activity)
 def send_activity_updates(sender, instance, **kwargs):
     activity = instance
     if activity.is_done:
@@ -359,7 +349,7 @@ def send_activity_updates(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='activities:activity', payload=payload)
 
 
-@receiver(pre_delete, sender=Activity)
+@receiver_transaction_task(pre_delete, sender=Activity)
 def send_activity_deleted(sender, instance, **kwargs):
     activity = instance
     payload = ActivitySerializer(activity).data
@@ -368,8 +358,7 @@ def send_activity_deleted(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='activities:activity_deleted', payload=payload)
 
 
-@receiver(post_save, sender=ActivityParticipant)
-@receiver(post_delete, sender=ActivityParticipant)
+@receiver_transaction_task([post_save, post_delete], sender=ActivityParticipant)
 def send_activity_participant_updates(sender, instance, **kwargs):
     activity = instance.activity
     payload = ActivitySerializer(activity).data
@@ -379,7 +368,7 @@ def send_activity_participant_updates(sender, instance, **kwargs):
 
 
 # Activity Series
-@receiver(post_save, sender=ActivitySeries)
+@receiver_transaction_task(post_save, sender=ActivitySeries)
 def send_activity_series_updates(sender, instance, **kwargs):
     series = instance
     payload = ActivitySeriesSerializer(series).data
@@ -388,7 +377,7 @@ def send_activity_series_updates(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='activities:series', payload=payload)
 
 
-@receiver(pre_delete, sender=ActivitySeries)
+@receiver_transaction_task(pre_delete, sender=ActivitySeries)
 def send_activity_series_delete(sender, instance, **kwargs):
     series = instance
     payload = ActivitySeriesSerializer(series).data
@@ -398,7 +387,7 @@ def send_activity_series_delete(sender, instance, **kwargs):
 
 
 # Activity Type
-@receiver(post_save, sender=ActivityType)
+@receiver_transaction_task(post_save, sender=ActivityType)
 def send_activity_type_updates(sender, instance, **kwargs):
     activity_type = instance
     payload = ActivityTypeSerializer(activity_type).data
@@ -407,7 +396,7 @@ def send_activity_type_updates(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='activities:type', payload=payload)
 
 
-@receiver(pre_delete, sender=ActivityType)
+@receiver_transaction_task(pre_delete, sender=ActivityType)
 def send_activity_type_delete(sender, instance, **kwargs):
     activity_type = instance
     payload = ActivityTypeSerializer(activity_type).data
@@ -417,7 +406,7 @@ def send_activity_type_delete(sender, instance, **kwargs):
 
 
 # Offer
-@receiver(post_save, sender=Offer)
+@receiver_transaction_task(post_save, sender=Offer)
 def send_offer_updates(sender, instance, created, **kwargs):
     offer = instance
     payload = OfferSerializer(offer).data
@@ -434,7 +423,7 @@ def send_offer_updates(sender, instance, created, **kwargs):
         tasks.notify_new_offer_push_subscribers(offer)
 
 
-@receiver(pre_delete, sender=Offer)
+@receiver_transaction_task(pre_delete, sender=Offer)
 def send_offer_delete(sender, instance, **kwargs):
     offer = instance
     payload = OfferSerializer(offer).data
@@ -443,7 +432,7 @@ def send_offer_delete(sender, instance, **kwargs):
 
 
 # Feedback
-@receiver(post_save, sender=Feedback)
+@receiver_transaction_task(post_save, sender=Feedback)
 def send_feedback_updates(sender, instance, **kwargs):
     feedback = instance
     for subscription in ChannelSubscription.objects.recent().filter(user__in=feedback.about.place.group.members.all()
@@ -453,7 +442,7 @@ def send_feedback_updates(sender, instance, **kwargs):
 
 
 # Users
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+@receiver_transaction_task(post_save, sender=settings.AUTH_USER_MODEL)
 def send_auth_user_updates(sender, instance, **kwargs):
     """Send full details to the user"""
     user = instance
@@ -462,13 +451,13 @@ def send_auth_user_updates(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='auth:user', payload=payload)
 
 
-@receiver(user_logged_out)
+@receiver_transaction_task(user_logged_out)
 def notify_logged_out_user(sender, user, **kwargs):
     for subscription in ChannelSubscription.objects.recent().filter(user=user):
         send_in_channel(subscription.reply_channel, topic='auth:logout', payload={})
 
 
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+@receiver_transaction_task(post_save, sender=settings.AUTH_USER_MODEL)
 def send_user_updates(sender, instance, **kwargs):
     """Send profile updates to everyone except the user"""
     user = instance
@@ -480,7 +469,7 @@ def send_user_updates(sender, instance, **kwargs):
 
 
 # History
-@receiver(history_created)
+@receiver_transaction_task(history_created)
 def send_history_updates(sender, instance, **kwargs):
     history = instance
     payload = HistorySerializer(history).data
@@ -489,7 +478,7 @@ def send_history_updates(sender, instance, **kwargs):
 
 
 # Notification
-@receiver(post_save, sender=Notification)
+@receiver_transaction_task(post_save, sender=Notification)
 def notification_saved(sender, instance, **kwargs):
     notification = instance
     payload = NotificationSerializer(notification).data
@@ -497,7 +486,7 @@ def notification_saved(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='notifications:notification', payload=payload)
 
 
-@receiver(pre_delete, sender=Notification)
+@receiver_transaction_task(pre_delete, sender=Notification)
 def notification_deleted(sender, instance, **kwargs):
     notification = instance
     payload = NotificationSerializer(notification).data
@@ -505,7 +494,7 @@ def notification_deleted(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='notifications:notification_deleted', payload=payload)
 
 
-@receiver(post_save, sender=NotificationMeta)
+@receiver_transaction_task(post_save, sender=NotificationMeta)
 def notification_meta_saved(sender, instance, **kwargs):
     meta = instance
     payload = NotificationMetaSerializer(meta).data
@@ -514,7 +503,7 @@ def notification_meta_saved(sender, instance, **kwargs):
 
 
 # Issue
-@receiver(issue_changed)
+@receiver_transaction_task(issue_changed)
 def send_issue_updates(sender, issue, **kwargs):
     for subscription in ChannelSubscription.objects.recent().filter(user__groupmembership__group=issue.group
                                                                     ).distinct():
@@ -523,7 +512,7 @@ def send_issue_updates(sender, issue, **kwargs):
 
 
 # Community Feed
-@receiver(post_save, sender=CommunityFeedMeta)
+@receiver_transaction_task(post_save, sender=CommunityFeedMeta)
 def community_feed_meta_saved(sender, instance, **kwargs):
     meta = instance
     payload = CommunityFeedMetaSerializer(meta).data
@@ -551,7 +540,7 @@ def send_conversation_status_update(subscriptions, changed_conversation=None):
             send_in_channel(subscription.reply_channel, topic='status', payload=payload)
 
 
-@receiver(new_conversation_message)
+@receiver_transaction_task(new_conversation_message)
 def new_conversation_message_to_status(sender, message, **kwargs):
     conversation = message.conversation
     send_conversation_status_update(
@@ -560,7 +549,7 @@ def new_conversation_message_to_status(sender, message, **kwargs):
     )
 
 
-@receiver(new_thread_message)
+@receiver_transaction_task(new_thread_message)
 def new_thread_message_to_status(sender, message, **kwargs):
     thread = message.thread
     send_conversation_status_update(
@@ -569,14 +558,14 @@ def new_thread_message_to_status(sender, message, **kwargs):
     )
 
 
-@receiver(post_save, sender=ConversationMeta)
+@receiver_transaction_task(post_save, sender=ConversationMeta)
 def conversation_participant_saved(sender, instance, **kwargs):
     # user opened the latest messages menu
     meta = instance
     send_conversation_status_update(ChannelSubscription.objects.recent().filter(user=meta.user))
 
 
-@receiver(conversation_marked_seen)
+@receiver_transaction_task(conversation_marked_seen)
 def conversation_marked_seen_to_status(sender, participant, **kwargs):
     conversation = participant.conversation
     send_conversation_status_update(
@@ -585,12 +574,12 @@ def conversation_marked_seen_to_status(sender, participant, **kwargs):
     )
 
 
-@receiver(thread_marked_seen)
+@receiver_transaction_task(thread_marked_seen)
 def conversation_thread_marked_to_status(sender, participant, **kwargs):
     send_conversation_status_update(ChannelSubscription.objects.recent().filter(user=participant.user).distinct())
 
 
-@receiver(post_delete, sender=ConversationParticipant)
+@receiver_transaction_task(post_delete, sender=ConversationParticipant)
 def conversation_participant_deleted(sender, instance, **kwargs):
     # user unsubscribed from the conversation
     participant = instance
@@ -611,20 +600,19 @@ def send_notification_status_update(user):
         )
 
 
-@receiver(post_save, sender=Notification)
-@receiver(post_delete, sender=Notification)
+@receiver_transaction_task([post_save, post_delete], sender=Notification)
 def notification_changed(sender, instance, **kwargs):
     notification = instance
     send_notification_status_update(user=notification.user)
 
 
-@receiver(post_save, sender=NotificationMeta)
+@receiver_transaction_task(post_save, sender=NotificationMeta)
 def notification_meta_to_status(sender, instance, **kwargs):
     notification_meta = instance
     send_notification_status_update(user=notification_meta.user)
 
 
-@receiver(post_save, sender=Application)
+@receiver_transaction_task(post_save, sender=Application)
 def application_saved(sender, instance, **kwargs):
     application = instance
     for user, subscriptions in groupby(sorted(list(
@@ -639,7 +627,7 @@ def application_saved(sender, instance, **kwargs):
             send_in_channel(subscription.reply_channel, topic='status', payload={'groups': groups})
 
 
-@receiver(post_save, sender=Activity)
+@receiver_transaction_task(post_save, sender=Activity)
 def activity_date_saved(sender, instance, **kwargs):
     activity = instance
 
@@ -660,7 +648,7 @@ def activity_date_saved(sender, instance, **kwargs):
             send_in_channel(subscription.reply_channel, topic='status', payload={'groups': groups})
 
 
-@receiver(post_save, sender=Feedback)
+@receiver_transaction_task(post_save, sender=Feedback)
 def feedback_saved(sender, instance, created, **kwargs):
     feedback = instance
 
@@ -672,7 +660,7 @@ def feedback_saved(sender, instance, created, **kwargs):
     send_feedback_possible_count(user)
 
 
-@receiver(post_save, sender=ActivityParticipant)
+@receiver_transaction_task(post_save, sender=ActivityParticipant)
 def activity_participant_saved(sender, instance, **kwargs):
     activity_participant = instance
 
