@@ -1,4 +1,5 @@
 from collections import defaultdict
+from copy import copy
 
 from itertools import groupby
 
@@ -6,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth import user_logged_out
 from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete, post_delete
+from django.dispatch import Signal, receiver
 
 from karrot.applications.models import Application
 from karrot.applications.serializers import ApplicationSerializer
@@ -19,6 +21,7 @@ from karrot.conversations.signals import thread_marked_seen, new_conversation_me
     conversation_marked_seen
 from karrot.groups.models import Group, Trust, GroupMembership
 from karrot.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer
+from karrot.groups.signals import notification_type_changed, roles_changed
 from karrot.history.models import history_created
 from karrot.history.serializers import HistorySerializer
 from karrot.invitations.models import Invitation
@@ -41,6 +44,14 @@ from karrot.subscriptions.models import ChannelSubscription
 from karrot.subscriptions.utils import send_in_channel, MockRequest, receiver_transaction_task
 from karrot.userauth.serializers import AuthUserSerializer
 from karrot.users.serializers import UserSerializer
+
+pre_delete_with_cloned_instance = Signal()
+
+
+@receiver(pre_delete)
+def clone_instance_and_forward(signal, sender, instance, **kwargs):
+    copied_instance = copy(instance)
+    pre_delete_with_cloned_instance.send(sender, instance=copied_instance, **kwargs)
 
 
 @receiver_transaction_task(post_save, sender=ConversationMessage)
@@ -160,7 +171,7 @@ def send_participant_joined(sender, instance, created, **kwargs):
         send_in_channel(subscription.reply_channel, topic, payload)
 
 
-@receiver_transaction_task(pre_delete, sender=ConversationParticipant)
+@receiver_transaction_task(pre_delete_with_cloned_instance, sender=ConversationParticipant)
 def remove_participant(sender, instance, **kwargs):
     """When a user is removed from a conversation we will notify them."""
 
@@ -219,47 +230,44 @@ def send_group_preview(group):
 def send_group_updates(sender, instance, **kwargs):
     group = instance
 
-    # avoid websocket updates if the change isn't visible to users
-    dirty_fields = group.get_dirty_fields()
-    if len(dirty_fields) == 1 and 'last_active_at' in dirty_fields:
-        return
-
     send_group_detail(group)
     send_group_preview(group)
 
 
 # GroupMembership
+@receiver_transaction_task(roles_changed)
+def send_roles_update(sender, instance, **kwargs):
+    membership = instance
+
+    send_group_detail(membership.group)
+
+
+@receiver_transaction_task(notification_type_changed)
+def send_notification_type_update(sender, instance, **kwargs):
+    membership = instance
+
+    send_group_detail(membership.group, user=membership.user)
+
+
 @receiver_transaction_task(post_save, sender=GroupMembership)
 def send_group_membership_updates(sender, instance, created, **kwargs):
     membership = instance
     group = membership.group
 
-    dirty_fields = membership.get_dirty_fields()
+    if not created:
+        return
 
-    # Send updates if the membership was created or roles changed
-    if created or 'roles' in dirty_fields.keys():
-        send_group_detail(group)
-    elif 'notification_types' in dirty_fields.keys():
-        # notification types are only visible to one user
-        send_group_detail(group, user=membership.user)
-
-
-@receiver_transaction_task(post_save, sender=GroupMembership)
-def send_group_membership_updates_on_commit(sender, instance, created, **kwargs):
-    membership = instance
-    group = membership.group
-
-    if created:
-        send_group_preview(group)
-        for subscription in ChannelSubscription.objects.recent().filter(user__in=group.members.all()):
-            send_in_channel(
-                subscription.reply_channel,
-                topic='groups:user_joined',
-                payload={
-                    'user_id': membership.user_id,
-                    'group_id': group.id,
-                }
-            )
+    send_group_detail(group)
+    send_group_preview(group)
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=group.members.all()):
+        send_in_channel(
+            subscription.reply_channel,
+            topic='groups:user_joined',
+            payload={
+                'user_id': membership.user_id,
+                'group_id': group.id,
+            }
+        )
 
 
 @receiver_transaction_task(post_delete, sender=GroupMembership)
@@ -295,7 +303,9 @@ def send_application_updates(sender, instance, **kwargs):
 # Trust
 @receiver_transaction_task([post_save, post_delete], sender=Trust)
 def send_trust_updates(sender, instance, **kwargs):
-    send_group_updates(sender, instance.membership.group)
+    group = instance.membership.group
+
+    send_group_detail(group)
 
 
 # Invitations
@@ -308,7 +318,7 @@ def send_invitation_updates(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='invitations:invitation', payload=payload)
 
 
-@receiver_transaction_task(pre_delete, sender=Invitation)
+@receiver_transaction_task(pre_delete_with_cloned_instance, sender=Invitation)
 def send_invitation_accept(sender, instance, **kwargs):
     invitation = instance
     payload = InvitationSerializer(invitation).data
@@ -349,7 +359,7 @@ def send_activity_updates(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='activities:activity', payload=payload)
 
 
-@receiver_transaction_task(pre_delete, sender=Activity)
+@receiver_transaction_task(pre_delete_with_cloned_instance, sender=Activity)
 def send_activity_deleted(sender, instance, **kwargs):
     activity = instance
     payload = ActivitySerializer(activity).data
@@ -377,7 +387,7 @@ def send_activity_series_updates(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='activities:series', payload=payload)
 
 
-@receiver_transaction_task(pre_delete, sender=ActivitySeries)
+@receiver_transaction_task(pre_delete_with_cloned_instance, sender=ActivitySeries)
 def send_activity_series_delete(sender, instance, **kwargs):
     series = instance
     payload = ActivitySeriesSerializer(series).data
@@ -396,7 +406,7 @@ def send_activity_type_updates(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='activities:type', payload=payload)
 
 
-@receiver_transaction_task(pre_delete, sender=ActivityType)
+@receiver_transaction_task(pre_delete_with_cloned_instance, sender=ActivityType)
 def send_activity_type_delete(sender, instance, **kwargs):
     activity_type = instance
     payload = ActivityTypeSerializer(activity_type).data
@@ -423,7 +433,7 @@ def send_offer_updates(sender, instance, created, **kwargs):
         tasks.notify_new_offer_push_subscribers(offer)
 
 
-@receiver_transaction_task(pre_delete, sender=Offer)
+@receiver_transaction_task(pre_delete_with_cloned_instance, sender=Offer)
 def send_offer_delete(sender, instance, **kwargs):
     offer = instance
     payload = OfferSerializer(offer).data
@@ -486,7 +496,7 @@ def notification_saved(sender, instance, **kwargs):
         send_in_channel(subscription.reply_channel, topic='notifications:notification', payload=payload)
 
 
-@receiver_transaction_task(pre_delete, sender=Notification)
+@receiver_transaction_task(pre_delete_with_cloned_instance, sender=Notification)
 def notification_deleted(sender, instance, **kwargs):
     notification = instance
     payload = NotificationSerializer(notification).data
@@ -601,7 +611,7 @@ def send_notification_status_update(user):
 
 
 @receiver_transaction_task([post_save, post_delete], sender=Notification)
-def notification_changed(sender, instance, **kwargs):
+def notification_saved_to_status(sender, instance, **kwargs):
     notification = instance
     send_notification_status_update(user=notification.user)
 

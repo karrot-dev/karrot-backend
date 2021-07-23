@@ -10,7 +10,6 @@ django-cors-headers
 django-enumfield
 django-extensions
 django-redis
-django-dirtyfields
 djangorestframework
 djangorestframework-csv
 drf-spectacular

@@ -12,6 +12,9 @@ from django.test import TestCase
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 
+from karrot.activities.factories import FeedbackFactory, ActivityFactory, \
+    ActivitySeriesFactory
+from karrot.activities.models import Activity, to_range
 from karrot.applications.factories import ApplicationFactory
 from karrot.conversations.factories import ConversationFactory
 from karrot.conversations.models import ConversationMessage, \
@@ -23,9 +26,6 @@ from karrot.invitations.models import Invitation
 from karrot.issues.factories import IssueFactory, vote_for_further_discussion
 from karrot.notifications.models import Notification
 from karrot.offers.factories import OfferFactory
-from karrot.activities.factories import FeedbackFactory, ActivityFactory, \
-    ActivitySeriesFactory
-from karrot.activities.models import Activity, to_range
 from karrot.places.factories import PlaceFactory
 from karrot.subscriptions.models import ChannelSubscription, \
     PushSubscription, PushSubscriptionPlatform
@@ -177,14 +177,10 @@ class ConversationReceiverTests(WSTestCase):
         response = ws_messages['conversations:conversation'][0]
         parse_dates(response)
         del response['payload']['participants']
-        self.assertEqual(
-            response,
-            make_conversation_broadcast(
-                conversation,
-                unread_message_count=1,
-                updated_at=response['payload']['updated_at'],  # TODO fix test
-            )
-        )
+        self.assertEqual(response, make_conversation_broadcast(
+            conversation,
+            unread_message_count=1,
+        ))
 
         # author should get message & updated conversations object too
         author_messages = author_client.messages_by_topic
@@ -192,16 +188,10 @@ class ConversationReceiverTests(WSTestCase):
         parse_dates(response)
         self.assertEqual(response, make_conversation_message_broadcast(message, is_editable=True))
 
-        # Author receives more recent `update_at` time,
-        # because their `seen_up_to` status is set after sending the message.
-        author_participant = conversation.conversationparticipant_set.get(user=author)
         response = author_messages['conversations:conversation'][0]
         parse_dates(response)
         del response['payload']['participants']
-        self.assertEqual(
-            response,
-            make_conversation_broadcast(conversation, seen_up_to=message.id, updated_at=author_participant.updated_at)
-        )
+        self.assertEqual(response, make_conversation_broadcast(conversation, seen_up_to=message.id))
 
     def tests_receive_message_on_leave(self):
         user = UserFactory()
@@ -540,11 +530,11 @@ class GroupMembershipReceiverTests(WSTestCase):
             [m['topic'] for m in joining_client.messages],
             [
                 'groups:group_detail',
+                'groups:group_preview',
+                'groups:user_joined',
                 'conversations:conversation',
                 'conversations:conversation',  # TODO: seems unnecessary!
                 'history:history',
-                'groups:group_preview',
-                'groups:user_joined',
             ]
         )
 
@@ -585,7 +575,6 @@ class GroupMembershipReceiverTests(WSTestCase):
             self.group.remove_member(self.member)
 
         self.assertEqual([m['topic'] for m in leave_client.messages], [
-            'history:history',
             'conversations:leave',
             'conversations:conversation',
             'status',
@@ -626,14 +615,18 @@ class GroupMembershipReceiverTests(WSTestCase):
         client = self.connect_as(self.member)
 
         with run_deferred_tasks(self):
-            membership.add_roles([roles.GROUP_EDITOR])
-            membership.save()
+            Trust.objects.create(membership=membership, given_by=self.member)
 
-        self.assertEqual([m['topic'] for m in client.messages], [
-            'notifications:notification',
-            'status',
-            'groups:group_detail',
-        ])
+        self.assertEqual(
+            [m['topic'] for m in client.messages],
+            [
+                'groups:group_detail',  # trust update
+                'notifications:notification',  # you became editor
+                'status',  # unread notification
+                'history:history',  # user became editor
+                'groups:group_detail',  # roles update
+            ]
+        )
 
         response = client.messages_by_topic.get('groups:group_detail')[0]
         self.assertIn(roles.GROUP_EDITOR, response['payload']['memberships'][self.user.id]['roles'])
@@ -868,7 +861,6 @@ class ActivitySeriesReceiverTests(WSTestCase):
 
         id = self.series.id
         with run_deferred_tasks(self):
-            print('delete!')
             self.series.delete()
 
         response = client.messages_by_topic.get('activities:series_deleted')[0]
@@ -1248,8 +1240,17 @@ class TrustReceiverTest(WSTestCase):
 
         with run_deferred_tasks(self):
             trust = Trust.objects.create(membership=membership, given_by=trust_giver)
-            trust.delete()
 
         responses = client.messages_by_topic.get('groups:group_detail')
         self.assertEqual(responses[0]['payload']['memberships'][trust_receiver.id]['trusted_by'], [trust_giver.id])
-        self.assertEqual(responses[1]['payload']['memberships'][trust_receiver.id]['trusted_by'], [])
+        self.assertEqual(len(responses), 1, responses)
+
+        client.reset_messages()
+
+        with run_deferred_tasks(self):
+            trust.delete()
+
+        responses = client.messages_by_topic.get('groups:group_detail')
+        self.assertEqual(responses[0]['payload']['memberships'][trust_receiver.id]['trusted_by'], [])
+        self.assertEqual(responses[1]['payload']['memberships'][trust_receiver.id]['roles'], [])
+        self.assertEqual(len(responses), 2, responses)
