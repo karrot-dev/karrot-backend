@@ -50,8 +50,9 @@ pre_delete_with_cloned_instance = Signal()
 
 @receiver(pre_delete)
 def clone_instance_and_forward(signal, sender, instance, **kwargs):
-    copied_instance = copy(instance)
-    pre_delete_with_cloned_instance.send(sender, instance=copied_instance, **kwargs)
+    if pre_delete_with_cloned_instance.has_listeners(sender):
+        copied_instance = copy(instance)
+        pre_delete_with_cloned_instance.send(sender, instance=copied_instance, **kwargs)
 
 
 @receiver_transaction_task(post_save, sender=ConversationMessage)
@@ -171,7 +172,7 @@ def send_participant_joined(sender, instance, created, **kwargs):
         send_in_channel(subscription.reply_channel, topic, payload)
 
 
-@receiver_transaction_task(pre_delete_with_cloned_instance, sender=ConversationParticipant)
+@receiver_transaction_task(post_delete, sender=ConversationParticipant)
 def remove_participant(sender, instance, **kwargs):
     """When a user is removed from a conversation we will notify them."""
 
