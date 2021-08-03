@@ -11,6 +11,7 @@
 # Sandro Eiler <sandro.eiler@posteo.de>, 2020
 # chandi <a.langecker@posteo.de>, 2020
 # Sebastian Blasius <sebastian.blasius@online.de>, 2020
+# Till R <transiflex@login.llit.eu>, 2021
 # 
 #, fuzzy
 msgid ""
@@ -18,7 +19,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
-"Last-Translator: Sebastian Blasius <sebastian.blasius@online.de>, 2020\n"
+"Last-Translator: Till R <transiflex@login.llit.eu>, 2021\n"
 "Language-Team: German (https://www.transifex.com/yunity-1/teams/68631/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -520,13 +521,15 @@ msgstr "%(group_name)s vermisst dich!"
 #: karrot/groups/templates/user_lost_editor_role.subject.jinja2:1
 #, python-format
 msgid "You lost editing permissions in %(group_name)s!"
-msgstr ""
+msgstr "Du hast Bearbeitungsrechte in %(group_name)s verloren!"
 
 #: karrot/groups/templates/user_lost_editor_role.html.jinja2:173
 msgid ""
 "You don't have enough trust from fellow group members anymore to grant you "
 "<strong>editing permissions</strong>."
 msgstr ""
+"Du hast nicht genug Vertrauen von anderen Gruppenmitgliedern, um "
+"<strong>Bearbeitungsrechte</strong> zu erhalten."
 
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:170
 msgid "Hey, we're really missing you!"
@@ -772,27 +775,27 @@ msgstr ""
 
 #: karrot/places/place_types.py:5
 msgid "Unspecified"
-msgstr ""
+msgstr "Unspezifiziert"
 
 #: karrot/places/place_types.py:6
 msgid "Store"
-msgstr ""
+msgstr "Betrieb"
 
 #: karrot/places/place_types.py:7
 msgid "Sharing Point"
-msgstr ""
+msgstr "Verteilstelle"
 
 #: karrot/places/place_types.py:8
 msgid "Meeting Place"
-msgstr ""
+msgstr "Treffpunkt"
 
 #: karrot/places/place_types.py:9
 msgid "Restaurant"
-msgstr ""
+msgstr "Restaurant"
 
 #: karrot/places/place_types.py:10
 msgid "Market"
-msgstr ""
+msgstr "Markt"
 
 #: karrot/places/serializers.py:171
 msgid "Set at least one week in advance"
