@@ -119,7 +119,7 @@ msgstr "Klick hei fir dech ze desabonéieren"
 
 #: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
-msgid "%(group_name)s upcoming pickups"
+msgid "%(group_name)s upcoming activities"
 msgstr "Zukünfteg Ofhuelungen vu %(group_name)s"
 
 #: karrot/applications/api.py:27

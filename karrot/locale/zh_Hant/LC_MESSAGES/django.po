@@ -118,7 +118,7 @@ msgstr "點擊以取消訂閱"
 
 #: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
-msgid "%(group_name)s upcoming pickups"
+msgid "%(group_name)s upcoming activities"
 msgstr "%(group_name)s的新領取任務 ! "
 
 #: karrot/applications/api.py:27

@@ -120,7 +120,7 @@ msgstr "Klikněte zde pro odhlášení odběru"
 
 #: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
-msgid "%(group_name)s upcoming pickups"
+msgid "%(group_name)s upcoming activities"
 msgstr "%(group_name)s nadcházející vyzvednutí"
 
 #: karrot/applications/api.py:27

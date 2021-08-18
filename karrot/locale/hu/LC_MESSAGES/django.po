@@ -119,7 +119,7 @@ msgstr "Kattints ide a leiratkozáshoz"
 
 #: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
-msgid "%(group_name)s upcoming pickups"
+msgid "%(group_name)s upcoming activities"
 msgstr "%(group_name)s közelgő felvételek"
 
 #: karrot/applications/api.py:27

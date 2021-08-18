@@ -118,7 +118,7 @@ msgstr "Klicka här för att avregistrera prenumerationen"
 
 #: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
-msgid "%(group_name)s upcoming pickups"
+msgid "%(group_name)s upcoming activities"
 msgstr "kommande upphämtningar i %(group_name)s"
 
 #: karrot/applications/api.py:27

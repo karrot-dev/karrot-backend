@@ -119,7 +119,7 @@ msgstr "Alklaku ĉi tie por malaboni"
 
 #: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
-msgid "%(group_name)s upcoming pickups"
+msgid "%(group_name)s upcoming activities"
 msgstr "%(group_name)sbaldaŭaj savadoj"
 
 #: karrot/applications/api.py:27
