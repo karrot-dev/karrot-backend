@@ -69,6 +69,7 @@ msgstr "Próxima%(activity_type)s"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:6
 #: karrot/activities/templates/activity_notification.html.jinja2:192
+#: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s upcoming activities"
 msgstr "Próximas actividades de %(group_name)s"
@@ -121,11 +122,6 @@ msgstr ""
 #: karrot/offers/templates/new_offer.html.jinja2:232
 msgid "Click here to unsubscribe"
 msgstr "Click aquí para darte de baja"
-
-#: karrot/activities/templates/activity_notification.subject.jinja2:1
-#, python-format
-msgid "%(group_name)s upcoming activities"
-msgstr "Recogidas futuras de %(group_name)s"
 
 #: karrot/applications/api.py:27
 msgid "You need to have a verified email address"
