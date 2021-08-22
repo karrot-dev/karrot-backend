@@ -41,7 +41,7 @@ decorator==5.0.9
 distlib==0.3.2
 django[argon2]==3.2.6
 django-anymail==8.4
-django-cors-headers==3.7.0
+django-cors-headers==3.8.0
 django-crispy-forms==1.12.0
 django-dirtyfields==1.7.0
 django-enumfield==2.0.2
@@ -58,7 +58,7 @@ drf-spectacular==0.17.3
 execnet==1.9.0
 face==20.1.1
 factory-boy==3.2.0
-faker==8.11.0
+faker==8.12.0
 filelock==3.0.12
 flake8==3.9.2
 freezegun==1.1.0
@@ -74,7 +74,7 @@ html2text==2020.1.16
 html5lib==1.1
 httpcore==0.13.6
 httptools==0.2.0
-httpx==0.18.2
+httpx==0.19.0
 huey==2.4.0
 hyperlink==21.0.0
 icalendar==4.0.7
@@ -112,7 +112,7 @@ pip-tools==6.2.0
 platformdirs==2.2.0
 pluggy==0.13.1
 pre-commit==2.14.0
-prompt-toolkit==3.0.19
+prompt-toolkit==3.0.20
 psutil==5.8.0
 psycopg2-binary==2.9.1
 ptyprocess==0.7.0
@@ -123,7 +123,7 @@ pycodestyle==2.7.0
 pycparser==2.20
 pyfcm==1.5.3
 pyflakes==2.3.1
-pygments==2.9.0
+pygments==2.10.0
 pymdown-extensions==8.2
 pyopenssl==20.0.1
 pyparsing==2.4.7
@@ -140,7 +140,7 @@ python-magic==0.4.24
 pytz==2021.1
 pyyaml==5.4.1
 redis==3.5.3
-regex==2021.8.3
+regex==2021.8.21
 requests==2.26.0
 requests-mock==1.9.3
 rfc3986[idna2008]==1.5.0
