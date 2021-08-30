@@ -3,6 +3,7 @@ from django.core import signing
 
 from karrot.conversations.models import ConversationThreadParticipant, ConversationParticipant, ConversationMessage
 from karrot.groups.models import GroupMembership
+from karrot.groups.signals import notification_type_changed
 
 
 def generate_token(user, group=None, conversation=None, thread=None, notification_type=None):
@@ -68,6 +69,8 @@ def unsubscribe_from_notification_type(user, group, notification_type):
     membership.remove_notification_types([notification_type])
     membership.save()
 
+    notification_type_changed.send(sender=GroupMembership.__class__, instance=membership)
+
 
 def unsubscribe_from_all_conversations_in_group(user, group):
     """
@@ -106,6 +109,8 @@ def unsubscribe_from_all_conversations_in_group(user, group):
     )
     membership.notification_types = []
     membership.save()
+
+    notification_type_changed.send(sender=GroupMembership.__class__, instance=membership)
 
     return {
         'conversations': conversation_count,
