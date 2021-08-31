@@ -9,7 +9,6 @@ from karrot.conversations.models import Conversation
 from karrot.groups import roles, stats
 from karrot.groups.emails import prepare_user_became_editor_email, prepare_user_lost_editor_role_email
 from karrot.groups.models import Group, GroupMembership, Trust
-from karrot.groups.signals import roles_changed
 from karrot.history.models import History, HistoryTypus
 from karrot.utils import frontend_urls
 
@@ -81,8 +80,6 @@ def trust_given(sender, instance, created, **kwargs):
 
         prepare_user_became_editor_email(user=membership.user, group=membership.group).send()
 
-        roles_changed.send(sender=GroupMembership.__class__, instance=membership)
-
         stats.member_became_editor(membership.group)
 
     stats.trust_given(membership.group)
@@ -108,8 +105,6 @@ def trust_revoked(sender, instance, **kwargs):
         )
 
         prepare_user_lost_editor_role_email(user=membership.user, group=membership.group).send()
-
-        roles_changed.send(sender=GroupMembership.__class__, instance=membership)
 
         stats.user_lost_editor_role(membership.group)
 

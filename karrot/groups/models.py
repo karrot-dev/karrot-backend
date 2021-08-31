@@ -1,4 +1,5 @@
 from datetime import timedelta
+from dirtyfields import DirtyFieldsMixin
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -67,7 +68,7 @@ class GroupManager(BaseManager.from_queryset(GroupQuerySet)):
         return super(GroupManager, self).create(*args, **kwargs)
 
 
-class Group(BaseModel, LocationModel, ConversationMixin):
+class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
     objects = GroupManager()
 
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH, unique=True)
@@ -162,7 +163,10 @@ class Group(BaseModel, LocationModel, ConversationMixin):
         )
 
     def refresh_active_status(self):
-        type(self).objects.filter(id=self.id).update(last_active_at=tz.now(), status=GroupStatus.ACTIVE.value)
+        self.last_active_at = tz.now()
+        if self.status == GroupStatus.INACTIVE.value:
+            self.status = GroupStatus.ACTIVE.value
+        self.save()
 
     def has_recent_activity(self):
         return self.last_active_at >= tz.now() - timedelta(days=settings.NUMBER_OF_DAYS_UNTIL_GROUP_INACTIVE)
@@ -269,7 +273,7 @@ class GroupMembershipQuerySet(QuerySet):
         return self.exclude(group__status=GroupStatus.PLAYGROUND)
 
 
-class GroupMembership(BaseModel):
+class GroupMembership(BaseModel, DirtyFieldsMixin):
     objects = GroupMembershipQuerySet.as_manager()
 
     group = models.ForeignKey(
