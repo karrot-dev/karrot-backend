@@ -315,23 +315,23 @@ msgstr "Nem adhatsz bizalmat magadnak"
 msgid "You already gave trust to this user"
 msgstr "Már bizalmat adtál ennek a felhasználónak"
 
-#: karrot/groups/serializers.py:34
+#: karrot/groups/serializers.py:33
 msgid "Unknown timezone"
 msgstr "Ismeretlen időzóna"
 
-#: karrot/groups/serializers.py:42
+#: karrot/groups/serializers.py:41
 msgid "Playground"
 msgstr "Játszótér"
 
-#: karrot/groups/serializers.py:151 karrot/groups/serializers.py:250
+#: karrot/groups/serializers.py:150 karrot/groups/serializers.py:249
 msgid "You cannot manage agreements"
 msgstr "Nem kezelhetsz egyezményeket"
 
-#: karrot/groups/serializers.py:153
+#: karrot/groups/serializers.py:152
 msgid "Agreement is not for this group"
 msgstr "Egyezmény nem erre a csoportra vonatkozik"
 
-#: karrot/groups/serializers.py:248
+#: karrot/groups/serializers.py:247
 msgid "You are not in this group"
 msgstr "Nem vagy benne ebben a csoportban"
 
