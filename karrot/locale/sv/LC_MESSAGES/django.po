@@ -310,23 +310,23 @@ msgstr "Du kan inte visa förtroende för dig själv"
 msgid "You already gave trust to this user"
 msgstr "Du har redan visat förtroende för den här användaren"
 
-#: karrot/groups/serializers.py:34
+#: karrot/groups/serializers.py:33
 msgid "Unknown timezone"
 msgstr "Okänd tidszon"
 
-#: karrot/groups/serializers.py:42
+#: karrot/groups/serializers.py:41
 msgid "Playground"
 msgstr "Lekplats"
 
-#: karrot/groups/serializers.py:151 karrot/groups/serializers.py:250
+#: karrot/groups/serializers.py:150 karrot/groups/serializers.py:249
 msgid "You cannot manage agreements"
 msgstr "Du kan inte hantera överenskommelser"
 
-#: karrot/groups/serializers.py:153
+#: karrot/groups/serializers.py:152
 msgid "Agreement is not for this group"
 msgstr "Överenskommelse är inte för denna grupp"
 
-#: karrot/groups/serializers.py:248
+#: karrot/groups/serializers.py:247
 msgid "You are not in this group"
 msgstr "Du är inte med i den här gruppen"
 

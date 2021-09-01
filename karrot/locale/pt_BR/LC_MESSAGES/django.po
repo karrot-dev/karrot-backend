@@ -312,23 +312,23 @@ msgstr "Você não pode dar confiança a você mesmo"
 msgid "You already gave trust to this user"
 msgstr "Você já deu confiança a esse usuário"
 
-#: karrot/groups/serializers.py:34
+#: karrot/groups/serializers.py:33
 msgid "Unknown timezone"
 msgstr "Fuso horário desconhecido"
 
-#: karrot/groups/serializers.py:42
+#: karrot/groups/serializers.py:41
 msgid "Playground"
 msgstr "Parque de diversões"
 
-#: karrot/groups/serializers.py:151 karrot/groups/serializers.py:250
+#: karrot/groups/serializers.py:150 karrot/groups/serializers.py:249
 msgid "You cannot manage agreements"
 msgstr "Você não pode administrar acordos"
 
-#: karrot/groups/serializers.py:153
+#: karrot/groups/serializers.py:152
 msgid "Agreement is not for this group"
 msgstr "Acordo não é para esse grupo"
 
-#: karrot/groups/serializers.py:248
+#: karrot/groups/serializers.py:247
 msgid "You are not in this group"
 msgstr "Você não está nesse grupo"
 
