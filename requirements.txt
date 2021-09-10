@@ -148,7 +148,7 @@ service-identity==21.1.0
 shiv==0.5.2
 six==1.16.0
 sniffio==1.2.0
-sqlparse==0.4.1
+sqlparse==0.4.2
 starlette==0.16.0
 tblib==1.7.0
 text-unidecode==1.3
