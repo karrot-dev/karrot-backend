@@ -19,6 +19,7 @@ from karrot.utils.misc import find_changed
 from karrot.utils.validators import prevent_reserved_names
 from . import roles
 from karrot.utils.geoip import geoip_is_available, get_client_ip, ip_to_lat_lon
+from .signals import notification_type_changed
 
 
 @extend_schema_field(OpenApiTypes.STR)
@@ -426,6 +427,8 @@ class GroupMembershipAddNotificationTypeSerializer(serializers.Serializer):
         notification_type = validated_data['notification_type']
         instance.add_notification_types([notification_type])
         instance.save()
+
+        notification_type_changed.send(sender=GroupMembership.__class__, instance=instance)
         return instance
 
 
@@ -436,4 +439,6 @@ class GroupMembershipRemoveNotificationTypeSerializer(serializers.Serializer):
         notification_type = validated_data['notification_type']
         instance.remove_notification_types([notification_type])
         instance.save()
+
+        notification_type_changed.send(sender=GroupMembership.__class__, instance=instance)
         return instance
