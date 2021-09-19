@@ -1,4 +1,5 @@
 import json
+from functools import wraps
 
 import sentry_sdk
 from asgiref.sync import async_to_sync
@@ -54,6 +55,14 @@ def receiver_transaction_task(signal, **kwargs):
     Can also be used outside of transactions, then it will run immediately (see docs for transaction.on_commit)
     """
     def inner(fn):
-        receiver(signal, **kwargs)(on_transaction_commit(db_task()(fn)))
+        deferred_db_task = db_task()(fn)
+
+        @wraps(deferred_db_task)
+        def db_task_without_signal(*args, **kwargs):
+            # Workaround: remove signal from kwargs because huey can't pickle it
+            del kwargs['signal']
+            return deferred_db_task(*args, **kwargs)
+
+        receiver(signal, **kwargs)(on_transaction_commit(db_task_without_signal))
 
     return inner
