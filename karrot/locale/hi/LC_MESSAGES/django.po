@@ -65,6 +65,7 @@ msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:6
 #: karrot/activities/templates/activity_notification.html.jinja2:192
+#: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s upcoming activities"
 msgstr ""
@@ -115,11 +116,6 @@ msgstr ""
 #: karrot/offers/templates/new_offer.html.jinja2:232
 msgid "Click here to unsubscribe"
 msgstr "सदस्यता समाप्त करने के लिए यहां क्लिक करें"
-
-#: karrot/activities/templates/activity_notification.subject.jinja2:1
-#, python-format
-msgid "%(group_name)s upcoming pickups"
-msgstr "%(group_name)s आगामी पिकअप"
 
 #: karrot/applications/api.py:27
 msgid "You need to have a verified email address"

@@ -5,7 +5,7 @@
 # 
 # Translators:
 # Tilmann Becker <tilmann.becker+github@gmail.com>, 2019
-# trendspotter, 2021
+# trendspotter <jirka.p@volny.cz>, 2021
 # 
 #, fuzzy
 msgid ""
@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
-"Last-Translator: trendspotter, 2021\n"
+"Last-Translator: trendspotter <jirka.p@volny.cz>, 2021\n"
 "Language-Team: Czech (https://www.transifex.com/yunity-1/teams/68631/cs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -65,6 +65,7 @@ msgstr "Připravujeme %(activity_type)s"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:6
 #: karrot/activities/templates/activity_notification.html.jinja2:192
+#: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s upcoming activities"
 msgstr "nadcházející aktivity %(group_name)s"
@@ -117,11 +118,6 @@ msgstr ""
 #: karrot/offers/templates/new_offer.html.jinja2:232
 msgid "Click here to unsubscribe"
 msgstr "Klikněte zde pro odhlášení odběru"
-
-#: karrot/activities/templates/activity_notification.subject.jinja2:1
-#, python-format
-msgid "%(group_name)s upcoming pickups"
-msgstr "%(group_name)s nadcházející vyzvednutí"
 
 #: karrot/applications/api.py:27
 msgid "You need to have a verified email address"

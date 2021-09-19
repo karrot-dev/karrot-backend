@@ -64,6 +64,7 @@ msgstr "Zukünfteg %(activity_type)s"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:6
 #: karrot/activities/templates/activity_notification.html.jinja2:192
+#: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s upcoming activities"
 msgstr "Zukünfteg Ofhuelungen vu %(group_name)s"
@@ -116,11 +117,6 @@ msgstr ""
 #: karrot/offers/templates/new_offer.html.jinja2:232
 msgid "Click here to unsubscribe"
 msgstr "Klick hei fir dech ze desabonéieren"
-
-#: karrot/activities/templates/activity_notification.subject.jinja2:1
-#, python-format
-msgid "%(group_name)s upcoming pickups"
-msgstr "Zukünfteg Ofhuelungen vu %(group_name)s"
 
 #: karrot/applications/api.py:27
 msgid "You need to have a verified email address"
@@ -519,6 +515,8 @@ msgid ""
 "You don't have enough trust from fellow group members anymore to grant you "
 "<strong>editing permissions</strong>."
 msgstr ""
+"Du hues net méi genuch Vertraue vun anere Membere fir <strong>beaarbechten "
+"ze duerfen</strong>."
 
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:170
 msgid "Hey, we're really missing you!"
@@ -759,27 +757,27 @@ msgstr ""
 
 #: karrot/places/place_types.py:5
 msgid "Unspecified"
-msgstr ""
+msgstr "Net spezifizéiert"
 
 #: karrot/places/place_types.py:6
 msgid "Store"
-msgstr ""
+msgstr "Buttek"
 
 #: karrot/places/place_types.py:7
 msgid "Sharing Point"
-msgstr ""
+msgstr "Verdeelungspunkt"
 
 #: karrot/places/place_types.py:8
 msgid "Meeting Place"
-msgstr ""
+msgstr "Treffpunkt"
 
 #: karrot/places/place_types.py:9
 msgid "Restaurant"
-msgstr ""
+msgstr "Restaurant"
 
 #: karrot/places/place_types.py:10
 msgid "Market"
-msgstr ""
+msgstr "Maart"
 
 #: karrot/places/serializers.py:171
 msgid "Set at least one week in advance"
