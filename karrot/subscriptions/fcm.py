@@ -1,6 +1,6 @@
 import logging
-from raven.contrib.django.raven_compat.models import client as sentry_client
 
+import sentry_sdk
 from django.conf import settings
 from pyfcm import FCMNotification
 
@@ -30,7 +30,8 @@ def notify_subscribers(subscriptions, fcm_options):
     success_subscriptions = [subscriptions[i] for i in success_indices]
     failure_subscriptions = [subscriptions[i] for i in failure_indices]
 
-    stats.pushed_via_subscription(success_subscriptions, failure_subscriptions)
+    if success_subscriptions or failure_subscriptions:
+        stats.pushed_via_subscription(success_subscriptions, failure_subscriptions)
 
 
 def _notify_multiple_devices(**kwargs):
@@ -45,11 +46,20 @@ def _notify_multiple_devices(**kwargs):
         return 0, 0
 
     response = fcm.notify_multiple_devices(**kwargs)
-    sentry_client.extra_context(response)
+    sentry_sdk.set_context('fcm_response', response)
     tokens = kwargs.get('registration_ids', [])
 
     # check for invalid tokens and remove any corresponding push subscriptions
     indexed_results = list(enumerate(response['results']))
+
+    # for some reason, the number of results sometimes doesn't match the number of registration ids given
+    # I don't know how to continue with token cleanup and stats reporting in this case
+    if len(tokens) != len(indexed_results):
+        sentry_sdk.capture_message('FCM results count does not match registration_id count', extras=response)
+
+        # to prevent further processing, return empty arrays as success and failure indices
+        return [], []
+
     cleanup_tokens = [
         tokens[i] for (i, result) in indexed_results if result.get('error') in
         ('InvalidRegistration', 'NotRegistered', 'MismatchSenderId', 'InvalidApnsCredential')
@@ -63,7 +73,7 @@ def _notify_multiple_devices(**kwargs):
 
     # tell Sentry if there were errors
     if len(failure_indices) > 0:
-        sentry_client.captureMessage('FCM error while sending', extra=response)
+        sentry_sdk.capture_message('FCM error while sending', extras=response)
         logger.warning(
             'FCM error while sending: {} tokens successful, {} failed, {} removed from database'.format(
                 len(success_indices), len(failure_indices), len(cleanup_tokens)

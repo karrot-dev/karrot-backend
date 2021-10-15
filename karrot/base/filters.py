@@ -21,7 +21,7 @@ class DateTimeRangeField(RangeField):
         super(DateTimeRangeField, self).__init__(fields, *args, **kwargs)
 
 
-class ISODateTimeRangeFromToRangeFilter(filters.Filter):
+class ISODateTimeRangeFromToRangeFilter(filters.IsoDateTimeFromToRangeFilter):
     """
     Filters a date time *range* field for a date time range
 
@@ -36,4 +36,4 @@ class ISODateTimeRangeFromToRangeFilter(filters.Filter):
     def filter(self, qs, value):
         if value:
             value = CustomDateTimeTZRange(value.start, value.stop)
-        return super().filter(qs, value)
+        return super(filters.RangeFilter, self).filter(qs, value)

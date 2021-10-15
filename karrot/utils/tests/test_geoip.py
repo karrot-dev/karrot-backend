@@ -8,6 +8,10 @@ from karrot.utils.geoip import ip_to_city, ip_to_lat_lon, geoip_is_available
 
 @patch('karrot.utils.geoip.geoip')
 class TestGeoUtils(TestCase):
+    def tearDown(self):
+        ip_to_lat_lon.cache_clear()
+        ip_to_city.cache_clear()
+
     def test_mock_geoip_is_available(self, geoip):
         self.assertTrue(geoip_is_available())
 

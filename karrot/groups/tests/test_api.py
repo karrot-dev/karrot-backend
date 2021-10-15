@@ -17,6 +17,7 @@ from karrot.activities.factories import ActivityFactory
 from karrot.activities.models import to_range
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory
+from karrot.utils.geoip import ip_to_lat_lon
 from karrot.utils.tests.fake import faker
 from karrot.utils.tests.images import image_path
 
@@ -26,15 +27,20 @@ class TestGroupsInfoAPI(APITestCase):
         self.user = UserFactory()
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member], application_questions='')
+        GroupFactory(application_questions='')
         self.url = '/api/groups-info/'
 
     def test_list_groups_as_anon(self):
-        response = self.client.get(self.url)
+        with self.assertNumQueries(1):
+            response = self.client.get(self.url)
+        self.assertEqual(len(response.data), 2)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_list_groups_as_user(self):
         self.client.force_login(user=self.user)
-        response = self.client.get(self.url)
+        with self.assertNumQueries(2):
+            response = self.client.get(self.url)
+        self.assertEqual(len(response.data), 2)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_retrieve_group_as_anon(self):
@@ -76,7 +82,7 @@ class TestGroupsInfoAPI(APITestCase):
         for _ in range(randint(3, 5)):
             GroupFactory().add_member(UserFactory())
         self.client.force_login(user=self.user)
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(2):
             self.client.get(self.url)
 
 
@@ -88,6 +94,9 @@ class TestGroupsInfoGeoIPAPI(APITestCase):
         self.group = GroupFactory(members=[self.member], latitude=lat, longitude=lng)
         self.url = '/api/groups-info/'
         self.client_ip = '2003:d9:ef08:4a00:4b7a:7964:8a3c:a33e'
+
+    def tearDown(self):
+        ip_to_lat_lon.cache_clear()
 
     @patch('karrot.utils.geoip.geoip')
     def test_returns_distance_via_geoip(self, geoip):

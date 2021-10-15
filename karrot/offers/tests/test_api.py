@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
 from rest_framework import status
-from rest_framework.test import APITestCase, APITransactionTestCase
+from rest_framework.test import APITestCase
 
 from karrot.groups.factories import GroupFactory
 from karrot.offers.factories import OfferFactory
@@ -163,7 +163,7 @@ class TestOffersAPI(APITestCase):
 
 
 @patch('karrot.offers.emails.prepare_email')
-class TestOffersTransactionAPI(APITransactionTestCase):
+class TestOffersTransactionAPI(APITestCase):
     def setUp(self):
         self.user = VerifiedUserFactory()
         self.another_user = VerifiedUserFactory()
@@ -181,7 +181,8 @@ class TestOffersTransactionAPI(APITransactionTestCase):
                     'image': image_file
                 }],
             }
-            response = self.client.post('/api/offers/', data=encode_data_with_images(data))
+            with self.captureOnCommitCallbacks(execute=True):
+                response = self.client.post('/api/offers/', data=encode_data_with_images(data))
             self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
             args, kwargs = prepare_email.call_args
             self.assertIsNotNone(kwargs['context']['offer_photo'])

@@ -1,6 +1,6 @@
 import os
+import subprocess
 
-import raven
 from dotenv import dotenv_values
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -11,10 +11,22 @@ def get_defaults():
 
 
 def get_git_rev():
-    try:
-        return raven.fetch_git_sha(os.path.dirname(os.pardir))
-    except raven.exceptions.InvalidGitRepository:
-        pass
+    with open(os.path.devnull, "w+") as null:
+        try:
+            release = (
+                subprocess.Popen(
+                    ["git", "rev-parse", "HEAD"],
+                    stdout=subprocess.PIPE,
+                    stderr=null,
+                    stdin=null,
+                ).communicate()[0].strip().decode("utf-8")
+            )
+        except (OSError, IOError):
+            pass
+
+    if release:
+        return release
+
     revision_file = os.path.join(BASE_DIR, 'karrot', 'COMMIT')
     if os.path.exists(revision_file):
         with open(revision_file, 'r') as f:

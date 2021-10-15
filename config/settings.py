@@ -12,8 +12,11 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import redis
+import sentry_sdk
 
 from dotenv import load_dotenv
+from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
 
 from karrot.groups import themes
 from config.options import get_options
@@ -86,11 +89,12 @@ KARROT_LOGO = options['SITE_LOGO']
 
 ASGI_APPLICATION = 'config.asgi_app.application'
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 # Django configuration
 INSTALLED_APPS = (
     # Should be loaded first
     'channels',
-    'raven.contrib.django.raven_compat',
 
     # core Django
     'django.contrib.admin',
@@ -132,9 +136,8 @@ INSTALLED_APPS = (
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_framework_swagger',
+    'drf_spectacular',
     'anymail',
-    'influxdb_metrics',
     'timezone_field',
     'django_jinja',
     'versatileimagefield',
@@ -150,12 +153,35 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ),
     'EXCEPTION_HANDLER': 'karrot.utils.misc.custom_exception_handler',
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Karrot API',
+    'DESCRIPTION': """
+Welcome to our API documentation!
+
+Check out our code on [GitHub](https://github.com/yunity/karrot-frontend)
+and talk with us on the [Foodsaving Worldwide Rocketchat](https://chat.foodsaving.world)!
+    """,
+    'VERSION': '0.1',
+    'SCHEMA_PATH_PREFIX': '/api/',
+    'SWAGGER_UI_FAVICON_HREF': '/favicon.ico',
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'defaultModelsExpandDepth': 0,
+        'docExpansion': 'none',
+    },
+    'ENUM_NAME_OVERRIDES': {
+        'PlaceStatusEnum': 'karrot.places.models.PlaceStatus.choices',
+        'GroupStatusEnum': 'karrot.groups.models.GroupStatus.choices',
+        'ActivityTypeStatusEnum': 'karrot.activities.models.ActivityTypeStatus.choices',
+    },
 }
 
 MIDDLEWARE = (
     'silk.middleware.SilkyMiddleware',
-    'influxdb_metrics.middleware.InfluxDBRequestMiddleware',
+    'karrot.utils.influxdb_middleware.InfluxDBRequestMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -208,9 +234,11 @@ DATABASES = {
         'USER': options['DATABASE_USER'],
         'PASSWORD': options['DATABASE_PASSWORD'],
         'HOST': options['DATABASE_HOST'],
-        'PORT': options['DATABASE_PORT'],
+        'PORT': options['DATABASE_PORT']
     }
 }
+
+REQUEST_DATABASE_TIMEOUT_MILLISECONDS = int(options['REQUEST_DATABASE_TIMEOUT_SECONDS']) * 1000
 
 REDIS_HOST = options['REDIS_HOST']
 REDIS_PORT = options['REDIS_PORT']
@@ -327,6 +355,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
 SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE   = True
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -376,19 +405,23 @@ INFLUXDB_PORT = options['INFLUXDB_PORT']
 INFLUXDB_USER = options['INFLUXDB_USER']
 INFLUXDB_PASSWORD = options['INFLUXDB_PASSWORD']
 INFLUXDB_DATABASE = options['INFLUXDB_NAME']
-INFLUXDB_TAGS_HOST = options['INFLUXDB_HOST_TAG']
 INFLUXDB_TIMEOUT = 5
-INFLUXDB_USE_CELERY = False
 INFLUXDB_USE_THREADING = True
 
 SENTRY_DSN = options['SENTRY_DSN']
+SENTRY_ENVIRONMENT = options['SENTRY_ENVIRONMENT']
 SENTRY_CLIENT_DSN = options['SENTRY_CLIENT_DSN']
 SENTRY_RELEASE = options['SENTRY_RELEASE']
 
 if SENTRY_DSN:
-    RAVEN_CONFIG = { 'dsn': SENTRY_DSN }
-    if SENTRY_RELEASE:
-        RAVEN_CONFIG['release'] = SENTRY_RELEASE
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration(), RedisIntegration()],
+        traces_sample_rate=0.1,
+        send_default_pii=False,
+        release=SENTRY_RELEASE,
+        environment=SENTRY_ENVIRONMENT,
+    )
 
 SECRET_KEY = options['SECRET_KEY']
 FCM_SERVER_KEY = options['FCM_SERVER_KEY']
@@ -442,54 +475,11 @@ LISTEN_CONCURRENCY = int(options['LISTEN_CONCURRENCY'])
 # twisted endpoint (for daphne)
 LISTEN_ENDPOINT = options['LISTEN_ENDPOINT']
 
+REQUEST_TIMEOUT_SECONDS = int(options['REQUEST_TIMEOUT_SECONDS'])
 
 # If you have the email_reply_trimmer_service running, set this to 'http://localhost:4567/trim' (or similar)
 # https://github.com/yunity/email_reply_trimmer_service
 EMAIL_REPLY_TRIMMER_URL = options['EMAIL_REPLY_TRIMMER_URL']
-
-if MODE == 'prod':
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'verbose': {
-                'format': '%(levelname)s %(asctime)s %(module)s '
-                          '%(process)d %(thread)d %(message)s'
-            },
-        },
-        'handlers': {
-            'sentry': {
-                'level': 'WARNING',
-                'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
-            },
-            'console': {
-                'level': 'WARNING',
-                'class': 'logging.StreamHandler',
-                'formatter': 'verbose'
-            }
-
-        },
-        'loggers': {
-            'raven': {
-                'level': 'WARNING',
-                'handlers': ['console'],
-                'propagate': False,
-            },
-            'sentry.errors': {
-                'level': 'WARNING',
-                'handlers': ['console'],
-                'propagate': False,
-            },
-            'django': {  # Disable django admin email logging by overriding
-                'level': 'ERROR',
-                'handlers': ['sentry'],
-            },
-        },
-        'root': {  # log everything unconfigured as error
-            'level': 'ERROR',
-            'handlers': ['sentry'],
-        },
-    }
 
 # NB: Keep this as the last line, and keep
 # local_settings.py out of version control

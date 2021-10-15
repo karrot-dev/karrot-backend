@@ -1,22 +1,23 @@
 from datetime import timedelta
-from dirtyfields import DirtyFieldsMixin
-from enum import Enum
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import TextField, DateTimeField, QuerySet, Count, Q, F
+from django.db.models import TextField, DateTimeField, QuerySet, Count, Q, F, Exists, OuterRef, Value
 from django.db.models.manager import BaseManager
 from django.template.loader import render_to_string
 from django.utils import timezone as tz, timezone
 from timezone_field import TimeZoneField
 from versatileimagefield.fields import VersatileImageField
 
+from karrot.activities.activity_types import default_activity_types
 from karrot.base.base_models import BaseModel, LocationModel
 from karrot.conversations.models import ConversationMixin
 from karrot.history.models import History, HistoryTypus
-from karrot.activities.models import Activity
+from karrot.activities.models import Activity, ActivityType
+from karrot.places.models import PlaceType
+from karrot.places.place_types import default_place_types
 from karrot.utils import markdown
 from karrot.groups import roles, themes
 
@@ -25,7 +26,7 @@ def default_group_features():
     return ['offers']
 
 
-class GroupStatus(Enum):
+class GroupStatus(models.TextChoices):
     ACTIVE = 'active'
     INACTIVE = 'inactive'
     PLAYGROUND = 'playground'
@@ -50,6 +51,15 @@ class GroupQuerySet(models.QuerySet):
             )
         )
 
+    def annotate_member_count(self):
+        return self.annotate(member_count=Count('groupmembership'))
+
+    def annotate_is_user_member(self, user):
+        if not user or user.is_anonymous:
+            return self.annotate(is_user_member=Value(False))
+        member = GroupMembership.objects.filter(user=user, group=OuterRef('pk'))
+        return self.annotate(is_user_member=Exists(member))
+
 
 class GroupManager(BaseManager.from_queryset(GroupQuerySet)):
     def create(self, *args, **kwargs):
@@ -57,7 +67,7 @@ class GroupManager(BaseManager.from_queryset(GroupQuerySet)):
         return super(GroupManager, self).create(*args, **kwargs)
 
 
-class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
+class Group(BaseModel, LocationModel, ConversationMixin):
     objects = GroupManager()
 
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH, unique=True)
@@ -73,7 +83,7 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
     application_questions = models.TextField(blank=True)
     status = models.CharField(
         default=GroupStatus.ACTIVE.value,
-        choices=[(status.value, status.value) for status in GroupStatus],
+        choices=GroupStatus.choices,
         max_length=100,
     )
     theme = models.TextField(
@@ -152,10 +162,7 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
         )
 
     def refresh_active_status(self):
-        self.last_active_at = tz.now()
-        if self.status == GroupStatus.INACTIVE.value:
-            self.status = GroupStatus.ACTIVE.value
-        self.save()
+        type(self).objects.filter(id=self.id).update(last_active_at=tz.now(), status=GroupStatus.ACTIVE.value)
 
     def has_recent_activity(self):
         return self.last_active_at >= tz.now() - timedelta(days=settings.NUMBER_OF_DAYS_UNTIL_GROUP_INACTIVE)
@@ -163,10 +170,10 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
     def get_application_questions_or_default(self):
         return self.application_questions or self.application_questions_default()
 
-    def application_questions_default(self):
+    def application_questions_default(self) -> str:
         return render_to_string('default_application_questions.nopreview.jinja2')
 
-    def trust_threshold_for_newcomer(self):
+    def trust_threshold_for_newcomer(self) -> int:
         count = getattr(self, '_yesterdays_member_count', None)
         if count is None:
             one_day_ago = timezone.now() - relativedelta(days=1)
@@ -185,6 +192,16 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
 
     def welcome_message_rendered(self, **kwargs):
         return markdown.render(self.welcome_message, **kwargs)
+
+    def create_default_types(self):
+
+        # activity types
+        for name, options in default_activity_types.items():
+            ActivityType.objects.get_or_create(name=name, group=self, defaults=options)
+
+        # place types
+        for name, options in default_place_types.items():
+            PlaceType.objects.get_or_create(name=name, group=self, defaults=options)
 
 
 class Agreement(BaseModel):
@@ -252,7 +269,7 @@ class GroupMembershipQuerySet(QuerySet):
         return self.exclude(group__status=GroupStatus.PLAYGROUND)
 
 
-class GroupMembership(BaseModel, DirtyFieldsMixin):
+class GroupMembership(BaseModel):
     objects = GroupMembershipQuerySet.as_manager()
 
     group = models.ForeignKey(

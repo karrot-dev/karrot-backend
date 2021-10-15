@@ -1,14 +1,8 @@
-# This is not maintained anymore
--e git+https://github.com/tiltec/django-rest-swagger@d15dd9a#egg=django-rest-swagger
-
 # Removes machine learning dependencies
+# Zulip maintains their own fork:
+# https://github.com/zulip/zulip/blob/61e1e38a00f4ef9fe4c1a302b93ce059646c62a6/requirements/common.in#L60-L61
+# Might hopefully get merged eventually: https://github.com/mailgun/talon/pull/200
 -e git+https://github.com/tiltec/talon@80886cd#egg=talon
-
-# Removes some fast-changing stats from tags in order to not overload influxdb
--e git+https://github.com/tiltec/django-influxdb-metrics@1746b8e206#egg=django-influxdb-metrics
-
-# This includes a patch to use anymail with postal
--e git+https://github.com/tiltec/django-anymail@916580#egg=django-anymail
 
 # Common PyPI dependencies
 django[argon2]
@@ -16,9 +10,9 @@ django-cors-headers
 django-enumfield
 django-extensions
 django-redis
-django-dirtyfields
 djangorestframework
 djangorestframework-csv
+drf-spectacular
 django-jinja
 hiredis
 markdown
@@ -28,7 +22,8 @@ pytz
 django-filter
 django-crispy-forms
 django-timezone-field
-raven
+django-anymail
+sentry-sdk
 furl
 pyfcm
 django-versatileimagefield
@@ -54,6 +49,7 @@ python-dotenv
 click
 httpx
 icalendar
+influxdb
 
 # dev PyPI dependencies
 pip-tools
@@ -75,3 +71,4 @@ django-silk
 yapf
 importlib-metadata # for py3.7 compat
 pre-commit
+psutil

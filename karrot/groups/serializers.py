@@ -1,24 +1,28 @@
+from typing import List
+
 import pytz
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.fields import Field
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
-from karrot.activities.activity_types import default_activity_types
 from karrot.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
     GroupNotificationType
 from karrot.history.models import History, HistoryTypus
-from karrot.activities.models import ActivityType
 from karrot.utils.misc import find_changed
 from karrot.utils.validators import prevent_reserved_names
 from . import roles
 from karrot.utils.geoip import geoip_is_available, get_client_ip, ip_to_lat_lon
+from .signals import notification_type_changed
 
 
+@extend_schema_field(OpenApiTypes.STR)
 class TimezoneField(serializers.Field):
     def to_representation(self, obj):
         return str(obj)
@@ -76,8 +80,17 @@ class GroupDetailSerializer(GroupBaseSerializer):
     timezone = TimezoneField()
 
     # setting constants
-    member_inactive_after_days = serializers.ReadOnlyField(default=settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP)
-    issue_voting_duration_days = serializers.ReadOnlyField(default=settings.VOTING_DURATION_DAYS)
+    member_inactive_after_days = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_member_inactive_after_days(_) -> int:
+        return settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP
+
+    issue_voting_duration_days = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_issue_voting_duration_days(_) -> int:
+        return settings.VOTING_DURATION_DAYS
 
     class Meta:
         model = GroupModel
@@ -140,10 +153,11 @@ class GroupDetailSerializer(GroupBaseSerializer):
             raise ValidationError(_('Agreement is not for this group'))
         return active_agreement
 
+    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_memberships(self, group):
         return {m.user_id: GroupMembershipInfoSerializer(m).data for m in group.groupmembership_set.all()}
 
-    def get_notification_types(self, group):
+    def get_notification_types(self, group) -> List[str]:
         user = self.context['request'].user
         membership = next(m for m in group.groupmembership_set.all() if m.user_id == user.id)
         return membership.notification_types
@@ -194,9 +208,8 @@ class GroupDetailSerializer(GroupBaseSerializer):
         membership.add_notification_types([GroupNotificationType.NEW_APPLICATION])
         membership.save()
 
-        # create the initial activity types
-        for name, options in default_activity_types.items():
-            ActivityType.objects.create(name=name, group=group, name_is_translatable=True, **options)
+        # create the initial types
+        group.create_default_types()
 
         History.objects.create(
             typus=HistoryTypus.GROUP_CREATE,
@@ -226,7 +239,7 @@ class AgreementSerializer(serializers.ModelSerializer):
 
     agreed = serializers.SerializerMethodField()
 
-    def get_agreed(self, agreement):
+    def get_agreed(self, agreement) -> bool:
         return UserAgreement.objects.filter(user=self.context['request'].user, agreement=agreement).exists()
 
     def validate_group(self, group):
@@ -256,7 +269,7 @@ class AgreementAgreeSerializer(serializers.ModelSerializer):
 
     agreed = serializers.SerializerMethodField()
 
-    def get_agreed(self, agreement):
+    def get_agreed(self, agreement) -> bool:
         return UserAgreement.objects.filter(user=self.context['request'].user, agreement=agreement).exists()
 
     def update(self, instance, validated_data):
@@ -266,18 +279,19 @@ class AgreementAgreeSerializer(serializers.ModelSerializer):
         return instance
 
 
+@extend_schema_field(OpenApiTypes.INT)
 class DistanceField(Field):
     """
     Returns distance of the object from users current location.
     - the object must have latitude/longitude fields
-    - the users location is detirmined via geoip if available
+    - the users location is determined via geoip if available
     - the geoip lookup is cached in an lru_cache
     - the return unit is km rounded to the nearest km
 
     It may return None under various conditions:
     - the GeoIP2 libary was not initialized (missing the files)
     - there is no request context
-    - we cannot detirmine the IP address of the client
+    - we cannot determine the IP address of the client
     - the IP address cannot be found in the database
     """
     def __init__(self, **kwargs):
@@ -341,7 +355,6 @@ class GroupPreviewSerializer(GroupBaseSerializer):
             'address',
             'latitude',
             'longitude',
-            'members',
             'member_count',
             'is_member',
             'status',
@@ -351,15 +364,24 @@ class GroupPreviewSerializer(GroupBaseSerializer):
             'distance',
         ]
 
-    def get_application_questions(self, group):
+    def get_application_questions(self, group) -> str:
         return group.get_application_questions_or_default()
 
-    def get_member_count(self, group):
+    def get_member_count(self, group) -> int:
+        if hasattr(group, 'member_count'):
+            return group.member_count
+
         return group.members.count()
 
-    def get_is_member(self, group):
+    def get_is_member(self, group) -> bool:
         user = self.context['request'].user if 'request' in self.context else None
-        return user in group.members.all() if user else False
+        if not user or user.is_anonymous:
+            return False
+
+        if hasattr(group, 'is_user_member'):
+            return group.is_user_member
+
+        return user in group.members.all()
 
 
 class GroupJoinSerializer(GroupBaseSerializer):
@@ -388,10 +410,6 @@ class TimezonesSerializer(serializers.Serializer):
     all_timezones = serializers.ListField(child=serializers.CharField(), read_only=True)
 
 
-class EmptySerializer(serializers.Serializer):
-    pass
-
-
 class GroupMembershipAddNotificationTypeSerializer(serializers.Serializer):
     notification_type = serializers.ChoiceField(
         choices=[(choice, choice) for choice in (
@@ -409,6 +427,8 @@ class GroupMembershipAddNotificationTypeSerializer(serializers.Serializer):
         notification_type = validated_data['notification_type']
         instance.add_notification_types([notification_type])
         instance.save()
+
+        notification_type_changed.send(sender=GroupMembership.__class__, instance=instance)
         return instance
 
 
@@ -419,4 +439,6 @@ class GroupMembershipRemoveNotificationTypeSerializer(serializers.Serializer):
         notification_type = validated_data['notification_type']
         instance.remove_notification_types([notification_type])
         instance.save()
+
+        notification_type_changed.send(sender=GroupMembership.__class__, instance=instance)
         return instance

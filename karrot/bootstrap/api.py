@@ -25,6 +25,8 @@ def get_config_data():
 
 
 class ConfigViewSet(GenericViewSet):
+    serializer_class = ConfigSerializer  # for OpenAPI generation with drf-spectacular
+
     def list(self, request, *args, **kwargs):
         data = get_config_data()
         serializer = ConfigSerializer(data, context=self.get_serializer_context())
@@ -32,6 +34,8 @@ class ConfigViewSet(GenericViewSet):
 
 
 class BootstrapViewSet(GenericViewSet):
+    serializer_class = BootstrapSerializer  # for OpenAPI generation with drf-spectacular
+
     def list(self, request, *args, **kwargs):
         user = request.user
         geo_data = None
@@ -55,7 +59,7 @@ class BootstrapViewSet(GenericViewSet):
             'config': get_config_data(),
             'user': user if user.is_authenticated else None,
             'geoip': geo_data,
-            'groups': Group.objects.prefetch_related('members'),
+            'groups': Group.objects.annotate_member_count().annotate_is_user_member(user),
         }
 
         serializer = BootstrapSerializer(data, context=self.get_serializer_context())

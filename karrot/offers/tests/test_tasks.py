@@ -1,6 +1,5 @@
 from django.core import mail
-from django.db import transaction
-from django.test import TransactionTestCase
+from django.test import TestCase
 
 from karrot.groups.factories import GroupFactory
 from karrot.offers.factories import OfferFactory
@@ -9,7 +8,7 @@ from karrot.users.factories import VerifiedUserFactory
 from karrot.utils.tests.images import image_path
 
 
-class TestTasks(TransactionTestCase):
+class TestTasks(TestCase):
     def setUp(self):
         self.user = VerifiedUserFactory()
         self.other_user = VerifiedUserFactory()
@@ -18,9 +17,8 @@ class TestTasks(TransactionTestCase):
     def test_does_not_notify_user_about_own_offer(self):
         mail.outbox = []
 
-        with execute_scheduled_tasks_immediately():
-            with transaction.atomic():
-                self.offer = OfferFactory(group=self.group, user=self.user, images=[image_path])
+        with execute_scheduled_tasks_immediately(), self.captureOnCommitCallbacks(execute=True):
+            self.offer = OfferFactory(group=self.group, user=self.user, images=[image_path])
 
         email_addresses = [address for m in mail.outbox for address in m.to]
         self.assertEqual(len(mail.outbox), 1)

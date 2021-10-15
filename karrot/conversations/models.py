@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import Count, F, Q, Value, IntegerField
+from django.db.models import Count, F, IntegerField, Q
 from django.db.models.manager import BaseManager
 from django.utils import timezone
 from versatileimagefield.fields import VersatileImageField
@@ -241,10 +241,6 @@ class ConversationMessageQuerySet(models.QuerySet):
         return self.filter(
             Q(conversation__participants=user) |
             Q(conversation__group__groupmembership__user=user, conversation__group__isnull=False)
-        ).annotate(
-            has_conversation_access=Value(True, output_field=models.BooleanField())
-            # This is not just an annotation, we use it because it results in a 'group by' clause
-            # It is much faster then the alternative 'distinct' modifier
         )
 
 

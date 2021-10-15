@@ -7,8 +7,8 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from karrot.activities.factories import ActivityFactory
-from karrot.activities.models import to_range, Activity
+from karrot.activities.factories import ActivityFactory, ActivityTypeFactory
+from karrot.activities.models import to_range, Activity, Feedback
 from karrot.groups.factories import GroupFactory
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import VerifiedUserFactory
@@ -115,6 +115,48 @@ class TestActivityHistoryStatsAPI(APITestCase):
         self.after_the_activity_is_over = self.date.end + timedelta(hours=2)
         self.activity = ActivityFactory(place=self.place, date=self.date, max_participants=max_participants)
 
+    def test_activity_done(self):
+        self.setup_activity()
+        self.client.force_login(user=self.user)
+        self.client.post(f'/api/activities/{self.activity.id}/add/')
+        with freeze_time(self.after_the_activity_is_over, tick=True):
+            Activity.objects.process_finished_activities()
+            response = self.client.get('/api/stats/activity-history/', {'group': self.group.id, 'user': self.user.id})
+            self.assertEqual(len(response.data), 1)
+            self.assertEqual([dict(entry) for entry in response.data], [self.expected_entry({
+                'done_count': 1,
+            })], response.data)
+
+    def test_activity_done_by_multiple_users(self):
+        self.setup_activity(max_participants=2)
+        self.client.force_login(user=self.user2)
+        self.client.post(f'/api/activities/{self.activity.id}/add/')
+
+        self.client.force_login(user=self.user)
+        self.client.post(f'/api/activities/{self.activity.id}/add/')
+
+        with freeze_time(self.after_the_activity_is_over, tick=True):
+            Activity.objects.process_finished_activities()
+            for user in [self.user, self.user2]:
+                response = self.client.get('/api/stats/activity-history/', {'group': self.group.id, 'user': user.id})
+                self.assertEqual(len(response.data), 1)
+                self.assertEqual([dict(entry) for entry in response.data], [self.expected_entry({
+                    'done_count': 1,
+                })], response.data)
+
+    def test_activity_missed(self):
+        self.setup_activity()
+        self.client.force_login(user=self.user)
+        with freeze_time(self.after_the_activity_is_over, tick=True):
+            Activity.objects.process_finished_activities()
+            # only relevant when no user specified
+            response = self.client.get('/api/stats/activity-history/', {'group': self.group.id})
+            self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+            self.assertEqual(len(response.data), 1)
+            self.assertEqual([dict(entry) for entry in response.data], [self.expected_entry({
+                'missed_count': 1,
+            })], response.data)
+
     def test_join_and_leave_activity_missed(self):
         self.setup_activity()
         self.client.force_login(user=self.user)
@@ -132,24 +174,14 @@ class TestActivityHistoryStatsAPI(APITestCase):
             response = self.client.get('/api/stats/activity-history/', {'group': self.group.id, 'user': self.user.id})
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
             self.assertEqual(len(response.data), 1)
-            self.assertEqual([dict(entry) for entry in response.data],
-                             [self.expected_entry({
-                                 'leave_count': 1,
-                                 'leave_late_count': 1,
-                             })], response.data)
-
-    def test_activity_done(self):
-        self.setup_activity()
-        self.client.force_login(user=self.user)
-
-        # join activity (well before it starts)
-        self.client.post(f'/api/activities/{self.activity.id}/add/')
-
-        with freeze_time(self.after_the_activity_is_over, tick=True):
-            Activity.objects.process_finished_activities()
-            response = self.client.get('/api/stats/activity-history/', {'group': self.group.id, 'user': self.user.id})
-            self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-            self.assertEqual(len(response.data), 1, response.data)
+            self.assertEqual([dict(entry) for entry in response.data], [
+                self.expected_entry({
+                    'leave_count': 1,
+                    'leave_late_count': 1,
+                    'leave_missed_count': 1,
+                    'leave_missed_late_count': 1,
+                })
+            ], response.data)
 
     def test_reports_left_late_if_activity_not_full(self):
         self.setup_activity(max_participants=2)
@@ -180,7 +212,7 @@ class TestActivityHistoryStatsAPI(APITestCase):
                                  'leave_late_count': 1,
                              })], response.data)
 
-    def test_does_not_report_left_late_if_activity_is_full(self):
+    def test_leave_missed(self):
         self.setup_activity()
         self.client.force_login(user=self.user)
 
@@ -202,7 +234,85 @@ class TestActivityHistoryStatsAPI(APITestCase):
             Activity.objects.process_finished_activities()
             response = self.client.get('/api/stats/activity-history/', {'group': self.group.id, 'user': self.user.id})
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-            # nothing returned! our secret is safe...
+            self.assertEqual(len(response.data), 1, response.data)
+            self.assertEqual(
+                [dict(entry) for entry in response.data],
+                [
+                    self.expected_entry({
+                        'leave_count': 1,
+                        'leave_late_count': 1,
+                        # the activity was not missed, so not too bad...
+                        'leave_missed_count': 0,
+                        'leave_missed_late_count': 0,
+                    })
+                ],
+                response.data
+            )
+
+    def test_feedback(self):
+        self.setup_activity()
+        self.client.force_login(user=self.user)
+        # join activity (well before it starts)
+        self.client.post(f'/api/activities/{self.activity.id}/add/')
+
+        # other user joins too
+        self.client.force_login(user=self.user2)
+        self.client.post(f'/api/activities/{self.activity.id}/add/')
+        self.client.force_login(user=self.user)
+
+        with freeze_time(self.after_the_activity_is_over, tick=True):
+            Activity.objects.process_finished_activities()
+            # both users give some feedback!
+            Feedback.objects.create(given_by=self.user, about=self.activity, weight=1.5, comment='foo')
+            Feedback.objects.create(given_by=self.user2, about=self.activity, weight=2.1, comment='foo')
+
+            # request just for one user
+            response = self.client.get('/api/stats/activity-history/', {'group': self.group.id, 'user': self.user.id})
+            self.assertEqual(len(response.data), 1, response.data)
+            self.assertEqual([dict(entry) for entry in response.data],
+                             [self.expected_entry({
+                                 'done_count': 1,
+                                 'feedback_count': 1,
+                                 'feedback_weight': 1.5,
+                             })], response.data)
+
+            # or all users
+            response = self.client.get('/api/stats/activity-history/', {'group': self.group.id})
+            self.assertEqual(len(response.data), 1, response.data)
+            self.assertEqual([dict(entry) for entry in response.data],
+                             [self.expected_entry({
+                                 'done_count': 1,
+                                 'feedback_count': 2,
+                                 'feedback_weight': 3.6,
+                             })], response.data)
+
+    def test_activity_type_filter(self):
+        self.setup_activity()
+        other_activity_type = ActivityTypeFactory(group=self.group)
+        self.client.force_login(user=self.user)
+        self.client.post(f'/api/activities/{self.activity.id}/add/')
+        with freeze_time(self.after_the_activity_is_over, tick=True):
+            Activity.objects.process_finished_activities()
+
+            # filter by matching activity type id
+            response = self.client.get(
+                '/api/stats/activity-history/', {
+                    'group': self.group.id,
+                    'activity_type': self.activity.activity_type.id
+                }
+            )
+            self.assertEqual(len(response.data), 1, response.data)
+            self.assertEqual([dict(entry) for entry in response.data], [self.expected_entry({
+                'done_count': 1,
+            })], response.data)
+
+            # or a different one...
+            response = self.client.get(
+                '/api/stats/activity-history/', {
+                    'group': self.group.id,
+                    'activity_type': other_activity_type.id
+                }
+            )
             self.assertEqual(len(response.data), 0, response.data)
 
     def expected_entry(self, data=None):
@@ -210,8 +320,12 @@ class TestActivityHistoryStatsAPI(APITestCase):
             'place': self.place.id,
             'group': self.place.group.id,
             'done_count': 0,
+            'missed_count': 0,
             'leave_count': 0,
             'leave_late_count': 0,
+            'leave_missed_count': 0,
+            'leave_missed_late_count': 0,
+            'feedback_count': 0,
             'feedback_weight': 0,
             **(data if data else {}),
         }

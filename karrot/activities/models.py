@@ -1,5 +1,4 @@
 from datetime import timedelta
-from enum import Enum
 
 import pytz
 from dateutil.relativedelta import relativedelta
@@ -20,7 +19,7 @@ from karrot.activities.utils import match_activities_with_dates, rrule_between_d
 from karrot.places.models import PlaceStatus
 
 
-class ActivityTypeStatus(Enum):
+class ActivityTypeStatus(models.TextChoices):
     ACTIVE = 'active'
     ARCHIVED = 'archived'
 
@@ -30,13 +29,13 @@ class ActivityType(BaseModel, UpdatedAtMixin):
     name = models.CharField(max_length=80)
     name_is_translatable = models.BooleanField(default=True)
     colour = models.CharField(max_length=6)
-    icon = models.CharField(max_length=32)
-    feedback_icon = models.CharField(max_length=32)
+    icon = models.CharField(max_length=100)
+    feedback_icon = models.CharField(max_length=100)
     has_feedback = models.BooleanField(default=True)
     has_feedback_weight = models.BooleanField(default=True)
     status = models.CharField(
         default=ActivityTypeStatus.ACTIVE.value,
-        choices=[(status.value, status.value) for status in ActivityTypeStatus],
+        choices=ActivityTypeStatus.choices,
         max_length=100,
     )
 
@@ -212,7 +211,8 @@ class ActivityQuerySet(models.QuerySet):
         return self.exclude_disabled().filter(date__startswith__lt=timezone.now(), participants=None)
 
     def done(self):
-        return self.exclude_disabled().filter(date__startswith__lt=timezone.now()).exclude(participants=None)
+        return self.exclude_disabled().filter(date__startswith__lt=timezone.now())\
+            .annotate_num_participants().filter(num_participants__gt=0)
 
     def done_not_full(self):
         return self.exclude_disabled() \

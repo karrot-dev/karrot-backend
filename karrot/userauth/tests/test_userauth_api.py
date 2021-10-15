@@ -270,9 +270,6 @@ class TestUploadPhoto(APITestCase):
 class TestRejectedAddress(APITestCase):
     def setUp(self):
         self.user = UserFactory()
-        self.url_user = '/api/auth/user/'
-        self.url_change_email = '/api/auth/password/'  # Should be url_change_password ?
-        self.url_request_account_deletion = '/api/auth/user/request_delete/'
 
         # Mock AnymailMessage to throw error on send
         self.mail_class = email_utils.AnymailMessage
@@ -284,7 +281,7 @@ class TestRejectedAddress(APITestCase):
 
     def test_sign_up_with_rejected_address_fails(self):
         response = self.client.post(
-            self.url_user, {
+            '/api/auth/user/', {
                 'email': 'bad@test.com',
                 'password': faker.name(),
                 'display_name': faker.name()
@@ -295,7 +292,7 @@ class TestRejectedAddress(APITestCase):
     def test_change_to_rejected_address_fails(self):
         self.client.force_login(user=self.user)
         response = self.client.put(
-            self.url_change_email, {
+            '/api/auth/email/', {
                 'password': self.user.display_name,
                 'new_email': 'bad@test.com'
             }
@@ -304,7 +301,7 @@ class TestRejectedAddress(APITestCase):
 
     def test_request_account_deletion_fails(self):
         self.client.force_login(user=self.user)
-        response = self.client.post(self.url_request_account_deletion)
+        response = self.client.post('/api/auth/user/request_delete/')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         codes = VerificationCode.objects.filter(user=self.user, type=VerificationCode.ACCOUNT_DELETE)
         self.assertEqual(codes.count(), 0)
@@ -312,7 +309,7 @@ class TestRejectedAddress(APITestCase):
     def test_account_deletion_fails(self):
         self.client.force_login(user=self.user)
         code = VerificationCode.objects.create(user=self.user, type=VerificationCode.ACCOUNT_DELETE).code
-        response = self.client.delete(self.url_user, {'code': code})
+        response = self.client.delete('/api/auth/user/', {'code': code})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         codes = VerificationCode.objects.filter(user=self.user, type=VerificationCode.ACCOUNT_DELETE)
         self.assertEqual(codes.count(), 1)

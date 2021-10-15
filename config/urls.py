@@ -8,9 +8,9 @@ from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import path, re_path, include
 from django.views.static import serve
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
-from rest_framework_swagger.views import get_swagger_view
 
 from karrot.applications.api import ApplicationViewSet
 from karrot.bootstrap.api import BootstrapViewSet, ConfigViewSet
@@ -23,7 +23,7 @@ from karrot.issues.api import IssuesViewSet
 from karrot.notifications.api import NotificationViewSet
 from karrot.offers.api import OfferViewSet
 from karrot.activities.api import ActivityViewSet, ActivitySeriesViewSet, FeedbackViewSet, ActivityTypeViewSet
-from karrot.places.api import PlaceViewSet
+from karrot.places.api import PlaceViewSet, PlaceTypeViewSet
 from karrot.stats.api import FrontendStatsView, ActivityHistoryStatsViewSet
 from karrot.status.api import StatusView
 from karrot.subscriptions.api import PushSubscriptionViewSet
@@ -70,6 +70,7 @@ router.register('offers', OfferViewSet)
 
 # Place endpoints
 router.register('places', PlaceViewSet)
+router.register('place-types', PlaceTypeViewSet)
 
 # History endpoints
 router.register('history', HistoryViewSet)
@@ -98,7 +99,7 @@ urlpatterns = [
     path('api/auth/password/', ChangePasswordView.as_view()),
     path('api/auth/password/request_reset/', RequestResetPasswordView.as_view()),
     path('api/auth/password/reset/', ResetPasswordView.as_view()),
-    path('api/unsubscribe/<token>/', TokenUnsubscribeView.as_view()),
+    path('api/unsubscribe/<str:token>/', TokenUnsubscribeView.as_view()),
     path('api/auth/', AuthView.as_view()),
     path('api/stats/', FrontendStatsView.as_view()),
     path('api/status/', StatusView.as_view()),
@@ -106,7 +107,8 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('admin/docs/', include('django.contrib.admindocs.urls')),
     path('admin/', admin.site.urls),
-    path('docs/', get_swagger_view()),
+    path('docs/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/anymail/', include('anymail.urls')),
     re_path(r'^silk/', include('silk.urls', namespace='silk'))
 ]
