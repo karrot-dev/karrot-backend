@@ -1,5 +1,4 @@
 import json
-from functools import wraps
 
 import sentry_sdk
 from asgiref.sync import async_to_sync
@@ -7,11 +6,8 @@ from channels.exceptions import ChannelFull
 from channels.layers import get_channel_layer
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
-from django.dispatch import receiver
-from huey.contrib.djhuey import db_task
 
 from karrot.subscriptions import stats
-from karrot.utils.misc import on_transaction_commit
 
 channel_layer = get_channel_layer()
 channel_layer_send_sync = async_to_sync(channel_layer.send)
@@ -45,24 +41,3 @@ class MockRequest:
 
     def build_absolute_uri(self, path):
         return settings.HOSTNAME + path
-
-
-def receiver_transaction_task(signal, **kwargs):
-    """Register a signal handler that runs as huey db_task after transaction commit
-
-    Useful for doing non-pressing work after write operations, e.g. sending websocket updates
-
-    Can also be used outside of transactions, then it will run immediately (see docs for transaction.on_commit)
-    """
-    def inner(fn):
-        deferred_db_task = db_task()(fn)
-
-        @wraps(deferred_db_task)
-        def db_task_without_signal(*args, **kwargs):
-            # Workaround: remove signal from kwargs because huey can't pickle it
-            del kwargs['signal']
-            return deferred_db_task(*args, **kwargs)
-
-        receiver(signal, **kwargs)(on_transaction_commit(db_task_without_signal))
-
-    return inner
