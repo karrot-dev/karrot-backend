@@ -167,6 +167,16 @@ class TestPlacesAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.patch(self.place_url, {'status': 'foobar'}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_default_view(self):
+        self.client.force_login(user=self.member)
+        response = self.client.patch(self.place_url, {'default_view': 'wall'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_invalid_default_view(self):
+        self.client.force_login(user=self.member)
+        response = self.client.patch(self.place_url, {'default_view': 'ceiling'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_change_group_as_member_in_one(self):
         self.client.force_login(user=self.member)
         response = self.client.patch(self.place_url, {'group': self.different_group.id}, format='json')
