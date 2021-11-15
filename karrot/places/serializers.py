@@ -108,6 +108,7 @@ class PlaceSerializer(serializers.ModelSerializer):
             'is_subscribed',
             'subscribers',
             'place_type',
+            'default_view',
         ]
         extra_kwargs = {
             'name': {
