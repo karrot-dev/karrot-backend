@@ -59,6 +59,7 @@ msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:6
 #: karrot/activities/templates/activity_notification.html.jinja2:192
+#: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s upcoming activities"
 msgstr ""
@@ -109,11 +110,6 @@ msgstr ""
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:219
 #: karrot/offers/templates/new_offer.html.jinja2:232
 msgid "Click here to unsubscribe"
-msgstr ""
-
-#: karrot/activities/templates/activity_notification.subject.jinja2:1
-#, python-format
-msgid "%(group_name)s upcoming pickups"
 msgstr ""
 
 #: karrot/applications/api.py:27
@@ -726,16 +722,16 @@ msgstr ""
 msgid "Market"
 msgstr ""
 
-#: karrot/places/serializers.py:171
+#: karrot/places/serializers.py:172
 msgid "Set at least one week in advance"
 msgstr ""
 
-#: karrot/places/serializers.py:174
+#: karrot/places/serializers.py:175
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr ""
 
-#: karrot/places/serializers.py:226
+#: karrot/places/serializers.py:227
 msgid "You are already subscribed to this place"
 msgstr ""
 
