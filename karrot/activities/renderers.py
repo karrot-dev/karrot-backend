@@ -1,6 +1,8 @@
 from rest_framework import renderers
 from rest_framework.utils.serializer_helpers import ReturnDict
 from icalendar import Calendar, Event
+from karrot.places.models import Place
+from karrot.groups.models import Group
 
 
 class ICSCalendarRenderer(renderers.BaseRenderer):
@@ -24,6 +26,18 @@ class ICSCalendarRenderer(renderers.BaseRenderer):
         calendar = Calendar()
         calendar['version'] = '2.0'
         calendar['prodid'] = '-//Karrot//EN'
+
+        # set the calendar name depending on the context. ugly hack!
+        args = renderer_context['request']._request.GET
+        group_id = args.get('group')
+        place_id = args.get('place')
+        if place_id:
+            calendar['name'] = Place.objects.get(id=place_id).name
+        if group_id:
+            calendar['name'] = Group.objects.get(id=group_id).name
+        else:
+            calendar['name'] = 'Karrot'
+
         for vevent in results:
             calendar.add_component(self.render_vevent(vevent))
         return calendar.to_ical()
