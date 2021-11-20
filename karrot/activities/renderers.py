@@ -33,7 +33,7 @@ class ICSCalendarRenderer(renderers.BaseRenderer):
         place_id = args.get('place')
         if place_id:
             calendar['name'] = Place.objects.get(id=place_id).name
-        if group_id:
+        elif group_id:
             calendar['name'] = Group.objects.get(id=group_id).name
         else:
             calendar['name'] = 'Karrot'
