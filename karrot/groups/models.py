@@ -15,6 +15,7 @@ from versatileimagefield.fields import VersatileImageField
 from karrot.activities.activity_types import default_activity_types
 from karrot.base.base_models import BaseModel, LocationModel
 from karrot.conversations.models import ConversationMixin
+from karrot.groups.roles import GROUP_MEMBER
 from karrot.history.models import History, HistoryTypus
 from karrot.activities.models import Activity, ActivityType
 from karrot.places.models import PlaceType
@@ -228,6 +229,12 @@ class GroupNotificationType(object):
     NEW_OFFER = 'new_offer'
 
 
+def get_default_roles():
+    return [
+        GROUP_MEMBER,
+    ]
+
+
 def get_default_notification_types():
     return [
         GroupNotificationType.WEEKLY_SUMMARY,
@@ -291,7 +298,7 @@ class GroupMembership(BaseModel, DirtyFieldsMixin):
         related_name='groupmembership_added',
     )
     trusted_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='membership', through='Trust')
-    roles = ArrayField(TextField(), default=list)
+    roles = ArrayField(TextField(), default=get_default_roles)
     lastseen_at = DateTimeField(default=tz.now)
     inactive_at = DateTimeField(null=True)
     notification_types = ArrayField(TextField(), default=get_default_notification_types)
