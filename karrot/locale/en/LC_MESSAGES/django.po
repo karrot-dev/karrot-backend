@@ -40,15 +40,15 @@ msgstr ""
 msgid "Task"
 msgstr ""
 
-#: karrot/activities/serializers.py:140
+#: karrot/activities/serializers.py:141
 msgid "Must be a list"
 msgstr ""
 
-#: karrot/activities/serializers.py:141
+#: karrot/activities/serializers.py:142
 msgid "Must be a list with one or two values"
 msgstr ""
 
-#: karrot/activities/serializers.py:142
+#: karrot/activities/serializers.py:143
 msgid "Must pass start value"
 msgstr ""
 
@@ -208,8 +208,8 @@ msgid ""
 "conversation</a>."
 msgstr ""
 
-#: karrot/conversations/api.py:65 karrot/conversations/api.py:246
-#: karrot/conversations/api.py:429 karrot/conversations/serializers.py:187
+#: karrot/conversations/api.py:65 karrot/conversations/api.py:247
+#: karrot/conversations/api.py:430 karrot/conversations/serializers.py:187
 msgid "You are not in this conversation"
 msgstr ""
 
@@ -224,11 +224,11 @@ msgid ""
 "creation."
 msgstr ""
 
-#: karrot/conversations/api.py:357
+#: karrot/conversations/api.py:358
 msgid "Must be first in thread"
 msgstr ""
 
-#: karrot/conversations/api.py:360
+#: karrot/conversations/api.py:361
 msgid "You are not a participant in this thread"
 msgstr ""
 
@@ -301,7 +301,7 @@ msgstr ""
 msgid "Playground"
 msgstr ""
 
-#: karrot/groups/serializers.py:150 karrot/groups/serializers.py:249
+#: karrot/groups/serializers.py:150 karrot/groups/serializers.py:251
 msgid "You cannot manage agreements"
 msgstr ""
 
@@ -309,7 +309,7 @@ msgstr ""
 msgid "Agreement is not for this group"
 msgstr ""
 
-#: karrot/groups/serializers.py:247
+#: karrot/groups/serializers.py:249
 msgid "You are not in this group"
 msgstr ""
 
