@@ -7,6 +7,7 @@ from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
 from karrot.activities.factories import ActivityFactory
 from karrot.activities.models import to_range
+from karrot.groups.roles import GROUP_MEMBER
 from karrot.history.models import History, HistoryTypus
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory
@@ -22,8 +23,8 @@ class TestActivitiesTypesAPI(APITestCase):
         self.activity_types = list(self.group.activity_types.all())
         self.activity_type = self.activity_types[0]
 
-        # remove all roles
-        GroupMembership.objects.filter(group=self.group, user=self.non_editor_member).update(roles=[])
+        # remove all roles except member
+        GroupMembership.objects.filter(group=self.group, user=self.non_editor_member).update(roles=[GROUP_MEMBER])
 
     def activity_type_data(self, extra=None):
         if extra is None:
@@ -46,6 +47,10 @@ class TestActivitiesTypesAPI(APITestCase):
             'date': to_range(timezone.now() + relativedelta(days=2)).as_list(),
             'max_participants': 5,
             'place': self.place.id,
+            'participant_roles': [{
+                'role': GROUP_MEMBER,
+                'max_participants': 5,
+            }],
             **extra,
         }
 

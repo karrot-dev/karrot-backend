@@ -29,6 +29,7 @@ from karrot.activities.models import Activity, to_range
 from karrot.places.factories import PlaceFactory
 from karrot.subscriptions.models import ChannelSubscription, \
     PushSubscription, PushSubscriptionPlatform
+from karrot.tests.utils import pluck
 from karrot.users.factories import UserFactory, VerifiedUserFactory
 from karrot.utils.geoip import ip_to_lat_lon
 from karrot.utils.tests.fake import faker
@@ -776,7 +777,7 @@ class ActivityReceiverTests(WSTestCase):
         self.activity.add_participant(self.member)
 
         response = client.messages_by_topic.get('activities:activity')[0]
-        self.assertEqual(response['payload']['participants'], [self.member.id])
+        self.assertEqual(pluck(response['payload']['participants'], 'user'), [self.member.id])
 
         response = client.messages_by_topic.get('conversations:conversation')[0]
         self.assertEqual(response['payload']['participants'], [self.member.id])
@@ -832,7 +833,9 @@ class ActivitySeriesReceiverTests(WSTestCase):
 
         date = faker.future_datetime(end_date='+30d', tzinfo=timezone.utc) + relativedelta(months=2)
         self.series.start_date = date
+        old = self.series.old()
         self.series.save()
+        self.series.update_activities(old)
 
         response = client.messages_by_topic.get('activities:series')[0]
         self.assertEqual(parse(response['payload']['start_date']), date)

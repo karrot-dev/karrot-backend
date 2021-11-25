@@ -30,6 +30,21 @@ class ActivityFactory(DjangoModelFactory):
         model = ActivityModel
 
     @post_generation
+    def participant_roles(self, created, participant_roles, **kwargs):
+        if not created:
+            return
+        if not participant_roles:
+            # default set...
+            participant_roles = [
+                {
+                    'role': 'member',
+                    'max_participants': 5,
+                },
+            ]
+        for participant_role in participant_roles:
+            self.participant_roles.create(**participant_role)
+
+    @post_generation
     def participants(self, created, participants, **kwargs):
         if not created:
             return
@@ -46,6 +61,25 @@ class ActivityFactory(DjangoModelFactory):
 class ActivitySeriesFactory(DjangoModelFactory):
     class Meta:
         model = ActivitySeriesModel
+
+    @post_generation
+    def participant_roles(self, created, participant_roles, **kwargs):
+        if not created:
+            return
+        if not participant_roles:
+            # default set...
+            participant_roles = [
+                {
+                    'role': 'member',
+                    'max_participants': 5,
+                },
+            ]
+        for participant_role in participant_roles:
+            self.participant_roles.create(**participant_role)
+
+    @post_generation
+    def update_activities(self, created, ignored, **kwargs):
+        self.update_activities()
 
     activity_type = SubFactory(ActivityTypeFactory, group=SelfAttribute('..place.group'))
     place = SubFactory(PlaceFactory)

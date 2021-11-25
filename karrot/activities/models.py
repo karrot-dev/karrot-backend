@@ -13,6 +13,7 @@ from django.utils import timezone
 
 from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin
 from karrot.conversations.models import ConversationMixin
+from karrot.groups.roles import GROUP_MEMBER
 from karrot.history.models import History, HistoryTypus
 from karrot.activities import stats
 from karrot.activities.utils import match_activities_with_dates, rrule_between_dates_in_local_time
@@ -97,7 +98,7 @@ class ActivitySeries(BaseModel):
     )
 
     def create_activity(self, date):
-        return self.activities.create(
+        activity = self.activities.create(
             activity_type=self.activity_type,
             date=CustomDateTimeTZRange(date, date + (self.duration or default_duration)),
             has_duration=self.duration is not None,
@@ -109,6 +110,16 @@ class ActivitySeries(BaseModel):
             description=self.description,
             last_changed_by=self.last_changed_by,
         )
+        # TODO: are we sure we are OK now that there will always be roles defined?
+        # if not self.participant_roles.exists():
+        #     raise Exception('NO ROLES FOR SERIES')
+        for participant_role in self.participant_roles.all():
+            activity.participant_roles.create(
+                role=participant_role.role,
+                max_participants=participant_role.max_participants,
+                description=participant_role.description
+            )
+        return activity
 
     def period_start(self):
         # shift start time slightly into future to avoid activities which are only valid for very short time
@@ -133,28 +144,21 @@ class ActivitySeries(BaseModel):
             new_dates=self.dates(),
         )
 
-    def update_activities(self):
+    def old(self):
+        return type(self).objects.get(pk=self.pk) if self.pk else None
+
+    def update_activities(self, old=None):
         """
         create new activities and delete empty activities that don't match series
+        if you pass in an old activity (before you saved), it will update existing activities with changes
         """
-
-        for activity, date in self.get_matched_activities():
-            if not activity:
-                self.create_activity(date)
-            elif not date:
-                if activity.participants.count() < 1:
-                    activity.delete()
-
-    def __str__(self):
-        return 'ActivitySeries {} - {}'.format(self.rule, self.place)
-
-    def save(self, *args, **kwargs):
-        old = type(self).objects.get(pk=self.pk) if self.pk else None
-
-        super().save(*args, **kwargs)
-
         if not old or old.start_date != self.start_date or old.rule != self.rule:
-            self.update_activities()
+            for activity, date in self.get_matched_activities():
+                if not activity:
+                    self.create_activity(date)
+                elif not date:
+                    if activity.participants.count() < 1:
+                        activity.delete()
 
         if old:
             description_changed = old.description != self.description
@@ -185,6 +189,9 @@ class ActivitySeries(BaseModel):
                             )
                     activity.save()
 
+    def __str__(self):
+        return 'ActivitySeries {} - {}'.format(self.rule, self.place)
+
     def delete(self, **kwargs):
         self.rule = str(rrulestr(self.rule).replace(dtstart=self.start_date, until=timezone.now()))
         self.update_activities()
@@ -207,14 +214,7 @@ class ActivityQuerySet(models.QuerySet):
         return self.filter(~self._feedback_possible_q(user))
 
     def annotate_num_participants(self):
-        return self.annotate(
-            num_participants=Count('activityparticipant', filter=Q(activityparticipant__is_open=False))
-        )
-
-    def annotate_num_open_participants(self):
-        return self.annotate(
-            num_participants=Count('activityparticipant', filter=Q(activityparticipant__is_open=True))
-        )
+        return self.annotate(num_participants=Count('activityparticipant'))
 
     def annotate_timezone(self):
         return self.annotate(timezone=F('place__group__timezone'))
@@ -398,22 +398,24 @@ class Activity(BaseModel, ConversationMixin):
         return self.date.start >= timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
     def empty_participants_count(self):
-        return self.max_participants - self.participants.filter(activityparticipant__is_open=False).count()
+        return 0  # TODO: this needs fixing in the email template to show per-role...
+        # return self.max_participants - self.participants.filter(activityparticipant__is_open=False).count()
 
-    def is_full(self, is_open):
-        if is_open and not self.require_role:
-            raise Exception('Activity does not support open participants')
-        max_participants = self.max_open_participants if is_open else self.max_participants
+    def is_full(self, role=GROUP_MEMBER):
+        participant_role = self.participant_roles.get(role=role)
+        max_participants = participant_role.max_participants
         return (
             max_participants is not None
-            and self.participants.filter(activityparticipant__is_open=is_open).count() >= max_participants
+            and self.participants.filter(activityparticipant__participant_role=participant_role
+                                         ).count() >= max_participants
         )
 
-    def add_participant(self, user, is_open=False):
+    def add_participant(self, user, role=GROUP_MEMBER):
+        participant_role = self.participant_roles.get(role=role)
         participant, _ = ActivityParticipant.objects.get_or_create(
             activity=self,
             user=user,
-            is_open=is_open,
+            participant_role=participant_role,
         )
         return participant
 
@@ -440,6 +442,34 @@ class Activity(BaseModel, ConversationMixin):
         super().save(*args, **kwargs)
 
 
+class SeriesParticipantRole(BaseModel):
+    class Meta:
+        unique_together = (('activity_series', 'role'), )
+
+    activity_series = models.ForeignKey(
+        ActivitySeries,
+        on_delete=models.CASCADE,
+        related_name='participant_roles',
+    )
+    role = models.CharField(null=True, blank=False, max_length=100)
+    max_participants = models.PositiveIntegerField(null=True)
+    description = models.TextField(blank=True)
+
+
+class ParticipantRole(BaseModel):
+    class Meta:
+        unique_together = (('activity', 'role'), )
+
+    activity = models.ForeignKey(
+        Activity,
+        on_delete=models.CASCADE,
+        related_name='participant_roles',
+    )
+    role = models.CharField(null=True, blank=False, max_length=100)
+    max_participants = models.PositiveIntegerField(null=True)
+    description = models.TextField(blank=True)
+
+
 class ActivityParticipant(BaseModel):
     activity = models.ForeignKey(
         Activity,
@@ -452,6 +482,7 @@ class ActivityParticipant(BaseModel):
     feedback_dismissed = models.BooleanField(default=False)
     reminder_task_id = models.TextField(null=True)  # stores a huey task id
     is_open = models.BooleanField(default=False)
+    participant_role = models.ForeignKey(ParticipantRole, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'activities_activity_participants'

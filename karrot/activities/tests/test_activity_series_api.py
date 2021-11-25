@@ -1,4 +1,5 @@
 from itertools import zip_longest
+from unittest.mock import ANY
 
 from dateutil import rrule
 from dateutil.parser import parse
@@ -25,6 +26,16 @@ def shift_date_in_local_time(old_date, delta, tz):
     old_date = old_date.astimezone(tz).replace(tzinfo=None)
     new_date = old_date + delta
     return tz.localize(new_date).astimezone(tzlocal())
+
+
+# default set
+participant_roles = [
+    {
+        'role': 'member',
+        'max_participants': 5,
+        'description': '',
+    },
+]
 
 
 class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
@@ -54,7 +65,8 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
             'require_role': None,
             'place': self.place.id,
             'rule': str(recurrence),
-            'start_date': start_date
+            'start_date': start_date,
+            'participant_roles': participant_roles,
         }
         start_date = start_date.replace(second=0, microsecond=0)
         self.client.force_login(user=self.member)
@@ -70,6 +82,10 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
             'max_participants': 5,
             'max_open_participants': None,
             'require_role': None,
+            'participant_roles': [{
+                'id': ANY,
+                **o
+            } for o in participant_roles],
             'place': self.place.id,
             'rule': str(recurrence),
             'description': '',
@@ -126,7 +142,10 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
                 'require_role': None,
                 'series': series_id,
                 'participants': [],
-                'participants_next': [],
+                'participant_roles': [{
+                    'id': ANY,
+                    **o
+                } for o in participant_roles],
                 'place': self.place.id,
                 'description': '',
                 'feedback_given_by': [],
@@ -149,7 +168,8 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
             'max_participants': 5,
             'place': self.place.id,
             'rule': str(recurrence),
-            'start_date': start_date
+            'start_date': start_date,
+            'participant_roles': participant_roles,
         }
         self.group.status = GroupStatus.INACTIVE.value
         self.group.save()
@@ -172,7 +192,8 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
                 'max_participants': 5,
                 'place': self.place.id,
                 'rule': str(recurrence),
-                'start_date': start_date
+                'start_date': start_date,
+                'participant_roles': participant_roles,
             },
             format='json'
         )
@@ -194,6 +215,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         "should change all future instances (except for individually changed ones), but not past ones"
         url = '/api/activity-series/{}/'.format(self.series.id)
         self.client.force_login(user=self.member)
+
         response = self.client.patch(url, {'max_participants': 99})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data['max_participants'], 99)
@@ -354,7 +376,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         url = '/api/activities/{}/'.format(joined_activity.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data['participants'], [self.member.id])
+        self.assertEqual([entry['user'] for entry in response.data['participants']], [self.member.id])
         self.assertFalse(response.data['is_disabled'])
 
     def test_change_max_participants_to_invalid_number_fails(self):
@@ -486,7 +508,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         #     )
         # ])
         self.assertEqual(
-            [p['participants'] for p in response.data['results']],
+            [[entry['user'] for entry in p['participants']] for p in response.data['results']],
             list(interleave(
                 [[self.member.id] for _ in range(4)],
                 [[] for _ in range(4)],
@@ -510,7 +532,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['id'], joined_activity.id)
-        self.assertEqual(response.data[0]['participants'], [self.member.id])
+        self.assertEqual([entry['user'] for entry in response.data[0]['participants']], [self.member.id])
 
     def test_cannot_move_activities_in_a_series(self):
         self.client.force_login(user=self.member)

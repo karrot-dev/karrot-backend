@@ -9,7 +9,7 @@ from karrot.issues.tasks import process_expired_votings
 from karrot.groups import roles
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupNotificationType
-from karrot.groups.roles import GROUP_EDITOR
+from karrot.groups.roles import GROUP_EDITOR, GROUP_MEMBER
 from karrot.history.models import History, HistoryTypus
 from karrot.users.factories import VerifiedUserFactory
 
@@ -43,7 +43,7 @@ class IssueModelTests(TestCase):
 
     def create_editor(self):
         user = VerifiedUserFactory()
-        self.group.groupmembership_set.create(user=user, roles=[GROUP_EDITOR])
+        self.group.groupmembership_set.create(user=user, roles=[GROUP_MEMBER, GROUP_EDITOR])
         return user
 
     def test_removes_user(self):
@@ -114,7 +114,9 @@ class IssueModelTests(TestCase):
 
     def test_new_members_are_not_in_existing_issue_conversations(self):
         # create a new member and a new editor
-        self.group.groupmembership_set.create(user=VerifiedUserFactory(), roles=[roles.GROUP_EDITOR])
+        self.group.groupmembership_set.create(
+            user=VerifiedUserFactory(), roles=[roles.GROUP_MEMBER, roles.GROUP_EDITOR]
+        )
         self.group.groupmembership_set.create(user=VerifiedUserFactory())
 
         # ...they shouldn't become part of existing issue conversations

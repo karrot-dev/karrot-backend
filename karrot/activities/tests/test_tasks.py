@@ -13,7 +13,7 @@ from karrot.activities import tasks
 from karrot.activities.factories import ActivityFactory
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
-from karrot.activities.models import ActivityParticipant, to_range
+from karrot.activities.models import to_range
 from karrot.activities.tasks import daily_activity_notifications, fetch_activity_notification_data_for_group
 from karrot.places.factories import PlaceFactory
 from karrot.places.models import PlaceStatus
@@ -43,7 +43,7 @@ class TestActivityReminderTask(TestCase):
         ]
 
     def test_activity_reminder_notifies_subscribers(self, notify_subscribers_by_device):
-        participant = ActivityParticipant.objects.create(user=self.user, activity=self.activity)
+        participant = self.activity.add_participant(self.user)
         notify_subscribers_by_device.reset_mock()
         tasks.activity_reminder.call_local(participant.id)
         args, kwargs = notify_subscribers_by_device.call_args

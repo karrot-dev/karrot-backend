@@ -6,6 +6,7 @@ from rest_framework.test import APITestCase
 
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
+from karrot.groups.roles import GROUP_MEMBER
 from karrot.history.models import History
 from karrot.activities.factories import ActivityFactory, \
     ActivitySeriesFactory, ActivityTypeFactory
@@ -135,7 +136,11 @@ class TestHistoryAPIWithExistingPlace(APITestCase, ExtractPaginationMixin):
             '/api/activities/', {
                 'activity_type': self.activity_type.id,
                 'date': to_range(timezone.now() + relativedelta(days=1)).as_list(),
-                'place': self.place.id
+                'place': self.place.id,
+                'participant_roles': [{
+                    'role': GROUP_MEMBER,
+                    'max_participants': 10,
+                }]
             },
             format='json'
         )
@@ -149,11 +154,16 @@ class TestHistoryAPIWithExistingPlace(APITestCase, ExtractPaginationMixin):
                 'activity_type': self.activity_type.id,
                 'start_date': timezone.now(),
                 'rule': 'FREQ=WEEKLY',
-                'place': self.place.id
-            }
+                'place': self.place.id,
+                'participant_roles': [{
+                    'role': GROUP_MEMBER,
+                    'max_participants': 10,
+                }]
+            },
+            format='json'
         )
         response = self.get_results(history_url)
-        self.assertEqual(response.data[0]['typus'], 'SERIES_CREATE')
+        self.assertEqual(response.data[0]['typus'], 'SERIES_CREATE', response.data)
 
 
 class TestHistoryAPIWithExistingActivities(APITestCase, ExtractPaginationMixin):

@@ -59,3 +59,7 @@ def execute_scheduled_tasks_immediately():
     yield
 
     disconnect_signal(task_scheduled_handler)
+
+
+def pluck(entries, key):
+    return [entry[key] for entry in entries]

@@ -13,16 +13,17 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.fields import DateTimeField, Field, CharField, BooleanField
+from rest_framework.fields import CharField, DateTimeField, Field
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework_csv.renderers import CSVRenderer
 
 from karrot.base.base_models import CustomDateTimeTZRange
+from karrot.groups.roles import GROUP_MEMBER
 from karrot.history.models import History, HistoryTypus
 from karrot.activities import stats
 from karrot.activities.models import (
     Activity as ActivityModel, Feedback as FeedbackModel, ActivitySeries as ActivitySeriesModel, ActivityType,
-    ActivityParticipant
+    ActivityParticipant, ParticipantRole, SeriesParticipantRole
 )
 from karrot.utils.date_utils import csv_datetime
 from karrot.utils.misc import find_changed
@@ -174,14 +175,49 @@ class ActivityParticipantSerializer(serializers.ModelSerializer):
         model = ActivityParticipant
         fields = [
             'user',
-            'is_open',
+            'role',
             'created_at',
         ]
         read_only_fields = [
             'user',
-            'is_open',
+            'role',
             'created_at',
         ]
+
+    role = serializers.SerializerMethodField()
+
+    def get_role(self, participant) -> str:
+        return participant.participant_role.role
+
+
+class ParticipantRoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ParticipantRole
+        fields = [
+            'id',
+            'role',
+            'max_participants',
+            'description',
+            '_removed',
+        ]
+
+    id = serializers.IntegerField(required=False)
+    _removed = serializers.BooleanField(required=False)
+
+
+class SeriesParticipantRoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SeriesParticipantRole
+        fields = [
+            'id',
+            'role',
+            'max_participants',
+            'description',
+            '_removed',
+        ]
+
+    id = serializers.IntegerField(required=False)
+    _removed = serializers.BooleanField(required=False)
 
 
 class ActivitySerializer(serializers.ModelSerializer):
@@ -196,8 +232,8 @@ class ActivitySerializer(serializers.ModelSerializer):
             'require_role',
             'max_participants',
             'max_open_participants',
+            'participant_roles',
             'participants',
-            'participants_next',
             'description',
             'feedback_due',
             'feedback_given_by',
@@ -212,20 +248,17 @@ class ActivitySerializer(serializers.ModelSerializer):
             'is_done',
         ]
 
-    # keep old field as before until frontend updated for compatability
-    participants = serializers.SerializerMethodField()
-    participants_next = ActivityParticipantSerializer(
+    participants = ActivityParticipantSerializer(
         read_only=True,
         source='activityparticipant_set',
         many=True,
     )
+    participant_roles = ParticipantRoleSerializer(many=True)
+
     feedback_dismissed_by = serializers.SerializerMethodField()
     feedback_due = DateTimeFieldWithTimezone(read_only=True, allow_null=True)
 
     date = DateTimeRangeField()
-
-    def get_participants(self, activity) -> List[int]:
-        return [c.user_id for c in activity.activityparticipant_set.all() if not c.is_open]
 
     def get_feedback_dismissed_by(self, activity) -> List[int]:
         # we are filtering in python to make use of prefetched data
@@ -235,7 +268,12 @@ class ActivitySerializer(serializers.ModelSerializer):
         return super().save(last_changed_by=self.context['request'].user)
 
     def create(self, validated_data):
+        participant_roles_data = validated_data.pop('participant_roles')
         activity = super().create(validated_data)
+        for participant_role_data in participant_roles_data:
+            # creating the nested data
+            activity.participant_roles.create(**participant_role_data)
+
         History.objects.create(
             typus=HistoryTypus.ACTIVITY_CREATE,
             group=activity.place.group,
@@ -332,6 +370,11 @@ class ActivityUpdateSerializer(ActivitySerializer):
 
         return activity
 
+    def update(self, instance, validated_data):
+        # TODO: this is where we'd need to updated the nested participant roles...
+        validated_data.pop('participant_roles', None)
+        return super().update(instance, validated_data)
+
     def validate_date(self, date):
         if self.instance.series is not None and abs((self.instance.date.start - date.start).total_seconds()) > 1:
             raise serializers.ValidationError('You can\'t move activities that are part of a series.')
@@ -423,34 +466,35 @@ class ActivityJoinSerializer(serializers.ModelSerializer):
     class Meta:
         model = ActivityModel
         fields = [
-            'open',
+            'role',
         ]
 
-    open = BooleanField(write_only=True, default=False)
+    role = serializers.CharField(write_only=True, default=None)
 
     def update(self, activity, validated_data):
         user = self.context['request'].user
         place = activity.place
         group = place.group
 
-        is_open = validated_data.get('open', False)
+        role = validated_data.get('role', GROUP_MEMBER)
 
-        # check the role is OK
-        if activity.require_role:
-            if not is_open:
-                if not group.is_member_with_role(user, activity.require_role):
-                    raise PermissionDenied('You do not have the required role.')
-        elif is_open:
-            raise serializers.ValidationError('This activity does not allow open participants.')
+        # check the user has the role
+        if not group.is_member_with_role(user, role):
+            raise PermissionDenied('You do not have the required role.')
+
+        # check the activity actually has slots for this role
+        if not activity.participant_roles.filter(role=role).exists():
+            raise PermissionDenied('This activity does not have this role.')
 
         # check there is space available
-        if activity.is_full(is_open):
+        if activity.is_full(role):
             raise PermissionDenied('Activity is already full.')
 
-        if is_open and activity.participants.filter(activityparticipant__is_open=False).count() == 0:
-            raise PermissionDenied('Cannot have only open participants.')
+        # TODO: does it need a way to restrict this case?
+        # if is_open and activity.participants.filter(activityparticipant__is_open=False).count() == 0:
+        #     raise PermissionDenied('Cannot have only open participants.')
 
-        activity.add_participant(user, is_open)
+        activity.add_participant(user, role)
 
         stats.activity_joined(activity)
 
@@ -535,6 +579,7 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
             'max_participants',
             'max_open_participants',
             'require_role',
+            'participant_roles',
             'place',
             'rule',
             'start_date',
@@ -553,14 +598,25 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
         source='dates',
     )
 
+    participant_roles = SeriesParticipantRoleSerializer(many=True)
+
     duration = DurationInSecondsField(required=False, allow_null=True)
 
     def save(self, **kwargs):
-        return super().save(last_changed_by=self.context['request'].user)
+        old = self.instance.old() if self.instance else None
+        series = super().save(last_changed_by=self.context['request'].user)
+        # TODO: implement updating nested participant roles (see offer images for example how to do it)
+        series.update_activities(old)
+        return series
 
     @transaction.atomic()
     def create(self, validated_data):
+        participant_roles_data = validated_data.pop('participant_roles')
         series = super().create(validated_data)
+        for participant_role_data in participant_roles_data:
+            # creating the nested data
+            series.participant_roles.create(**participant_role_data)
+        series.update_activities()
 
         History.objects.create(
             typus=HistoryTypus.SERIES_CREATE,

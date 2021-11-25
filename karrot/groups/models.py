@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import TextField, DateTimeField, QuerySet, Count, Q, F, Exists, OuterRef, Value
+from django.db.models import TextField, DateTimeField, QuerySet, Count, Q, F, Exists, OuterRef, Value, CheckConstraint
 from django.db.models.manager import BaseManager
 from django.template.loader import render_to_string
 from django.utils import timezone as tz, timezone
@@ -307,6 +307,10 @@ class GroupMembership(BaseModel, DirtyFieldsMixin):
     class Meta:
         db_table = 'groups_group_members'
         unique_together = (('group', 'user'), )
+        constraints = [CheckConstraint(
+            check=Q(roles__contains=[GROUP_MEMBER]),
+            name='must_have_member_role',
+        )]
 
     def add_roles(self, roles):
         for role in roles:

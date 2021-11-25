@@ -74,7 +74,7 @@ class TestConversationsAPI(APITestCase):
         [c.messages.create(content='hey', author=user) for c in conversations]
 
         self.client.force_login(user=user)
-        with self.assertNumQueries(16):
+        with self.assertNumQueries(17):
             response = self.client.get('/api/conversations/', {'group': group.id}, format='json')
         results = response.data['results']
 

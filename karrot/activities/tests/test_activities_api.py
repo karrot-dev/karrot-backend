@@ -1,4 +1,6 @@
 from datetime import timedelta
+from unittest.mock import ANY
+
 from dateutil.relativedelta import relativedelta
 from django.db import IntegrityError
 from django.utils import timezone
@@ -11,8 +13,9 @@ from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership, GroupStatus
 from karrot.activities.factories import ActivityFactory, ActivityTypeFactory
 from karrot.activities.models import to_range, ActivityParticipant
+from karrot.groups.roles import GROUP_MEMBER
 from karrot.places.factories import PlaceFactory
-from karrot.tests.utils import ExtractPaginationMixin
+from karrot.tests.utils import ExtractPaginationMixin, pluck
 from karrot.users.factories import UserFactory
 
 APPROVED = 'approved'
@@ -22,6 +25,15 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
     @classmethod
     def setUpTestData(cls):
         cls.url = '/api/activities/'
+
+        # default set
+        participant_roles = [
+            {
+                'role': 'member',
+                'max_participants': 5,
+                'description': '',
+            },
+        ]
 
         # activity for group with one member and one place
         cls.member = UserFactory()
@@ -44,7 +56,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         cls.activity_data = {
             'activity_type': cls.activity_type.id,
             'date': to_range(timezone.now() + relativedelta(days=2)).as_list(),
-            'max_participants': 5,
+            'participant_roles': participant_roles,
             'place': cls.place.id
         }
 
@@ -52,7 +64,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         cls.past_activity_data = {
             'activity_type': cls.activity_type.id,
             'date': to_range(timezone.now() - relativedelta(days=1)).as_list(),
-            'max_participants': 5,
+            'participant_roles': participant_roles,
             'place': cls.place.id
         }
         cls.past_activity = ActivityFactory(
@@ -122,7 +134,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
 
     def test_list_activities_as_group_member(self):
         self.client.force_login(user=self.member)
-        with self.assertNumQueries(4):
+        with self.assertNumQueries(5):
             response = self.get_results(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 2)
@@ -138,7 +150,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
 
     def test_retrieve_activities_as_group_member(self):
         self.client.force_login(user=self.member)
-        with self.assertNumQueries(4):
+        with self.assertNumQueries(5):
             response = self.client.get(self.activity_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
@@ -211,12 +223,12 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         participant_order = [self.second_member.id, self.member.id]
         response = self.client.get(self.activity_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['participants'], participant_order)
+        self.assertEqual(pluck(response.data['participants'], 'user'), participant_order)
 
         response = self.get_results(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         activity = next(p for p in response.data if p['id'] == self.activity.id)
-        self.assertEqual(activity['participants'], participant_order)
+        self.assertEqual(pluck(activity['participants'], 'user'), participant_order)
 
         # reverse order
         participant = self.activity.activityparticipant_set.earliest('created_at')
@@ -226,12 +238,12 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
 
         response = self.client.get(self.activity_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['participants'], participant_order)
+        self.assertEqual(pluck(response.data['participants'], 'user'), participant_order)
 
         response = self.get_results(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         activity = next(p for p in response.data if p['id'] == self.activity.id)
-        self.assertEqual(activity['participants'], participant_order)
+        self.assertEqual(pluck(activity['participants'], 'user'), participant_order)
 
     def test_join_activity_as_newcomer(self):
         newcomer = UserFactory()
@@ -257,6 +269,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
     def test_join_full_activity_fails(self):
         self.client.force_login(user=self.member)
         self.activity.max_participants = 1
+        self.activity.participant_roles.update(max_participants=1)
         self.activity.save()
         u2 = UserFactory()
         GroupMembership.objects.create(group=self.group, user=u2)
@@ -500,7 +513,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
 
-class TestActivitiesWithRequiredRolesAPI(APITestCase):
+class TestActivitiesWithRolesAPI(APITestCase):
     def setUp(self):
         self.member = UserFactory()
         self.other_member = UserFactory()
@@ -509,12 +522,22 @@ class TestActivitiesWithRequiredRolesAPI(APITestCase):
         self.approved_member = UserFactory()
         self.group.groupmembership_set.create(
             user=self.approved_member,
-            roles=[APPROVED],
+            roles=[GROUP_MEMBER, APPROVED],
         )
         self.activity = ActivityFactory(
             place=self.place,
             require_role=APPROVED,
             max_open_participants=1,
+            participant_roles=[
+                {
+                    'role': GROUP_MEMBER,
+                    'max_participants': 1,
+                },
+                {
+                    'role': APPROVED,
+                    'max_participants': 10,
+                },
+            ]
         )
 
     def test_cannot_join_open_slot_if_none_available(self):
@@ -522,72 +545,75 @@ class TestActivitiesWithRequiredRolesAPI(APITestCase):
             place=self.place,
             require_role=APPROVED,
             max_open_participants=0,
+            participant_roles=[
+                {
+                    'role': APPROVED,
+                    'max_participants': 10,
+                },
+            ]
         )
         self.client.force_login(user=self.member)
         response = self.client.post('/api/activities/{}/add/'.format(activity.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_can_join_as_participant_without_role(self):
-        self.activity.add_participant(self.approved_member, is_open=False)  # need at least one non-open participant
+        self.activity.add_participant(self.approved_member, role=APPROVED)  # need at least one non-open participant
         self.client.force_login(user=self.member)
-        response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'open': True})
+        response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'role': GROUP_MEMBER})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         participant = ActivityParticipant.objects.get(activity=self.activity, user=self.member)
-        self.assertEqual(participant.is_open, True)
+        self.assertEqual(participant.participant_role.role, GROUP_MEMBER)
 
     def test_cannot_join_as_participant_without_role_if_full(self):
-        self.activity.add_participant(self.member, is_open=True)
+        self.activity.add_participant(self.member, role=GROUP_MEMBER)
         self.client.force_login(user=self.other_member)
         response = self.client.post('/api/activities/{}/add/'.format(self.activity.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
-    def test_can_join_specifying_is_open(self):
+    def test_can_join_as_approved_role(self):
         self.client.force_login(user=self.approved_member)
-        response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'open': False})
+        response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'role': APPROVED})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         participant = ActivityParticipant.objects.get(activity=self.activity, user=self.approved_member)
-        self.assertEqual(participant.is_open, False)
+        self.assertEqual(participant.participant_role.role, APPROVED)
 
     def test_cannot_join_if_missing_role(self):
         self.client.force_login(user=self.member)
-        response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'open': False})
+        response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'role': APPROVED})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
-    def test_cannot_have_only_open_participants(self):
-        self.client.force_login(user=self.member)
-        response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'open': True})
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+    # TODO: this would be an extra feature, to specify "must have other roles" on the participant_role object...
+    # def test_cannot_have_only_open_participants(self):
+    #     self.client.force_login(user=self.member)
+    #     response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'open': True})
+    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+    #
+    # TODO: sorry, gave up on this backwards compatible idea, too many changes...
+    # def test_backwards_compatible_participants_api(self):
+    #     self.activity.add_participant(self.member, role=GROUP_MEMBER)
+    #     self.activity.add_participant(self.approved_member, role=APPROVED)
+    #     self.client.force_login(user=self.member)
+    #     response = self.client.get('/api/activities/{}/'.format(self.activity.id))
+    #
+    #     # participants field doesn't show open participants
+    #     self.assertEqual(response.data['participants'], [self.approved_member.id])
 
-    def test_backwards_compatible_participants_api(self):
-        self.activity.add_participant(self.member, is_open=True)
-        self.activity.add_participant(self.approved_member, is_open=False)
+    def test_participants_api(self):
+        self.activity.add_participant(self.member, role=GROUP_MEMBER)
+        self.activity.add_participant(self.approved_member, role=APPROVED)
         self.client.force_login(user=self.member)
         response = self.client.get('/api/activities/{}/'.format(self.activity.id))
 
-        # participants field doesn't show open participants
-        self.assertEqual(response.data['participants'], [self.approved_member.id])
-
-    def test_next_participants_api(self):
-        self.activity.add_participant(self.member, is_open=True)
-        self.activity.add_participant(self.approved_member, is_open=False)
-        self.client.force_login(user=self.member)
-        response = self.client.get('/api/activities/{}/'.format(self.activity.id))
-
-        # participants_next field shows participant object with user id and role
-        self.assertEqual(len(response.data['participants_next']), 2)
-        self.assertDictContainsSubset(
-            {
+        self.assertEqual(
+            response.data['participants'], [{
                 'user': self.member.id,
-                'is_open': True,
-            },
-            response.data['participants_next'][0],
-        )
-        self.assertDictContainsSubset(
-            {
+                'role': GROUP_MEMBER,
+                'created_at': ANY,
+            }, {
                 'user': self.approved_member.id,
-                'is_open': False,
-            },
-            response.data['participants_next'][1],
+                'role': APPROVED,
+                'created_at': ANY,
+            }]
         )
 
     def test_cannot_set_max_collectors_without_required_role(self):

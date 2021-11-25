@@ -11,7 +11,7 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 
 from karrot.groups.models import Group, GroupMembership, GroupStatus
-from karrot.groups.roles import GROUP_EDITOR
+from karrot.groups.roles import GROUP_EDITOR, GROUP_MEMBER
 from karrot.activities.models import Activity, ActivitySeries, to_range, ActivityType
 from karrot.places.models import Place, PlaceType
 from karrot.users.models import User
@@ -204,13 +204,21 @@ class Command(BaseCommand):
 
         def make_series(place, activity_type):
             response = c.post(
-                '/api/activity-series/', {
+                '/api/activity-series/',
+                {
                     'activity_type': activity_type.id,
                     'start_date': faker.date_time_between(start_date='now', end_date='+24h', tzinfo=pytz.utc),
                     'rule': 'FREQ=WEEKLY;BYDAY=MO,TU,SA',
                     'max_participants': 10,
-                    'place': place
-                }
+                    'place': place,
+                    'participant_roles': [
+                        {
+                            'role': GROUP_MEMBER,
+                            'max_participants': 10,
+                        },
+                    ],
+                },
+                format='json',
             )
             if response.status_code != 201:
                 raise Exception('could not make series', place, response.data)
@@ -245,7 +253,13 @@ class Command(BaseCommand):
                     'activity_type': activity_type.id,
                     'date': date.as_list(),
                     'place': place,
-                    'max_participants': 10
+                    'max_participants': 10,
+                    'participant_roles': [
+                        {
+                            'role': GROUP_MEMBER,
+                            'max_participants': 10,
+                        },
+                    ],
                 },
                 format='json',
             )
@@ -304,6 +318,7 @@ class Command(BaseCommand):
                 place_id=place,
                 max_participants=10,
             )
+            activity.participant_roles.create(role=GROUP_MEMBER, max_participants=10)
             activity.add_participant(User.objects.get(pk=user_id))
             print('created done activity: ', activity)
             return activity
