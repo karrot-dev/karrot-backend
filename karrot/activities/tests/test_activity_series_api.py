@@ -209,7 +209,22 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
-        self.series = ActivitySeriesFactory(max_participants=3, place=self.place)
+        self.series = ActivitySeriesFactory(
+            max_participants=3,
+            place=self.place,
+            participant_roles=[
+                {
+                    'role': 'member',
+                    'max_participants': 5,
+                    'description': '',
+                },
+                {
+                    'role': 'approved',
+                    'max_participants': 5,
+                    'description': '',
+                },
+            ]
+        )
 
     def test_change_max_participants_for_series(self):
         "should change all future instances (except for individually changed ones), but not past ones"
@@ -225,6 +240,64 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         for _ in response.data:
             self.assertEqual(_['max_participants'], 99)
+
+    def test_add_participant_role(self):
+        self.client.force_login(user=self.member)
+        self.client.patch(
+            '/api/activity-series/{}/'.format(self.series.id), {'participant_roles': [{
+                'role': 'driver',
+            }]},
+            format='json'
+        )
+        self.group.refresh_from_db()
+        self.assertEqual(
+            list(self.series.participant_roles.order_by('role').values_list('role', flat=True)),
+            ['approved', 'driver', 'member'],
+        )
+        self.series.activities.upcoming()
+
+    def test_modify_participant_role_description(self):
+        self.client.force_login(user=self.member)
+        response = self.client.patch(
+            '/api/activity-series/{}/'.format(self.series.id), {
+                'participant_roles': [{
+                    'id': self.series.participant_roles.get(role='approved').id,
+                    'description': 'new description',
+                }]
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(self.series.participant_roles.get(role='approved').description, 'new description')
+
+    def test_modify_participant_role(self):
+        self.client.force_login(user=self.member)
+        response = self.client.patch(
+            '/api/activity-series/{}/'.format(self.series.id),
+            {'participant_roles': [{
+                'id': self.series.participant_roles.get(role='approved').id,
+                'role': 'driver',
+            }]},
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
+    def test_remove_participant_role(self):
+        self.client.force_login(user=self.member)
+        response = self.client.patch(
+            '/api/activity-series/{}/'.format(self.series.id),
+            {'participant_roles': [{
+                'id': self.series.participant_roles.get(role='approved').id,
+                '_removed': True,
+            }]},
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.series.refresh_from_db()
+        self.assertEqual(
+            list(self.series.participant_roles.order_by('role').values_list('role', flat=True)),
+            ['member'],
+        )
 
     def test_change_series_activates_group(self):
         self.group.status = GroupStatus.INACTIVE.value

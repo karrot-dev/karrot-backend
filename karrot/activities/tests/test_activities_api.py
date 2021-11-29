@@ -56,16 +56,22 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         cls.activity_data = {
             'activity_type': cls.activity_type.id,
             'date': to_range(timezone.now() + relativedelta(days=2)).as_list(),
-            'participant_roles': participant_roles,
             'place': cls.place.id
+        }
+        cls.activity_create_data = {
+            **cls.activity_data,
+            'participant_roles': participant_roles,
         }
 
         # past activity
         cls.past_activity_data = {
             'activity_type': cls.activity_type.id,
             'date': to_range(timezone.now() - relativedelta(days=1)).as_list(),
-            'participant_roles': participant_roles,
             'place': cls.place.id
+        }
+        cls.past_activity_create_data = {
+            **cls.past_activity_data,
+            'participant_roles': participant_roles,
         }
         cls.past_activity = ActivityFactory(
             activity_type=cls.activity_type, place=cls.place, date=to_range(timezone.now() - relativedelta(days=1))
@@ -79,24 +85,24 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         self.group.refresh_from_db()
 
     def test_create_activity(self):
-        response = self.client.post(self.url, self.activity_data, format='json')
+        response = self.client.post(self.url, self.activity_create_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_create_activity_as_user(self):
         self.client.force_login(user=self.user)
-        response = self.client.post(self.url, self.activity_data, format='json')
+        response = self.client.post(self.url, self.activity_create_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_create_activity_as_group_member(self):
         self.client.force_login(user=self.member)
-        response = self.client.post(self.url, self.activity_data, format='json')
+        response = self.client.post(self.url, self.activity_create_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
     def test_create_activity_for_archived_type_fails(self):
         self.client.force_login(user=self.member)
         response = self.client.post(
             self.url, {
-                **self.activity_data,
+                **self.activity_create_data,
                 'activity_type': self.archived_activity_type.id,
             }, format='json'
         )
@@ -106,13 +112,13 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.member)
         self.group.status = GroupStatus.INACTIVE.value
         self.group.save()
-        self.client.post(self.url, self.activity_data, format='json')
+        self.client.post(self.url, self.activity_create_data, format='json')
         self.group.refresh_from_db()
         self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)
 
     def test_create_past_activity_date_fails(self):
         self.client.force_login(user=self.member)
-        response = self.client.post(self.url, self.past_activity_data, format='json')
+        response = self.client.post(self.url, self.past_activity_create_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_create_activity_as_newcomer_fails(self):
@@ -624,6 +630,65 @@ class TestActivitiesWithRolesAPI(APITestCase):
         with self.assertRaises(IntegrityError):
             # uh oh! what would a participant without role be here? given no role is needed...
             ActivityFactory(place=self.place, max_open_participants=47)
+
+    def test_add_participant_role(self):
+        self.client.force_login(user=self.member)
+        response = self.client.patch(
+            '/api/activities/{}/'.format(self.activity.id), {'participant_roles': [{
+                'role': 'driver',
+            }]},
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.activity.refresh_from_db()
+        self.assertEqual(
+            list(self.activity.participant_roles.order_by('role').values_list('role', flat=True)),
+            ['approved', 'driver', 'member'],
+        )
+
+    def test_modify_participant_role_description(self):
+        self.client.force_login(user=self.member)
+        response = self.client.patch(
+            '/api/activities/{}/'.format(self.activity.id), {
+                'participant_roles': [{
+                    'id': self.activity.participant_roles.get(role='approved').id,
+                    'description': 'yay it changed',
+                }]
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(self.activity.participant_roles.get(role='approved').description, 'yay it changed')
+
+    def test_cannot_modify_participant_role(self):
+        self.client.force_login(user=self.member)
+        response = self.client.patch(
+            '/api/activities/{}/'.format(self.activity.id),
+            {'participant_roles': [{
+                'id': self.activity.participant_roles.get(role='approved').id,
+                'role': 'cook',
+            }]},
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+
+    def test_remove_participant_role(self):
+        self.client.force_login(user=self.member)
+        response = self.client.patch(
+            '/api/activities/{}/'.format(self.activity.id), {
+                'participant_roles': [{
+                    'id': self.activity.participant_roles.get(role='approved').id,
+                    '_removed': True,
+                }]
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.activity.refresh_from_db()
+        self.assertEqual(
+            list(self.activity.participant_roles.order_by('role').values_list('role', flat=True)),
+            ['member'],
+        )
 
 
 class TestActivitiesListAPI(APITestCase, ExtractPaginationMixin):

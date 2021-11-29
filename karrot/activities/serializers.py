@@ -370,9 +370,24 @@ class ActivityUpdateSerializer(ActivitySerializer):
 
         return activity
 
+    @transaction.atomic()
     def update(self, instance, validated_data):
-        # TODO: this is where we'd need to updated the nested participant roles...
-        validated_data.pop('participant_roles', None)
+        activity = instance
+        participant_roles = validated_data.pop('participant_roles', None)
+        if participant_roles:
+            for entry in participant_roles:
+                pk = entry.pop('id', None)
+                if pk:
+                    participant_role = ParticipantRole.objects.get(pk=pk)
+                    if entry.get('_removed', False):
+                        participant_role.delete()
+                    else:
+                        role = entry.get('role', None)
+                        if role and role != participant_role.role:
+                            raise serializers.ValidationError('You cannot modify role')
+                        ParticipantRole.objects.filter(pk=pk).update(**entry)
+                else:
+                    ParticipantRole.objects.create(activity=activity, **entry)
         return super().update(instance, validated_data)
 
     def validate_date(self, date):
@@ -688,6 +703,23 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
     @transaction.atomic()
     def update(self, series, validated_data):
         before_data = ActivitySeriesHistorySerializer(series).data
+
+        participant_roles = validated_data.pop('participant_roles', None)
+        if participant_roles:
+            for entry in participant_roles:
+                pk = entry.pop('id', None)
+                if pk:
+                    participant_role = SeriesParticipantRole.objects.get(pk=pk)
+                    if entry.get('_removed', False):
+                        participant_role.delete()
+                    else:
+                        role = entry.get('role', None)
+                        if role and role != participant_role.role:
+                            raise serializers.ValidationError('You cannot modify role')
+                        SeriesParticipantRole.objects.filter(pk=pk).update(**entry)
+                else:
+                    SeriesParticipantRole.objects.create(activity_series=series, **entry)
+
         super().update(series, validated_data)
         after_data = ActivitySeriesHistorySerializer(series).data
 
