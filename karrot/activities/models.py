@@ -68,7 +68,6 @@ class ActivitySeries(BaseModel):
     objects = ActivitySeriesManager()
 
     place = models.ForeignKey('places.Place', related_name='series', on_delete=models.CASCADE)
-    max_participants = models.PositiveIntegerField(blank=True, null=True)
     rule = models.TextField()
     start_date = models.DateTimeField()
     description = models.TextField(blank=True)
@@ -92,7 +91,6 @@ class ActivitySeries(BaseModel):
             activity_type=self.activity_type,
             date=CustomDateTimeTZRange(date, date + (self.duration or default_duration)),
             has_duration=self.duration is not None,
-            max_participants=self.max_participants,
             series=self,
             place=self.place,
             description=self.description,
@@ -150,14 +148,11 @@ class ActivitySeries(BaseModel):
 
         if old:
             description_changed = old.description != self.description
-            max_participants_changed = old.max_participants != self.max_participants
             duration_changed = old.duration != self.duration
-            if description_changed or max_participants_changed or duration_changed:
+            if description_changed or duration_changed:
                 for activity in self.activities.upcoming():
                     if description_changed and old.description == activity.description:
                         activity.description = self.description
-                    if max_participants_changed and old.max_participants == activity.max_participants:
-                        activity.max_participants = self.max_participants
                     if duration_changed:
                         if self.duration:
                             activity.has_duration = True
@@ -244,8 +239,9 @@ class ActivityQuerySet(models.QuerySet):
             payload['activity_date'] = activity.id
             if activity.series:
                 payload['series'] = activity.series.id
-            if activity.max_participants:
-                payload['max_participants'] = activity.max_participants
+            max_participants = activity.total_max_participants()
+            if max_participants:
+                payload['max_participants'] = max_participants
             if activity.participants.count() == 0:
                 stats.activity_missed(activity)
                 History.objects.create(
@@ -328,7 +324,6 @@ class Activity(BaseModel, ConversationMixin):
     has_duration = models.BooleanField(default=False)
 
     description = models.TextField(blank=True)
-    max_participants = models.PositiveIntegerField(null=True)
     is_disabled = models.BooleanField(default=False)
     last_changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -374,6 +369,12 @@ class Activity(BaseModel, ConversationMixin):
     def empty_participants_count(self):
         return 0  # TODO: this needs fixing in the email template to show per-role...
         # return self.max_participants - self.participants.filter(activityparticipant__is_open=False).count()
+
+    def get_total_max_participants(self):
+        values = [entry.max_participants for entry in self.participant_roles.all()]
+        if None in values:
+            return None
+        return sum(values)
 
     def is_full(self, role=GROUP_MEMBER):
         participant_role = self.participant_roles.get(role=role)

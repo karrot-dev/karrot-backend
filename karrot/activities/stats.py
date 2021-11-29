@@ -50,10 +50,11 @@ def activity_done(activity):
         'activity_done_slots_joined': participants_count,
     }
 
-    if activity.max_participants is not None and activity.max_participants > 0:
+    max_participants = activity.total_max_participants()
+    if max_participants is not None and max_participants > 0:
         fields.update({
-            'activity_done_slots_total': activity.max_participants,
-            'activity_done_slots_percentage': participants_count / activity.max_participants,
+            'activity_done_slots_total': max_participants,
+            'activity_done_slots_percentage': participants_count / max_participants,
         })
 
     write_points([{

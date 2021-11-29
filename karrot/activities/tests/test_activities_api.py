@@ -10,7 +10,7 @@ from rest_framework.test import APITestCase
 from karrot.base.base_models import CustomDateTimeTZRange
 from karrot.conversations.models import ConversationNotificationStatus
 from karrot.groups.factories import GroupFactory
-from karrot.groups.models import GroupMembership, GroupStatus
+from karrot.groups.models import GroupStatus
 from karrot.activities.factories import ActivityFactory, ActivityTypeFactory
 from karrot.activities.models import to_range, ActivityParticipant
 from karrot.groups.roles import GROUP_MEMBER
@@ -184,7 +184,8 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
 
     def test_patch_max_participants_to_negative_value_fails(self):
         self.client.force_login(user=self.member)
-        response = self.client.patch(self.activity_url, {'max_participants': -1})
+        id = self.activity.participant_roles.first().id
+        response = self.client.patch(self.activity_url, {'participant_roles': {'id': id, 'max_participants': -1}})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_patch_past_activity_fails(self):
@@ -196,7 +197,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         newcomer = UserFactory()
         self.group.groupmembership_set.create(user=newcomer)
         self.client.force_login(user=newcomer)
-        response = self.client.patch(self.activity_url, {'max_participants': 1}, format='json')
+        response = self.client.patch(self.activity_url, {'description': 'woo'}, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_join_activity(self):
@@ -268,17 +269,16 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
 
     def test_join_activity_without_max_participants_as_member(self):
         self.client.force_login(user=self.member)
-        p = ActivityFactory(activity_type=self.activity_type, max_participants=None, place=self.place)
+        p = ActivityFactory(participant_roles=[{'role': GROUP_MEMBER, 'max_participants': None}])
         response = self.client.post('/api/activities/{}/add/'.format(p.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_join_full_activity_fails(self):
         self.client.force_login(user=self.member)
-        self.activity.max_participants = 1
         self.activity.participant_roles.update(max_participants=1)
         self.activity.save()
         u2 = UserFactory()
-        GroupMembership.objects.create(group=self.group, user=u2)
+        self.group.add_member(u2)
         self.activity.add_participant(u2)
         response = self.client.post(self.join_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)

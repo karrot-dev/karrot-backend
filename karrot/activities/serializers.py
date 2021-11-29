@@ -229,7 +229,6 @@ class ActivitySerializer(serializers.ModelSerializer):
             'date',
             'series',
             'place',
-            'max_participants',
             'participant_roles',
             'participants',
             'description',
@@ -589,7 +588,6 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'activity_type',
-            'max_participants',
             'participant_roles',
             'place',
             'rule',
