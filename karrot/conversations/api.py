@@ -295,7 +295,7 @@ class ConversationMessageViewSet(
 
     def list(self, request, *args, **kwargs):
         # Workaround to avoid extremely slow cases
-        # https://github.com/yunity/karrot-frontend/issues/2369
+        # https://github.com/karrot-dev/karrot-frontend/issues/2369
         # Split up query in two parts:
         # 1. get message ids, including costly access control
         queryset = ConversationMessage.objects.with_conversation_access(request.user).values('id').distinct()
