@@ -1,6 +1,7 @@
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
+from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -261,6 +262,17 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.post(self.join_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
         self.assertEqual(response.data['detail'], 'Activity is already full.')
+
+    def test_join_started_but_not_finished_activity(self):
+        activity = ActivityFactory(
+            place=self.place,
+            date=to_range(timezone.now(), hours=4),
+        )
+        # jump to 5 minutes after it starts
+        with freeze_time(activity.date.start + relativedelta(minutes=5), tick=True):
+            self.client.force_login(user=self.member)
+            response = self.client.post('/api/activities/{}/add/'.format(activity.id))
+            self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_join_past_activity_fails(self):
         self.client.force_login(user=self.member)

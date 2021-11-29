@@ -20,7 +20,7 @@ from karrot.activities.models import (
 )
 from karrot.activities.permissions import (
     IsUpcoming, HasNotJoinedActivity, HasJoinedActivity, IsEmptyActivity, IsNotFull, IsSameParticipant,
-    IsRecentActivity, IsGroupEditor, TypeHasNoActivities, CannotChangeGroup, IsNotUpcoming
+    IsRecentActivity, IsGroupEditor, TypeHasNoActivities, CannotChangeGroup, IsNotUpcoming, IsNotPast
 )
 from karrot.activities.serializers import (
     ActivityDismissFeedbackSerializer, ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer,
@@ -227,7 +227,7 @@ class ActivityViewSet(
     @action(
         detail=True,
         methods=['POST'],
-        permission_classes=(IsAuthenticated, IsUpcoming, HasNotJoinedActivity, IsNotFull),
+        permission_classes=(IsAuthenticated, IsNotPast, HasNotJoinedActivity, IsNotFull),
         serializer_class=ActivityJoinSerializer
     )
     def add(self, request, pk=None):
@@ -238,7 +238,7 @@ class ActivityViewSet(
     @action(
         detail=True,
         methods=['POST'],
-        permission_classes=(IsAuthenticated, IsUpcoming, HasJoinedActivity),
+        permission_classes=(IsAuthenticated, IsNotPast, HasJoinedActivity),
         serializer_class=ActivityLeaveSerializer
     )
     def remove(self, request, pk=None):

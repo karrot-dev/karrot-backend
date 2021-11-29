@@ -2,8 +2,19 @@ from django.conf import settings
 from rest_framework import permissions
 
 
-class IsUpcoming(permissions.BasePermission):
+class IsNotPast(permissions.BasePermission):
     message = 'The activity is in the past.'
+
+    def has_object_permission(self, request, view, obj):
+        # do allow GETs for activities in the past
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        else:
+            return obj.is_not_past()
+
+
+class IsUpcoming(permissions.BasePermission):
+    message = 'The activity is not upcoming.'
 
     def has_object_permission(self, request, view, obj):
         # do allow GETs for activities in the past
