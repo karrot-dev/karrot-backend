@@ -532,8 +532,6 @@ class TestActivitiesWithRolesAPI(APITestCase):
         )
         self.activity = ActivityFactory(
             place=self.place,
-            require_role=APPROVED,
-            max_open_participants=1,
             participant_roles=[
                 {
                     'role': GROUP_MEMBER,
@@ -548,10 +546,7 @@ class TestActivitiesWithRolesAPI(APITestCase):
 
     def test_cannot_join_open_slot_if_none_available(self):
         activity = ActivityFactory(
-            place=self.place,
-            require_role=APPROVED,
-            max_open_participants=0,
-            participant_roles=[
+            place=self.place, participant_roles=[
                 {
                     'role': APPROVED,
                     'max_participants': 10,
@@ -623,13 +618,14 @@ class TestActivitiesWithRolesAPI(APITestCase):
         )
 
     def test_cannot_set_max_collectors_without_required_role(self):
+        # TODO: update this test to use participant roles!
         # all good
-        ActivityFactory(place=self.place, require_role='foo')
+        ActivityFactory(place=self.place)
         # looks lovely
-        ActivityFactory(place=self.place, require_role='bar', max_open_participants=47)
+        ActivityFactory(place=self.place)
         with self.assertRaises(IntegrityError):
             # uh oh! what would a participant without role be here? given no role is needed...
-            ActivityFactory(place=self.place, max_open_participants=47)
+            ActivityFactory(place=self.place)
 
     def test_add_participant_role(self):
         self.client.force_login(user=self.member)

@@ -1,6 +1,6 @@
 from babel.dates import format_time, format_datetime
 from dateutil.relativedelta import relativedelta
-from django.db.models import F, QuerySet, Q
+from django.db.models import F, QuerySet
 from django.utils import timezone, translation
 from django.utils.text import Truncator
 from django.utils.translation import gettext as _
@@ -143,11 +143,12 @@ def fetch_activity_notification_data_for_group(group):
     )
 
     for user in users:
-        membership = group.groupmembership_set.get(user=user)
+        # membership = group.groupmembership_set.get(user=user)
 
         activities = group_activities.filter(
             # either where it doesn't require a role, or the user has the required role
-            Q(require_role=None) | Q(require_role__in=membership.roles)
+            # Q(require_role=None) | Q(require_role__in=membership.roles)
+            # TODO: filter based on participant roles
         ).filter(
             # only the places they subscribed to
             place__placesubscription__user=user,

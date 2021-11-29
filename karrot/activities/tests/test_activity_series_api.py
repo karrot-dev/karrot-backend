@@ -61,8 +61,6 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
         activity_series_data = {
             'activity_type': self.activity_type.id,
             'max_participants': 5,
-            'max_open_participants': None,
-            'require_role': None,
             'place': self.place.id,
             'rule': str(recurrence),
             'start_date': start_date,
@@ -80,8 +78,6 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
         expected_series_data = {
             'activity_type': self.activity_type.id,
             'max_participants': 5,
-            'max_open_participants': None,
-            'require_role': None,
             'participant_roles': [{
                 'id': ANY,
                 **o
@@ -138,8 +134,6 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
             created_activities.append({
                 'activity_type': self.activity_type.id,
                 'max_participants': 5,
-                'max_open_participants': None,
-                'require_role': None,
                 'series': series_id,
                 'participants': [],
                 'participant_roles': [{

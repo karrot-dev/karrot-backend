@@ -8,7 +8,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext as _
 from django.db import models
 from django.db import transaction
-from django.db.models import CheckConstraint, Count, DurationField, F, Q, Sum
+from django.db.models import Count, DurationField, F, Q, Sum
 from django.utils import timezone
 
 from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin
@@ -67,22 +67,12 @@ class ActivitySeriesManager(models.Manager.from_queryset(ActivitySeriesQuerySet)
 class ActivitySeries(BaseModel):
     objects = ActivitySeriesManager()
 
-    class Meta:
-        constraints = [
-            CheckConstraint(
-                check=Q(max_open_participants=None) | ~Q(require_role=None),
-                name='series_only_open_participants_if_require_role',
-            )
-        ]
-
     place = models.ForeignKey('places.Place', related_name='series', on_delete=models.CASCADE)
     max_participants = models.PositiveIntegerField(blank=True, null=True)
-    max_open_participants = models.PositiveIntegerField(null=True)
     rule = models.TextField()
     start_date = models.DateTimeField()
     description = models.TextField(blank=True)
     duration = DurationField(null=True)
-    require_role = models.CharField(null=True, blank=False, max_length=100)
 
     activity_type = models.ForeignKey(
         ActivityType,
@@ -103,8 +93,6 @@ class ActivitySeries(BaseModel):
             date=CustomDateTimeTZRange(date, date + (self.duration or default_duration)),
             has_duration=self.duration is not None,
             max_participants=self.max_participants,
-            max_open_participants=self.max_open_participants,
-            require_role=self.require_role,
             series=self,
             place=self.place,
             description=self.description,
@@ -163,8 +151,6 @@ class ActivitySeries(BaseModel):
         if old:
             description_changed = old.description != self.description
             max_participants_changed = old.max_participants != self.max_participants
-            max_open_participants_changed = old.max_open_participants != self.max_open_participants
-            require_role_changed = old.require_role != self.require_role
             duration_changed = old.duration != self.duration
             if description_changed or max_participants_changed or duration_changed:
                 for activity in self.activities.upcoming():
@@ -172,10 +158,6 @@ class ActivitySeries(BaseModel):
                         activity.description = self.description
                     if max_participants_changed and old.max_participants == activity.max_participants:
                         activity.max_participants = self.max_participants
-                    if max_open_participants_changed and old.max_open_participants == activity.max_open_participants:
-                        activity.max_open_participants = self.max_open_participants
-                    if require_role_changed and old.require_role == activity.require_role:
-                        activity.require_role = self.require_role
                     if duration_changed:
                         if self.duration:
                             activity.has_duration = True
@@ -312,12 +294,6 @@ class Activity(BaseModel, ConversationMixin):
 
     class Meta:
         ordering = ['date']
-        constraints = [
-            CheckConstraint(
-                check=Q(max_open_participants=None) | ~Q(require_role=None),
-                name='only_open_participants_if_require_role',
-            )
-        ]
 
     activity_type = models.ForeignKey(
         ActivityType,
@@ -352,9 +328,7 @@ class Activity(BaseModel, ConversationMixin):
     has_duration = models.BooleanField(default=False)
 
     description = models.TextField(blank=True)
-    require_role = models.CharField(null=True, blank=False, max_length=100)
     max_participants = models.PositiveIntegerField(null=True)
-    max_open_participants = models.PositiveIntegerField(null=True)
     is_disabled = models.BooleanField(default=False)
     last_changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
