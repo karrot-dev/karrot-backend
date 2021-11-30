@@ -14,6 +14,7 @@ class ICSCalendarRendererTest(TestCase):
         attendee.params['cn'] = vText('Mary Smith')
         attendee.params['ROLE'] = vText('REQ-PARTICIPANT')
         self.event = ReturnDict({
+            'status': 'CONFIRMED',
             'dtstart': datetime(year=2021, month=3, day=19, hour=17, tzinfo=UTC),
             'dtend': datetime(year=2021, month=3, day=19, hour=18, tzinfo=UTC),
             'description': 'Hello\nWorld!',
@@ -31,6 +32,7 @@ class ICSCalendarRendererTest(TestCase):
             "DTEND;VALUE=DATE-TIME:20210319T180000Z",
             "ATTENDEE;CN=\"Mary Smith\";ROLE=REQ-PARTICIPANT:MAILTO:marysmith@example.com",
             "DESCRIPTION:Hello\\nWorld!",
+            "STATUS:CONFIRMED",
             "TRANSP:OPAQUE",
             "END:VEVENT",
             "END:VCALENDAR",

@@ -407,13 +407,15 @@ class ActivityICSSerializer(serializers.ModelSerializer):
         model = ActivityModel
         fields = [
             'uid', 'dtstamp', 'summary', 'description', 'dtstart', 'dtend', 'transp', 'categories', 'location', 'geo',
-            'attendee'
+            'attendee', 'status'
         ]
 
     # date of generation of the ICS representation of the event
     dtstamp = serializers.SerializerMethodField()
     # unique id, of the form uid@domain.com
     uid = serializers.SerializerMethodField()
+    # status, one of "CONFIRMED", "TENTATIVE" or "CANCELLED"
+    status = serializers.SerializerMethodField()
 
     # title (short description)
     summary = serializers.SerializerMethodField()
@@ -446,6 +448,9 @@ class ActivityICSSerializer(serializers.ModelSerializer):
         if request and request.META.get('HTTP_HOST'):
             domain = request.META.get('HTTP_HOST')
         return 'activity_{}@{}'.format(activity.id, domain)
+
+    def get_status(self, activity):
+        return 'CANCELLED' if activity.is_disabled else 'CONFIRMED'
 
     def get_summary(self, activity):
         return '{}: {}'.format(activity.activity_type.name, activity.place.name)
