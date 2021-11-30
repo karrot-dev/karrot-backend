@@ -60,7 +60,6 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
         start_date = self.group.timezone.localize(datetime.now().replace(hour=20, minute=0))
         activity_series_data = {
             'activity_type': self.activity_type.id,
-            'max_participants': 5,
             'place': self.place.id,
             'rule': str(recurrence),
             'start_date': start_date,
@@ -77,7 +76,6 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
         del response.data['dates_preview']
         expected_series_data = {
             'activity_type': self.activity_type.id,
-            'max_participants': 5,
             'participant_roles': [{
                 'id': ANY,
                 **o
@@ -133,7 +131,6 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
         for _ in dates_list:
             created_activities.append({
                 'activity_type': self.activity_type.id,
-                'max_participants': 5,
                 'series': series_id,
                 'participants': [],
                 'participant_roles': [{
@@ -159,7 +156,6 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
         start_date = self.group.timezone.localize(datetime.now().replace(hour=20, minute=0))
         activity_series_data = {
             'activity_type': self.activity_type.id,
-            'max_participants': 5,
             'place': self.place.id,
             'rule': str(recurrence),
             'start_date': start_date,
@@ -183,7 +179,6 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.post(
             url, {
                 'activity_type': self.archived_activity_type.id,
-                'max_participants': 5,
                 'place': self.place.id,
                 'rule': str(recurrence),
                 'start_date': start_date,
@@ -204,7 +199,6 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
         self.series = ActivitySeriesFactory(
-            max_participants=3,
             place=self.place,
             participant_roles=[
                 {
@@ -221,19 +215,21 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         )
 
     def test_change_max_participants_for_series(self):
-        "should change all future instances (except for individually changed ones), but not past ones"
+        """should change all future instances (except for individually changed ones), but not past ones"""
         url = '/api/activity-series/{}/'.format(self.series.id)
         self.client.force_login(user=self.member)
 
-        response = self.client.patch(url, {'max_participants': 99})
+        participant_role = self.series.participant_roles.get(role='member')
+        response = self.client.patch(url, {'participant_roles': {'id': participant_role.id, 'max_participants': 99}})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data['max_participants'], 99)
 
         url = '/api/activities/'
         response = self.get_results(url, {'series': self.series.id, 'date_min': self.now})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         for _ in response.data:
-            self.assertEqual(_['max_participants'], 99)
+            for item in _['participant_roles']:
+                if item['role'] == 'member':
+                    self.assertEqual(item['max_participants'], 99)
 
     def test_add_participant_role(self):
         self.client.force_login(user=self.member)
