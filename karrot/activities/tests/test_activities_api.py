@@ -486,6 +486,16 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         response = self.client.get('/api/activities/{id}/ics/'.format(id=self.activity.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEquals(response.data['status'], 'CONFIRMED')
+
+    def test_export_ics_disabled_activity(self):
+        self.client.force_login(user=self.member)
+        self.activity.is_disabled = True
+        self.activity.save()
+        response = self.client.get('/api/activities/{id}/ics/'.format(id=self.activity.id))
+        # disabled activities are still visible
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEquals(response.data['status'], 'CANCELLED')
 
     def test_export_ics_activities_logged_out(self):
         response = self.get_results('/api/activities/ics/')
