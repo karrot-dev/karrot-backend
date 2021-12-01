@@ -506,6 +506,16 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         response = self.get_results('/api/activities/ics/')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
+    def test_export_ics_activities_place(self):
+        self.client.force_login(user=self.member)
+        response = self.get_results('/api/activities/ics/', {'place': self.place.id})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+    def test_export_ics_activities_group(self):
+        self.client.force_login(user=self.member)
+        response = self.get_results('/api/activities/ics/', {'group': self.group.id})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
 
 class TestActivitiesListAPI(APITestCase, ExtractPaginationMixin):
     def setUp(self):
