@@ -343,7 +343,7 @@ class Activity(BaseModel, ConversationMixin):
 
     @property
     def ended_at(self):
-        if self.is_upcoming():
+        if self.is_not_past():
             return None
         return self.date.end
 
@@ -362,6 +362,12 @@ class Activity(BaseModel, ConversationMixin):
 
     def is_upcoming(self):
         return self.date.start > timezone.now()
+
+    def is_past(self):
+        return self.date.end < timezone.now()
+
+    def is_not_past(self):
+        return not self.is_past()
 
     def is_full(self):
         if not self.max_participants:
