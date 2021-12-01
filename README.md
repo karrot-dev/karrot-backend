@@ -2,19 +2,19 @@
 
 Django API server for the _karrot_ frontend
 
-Our issues are tracked in [karrot-frontend](https://github.com/yunity/karrot-frontend/issues). We plan to unite karrot-backend, karrot-frontend and related repos in near future.
+Our issues are tracked in [karrot-frontend](https://github.com/karrot-dev/karrot-frontend/issues). We plan to unite karrot-backend, karrot-frontend and related repos in near future.
 
-[![CircleCI](https://circleci.com/gh/yunity/karrot-backend.svg?style=svg)](https://circleci.com/gh/yunity/karrot-backend)
-[![codecov](https://codecov.io/gh/yunity/karrot-backend/branch/master/graph/badge.svg)](https://codecov.io/gh/yunity/karrot-backend)
+[![CircleCI](https://circleci.com/gh/karrot-dev/karrot-backend/tree/master.svg?style=svg)](https://circleci.com/gh/karrot-dev/karrot-backend/tree/master)
+[![codecov](https://codecov.io/gh/karrot-dev/karrot-backend/branch/master/graph/badge.svg?token=U2gJZBxdkU)](https://codecov.io/gh/karrot-dev/karrot-backend)
 
 ## Developer setup
 
 The recommended way to getting your developer environment setup is docker-compose - includes backend, frontend, mail catcher, postgres, redis, etc..
 
-Head over to [yunity/karrot-docker](https://github.com/yunity/karrot-docker) for further instructions.
+Head over to [karrot-dev/karrot-docker](https://github.com/karrot-dev/karrot-docker) for further instructions.
 
 If you can't or don't want to use docker-compose, look into [SETUP.md](SETUP.md) for other ways.
- 
+
 ## Coding guidelines
 
 We follow PEP8 with the same rules as the [Django project](https://docs.djangoproject.com/en/dev/internals/contributing/writing-code/coding-style/).
@@ -45,7 +45,7 @@ The manage.py application can be used to perform administrative tasks:
   - migrate: Apply database migrations
   - shell\_plus: (requires ipython) for playing in a django python environment
   - test: Run automated tests
-  
+
 You can launch them via docker-compose, for example:
 
 ```
@@ -98,7 +98,7 @@ If you want to watch for changes, and support hot reloading then run:
 
 (refresh your browser after starting the server as the websocket is not reconnecting)
 
-_Note: you should never edit `.html.jinja2` files directly._ 
+_Note: you should never edit `.html.jinja2` files directly._
 
 
 Enjoy! ... oh and be sure to visit https://mjml.io/documentation/#components to find some nice components to use.

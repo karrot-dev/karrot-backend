@@ -161,7 +161,7 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': """
 Welcome to our API documentation!
 
-Check out our code on [GitHub](https://github.com/yunity/karrot-frontend)
+Check out our code on [GitHub](https://github.com/karrot-dev/karrot-frontend)
 and talk with us on the [Foodsaving Worldwide Rocketchat](https://chat.foodsaving.world)!
     """,
     'VERSION': '0.1',
@@ -478,7 +478,7 @@ LISTEN_ENDPOINT = options['LISTEN_ENDPOINT']
 REQUEST_TIMEOUT_SECONDS = int(options['REQUEST_TIMEOUT_SECONDS'])
 
 # If you have the email_reply_trimmer_service running, set this to 'http://localhost:4567/trim' (or similar)
-# https://github.com/yunity/email_reply_trimmer_service
+# https://github.com/karrot-dev/email_reply_trimmer_service
 EMAIL_REPLY_TRIMMER_URL = options['EMAIL_REPLY_TRIMMER_URL']
 
 # NB: Keep this as the last line, and keep
