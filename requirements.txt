@@ -13,7 +13,6 @@ anyio==3.3.4
 argon2-cffi==21.1.0
 asgiref==3.4.1
 async-timeout==4.0.1
-asynctest==0.13.0
 attrs==21.2.0
 autobahn==21.3.1
 autoflake==1.4
@@ -84,7 +83,6 @@ icalendar==4.0.9
 identify==2.3.5
 idna==3.3
 importlib-metadata==4.2.0
-importlib-resources==5.4.0
 incremental==21.3.0
 inflection==0.5.1
 influxdb==5.3.1
@@ -94,7 +92,7 @@ jedi==0.18.0
 jinja2==3.0.3
 jsonschema==4.2.1
 logging-tree==1.9
-lxml==4.6.4
+lxml==4.6.5
 markdown==3.3.4
 markupsafe==2.0.1
 matplotlib-inline==0.1.3
