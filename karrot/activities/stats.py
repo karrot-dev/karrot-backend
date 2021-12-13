@@ -50,7 +50,7 @@ def activity_done(activity):
         'activity_done_slots_joined': participants_count,
     }
 
-    max_participants = activity.total_max_participants()
+    max_participants = activity.get_total_max_participants()
     if max_participants is not None and max_participants > 0:
         fields.update({
             'activity_done_slots_total': max_participants,

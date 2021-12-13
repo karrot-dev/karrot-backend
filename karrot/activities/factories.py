@@ -55,7 +55,6 @@ class ActivityFactory(DjangoModelFactory):
     activity_type = SubFactory(ActivityTypeFactory, group=SelfAttribute('..place.group'))
     place = SubFactory(PlaceFactory)
     date = LazyFunction(in_one_day)
-    max_participants = 5
 
 
 class ActivitySeriesFactory(DjangoModelFactory):

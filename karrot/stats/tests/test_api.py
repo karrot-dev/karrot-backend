@@ -10,6 +10,7 @@ from rest_framework.test import APITestCase
 from karrot.activities.factories import ActivityFactory, ActivityTypeFactory
 from karrot.activities.models import to_range, Activity, Feedback
 from karrot.groups.factories import GroupFactory
+from karrot.groups.roles import GROUP_MEMBER
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import VerifiedUserFactory
 from karrot.utils.tests.fake import faker
@@ -113,7 +114,14 @@ class TestActivityHistoryStatsAPI(APITestCase):
         self.date = to_range(timezone.now() + timedelta(days=33))
         self.just_before_the_activity_starts = self.date.start - timedelta(hours=1)
         self.after_the_activity_is_over = self.date.end + timedelta(hours=2)
-        self.activity = ActivityFactory(place=self.place, date=self.date, max_participants=max_participants)
+        self.activity = ActivityFactory(
+            place=self.place,
+            date=self.date,
+            participant_roles=[{
+                'role': GROUP_MEMBER,
+                'max_participants': max_participants
+            }],
+        )
 
     def test_activity_done(self):
         self.setup_activity()

@@ -239,7 +239,7 @@ class ActivityQuerySet(models.QuerySet):
             payload['activity_date'] = activity.id
             if activity.series:
                 payload['series'] = activity.series.id
-            max_participants = activity.total_max_participants()
+            max_participants = activity.get_total_max_participants()
             if max_participants:
                 payload['max_participants'] = max_participants
             if activity.participants.count() == 0:

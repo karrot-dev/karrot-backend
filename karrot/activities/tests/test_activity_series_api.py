@@ -220,7 +220,12 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.member)
 
         participant_role = self.series.participant_roles.get(role='member')
-        response = self.client.patch(url, {'participant_roles': {'id': participant_role.id, 'max_participants': 99}})
+        response = self.client.patch(
+            url, {'participant_roles': [{
+                'id': participant_role.id,
+                'max_participants': 99
+            }]}, format='json'
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
         url = '/api/activities/'
@@ -294,7 +299,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.group.save()
         url = '/api/activity-series/{}/'.format(self.series.id)
         self.client.force_login(user=self.member)
-        self.client.patch(url, {'max_participants': 99})
+        self.client.patch(url, {'description': 'I changed it'})
         self.group.refresh_from_db()
         self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)
 
@@ -445,7 +450,8 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
     def test_change_max_participants_to_invalid_number_fails(self):
         self.client.force_login(user=self.member)
         url = '/api/activity-series/{}/'.format(self.series.id)
-        response = self.client.patch(url, {'max_participants': -1})
+        participant_role = self.series.participant_roles.first()
+        response = self.client.patch(url, {'participant_roles': {'id': participant_role.id, 'max_participants': -1}})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_set_invalid_place_fails(self):

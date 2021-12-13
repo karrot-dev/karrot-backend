@@ -93,7 +93,6 @@ class TestActivityNotificationTask(APITestCase):
         return ActivityFactory(
             place=place,
             date=to_range(timezone.localtime() + delta),
-            max_participants=1,
         )
 
     def create_not_full_activity(self, delta, place=None):
@@ -102,7 +101,6 @@ class TestActivityNotificationTask(APITestCase):
         activity = ActivityFactory(
             place=place,
             date=to_range(timezone.localtime() + delta),
-            max_participants=2,
         )
         activity.add_participant(self.other_user)
         activity.save()
@@ -126,7 +124,6 @@ class TestActivityNotificationTask(APITestCase):
         return ActivityFactory(
             place=place,
             date=to_range(timezone.localtime() + delta),
-            max_participants=1,
             deleted=True,
         )
 
@@ -136,14 +133,13 @@ class TestActivityNotificationTask(APITestCase):
         return ActivityFactory(
             place=place,
             date=to_range(timezone.localtime() + delta),
-            max_participants=1,
             is_disabled=True,
         )
 
     def test_user_activities(self):
         with group_timezone_at(self.group, hour=20):
-            user_activity_tonight = self.create_user_activity(relativedelta(minutes=50), max_participants=1)
-            user_activity_tomorrow = self.create_user_activity(relativedelta(hours=8), max_participants=1)
+            user_activity_tonight = self.create_user_activity(relativedelta(minutes=50))
+            user_activity_tomorrow = self.create_user_activity(relativedelta(hours=8))
             entries = fetch_activity_notification_data_for_group(self.group)
             self.assertEqual(list(entries[0]['tonight_user']), [user_activity_tonight])
             self.assertEqual(list(entries[0]['tomorrow_user']), [user_activity_tomorrow])
@@ -166,8 +162,8 @@ class TestActivityNotificationTask(APITestCase):
 
     def test_do_not_include_not_full_if_user_is_participant(self):
         with group_timezone_at(self.group, hour=20):
-            self.create_user_activity(relativedelta(minutes=50), max_participants=2)
-            self.create_user_activity(relativedelta(hours=8), max_participants=2)
+            self.create_user_activity(relativedelta(minutes=50))
+            self.create_user_activity(relativedelta(hours=8))
             entries = fetch_activity_notification_data_for_group(self.group)
             self.assertEqual(list(entries[0]['tonight_not_full']), [])
             self.assertEqual(list(entries[0]['tomorrow_not_full']), [])

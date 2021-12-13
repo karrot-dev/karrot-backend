@@ -2,7 +2,6 @@ from datetime import timedelta
 from unittest.mock import ANY
 
 from dateutil.relativedelta import relativedelta
-from django.db import IntegrityError
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -185,7 +184,12 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
     def test_patch_max_participants_to_negative_value_fails(self):
         self.client.force_login(user=self.member)
         id = self.activity.participant_roles.first().id
-        response = self.client.patch(self.activity_url, {'participant_roles': {'id': id, 'max_participants': -1}})
+        response = self.client.patch(
+            self.activity_url, {'participant_roles': {
+                'id': id,
+                'max_participants': -1
+            }}, format='json'
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_patch_past_activity_fails(self):
@@ -269,8 +273,8 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
 
     def test_join_activity_without_max_participants_as_member(self):
         self.client.force_login(user=self.member)
-        p = ActivityFactory(participant_roles=[{'role': GROUP_MEMBER, 'max_participants': None}])
-        response = self.client.post('/api/activities/{}/add/'.format(p.id))
+        activity = ActivityFactory(place=self.place, participant_roles=[{'role': GROUP_MEMBER, 'max_participants': 5}])
+        response = self.client.post('/api/activities/{}/add/'.format(activity.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_join_full_activity_fails(self):
@@ -626,16 +630,6 @@ class TestActivitiesWithRolesAPI(APITestCase):
                 'created_at': ANY,
             }]
         )
-
-    def test_cannot_set_max_collectors_without_required_role(self):
-        # TODO: update this test to use participant roles!
-        # all good
-        ActivityFactory(place=self.place)
-        # looks lovely
-        ActivityFactory(place=self.place)
-        with self.assertRaises(IntegrityError):
-            # uh oh! what would a participant without role be here? given no role is needed...
-            ActivityFactory(place=self.place)
 
     def test_add_participant_role(self):
         self.client.force_login(user=self.member)

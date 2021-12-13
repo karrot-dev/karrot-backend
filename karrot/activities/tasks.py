@@ -1,6 +1,6 @@
 from babel.dates import format_time, format_datetime
 from dateutil.relativedelta import relativedelta
-from django.db.models import F, QuerySet
+from django.db.models import QuerySet, Sum
 from django.utils import timezone, translation
 from django.utils.text import Truncator
 from django.utils.translation import gettext as _
@@ -127,7 +127,9 @@ def fetch_activity_notification_data_for_group(group):
     tomorrow = {'date__startswith__gte': midnight, 'date__startswith__lt': midnight_tomorrow}
 
     empty = {'num_participants': 0}
-    not_full = {'num_participants__gt': 0, 'num_participants__lt': F('max_participants')}
+    # TODO: think/check this way of summing max participants works (e.g. if is null...)
+    # TODO: actually, this is going to need to totally change to consider role by role...
+    not_full = {'num_participants__gt': 0, 'num_participants__lt': Sum('participant_roles__max_participants')}
 
     group_activities = Activity.objects.exclude_disabled().annotate_num_participants().filter(
         place__status=PlaceStatus.ACTIVE.value,
