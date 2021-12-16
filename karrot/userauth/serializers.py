@@ -7,8 +7,11 @@ from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from karrot.userauth import stats
 from karrot.userauth.models import VerificationCode
-from karrot.utils.validators import prevent_reserved_names
 from karrot.webhooks.models import EmailEvent
+from karrot.utils.validators import (
+    prevent_reserved_names, contains_number, contains_lowercase_letter, contains_uppercase_letter,
+    contains_special_character, prevent_use_of_company_name, password_not_blacklisted
+)
 
 
 class AuthLoginSerializer(serializers.Serializer):
@@ -56,7 +59,14 @@ class AuthUserSerializer(serializers.ModelSerializer):
                 'validators': [prevent_reserved_names],
             },
             'password': {
-                'write_only': True,
+                'write_only':
+                True,
+                'min_length':
+                8,
+                'validators': [
+                    contains_number, contains_lowercase_letter, contains_uppercase_letter, contains_special_character,
+                    prevent_use_of_company_name, password_not_blacklisted
+                ]
             },
             'description': {
                 'trim_whitespace': False,

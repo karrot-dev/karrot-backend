@@ -31,7 +31,7 @@ class TestUsersAPI(APITestCase):
         self.url = '/api/auth/user/'
         self.user_data = {
             'email': faker.email(),
-            'password': faker.name(),
+            'password': faker.password(length=10, special_chars=True, digits=True, upper_case=True, lower_case=True),
             'display_name': faker.name(),
             'address': faker.address(),
             'latitude': faker.latitude(),
@@ -201,7 +201,11 @@ class TestCreateUserErrors(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.url = '/api/auth/user/'
-        self.user_data = {'email': 'fancy@example.com', 'password': faker.name(), 'display_name': faker.name()}
+        self.user_data = {
+            'email': 'fancy@example.com',
+            'password': faker.password(length=10, special_chars=True, digits=True, upper_case=True, lower_case=True),
+            'display_name': faker.name()
+        }
 
     def test_create_user_with_similar_cased_email_fails(self):
         response = self.client.post(self.url, self.user_data)
@@ -609,3 +613,44 @@ class TestFailedEmailDeliveryAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.data[0]['reason'], 'my reason')
         self.assertEqual(response.data[0]['event'], 'bounced')
         self.assertEqual(response.data[0]['subject'], 'something')
+
+
+class TestCreateUserPasswordPolicy(APITestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.url = '/api/auth/user/'
+        self.user_data = {'email': 'fancy@example.com', 'password': '3aL5y%9*3EqBv', 'display_name': faker.name()}
+
+    def test_create_user_with_strong_password(self):
+        response = self.client.post(self.url, self.user_data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_create_user_password_no_numbers(self):
+        response = self.client.post(self.url, {**self.user_data, 'password': 'YaLgy%v*pEqBv'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(response.data['password'], ['password does not contain a number'])
+
+    def test_create_user_password_no_lowercase_letters(self):
+        response = self.client.post(self.url, {**self.user_data, 'password': '3AL5Y%9*3EQBV'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(response.data['password'], ['password does not contain a lowercase letter'])
+
+    def test_create_user_password_no_uppercase_letters(self):
+        response = self.client.post(self.url, {**self.user_data, 'password': '3al5y%9*3eqbv'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(response.data['password'], ['password does not contain an uppercase letter'])
+
+    def test_create_user_password_no_special_characters(self):
+        response = self.client.post(self.url, {**self.user_data, 'password': '3aL5yp9a3EqBv'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(response.data['password'], ['password does not contain a special character'])
+
+    def test_create_user_password_contains_company_name(self):
+        response = self.client.post(self.url, {**self.user_data, 'password': '3aL5y%KaRroT9*3EqBv'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(response.data['password'], ['password cannot contain company name'])
+
+    def test_create_user_password_blacklisted(self):
+        response = self.client.post(self.url, {**self.user_data, 'password': 'P@ssw0rd'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(response.data['password'], ['password is blacklisted'])

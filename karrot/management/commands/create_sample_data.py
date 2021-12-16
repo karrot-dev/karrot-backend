@@ -72,7 +72,7 @@ class Command(BaseCommand):
             print('login as', u)
             return u
 
-        default_password = '123'
+        default_password = 'K@rr0t1!'
 
         def make_user(verified=True):
             response = c.post(
