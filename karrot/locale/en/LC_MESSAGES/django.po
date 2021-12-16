@@ -735,9 +735,9 @@ msgstr ""
 msgid "You are already subscribed to this place"
 msgstr ""
 
-#: karrot/userauth/api.py:98 karrot/userauth/serializers.py:94
-#: karrot/userauth/serializers.py:143 karrot/userauth/serializers.py:164
-#: karrot/userauth/serializers.py:194 karrot/userauth/serializers.py:216
+#: karrot/userauth/api.py:98 karrot/userauth/serializers.py:104
+#: karrot/userauth/serializers.py:153 karrot/userauth/serializers.py:174
+#: karrot/userauth/serializers.py:204 karrot/userauth/serializers.py:226
 msgid "We could not send you an e-mail."
 msgstr ""
 
@@ -745,27 +745,27 @@ msgstr ""
 msgid "Mail is already verified."
 msgstr ""
 
-#: karrot/userauth/serializers.py:24
+#: karrot/userauth/serializers.py:27
 msgid "Unable to log in with provided credentials."
 msgstr ""
 
-#: karrot/userauth/serializers.py:81 karrot/userauth/serializers.py:181
+#: karrot/userauth/serializers.py:91 karrot/userauth/serializers.py:191
 msgid "Similar e-mail exists: "
 msgstr ""
 
-#: karrot/userauth/serializers.py:118
+#: karrot/userauth/serializers.py:128
 msgid "Verification code is invalid"
 msgstr ""
 
-#: karrot/userauth/serializers.py:122
+#: karrot/userauth/serializers.py:132
 msgid "Verification code has expired"
 msgstr ""
 
-#: karrot/userauth/serializers.py:157 karrot/userauth/serializers.py:175
+#: karrot/userauth/serializers.py:167 karrot/userauth/serializers.py:185
 msgid "Wrong password"
 msgstr ""
 
-#: karrot/userauth/serializers.py:208
+#: karrot/userauth/serializers.py:218
 msgid "Unknown e-mail address"
 msgstr ""
 
@@ -914,7 +914,7 @@ msgid ""
 "service using this email address."
 msgstr ""
 
-#: karrot/utils/validators.py:8
+#: karrot/utils/validators.py:18
 #, python-format
 msgid "%(value)s is a reserved name"
 msgstr ""
