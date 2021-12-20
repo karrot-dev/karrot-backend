@@ -13,6 +13,7 @@ from django.utils import timezone
 
 from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin
 from karrot.conversations.models import ConversationMixin
+from karrot.groups.roles import GROUP_MEMBER
 from karrot.history.models import History, HistoryTypus
 from karrot.activities import stats
 from karrot.activities.utils import match_activities_with_dates, rrule_between_dates_in_local_time
@@ -423,12 +424,23 @@ class SeriesParticipantType(BaseModel):
         related_name='participant_types',
     )
     name = models.CharField(blank=True, max_length=100)
-    role = models.CharField(null=True, blank=False, max_length=100)
+    role = models.CharField(max_length=100, default=GROUP_MEMBER)
     max_participants = models.PositiveIntegerField(null=True)
     description = models.TextField(blank=True)
 
 
+class ParticipantTypeQuerySet(models.QuerySet):
+    def annotate_num_participants(self):
+        return self.annotate(num_participants=Count('activityparticipant'))
+
+
+class ParticipantTypeManager(models.Manager.from_queryset(ActivityQuerySet)):
+    pass
+
+
 class ParticipantType(BaseModel):
+    objects = ParticipantTypeManager()
+
     activity = models.ForeignKey(
         Activity,
         on_delete=models.CASCADE,
@@ -441,9 +453,11 @@ class ParticipantType(BaseModel):
         null=True,
     )
     name = models.CharField(blank=True, max_length=100)
-    role = models.CharField(null=True, blank=False, max_length=100)
+    role = models.CharField(max_length=100, default=GROUP_MEMBER)
     max_participants = models.PositiveIntegerField(null=True)
     description = models.TextField(blank=True)
+
+    # # return self.annotate(num_participants=Count('activityparticipant'))
 
     def is_full(self):
         return self.activity.activityparticipant_set.filter(participant_type=self).count() >= self.max_participants

@@ -11,12 +11,14 @@ from rest_framework.test import APITestCase
 
 from karrot.activities import tasks
 from karrot.activities.factories import ActivityFactory
+from karrot.activities.tests.test_activities_api import APPROVED
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
 from karrot.activities.models import to_range
 from karrot.activities.tasks import daily_activity_notifications, fetch_activity_notification_data_for_group
+from karrot.groups.roles import GROUP_MEMBER, GROUP_EDITOR
 from karrot.places.factories import PlaceFactory
-from karrot.places.models import PlaceStatus
+from karrot.places.models import PlaceStatus, PlaceSubscription
 from karrot.subscriptions.models import PushSubscription, PushSubscriptionPlatform
 from karrot.users.factories import VerifiedUserFactory, UserFactory
 from karrot.utils.frontend_urls import place_url
@@ -87,12 +89,20 @@ class TestActivityNotificationTask(APITestCase):
     def setUp(self):
         mail.outbox = []
 
-    def create_empty_activity(self, delta, place=None):
+    def create_user(self, roles):
+        user = VerifiedUserFactory()
+        self.group.add_member(user)
+        PlaceSubscription.objects.create(place=self.place, user=user)
+        GroupMembership.objects.filter(group=self.group, user=user).update(roles=roles)
+        return user
+
+    def create_empty_activity(self, delta, place=None, **kwargs):
         if place is None:
             place = self.place
         return ActivityFactory(
             place=place,
             date=to_range(timezone.localtime() + delta),
+            **kwargs,
         )
 
     def create_not_full_activity(self, delta, place=None):
@@ -168,11 +178,33 @@ class TestActivityNotificationTask(APITestCase):
             self.assertEqual(list(entries[0]['tonight_not_full']), [])
             self.assertEqual(list(entries[0]['tomorrow_not_full']), [])
 
+    def test_considers_participant_types(self):
+        with group_timezone_at(self.group, hour=20):
+            approved_user = self.create_user(roles=[GROUP_MEMBER, GROUP_EDITOR, APPROVED])
+            anyone_activity = self.create_empty_activity(relativedelta(minutes=30))
+            approved_activity = self.create_empty_activity(
+                relativedelta(minutes=50), participant_types=[{
+                    'role': APPROVED,
+                    'max_participants': 3,
+                }]
+            )
+            entries = fetch_activity_notification_data_for_group(self.group)
+
+            def entries_for(user, key):
+                for entry in entries:
+                    if entry['user'] == user:
+                        return list(entry[key])
+
+            self.assertEqual(entries_for(self.user, 'tonight_empty'), [anyone_activity])
+            self.assertEqual(entries_for(approved_user, 'tonight_empty'), [anyone_activity, approved_activity])
+
     def test_send_notification_email(self):
         with group_timezone_at(self.group, hour=20):
             self.create_empty_activity(delta=relativedelta(minutes=10))
             daily_activity_notifications()
-            self.assertEqual(len(mail.outbox), 1)
+            expected_users = [self.user]
+            self.assertEqual(len(mail.outbox), len(expected_users))
+            self.assertEqual(set(email for m in mail.outbox for email in m.to), set(u.email for u in expected_users))
             self.assertIn(place_url(self.place), mail.outbox[0].body)
 
     def test_does_not_send_if_no_activities(self):

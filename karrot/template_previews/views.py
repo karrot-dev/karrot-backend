@@ -37,7 +37,9 @@ basedir = os.path.abspath(os.path.join(settings.BASE_DIR, 'karrot'))
 MockVerificationCode = namedtuple('VerificationCode', ['code'])
 
 
-def random_user():
+def random_user(group=None):
+    if group:
+        return group.members.order_by('?').first()
     return User.objects.order_by('?').first()
 
 
@@ -199,7 +201,8 @@ class Handlers:
         return karrot.users.emails.prepare_passwordreset_success_email(user=random_user())
 
     def activity_notification(self):
-        user = random_user()
+        group = random_group()
+        user = random_user(group)
 
         activity1 = Activity.objects.order_by('?').first()
         activity2 = Activity.objects.order_by('?').first()

@@ -1,6 +1,6 @@
 from babel.dates import format_time, format_datetime
 from dateutil.relativedelta import relativedelta
-from django.db.models import QuerySet, Sum
+from django.db.models import F, Q, QuerySet
 from django.utils import timezone, translation
 from django.utils.text import Truncator
 from django.utils.translation import gettext as _
@@ -9,7 +9,7 @@ from huey.contrib.djhuey import db_periodic_task, db_task
 
 from karrot.activities import stats
 from karrot.activities.emails import prepare_activity_notification_email
-from karrot.activities.models import Activity, ActivitySeries, ActivityParticipant
+from karrot.activities.models import Activity, ActivitySeries, ActivityParticipant, ParticipantType
 from karrot.groups.models import Group, GroupMembership, GroupNotificationType
 from karrot.places.models import PlaceStatus
 from karrot.subscriptions.models import PushSubscription
@@ -123,13 +123,15 @@ def fetch_activity_notification_data_for_group(group):
     midnight = localnow.replace(hour=0, minute=0, second=0, microsecond=0) + relativedelta(days=1)
     midnight_tomorrow = midnight + relativedelta(days=1)
 
-    tonight = {'date__startswith__gte': localnow, 'date__startswith__lt': midnight}
-    tomorrow = {'date__startswith__gte': midnight, 'date__startswith__lt': midnight_tomorrow}
+    tonight = dict(date__startswith__gte=localnow, date__startswith__lt=midnight)
+    tomorrow = dict(date__startswith__gte=midnight, date__startswith__lt=midnight_tomorrow)
 
-    empty = {'num_participants': 0}
-    # TODO: think/check this way of summing max participants works (e.g. if is null...)
-    # TODO: actually, this is going to need to totally change to consider role by role...
-    not_full = {'num_participants__gt': 0, 'num_participants__lt': Sum('participant_types__max_participants')}
+    empty = dict(num_participants=0)
+    not_full = dict(
+        participant_types__in=ParticipantType.objects.annotate_num_participants().filter(
+            Q(num_participants__gt=0) & (Q(max_participants=None) | Q(num_participants__lt=F('max_participants'))),
+        )
+    )
 
     group_activities = Activity.objects.exclude_disabled().annotate_num_participants().filter(
         place__status=PlaceStatus.ACTIVE.value,
@@ -145,12 +147,10 @@ def fetch_activity_notification_data_for_group(group):
     )
 
     for user in users:
-        # membership = group.groupmembership_set.get(user=user)
+        membership = group.groupmembership_set.get(user=user)
 
         activities = group_activities.filter(
-            # either where it doesn't require a role, or the user has the required role
-            # Q(require_role=None) | Q(require_role__in=membership.roles)
-            # TODO: filter based on participant roles
+            participant_types__role__in=membership.roles,
         ).filter(
             # only the places they subscribed to
             place__placesubscription__user=user,
