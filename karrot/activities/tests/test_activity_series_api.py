@@ -451,7 +451,12 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.member)
         url = '/api/activity-series/{}/'.format(self.series.id)
         participant_role = self.series.participant_roles.first()
-        response = self.client.patch(url, {'participant_roles': {'id': participant_role.id, 'max_participants': -1}})
+        response = self.client.patch(
+            url, {'participant_roles': {
+                'id': participant_role.id,
+                'max_participants': -1
+            }}, format='json'
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_set_invalid_place_fails(self):
@@ -481,6 +486,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         # change setting of activity
         response = self.client.patch(url, {'max_participants': 666})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        print(response.data)
         self.assertEqual(response.data['max_participants'], 666)
 
         # run regular update command of series
@@ -490,7 +496,8 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         url = '/api/activities/{}/'.format(activity_under_test.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data['max_participants'], 666)
+        print(response.data)
+        self.assertEqual(response.data['max_participants'], 666, response.data)
 
         # modify series max_participants
         series_url = '/api/activity-series/{}/'.format(self.series.id)

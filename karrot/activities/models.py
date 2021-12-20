@@ -103,7 +103,8 @@ class ActivitySeries(BaseModel):
             activity.participant_roles.create(
                 role=participant_role.role,
                 max_participants=participant_role.max_participants,
-                description=participant_role.description
+                description=participant_role.description,
+                series_participant_role=participant_role,
             )
         return activity
 
@@ -334,6 +335,10 @@ class Activity(BaseModel, ConversationMixin):
 
     is_done = models.BooleanField(default=False)
 
+    # if it's been changed from the series then mark it here
+    # this means we'll then not do further updates when changing the series
+    # is_changed = models.BooleanField(default=False)
+
     @property
     def group(self):
         return self.place.group
@@ -427,6 +432,7 @@ class SeriesParticipantRole(BaseModel):
         related_name='participant_roles',
     )
     role = models.CharField(null=True, blank=False, max_length=100)
+    name = models.CharField(null=True, blank=True, max_length=100)
     max_participants = models.PositiveIntegerField(null=True)
     description = models.TextField(blank=True)
 
@@ -440,7 +446,14 @@ class ParticipantRole(BaseModel):
         on_delete=models.CASCADE,
         related_name='participant_roles',
     )
+    series_participant_role = models.ForeignKey(
+        SeriesParticipantRole,
+        on_delete=models.SET_NULL,
+        related_name='participant_roles',
+        null=True,
+    )
     role = models.CharField(null=True, blank=False, max_length=100)
+    name = models.CharField(null=True, blank=True, max_length=100)
     max_participants = models.PositiveIntegerField(null=True)
     description = models.TextField(blank=True)
 

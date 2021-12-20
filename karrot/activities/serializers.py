@@ -196,6 +196,7 @@ class ParticipantRoleSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'role',
+            'name',
             'max_participants',
             'description',
             '_removed',
@@ -211,6 +212,7 @@ class SeriesParticipantRoleSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'role',
+            'name',
             'max_participants',
             'description',
             '_removed',
@@ -710,14 +712,23 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
                 if pk:
                     participant_role = SeriesParticipantRole.objects.get(pk=pk)
                     if entry.get('_removed', False):
+                        # TODO: need to remove participants with the role, and with a nice message?
+                        ParticipantRole.objects.filter(series_participant_role=participant_role).delete()
                         participant_role.delete()
                     else:
                         role = entry.get('role', None)
                         if role and role != participant_role.role:
                             raise serializers.ValidationError('You cannot modify role')
                         SeriesParticipantRole.objects.filter(pk=pk).update(**entry)
+                        ParticipantRole.objects.filter(series_participant_role_id=pk).update(**entry)
                 else:
-                    SeriesParticipantRole.objects.create(activity_series=series, **entry)
+                    participant_role = SeriesParticipantRole.objects.create(activity_series=series, **entry)
+                    for activity in series.activities.upcoming():
+                        ParticipantRole.objects.create(
+                            activity=activity,
+                            series_participant_role=participant_role,
+                            **entry,
+                        )
 
         super().update(series, validated_data)
         after_data = ActivitySeriesHistorySerializer(series).data
