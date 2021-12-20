@@ -40,15 +40,15 @@ msgstr ""
 msgid "Task"
 msgstr ""
 
-#: karrot/activities/serializers.py:141
+#: karrot/activities/serializers.py:140
 msgid "Must be a list"
 msgstr ""
 
-#: karrot/activities/serializers.py:142
+#: karrot/activities/serializers.py:141
 msgid "Must be a list with one or two values"
 msgstr ""
 
-#: karrot/activities/serializers.py:143
+#: karrot/activities/serializers.py:142
 msgid "Must pass start value"
 msgstr ""
 
@@ -58,52 +58,47 @@ msgid "Upcoming %(activity_type)s"
 msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:6
-#: karrot/activities/templates/activity_notification.html.jinja2:192
+#: karrot/activities/templates/activity_notification.html.jinja2:185
 #: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s upcoming activities"
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:181
-#, python-format
-msgid "%(empty_participants_count)s/%(max_participants)s remaining"
-msgstr ""
-
-#: karrot/activities/templates/activity_notification.html.jinja2:196
+#: karrot/activities/templates/activity_notification.html.jinja2:189
 msgid "Tonight"
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:200
+#: karrot/activities/templates/activity_notification.html.jinja2:193
 msgid "The day is not over, there are still activities to be done!"
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:203
-#: karrot/activities/templates/activity_notification.html.jinja2:231
+#: karrot/activities/templates/activity_notification.html.jinja2:196
+#: karrot/activities/templates/activity_notification.html.jinja2:224
 msgid "You are signed up for"
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:208
-#: karrot/activities/templates/activity_notification.html.jinja2:236
+#: karrot/activities/templates/activity_notification.html.jinja2:201
+#: karrot/activities/templates/activity_notification.html.jinja2:229
 msgid "No-one is yet signed up for"
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:213
-#: karrot/activities/templates/activity_notification.html.jinja2:241
+#: karrot/activities/templates/activity_notification.html.jinja2:206
+#: karrot/activities/templates/activity_notification.html.jinja2:234
 msgid "There is still space available for"
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:226
+#: karrot/activities/templates/activity_notification.html.jinja2:219
 msgid "Tomorrow"
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:267
+#: karrot/activities/templates/activity_notification.html.jinja2:260
 msgid ""
 "You are receiving this because you are subscribed to\n"
 "                            <strong>Activity notification</strong> emails"
 " for this group."
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:269
+#: karrot/activities/templates/activity_notification.html.jinja2:262
 #: karrot/applications/templates/new_application.html.jinja2:223
 #: karrot/groups/templates/group_summary.html.jinja2:265
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:212
