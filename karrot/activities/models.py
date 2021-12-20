@@ -13,7 +13,6 @@ from django.utils import timezone
 
 from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin
 from karrot.conversations.models import ConversationMixin
-from karrot.groups.roles import GROUP_MEMBER
 from karrot.history.models import History, HistoryTypus
 from karrot.activities import stats
 from karrot.activities.utils import match_activities_with_dates, rrule_between_dates_in_local_time
@@ -96,15 +95,13 @@ class ActivitySeries(BaseModel):
             description=self.description,
             last_changed_by=self.last_changed_by,
         )
-        # TODO: are we sure we are OK now that there will always be roles defined?
-        # if not self.participant_roles.exists():
-        #     raise Exception('NO ROLES FOR SERIES')
-        for participant_role in self.participant_roles.all():
-            activity.participant_roles.create(
-                role=participant_role.role,
-                max_participants=participant_role.max_participants,
-                description=participant_role.description,
-                series_participant_role=participant_role,
+        for participant_type in self.participant_types.all():
+            activity.participant_types.create(
+                name=participant_type.name,
+                role=participant_type.role,
+                max_participants=participant_type.max_participants,
+                description=participant_type.description,
+                series_participant_type=participant_type,
             )
         return activity
 
@@ -376,26 +373,23 @@ class Activity(BaseModel, ConversationMixin):
         # return self.max_participants - self.participants.filter(activityparticipant__is_open=False).count()
 
     def get_total_max_participants(self):
-        values = [entry.max_participants for entry in self.participant_roles.all()]
+        values = [entry.max_participants for entry in self.participant_types.all()]
         if None in values:
             return None
         return sum(values)
 
-    def is_full(self, role=GROUP_MEMBER):
-        participant_role = self.participant_roles.get(role=role)
-        max_participants = participant_role.max_participants
-        return (
-            max_participants is not None
-            and self.participants.filter(activityparticipant__participant_role=participant_role
-                                         ).count() >= max_participants
-        )
+    def add_participant(self, user, participant_type=None):
+        if not participant_type:
+            # make it work without passing participant_type for the simple case
+            if self.participant_types.count() > 1:
+                print(self.participant_types.count())
+                raise Exception('must pass participant_type as >1')
+            participant_type = self.participant_types.first()
 
-    def add_participant(self, user, role=GROUP_MEMBER):
-        participant_role = self.participant_roles.get(role=role)
         participant, _ = ActivityParticipant.objects.get_or_create(
             activity=self,
             user=user,
-            participant_role=participant_role,
+            participant_type=participant_type,
         )
         return participant
 
@@ -422,40 +416,37 @@ class Activity(BaseModel, ConversationMixin):
         super().save(*args, **kwargs)
 
 
-class SeriesParticipantRole(BaseModel):
-    class Meta:
-        unique_together = (('activity_series', 'role'), )
-
+class SeriesParticipantType(BaseModel):
     activity_series = models.ForeignKey(
         ActivitySeries,
         on_delete=models.CASCADE,
-        related_name='participant_roles',
+        related_name='participant_types',
     )
+    name = models.CharField(blank=True, max_length=100)
     role = models.CharField(null=True, blank=False, max_length=100)
-    name = models.CharField(null=True, blank=True, max_length=100)
     max_participants = models.PositiveIntegerField(null=True)
     description = models.TextField(blank=True)
 
 
-class ParticipantRole(BaseModel):
-    class Meta:
-        unique_together = (('activity', 'role'), )
-
+class ParticipantType(BaseModel):
     activity = models.ForeignKey(
         Activity,
         on_delete=models.CASCADE,
-        related_name='participant_roles',
+        related_name='participant_types',
     )
-    series_participant_role = models.ForeignKey(
-        SeriesParticipantRole,
+    series_participant_type = models.ForeignKey(
+        SeriesParticipantType,
         on_delete=models.SET_NULL,
-        related_name='participant_roles',
+        related_name='participant_types',
         null=True,
     )
+    name = models.CharField(blank=True, max_length=100)
     role = models.CharField(null=True, blank=False, max_length=100)
-    name = models.CharField(null=True, blank=True, max_length=100)
     max_participants = models.PositiveIntegerField(null=True)
     description = models.TextField(blank=True)
+
+    def is_full(self):
+        return self.activity.activityparticipant_set.filter(participant_type=self).count() >= self.max_participants
 
 
 class ActivityParticipant(BaseModel):
@@ -469,8 +460,8 @@ class ActivityParticipant(BaseModel):
     )
     feedback_dismissed = models.BooleanField(default=False)
     reminder_task_id = models.TextField(null=True)  # stores a huey task id
-    is_open = models.BooleanField(default=False)
-    participant_role = models.ForeignKey(ParticipantRole, on_delete=models.CASCADE)
+    # is_open = models.BooleanField(default=False)
+    participant_type = models.ForeignKey(ParticipantType, on_delete=models.CASCADE, null=True)
 
     class Meta:
         db_table = 'activities_activity_participants'

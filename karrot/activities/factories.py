@@ -30,19 +30,19 @@ class ActivityFactory(DjangoModelFactory):
         model = ActivityModel
 
     @post_generation
-    def participant_roles(self, created, participant_roles, **kwargs):
+    def participant_types(self, created, participant_types, **kwargs):
         if not created:
             return
-        if not participant_roles:
+        if not participant_types:
             # default set...
-            participant_roles = [
+            participant_types = [
                 {
                     'role': 'member',
                     'max_participants': 5,
                 },
             ]
-        for participant_role in participant_roles:
-            self.participant_roles.create(**participant_role)
+        for participant_type in participant_types:
+            self.participant_types.create(**participant_type)
 
     @post_generation
     def participants(self, created, participants, **kwargs):
@@ -62,19 +62,19 @@ class ActivitySeriesFactory(DjangoModelFactory):
         model = ActivitySeriesModel
 
     @post_generation
-    def participant_roles(self, created, participant_roles, **kwargs):
+    def participant_types(self, created, participant_types, **kwargs):
         if not created:
             return
-        if not participant_roles:
+        if not participant_types:
             # default set...
-            participant_roles = [
+            participant_types = [
                 {
                     'role': 'member',
                     'max_participants': 5,
                 },
             ]
-        for participant_role in participant_roles:
-            self.participant_roles.create(**participant_role)
+        for participant_type in participant_types:
+            self.participant_types.create(**participant_type)
 
     @post_generation
     def update_activities(self, created, ignored, **kwargs):

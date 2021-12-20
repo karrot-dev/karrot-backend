@@ -117,7 +117,7 @@ class TestActivityHistoryStatsAPI(APITestCase):
         self.activity = ActivityFactory(
             place=self.place,
             date=self.date,
-            participant_roles=[{
+            participant_types=[{
                 'role': GROUP_MEMBER,
                 'max_participants': max_participants
             }],

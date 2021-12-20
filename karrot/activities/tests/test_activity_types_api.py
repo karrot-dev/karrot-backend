@@ -47,7 +47,7 @@ class TestActivitiesTypesAPI(APITestCase):
             'date': to_range(timezone.now() + relativedelta(days=2)).as_list(),
             'max_participants': 5,
             'place': self.place.id,
-            'participant_roles': [{
+            'participant_types': [{
                 'role': GROUP_MEMBER,
                 'max_participants': 5,
             }],

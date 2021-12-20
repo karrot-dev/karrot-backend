@@ -137,7 +137,7 @@ class TestHistoryAPIWithExistingPlace(APITestCase, ExtractPaginationMixin):
                 'activity_type': self.activity_type.id,
                 'date': to_range(timezone.now() + relativedelta(days=1)).as_list(),
                 'place': self.place.id,
-                'participant_roles': [{
+                'participant_types': [{
                     'role': GROUP_MEMBER,
                     'max_participants': 10,
                 }]
@@ -155,7 +155,7 @@ class TestHistoryAPIWithExistingPlace(APITestCase, ExtractPaginationMixin):
                 'start_date': timezone.now(),
                 'rule': 'FREQ=WEEKLY',
                 'place': self.place.id,
-                'participant_roles': [{
+                'participant_types': [{
                     'role': GROUP_MEMBER,
                     'max_participants': 10,
                 }]
@@ -178,10 +178,10 @@ class TestHistoryAPIWithExistingActivities(APITestCase, ExtractPaginationMixin):
 
     def test_modify_activity(self):
         self.client.force_login(self.member)
-        self.client.patch(self.activity_url, {'max_participants': '11'})
+        self.client.patch(self.activity_url, {'description': 'changed :)'})
         response = self.get_results(history_url)
         self.assertEqual(response.data[0]['typus'], 'ACTIVITY_MODIFY')
-        self.assertEqual(response.data[0]['payload']['max_participants'], '11')
+        self.assertEqual(response.data[0]['payload']['description'], 'changed :)')
 
     def test_dont_modify_activity(self):
         self.client.force_login(self.member)
@@ -191,10 +191,10 @@ class TestHistoryAPIWithExistingActivities(APITestCase, ExtractPaginationMixin):
 
     def test_modify_series(self):
         self.client.force_login(self.member)
-        self.client.patch(self.series_url, {'max_participants': '11'})
+        self.client.patch(self.series_url, {'description': 'woah!'})
         response = self.get_results(history_url)
         self.assertEqual(response.data[0]['typus'], 'SERIES_MODIFY')
-        self.assertEqual(response.data[0]['payload']['max_participants'], '11')
+        self.assertEqual(response.data[0]['payload']['description'], 'woah!')
 
     def test_dont_modify_series(self):
         self.client.force_login(self.member)

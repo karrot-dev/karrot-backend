@@ -129,7 +129,7 @@ def fetch_activity_notification_data_for_group(group):
     empty = {'num_participants': 0}
     # TODO: think/check this way of summing max participants works (e.g. if is null...)
     # TODO: actually, this is going to need to totally change to consider role by role...
-    not_full = {'num_participants__gt': 0, 'num_participants__lt': Sum('participant_roles__max_participants')}
+    not_full = {'num_participants__gt': 0, 'num_participants__lt': Sum('participant_types__max_participants')}
 
     group_activities = Activity.objects.exclude_disabled().annotate_num_participants().filter(
         place__status=PlaceStatus.ACTIVE.value,

@@ -209,9 +209,8 @@ class Command(BaseCommand):
                     'activity_type': activity_type.id,
                     'start_date': faker.date_time_between(start_date='now', end_date='+24h', tzinfo=pytz.utc),
                     'rule': 'FREQ=WEEKLY;BYDAY=MO,TU,SA',
-                    'max_participants': 10,
                     'place': place,
-                    'participant_roles': [
+                    'participant_types': [
                         {
                             'role': GROUP_MEMBER,
                             'max_participants': 10,
@@ -253,8 +252,7 @@ class Command(BaseCommand):
                     'activity_type': activity_type.id,
                     'date': date.as_list(),
                     'place': place,
-                    'max_participants': 10,
-                    'participant_roles': [
+                    'participant_types': [
                         {
                             'role': GROUP_MEMBER,
                             'max_participants': 10,
@@ -271,7 +269,18 @@ class Command(BaseCommand):
             return data
 
         def modify_activity(activity):
-            response = c.patch('/api/activities/{}/'.format(activity), {'max_participants': 3})
+            pt = activity.participant_types.first()
+            response = c.patch(
+                '/api/activities/{}/'.format(activity.id), {
+                    'participant_types': [
+                        {
+                            'id': pt.id,
+                            'max_participants': 3,
+                        },
+                    ],
+                },
+                format='json'
+            )
             if response.status_code != 200:
                 raise Exception('could not modify activity', activity, response.data)
             print('modified activity: ', activity)
@@ -316,9 +325,8 @@ class Command(BaseCommand):
                 activity_type=activity_type,
                 date=to_range(faker.date_time_between(start_date='-9d', end_date='-1d', tzinfo=pytz.utc), minutes=30),
                 place_id=place,
-                max_participants=10,
             )
-            activity.participant_roles.create(role=GROUP_MEMBER, max_participants=10)
+            activity.participant_types.create(role=GROUP_MEMBER, max_participants=10)
             activity.add_participant(User.objects.get(pk=user_id))
             print('created done activity: ', activity)
             return activity
@@ -396,7 +404,7 @@ class Command(BaseCommand):
             date__startswith__gte=timezone.now() + relativedelta(hours=1),
             place__group__in=Group.objects.user_is_editor(u)
         ).first()
-        modify_activity(o.id)
+        modify_activity(o)
 
         # leave
         u = login_user()

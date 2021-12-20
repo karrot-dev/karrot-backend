@@ -107,7 +107,7 @@ class FeedbackViewSet(
         queryset = self.filter_queryset(self.get_queryset()) \
             .select_related('about') \
             .prefetch_related('about__activity_type', 'about__activityparticipant_set', 'about__feedback_given_by',
-                              'about__participant_roles', 'about__activityparticipant_set__participant_role', ) \
+                              'about__participant_types', 'about__activityparticipant_set__participant_type', ) \
             .annotate(
             timezone=F('about__place__group__timezone'),
             activity_date=F('about__date__startswith'))
@@ -213,8 +213,8 @@ class ActivityViewSet(
             # because we have participants field in the serializer
             # only prefetch on read_only actions, otherwise there are caching problems when participants get added
             qs = qs.select_related('activity_type').prefetch_related(
-                'activityparticipant_set', 'feedback_given_by', 'participant_roles',
-                'activityparticipant_set__participant_role'
+                'activityparticipant_set', 'feedback_given_by', 'participant_types',
+                'activityparticipant_set__participant_type'
             )
         if self.action == 'add':
             # Lock activity when adding a participant
