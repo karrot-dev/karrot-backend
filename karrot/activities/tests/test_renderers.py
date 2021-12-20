@@ -5,6 +5,7 @@ from rest_framework.utils.serializer_helpers import ReturnDict, ReturnList
 from rest_framework.response import Response
 from karrot.activities.renderers import ICSCalendarRenderer
 from icalendar import vCalAddress, vText
+from collections import namedtuple
 
 
 class ICSCalendarRendererTest(TestCase):
@@ -27,6 +28,7 @@ class ICSCalendarRendererTest(TestCase):
             "BEGIN:VCALENDAR",
             "VERSION:2.0",
             "PRODID:-//Karrot//EN",
+            "NAME:Karrot",
             "BEGIN:VEVENT",
             "DTSTART;VALUE=DATE-TIME:20210319T170000Z",
             "DTEND;VALUE=DATE-TIME:20210319T180000Z",
@@ -37,7 +39,11 @@ class ICSCalendarRendererTest(TestCase):
             "END:VEVENT",
             "END:VCALENDAR",
         ])
-        self.renderer_context = {'response': Response()}
+
+        class FakeRequest:
+            _request = namedtuple('FakeRequestBody', 'GET')(GET={})
+
+        self.renderer_context = {'response': Response(), 'request': FakeRequest()}
 
     def test_render_ics_calendar(self):
         calendar = ReturnList([self.event], serializer=None)
