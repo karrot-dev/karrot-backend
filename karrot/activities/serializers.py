@@ -721,14 +721,21 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
                     participant_type = SeriesParticipantType.objects.get(pk=pk)
                     if entry.get('_removed', False):
                         # TODO: need to remove participants with the role, and with a nice message?
-                        ParticipantType.objects.filter(series_participant_type=participant_type).delete()
+                        # TODO: only do it for future activities
+                        ParticipantType.objects.filter(
+                            series_participant_type=participant_type,
+                            activity__in=ActivityModel.objects.upcoming(),
+                        ).delete()
                         participant_type.delete()
                     else:
                         role = entry.get('role', None)
                         if role and role != participant_type.role:
                             raise serializers.ValidationError('You cannot modify role')
                         SeriesParticipantType.objects.filter(pk=pk).update(**entry)
-                        ParticipantType.objects.filter(series_participant_type_id=pk).update(**entry)
+                        ParticipantType.objects.filter(
+                            series_participant_type_id=pk,
+                            activity__in=ActivityModel.objects.upcoming(),
+                        ).update(**entry)
                 else:
                     participant_type = SeriesParticipantType.objects.create(activity_series=series, **entry)
                     for activity in series.activities.upcoming():
