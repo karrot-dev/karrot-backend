@@ -13,6 +13,7 @@ from karrot.groups.emails import calculate_group_summary_dates, prepare_group_su
     prepare_group_summary_emails
 from karrot.groups.factories import GroupFactory, PlaygroundGroupFactory, InactiveGroupFactory
 from karrot.groups.models import GroupMembership, GroupStatus
+from karrot.groups.roles import GROUP_MEMBER
 from karrot.groups.tasks import process_inactive_users, send_summary_emails, mark_inactive_groups
 from karrot.history.models import History, HistoryTypus
 from karrot.activities.factories import ActivityFactory, FeedbackFactory
@@ -167,8 +168,14 @@ class TestSummaryEmailTask(TestCase):
 
             # fullfilled activities
             activities = [
-                ActivityFactory(place=place, max_participants=1, participants=[user])
-                for _ in range(self.activities_done_count)
+                ActivityFactory(
+                    place=place,
+                    participant_types=[{
+                        'role': GROUP_MEMBER,
+                        'max_participants': 1
+                    }],
+                    participants=[user],
+                ) for _ in range(self.activities_done_count)
             ]
 
             # activity feedback
