@@ -375,10 +375,6 @@ class Activity(BaseModel, ConversationMixin):
     def is_recent(self):
         return self.date.start >= timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
-    def empty_participants_count(self):
-        return 0  # TODO: this needs fixing in the email template to show per-role...
-        # return self.max_participants - self.participants.filter(activityparticipant__is_open=False).count()
-
     def get_total_max_participants(self):
         values = [entry.max_participants for entry in self.participant_types.all()]
         if None in values:
@@ -389,7 +385,6 @@ class Activity(BaseModel, ConversationMixin):
         if not participant_type:
             # make it work without passing participant_type for the simple case
             if self.participant_types.count() > 1:
-                print(self.participant_types.count())
                 raise Exception('must pass participant_type as >1')
             participant_type = self.participant_types.first()
 
