@@ -1,17 +1,24 @@
-from django.db import migrations, models
-import django.db.models.deletion
-import django.utils.timezone
+from django.db import migrations
 
 
 def backfill_participant_type(apps, schema_editor):
     Activity = apps.get_model('activities', 'Activity')
-    ParticipantType = apps.get_model('activities', 'ParticipantType')
+    ActivitySeries = apps.get_model('activities', 'ActivitySeries')
 
     for activity in Activity.objects.all():
-        participant_type = ParticipantType.objects.create(role='member', max_participants=activity.max_participants)
-        for participant in activity.participants.all():
-            participant.participant_type = participant_type
-            participant.save()
+        if activity.participant_types.count() == 0:
+            participant_type = activity.participant_types.create(
+                role='member',
+                max_participants=activity.max_participants,
+            )
+            activity.activityparticipant_set.update(participant_type=participant_type)
+
+    for series in ActivitySeries.objects.all():
+        if series.participant_types.count() == 0:
+            series.participant_types.create(
+                role='member',
+                max_participants=series.max_participants,
+            )
 
 
 class Migration(migrations.Migration):

@@ -475,7 +475,7 @@ class ActivityParticipant(BaseModel):
     )
     feedback_dismissed = models.BooleanField(default=False)
     reminder_task_id = models.TextField(null=True)  # stores a huey task id
-    participant_type = models.ForeignKey(ParticipantType, on_delete=models.CASCADE, null=True)
+    participant_type = models.ForeignKey(ParticipantType, on_delete=models.CASCADE, null=False)
 
     class Meta:
         db_table = 'activities_activity_participants'
