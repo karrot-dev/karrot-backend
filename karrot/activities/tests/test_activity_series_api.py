@@ -154,6 +154,7 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
                 'is_disabled': False,
                 'has_duration': False,
                 'is_done': False,
+                'is_modified': False,
             })
         self.assertEqual(response.data, created_activities, response.data)
 
@@ -672,6 +673,24 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(
             'You cannot modify the duration of activities that are part of a series', response.data['has_duration'][0]
         )
+
+    def test_marks_changed_activities_is_modified(self):
+        self.client.force_login(user=self.member)
+        activity = self.series.activities.last()
+        self.assertEqual(activity.is_modified, False)
+
+        response = self.client.patch(
+            '/api/activities/{}/'.format(activity.id),
+            {
+                'description': 'I changed it',
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['is_modified'], True)
+        activity.refresh_from_db()
+        self.assertEqual(activity.is_modified, True)
 
 
 class TestActivitySeriesAPIAuth(APITestCase):

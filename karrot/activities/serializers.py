@@ -248,11 +248,13 @@ class ActivitySerializer(serializers.ModelSerializer):
             'is_disabled',
             'has_duration',
             'is_done',
+            'is_modified',
         ]
         read_only_fields = [
             'id',
             'series',
             'is_done',
+            'is_modified',
         ]
 
     participants = ActivityParticipantSerializer(
