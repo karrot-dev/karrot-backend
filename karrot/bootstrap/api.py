@@ -20,6 +20,7 @@ def get_config_data():
         },
         'sentry': {
             'dsn': settings.SENTRY_CLIENT_DSN,
+            'environment': settings.SENTRY_ENVIRONMENT,
         },
     }
 
