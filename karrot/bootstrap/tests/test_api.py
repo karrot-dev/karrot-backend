@@ -12,6 +12,7 @@ from karrot.utils.tests.fake import faker
 
 OVERRIDE_SETTINGS = {
     'SENTRY_CLIENT_DSN': faker.name(),
+    'SENTRY_ENVIRONMENT': faker.name(),
     'FCM_CLIENT_API_KEY': faker.name(),
     'FCM_CLIENT_MESSAGING_SENDER_ID': faker.name(),
     'FCM_CLIENT_PROJECT_ID': faker.name(),
@@ -19,9 +20,27 @@ OVERRIDE_SETTINGS = {
 }
 
 
-@override_settings(**OVERRIDE_SETTINGS)
 class TestConfigAPI(APITestCase):
-    def test_config(self):
+    def test_default_config(self):
+        response = self.client.get('/api/config/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data, {
+                'fcm': {
+                    'api_key': None,
+                    'messaging_sender_id': None,
+                    'project_id': None,
+                    'app_id': None,
+                },
+                'sentry': {
+                    'dsn': None,
+                    'environment': 'production',
+                },
+            }, response.data
+        )
+
+    @override_settings(**OVERRIDE_SETTINGS)
+    def test_config_with_overrides(self):
         response = self.client.get('/api/config/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -34,6 +53,7 @@ class TestConfigAPI(APITestCase):
                 },
                 'sentry': {
                     'dsn': OVERRIDE_SETTINGS['SENTRY_CLIENT_DSN'],
+                    'environment': OVERRIDE_SETTINGS['SENTRY_ENVIRONMENT'],
                 },
             }, response.data
         )

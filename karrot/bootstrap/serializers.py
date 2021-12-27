@@ -24,6 +24,7 @@ class FCMClientConfigSerializer(serializers.Serializer):
 
 class SentryClientConfigSerializer(serializers.Serializer):
     dsn = serializers.CharField()
+    environment = serializers.CharField()
 
 
 class ConfigSerializer(serializers.Serializer):
