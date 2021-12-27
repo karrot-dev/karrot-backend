@@ -627,22 +627,6 @@ class TestActivitiesWithParticipantTypeAPI(APITestCase):
         response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'role': APPROVED})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
-    # TODO: this would be an extra feature, to specify "must have other roles" on the participant_type object...
-    # def test_cannot_have_only_open_participants(self):
-    #     self.client.force_login(user=self.member)
-    #     response = self.client.post('/api/activities/{}/add/'.format(self.activity.id), {'open': True})
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
-    #
-    # TODO: sorry, gave up on this backwards compatible idea, too many changes...
-    # def test_backwards_compatible_participants_api(self):
-    #     self.activity.add_participant(self.member, role=GROUP_MEMBER)
-    #     self.activity.add_participant(self.approved_member, role=APPROVED)
-    #     self.client.force_login(user=self.member)
-    #     response = self.client.get('/api/activities/{}/'.format(self.activity.id))
-    #
-    #     # participants field doesn't show open participants
-    #     self.assertEqual(response.data['participants'], [self.approved_member.id])
-
     def test_participants_api(self):
         pt_member = self.activity.participant_types.get(role=GROUP_MEMBER)
         pt_approved = self.activity.participant_types.get(role=APPROVED)
