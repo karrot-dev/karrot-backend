@@ -149,9 +149,8 @@ class ActivitySeries(BaseModel):
             description_changed = old.description != self.description
             duration_changed = old.duration != self.duration
             if description_changed or duration_changed:
-                for activity in self.activities.upcoming():
-                    if description_changed and old.description == activity.description:
-                        activity.description = self.description
+                for activity in self.activities.not_modified().upcoming():
+                    activity.description = self.description
                     if duration_changed:
                         if self.duration:
                             activity.has_duration = True
@@ -217,6 +216,9 @@ class ActivityQuerySet(models.QuerySet):
 
     def upcoming(self):
         return self.filter(date__startswith__gt=timezone.now())
+
+    def not_modified(self):
+        return self.filter(is_modified=False)
 
     @transaction.atomic
     def process_finished_activities(self):
@@ -333,9 +335,9 @@ class Activity(BaseModel, ConversationMixin):
 
     is_done = models.BooleanField(default=False)
 
-    # if it's been changed from the series then mark it here
+    # if it's been modified from the series then mark it here
     # this means we'll then not do further updates when changing the series
-    # is_changed = models.BooleanField(default=False)
+    is_modified = models.BooleanField(default=False)
 
     @property
     def group(self):
@@ -458,8 +460,6 @@ class ParticipantType(BaseModel):
     max_participants = models.PositiveIntegerField(null=True)
     description = models.TextField(blank=True)
 
-    # # return self.annotate(num_participants=Count('activityparticipant'))
-
     def is_full(self):
         return self.activity.activityparticipant_set.filter(participant_type=self).count() >= self.max_participants
 
@@ -475,7 +475,6 @@ class ActivityParticipant(BaseModel):
     )
     feedback_dismissed = models.BooleanField(default=False)
     reminder_task_id = models.TextField(null=True)  # stores a huey task id
-    # is_open = models.BooleanField(default=False)
     participant_type = models.ForeignKey(ParticipantType, on_delete=models.CASCADE, null=True)
 
     class Meta:

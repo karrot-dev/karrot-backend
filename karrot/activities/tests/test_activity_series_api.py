@@ -41,6 +41,13 @@ participant_types = [
 ]
 
 
+def find_by_id(entries, value):
+    for entry in entries:
+        if entry['id'] == value:
+            return entry
+    return None
+
+
 class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
     """
     This is an integration test for the activity-series API
@@ -268,17 +275,26 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(self.series.participant_types.get(role='approved').description, 'new description')
 
-    def test_modify_participant_type(self):
+    def test_modify_participant_type_role(self):
         self.client.force_login(user=self.member)
+        pt = self.series.participant_types.get(role='approved')
+        activity = self.series.activities.not_modified().upcoming().first()
+        pt_activity = activity.participant_types.get(series_participant_type=pt)
+        activity.add_participant(self.member, participant_type=pt_activity)
+        self.assertEqual(activity.participants.count(), 1)
         response = self.client.patch(
             '/api/activity-series/{}/'.format(self.series.id),
             {'participant_types': [{
-                'id': self.series.participant_types.get(role='approved').id,
+                'id': pt.id,
                 'role': 'driver',
             }]},
             format='json'
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        pt_data = find_by_id(response.data['participant_types'], pt.id)
+        self.assertEqual(pt_data['role'], 'driver')
+        # our participant is kicked out too as they don't have the updated role
+        self.assertEqual(activity.participants.count(), 0)
 
     def test_remove_participant_type(self):
         self.client.force_login(user=self.member)
@@ -499,9 +515,8 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
             }]}, format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        for pt_data in response.data['participant_types']:
-            if pt_data['id'] == pt.id:
-                self.assertEqual(pt_data['max_participants'], 666)
+        pt_data = find_by_id(response.data['participant_types'], pt.id)
+        self.assertEqual(pt_data['max_participants'], 666)
 
         # run regular update command of series
         self.series.update_activities()
@@ -510,9 +525,8 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         url = '/api/activities/{}/'.format(activity_under_test.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        for pt_data in response.data['participant_types']:
-            if pt_data['id'] == pt.id:
-                self.assertEqual(pt_data['max_participants'], 666)
+        pt_data = find_by_id(response.data['participant_types'], pt.id)
+        self.assertEqual(pt_data['max_participants'], 666)
 
         # modify series max_participants
         series_url = '/api/activity-series/{}/'.format(self.series.id)
@@ -523,9 +537,8 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         url = '/api/activities/{}/'.format(activity_under_test.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        for pt_data in response.data['participant_types']:
-            if pt_data['id'] == pt.id:
-                self.assertEqual(pt_data['max_participants'], 666)
+        pt_data = find_by_id(response.data['participant_types'], pt.id)
+        self.assertEqual(pt_data['max_participants'], 666)
 
     def test_keep_changes_to_description(self):
         self.client.force_login(user=self.member)

@@ -704,17 +704,20 @@ class TestActivitiesWithParticipantTypeAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(self.activity.participant_types.get(role='approved').description, 'yay it changed')
 
-    def test_cannot_modify_participant_type(self):
+    def test_can_modify_participant_type_role(self):
+        pt = self.activity.participant_types.get(role=APPROVED)
+        self.activity.add_participant(self.approved_member, participant_type=pt)
+        self.assertEqual(self.activity.participants.count(), 1)
         self.client.force_login(user=self.member)
         response = self.client.patch(
-            '/api/activities/{}/'.format(self.activity.id),
-            {'participant_types': [{
-                'id': self.activity.participant_types.get(role='approved').id,
+            '/api/activities/{}/'.format(self.activity.id), {'participant_types': [{
+                'id': pt.id,
                 'role': 'cook',
             }]},
             format='json'
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(self.activity.participants.count(), 0)
 
     def test_remove_participant_type(self):
         self.client.force_login(user=self.member)
