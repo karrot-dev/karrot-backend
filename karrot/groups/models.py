@@ -15,7 +15,7 @@ from versatileimagefield.fields import VersatileImageField
 from karrot.activities.activity_types import default_activity_types
 from karrot.base.base_models import BaseModel, LocationModel
 from karrot.conversations.models import ConversationMixin
-from karrot.groups.roles import GROUP_MEMBER
+from karrot.groups.roles import GROUP_MEMBER, GROUP_NEWCOMER
 from karrot.history.models import History, HistoryTypus
 from karrot.activities.models import Activity, ActivityType
 from karrot.places.models import PlaceType
@@ -232,6 +232,7 @@ class GroupNotificationType(object):
 def get_default_roles():
     return [
         GROUP_MEMBER,
+        GROUP_NEWCOMER,
     ]
 
 
@@ -274,7 +275,7 @@ class GroupMembershipQuerySet(QuerySet):
         return self.with_role(roles.GROUP_EDITOR)
 
     def newcomers(self):
-        return self.without_role(roles.GROUP_EDITOR)
+        return self.with_role(roles.GROUP_NEWCOMER)
 
     def exclude_playgrounds(self):
         return self.exclude(group__status=GroupStatus.PLAYGROUND)
@@ -316,11 +317,17 @@ class GroupMembership(BaseModel, DirtyFieldsMixin):
         for role in roles:
             if role not in self.roles:
                 self.roles.append(role)
+        if self.roles == [GROUP_MEMBER]:
+            self.roles.append(GROUP_NEWCOMER)
+        else:
+            self.remove_roles([GROUP_NEWCOMER])
 
     def remove_roles(self, roles):
         for role in roles:
             while role in self.roles:
                 self.roles.remove(role)
+        if self.roles == [GROUP_MEMBER]:
+            self.roles.append(GROUP_NEWCOMER)
 
     def add_notification_types(self, notification_types):
         for notification_type in notification_types:
