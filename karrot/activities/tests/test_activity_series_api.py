@@ -33,7 +33,6 @@ def shift_date_in_local_time(old_date, delta, tz):
 # default set
 participant_types = [
     {
-        'name': '',
         'role': 'member',
         'max_participants': 5,
         'description': '',

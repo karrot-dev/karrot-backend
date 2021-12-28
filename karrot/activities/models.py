@@ -98,7 +98,6 @@ class ActivitySeries(BaseModel):
         )
         for participant_type in self.participant_types.all():
             activity.participant_types.create(
-                name=participant_type.name,
                 role=participant_type.role,
                 max_participants=participant_type.max_participants,
                 description=participant_type.description,
@@ -426,10 +425,9 @@ class SeriesParticipantType(BaseModel):
         on_delete=models.CASCADE,
         related_name='participant_types',
     )
-    name = models.CharField(blank=True, max_length=100)
-    role = models.CharField(max_length=100, default=GROUP_MEMBER)
-    max_participants = models.PositiveIntegerField(null=True)
     description = models.TextField(blank=True)
+    max_participants = models.PositiveIntegerField(null=True)
+    role = models.CharField(max_length=100, default=GROUP_MEMBER)
 
 
 class ParticipantTypeQuerySet(models.QuerySet):
@@ -455,10 +453,9 @@ class ParticipantType(BaseModel):
         related_name='participant_types',
         null=True,
     )
-    name = models.CharField(blank=True, max_length=100)
-    role = models.CharField(max_length=100, default=GROUP_MEMBER)
-    max_participants = models.PositiveIntegerField(null=True)
     description = models.TextField(blank=True)
+    max_participants = models.PositiveIntegerField(null=True)
+    role = models.CharField(max_length=100, default=GROUP_MEMBER)
 
     def is_full(self):
         return self.activity.activityparticipant_set.filter(participant_type=self).count() >= self.max_participants

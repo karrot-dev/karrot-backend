@@ -174,10 +174,9 @@ class ParticipantTypeInfoSerializer(serializers.ModelSerializer):
         model = ParticipantType
         fields = [
             'id',
-            'role',
-            'name',
-            'max_participants',
             'description',
+            'max_participants',
+            'role',
         ]
 
 
@@ -203,10 +202,9 @@ class ParticipantTypeSerializer(serializers.ModelSerializer):
         model = ParticipantType
         fields = [
             'id',
-            'role',
-            'name',
-            'max_participants',
             'description',
+            'max_participants',
+            'role',
             '_removed',
         ]
 
@@ -219,10 +217,9 @@ class SeriesParticipantTypeSerializer(serializers.ModelSerializer):
         model = SeriesParticipantType
         fields = [
             'id',
-            'role',
-            'name',
-            'max_participants',
             'description',
+            'max_participants',
+            'role',
             '_removed',
         ]
 
