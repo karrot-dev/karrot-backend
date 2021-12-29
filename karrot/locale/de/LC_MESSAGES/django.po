@@ -793,16 +793,16 @@ msgstr "Restaurant"
 msgid "Market"
 msgstr "Markt"
 
-#: karrot/places/serializers.py:171
+#: karrot/places/serializers.py:172
 msgid "Set at least one week in advance"
 msgstr "Mindestens eine Woche im Voraus einstellen."
 
-#: karrot/places/serializers.py:174
+#: karrot/places/serializers.py:175
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr "Nicht mehr als %(count)s Wochen im Voraus setzen"
 
-#: karrot/places/serializers.py:226
+#: karrot/places/serializers.py:227
 msgid "You are already subscribed to this place"
 msgstr "Du hast diesen Ort bereits abonniert"
 

@@ -3,12 +3,16 @@
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
 # 
+# Translators:
+# DignifiedSilence, 2021
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
+"Last-Translator: DignifiedSilence, 2021\n"
 "Language-Team: Japanese (https://www.transifex.com/yunity-1/teams/68631/ja/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -31,15 +35,15 @@ msgstr ""
 
 #: karrot/activities/activity_types.py:8
 msgid "Event"
-msgstr ""
+msgstr "イベント"
 
 #: karrot/activities/activity_types.py:9
 msgid "Activity"
-msgstr ""
+msgstr "アクティビティ"
 
 #: karrot/activities/activity_types.py:10
 msgid "Task"
-msgstr ""
+msgstr "タスク"
 
 #: karrot/activities/serializers.py:139
 msgid "Must be a list"
@@ -72,7 +76,7 @@ msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:196
 msgid "Tonight"
-msgstr ""
+msgstr "今夜"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:200
 msgid "The day is not over, there are still activities to be done!"
@@ -95,7 +99,7 @@ msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:226
 msgid "Tomorrow"
-msgstr ""
+msgstr "明日"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:267
 msgid ""
@@ -114,7 +118,7 @@ msgstr ""
 
 #: karrot/applications/api.py:27
 msgid "You need to have a verified email address"
-msgstr ""
+msgstr "認証されたメールアドレスを登録している必要があります"
 
 #: karrot/applications/api.py:36 karrot/groups/api.py:52
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
@@ -135,7 +139,7 @@ msgstr ""
 
 #: karrot/applications/serializers.py:41
 msgid "You are already member of the group"
-msgstr ""
+msgstr "あなたは既にグループのメンバーです"
 
 #: karrot/applications/serializers.py:43
 msgid "You cannot apply to open groups"
@@ -155,7 +159,7 @@ msgstr ""
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:191
 #, python-format
 msgid "Visit %(group_name)s"
-msgstr ""
+msgstr "%(group_name)sを見てみる"
 
 #: karrot/applications/templates/application_declined.html.jinja2:6
 #: karrot/applications/templates/application_declined.html.jinja2:169
@@ -185,7 +189,7 @@ msgstr ""
 #: karrot/applications/templates/new_application.html.jinja2:178
 #, python-format
 msgid "Answers from %(user_name)s"
-msgstr ""
+msgstr "%(user_name)sからの回答"
 
 #: karrot/applications/templates/new_application.html.jinja2:195
 msgid "View applications"
@@ -214,7 +218,7 @@ msgstr ""
 
 #: karrot/conversations/api.py:74
 msgid "You are not the author of this message"
-msgstr ""
+msgstr "あなたはこのメッセージを書いた人ではありません"
 
 #: karrot/conversations/api.py:83
 #, python-format
@@ -228,7 +232,7 @@ msgstr ""
 
 #: karrot/conversations/api.py:360
 msgid "You are not a participant in this thread"
-msgstr ""
+msgstr "あなたはこのスレッドの参加者ではありません"
 
 #: karrot/conversations/emails.py:236
 #, python-format
@@ -261,7 +265,7 @@ msgstr ""
 
 #: karrot/conversations/templates/thread_message_notification.html.jinja2:134
 msgid "In reply to:"
-msgstr ""
+msgstr "次のアカウントへの返信:"
 
 #: karrot/conversations/templates/thread_message_notification.html.jinja2:160
 msgid ""
@@ -278,11 +282,11 @@ msgstr ""
 
 #: karrot/groups/api.py:31
 msgid "You are already a member."
-msgstr ""
+msgstr "既にあなたはメンバーです。"
 
 #: karrot/groups/api.py:38
 msgid "You can only join open groups."
-msgstr ""
+msgstr "あなたは公開グループにのみ、参加することができます。"
 
 #: karrot/groups/api.py:45
 msgid "You cannot give trust to yourself"
@@ -294,7 +298,7 @@ msgstr ""
 
 #: karrot/groups/serializers.py:33
 msgid "Unknown timezone"
-msgstr ""
+msgstr "不明なタイムゾーン"
 
 #: karrot/groups/serializers.py:41
 msgid "Playground"
@@ -310,7 +314,7 @@ msgstr ""
 
 #: karrot/groups/serializers.py:247
 msgid "You are not in this group"
-msgstr ""
+msgstr "あなたはこのグループには属していません"
 
 #: karrot/groups/templates/default_application_questions.nopreview.jinja2:1
 msgid ""
@@ -361,7 +365,7 @@ msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:200
 msgid "no feedback was given"
-msgstr ""
+msgstr "まだフィードバックはありません"
 
 #: karrot/groups/templates/group_summary.html.jinja2:204
 #, python-format
@@ -370,11 +374,11 @@ msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:206
 msgid "no messages were sent"
-msgstr ""
+msgstr "メッセージは送られていません"
 
 #: karrot/groups/templates/group_summary.html.jinja2:213
 msgid "Feedback"
-msgstr ""
+msgstr "フィードバック"
 
 #: karrot/groups/templates/group_summary.html.jinja2:221
 #, python-format
@@ -528,15 +532,15 @@ msgstr ""
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
 #: karrot/offers/serializers.py:91
 msgid "You are not a member of this group."
-msgstr ""
+msgstr "このグループのメンバーではありません。"
 
 #: karrot/invitations/serializers.py:33
 msgid "User is already member of group"
-msgstr ""
+msgstr "ユーザーは既にグループのメンバーです"
 
 #: karrot/invitations/serializers.py:41
 msgid "Email could not be sent"
-msgstr ""
+msgstr "メールが送信されませんでした"
 
 #: karrot/invitations/templates/emailinvitation.html.jinja2:6
 #: karrot/invitations/templates/emailinvitation.subject.jinja2:1
@@ -558,7 +562,7 @@ msgstr ""
 
 #: karrot/invitations/templates/emailinvitation.html.jinja2:178
 msgid "If you'd like to join, please click the link below:"
-msgstr ""
+msgstr "参加したい場合、以下のリンクをクリックして下さい:"
 
 #: karrot/invitations/templates/emailinvitation.html.jinja2:191
 msgid "Follow the invitation"
@@ -582,7 +586,7 @@ msgstr ""
 
 #: karrot/issues/serializers.py:132
 msgid "Topic cannot be empty"
-msgstr ""
+msgstr "トピック欄を空白にする事はできません"
 
 #: karrot/issues/serializers.py:139
 msgid "Affected user is not part of that group"
@@ -617,7 +621,7 @@ msgstr ""
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:191
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:191
 msgid "View discussion"
-msgstr ""
+msgstr "議論を見る"
 
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:211
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:218
@@ -698,7 +702,7 @@ msgstr ""
 
 #: karrot/places/place_types.py:6
 msgid "Store"
-msgstr ""
+msgstr "お店"
 
 #: karrot/places/place_types.py:7
 msgid "Sharing Point"
@@ -710,22 +714,22 @@ msgstr ""
 
 #: karrot/places/place_types.py:9
 msgid "Restaurant"
-msgstr ""
+msgstr "レストラン"
 
 #: karrot/places/place_types.py:10
 msgid "Market"
-msgstr ""
+msgstr "市場"
 
-#: karrot/places/serializers.py:171
+#: karrot/places/serializers.py:172
 msgid "Set at least one week in advance"
 msgstr ""
 
-#: karrot/places/serializers.py:174
+#: karrot/places/serializers.py:175
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr ""
 
-#: karrot/places/serializers.py:226
+#: karrot/places/serializers.py:227
 msgid "You are already subscribed to this place"
 msgstr ""
 
@@ -733,11 +737,11 @@ msgstr ""
 #: karrot/userauth/serializers.py:143 karrot/userauth/serializers.py:164
 #: karrot/userauth/serializers.py:194 karrot/userauth/serializers.py:216
 msgid "We could not send you an e-mail."
-msgstr ""
+msgstr "あなたにメールを送ることができませんでした。"
 
 #: karrot/userauth/permissions.py:6
 msgid "Mail is already verified."
-msgstr ""
+msgstr "メールアドレスは既に認証されています。"
 
 #: karrot/userauth/serializers.py:24
 msgid "Unable to log in with provided credentials."
@@ -745,28 +749,28 @@ msgstr ""
 
 #: karrot/userauth/serializers.py:81 karrot/userauth/serializers.py:181
 msgid "Similar e-mail exists: "
-msgstr ""
+msgstr "同じメールアドレスが存在します:"
 
 #: karrot/userauth/serializers.py:118
 msgid "Verification code is invalid"
-msgstr ""
+msgstr "認証コードが有効なものではありません"
 
 #: karrot/userauth/serializers.py:122
 msgid "Verification code has expired"
-msgstr ""
+msgstr "認証コードの有効期限が切れています"
 
 #: karrot/userauth/serializers.py:157 karrot/userauth/serializers.py:175
 msgid "Wrong password"
-msgstr ""
+msgstr "間違ったパスワード"
 
 #: karrot/userauth/serializers.py:208
 msgid "Unknown e-mail address"
-msgstr ""
+msgstr "不明なメールアドレス"
 
 #: karrot/users/templates/accountdelete_request.html.jinja2:6
 #: karrot/users/templates/accountdelete_request.subject.jinja2:1
 msgid "Request to delete your account"
-msgstr ""
+msgstr "アカウント削除のリクエスト"
 
 #: karrot/users/templates/accountdelete_request.html.jinja2:169
 #, python-format
@@ -785,7 +789,7 @@ msgstr ""
 
 #: karrot/users/templates/accountdelete_request.html.jinja2:191
 msgid "Delete your account"
-msgstr ""
+msgstr "アカウントの削除"
 
 #: karrot/users/templates/accountdelete_request.html.jinja2:204
 msgid "If you changed your mind, you can simply ignore this e-mail."
@@ -794,12 +798,12 @@ msgstr ""
 #: karrot/users/templates/accountdelete_success.html.jinja2:6
 #: karrot/users/templates/accountdelete_success.subject.jinja2:1
 msgid "Account successfully deleted"
-msgstr ""
+msgstr "アカウントが削除されました"
 
 #: karrot/users/templates/accountdelete_success.html.jinja2:169
 #, python-format
 msgid "Your account on %(site_name)s was successfully deleted!"
-msgstr ""
+msgstr "あなたのアカウント%(site_name)sの削除に成功しました！"
 
 #: karrot/users/templates/accountdelete_success.html.jinja2:177
 msgid ""
@@ -809,12 +813,12 @@ msgstr ""
 
 #: karrot/users/templates/accountdelete_success.html.jinja2:178
 msgid "Goodbye!"
-msgstr ""
+msgstr "さようなら！"
 
 #: karrot/users/templates/changemail_request.html.jinja2:6
 #: karrot/users/templates/signup.html.jinja2:6
 msgid "Please verify your email"
-msgstr ""
+msgstr "あなたのメールアドレスを認証して下さい。"
 
 #: karrot/users/templates/changemail_request.html.jinja2:170
 #, python-format
@@ -826,12 +830,12 @@ msgstr ""
 #: karrot/users/templates/changemail_request.html.jinja2:181
 #: karrot/users/templates/signup.html.jinja2:177
 msgid "Please click the following link to confirm your email:"
-msgstr ""
+msgstr "次のリンクをクリックして、あなたのメールアドレスを確認して下さい:"
 
 #: karrot/users/templates/changemail_request.html.jinja2:194
 #: karrot/users/templates/signup.html.jinja2:190
 msgid "Verify your email address"
-msgstr ""
+msgstr "メールアドレスの認証"
 
 #: karrot/users/templates/changemail_request.html.jinja2:207
 #: karrot/users/templates/passwordreset_request.html.jinja2:204
@@ -842,30 +846,30 @@ msgstr ""
 #: karrot/users/templates/changemail_request.subject.jinja2:1
 #: karrot/users/templates/signup.subject.jinja2:1
 msgid "Please verify your email address"
-msgstr ""
+msgstr "メールアドレスを認証して下さい"
 
 #: karrot/users/templates/changemail_success.html.jinja2:6
 msgid "Your email address changed"
-msgstr ""
+msgstr "メールアドレスが変更されました"
 
 #: karrot/users/templates/changemail_success.html.jinja2:169
 #, python-format
 msgid "Your email address on %(site_name)s changed!"
-msgstr ""
+msgstr "あなたのメールアドレスは%(site_name)sに変更されました！"
 
 #: karrot/users/templates/changemail_success.html.jinja2:177
 #, python-format
 msgid "Your new email address is %(new_email)s."
-msgstr ""
+msgstr "%(new_email)sが、あなたの新しいメールアドレスです。"
 
 #: karrot/users/templates/changemail_success.subject.jinja2:1
 msgid "Your email address changed!"
-msgstr ""
+msgstr "あなたのメールアドレスが変更されました！"
 
 #: karrot/users/templates/passwordreset_request.html.jinja2:6
 #: karrot/users/templates/passwordreset_request.subject.jinja2:1
 msgid "Request to reset your password"
-msgstr ""
+msgstr "パスワードのリセットをリクエスト"
 
 #: karrot/users/templates/passwordreset_request.html.jinja2:169
 #, python-format
@@ -874,20 +878,20 @@ msgstr ""
 
 #: karrot/users/templates/passwordreset_request.html.jinja2:177
 msgid "Did you forget your password? No problem!"
-msgstr ""
+msgstr "パスワードを忘れましたか？問題ありません！"
 
 #: karrot/users/templates/passwordreset_request.html.jinja2:178
 msgid "Click this link to change it:"
-msgstr ""
+msgstr "このリンクをクリックして、パスワードを変更しましょう:"
 
 #: karrot/users/templates/passwordreset_request.html.jinja2:191
 msgid "Change password"
-msgstr ""
+msgstr "パスワードの変更"
 
 #: karrot/users/templates/passwordreset_success.html.jinja2:6
 #: karrot/users/templates/passwordreset_success.subject.jinja2:1
 msgid "New password set!"
-msgstr ""
+msgstr "新しいパスワードを設定する！"
 
 #: karrot/users/templates/passwordreset_success.html.jinja2:169
 #, python-format
@@ -896,7 +900,7 @@ msgstr ""
 
 #: karrot/users/templates/passwordreset_success.html.jinja2:177
 msgid "Your password has been successfully changed!"
-msgstr ""
+msgstr "あなたのパスワードの変更に成功しました！"
 
 #: karrot/users/templates/signup.html.jinja2:169
 #, python-format
