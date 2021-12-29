@@ -58,7 +58,7 @@ factory-boy
 ipython
 requests-mock
 tblib
-flake8
+# flake8 # See https://github.com/karrot-dev/karrot-frontend/issues/2476
 autopep8
 autoflake
 pytest-asyncio

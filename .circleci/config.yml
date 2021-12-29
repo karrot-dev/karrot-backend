@@ -62,9 +62,10 @@ jobs:
             cp config/ci.env .env
             (cd mjml && yarn)
             mjml/convert
-      - run:
-          name: flake8
-          command: flake8 ./
+      # See https://github.com/karrot-dev/karrot-frontend/issues/2476
+      #- run:
+      #    name: flake8
+      #    command: flake8 ./
       - run:
           name: no missing migrations?
           command: python manage.py makemigrations --dry-run --check --no-input
