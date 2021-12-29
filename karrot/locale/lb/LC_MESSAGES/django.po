@@ -779,16 +779,16 @@ msgstr "Restaurant"
 msgid "Market"
 msgstr "Maart"
 
-#: karrot/places/serializers.py:171
+#: karrot/places/serializers.py:172
 msgid "Set at least one week in advance"
 msgstr "Setz se mindestens eng Woch am Viraus"
 
-#: karrot/places/serializers.py:174
+#: karrot/places/serializers.py:175
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr "Setz se net méi wéi %(count)s Wochen am Viraus"
 
-#: karrot/places/serializers.py:226
+#: karrot/places/serializers.py:227
 msgid "You are already subscribed to this place"
 msgstr "Du hues dës Plaz schonn abonéiert"
 
@@ -984,8 +984,8 @@ msgid ""
 "You can safely ignore this message if it wasn't you who signed up at our "
 "service using this email address."
 msgstr ""
-"Du kanns dës E-Mail einfach ignoréiere wann's du dech net selwer mat dëser E"
-"-Mail-Adress bei eisem Déngscht ugemellt hues."
+"Du kanns dës E-Mail einfach ignoréiere wann's du dech net selwer mat dëser "
+"E-Mail-Adress bei eisem Déngscht ugemellt hues."
 
 #: karrot/utils/validators.py:8
 #, python-format

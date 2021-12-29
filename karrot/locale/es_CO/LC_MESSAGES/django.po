@@ -3,22 +3,18 @@
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
 # 
-# Translators:
-# Tilmann Becker <tilmann.becker+github@gmail.com>, 2019
-# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
-"Last-Translator: Tilmann Becker <tilmann.becker+github@gmail.com>, 2019\n"
-"Language-Team: Portuguese (https://www.transifex.com/yunity-1/teams/68631/pt/)\n"
+"Language-Team: Spanish (Colombia) (https://www.transifex.com/yunity-1/teams/68631/es_CO/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.1\n"
-"Language: pt\n"
+"Language: es_CO\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: karrot/activities/activity_types.py:5
@@ -527,12 +523,12 @@ msgstr ""
 
 #: karrot/invitations/serializers.py:20
 msgid "An invitation has already been sent to this e-mail address"
-msgstr "Um convite já foi enviado para este e-mail"
+msgstr ""
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
 #: karrot/offers/serializers.py:91
 msgid "You are not a member of this group."
-msgstr "Você não é um membro deste grupo."
+msgstr ""
 
 #: karrot/invitations/serializers.py:33
 msgid "User is already member of group"
@@ -886,7 +882,7 @@ msgstr ""
 
 #: karrot/users/templates/passwordreset_request.html.jinja2:191
 msgid "Change password"
-msgstr "Trocar senha"
+msgstr ""
 
 #: karrot/users/templates/passwordreset_success.html.jinja2:6
 #: karrot/users/templates/passwordreset_success.subject.jinja2:1

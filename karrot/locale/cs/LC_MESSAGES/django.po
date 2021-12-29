@@ -778,16 +778,16 @@ msgstr "Restaurace"
 msgid "Market"
 msgstr "Tržiště"
 
-#: karrot/places/serializers.py:171
+#: karrot/places/serializers.py:172
 msgid "Set at least one week in advance"
 msgstr "Nastavte alespoň týden předem"
 
-#: karrot/places/serializers.py:174
+#: karrot/places/serializers.py:175
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr "Nenastavujte více než %(count)s týdny předem"
 
-#: karrot/places/serializers.py:226
+#: karrot/places/serializers.py:227
 msgid "You are already subscribed to this place"
 msgstr "Jste již přihlášeni k odběru tohoto místa"
 
