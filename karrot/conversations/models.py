@@ -1,3 +1,4 @@
+import re
 from enum import Enum
 
 from dateutil.relativedelta import relativedelta
@@ -287,6 +288,8 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 
         super().save(**kwargs)
 
+        self.update_mentions()
+
         if creating:
             # keep latest_message reference up-to-date
             if self.is_thread_reply():
@@ -324,6 +327,27 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
     @replies_count.setter
     def replies_count(self, value):
         self._replies_count = value
+
+    def update_mentions(self):
+        pattern = re.compile('@(\w+)')  # this needs to match the regex in the frontend
+        usernames = pattern.findall(self.content)
+
+        # add in the new ones
+        newly_mentioned_users = self.conversation.group.members \
+            .filter(username__in=usernames) \
+            .exclude(id__in=self.mentions.values('user__id'))
+        created = [self.mentions.create(user=user) for user in newly_mentioned_users]
+
+        # clear out the old ones
+        removed = self.mentions.exclude(user__username__in=usernames).delete()
+
+        return created, removed
+
+
+class ConversationMessageMention(BaseModel, UpdatedAtMixin):
+    message = models.ForeignKey(ConversationMessage, related_name='mentions', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    notified_at = models.DateTimeField(null=True)
 
 
 class ConversationThreadParticipantQuerySet(models.QuerySet):
