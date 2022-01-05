@@ -52,7 +52,7 @@ msgstr ""
 msgid "Must pass start value"
 msgstr ""
 
-#: karrot/activities/tasks.py:68
+#: karrot/activities/tasks.py:71
 #, python-format
 msgid "Upcoming %(activity_type)s"
 msgstr ""
