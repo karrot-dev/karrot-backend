@@ -141,7 +141,19 @@ def notify_mention(mention):
         user=mention.user,
         mention=mention,
     )
-    email.send()
+    message = mention.message
+    user = mention.user
+    conversation = message.conversation
+    participant = conversation.conversationparticipant_set.filter(user=user).first()
+    if participant:
+        # if they are in the conversation, we mark it, so we won't send out a message notification later
+        send_and_mark(
+            participant=participant,
+            message=message,
+            email=email,
+        )
+    else:
+        email.send()
 
 
 @db_periodic_task(crontab(hour=3, minute=9))  # around 3am every day

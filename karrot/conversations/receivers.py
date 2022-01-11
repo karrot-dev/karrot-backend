@@ -111,24 +111,23 @@ def user_mentioned(sender, instance, created, **kwargs):
         # ignore self-mentions
         return
 
-    # only if they are NOT in the conversation, notify them!
-    # (if they are in the conversation they'll already get notified)
-    # we will notify inactive members too here
-    if not conversation.conversationparticipant_set.filter(user=user).exists():
-        if user.mail_verified:
-            tasks.notify_mention(mention)
+    # always give them a bell notification
+    Notification.objects.create(
+        type=NotificationType.MENTION.value,
+        user=mention.user,
+        context={
+            # TODO: what to include in here?
+            'group': conversation.group.id,
+            'conversation': conversation.id,
+            'message': message.id,
+            'author': message.author.id,
+        },
+    )
 
-        Notification.objects.create(
-            type=NotificationType.MENTION.value,
-            user=mention.user,
-            context={
-                # TODO: what to include in here?
-                'group': conversation.group.id,
-                'conversation': conversation.id,
-                'message': message.id,
-                'author': message.author.id,
-            },
-        )
+    if user.mail_verified:
+        # verified mail is enough
+        # we will notify inactive members here as maybe being mentioned draws them in again :)
+        tasks.notify_mention(mention)
 
     stats.user_mentioned(instance)
 
