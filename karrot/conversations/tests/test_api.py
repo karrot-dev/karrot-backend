@@ -573,6 +573,42 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
         ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
         self.assertEqual(len(mail.outbox), 0)
 
+    def test_notifies_mentions(self):
+        mentioned_user = VerifiedUserFactory()
+        self.group.add_member(mentioned_user)
+
+        # make a conversation they are not part of
+        place = PlaceFactory(group=self.group)
+        conversation = place.conversation
+
+        mail.outbox = []
+        with execute_scheduled_tasks_immediately():
+            ConversationMessage.objects.create(
+                author=self.user,
+                conversation=conversation,
+                content='hey @{} how are you?'.format(mentioned_user.username),
+            )
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('you were mentioned', mail.outbox[0].body)
+
+    def test_does_not_notify_mentions_if_in_conversation(self):
+        mentioned_user = VerifiedUserFactory()
+        self.group.add_member(mentioned_user)
+
+        place = PlaceFactory(group=self.group)
+        conversation = place.conversation
+        conversation.join(mentioned_user)
+
+        mail.outbox = []
+        with execute_scheduled_tasks_immediately():
+            ConversationMessage.objects.create(
+                author=self.user,
+                conversation=conversation,
+                content='hey @{} how are you?'.format(mentioned_user.username),
+            )
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertNotIn('you were mentioned', mail.outbox[0].body)
+
 
 class TestConversationsMessageReactionsPostAPI(APITestCase):
     def setUp(self):

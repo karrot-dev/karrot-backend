@@ -11,6 +11,7 @@ from karrot.conversations.emails import (
     prepare_conversation_message_notification,
     prepare_group_conversation_message_notification,
     prepare_place_conversation_message_notification,
+    prepare_mention_notification,
 )
 from karrot.conversations.models import ConversationParticipant, ConversationThreadParticipant, Conversation
 from karrot.users.models import User
@@ -132,6 +133,15 @@ def notify_participants(message):
             message=message,
             email=email,
         )
+
+
+@db_task()
+def notify_mention(mention):
+    email = prepare_mention_notification(
+        user=mention.user,
+        mention=mention,
+    )
+    email.send()
 
 
 @db_periodic_task(crontab(hour=3, minute=9))  # around 3am every day

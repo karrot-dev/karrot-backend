@@ -1,0 +1,26 @@
+<mjml>
+    <mj-head>
+        <mj-include path="../../base/templates/_base-head.mjml"/>
+        <mj-title>You were mentioned by {{ message.author.display_name }}</mj-title>
+    </mj-head>
+    <mj-body>
+        <mj-section>
+            <mj-column>
+                <mj-text>
+                    <div class="message">
+                        <a class="message-author" href="{{ user_url(message.author) }}">{{ message.author.display_name }}</a><br>
+                        <span class="message-content">{{ message.content_rendered() | safe }}</span>
+                    </div>
+                </mj-text>
+                <mj-divider/>
+                <mj-text font-size="13px" line-height="18px" color="#777">
+                    <p>
+                        {% trans %}You are receiving this because you were mentioned.{% endtrans %}<br/>
+                        {% trans %}Reply to this email directly or <a href="{{ conversation_url }}">view it on {{ site_name }}</a>.{% endtrans %}
+                    </p>
+                </mj-text>
+            </mj-column>
+        </mj-section>
+        <mj-include path="../../base/templates/_footer.mjml"/>
+    </mj-body>
+</mjml>

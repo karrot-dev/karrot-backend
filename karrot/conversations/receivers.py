@@ -91,7 +91,31 @@ def reaction_created(sender, instance, created, **kwargs):
 def user_mentioned(sender, instance, created, **kwargs):
     if not created:
         return
-    # TODO: handle notifications here, or as part of notify_participants?
+
+    mention = instance
+    message = mention.message
+    user = mention.user
+    conversation = message.conversation
+
+    if conversation.type() == 'private' or not conversation.type() or not conversation.group:
+        # ignore private conversations (and those without a type/group...)
+        return
+
+    if not conversation.group.is_member(user):
+        # don't notify anyone who isn't in the group
+        # we should not have created a mention though...
+        return
+
+    if user.id == message.author.id:
+        # ignore self-mentions
+        return
+
+    # only if they are NOT in the conversation, notify them!
+    # (if they are in the conversation they'll already get notified)
+    # we will notify inactive members too here
+    if user.mail_verified and not conversation.conversationparticipant_set.filter(user=user).exists():
+        tasks.notify_mention(mention)
+
     stats.user_mentioned(instance)
 
 
