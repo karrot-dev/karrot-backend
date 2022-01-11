@@ -479,12 +479,12 @@ class GroupReceiverTests(WSTestCase):
 
         response = client.messages_by_topic.get('groups:group_detail')[0]
         self.assertEqual(response['payload']['name'], name)
-        self.assertTrue('description' in response['payload'])
+        self.assertTrue('information' in response['payload'])
 
         response = client.messages_by_topic.get('groups:group_preview')[0]
         self.assertEqual(response['payload']['name'], name)
         self.assertEqual(response['payload']['distance'], 141)
-        self.assertTrue('description' not in response['payload'])
+        self.assertTrue('information' not in response['payload'])
 
         self.assertEqual(len(client.messages), 2)
 

@@ -80,7 +80,7 @@ class Command(BaseCommand):
                     'email': str(timezone.now().microsecond) + faker.email(),
                     'password': default_password,
                     'display_name': faker.name(),
-                    'description': 'I am a fake user',
+                    'information': 'I am a fake user',
                     'mobile_number': faker.phone_number()
                 }
             )
@@ -96,7 +96,7 @@ class Command(BaseCommand):
             response = c.post(
                 '/api/groups/', {
                     'name': 'Group ' + city,
-                    'description': faker.text(),
+                    'information': faker.text(),
                     'timezone': 'Europe/Berlin',
                     'address': faker.street_address() + ', ' + city,
                     'latitude': lat,
@@ -115,7 +115,7 @@ class Command(BaseCommand):
             response = c.patch(
                 '/api/groups/{}/'.format(group), {
                     'name': 'Group (edited) ' + faker.city(),
-                    'description': faker.text(),
+                    'information': faker.text(),
                 }
             )
             if response.status_code != 200:

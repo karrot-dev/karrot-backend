@@ -96,7 +96,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
         fields = [
             'id',
             'name',
-            'description',
+            'information',
             'welcome_message',
             'public_description',
             'application_questions',
@@ -124,7 +124,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
                 'min_length': 5,
                 'validators': [prevent_reserved_names],
             },
-            'description': {
+            'information': {
                 'trim_whitespace': False,
                 'max_length': settings.DESCRIPTION_MAX_LENGTH
             },

@@ -141,7 +141,7 @@ class TestGroupsAPI(APITestCase):
         self.url = '/api/groups/'
         self.group_data = {
             'name': faker.name(),
-            'description': faker.text(),
+            'information': faker.text(),
             'address': faker.address(),
             'latitude': faker.latitude(),
             'longitude': faker.longitude(),
@@ -150,13 +150,13 @@ class TestGroupsAPI(APITestCase):
 
     def test_create_group(self):
         self.client.force_login(user=self.user)
-        data = {'name': 'random_name', 'description': 'still alive', 'timezone': 'Europe/Berlin'}
+        data = {'name': 'random_name', 'information': 'still alive', 'timezone': 'Europe/Berlin'}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertEqual(response.data['name'], data['name'])
 
         new_group = GroupModel.objects.get(name=data['name'])
-        self.assertEqual(new_group.description, data['description'])
+        self.assertEqual(new_group.information, data['information'])
         membership = new_group.groupmembership_set.get(user=self.user)
         self.assertIn(GroupNotificationType.NEW_APPLICATION, membership.notification_types)
 
@@ -166,12 +166,12 @@ class TestGroupsAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['name'], self.group_data['name'])
         self.assertEqual(
-            GroupModel.objects.get(name=self.group_data['name']).description, self.group_data['description']
+            GroupModel.objects.get(name=self.group_data['name']).information, self.group_data['information']
         )
         self.assertEqual(response.data['address'], self.group_data['address'])
 
     def test_create_group_fails_if_not_logged_in(self):
-        data = {'name': 'random_name', 'description': 'still alive'}
+        data = {'name': 'random_name', 'information': 'still alive'}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
