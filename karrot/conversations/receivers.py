@@ -7,7 +7,7 @@ from pytz import utc
 from karrot.conversations import tasks, stats
 from karrot.conversations.models import (
     ConversationParticipant, ConversationMessage, ConversationMessageReaction, ConversationThreadParticipant,
-    ConversationMeta
+    ConversationMeta, ConversationMessageMention
 )
 from karrot.users.models import User
 
@@ -85,6 +85,14 @@ def reaction_created(sender, instance, created, **kwargs):
     if not created:
         return
     stats.reaction_given(instance)
+
+
+@receiver(post_save, sender=ConversationMessageMention)
+def user_mentioned(sender, instance, created, **kwargs):
+    if not created:
+        return
+    # TODO: handle notifications here, or as part of notify_participants?
+    stats.user_mentioned(instance)
 
 
 @receiver(post_save, sender=ConversationParticipant)
