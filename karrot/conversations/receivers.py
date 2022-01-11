@@ -9,6 +9,7 @@ from karrot.conversations.models import (
     ConversationParticipant, ConversationMessage, ConversationMessageReaction, ConversationThreadParticipant,
     ConversationMeta, ConversationMessageMention
 )
+from karrot.notifications.models import Notification, NotificationType
 from karrot.users.models import User
 
 
@@ -113,8 +114,21 @@ def user_mentioned(sender, instance, created, **kwargs):
     # only if they are NOT in the conversation, notify them!
     # (if they are in the conversation they'll already get notified)
     # we will notify inactive members too here
-    if user.mail_verified and not conversation.conversationparticipant_set.filter(user=user).exists():
-        tasks.notify_mention(mention)
+    if not conversation.conversationparticipant_set.filter(user=user).exists():
+        if user.mail_verified:
+            tasks.notify_mention(mention)
+
+        Notification.objects.create(
+            type=NotificationType.MENTION.value,
+            user=mention.user,
+            context={
+                # TODO: what to include in here?
+                'group': conversation.group.id,
+                'conversation': conversation.id,
+                'message': message.id,
+                'author': message.author.id,
+            },
+        )
 
     stats.user_mentioned(instance)
 
