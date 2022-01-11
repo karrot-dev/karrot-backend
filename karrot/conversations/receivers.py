@@ -11,6 +11,7 @@ from karrot.conversations.models import (
 )
 from karrot.notifications.models import Notification, NotificationType
 from karrot.users.models import User
+from karrot.utils.frontend_urls import conversation_url
 
 
 @receiver(pre_save, sender=ConversationMessage)
@@ -116,11 +117,9 @@ def user_mentioned(sender, instance, created, **kwargs):
         type=NotificationType.MENTION.value,
         user=mention.user,
         context={
-            # TODO: what to include in here?
             'group': conversation.group.id,
-            'conversation': conversation.id,
-            'message': message.id,
-            'author': message.author.id,
+            'user': message.author.id,
+            'url': conversation_url(conversation, user),
         },
     )
 
