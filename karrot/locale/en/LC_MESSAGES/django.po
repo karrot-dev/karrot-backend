@@ -260,11 +260,18 @@ msgstr ""
 msgid "You are receiving this because you are subscribed to this conversation."
 msgstr ""
 
-#: karrot/conversations/templates/mention_notification.html.jinja2:148
+#: karrot/conversations/templates/mention_notification.html.jinja2:6
+#: karrot/conversations/templates/mention_notification.html.jinja2:123
+#: karrot/conversations/templates/mention_notification.subject.jinja2:1
+#, python-format
+msgid "You were mentioned by %(user_name)s"
+msgstr ""
+
+#: karrot/conversations/templates/mention_notification.html.jinja2:156
 msgid "You are receiving this because you were mentioned."
 msgstr ""
 
-#: karrot/conversations/templates/mention_notification.html.jinja2:149
+#: karrot/conversations/templates/mention_notification.html.jinja2:157
 #, python-format
 msgid ""
 "Reply to this email directly or <a href=\"%(conversation_url)s\">view it "
