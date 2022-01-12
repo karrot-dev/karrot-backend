@@ -306,7 +306,7 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
                 new_conversation_message.send(sender=self.__class__, message=self)
 
     def content_rendered(self, **kwargs):
-        return markdown.render(self.content, **kwargs)
+        return markdown.render(self.content, mentions=self.mentions.all(), **kwargs)
 
     def is_recent(self):
         return self.created_at >= timezone.now() - relativedelta(days=settings.MESSAGE_EDIT_DAYS)

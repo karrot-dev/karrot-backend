@@ -310,7 +310,7 @@ def prepare_offer_message_notification(user, messages):
         )
 
 
-def prepare_mention_notification(user, mention):
+def prepare_mention_notification(mention):
     message = mention.message
     user = mention.user
     conversation = message.conversation

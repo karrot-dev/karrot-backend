@@ -137,10 +137,7 @@ def notify_participants(message):
 
 @db_task()
 def notify_mention(mention):
-    email = prepare_mention_notification(
-        user=mention.user,
-        mention=mention,
-    )
+    email = prepare_mention_notification(mention)
     message = mention.message
     user = mention.user
     conversation = message.conversation

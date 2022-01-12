@@ -1,11 +1,14 @@
 <mjml>
     <mj-head>
         <mj-include path="../../base/templates/_base-head.mjml"/>
-        <mj-title>You were mentioned by {{ message.author.display_name }}</mj-title>
+        <mj-title>{% trans user_name=message.author.display_name %}You were mentioned by {{ user_name }}{% endtrans %}</mj-title>
     </mj-head>
     <mj-body>
         <mj-section>
             <mj-column>
+                <mj-text>
+                    <em>{% trans user_name=message.author.display_name %}You were mentioned by {{ user_name }}{% endtrans %}</em>
+                </mj-text>
                 <mj-text>
                     <div class="message">
                         <a class="message-author" href="{{ user_url(message.author) }}">{{ message.author.display_name }}</a><br>
