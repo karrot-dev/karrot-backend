@@ -3,6 +3,8 @@ import random
 import string
 
 from django.db import migrations, models, IntegrityError, transaction
+from django.db.models import Max, F
+from django.db.models.functions import Coalesce
 
 
 def try_options(user, options, n=None):
@@ -26,7 +28,9 @@ def random_username():
 
 def generate_usernames(apps, schema_editor):
     User = apps.get_model('users', 'User')
-    for user in User.objects.order_by('-last_login'):
+    # prefer users that were seen recently, then ones that logged in recently, finally fall back to creation date
+    users = User.objects.annotate(lastseen_at=Max(F('groupmembership__lastseen_at')))
+    for user in users.order_by(Coalesce('lastseen_at', 'last_login').desc(nulls_last=True), '-created_at'):
         options = []
         if user.display_name:
             options.append(user.display_name.split(' ')[0].lower())
