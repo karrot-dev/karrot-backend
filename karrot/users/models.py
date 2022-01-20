@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
+from django.contrib.postgres.fields import CICharField
 from django.db import transaction, models
 from django.db.models import EmailField, BooleanField, TextField, CharField, DateTimeField, ForeignKey
 from django.dispatch import Signal
@@ -75,7 +76,7 @@ class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
 class User(AbstractBaseUser, BaseModel, LocationModel):
     objects = UserManager()
 
-    username = CharField(max_length=255, unique=True)
+    username = CICharField(max_length=255, unique=True)
     email = EmailField(unique=True, null=True)
     is_active = BooleanField(default=True)
     is_staff = BooleanField(default=False)

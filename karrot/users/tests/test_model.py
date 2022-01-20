@@ -69,6 +69,21 @@ class TestUserModel(TestCase):
         self.assertFalse(user.has_perm('eating this specific horse', 'I am a kind and gentle horse'))
         self.assertFalse(user.has_module_perms('lunar'))
 
+    def test_username(self):
+        user = get_user_model().objects.create_user(
+            faker.email(), 'foo', display_name='I am normal', username='no spaces allowed'
+        )
+
+    def test_case_unique_usernames(self):
+        get_user_model().objects.create_user(faker.email(), 'foo', display_name='I am normal', username='karrot')
+        with self.assertRaisesMessage(IntegrityError, 'already exists'):
+            get_user_model().objects.create_user(faker.email(), 'foo', display_name='I am normal', username='karrot')
+
+    def test_case_insensitive_unique_usernames(self):
+        get_user_model().objects.create_user(faker.email(), 'foo', display_name='I am normal', username='karrot')
+        with self.assertRaisesMessage(IntegrityError, 'already exists'):
+            get_user_model().objects.create_user(faker.email(), 'foo', display_name='I am normal', username='KaRrOt')
+
 
 class TestSendMail(TestCase):
     def setUp(self):
