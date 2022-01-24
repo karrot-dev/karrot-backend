@@ -2,6 +2,7 @@
 import random
 import string
 
+import unidecode
 from django.db import migrations, models, IntegrityError, transaction
 from django.db.models import Max, F
 from django.db.models.functions import Coalesce
@@ -26,6 +27,14 @@ def random_username():
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
 
 
+def convert(text):
+    # has various caveats, does not do locale-aware conversion
+    # e.g. German "ä" goes to "a" not "ae"
+    # https://pypi.org/project/Unidecode/ explains why it's difficult
+    # it should be fine for our purposes :)
+    return unidecode.unidecode(text.lower())
+
+
 def generate_usernames(apps, schema_editor):
     User = apps.get_model('users', 'User')
     # prefer users that were seen recently, then ones that logged in recently, finally fall back to creation date
@@ -33,10 +42,10 @@ def generate_usernames(apps, schema_editor):
     for user in users.order_by(Coalesce('lastseen_at', 'last_login').desc(nulls_last=True), '-created_at'):
         options = []
         if user.display_name:
-            options.append(user.display_name.split(' ')[0].lower())
-            options.append(user.display_name.replace(' ', '').lower())
+            options.append(convert(user.display_name.split(' ')[0]))
+            options.append(convert(user.display_name.replace(' ', '')))
         if user.email:
-            options.append(user.email.split('@')[0].lower())
+            options.append(convert(user.email.split('@')[0]))
         if not options:
             options.append(random_username())
         try_options(user, options)

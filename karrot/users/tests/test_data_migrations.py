@@ -47,6 +47,9 @@ class TestGenerateUsername(TestMigrations):
         self.id11 = User.objects.create(display_name='nick', last_login=ages_ago).id
         self.id12 = User.objects.create(display_name='nick', last_login=just_the_other_day).id
 
+        # converts special chars
+        self.id13 = self.create_user(display_name='Ĥölã').id
+
     def test_username_creation(self):
         User = self.apps.get_model('users', 'User')
 
@@ -69,6 +72,8 @@ class TestGenerateUsername(TestMigrations):
 
         self.check_username(self.id12, 'nick')
         self.check_username(self.id11, 'nick1')
+
+        self.check_username(self.id13, 'hola')
 
     def check_username(self, id, username):
         User = self.apps.get_model('users', 'User')
