@@ -93,6 +93,9 @@ class ConversationMessageMentionTests(TestCase):
         self.group = GroupFactory(members=[self.user, self.user2])
         self.conversation = self.group.conversation
 
+        self.user_in_other_group = UserFactory()
+        self.other_group = GroupFactory(members=[self.user_in_other_group])
+
     def create_message(self, **kwargs):
         return ConversationMessage.objects.create(
             **kwargs,
@@ -104,6 +107,10 @@ class ConversationMessageMentionTests(TestCase):
         message = self.create_message(content='some message with a mention for @{} yay!'.format(self.user2.username))
         self.assertEqual(message.mentions.count(), 1)
         self.assertEqual(message.mentions.first().user, self.user2)
+
+    def test_mentions_for_user_in_other_group(self):
+        message = self.create_message(content='hey @{} in other group!'.format(self.user_in_other_group.username))
+        self.assertEqual(message.mentions.count(), 0)
 
     def test_mentions_for_non_user(self):
         message = self.create_message(content='hello @probablynotauser how are you?', )

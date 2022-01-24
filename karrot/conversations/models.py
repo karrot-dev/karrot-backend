@@ -128,6 +128,10 @@ class Conversation(BaseModel, UpdatedAtMixin):
             return None
         return self.target.group
 
+    def supports_mentions(self):
+        # no mentions for private conversations (and those without a type/group...)
+        return self.type() is not None and self.type() != 'private' and self.group is not None
+
 
 class ConversationMeta(BaseModel):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -329,6 +333,9 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
         self._replies_count = value
 
     def update_mentions(self):
+        if not self.conversation.supports_mentions():
+            return
+
         pattern = re.compile('@(\w+)')  # this needs to match the regex in the frontend
         usernames = pattern.findall(self.content)
 

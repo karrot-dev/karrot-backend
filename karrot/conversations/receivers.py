@@ -99,8 +99,7 @@ def user_mentioned(sender, instance, created, **kwargs):
     user = mention.user
     conversation = message.conversation
 
-    if conversation.type() == 'private' or not conversation.type() or not conversation.group:
-        # ignore private conversations (and those without a type/group...)
+    if not conversation.supports_mentions():
         return
 
     if not conversation.group.is_member(user):
