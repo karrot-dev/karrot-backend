@@ -347,7 +347,6 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 class ConversationMessageMention(BaseModel, UpdatedAtMixin):
     message = models.ForeignKey(ConversationMessage, related_name='mentions', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='mentions', on_delete=models.CASCADE)
-    notified_at = models.DateTimeField(null=True)
 
 
 class ConversationThreadParticipantQuerySet(models.QuerySet):
