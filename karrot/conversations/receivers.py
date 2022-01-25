@@ -116,6 +116,7 @@ def user_mentioned(sender, instance, created, **kwargs):
         type=NotificationType.MENTION.value,
         user=mention.user,
         context={
+            'mention': mention.id,
             'group': conversation.group.id,
             'user': message.author.id,
             'url': conversation_url(conversation, user),
@@ -128,6 +129,12 @@ def user_mentioned(sender, instance, created, **kwargs):
         tasks.notify_mention(mention)
 
     stats.user_mentioned(instance)
+
+
+@receiver(pre_delete, sender=ConversationMessageMention)
+def user_mention_deleted(sender, instance, **kwargs):
+    mention = instance
+    Notification.objects.filter(type=NotificationType.MENTION.value, context__mention=mention.id).delete()
 
 
 @receiver(post_save, sender=ConversationParticipant)
