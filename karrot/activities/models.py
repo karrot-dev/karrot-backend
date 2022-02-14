@@ -10,6 +10,7 @@ from django.db import models
 from django.db import transaction
 from django.db.models import Count, DurationField, F, Q, Sum
 from django.utils import timezone
+from django.contrib.postgres.indexes import GistIndex
 
 from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin
 from karrot.conversations.models import ConversationMixin
@@ -292,6 +293,8 @@ class Activity(BaseModel, ConversationMixin):
 
     class Meta:
         ordering = ['date']
+        # TODO: check this index is actually used
+        indexes = [GistIndex(fields=['date'])]
 
     activity_type = models.ForeignKey(
         ActivityType,
