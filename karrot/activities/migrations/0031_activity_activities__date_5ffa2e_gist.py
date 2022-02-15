@@ -2,7 +2,6 @@
 
 import django.contrib.postgres.indexes
 from django.db import migrations
-from django.contrib.postgres.operations import BtreeGistExtension
 
 
 class Migration(migrations.Migration):
@@ -12,7 +11,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        BtreeGistExtension(),
+        # need to have btree_gist extension
+        # could create it here, but then would have to run migations as superuser
         migrations.AddIndex(
             model_name='activity',
             index=django.contrib.postgres.indexes.GistIndex(fields=['date'], name='activities__date_5ffa2e_gist'),
