@@ -56,6 +56,10 @@ jobs:
       - *restore-env-cache
       - *setup-env
       - *save-env-cache
+      - run: |
+          psql \
+          -d "postgres://ubuntu@localhost:5432/karrot_test" \
+          -c "CREATE EXTENSION citext; CREATE EXTENSION btree_gist;"
       - run:
           name: setup
           command: |
