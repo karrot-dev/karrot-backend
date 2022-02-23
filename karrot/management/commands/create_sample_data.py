@@ -79,6 +79,7 @@ class Command(BaseCommand):
                 '/api/auth/user/', {
                     'email': str(timezone.now().microsecond) + faker.email(),
                     'password': default_password,
+                    'username': faker.user_name(),
                     'display_name': faker.name(),
                     'description': 'I am a fake user',
                     'mobile_number': faker.phone_number()
@@ -419,7 +420,7 @@ class Command(BaseCommand):
         foo = User.objects.filter(email='foo@foo.com').first()
         if foo is None:
             foo = User.objects.create_user(
-                email='foo@foo.com', password='foofoo', display_name='Playground User', is_staff=True
+                username='foo', email='foo@foo.com', password='foofoo', display_name='Playground User', is_staff=True
             )
 
         login_user(foo.id)

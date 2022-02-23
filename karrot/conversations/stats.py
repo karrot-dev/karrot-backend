@@ -37,3 +37,13 @@ def reaction_given(reaction):
             'message_reaction': 1
         },
     }])
+
+
+def user_mentioned(mention):
+    write_points([{
+        'measurement': 'karrot.events',
+        'tags': conversation_tags(mention.message.conversation),
+        'fields': {
+            'user_mention': 1
+        },
+    }])

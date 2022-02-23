@@ -8,6 +8,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
         model = get_user_model()
         fields = [
             'id',
+            'username',
             'display_name',
         ]
 
@@ -19,6 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = get_user_model()
         fields = [
             'id',
+            'username',
             'display_name',
             'photo_urls',
             'latitude',
@@ -33,6 +35,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = get_user_model()
         fields = [
             'id',
+            'username',
             'display_name',
             'email',
             'mobile_number',

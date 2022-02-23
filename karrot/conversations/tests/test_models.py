@@ -86,6 +86,51 @@ class ConversationModelTests(TestCase):
             ConversationParticipant.objects.create(conversation=conversation, user=user)
 
 
+class ConversationMessageMentionTests(TestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.user2 = UserFactory()
+        self.group = GroupFactory(members=[self.user, self.user2])
+        self.conversation = self.group.conversation
+
+        self.user_in_other_group = UserFactory()
+        self.other_group = GroupFactory(members=[self.user_in_other_group])
+
+    def create_message(self, **kwargs):
+        return ConversationMessage.objects.create(
+            **kwargs,
+            conversation=self.conversation,
+            author=self.user,
+        )
+
+    def test_mentions(self):
+        message = self.create_message(content='some message with a mention for @{} yay!'.format(self.user2.username))
+        self.assertEqual(message.mentions.count(), 1)
+        self.assertEqual(message.mentions.first().user, self.user2)
+
+    def test_mentions_for_user_in_other_group(self):
+        message = self.create_message(content='hey @{} in other group!'.format(self.user_in_other_group.username))
+        self.assertEqual(message.mentions.count(), 0)
+
+    def test_mentions_for_non_user(self):
+        message = self.create_message(content='hello @probablynotauser how are you?', )
+        self.assertEqual(message.mentions.count(), 0)
+
+    def test_update_removes_mentions(self):
+        message = self.create_message(content='some message with a mention for @{} yay!'.format(self.user2.username))
+        self.assertEqual(message.mentions.count(), 1)
+        message.content = 'nobody to mention any more'
+        message.save()
+        self.assertEqual(message.mentions.count(), 0)
+
+    def test_update_adds_mentions(self):
+        message = self.create_message(content='no mentions to see here', )
+        self.assertEqual(message.mentions.count(), 0)
+        message.content = 'oh actually I can mention @{} now'.format(self.user2.username)
+        message.save()
+        self.assertEqual(message.mentions.count(), 1)
+
+
 class ConversationThreadModelTests(TestCase):
     def setUp(self):
         self.user = UserFactory()

@@ -1,3 +1,4 @@
+import re
 from enum import Enum
 
 from dateutil.relativedelta import relativedelta
@@ -126,6 +127,10 @@ class Conversation(BaseModel, UpdatedAtMixin):
         if self.is_private or self.target_type_id is None:
             return None
         return self.target.group
+
+    def supports_mentions(self):
+        # no mentions for private conversations (and those without a type/group...)
+        return self.type() is not None and self.type() != 'private' and self.group is not None
 
 
 class ConversationMeta(BaseModel):
@@ -287,6 +292,8 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 
         super().save(**kwargs)
 
+        self.update_mentions()
+
         if creating:
             # keep latest_message reference up-to-date
             if self.is_thread_reply():
@@ -303,7 +310,7 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
                 new_conversation_message.send(sender=self.__class__, message=self)
 
     def content_rendered(self, **kwargs):
-        return markdown.render(self.content, **kwargs)
+        return markdown.render(self.content, mentions=self.mentions.all(), **kwargs)
 
     def is_recent(self):
         return self.created_at >= timezone.now() - relativedelta(days=settings.MESSAGE_EDIT_DAYS)
@@ -324,6 +331,29 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
     @replies_count.setter
     def replies_count(self, value):
         self._replies_count = value
+
+    def update_mentions(self):
+        if not self.conversation.supports_mentions():
+            return
+
+        pattern = re.compile('@(\w+)')  # this needs to match the regex in the frontend
+        usernames = pattern.findall(self.content)
+
+        # add in the new ones
+        newly_mentioned_users = self.conversation.group.members \
+            .filter(username__in=usernames) \
+            .exclude(id__in=self.mentions.values('user__id'))
+        created = [self.mentions.create(user=user) for user in newly_mentioned_users]
+
+        # clear out the old ones
+        removed = self.mentions.exclude(user__username__in=usernames).delete()
+
+        return created, removed
+
+
+class ConversationMessageMention(BaseModel, UpdatedAtMixin):
+    message = models.ForeignKey(ConversationMessage, related_name='mentions', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='mentions', on_delete=models.CASCADE)
 
 
 class ConversationThreadParticipantQuerySet(models.QuerySet):

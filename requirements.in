@@ -51,6 +51,7 @@ click
 httpx
 icalendar
 influxdb
+Unidecode
 
 # dev PyPI dependencies
 pip-tools

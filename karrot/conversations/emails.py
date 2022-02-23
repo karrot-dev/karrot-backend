@@ -36,6 +36,29 @@ def prepare_conversation_message_notification(user, messages):
     raise Exception('Cannot send message notification because conversation doesn\'t have a known type')
 
 
+def conversation_url_for(message):
+    conversation = message.conversation
+    type = conversation.type()
+
+    if message.is_thread_reply():
+        return thread_url(message.thread)
+    if type == 'group':
+        return group_wall_url(conversation.target)
+    if type == 'place':
+        return place_wall_url(conversation.target)
+    if type == 'activity':
+        return activity_detail_url(conversation.target)
+    if type == 'application':
+        return application_url(conversation.target)
+    if type == 'issue':
+        return issue_url(conversation.target)
+    if type == 'offer':
+        return offer_url(conversation.target)
+    if type == 'private':
+        return user_detail_url(message.author)
+    raise Exception('Cannot get conversation url because conversation doesn\'t have a known type')
+
+
 def prepare_thread_message_notification(user, messages):
     first_message = messages[0]
     conversation = first_message.conversation
@@ -88,6 +111,16 @@ def language_for_user(user):
     return language
 
 
+def get_timezone(user, group):
+    if group:
+        return group.timezone
+    elif user.current_group:
+        return user.current_group.timezone
+
+    # default, I guess most groups are not so far from this timezone...
+    return pytz.timezone('Europe/Berlin')
+
+
 def prepare_message_notification(
     user,
     messages,
@@ -102,13 +135,7 @@ def prepare_message_notification(
     conversation = first_message.conversation
     author = first_message.author
 
-    if group:
-        tz = group.timezone
-    elif user.current_group:
-        tz = user.current_group.timezone
-    else:
-        # default, I guess most groups are not so far from this timezone...
-        tz = pytz.timezone('Europe/Berlin')
+    tz = get_timezone(user, group)
 
     if reply_to_name is None:
         reply_to_name = author.display_name
@@ -280,4 +307,32 @@ def prepare_offer_message_notification(user, messages):
             },
             conversation_url=offer_url(offer),
             stats_category='offer_message'
+        )
+
+
+def prepare_mention_notification(mention):
+    message = mention.message
+    user = mention.user
+    conversation = message.conversation
+    tz = get_timezone(user, conversation.group)
+
+    reply_to_name = message.author.display_name
+    local_part = make_local_part(conversation, user, message.thread)  # TODO: is this right to put the thread there?
+    reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.EMAIL_REPLY_DOMAIN)))
+
+    from_text = message.author.display_name
+    from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
+
+    with translation.override(language_for_user(user)), timezone.override(tz):
+        return prepare_email(
+            template='mention_notification',
+            from_email=from_email,
+            user=user,
+            tz=tz,
+            reply_to=[reply_to],
+            context={
+                'message': message,
+                'conversation_url': conversation_url_for(message),
+            },
+            stats_category='{}_mention'.format(conversation.type()),
         )
