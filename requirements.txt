@@ -87,7 +87,7 @@ incremental==21.3.0
 inflection==0.5.1
 influxdb==5.3.1
 iniconfig==1.1.1
-ipython==7.30.1
+ipython==7.31.1
 jedi==0.18.1
 jinja2==3.0.3
 jsonschema==4.3.3
@@ -175,8 +175,8 @@ wrapt==1.13.3
 yapf==0.32.0
 yarl==1.7.2
 zipp==3.7.0
-zope.event==4.5.0
-zope.interface==5.4.0
+zope-event==4.5.0
+zope-interface==5.4.0
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
