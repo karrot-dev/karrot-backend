@@ -107,7 +107,7 @@ parso==0.8.3
 pep517==0.12.0
 pexpect==4.8.0
 pickleshare==0.7.5
-pillow==8.4.0
+pillow==9.0.1
 pip-tools==6.4.0
 platformdirs==2.4.1
 pluggy==1.0.0
@@ -175,8 +175,8 @@ wrapt==1.13.3
 yapf==0.32.0
 yarl==1.7.2
 zipp==3.7.0
-zope.event==4.5.0
-zope.interface==5.4.0
+zope-event==4.5.0
+zope-interface==5.4.0
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
