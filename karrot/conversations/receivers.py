@@ -125,7 +125,8 @@ def user_mentioned(sender, instance, created, **kwargs):
     if user.mail_verified:
         # verified mail is enough
         # we will notify inactive members here as maybe being mentioned draws them in again :)
-        tasks.notify_mention(mention)
+        # 5 seconds delay so we don't notify them if they read it immediately
+        tasks.notify_mention.schedule((mention, ), delay=5)
 
     stats.user_mentioned(instance)
 

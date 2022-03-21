@@ -143,7 +143,12 @@ def notify_mention(mention):
     conversation = message.conversation
     participant = conversation.conversationparticipant_set.filter(user=user).first()
     if participant:
-        # if they are in the conversation, we mark it, so we won't send out a message notification later
+        if participant.notified_up_to_id >= message.id:
+            # they've already read the message, so don't send out a notification
+            return
+
+        # they are in the conversation
+        # we mark it, so we won't send out a normal message notification later
         send_and_mark(
             participant=participant,
             message=message,
