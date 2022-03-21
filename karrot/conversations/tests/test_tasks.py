@@ -138,7 +138,7 @@ class TestConversationNotificationTask(TestCase):
         self.assertEqual(len(mail.outbox), 0)
 
     def test_exclude_already_notified_in_thread(self):
-        with execute_scheduled_tasks_immediately():
+        with execute_scheduled_tasks_immediately(wait_till_end_of_block=False):
             self.group.conversation.messages.create(
                 author=self.user, thread=self.message, content='first thread reply'
             )

@@ -143,7 +143,7 @@ def notify_mention(mention):
     conversation = message.conversation
     participant = conversation.conversationparticipant_set.filter(user=user).first()
     if participant:
-        if participant.notified_up_to_id >= message.id:
+        if participant.notified_up_to_id and participant.notified_up_to_id >= message.id:
             # they've already read the message, so don't send out a notification
             return
 

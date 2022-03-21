@@ -592,18 +592,6 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
         self.assertIn('you were mentioned', mail.outbox[0].body)
 
     def test_notifies_mentions_when_in_conversation(self):
-        """
-        This test isn't quite as good as it could be...
-
-        We *would* send the mention email notification first,
-        then, after a delay, check to see if we need to notify
-        about other messages.
-
-        But because we run huey in immediate mode, it sends the
-        normal "non-mention" notification immediately, followed
-        by the mention one. This wouldn't happen when huey is
-        running normally...
-        """
         mentioned_user = VerifiedUserFactory()
         self.group.add_member(mentioned_user)
 
@@ -618,8 +606,8 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
                 conversation=conversation,
                 content='hey @{} how are you?'.format(mentioned_user.username),
             )
-        self.assertEqual(len(mail.outbox), 2)
-        self.assertIn('you were mentioned', mail.outbox[1].body)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('you were mentioned', mail.outbox[0].body)
 
 
 class TestConversationsMessageReactionsPostAPI(APITestCase):
