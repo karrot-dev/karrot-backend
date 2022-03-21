@@ -1,5 +1,6 @@
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
+from django.contrib.auth import get_user_model
 from django.core import mail
 from django.utils import timezone
 from freezegun import freeze_time
@@ -10,7 +11,7 @@ from karrot.conversations.models import ConversationNotificationStatus
 from karrot.groups import roles
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupNotificationType
-from karrot.issues.factories import IssueFactory, vote_for_remove_user, vote_for_no_change
+from karrot.issues.factories import IssueFactory, vote_for_remove_user, vote_for_no_change, vote_for_further_discussion
 from karrot.issues.models import Vote, IssueStatus
 from karrot.issues.tasks import process_expired_votings
 from karrot.tests.utils import ExtractPaginationMixin
@@ -151,8 +152,9 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         cls.member = VerifiedUserFactory()
         cls.newcomer = VerifiedUserFactory()
         cls.affected_member = VerifiedUserFactory()
+        cls.other_member = VerifiedUserFactory()
         cls.group = GroupFactory(
-            members=[cls.member, cls.affected_member],
+            members=[cls.member, cls.affected_member, cls.other_member],
             newcomers=[cls.newcomer],
         )
 
@@ -385,3 +387,21 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         # cannot access conversation
         response = self.get_results('/api/conversations/{}/'.format(issue.conversation.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
+
+    def test_what_happens_to_vote_when_user_leaves_group_voluntarily(self):
+        issue = self.create_issue(affected_user=self.affected_member)
+        voting = issue.latest_voting()
+        vote_for_further_discussion(voting=voting, user=self.other_member)
+
+        # other_member leaves the group voluntarily
+        self.client.force_login(user=self.other_member)
+        response = self.client.post('/api/groups/{}/leave/'.format(self.group.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        with self.fast_forward_to_voting_expiration(voting):
+            process_expired_votings()
+            voting.refresh_from_db()
+            self.assertEqual(voting.accepted_option.type, 'further_discussion')
+            # TODO: should we keep the votes of users that since left the group?
+            for voting_user in get_user_model().objects.filter(votes_given__option__voting=voting).distinct():
+                self.assertFalse(issue.group.is_member(voting_user))

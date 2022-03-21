@@ -1,7 +1,7 @@
 defaults: &defaults
   working_directory: ~/repo
   docker:
-    - image: karrot/python:2.9
+    - image: karrot/python:2.10
 
 aliases:
   - &restore-env-cache
@@ -42,7 +42,7 @@ jobs:
       LC_ALL: C.UTF-8
       LANG: C.UTF-8
     docker:
-      - image: karrot/python:2.9
+      - image: karrot/python:2.10
         environment:
           PGHOST: 127.0.0.1
       - image: circleci/postgres:11
@@ -56,6 +56,10 @@ jobs:
       - *restore-env-cache
       - *setup-env
       - *save-env-cache
+      - run: |
+          psql \
+          -d "postgres://ubuntu@localhost:5432/template1" \
+          -c "CREATE EXTENSION citext; CREATE EXTENSION btree_gist;"
       - run:
           name: setup
           command: |
