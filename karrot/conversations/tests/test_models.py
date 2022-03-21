@@ -231,12 +231,11 @@ class TestPlaceConversations(TestCase):
     def test_reply_email_notifications(self):
         with execute_scheduled_tasks_immediately():
             message = self.conversation.messages.create(author=self.user, content='asdf')
-            mail.outbox = []
             reply = self.conversation.messages.create(author=self.user2, thread=message, content='my reply')
 
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertIn(message.content, mail.outbox[0].subject)
-        self.assertIn(reply.content, mail.outbox[0].body)
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertIn(message.content, mail.outbox[1].subject)
+        self.assertIn(reply.content, mail.outbox[1].body)
 
 
 class TestActivityConversations(TestCase):
