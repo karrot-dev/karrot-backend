@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login, get_user_model
 from django.utils.translation import gettext as _
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from karrot.userauth import stats
@@ -53,7 +54,10 @@ class AuthUserSerializer(serializers.ModelSerializer):
         read_only_fields = ('unverified_email', 'mail_verified')
         extra_kwargs = {
             'username': {
-                'validators': [username_validator],
+                'validators': [
+                    username_validator,
+                    UniqueValidator(queryset=get_user_model().objects.all(), message='username_taken'),
+                ]
             },
             'display_name': {
                 'min_length': 3,
