@@ -114,14 +114,9 @@ def notify_message_push_subscribers_with_language(message, subscriptions, langua
     with translation.override(language):
         message_title = get_message_title(message, language)
 
-    if message.is_thread_reply():
-        click_action = frontend_urls.thread_url(message.thread)
-    else:
-        click_action = frontend_urls.conversation_url(conversation, message.author)
-
     notify_subscribers_by_device(
         subscriptions,
-        click_action=click_action,
+        click_action=frontend_urls.message_url(message),
         fcm_options={
             'message_title': message_title,
             'message_body': Truncator(message.content).chars(num=1000),
@@ -130,6 +125,19 @@ def notify_message_push_subscribers_with_language(message, subscriptions, langua
             'tag': 'conversation:{}'.format(conversation.id),
         }
     )
+
+
+@db_task()
+def notify_mention_push_subscribers(mention):
+    message = mention.message
+    conversation = message.conversation
+    user = mention.user
+
+    # check (again) they are *not* in the conversation... (as will already get a push message for that case)
+    if conversation.conversationparticipant_set.filter(user=user).exists():
+        return
+
+    notify_message_push_subscribers_with_language(message, PushSubscription.objects.filter(user=user), user.language)
 
 
 @db_task()
@@ -176,28 +184,30 @@ def notify_subscribers_by_device(subscriptions, *, click_action, fcm_options):
     android_subscriptions = [s for s in subscriptions if s.platform == PushSubscriptionPlatform.ANDROID.value]
     web_subscriptions = [s for s in subscriptions if s.platform == PushSubscriptionPlatform.WEB.value]
 
-    notify_subscribers(
-        subscriptions=android_subscriptions,
-        fcm_options={
-            **fcm_options,
-            # according to https://github.com/fechanique/cordova-plugin-fcm#send-notification-payload-example-rest-api
-            'click_action':
-            'FCM_PLUGIN_ACTIVITY',
-            'data_message': {
-                # we send the route as data - the frontend takes care of the actual routing
-                'karrot_route': str(furl(click_action).fragment),
-            },
-        }
-    )
+    if android_subscriptions:
+        notify_subscribers(
+            subscriptions=android_subscriptions,
+            fcm_options={
+                **fcm_options,
+                # according to https://github.com/fechanique/cordova-plugin-fcm#send-notification-payload-example-rest-api
+                'click_action':
+                'FCM_PLUGIN_ACTIVITY',
+                'data_message': {
+                    # we send the route as data - the frontend takes care of the actual routing
+                    'karrot_route': str(furl(click_action).fragment),
+                },
+            }
+        )
 
-    notify_subscribers(
-        subscriptions=web_subscriptions,
-        fcm_options={
-            **fcm_options,
-            'message_icon': frontend_urls.logo_url(),
-            'click_action': click_action,
-        }
-    )
+    if web_subscriptions:
+        notify_subscribers(
+            subscriptions=web_subscriptions,
+            fcm_options={
+                **fcm_options,
+                'message_icon': frontend_urls.logo_url(),
+                'click_action': click_action,
+            }
+        )
 
 
 @db_periodic_task(crontab(hour='*/24', minute=35))  # every 24 hours

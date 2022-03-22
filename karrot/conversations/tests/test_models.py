@@ -130,6 +130,19 @@ class ConversationMessageMentionTests(TestCase):
         message.save()
         self.assertEqual(message.mentions.count(), 1)
 
+    def test_creates_bell_notification(self):
+        self.assertEqual(self.user2.notification_set.filter(type='mention').count(), 0)
+        message = self.create_message(content='some message with a mention for @{} yay!'.format(self.user2.username))
+        self.assertEqual(self.user2.notification_set.filter(type='mention').count(), 1)
+
+    def test_removes_bell_notification(self):
+        self.assertEqual(self.user2.notification_set.filter(type='mention').count(), 0)
+        message = self.create_message(content='some message with a mention for @{} yay!'.format(self.user2.username))
+        self.assertEqual(self.user2.notification_set.filter(type='mention').count(), 1)
+        message.content = 'no mentions'
+        message.save()
+        self.assertEqual(self.user2.notification_set.filter(type='mention').count(), 0)
+
 
 class ConversationThreadModelTests(TestCase):
     def setUp(self):
@@ -231,12 +244,11 @@ class TestPlaceConversations(TestCase):
     def test_reply_email_notifications(self):
         with execute_scheduled_tasks_immediately():
             message = self.conversation.messages.create(author=self.user, content='asdf')
-            mail.outbox = []
             reply = self.conversation.messages.create(author=self.user2, thread=message, content='my reply')
 
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertIn(message.content, mail.outbox[0].subject)
-        self.assertIn(reply.content, mail.outbox[0].body)
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertIn(message.content, mail.outbox[1].subject)
+        self.assertIn(reply.content, mail.outbox[1].body)
 
 
 class TestActivityConversations(TestCase):

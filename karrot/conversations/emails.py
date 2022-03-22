@@ -317,7 +317,7 @@ def prepare_mention_notification(mention):
     tz = get_timezone(user, conversation.group)
 
     reply_to_name = message.author.display_name
-    local_part = make_local_part(conversation, user, message.thread)  # TODO: is this right to put the thread there?
+    local_part = make_local_part(conversation, user, message.thread)
     reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.EMAIL_REPLY_DOMAIN)))
 
     from_text = message.author.display_name
