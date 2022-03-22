@@ -130,6 +130,19 @@ class ConversationMessageMentionTests(TestCase):
         message.save()
         self.assertEqual(message.mentions.count(), 1)
 
+    def test_creates_bell_notification(self):
+        self.assertEqual(self.user2.notification_set.filter(type='mention').count(), 0)
+        message = self.create_message(content='some message with a mention for @{} yay!'.format(self.user2.username))
+        self.assertEqual(self.user2.notification_set.filter(type='mention').count(), 1)
+
+    def test_removes_bell_notification(self):
+        self.assertEqual(self.user2.notification_set.filter(type='mention').count(), 0)
+        message = self.create_message(content='some message with a mention for @{} yay!'.format(self.user2.username))
+        self.assertEqual(self.user2.notification_set.filter(type='mention').count(), 1)
+        message.content = 'no mentions'
+        message.save()
+        self.assertEqual(self.user2.notification_set.filter(type='mention').count(), 0)
+
 
 class ConversationThreadModelTests(TestCase):
     def setUp(self):
