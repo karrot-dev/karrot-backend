@@ -19,6 +19,8 @@ from karrot.webhooks.models import EmailEvent
 
 MAX_DISPLAY_NAME_LENGTH = 80
 
+# these needs to match the regex in the frontend
+
 post_erase_user = Signal()
 
 

@@ -6,7 +6,20 @@ from django.utils import timezone
 from karrot.tests.utils import TestMigrations
 
 
-class TestGenerateUsername(TestMigrations):
+class UtilsMixin:
+    def create_user(self, **kwargs):
+        User = self.apps.get_model('users', 'User')
+        GroupMembership = self.apps.get_model('groups', 'GroupMembership')
+        user = User.objects.create(**kwargs)
+        GroupMembership.objects.create(user=user, group=self.group)
+        return user
+
+    def check_username(self, id, username):
+        User = self.apps.get_model('users', 'User')
+        self.assertEqual(User.objects.get(id=id).username, username)
+
+
+class TestGenerateUsername(TestMigrations, UtilsMixin):
     migrate_from = [
         ('users', '0023_user_username'),
         ('groups', '0043_auto_20200717_1325'),
@@ -78,3 +91,31 @@ class TestGenerateUsername(TestMigrations):
     def check_username(self, id, username):
         User = self.apps.get_model('users', 'User')
         self.assertEqual(User.objects.get(id=id).username, username)
+
+
+class TestFixUsername(TestMigrations, UtilsMixin):
+    migrate_from = [
+        ('users', '0026_alter_user_username'),
+        ('groups', '0043_auto_20200717_1325'),
+    ]
+    migrate_to = [
+        ('users', '0027_fix_usernames'),
+    ]
+
+    def setUpBeforeMigration(self, apps):
+        self.apps = apps
+        apps.get_model('users', 'User')
+        Group = apps.get_model('groups', 'Group')
+        self.group = Group.objects.create(name='testgroup')
+        self.id1 = self.create_user(username='something with spaces').id
+        self.id2 = self.create_user(username='NothingChanged').id
+        self.id3 = self.create_user(username='$$$$$').id
+        self.id4 = self.create_user(username='someaddress@gmail.com').id
+
+    def test_username_creation(self):
+        self.apps.get_model('users', 'User')
+
+        self.check_username(self.id1, 'something_with_spaces')
+        self.check_username(self.id2, 'NothingChanged')
+        self.check_username(self.id3, '_____')
+        self.check_username(self.id4, 'someaddress')

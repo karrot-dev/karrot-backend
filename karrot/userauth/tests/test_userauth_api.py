@@ -244,8 +244,13 @@ class TestCreateUserErrors(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['display_name'], ['Karrot is a reserved name'])
 
-    def test_invalid_username(self):
+    def test_username_with_spaces_is_rejected(self):
         response = self.client.post(self.url, {**self.user_data, 'username': 'no spaces allowed'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['username'], ['username_invalid'])
+
+    def test_username_with_invalid_chars_is_rejected(self):
+        response = self.client.post(self.url, {**self.user_data, 'username': 'no$allowed'}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['username'], ['username_invalid'])
 
