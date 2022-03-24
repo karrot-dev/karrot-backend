@@ -13,7 +13,7 @@ from versatileimagefield.fields import VersatileImageField
 from karrot.base.base_models import BaseModel, UpdatedAtMixin
 from karrot.conversations.signals import new_conversation_message, new_thread_message, conversation_marked_seen, \
     thread_marked_seen
-from karrot.config.settings import USERNAME_MENTION_RE
+from config.settings import USERNAME_MENTION_RE
 from karrot.utils import markdown
 
 

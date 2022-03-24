@@ -2,7 +2,7 @@ from django.conf import settings
 from rest_framework import serializers
 from django.utils.translation import gettext as _
 
-from karrot.config.settings import USERNAME_RE
+from config.settings import USERNAME_RE
 
 
 def prevent_reserved_names(value):
