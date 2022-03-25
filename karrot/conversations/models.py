@@ -1,4 +1,3 @@
-import re
 from enum import Enum
 
 from dateutil.relativedelta import relativedelta
@@ -14,6 +13,7 @@ from versatileimagefield.fields import VersatileImageField
 from karrot.base.base_models import BaseModel, UpdatedAtMixin
 from karrot.conversations.signals import new_conversation_message, new_thread_message, conversation_marked_seen, \
     thread_marked_seen
+from config.settings import USERNAME_MENTION_RE
 from karrot.utils import markdown
 
 
@@ -336,8 +336,7 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
         if not self.conversation.supports_mentions():
             return
 
-        pattern = re.compile('@(\w+)')  # this needs to match the regex in the frontend
-        usernames = pattern.findall(self.content)
+        usernames = USERNAME_MENTION_RE.findall(self.content)
 
         # add in the new ones
         newly_mentioned_users = self.conversation.group.members \
