@@ -185,6 +185,8 @@ jobs:
             git branch --delete --force $BRANCH || true
             git checkout -b $BRANCH
             pip-compile --upgrade --no-annotate
+            # only need backports.zoneinfo for python < 3.9 (won't build on my 3.10 here)
+            sed -i 's/\(backports.zoneinfo.*\)/\1;python_version<"3.9"/g' requirements.txt
             git add requirements.txt
             pushd mjml
             yarn upgrade --latest
