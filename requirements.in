@@ -5,7 +5,7 @@
 -e git+https://github.com/tiltec/talon@80886cd#egg=talon
 
 # Common PyPI dependencies
-django[argon2]
+django[argon2] < 4
 django-cors-headers
 django-enumfield
 django-extensions

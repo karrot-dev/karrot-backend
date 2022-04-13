@@ -42,7 +42,7 @@ daphne==3.0.2
 decorator==5.1.1
 deprecated==1.2.13
 distlib==0.3.4
-django[argon2]==4.0.4
+django[argon2]==3.2.13
 django-anymail==8.5
 django-cors-headers==3.11.0
 django-crispy-forms==1.14.0
