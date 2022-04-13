@@ -5,7 +5,7 @@
 # 
 # Translators:
 # Tilmann Becker <tilmann.becker+github@gmail.com>, 2019
-# trendspotter <jirka.p@volny.cz>, 2021
+# trendspotter <jirka.p@volny.cz>, 2022
 # 
 #, fuzzy
 msgid ""
@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
-"Last-Translator: trendspotter <jirka.p@volny.cz>, 2021\n"
+"Last-Translator: trendspotter <jirka.p@volny.cz>, 2022\n"
 "Language-Team: Czech (https://www.transifex.com/yunity-1/teams/68631/cs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -245,22 +245,22 @@ msgstr "Musí být první v podprocesu"
 msgid "You are not a participant in this thread"
 msgstr "Nejste účastníkem tohoto vlákna"
 
-#: karrot/conversations/emails.py:236
+#: karrot/conversations/emails.py:263
 #, python-format
 msgid "New message in your application to %(group_name)s"
 msgstr "Nová zpráva k vaší žádosti o připojení k  %(group_name)s"
 
-#: karrot/conversations/emails.py:240
+#: karrot/conversations/emails.py:267
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr "Nová zpráva od %(user_name)s k žádosti o připojení do %(group_name)s"
 
-#: karrot/conversations/emails.py:262
+#: karrot/conversations/emails.py:289
 #, python-format
 msgid "New message in conflict resolution in %(group_name)s"
 msgstr "Nová zpráva při řešení konfliktů ve skupině %(group_name)s"
 
-#: karrot/conversations/emails.py:277
+#: karrot/conversations/emails.py:304
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr "Nová zpráva pro nabídku %(offer_name)s v  %(group_name)s"
@@ -273,6 +273,26 @@ msgstr "Tato konverzace byla ukončena"
 msgid ""
 "You are receiving this because you are subscribed to this conversation."
 msgstr "Toto jste obdrželi, protože jste přihlášeni k odběru této konverzace."
+
+#: karrot/conversations/templates/mention_notification.html.jinja2:6
+#: karrot/conversations/templates/mention_notification.html.jinja2:123
+#: karrot/conversations/templates/mention_notification.subject.jinja2:1
+#, python-format
+msgid "You were mentioned by %(user_name)s"
+msgstr "Zmínil se o vás %(user_name)s"
+
+#: karrot/conversations/templates/mention_notification.html.jinja2:156
+msgid "You are receiving this because you were mentioned."
+msgstr "Dostáváte ji, protože jste byli zmíněni."
+
+#: karrot/conversations/templates/mention_notification.html.jinja2:157
+#, python-format
+msgid ""
+"Reply to this email directly or <a href=\"%(conversation_url)s\">view it on "
+"%(site_name)s</a>."
+msgstr ""
+"Odpovězte na tento e-mail přímo nebo <a href=\"%(conversation_url)s\">si jej"
+" prohlédněte na %(site_name)s</a>."
 
 #: karrot/conversations/templates/thread_message_notification.html.jinja2:136
 msgid "In reply to:"
@@ -791,9 +811,9 @@ msgstr "Nenastavujte více než %(count)s týdny předem"
 msgid "You are already subscribed to this place"
 msgstr "Jste již přihlášeni k odběru tohoto místa"
 
-#: karrot/userauth/api.py:98 karrot/userauth/serializers.py:94
-#: karrot/userauth/serializers.py:143 karrot/userauth/serializers.py:164
-#: karrot/userauth/serializers.py:194 karrot/userauth/serializers.py:216
+#: karrot/userauth/api.py:98 karrot/userauth/serializers.py:102
+#: karrot/userauth/serializers.py:151 karrot/userauth/serializers.py:172
+#: karrot/userauth/serializers.py:202 karrot/userauth/serializers.py:224
 msgid "We could not send you an e-mail."
 msgstr "Nemohli jsme vám poslat e-mail."
 
@@ -801,27 +821,27 @@ msgstr "Nemohli jsme vám poslat e-mail."
 msgid "Mail is already verified."
 msgstr "E-mail je již ověřený."
 
-#: karrot/userauth/serializers.py:24
+#: karrot/userauth/serializers.py:25
 msgid "Unable to log in with provided credentials."
 msgstr "Nelze se přihlásit s poskytnutými přihlašovacími údaji."
 
-#: karrot/userauth/serializers.py:81 karrot/userauth/serializers.py:181
+#: karrot/userauth/serializers.py:89 karrot/userauth/serializers.py:189
 msgid "Similar e-mail exists: "
 msgstr "Podobný e-mail existuje:"
 
-#: karrot/userauth/serializers.py:118
+#: karrot/userauth/serializers.py:126
 msgid "Verification code is invalid"
 msgstr "Ověřovací kód je neplatný"
 
-#: karrot/userauth/serializers.py:122
+#: karrot/userauth/serializers.py:130
 msgid "Verification code has expired"
 msgstr "Platnost ověřovacího kódu vypršela"
 
-#: karrot/userauth/serializers.py:157 karrot/userauth/serializers.py:175
+#: karrot/userauth/serializers.py:165 karrot/userauth/serializers.py:183
 msgid "Wrong password"
 msgstr "Špatné heslo"
 
-#: karrot/userauth/serializers.py:208
+#: karrot/userauth/serializers.py:216
 msgid "Unknown e-mail address"
 msgstr "Neznámá e-mailová adresa"
 
@@ -977,7 +997,7 @@ msgstr ""
 "Tuto zprávu můžete bezpečně ignorovat, pokud jste to nebyli vy, kdo se "
 "zaregistroval do naší služby pomocí této e-mailové adresy."
 
-#: karrot/utils/validators.py:8
+#: karrot/utils/validators.py:10
 #, python-format
 msgid "%(value)s is a reserved name"
 msgstr "%(value)s je vyhrazený název"

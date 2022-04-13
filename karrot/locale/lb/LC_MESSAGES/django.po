@@ -4,7 +4,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
 # 
 # Translators:
-# Daniel Waxweiler, 2021
+# Daniel Waxweiler, 2022
 # 
 #, fuzzy
 msgid ""
@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
-"Last-Translator: Daniel Waxweiler, 2021\n"
+"Last-Translator: Daniel Waxweiler, 2022\n"
 "Language-Team: Luxembourgish (https://www.transifex.com/yunity-1/teams/68631/lb/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -245,22 +245,22 @@ msgstr "Muss als éischt am Thread sinn"
 msgid "You are not a participant in this thread"
 msgstr "Du bass kee Member vun dëser Ënnerhalung"
 
-#: karrot/conversations/emails.py:236
+#: karrot/conversations/emails.py:263
 #, python-format
 msgid "New message in your application to %(group_name)s"
 msgstr "Nei Noriicht op deng Bewerbung bei %(group_name)s"
 
-#: karrot/conversations/emails.py:240
+#: karrot/conversations/emails.py:267
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr "Nei Noriicht an der Bewerbung vum %(user_name)s bei %(group_name)s"
 
-#: karrot/conversations/emails.py:262
+#: karrot/conversations/emails.py:289
 #, python-format
 msgid "New message in conflict resolution in %(group_name)s"
 msgstr "Nei Noriicht am Konflikt-Léisungsprozess bei %(group_name)s"
 
-#: karrot/conversations/emails.py:277
+#: karrot/conversations/emails.py:304
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr "Nei Norricht fir d'Offer %(offer_name)s bei %(group_name)s"
@@ -273,6 +273,26 @@ msgstr "Dës Ënnerhalung gouf zougemaach"
 msgid ""
 "You are receiving this because you are subscribed to this conversation."
 msgstr "Du kriss dëst well's du dës Ënnerhalung abonéiert hues."
+
+#: karrot/conversations/templates/mention_notification.html.jinja2:6
+#: karrot/conversations/templates/mention_notification.html.jinja2:123
+#: karrot/conversations/templates/mention_notification.subject.jinja2:1
+#, python-format
+msgid "You were mentioned by %(user_name)s"
+msgstr "Du goufs erwäänt vum %(user_name)s"
+
+#: karrot/conversations/templates/mention_notification.html.jinja2:156
+msgid "You are receiving this because you were mentioned."
+msgstr "Du kriss dëst well s du erwäänt gi bass."
+
+#: karrot/conversations/templates/mention_notification.html.jinja2:157
+#, python-format
+msgid ""
+"Reply to this email directly or <a href=\"%(conversation_url)s\">view it on "
+"%(site_name)s</a>."
+msgstr ""
+"Äntwer op dës E-Mail oder <a href=\"%(conversation_url)s\">kuck et op "
+"%(site_name)s</a>."
 
 #: karrot/conversations/templates/thread_message_notification.html.jinja2:136
 msgid "In reply to:"
@@ -792,9 +812,9 @@ msgstr "Setz se net méi wéi %(count)s Wochen am Viraus"
 msgid "You are already subscribed to this place"
 msgstr "Du hues dës Plaz schonn abonéiert"
 
-#: karrot/userauth/api.py:98 karrot/userauth/serializers.py:94
-#: karrot/userauth/serializers.py:143 karrot/userauth/serializers.py:164
-#: karrot/userauth/serializers.py:194 karrot/userauth/serializers.py:216
+#: karrot/userauth/api.py:98 karrot/userauth/serializers.py:102
+#: karrot/userauth/serializers.py:151 karrot/userauth/serializers.py:172
+#: karrot/userauth/serializers.py:202 karrot/userauth/serializers.py:224
 msgid "We could not send you an e-mail."
 msgstr "Mir konnten dir keng E-Mail schécken."
 
@@ -802,27 +822,27 @@ msgstr "Mir konnten dir keng E-Mail schécken."
 msgid "Mail is already verified."
 msgstr "Dës E-Mail-Adress ass scho verifizéiert."
 
-#: karrot/userauth/serializers.py:24
+#: karrot/userauth/serializers.py:25
 msgid "Unable to log in with provided credentials."
 msgstr "Onméiglech dech mat dësen Donnéeën anzeloggen"
 
-#: karrot/userauth/serializers.py:81 karrot/userauth/serializers.py:181
+#: karrot/userauth/serializers.py:89 karrot/userauth/serializers.py:189
 msgid "Similar e-mail exists: "
 msgstr "Et gëtt eng änlech E-Mail-Adress:"
 
-#: karrot/userauth/serializers.py:118
+#: karrot/userauth/serializers.py:126
 msgid "Verification code is invalid"
 msgstr "De Code fir ze verifizéieren ass ongëlteg"
 
-#: karrot/userauth/serializers.py:122
+#: karrot/userauth/serializers.py:130
 msgid "Verification code has expired"
 msgstr "De Code fir ze verifizéieren ass ofgelaf"
 
-#: karrot/userauth/serializers.py:157 karrot/userauth/serializers.py:175
+#: karrot/userauth/serializers.py:165 karrot/userauth/serializers.py:183
 msgid "Wrong password"
 msgstr "Falscht Passwuert"
 
-#: karrot/userauth/serializers.py:208
+#: karrot/userauth/serializers.py:216
 msgid "Unknown e-mail address"
 msgstr "Onbekannt E-Mail-Adress"
 
@@ -987,7 +1007,7 @@ msgstr ""
 "Du kanns dës E-Mail einfach ignoréiere wann's du dech net selwer mat dëser "
 "E-Mail-Adress bei eisem Déngscht ugemellt hues."
 
-#: karrot/utils/validators.py:8
+#: karrot/utils/validators.py:10
 #, python-format
 msgid "%(value)s is a reserved name"
 msgstr "%(value)s ass ee reservéierten Numm"

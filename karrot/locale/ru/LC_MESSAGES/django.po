@@ -234,22 +234,22 @@ msgstr ""
 msgid "You are not a participant in this thread"
 msgstr ""
 
-#: karrot/conversations/emails.py:236
+#: karrot/conversations/emails.py:263
 #, python-format
 msgid "New message in your application to %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:240
+#: karrot/conversations/emails.py:267
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:262
+#: karrot/conversations/emails.py:289
 #, python-format
 msgid "New message in conflict resolution in %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:277
+#: karrot/conversations/emails.py:304
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr ""
@@ -261,6 +261,24 @@ msgstr ""
 #: karrot/conversations/templates/conversation_message_notification.html.jinja2:150
 msgid ""
 "You are receiving this because you are subscribed to this conversation."
+msgstr ""
+
+#: karrot/conversations/templates/mention_notification.html.jinja2:6
+#: karrot/conversations/templates/mention_notification.html.jinja2:123
+#: karrot/conversations/templates/mention_notification.subject.jinja2:1
+#, python-format
+msgid "You were mentioned by %(user_name)s"
+msgstr ""
+
+#: karrot/conversations/templates/mention_notification.html.jinja2:156
+msgid "You are receiving this because you were mentioned."
+msgstr ""
+
+#: karrot/conversations/templates/mention_notification.html.jinja2:157
+#, python-format
+msgid ""
+"Reply to this email directly or <a href=\"%(conversation_url)s\">view it on "
+"%(site_name)s</a>."
 msgstr ""
 
 #: karrot/conversations/templates/thread_message_notification.html.jinja2:136
@@ -733,9 +751,9 @@ msgstr ""
 msgid "You are already subscribed to this place"
 msgstr ""
 
-#: karrot/userauth/api.py:98 karrot/userauth/serializers.py:94
-#: karrot/userauth/serializers.py:143 karrot/userauth/serializers.py:164
-#: karrot/userauth/serializers.py:194 karrot/userauth/serializers.py:216
+#: karrot/userauth/api.py:98 karrot/userauth/serializers.py:102
+#: karrot/userauth/serializers.py:151 karrot/userauth/serializers.py:172
+#: karrot/userauth/serializers.py:202 karrot/userauth/serializers.py:224
 msgid "We could not send you an e-mail."
 msgstr ""
 
@@ -743,27 +761,27 @@ msgstr ""
 msgid "Mail is already verified."
 msgstr ""
 
-#: karrot/userauth/serializers.py:24
+#: karrot/userauth/serializers.py:25
 msgid "Unable to log in with provided credentials."
 msgstr ""
 
-#: karrot/userauth/serializers.py:81 karrot/userauth/serializers.py:181
+#: karrot/userauth/serializers.py:89 karrot/userauth/serializers.py:189
 msgid "Similar e-mail exists: "
 msgstr ""
 
-#: karrot/userauth/serializers.py:118
+#: karrot/userauth/serializers.py:126
 msgid "Verification code is invalid"
 msgstr ""
 
-#: karrot/userauth/serializers.py:122
+#: karrot/userauth/serializers.py:130
 msgid "Verification code has expired"
 msgstr ""
 
-#: karrot/userauth/serializers.py:157 karrot/userauth/serializers.py:175
+#: karrot/userauth/serializers.py:165 karrot/userauth/serializers.py:183
 msgid "Wrong password"
 msgstr ""
 
-#: karrot/userauth/serializers.py:208
+#: karrot/userauth/serializers.py:216
 msgid "Unknown e-mail address"
 msgstr ""
 
@@ -913,7 +931,7 @@ msgid ""
 "service using this email address."
 msgstr ""
 
-#: karrot/utils/validators.py:8
+#: karrot/utils/validators.py:10
 #, python-format
 msgid "%(value)s is a reserved name"
 msgstr ""
