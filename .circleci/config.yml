@@ -30,6 +30,8 @@ aliases:
         # pip-tools might have been downgraded to a broken version in the line above
         env/bin/pip install --upgrade pip-tools
         echo "source env/bin/activate" >> $BASH_ENV
+        # quick fix. until debian package has got tz updates
+        ln -s /usr/share/zoneinfo/Pacific/Enderbury /usr/share/zoneinfo/Pacific/Kanton
 
   - &add-token-to-remote
     run:
@@ -183,6 +185,8 @@ jobs:
             git branch --delete --force $BRANCH || true
             git checkout -b $BRANCH
             pip-compile --upgrade --no-annotate
+            # only need backports.zoneinfo for python < 3.9 (won't build on my 3.10 here)
+            sed -i 's/\(backports.zoneinfo.*\)/\1;python_version<"3.9"/g' requirements.txt
             git add requirements.txt
             pushd mjml
             yarn upgrade --latest
