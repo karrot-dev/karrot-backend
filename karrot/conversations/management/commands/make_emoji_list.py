@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 from operator import itemgetter
 from pymdownx import twemoji_db
 
-SOURCE_URL = 'https://raw.githubusercontent.com/markdown-it/markdown-it-emoji/fffd76a632c1ff5c7014156320a1db894a3a02e0/lib/data/full.json'  # noqa E501
+SOURCE_URL = 'https://raw.githubusercontent.com/markdown-it/markdown-it-emoji/339abf72f84a02e66fe9a4d682a7217d1f660e6a/lib/data/full.json'  # noqa E501
 FILENAME = 'karrot/conversations/emoji_db.py'
 HEADER = """
 # Source: {url} # noqa E501

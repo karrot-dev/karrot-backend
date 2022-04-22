@@ -681,6 +681,12 @@ class TestConversationsMessageReactionsPostAPI(APITestCase):
         response = self.client.post('/api/messages/{}/reactions/'.format(self.message.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_react_updated_emoji(self):
+        "Test if source-url has been updated to newest list of emojis"
+        self.client.force_login(user=self.user)
+        data = {'name': 'star_struck'}
+        response = self.client.post('/api/messages/{}/reactions/'.format(self.message.id), data, format='json')
+
     def test_empty_request_fails(self):
         """If no emoji is given, the request should fail (respond 400)"""
         self.client.force_login(user=self.user)
