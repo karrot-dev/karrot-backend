@@ -14,7 +14,6 @@ argon2-cffi==21.3.0
 argon2-cffi-bindings==21.2.0
 asgiref==3.5.0
 async-timeout==4.0.2
-asynctest==0.13.0
 attrs==21.4.0
 autobahn==22.3.2
 autoflake==1.4
@@ -22,7 +21,7 @@ automat==20.2.0
 autopep8==1.6.0
 babel==2.9.1
 backcall==0.2.0
-backports-zoneinfo==0.2.1;python_version<"3.9"
+backports-zoneinfo==0.2.1
 bleach==5.0.0
 bleach-allowlist==1.0.3
 boltons==21.0.0
@@ -110,7 +109,7 @@ parso==0.8.3
 pep517==0.12.0
 pexpect==4.8.0
 pickleshare==0.7.5
-pillow==9.1.0
+pillow==9.1.1
 pip-tools==6.6.0
 platformdirs==2.5.1
 pluggy==1.0.0
