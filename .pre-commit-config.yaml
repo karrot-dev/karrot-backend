@@ -3,7 +3,7 @@ repos:
   hooks:
   - id: autoflake
     name: autoflake
-    entry: autoflake
+    entry: ./scripts/local-or-docker-compose autoflake
     args:
     - "--in-place"
     - "--remove-all-unused-imports"
@@ -15,7 +15,7 @@ repos:
     exclude: "karrot\/.*\/migrations"
   - id: yapf
     name: yapf
-    entry: yapf
+    entry: ./scripts/local-or-docker-compose yapf
     args:
     - "--in-place"
     language: system
@@ -29,7 +29,7 @@ repos:
   #  types: [python]
   - id: makemessages
     name: makemessages
-    entry: python manage.py makemessages
+    entry: ./scripts/local-or-docker-compose python manage.py makemessages
     language: system
     types: [python]
     stages: [push]
