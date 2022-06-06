@@ -161,6 +161,7 @@ class TestSetActivityTypes(TestMigrations):
 
 class TestAddParticipantTypes(TestMigrations):
     migrate_from = [
+        ('users', '0027_fix_usernames'),
         ('groups', '0046_groupmembership_must_have_member_role'),
         ('places', '0038_place_default_view'),
         ('activities', '0031_add_participant_types'),
@@ -184,7 +185,7 @@ class TestAddParticipantTypes(TestMigrations):
         place_type = PlaceType.objects.create(name=faker.name(), group=group)
         place = Place.objects.create(name=faker.name(), group=group, place_type=place_type)
         activity_type = ActivityType.objects.create(name=faker.name(), group=group)
-        user = User.objects.create()
+        user = User.objects.create(username=faker.user_name())
         GroupMembership.objects.create(group=group, user=user)
 
         for _ in range(5):

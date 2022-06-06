@@ -67,7 +67,7 @@ class TestActivityReminderTask(TestCase):
     def test_does_not_send_for_disabled_activity(self, notify_subscribers_by_device):
         self.activity.is_disabled = True
         self.activity.save()
-        participant = ActivityParticipant.objects.create(user=self.user, activity=self.activity)
+        participant = self.activity.add_participant(self.user)
         notify_subscribers_by_device.reset_mock()
         tasks.activity_reminder.call_local(participant.id)
         self.assertEqual(notify_subscribers_by_device.call_count, 0)

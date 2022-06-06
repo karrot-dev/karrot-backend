@@ -13,6 +13,7 @@ def to_range(date, **kwargs):
 
 class TestAddNewcomerRoleMigration(TestMigrations):
     migrate_from = [
+        ('users', '0027_fix_usernames'),
         ('groups', '0046_groupmembership_must_have_member_role'),
     ]
     migrate_to = [
@@ -25,9 +26,9 @@ class TestAddNewcomerRoleMigration(TestMigrations):
         GroupMembership = apps.get_model('groups', 'GroupMembership')
 
         group = Group.objects.create(name=faker.name())
-        user1 = User.objects.create()
-        user2 = User.objects.create()
-        user3 = User.objects.create()
+        user1 = User.objects.create(username=faker.user_name())
+        user2 = User.objects.create(username=faker.user_name())
+        user3 = User.objects.create(username=faker.user_name())
         self.membership1_id = GroupMembership.objects.create(group=group, user=user1, roles=['member']).id
         self.membership2_id = GroupMembership.objects.create(group=group, user=user2, roles=['member', 'editor']).id
         self.membership3_id = GroupMembership.objects.create(group=group, user=user3, roles=['member', 'foo']).id
