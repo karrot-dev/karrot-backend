@@ -1,5 +1,6 @@
 import html
 import os
+import random
 import re
 from collections import namedtuple
 
@@ -18,7 +19,7 @@ from config import settings
 from karrot.applications.factories import ApplicationFactory
 from karrot.applications.models import Application
 from karrot.issues.factories import IssueFactory
-from karrot.conversations.models import ConversationMessage
+from karrot.conversations.models import ConversationMessage, Conversation
 from karrot.groups.emails import prepare_user_inactive_in_group_email, prepare_group_summary_emails, \
     prepare_group_summary_data, prepare_user_became_editor_email, prepare_user_removal_from_group_email
 from karrot.groups.models import Group
@@ -31,6 +32,7 @@ from karrot.activities.models import Activity
 from karrot.users.factories import VerifiedUserFactory
 from karrot.users.models import User
 from karrot.utils.tests.fake import faker
+from karrot.conversations.emails import prepare_mention_notification
 
 basedir = os.path.abspath(os.path.join(settings.BASE_DIR, 'karrot'))
 
@@ -53,6 +55,10 @@ def shuffle_groups():
 
 def random_issue():
     return IssueFactory(group=random_group(), created_by=random_user(), affected_user=random_user())
+
+
+def random_conversation():
+    return Conversation.objects.order_by('?').first()
 
 
 def random_message():
@@ -103,6 +109,21 @@ def get_or_create_offer():
         offer = OfferFactory(group=group, user=user, images=[image_path])
 
     return offer
+
+
+def get_or_create_mention():
+    group = random_group()
+    author = random_user(group)
+    mentioned_user = random_user(group)
+    conversation = group.conversation
+
+    # insert a mention into some faker text
+    parts = faker.text().split(' ')
+    parts.insert(random.randint(0, len(parts)), '@{}'.format(mentioned_user.username))
+    content = ' '.join(parts)
+
+    message = conversation.messages.create(author=author, content=content)
+    return message.mentions.first()
 
 
 class Handlers:
@@ -235,6 +256,9 @@ class Handlers:
 
     def new_offer(self):
         return prepare_new_offer_notification_email(user=random_user(), offer=get_or_create_offer())
+
+    def mention_notification(self):
+        return prepare_mention_notification(get_or_create_mention())
 
 
 handlers = Handlers()

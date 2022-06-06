@@ -13,7 +13,7 @@ from karrot.applications.serializers import ApplicationSerializer
 from karrot.community_feed.models import CommunityFeedMeta
 from karrot.community_feed.serializers import CommunityFeedMetaSerializer
 from karrot.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction, \
-    ConversationThreadParticipant, ConversationMeta
+    ConversationThreadParticipant, ConversationMeta, ConversationMessageMention
 from karrot.conversations.serializers import ConversationMessageSerializer, ConversationSerializer, \
     ConversationMetaSerializer
 from karrot.conversations.signals import thread_marked_seen, new_conversation_message, new_thread_message, \
@@ -130,6 +130,36 @@ def send_thread_update(sender, instance, created, **kwargs):
 
     for subscription in ChannelSubscription.objects.recent().filter(user=instance.user):
         send_in_channel(subscription.reply_channel, topic, payload)
+
+
+@receiver(post_save, sender=ConversationMessageMention)
+@on_transaction_commit
+def send_mention_push_message(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    mention = instance
+    message = mention.message
+    conversation = message.conversation
+    user = mention.user
+
+    if not conversation.supports_mentions():
+        return
+
+    if not conversation.group.is_member(user):
+        # don't notify anyone who isn't in the group
+        # we should not have created a mention though...
+        return
+
+    if user.id == message.author.id:
+        # ignore self-mentions
+        return
+
+    # check they are *not* in the conversation... (as will already get a push message for that case)
+    if conversation.conversationparticipant_set.filter(user=user).exists():
+        return
+
+    tasks.notify_mention_push_subscribers(mention)
 
 
 @receiver(post_save, sender=ConversationMessageReaction)

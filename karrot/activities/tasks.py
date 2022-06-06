@@ -34,6 +34,9 @@ def activity_reminder(participant_id):
         return
 
     activity = participant.activity
+    if activity.is_disabled:
+        return
+
     user = participant.user
     language = user.language
     tz = activity.group.timezone

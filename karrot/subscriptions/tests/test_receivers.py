@@ -1103,12 +1103,17 @@ class ReceiverPushTests(TestCase):
     def setUp(self):
         self.user = UserFactory()
         self.author = UserFactory()
+        self.group = GroupFactory(members=[self.user, self.author])
 
         self.token = faker.uuid4()
         self.content = faker.text()
 
         # join a conversation
         self.conversation = ConversationFactory(participants=[self.user, self.author])
+
+        # another conversation they are not subscribed to, but part of the group they are in
+        self.place = PlaceFactory(group=self.group)
+        self.other_conversation = self.place.conversation
 
         # add a push subscriber
         self.subscription = PushSubscription.objects.create(
@@ -1124,7 +1129,7 @@ class ReceiverPushTests(TestCase):
                 conversation=self.conversation, content=self.content, author=self.author
             )
 
-        self.assertEqual(notify_subscribers.call_count, 2)
+        self.assertEqual(notify_subscribers.call_count, 1)
         kwargs = notify_subscribers.call_args_list[0][1]
         self.assertEqual(list(kwargs['subscriptions']), [self.subscription])
         self.assertEqual(kwargs['fcm_options']['message_title'], self.author.display_name)
@@ -1141,8 +1146,6 @@ class ReceiverPushTests(TestCase):
 
         kwargs = notify_subscribers.call_args_list[0][1]
         self.assertEqual(len(kwargs['subscriptions']), 1)
-        kwargs = notify_subscribers.call_args_list[1][1]
-        self.assertEqual(len(kwargs['subscriptions']), 0)
 
     def test_send_push_notification_if_channel_subscription_is_away(self, notify_subscribers):
         with self.captureOnCommitCallbacks(execute=True):
@@ -1154,11 +1157,35 @@ class ReceiverPushTests(TestCase):
                 conversation=self.conversation, content=self.content, author=self.author
             )
 
-        self.assertEqual(notify_subscribers.call_count, 2)
+        self.assertEqual(notify_subscribers.call_count, 1)
         kwargs = notify_subscribers.call_args_list[0][1]
         self.assertEqual(list(kwargs['subscriptions']), [self.subscription])
         self.assertEqual(kwargs['fcm_options']['message_title'], self.author.display_name)
         self.assertEqual(kwargs['fcm_options']['message_body'], self.content)
+
+    def test_does_not_send_to_push_subscribers_when_not_in_conversation(self, notify_subscribers):
+        with self.captureOnCommitCallbacks(execute=True):
+            ConversationMessage.objects.create(
+                conversation=self.other_conversation, content=self.content, author=self.author
+            )
+
+        self.assertEqual(notify_subscribers.call_count, 0)
+
+    def test_sends_mentions_when_not_in_conversation(self, notify_subscribers):
+        content = 'hello @{} are are you?'.format(self.user.username)
+
+        with self.captureOnCommitCallbacks(execute=True):
+            ConversationMessage.objects.create(
+                conversation=self.other_conversation, content=content, author=self.author
+            )
+
+        self.assertEqual(notify_subscribers.call_count, 1)
+        kwargs = notify_subscribers.call_args_list[0][1]
+        self.assertEqual(list(kwargs['subscriptions']), [self.subscription])
+        self.assertEqual(
+            kwargs['fcm_options']['message_title'], '{} / {}'.format(self.place.name, self.author.display_name)
+        )
+        self.assertEqual(kwargs['fcm_options']['message_body'], content)
 
 
 @patch('karrot.subscriptions.tasks.notify_subscribers')
@@ -1189,7 +1216,7 @@ class GroupConversationReceiverPushTests(TestCase):
                 conversation=self.conversation, content=self.content, author=self.author
             )
 
-        self.assertEqual(notify_subscribers.call_count, 2)
+        self.assertEqual(notify_subscribers.call_count, 1)
         kwargs = notify_subscribers.call_args_list[0][1]
         self.assertEqual(list(kwargs['subscriptions']), [self.subscription])
         self.assertEqual(kwargs['fcm_options']['message_title'], self.group.name + ' / ' + self.author.display_name)

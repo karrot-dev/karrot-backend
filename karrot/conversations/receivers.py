@@ -7,9 +7,11 @@ from pytz import utc
 from karrot.conversations import tasks, stats
 from karrot.conversations.models import (
     ConversationParticipant, ConversationMessage, ConversationMessageReaction, ConversationThreadParticipant,
-    ConversationMeta
+    ConversationMeta, ConversationMessageMention
 )
+from karrot.notifications.models import Notification, NotificationType
 from karrot.users.models import User
+from karrot.utils.frontend_urls import conversation_url
 
 
 @receiver(pre_save, sender=ConversationMessage)
@@ -85,6 +87,55 @@ def reaction_created(sender, instance, created, **kwargs):
     if not created:
         return
     stats.reaction_given(instance)
+
+
+@receiver(post_save, sender=ConversationMessageMention)
+def user_mentioned(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    mention = instance
+    message = mention.message
+    user = mention.user
+    conversation = message.conversation
+
+    if not conversation.supports_mentions():
+        return
+
+    if not conversation.group.is_member(user):
+        # don't notify anyone who isn't in the group
+        # we should not have created a mention though...
+        return
+
+    if user.id == message.author.id:
+        # ignore self-mentions
+        return
+
+    # always give them a bell notification
+    Notification.objects.create(
+        type=NotificationType.MENTION.value,
+        user=mention.user,
+        context={
+            'mention': mention.id,
+            'group': conversation.group.id,
+            'user': message.author.id,
+            'url': conversation_url(conversation, user),
+        },
+    )
+
+    if user.mail_verified:
+        # verified mail is enough
+        # we will notify inactive members here as maybe being mentioned draws them in again :)
+        # 5 seconds delay so we don't notify them if they read it immediately
+        tasks.notify_mention.schedule((mention, ), delay=5)
+
+    stats.user_mentioned(instance)
+
+
+@receiver(pre_delete, sender=ConversationMessageMention)
+def user_mention_deleted(sender, instance, **kwargs):
+    mention = instance
+    Notification.objects.filter(type=NotificationType.MENTION.value, context__mention=mention.id).delete()
 
 
 @receiver(post_save, sender=ConversationParticipant)

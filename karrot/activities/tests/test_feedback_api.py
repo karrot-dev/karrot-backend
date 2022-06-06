@@ -1,6 +1,9 @@
+from datetime import timedelta
+
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.utils import timezone
+from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -161,6 +164,18 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=newcomer)
         response = self.client.post(self.url, self.feedback_post, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+
+    def test_create_feedback_when_joined_activity_late(self):
+        activity = ActivityFactory(place=self.place)
+        with freeze_time(activity.date.start + timedelta(minutes=1), tick=True):
+            self.client.force_login(user=self.member)
+            response = self.client.post('/api/activities/{}/add/'.format(activity.id))
+            self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+            response = self.client.post(self.url, {
+                'about': activity.id,
+                'comment': 'hello',
+            })
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
     def test_create_feedback_activates_group(self):
         self.group.status = GroupStatus.INACTIVE.value

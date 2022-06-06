@@ -31,6 +31,7 @@ class TestUsersAPI(APITestCase):
         self.url = '/api/auth/user/'
         self.user_data = {
             'email': faker.email(),
+            'username': faker.user_name(),
             'password': faker.name(),
             'display_name': faker.name(),
             'address': faker.address(),
@@ -201,7 +202,12 @@ class TestCreateUserErrors(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.url = '/api/auth/user/'
-        self.user_data = {'email': 'fancy@example.com', 'password': faker.name(), 'display_name': faker.name()}
+        self.user_data = {
+            'email': 'fancy@example.com',
+            'username': faker.user_name(),
+            'password': faker.name(),
+            'display_name': faker.name(),
+        }
 
     def test_create_user_with_similar_cased_email_fails(self):
         response = self.client.post(self.url, self.user_data)
@@ -237,6 +243,16 @@ class TestCreateUserErrors(APITestCase):
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['display_name'], ['Karrot is a reserved name'])
+
+    def test_username_with_spaces_is_rejected(self):
+        response = self.client.post(self.url, {**self.user_data, 'username': 'no spaces allowed'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['username'], ['username_invalid'])
+
+    def test_username_with_invalid_chars_is_rejected(self):
+        response = self.client.post(self.url, {**self.user_data, 'username': 'no$allowed'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['username'], ['username_invalid'])
 
 
 class TestUploadPhoto(APITestCase):

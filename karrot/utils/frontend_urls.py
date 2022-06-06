@@ -7,6 +7,13 @@ from karrot.groups.models import GroupNotificationType
 from karrot.unsubscribe.utils import generate_token
 
 
+def message_url(message):
+    if message.is_thread_reply():
+        return thread_url(message.thread)
+    else:
+        return conversation_url(message.conversation, message.author)
+
+
 def conversation_url(conversation, user):
     type = conversation.type()
     if type == 'group':

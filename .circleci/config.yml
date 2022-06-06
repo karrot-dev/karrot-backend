@@ -1,7 +1,7 @@
 defaults: &defaults
   working_directory: ~/repo
   docker:
-    - image: karrot/python:2.4
+    - image: karrot/python:2.10
 
 aliases:
   - &restore-env-cache
@@ -27,7 +27,11 @@ aliases:
         env/bin/pip install --upgrade pip
         env/bin/pip install --upgrade pip-tools
         PIP_EXISTS_ACTION=w env/bin/pip-sync <(sed 's/^-e //g' requirements.txt)
+        # pip-tools might have been downgraded to a broken version in the line above
+        env/bin/pip install --upgrade pip-tools
         echo "source env/bin/activate" >> $BASH_ENV
+        # quick fix. until debian package has got tz updates
+        ln -s /usr/share/zoneinfo/Pacific/Enderbury /usr/share/zoneinfo/Pacific/Kanton
 
   - &add-token-to-remote
     run:
@@ -42,7 +46,7 @@ jobs:
       LC_ALL: C.UTF-8
       LANG: C.UTF-8
     docker:
-      - image: karrot/python:2.4
+      - image: karrot/python:2.10
         environment:
           PGHOST: 127.0.0.1
       - image: circleci/postgres:11
@@ -56,15 +60,20 @@ jobs:
       - *restore-env-cache
       - *setup-env
       - *save-env-cache
+      - run: |
+          psql \
+          -d "postgres://ubuntu@localhost:5432/template1" \
+          -c "CREATE EXTENSION citext; CREATE EXTENSION btree_gist;"
       - run:
           name: setup
           command: |
             cp config/ci.env .env
             (cd mjml && yarn)
             mjml/convert
-      - run:
-          name: flake8
-          command: flake8 ./
+      # See https://github.com/karrot-dev/karrot-frontend/issues/2476
+      #- run:
+      #    name: flake8
+      #    command: flake8 ./
       - run:
           name: no missing migrations?
           command: python manage.py makemigrations --dry-run --check --no-input
@@ -176,6 +185,8 @@ jobs:
             git branch --delete --force $BRANCH || true
             git checkout -b $BRANCH
             pip-compile --upgrade --no-annotate
+            # only need backports.zoneinfo for python < 3.9 (won't build on my 3.10 here)
+            sed -i 's/\(backports.zoneinfo.*\)/\1;python_version<"3.9"/g' requirements.txt
             git add requirements.txt
             pushd mjml
             yarn upgrade --latest

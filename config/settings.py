@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import re
+
 import redis
 import sentry_sdk
 
@@ -55,6 +57,9 @@ RESERVED_NAMES = (
 EMAIL_VERIFICATION_TIME_LIMIT_HOURS = 7 * 24
 PASSWORD_RESET_TIME_LIMIT_MINUTES = 180
 ACCOUNT_DELETE_TIME_LIMIT_MINUTES = 180
+
+USERNAME_RE = re.compile(r'[a-zA-Z0-9_\-.]+')
+USERNAME_MENTION_RE = re.compile(r'@([a-zA-Z0-9_\-.]+)')
 
 # Groups
 GROUP_EDITOR_TRUST_MAX_THRESHOLD = 3
