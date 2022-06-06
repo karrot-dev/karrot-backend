@@ -1,5 +1,6 @@
 from unittest.mock import ANY, patch
 
+from django.conf import settings
 from django.test import override_settings
 from geoip2.errors import AddressNotFoundError
 from rest_framework import status
@@ -9,6 +10,15 @@ from karrot.groups.factories import GroupFactory
 from karrot.users.factories import UserFactory
 from karrot.utils.geoip import ip_to_city
 from karrot.utils.tests.fake import faker
+
+DEFAULT_SETTINGS = {
+    'SENTRY_CLIENT_DSN': settings.SENTRY_CLIENT_DSN,
+    'SENTRY_ENVIRONMENT': settings.SENTRY_ENVIRONMENT,
+    'FCM_CLIENT_API_KEY': settings.FCM_CLIENT_API_KEY,
+    'FCM_CLIENT_MESSAGING_SENDER_ID': settings.FCM_CLIENT_MESSAGING_SENDER_ID,
+    'FCM_CLIENT_PROJECT_ID': settings.FCM_CLIENT_PROJECT_ID,
+    'FCM_CLIENT_APP_ID': settings.FCM_CLIENT_APP_ID,
+}
 
 OVERRIDE_SETTINGS = {
     'SENTRY_CLIENT_DSN': faker.name(),
@@ -27,14 +37,14 @@ class TestConfigAPI(APITestCase):
         self.assertEqual(
             response.data, {
                 'fcm': {
-                    'api_key': None,
-                    'messaging_sender_id': None,
-                    'project_id': None,
-                    'app_id': None,
+                    'api_key': DEFAULT_SETTINGS['FCM_CLIENT_API_KEY'],
+                    'messaging_sender_id': DEFAULT_SETTINGS['FCM_CLIENT_MESSAGING_SENDER_ID'],
+                    'project_id': DEFAULT_SETTINGS['FCM_CLIENT_PROJECT_ID'],
+                    'app_id': DEFAULT_SETTINGS['FCM_CLIENT_APP_ID'],
                 },
                 'sentry': {
-                    'dsn': None,
-                    'environment': 'production',
+                    'dsn': DEFAULT_SETTINGS['SENTRY_CLIENT_DSN'],
+                    'environment': DEFAULT_SETTINGS['SENTRY_ENVIRONMENT'],
                 },
             }, response.data
         )
