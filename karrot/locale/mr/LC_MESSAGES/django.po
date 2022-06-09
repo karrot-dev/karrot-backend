@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.1\n"
+"Generated-By: Babel 2.10.1\n"
 "Language: mr\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
@@ -62,57 +62,57 @@ msgstr ""
 msgid "Upcoming %(activity_type)s"
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:6
-#: karrot/activities/templates/activity_notification.html.jinja2:194
+#: karrot/activities/templates/activity_notification.html.jinja2:5
+#: karrot/activities/templates/activity_notification.html.jinja2:193
 #: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s upcoming activities"
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:183
+#: karrot/activities/templates/activity_notification.html.jinja2:182
 #, python-format
 msgid "%(empty_participants_count)s/%(max_participants)s remaining"
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:198
+#: karrot/activities/templates/activity_notification.html.jinja2:197
 msgid "Tonight"
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:202
+#: karrot/activities/templates/activity_notification.html.jinja2:201
 msgid "The day is not over, there are still activities to be done!"
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:205
-#: karrot/activities/templates/activity_notification.html.jinja2:233
+#: karrot/activities/templates/activity_notification.html.jinja2:204
+#: karrot/activities/templates/activity_notification.html.jinja2:232
 msgid "You are signed up for"
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:210
-#: karrot/activities/templates/activity_notification.html.jinja2:238
+#: karrot/activities/templates/activity_notification.html.jinja2:209
+#: karrot/activities/templates/activity_notification.html.jinja2:237
 msgid "No-one is yet signed up for"
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:215
-#: karrot/activities/templates/activity_notification.html.jinja2:243
+#: karrot/activities/templates/activity_notification.html.jinja2:214
+#: karrot/activities/templates/activity_notification.html.jinja2:242
 msgid "There is still space available for"
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:228
+#: karrot/activities/templates/activity_notification.html.jinja2:227
 msgid "Tomorrow"
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:269
+#: karrot/activities/templates/activity_notification.html.jinja2:268
 msgid ""
 "You are receiving this because you are subscribed to\n"
 "                            <strong>Activity notification</strong> emails for this group."
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:271
-#: karrot/applications/templates/new_application.html.jinja2:225
-#: karrot/groups/templates/group_summary.html.jinja2:267
-#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:214
-#: karrot/issues/templates/new_conflict_resolution.html.jinja2:221
-#: karrot/offers/templates/new_offer.html.jinja2:234
+#: karrot/activities/templates/activity_notification.html.jinja2:270
+#: karrot/applications/templates/new_application.html.jinja2:224
+#: karrot/groups/templates/group_summary.html.jinja2:266
+#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:213
+#: karrot/issues/templates/new_conflict_resolution.html.jinja2:220
+#: karrot/offers/templates/new_offer.html.jinja2:233
 msgid "Click here to unsubscribe"
 msgstr ""
 
@@ -145,66 +145,66 @@ msgstr "आपण आधीच या गटाचे सदस्य आहा�
 msgid "You cannot apply to open groups"
 msgstr "आपण गट उघडण्यासाठी अर्ज करू शकत नाही"
 
-#: karrot/applications/templates/application_accepted.html.jinja2:6
-#: karrot/applications/templates/application_accepted.html.jinja2:171
+#: karrot/applications/templates/application_accepted.html.jinja2:5
+#: karrot/applications/templates/application_accepted.html.jinja2:170
 #: karrot/applications/templates/application_accepted.subject.jinja2:1
 #, python-format
 msgid "Your application to join %(group_name)s was accepted"
 msgstr "%(group_name)sमधे सामील होण्यासाठी आपला अर्ज स्वीकारला गेला"
 
-#: karrot/applications/templates/application_accepted.html.jinja2:189
-#: karrot/groups/templates/user_became_editor.html.jinja2:195
-#: karrot/groups/templates/user_inactive_in_group.html.jinja2:195
-#: karrot/groups/templates/user_lost_editor_role.html.jinja2:191
-#: karrot/groups/templates/user_removal_from_group.html.jinja2:193
+#: karrot/applications/templates/application_accepted.html.jinja2:188
+#: karrot/groups/templates/user_became_editor.html.jinja2:194
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:194
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:190
+#: karrot/groups/templates/user_removal_from_group.html.jinja2:192
 #, python-format
 msgid "Visit %(group_name)s"
 msgstr "%(group_name)sला भेटा  "
 
-#: karrot/applications/templates/application_declined.html.jinja2:6
-#: karrot/applications/templates/application_declined.html.jinja2:171
+#: karrot/applications/templates/application_declined.html.jinja2:5
+#: karrot/applications/templates/application_declined.html.jinja2:170
 #: karrot/applications/templates/application_declined.subject.jinja2:1
 #, python-format
 msgid "Your application to join %(group_name)s was declined"
 msgstr "%(group_name)sमधे सामील होण्यासाठी आपला अर्ज स्वीकारला गेला नाही "
 
-#: karrot/applications/templates/new_application.html.jinja2:6
-#: karrot/applications/templates/new_application.html.jinja2:171
+#: karrot/applications/templates/new_application.html.jinja2:5
+#: karrot/applications/templates/new_application.html.jinja2:170
 #: karrot/applications/templates/new_application.subject.jinja2:1
 #, python-format
 msgid "%(user_name)s wants to join %(group_name)s"
 msgstr ""
 
-#: karrot/applications/templates/new_application.html.jinja2:173
+#: karrot/applications/templates/new_application.html.jinja2:172
 msgid "Questions asked by your group"
 msgstr ""
 
-#: karrot/applications/templates/new_application.html.jinja2:178
+#: karrot/applications/templates/new_application.html.jinja2:177
 #, python-format
 msgid ""
 "You can edit the questions for new applications on the <a "
 "href=\"%(group_edit_url)s\">group edit page</a>."
 msgstr ""
 
-#: karrot/applications/templates/new_application.html.jinja2:180
+#: karrot/applications/templates/new_application.html.jinja2:179
 #, python-format
 msgid "Answers from %(user_name)s"
 msgstr ""
 
-#: karrot/applications/templates/new_application.html.jinja2:197
+#: karrot/applications/templates/new_application.html.jinja2:196
 msgid "View applications"
 msgstr ""
 
-#: karrot/applications/templates/new_application.html.jinja2:224
+#: karrot/applications/templates/new_application.html.jinja2:223
 msgid ""
 "You are receiving this because you are subscribed to <strong>User "
 "application</strong> emails for this group."
 msgstr ""
 
-#: karrot/applications/templates/new_application.html.jinja2:228
-#: karrot/conversations/templates/conversation_message_notification.html.jinja2:151
-#: karrot/issues/templates/new_conflict_resolution.html.jinja2:224
-#: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:220
+#: karrot/applications/templates/new_application.html.jinja2:227
+#: karrot/conversations/templates/conversation_message_notification.html.jinja2:150
+#: karrot/issues/templates/new_conflict_resolution.html.jinja2:223
+#: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:219
 #, python-format
 msgid ""
 "Reply to this email directly, <a href=\"%(conversation_url)s\">view it on "
@@ -258,40 +258,40 @@ msgstr ""
 msgid "This conversation has been closed"
 msgstr ""
 
-#: karrot/conversations/templates/conversation_message_notification.html.jinja2:150
+#: karrot/conversations/templates/conversation_message_notification.html.jinja2:149
 msgid ""
 "You are receiving this because you are subscribed to this conversation."
 msgstr ""
 
-#: karrot/conversations/templates/mention_notification.html.jinja2:6
-#: karrot/conversations/templates/mention_notification.html.jinja2:123
+#: karrot/conversations/templates/mention_notification.html.jinja2:5
+#: karrot/conversations/templates/mention_notification.html.jinja2:122
 #: karrot/conversations/templates/mention_notification.subject.jinja2:1
 #, python-format
 msgid "You were mentioned by %(user_name)s"
 msgstr ""
 
-#: karrot/conversations/templates/mention_notification.html.jinja2:156
+#: karrot/conversations/templates/mention_notification.html.jinja2:155
 msgid "You are receiving this because you were mentioned."
 msgstr ""
 
-#: karrot/conversations/templates/mention_notification.html.jinja2:157
+#: karrot/conversations/templates/mention_notification.html.jinja2:156
 #, python-format
 msgid ""
 "Reply to this email directly or <a href=\"%(conversation_url)s\">view it on "
 "%(site_name)s</a>."
 msgstr ""
 
-#: karrot/conversations/templates/thread_message_notification.html.jinja2:136
+#: karrot/conversations/templates/thread_message_notification.html.jinja2:135
 msgid "In reply to:"
 msgstr ""
 
-#: karrot/conversations/templates/thread_message_notification.html.jinja2:162
+#: karrot/conversations/templates/thread_message_notification.html.jinja2:161
 msgid ""
 "You are receiving this because you are subscribed to replies in this "
 "conversation."
 msgstr ""
 
-#: karrot/conversations/templates/thread_message_notification.html.jinja2:163
+#: karrot/conversations/templates/thread_message_notification.html.jinja2:162
 #, python-format
 msgid ""
 "Reply to this email directly, <a href=\"%(thread_url)s\">view replies on "
@@ -341,73 +341,73 @@ msgid ""
 "you wish to do here!"
 msgstr ""
 
-#: karrot/groups/templates/group_summary.html.jinja2:6
-#: karrot/groups/templates/group_summary.html.jinja2:171
+#: karrot/groups/templates/group_summary.html.jinja2:5
+#: karrot/groups/templates/group_summary.html.jinja2:170
 #, python-format
 msgid "%(group_name)s weekly summary"
 msgstr ""
 
-#: karrot/groups/templates/group_summary.html.jinja2:173
+#: karrot/groups/templates/group_summary.html.jinja2:172
 msgid ""
 "Hope you are having a good weekend! Here's a summary of what happened in "
 "your group last week"
 msgstr ""
 
-#: karrot/groups/templates/group_summary.html.jinja2:177
+#: karrot/groups/templates/group_summary.html.jinja2:176
 #, python-format
 msgid "%(activities_done_count)s activities were done"
 msgstr ""
 
-#: karrot/groups/templates/group_summary.html.jinja2:179
+#: karrot/groups/templates/group_summary.html.jinja2:178
 msgid "no activities were done"
 msgstr ""
 
-#: karrot/groups/templates/group_summary.html.jinja2:183
+#: karrot/groups/templates/group_summary.html.jinja2:182
 #, python-format
 msgid "%(activities_missed_count)s activities were missed"
 msgstr ""
 
-#: karrot/groups/templates/group_summary.html.jinja2:186
+#: karrot/groups/templates/group_summary.html.jinja2:185
 msgid "no activities were missed"
 msgstr ""
 
-#: karrot/groups/templates/group_summary.html.jinja2:192
+#: karrot/groups/templates/group_summary.html.jinja2:191
 #, python-format
 msgid "%(new_user_count)s people joined the group"
 msgstr ""
 
-#: karrot/groups/templates/group_summary.html.jinja2:200
+#: karrot/groups/templates/group_summary.html.jinja2:199
 #, python-format
 msgid "%(feedbacks_count)s feedbacks were given"
 msgstr ""
 
-#: karrot/groups/templates/group_summary.html.jinja2:202
+#: karrot/groups/templates/group_summary.html.jinja2:201
 msgid "no feedback was given"
 msgstr ""
 
-#: karrot/groups/templates/group_summary.html.jinja2:206
+#: karrot/groups/templates/group_summary.html.jinja2:205
 #, python-format
 msgid "%(sent_messages_count)s messages were sent"
 msgstr ""
 
-#: karrot/groups/templates/group_summary.html.jinja2:208
+#: karrot/groups/templates/group_summary.html.jinja2:207
 msgid "no messages were sent"
 msgstr ""
 
-#: karrot/groups/templates/group_summary.html.jinja2:215
+#: karrot/groups/templates/group_summary.html.jinja2:214
 msgid "Feedback"
 msgstr ""
 
-#: karrot/groups/templates/group_summary.html.jinja2:223
+#: karrot/groups/templates/group_summary.html.jinja2:222
 #, python-format
 msgid "%(weight)s kg from <a href=\"%(store_url)s\">%(store_name)s</a>"
 msgstr ""
 
-#: karrot/groups/templates/group_summary.html.jinja2:237
+#: karrot/groups/templates/group_summary.html.jinja2:236
 msgid "Here's what was said last week"
 msgstr ""
 
-#: karrot/groups/templates/group_summary.html.jinja2:266
+#: karrot/groups/templates/group_summary.html.jinja2:265
 msgid ""
 "You are receiving this because you are subscribed to <strong>Weekly "
 "summary</strong> emails for this group."
@@ -427,45 +427,45 @@ msgid ""
 "All email notifications are disabled by default."
 msgstr ""
 
-#: karrot/groups/templates/user_became_editor.html.jinja2:6
-#: karrot/groups/templates/user_became_editor.html.jinja2:172
+#: karrot/groups/templates/user_became_editor.html.jinja2:5
+#: karrot/groups/templates/user_became_editor.html.jinja2:171
 #: karrot/groups/templates/user_became_editor.subject.jinja2:1
 #, python-format
 msgid "You gained editing permissions in %(group_name)s!"
 msgstr ""
 
-#: karrot/groups/templates/user_became_editor.html.jinja2:175
+#: karrot/groups/templates/user_became_editor.html.jinja2:174
 msgid ""
 "You've received enough trust from fellow group members to grant you "
 "<strong>editing permissions</strong>. For example, you can now modify your "
 "group, places and activities, or create new ones."
 msgstr ""
 
-#: karrot/groups/templates/user_became_editor.html.jinja2:181
+#: karrot/groups/templates/user_became_editor.html.jinja2:180
 msgid "Use your power wisely!"
 msgstr ""
 
-#: karrot/groups/templates/user_became_editor.html.jinja2:222
-#: karrot/groups/templates/user_inactive_in_group.html.jinja2:222
-#: karrot/groups/templates/user_lost_editor_role.html.jinja2:218
+#: karrot/groups/templates/user_became_editor.html.jinja2:221
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:221
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:217
 #, python-format
 msgid ""
 "You are receiving this because you are a member of "
 "<strong>%(group_name)s</strong>."
 msgstr ""
 
-#: karrot/groups/templates/user_became_editor.html.jinja2:223
-#: karrot/groups/templates/user_inactive_in_group.html.jinja2:223
-#: karrot/groups/templates/user_lost_editor_role.html.jinja2:219
+#: karrot/groups/templates/user_became_editor.html.jinja2:222
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:222
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:218
 #, python-format
 msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
 msgstr ""
 
-#: karrot/groups/templates/user_inactive_in_group.html.jinja2:172
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:171
 msgid "Hey, we're missing you!"
 msgstr ""
 
-#: karrot/groups/templates/user_inactive_in_group.html.jinja2:175
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:174
 #, python-format
 msgid ""
 "It looks like you've not visited the\n"
@@ -473,7 +473,7 @@ msgid ""
 "                            days."
 msgstr ""
 
-#: karrot/groups/templates/user_inactive_in_group.html.jinja2:180
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:179
 msgid ""
 "We've marked you as inactive, but you can reactivate by simply visiting the group\n"
 "                            again."
@@ -484,49 +484,49 @@ msgstr ""
 msgid "%(group_name)s is missing you!"
 msgstr ""
 
-#: karrot/groups/templates/user_lost_editor_role.html.jinja2:6
-#: karrot/groups/templates/user_lost_editor_role.html.jinja2:172
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:5
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:171
 #: karrot/groups/templates/user_lost_editor_role.subject.jinja2:1
 #, python-format
 msgid "You lost editing permissions in %(group_name)s!"
 msgstr ""
 
-#: karrot/groups/templates/user_lost_editor_role.html.jinja2:175
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:174
 msgid ""
 "You don't have enough trust from fellow group members anymore to grant you "
 "<strong>editing permissions</strong>."
 msgstr ""
 
-#: karrot/groups/templates/user_removal_from_group.html.jinja2:172
+#: karrot/groups/templates/user_removal_from_group.html.jinja2:171
 msgid "Hey, we're really missing you!"
 msgstr ""
 
-#: karrot/groups/templates/user_removal_from_group.html.jinja2:175
+#: karrot/groups/templates/user_removal_from_group.html.jinja2:174
 #, python-format
 msgid ""
 "It's been %(num_months_inactive)s months since we noticed you were inactive in\n"
 "                            <a href=\"%(group_url)s\">%(group_name)s</a>."
 msgstr ""
 
-#: karrot/groups/templates/user_removal_from_group.html.jinja2:179
+#: karrot/groups/templates/user_removal_from_group.html.jinja2:178
 msgid "If you want to stay part of the group, just visit the group again!"
 msgstr ""
 
-#: karrot/groups/templates/user_removal_from_group.html.jinja2:207
+#: karrot/groups/templates/user_removal_from_group.html.jinja2:206
 #, python-format
 msgid ""
 "Otherwise we'll remove you from the group in %(num_removal_days)s\n"
 "                        days."
 msgstr ""
 
-#: karrot/groups/templates/user_removal_from_group.html.jinja2:231
+#: karrot/groups/templates/user_removal_from_group.html.jinja2:230
 #, python-format
 msgid ""
 "You are receiving this because you are a member of <strong>%(group_name)s</strong>\n"
 "                            ."
 msgstr ""
 
-#: karrot/groups/templates/user_removal_from_group.html.jinja2:233
+#: karrot/groups/templates/user_removal_from_group.html.jinja2:232
 #, python-format
 msgid ""
 "You can leave the group from the <a href=\"%(group_url)s\">group page</a>\n"
@@ -560,29 +560,29 @@ msgstr ""
 msgid "Email could not be sent"
 msgstr ""
 
-#: karrot/invitations/templates/emailinvitation.html.jinja2:6
+#: karrot/invitations/templates/emailinvitation.html.jinja2:5
 #: karrot/invitations/templates/emailinvitation.subject.jinja2:1
 #, python-format
 msgid "Invitation to join %(group_name)s"
 msgstr ""
 
-#: karrot/invitations/templates/emailinvitation.html.jinja2:171
+#: karrot/invitations/templates/emailinvitation.html.jinja2:170
 #, python-format
 msgid "You're invited to join %(group_name)s!"
 msgstr ""
 
-#: karrot/invitations/templates/emailinvitation.html.jinja2:179
+#: karrot/invitations/templates/emailinvitation.html.jinja2:178
 #, python-format
 msgid ""
 "%(invited_by_name)s invited you to join the \"%(group_name)s\" community on "
 "%(site_name)s!"
 msgstr ""
 
-#: karrot/invitations/templates/emailinvitation.html.jinja2:180
+#: karrot/invitations/templates/emailinvitation.html.jinja2:179
 msgid "If you'd like to join, please click the link below:"
 msgstr ""
 
-#: karrot/invitations/templates/emailinvitation.html.jinja2:193
+#: karrot/invitations/templates/emailinvitation.html.jinja2:192
 msgid "Follow the invitation"
 msgstr ""
 
@@ -614,66 +614,66 @@ msgstr ""
 msgid "A conflict resolution about that user has already been started"
 msgstr ""
 
-#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:6
-#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:171
+#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:5
+#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:170
 #: karrot/issues/templates/conflict_resolution_continued.subject.jinja2:1
 #, python-format
 msgid "Keep discussing about the conflict with %(affected_user_name)s"
 msgstr ""
 
-#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:172
-#: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:172
+#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:171
+#: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:171
 msgid ""
 "The result of the last voting round is to continue discussion and start "
 "another round of voting."
 msgstr ""
 
-#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:173
-#: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:173
+#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:172
+#: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:172
 #, python-format
 msgid "The new voting round ends at %(expiry_date)s."
 msgstr ""
 
-#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:186
-#: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:186
-#: karrot/issues/templates/new_conflict_resolution.html.jinja2:193
-#: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:193
+#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:185
+#: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:185
+#: karrot/issues/templates/new_conflict_resolution.html.jinja2:192
+#: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:192
 msgid "View discussion"
 msgstr ""
 
-#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:213
-#: karrot/issues/templates/new_conflict_resolution.html.jinja2:220
+#: karrot/issues/templates/conflict_resolution_continued.html.jinja2:212
+#: karrot/issues/templates/new_conflict_resolution.html.jinja2:219
 msgid ""
 "You are receiving this because you are subscribed to <strong>Conflict "
 "Resolution</strong> emails for this group."
 msgstr ""
 
-#: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:6
-#: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:171
+#: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:5
+#: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:170
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.subject.jinja2:1
 msgid "Keep discussing about the conflict with you"
 msgstr ""
 
-#: karrot/issues/templates/new_conflict_resolution.html.jinja2:6
-#: karrot/issues/templates/new_conflict_resolution.html.jinja2:171
+#: karrot/issues/templates/new_conflict_resolution.html.jinja2:5
+#: karrot/issues/templates/new_conflict_resolution.html.jinja2:170
 #: karrot/issues/templates/new_conflict_resolution.subject.jinja2:1
 #, python-format
 msgid "A conflict resolution process was started with %(affected_user_name)s"
 msgstr ""
 
-#: karrot/issues/templates/new_conflict_resolution.html.jinja2:179
-#: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:179
+#: karrot/issues/templates/new_conflict_resolution.html.jinja2:178
+#: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:178
 msgid "You can discuss the topic and give your opinion in the voting."
 msgstr ""
 
-#: karrot/issues/templates/new_conflict_resolution.html.jinja2:180
-#: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:180
+#: karrot/issues/templates/new_conflict_resolution.html.jinja2:179
+#: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:179
 #, python-format
 msgid "This voting round ends at %(expiry_date)s."
 msgstr ""
 
-#: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:6
-#: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:171
+#: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:5
+#: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:170
 #: karrot/issues/templates/new_conflict_resolution_affected_user.subject.jinja2:1
 msgid "A conflict resolution process was started with you"
 msgstr ""
@@ -686,28 +686,28 @@ msgstr ""
 msgid "You can only archive an active offer"
 msgstr ""
 
-#: karrot/offers/templates/new_offer.html.jinja2:6
+#: karrot/offers/templates/new_offer.html.jinja2:5
 #: karrot/offers/templates/new_offer.subject.jinja2:1
 #, python-format
 msgid "%(user_name)s created a new offer %(offer_name)s"
 msgstr ""
 
-#: karrot/offers/templates/new_offer.html.jinja2:189
+#: karrot/offers/templates/new_offer.html.jinja2:188
 #, python-format
 msgid "%(user_name)s created a new offer"
 msgstr ""
 
-#: karrot/offers/templates/new_offer.html.jinja2:206
+#: karrot/offers/templates/new_offer.html.jinja2:205
 msgid "View offer"
 msgstr ""
 
-#: karrot/offers/templates/new_offer.html.jinja2:233
+#: karrot/offers/templates/new_offer.html.jinja2:232
 msgid ""
 "You are receiving this because you are subscribed to <strong>New "
 "Offer</strong> emails for this group."
 msgstr ""
 
-#: karrot/offers/templates/new_offer.html.jinja2:237
+#: karrot/offers/templates/new_offer.html.jinja2:236
 #, python-format
 msgid ""
 "Reply to this email directly, <a href=\"%(offer_url)s\">view it on "
@@ -785,78 +785,78 @@ msgstr ""
 msgid "Unknown e-mail address"
 msgstr ""
 
-#: karrot/users/templates/accountdelete_request.html.jinja2:6
+#: karrot/users/templates/accountdelete_request.html.jinja2:5
 #: karrot/users/templates/accountdelete_request.subject.jinja2:1
 msgid "Request to delete your account"
 msgstr ""
 
-#: karrot/users/templates/accountdelete_request.html.jinja2:171
+#: karrot/users/templates/accountdelete_request.html.jinja2:170
 #, python-format
 msgid "You requested to delete your account on %(site_name)s!"
 msgstr ""
 
-#: karrot/users/templates/accountdelete_request.html.jinja2:179
+#: karrot/users/templates/accountdelete_request.html.jinja2:178
 msgid ""
 "We're sad to hear that you want to delete your account, could we have done "
 "anything better?"
 msgstr ""
 
-#: karrot/users/templates/accountdelete_request.html.jinja2:180
+#: karrot/users/templates/accountdelete_request.html.jinja2:179
 msgid "Anyhow, you can finish the deletion by clicking the link below:"
 msgstr ""
 
-#: karrot/users/templates/accountdelete_request.html.jinja2:193
+#: karrot/users/templates/accountdelete_request.html.jinja2:192
 msgid "Delete your account"
 msgstr ""
 
-#: karrot/users/templates/accountdelete_request.html.jinja2:206
+#: karrot/users/templates/accountdelete_request.html.jinja2:205
 msgid "If you changed your mind, you can simply ignore this e-mail."
 msgstr ""
 
-#: karrot/users/templates/accountdelete_success.html.jinja2:6
+#: karrot/users/templates/accountdelete_success.html.jinja2:5
 #: karrot/users/templates/accountdelete_success.subject.jinja2:1
 msgid "Account successfully deleted"
 msgstr ""
 
-#: karrot/users/templates/accountdelete_success.html.jinja2:171
+#: karrot/users/templates/accountdelete_success.html.jinja2:170
 #, python-format
 msgid "Your account on %(site_name)s was successfully deleted!"
 msgstr ""
 
-#: karrot/users/templates/accountdelete_success.html.jinja2:179
+#: karrot/users/templates/accountdelete_success.html.jinja2:178
 msgid ""
 "We're still sad that you saw it necessary to delete your account, but we're "
 "happy to tell you that your request was met without any problems."
 msgstr ""
 
-#: karrot/users/templates/accountdelete_success.html.jinja2:180
+#: karrot/users/templates/accountdelete_success.html.jinja2:179
 msgid "Goodbye!"
 msgstr ""
 
-#: karrot/users/templates/changemail_request.html.jinja2:6
-#: karrot/users/templates/signup.html.jinja2:6
+#: karrot/users/templates/changemail_request.html.jinja2:5
+#: karrot/users/templates/signup.html.jinja2:5
 msgid "Please verify your email"
 msgstr ""
 
-#: karrot/users/templates/changemail_request.html.jinja2:172
+#: karrot/users/templates/changemail_request.html.jinja2:171
 #, python-format
 msgid ""
 "You requested to change your email address from %(old_email)s to "
 "%(new_email)s"
 msgstr ""
 
-#: karrot/users/templates/changemail_request.html.jinja2:183
-#: karrot/users/templates/signup.html.jinja2:179
+#: karrot/users/templates/changemail_request.html.jinja2:182
+#: karrot/users/templates/signup.html.jinja2:178
 msgid "Please click the following link to confirm your email:"
 msgstr ""
 
-#: karrot/users/templates/changemail_request.html.jinja2:196
-#: karrot/users/templates/signup.html.jinja2:192
+#: karrot/users/templates/changemail_request.html.jinja2:195
+#: karrot/users/templates/signup.html.jinja2:191
 msgid "Verify your email address"
 msgstr ""
 
-#: karrot/users/templates/changemail_request.html.jinja2:209
-#: karrot/users/templates/passwordreset_request.html.jinja2:206
+#: karrot/users/templates/changemail_request.html.jinja2:208
+#: karrot/users/templates/passwordreset_request.html.jinja2:205
 msgid ""
 "If you did not request this change, you can safely ignore this message."
 msgstr ""
@@ -866,16 +866,16 @@ msgstr ""
 msgid "Please verify your email address"
 msgstr ""
 
-#: karrot/users/templates/changemail_success.html.jinja2:6
+#: karrot/users/templates/changemail_success.html.jinja2:5
 msgid "Your email address changed"
 msgstr ""
 
-#: karrot/users/templates/changemail_success.html.jinja2:171
+#: karrot/users/templates/changemail_success.html.jinja2:170
 #, python-format
 msgid "Your email address on %(site_name)s changed!"
 msgstr ""
 
-#: karrot/users/templates/changemail_success.html.jinja2:179
+#: karrot/users/templates/changemail_success.html.jinja2:178
 #, python-format
 msgid "Your new email address is %(new_email)s."
 msgstr ""
@@ -884,48 +884,48 @@ msgstr ""
 msgid "Your email address changed!"
 msgstr ""
 
-#: karrot/users/templates/passwordreset_request.html.jinja2:6
+#: karrot/users/templates/passwordreset_request.html.jinja2:5
 #: karrot/users/templates/passwordreset_request.subject.jinja2:1
 msgid "Request to reset your password"
 msgstr ""
 
-#: karrot/users/templates/passwordreset_request.html.jinja2:171
+#: karrot/users/templates/passwordreset_request.html.jinja2:170
 #, python-format
 msgid "You requested to reset your password for %(site_name)s"
 msgstr ""
 
-#: karrot/users/templates/passwordreset_request.html.jinja2:179
+#: karrot/users/templates/passwordreset_request.html.jinja2:178
 msgid "Did you forget your password? No problem!"
 msgstr ""
 
-#: karrot/users/templates/passwordreset_request.html.jinja2:180
+#: karrot/users/templates/passwordreset_request.html.jinja2:179
 msgid "Click this link to change it:"
 msgstr ""
 
-#: karrot/users/templates/passwordreset_request.html.jinja2:193
+#: karrot/users/templates/passwordreset_request.html.jinja2:192
 msgid "Change password"
 msgstr ""
 
-#: karrot/users/templates/passwordreset_success.html.jinja2:6
+#: karrot/users/templates/passwordreset_success.html.jinja2:5
 #: karrot/users/templates/passwordreset_success.subject.jinja2:1
 msgid "New password set!"
 msgstr ""
 
-#: karrot/users/templates/passwordreset_success.html.jinja2:171
+#: karrot/users/templates/passwordreset_success.html.jinja2:170
 #, python-format
 msgid "You set a new password for %(site_name)s"
 msgstr ""
 
-#: karrot/users/templates/passwordreset_success.html.jinja2:179
+#: karrot/users/templates/passwordreset_success.html.jinja2:178
 msgid "Your password has been successfully changed!"
 msgstr ""
 
-#: karrot/users/templates/signup.html.jinja2:171
+#: karrot/users/templates/signup.html.jinja2:170
 #, python-format
 msgid "Thank you for signing up to %(site_name)s"
 msgstr ""
 
-#: karrot/users/templates/signup.html.jinja2:205
+#: karrot/users/templates/signup.html.jinja2:204
 msgid ""
 "You can safely ignore this message if it wasn't you who signed up at our "
 "service using this email address."
