@@ -169,17 +169,6 @@ class DateTimeRangeField(serializers.ListField):
         return CustomDateTimeTZRange(lower, upper)
 
 
-class ParticipantTypeInfoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ParticipantType
-        fields = [
-            'id',
-            'description',
-            'max_participants',
-            'role',
-        ]
-
-
 class ActivityParticipantSerializer(serializers.ModelSerializer):
     class Meta:
         model = ActivityParticipant
@@ -193,8 +182,6 @@ class ActivityParticipantSerializer(serializers.ModelSerializer):
             'participant_type',
             'created_at',
         ]
-
-    participant_type = ParticipantTypeInfoSerializer()
 
 
 class ParticipantTypeSerializer(serializers.ModelSerializer):

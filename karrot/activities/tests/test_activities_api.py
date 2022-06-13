@@ -638,21 +638,11 @@ class TestActivitiesWithParticipantTypeAPI(APITestCase):
         self.assertEqual(
             response.data['participants'], [{
                 'user': self.member.id,
-                'participant_type': {
-                    'id': ANY,
-                    'role': GROUP_MEMBER,
-                    'max_participants': ANY,
-                    'description': '',
-                },
+                'participant_type': ANY,
                 'created_at': ANY,
             }, {
                 'user': self.approved_member.id,
-                'participant_type': {
-                    'id': ANY,
-                    'role': APPROVED,
-                    'max_participants': ANY,
-                    'description': '',
-                },
+                'participant_type': ANY,
                 'created_at': ANY,
             }]
         )
