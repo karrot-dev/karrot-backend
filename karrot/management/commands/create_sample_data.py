@@ -131,7 +131,7 @@ class Command(BaseCommand):
 
             # make editor
             membership = GroupMembership.objects.get(user=user, group_id=group)
-            membership.roles.append(GROUP_EDITOR)
+            membership.add_roles([GROUP_EDITOR])
             membership.save()
 
             print('joined group {}'.format(group))
