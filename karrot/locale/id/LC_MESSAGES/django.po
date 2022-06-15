@@ -3,28 +3,19 @@
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
 # 
-# Translators:
-# Janina Abels <hopefullyunique@gmx.de>, 2019
-# Lucas JARLAUD <lucas.jarlaud@gmail.com>, 2019
-# taistadam <real.j.tais@gmail.com>, 2019
-# Tilmann Becker <tilmann.becker+github@gmail.com>, 2019
-# Sandro Eiler <sandro.eiler@posteo.de>, 2020
-# Clément Chedmail <clement.chedmail@laposte.net>, 2020
-# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
-"Last-Translator: Clément Chedmail <clement.chedmail@laposte.net>, 2020\n"
-"Language-Team: French (https://www.transifex.com/yunity-1/teams/68631/fr/)\n"
+"Language-Team: Indonesian (https://www.transifex.com/yunity-1/teams/68631/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.10.1\n"
-"Language: fr\n"
-"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+"Language: id\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: karrot/activities/activity_types.py:5
 msgid "Meeting"
@@ -52,15 +43,15 @@ msgstr ""
 
 #: karrot/activities/serializers.py:139
 msgid "Must be a list"
-msgstr "Doit être une liste"
+msgstr ""
 
 #: karrot/activities/serializers.py:140
 msgid "Must be a list with one or two values"
-msgstr "Doit être une liste avec une ou deux valeurs"
+msgstr ""
 
 #: karrot/activities/serializers.py:141
 msgid "Must pass start value"
-msgstr "Doit dépasser la valeur de départ"
+msgstr ""
 
 #: karrot/activities/tasks.py:71
 #, python-format
@@ -81,7 +72,7 @@ msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:197
 msgid "Tonight"
-msgstr "Ce soir"
+msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:201
 msgid "The day is not over, there are still activities to be done!"
@@ -90,21 +81,21 @@ msgstr ""
 #: karrot/activities/templates/activity_notification.html.jinja2:204
 #: karrot/activities/templates/activity_notification.html.jinja2:232
 msgid "You are signed up for"
-msgstr "Vous vous êtes inscrit pour"
+msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:209
 #: karrot/activities/templates/activity_notification.html.jinja2:237
 msgid "No-one is yet signed up for"
-msgstr "Personne est pour le moment inscrit pour "
+msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:214
 #: karrot/activities/templates/activity_notification.html.jinja2:242
 msgid "There is still space available for"
-msgstr "Il y a toujours de l'espace disponible pour"
+msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:227
 msgid "Tomorrow"
-msgstr "Demain"
+msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:268
 msgid ""
@@ -119,20 +110,20 @@ msgstr ""
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:220
 #: karrot/offers/templates/new_offer.html.jinja2:233
 msgid "Click here to unsubscribe"
-msgstr "Clique ici pour te désabonner"
+msgstr ""
 
 #: karrot/applications/api.py:27
 msgid "You need to have a verified email address"
-msgstr "Ton adresse email doit être vérifiée "
+msgstr ""
 
 #: karrot/applications/api.py:36 karrot/groups/api.py:52
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
 msgid "You need to be a group editor"
-msgstr "Tu dois être éditeur du groupe"
+msgstr ""
 
 #: karrot/applications/api.py:44
 msgid "You need to be the applicant"
-msgstr "Il faut que ce soit toi qui postule"
+msgstr ""
 
 #: karrot/applications/api.py:52
 msgid "Application is not pending anymore"
@@ -140,22 +131,22 @@ msgstr ""
 
 #: karrot/applications/serializers.py:36
 msgid "Application is already pending"
-msgstr "Ta candidature est déjà en attente"
+msgstr ""
 
 #: karrot/applications/serializers.py:41
 msgid "You are already member of the group"
-msgstr "Tu es déjà membre de ce groupe"
+msgstr ""
 
 #: karrot/applications/serializers.py:43
 msgid "You cannot apply to open groups"
-msgstr "Tu ne peux pas postuler aux groupes ouverts"
+msgstr ""
 
 #: karrot/applications/templates/application_accepted.html.jinja2:5
 #: karrot/applications/templates/application_accepted.html.jinja2:170
 #: karrot/applications/templates/application_accepted.subject.jinja2:1
 #, python-format
 msgid "Your application to join %(group_name)s was accepted"
-msgstr "Ta demande pour rejoindre %(group_name)s a été acceptée"
+msgstr ""
 
 #: karrot/applications/templates/application_accepted.html.jinja2:188
 #: karrot/groups/templates/user_became_editor.html.jinja2:194
@@ -164,25 +155,25 @@ msgstr "Ta demande pour rejoindre %(group_name)s a été acceptée"
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:192
 #, python-format
 msgid "Visit %(group_name)s"
-msgstr "Visiter %(group_name)s"
+msgstr ""
 
 #: karrot/applications/templates/application_declined.html.jinja2:5
 #: karrot/applications/templates/application_declined.html.jinja2:170
 #: karrot/applications/templates/application_declined.subject.jinja2:1
 #, python-format
 msgid "Your application to join %(group_name)s was declined"
-msgstr "Ta demande pour rejoindre %(group_name)s a été refusée"
+msgstr ""
 
 #: karrot/applications/templates/new_application.html.jinja2:5
 #: karrot/applications/templates/new_application.html.jinja2:170
 #: karrot/applications/templates/new_application.subject.jinja2:1
 #, python-format
 msgid "%(user_name)s wants to join %(group_name)s"
-msgstr "%(user_name)s veut rejoindre %(group_name)s"
+msgstr ""
 
 #: karrot/applications/templates/new_application.html.jinja2:172
 msgid "Questions asked by your group"
-msgstr "Questions posées par ton groupe"
+msgstr ""
 
 #: karrot/applications/templates/new_application.html.jinja2:177
 #, python-format
@@ -190,25 +181,21 @@ msgid ""
 "You can edit the questions for new applications on the <a "
 "href=\"%(group_edit_url)s\">group edit page</a>."
 msgstr ""
-"TU peux éditer les questions pour les nouvelles demandes d'ajout sur le <a "
-"href=\"%(group_edit_url)s\">la page d'édition du groupe</a>"
 
 #: karrot/applications/templates/new_application.html.jinja2:179
 #, python-format
 msgid "Answers from %(user_name)s"
-msgstr "Réponses de %(user_name)s"
+msgstr ""
 
 #: karrot/applications/templates/new_application.html.jinja2:196
 msgid "View applications"
-msgstr "Voir les demandes d'ajout"
+msgstr ""
 
 #: karrot/applications/templates/new_application.html.jinja2:223
 msgid ""
 "You are receiving this because you are subscribed to <strong>User "
 "application</strong> emails for this group."
 msgstr ""
-"Tu a reçu ceci car tu es enregistré à <strong>demande d'ajout "
-"d'utilisateur</strong> mails pour ce groupe."
 
 #: karrot/applications/templates/new_application.html.jinja2:227
 #: karrot/conversations/templates/conversation_message_notification.html.jinja2:150
@@ -219,65 +206,58 @@ msgid ""
 "Reply to this email directly, <a href=\"%(conversation_url)s\">view it on "
 "%(site_name)s</a>, or <a href=\"%(mute_url)s\">mute the conversation</a>."
 msgstr ""
-"Réponds à ce mail directement, <a href=\"%(conversation_url)s\"> regarde le "
-"sur%(site_name)s</a>, ou <a href=\"%(mute_url)s\"> rend muet la conversation"
-" </a>."
 
 #: karrot/conversations/api.py:65 karrot/conversations/api.py:246
 #: karrot/conversations/api.py:429 karrot/conversations/serializers.py:187
 msgid "You are not in this conversation"
-msgstr "Tu n'es pas dans cette conversation"
+msgstr ""
 
 #: karrot/conversations/api.py:74
 msgid "You are not the author of this message"
-msgstr "Tu n'es pas l'auteur de ce message"
+msgstr ""
 
 #: karrot/conversations/api.py:83
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
 msgstr ""
-"Tu ne peux pas éditer un message plus de %(days_number)s jours après sa "
-"création."
 
 #: karrot/conversations/api.py:357
 msgid "Must be first in thread"
-msgstr "Doit être le premier dans le fil de discussions"
+msgstr ""
 
 #: karrot/conversations/api.py:360
 msgid "You are not a participant in this thread"
-msgstr "Tu n'es pas participant à ce fil de discussion."
+msgstr ""
 
 #: karrot/conversations/emails.py:263
 #, python-format
 msgid "New message in your application to %(group_name)s"
-msgstr "Nouveau message au sujet de votre demande d'ajout à %(group_name)s"
+msgstr ""
 
 #: karrot/conversations/emails.py:267
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr ""
-"Nouveau message pour demande d'ajout de %(user_name)s pour %(group_name)s"
 
 #: karrot/conversations/emails.py:289
 #, python-format
 msgid "New message in conflict resolution in %(group_name)s"
 msgstr ""
-"Nouveau message au sujet de la résolution de  conflit dans%(group_name)s"
 
 #: karrot/conversations/emails.py:304
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
-msgstr "Nouveau message pour offre %(offer_name)s dans %(group_name)s"
+msgstr ""
 
 #: karrot/conversations/serializers.py:189
 msgid "This conversation has been closed"
-msgstr "Cette conversation a été fermée"
+msgstr ""
 
 #: karrot/conversations/templates/conversation_message_notification.html.jinja2:149
 msgid ""
 "You are receiving this because you are subscribed to this conversation."
-msgstr "Tu reçois ceci car tu es enregistré sur cette conversation."
+msgstr ""
 
 #: karrot/conversations/templates/mention_notification.html.jinja2:5
 #: karrot/conversations/templates/mention_notification.html.jinja2:122
@@ -299,14 +279,13 @@ msgstr ""
 
 #: karrot/conversations/templates/thread_message_notification.html.jinja2:135
 msgid "In reply to:"
-msgstr "En réponse à : "
+msgstr ""
 
 #: karrot/conversations/templates/thread_message_notification.html.jinja2:161
 msgid ""
 "You are receiving this because you are subscribed to replies in this "
 "conversation."
 msgstr ""
-"Tu reçois ceci car tu es enregistré aux réponses à cette conversation "
 
 #: karrot/conversations/templates/thread_message_notification.html.jinja2:162
 #, python-format
@@ -314,45 +293,42 @@ msgid ""
 "Reply to this email directly, <a href=\"%(thread_url)s\">view replies on "
 "%(site_name)s</a>, or <a href=\"%(mute_url)s\">mute further replies</a>."
 msgstr ""
-"Réponds à ce mail directement, <a href=\"%(thread_url)s\">regarde les "
-"réponses sur%(site_name)s</a>, ou <a href=\"%(mute_url)s\">rend muette les "
-"réponses suivantes</a>."
 
 #: karrot/groups/api.py:31
 msgid "You are already a member."
-msgstr "Tu est déjà membre du groupe."
+msgstr ""
 
 #: karrot/groups/api.py:38
 msgid "You can only join open groups."
-msgstr "Tu peux rejoindre uniquement les groupes ouverts."
+msgstr ""
 
 #: karrot/groups/api.py:45
 msgid "You cannot give trust to yourself"
-msgstr "Tu ne peux pas donner ta confiance à toi-même"
+msgstr ""
 
 #: karrot/groups/api.py:210
 msgid "You already gave trust to this user"
-msgstr "Tu as déjà donné ta confiance à cette utilisateur "
+msgstr ""
 
 #: karrot/groups/serializers.py:33
 msgid "Unknown timezone"
-msgstr "Fuseau horaire inconnu"
+msgstr ""
 
 #: karrot/groups/serializers.py:41
 msgid "Playground"
-msgstr "Terrain de jeux"
+msgstr ""
 
 #: karrot/groups/serializers.py:150 karrot/groups/serializers.py:249
 msgid "You cannot manage agreements"
-msgstr "Tu ne peux pas gérer les agréements"
+msgstr ""
 
 #: karrot/groups/serializers.py:152
 msgid "Agreement is not for this group"
-msgstr "L’agrément n'est pas pour ce groupe "
+msgstr ""
 
 #: karrot/groups/serializers.py:247
 msgid "You are not in this group"
-msgstr "Tu n'es pas dans ce groupe"
+msgstr ""
 
 #: karrot/groups/templates/default_application_questions.nopreview.jinja2:1
 msgid ""
@@ -360,23 +336,18 @@ msgid ""
 "and your motivation. Please tell us how you got to know about us and what "
 "you wish to do here!"
 msgstr ""
-"Salut à toi ! Avant que tu puisses rejoindre notre groupe nous souhaiterions"
-" en savoir un peux plus à propos de toi et de ta motivation. S'il te plaît "
-"dis nous comment tu nous as connuet ce que tu souhaiterai faire ici !"
 
 #: karrot/groups/templates/group_summary.html.jinja2:5
 #: karrot/groups/templates/group_summary.html.jinja2:170
 #, python-format
 msgid "%(group_name)s weekly summary"
-msgstr "%(group_name)s résumé hebdomadaire"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:172
 msgid ""
 "Hope you are having a good weekend! Here's a summary of what happened in "
 "your group last week"
 msgstr ""
-"J'espère que tu as passé un bon week-end ! Tu trouveras ici un résumé de ce "
-"qui s'est  passé dans ton groupe au cours de la dernière semaine"
 
 #: karrot/groups/templates/group_summary.html.jinja2:176
 #, python-format
@@ -399,7 +370,7 @@ msgstr ""
 #: karrot/groups/templates/group_summary.html.jinja2:191
 #, python-format
 msgid "%(new_user_count)s people joined the group"
-msgstr "%(new_user_count)s personnes ont rejoint le groupe"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:199
 #, python-format
@@ -408,16 +379,16 @@ msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:201
 msgid "no feedback was given"
-msgstr "aucun retour d'information n'a été donné"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:205
 #, python-format
 msgid "%(sent_messages_count)s messages were sent"
-msgstr "%(sent_messages_count)s messages ont été evoyés"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:207
 msgid "no messages were sent"
-msgstr "aucun messages a été envoyés"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:214
 msgid "Feedback"
@@ -426,24 +397,22 @@ msgstr ""
 #: karrot/groups/templates/group_summary.html.jinja2:222
 #, python-format
 msgid "%(weight)s kg from <a href=\"%(store_url)s\">%(store_name)s</a>"
-msgstr "%(weight)s Kg de <a href=\"%(store_url)s\">%(store_name)s</a>"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:236
 msgid "Here's what was said last week"
-msgstr "Tu trouveras ici ce qui a été dit la semaine dernière"
+msgstr ""
 
 #: karrot/groups/templates/group_summary.html.jinja2:265
 msgid ""
 "You are receiving this because you are subscribed to <strong>Weekly "
 "summary</strong> emails for this group."
 msgstr ""
-"Tu reçois ça car tu as souscrit à <strong>résumé hebdomadaire</strong>mails "
-"pour ce groupe."
 
 #: karrot/groups/templates/group_summary.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s updates for the week of %(day)s"
-msgstr "%(group_name)smises à jours pour la semaine du %(day)s"
+msgstr ""
 
 #: karrot/groups/templates/playground_public_description.nopreview.jinja2:1
 msgid ""
@@ -453,18 +422,13 @@ msgid ""
 "\n"
 "All email notifications are disabled by default."
 msgstr ""
-"Bienvenu à **karrot**\n"
-"\n"
-"Entre, clique aux alentours et fais  tout ce que bon te semble :carrot: Pas de soucis, rien peux être cassé ici !\n"
-"\n"
-"Toutes les notifications mails sont désactivées par défaut.  "
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:5
 #: karrot/groups/templates/user_became_editor.html.jinja2:171
 #: karrot/groups/templates/user_became_editor.subject.jinja2:1
 #, python-format
 msgid "You gained editing permissions in %(group_name)s!"
-msgstr "Tu a obtenu les permissions d'éditer dans %(group_name)s!"
+msgstr ""
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:174
 msgid ""
@@ -475,7 +439,7 @@ msgstr ""
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:180
 msgid "Use your power wisely!"
-msgstr "Utilise ton pouvoir à bon escient !"
+msgstr ""
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:221
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:221
@@ -485,7 +449,6 @@ msgid ""
 "You are receiving this because you are a member of "
 "<strong>%(group_name)s</strong>."
 msgstr ""
-"Tu as reçu ceci car tu es un membre de <strong>%(group_name)s</strong>."
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:222
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:222
@@ -493,12 +456,10 @@ msgstr ""
 #, python-format
 msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
 msgstr ""
-"Tu peux quitter le groupe depuis le<a href=\"%(group_url)s\">page du "
-"groupe</a>."
 
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:171
 msgid "Hey, we're missing you!"
-msgstr "Salut, tu nous as manqué !"
+msgstr ""
 
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:174
 #, python-format
@@ -507,22 +468,17 @@ msgid ""
 "                            <a href=\"%(group_url)s\">%(group_name)s</a> group for over %(num_days_inactive)s\n"
 "                            days."
 msgstr ""
-"On dirait que tu n'a pas visité le \n"
-"                           <a href=\"%(group_url)s\">%(group_name)s</a> groupe pendant plus de %(num_days_inactive)s\n"
-"                            jours."
 
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:179
 msgid ""
 "We've marked you as inactive, but you can reactivate by simply visiting the group\n"
 "                            again."
 msgstr ""
-"Nous t'avons marqué ton profil comme inactif, mais tu peux le réactiver simplement en visitant le groupe\n"
-"à nouveau"
 
 #: karrot/groups/templates/user_inactive_in_group.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s is missing you!"
-msgstr "Tu as manqué à %(group_name)s!"
+msgstr ""
 
 #: karrot/groups/templates/user_lost_editor_role.html.jinja2:5
 #: karrot/groups/templates/user_lost_editor_role.html.jinja2:171
@@ -539,7 +495,7 @@ msgstr ""
 
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:171
 msgid "Hey, we're really missing you!"
-msgstr "Salut, tu nous a vraiment manqué !"
+msgstr ""
 
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:174
 #, python-format
@@ -547,13 +503,10 @@ msgid ""
 "It's been %(num_months_inactive)s months since we noticed you were inactive in\n"
 "                            <a href=\"%(group_url)s\">%(group_name)s</a>."
 msgstr ""
-"ça fait depuis %(num_months_inactive)s mois que nous t'avons notifié que tu était inactif dans\n"
-"                              <a href=\"%(group_url)s\">%(group_name)s</a>."
 
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:178
 msgid "If you want to stay part of the group, just visit the group again!"
 msgstr ""
-"Si tu veux rester un membre du groupe, juste visite le groupe à nouveau !"
 
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:206
 #, python-format
@@ -561,8 +514,6 @@ msgid ""
 "Otherwise we'll remove you from the group in %(num_removal_days)s\n"
 "                        days."
 msgstr ""
-"Sinon nous t'enlèverons du groupe dans %(num_removal_days)s\n"
-"                        jours."
 
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:230
 #, python-format
@@ -570,8 +521,6 @@ msgid ""
 "You are receiving this because you are a member of <strong>%(group_name)s</strong>\n"
 "                            ."
 msgstr ""
-"Tu reçois ceci car tu es membre de <strong>%(group_name)s</strong>\n"
-"."
 
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:232
 #, python-format
@@ -579,48 +528,44 @@ msgid ""
 "You can leave the group from the <a href=\"%(group_url)s\">group page</a>\n"
 "                            ."
 msgstr ""
-"Tu peux quitter le groupe depuis le <a href=\"%(group_url)s\">page du groupe</a>\n"
-"."
 
 #: karrot/groups/templates/user_removal_from_group.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s is really missing you!"
-msgstr "Tu as vraiment manqué à %(group_name)s !"
+msgstr ""
 
 #: karrot/invitations/api.py:27
 msgid ""
 "Invitation to this email address was sent recently, wait before resending"
 msgstr ""
-"Une invitation à cette adresse e-mail t'as été envoyé récemment, attends un "
-"peu avant de la renvoyer."
 
 #: karrot/invitations/serializers.py:20
 msgid "An invitation has already been sent to this e-mail address"
-msgstr "Une invitation a déjà été envoyée à cette adresse e-mail"
+msgstr ""
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
 #: karrot/offers/serializers.py:91
 msgid "You are not a member of this group."
-msgstr "Tu n'est pas membre de ce groupe."
+msgstr ""
 
 #: karrot/invitations/serializers.py:33
 msgid "User is already member of group"
-msgstr "L'utilisateur est déjà membre du groupe."
+msgstr ""
 
 #: karrot/invitations/serializers.py:41
 msgid "Email could not be sent"
-msgstr "Le mail pourrai ne pas être envoyé"
+msgstr ""
 
 #: karrot/invitations/templates/emailinvitation.html.jinja2:5
 #: karrot/invitations/templates/emailinvitation.subject.jinja2:1
 #, python-format
 msgid "Invitation to join %(group_name)s"
-msgstr "Invitation de joinde %(group_name)s"
+msgstr ""
 
 #: karrot/invitations/templates/emailinvitation.html.jinja2:170
 #, python-format
 msgid "You're invited to join %(group_name)s!"
-msgstr "Tu es invité à rejoindre %(group_name)s !"
+msgstr ""
 
 #: karrot/invitations/templates/emailinvitation.html.jinja2:178
 #, python-format
@@ -628,46 +573,42 @@ msgid ""
 "%(invited_by_name)s invited you to join the \"%(group_name)s\" community on "
 "%(site_name)s!"
 msgstr ""
-"%(invited_by_name)s vous a invité à  rejoindre le \"%(group_name)s\" "
-"communauté de %(site_name)s! "
 
 #: karrot/invitations/templates/emailinvitation.html.jinja2:179
 msgid "If you'd like to join, please click the link below:"
 msgstr ""
-"Si tu souhaites le rejoindre, merci de cliquer sur le lien ci-dessous:"
 
 #: karrot/invitations/templates/emailinvitation.html.jinja2:192
 msgid "Follow the invitation"
-msgstr "Suivre l'invitation"
+msgstr ""
 
 #: karrot/issues/api.py:17
 msgid "Can only modify vote for ongoing issues"
-msgstr "Ne peut modifier le vote que pour les problèmes en cours"
+msgstr ""
 
 #: karrot/issues/serializers.py:13
 msgid "You need to provide a score for all options"
-msgstr "Tu dois fournir un score pour toutes les options."
+msgstr ""
 
 #: karrot/issues/serializers.py:39
 msgid "Provided option is not part of this voting"
-msgstr "L'option suivante n'est pas disponible pour ce vote"
+msgstr ""
 
 #: karrot/issues/serializers.py:44
 msgid "Provided score is outside of allowed range"
-msgstr "Le score suivant est en dehors des valeurs permises"
+msgstr ""
 
 #: karrot/issues/serializers.py:132
 msgid "Topic cannot be empty"
-msgstr "Ce sujet ne peut pas être vide"
+msgstr ""
 
 #: karrot/issues/serializers.py:139
 msgid "Affected user is not part of that group"
-msgstr "L'utilisateur concerné n'est pas membre de ce groupe"
+msgstr ""
 
 #: karrot/issues/serializers.py:141
 msgid "A conflict resolution about that user has already been started"
 msgstr ""
-"Une résolution de conflit concernant cet utilisateur a déjà été démarrée"
 
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:5
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:170
@@ -675,7 +616,6 @@ msgstr ""
 #, python-format
 msgid "Keep discussing about the conflict with %(affected_user_name)s"
 msgstr ""
-"Continues à discuter à propos de ce conflit avec%(affected_user_name)s "
 
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:171
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:171
@@ -683,21 +623,19 @@ msgid ""
 "The result of the last voting round is to continue discussion and start "
 "another round of voting."
 msgstr ""
-"Le résultat du dernier tour de vote est de continuer la discussion et de "
-"démarrer un autre tour de vote."
 
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:172
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:172
 #, python-format
 msgid "The new voting round ends at %(expiry_date)s."
-msgstr "La nouveau tour de vote se termine à %(expiry_date)s"
+msgstr ""
 
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:185
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:185
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:192
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:192
 msgid "View discussion"
-msgstr "Regarder la discussion"
+msgstr ""
 
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:212
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:219
@@ -705,14 +643,12 @@ msgid ""
 "You are receiving this because you are subscribed to <strong>Conflict "
 "Resolution</strong> emails for this group."
 msgstr ""
-"Tu reçois ceci car tu as souscrit à <strong>résolution de "
-"conflit</strong>mails pour ce groupe."
 
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:5
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:170
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.subject.jinja2:1
 msgid "Keep discussing about the conflict with you"
-msgstr "Continue à discuter à propos du conflit avec vous"
+msgstr ""
 
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:5
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:170
@@ -720,56 +656,52 @@ msgstr "Continue à discuter à propos du conflit avec vous"
 #, python-format
 msgid "A conflict resolution process was started with %(affected_user_name)s"
 msgstr ""
-"Un processus de résolution des conflits a été lancé "
-"avec%(affected_user_name)s"
 
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:178
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:178
 msgid "You can discuss the topic and give your opinion in the voting."
-msgstr "Tu peux discuter du sujet et donner ton opinion dans le vote."
+msgstr ""
 
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:179
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:179
 #, python-format
 msgid "This voting round ends at %(expiry_date)s."
-msgstr "Ce tour de vote se termine le %(expiry_date)s."
+msgstr ""
 
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:5
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:170
 #: karrot/issues/templates/new_conflict_resolution_affected_user.subject.jinja2:1
 msgid "A conflict resolution process was started with you"
-msgstr "Un processus de résolution des conflits a été lancé avec vous"
+msgstr ""
 
 #: karrot/offers/api.py:31
 msgid "You are not the owner of this offer"
-msgstr "Vous n'êtes pas propriétaire de cette proposition"
+msgstr ""
 
 #: karrot/offers/api.py:93
 msgid "You can only archive an active offer"
-msgstr "Vous ne pouvez archiver qu'une proposition active"
+msgstr ""
 
 #: karrot/offers/templates/new_offer.html.jinja2:5
 #: karrot/offers/templates/new_offer.subject.jinja2:1
 #, python-format
 msgid "%(user_name)s created a new offer %(offer_name)s"
-msgstr "%(user_name)s a créé une nouvelle proposition à %(offer_name)s"
+msgstr ""
 
 #: karrot/offers/templates/new_offer.html.jinja2:188
 #, python-format
 msgid "%(user_name)s created a new offer"
-msgstr "%(user_name)s a créé une nouvelle proposition"
+msgstr ""
 
 #: karrot/offers/templates/new_offer.html.jinja2:205
 msgid "View offer"
-msgstr "Voir la proposition"
+msgstr ""
 
 #: karrot/offers/templates/new_offer.html.jinja2:232
 msgid ""
 "You are receiving this because you are subscribed to <strong>New "
 "Offer</strong> emails for this group."
 msgstr ""
-"Vous le recevez car vous êtes abonné aux e-mails de<strong>nouvelle "
-"proposition</strong> pour ce groupe."
 
 #: karrot/offers/templates/new_offer.html.jinja2:236
 #, python-format
@@ -777,9 +709,6 @@ msgid ""
 "Reply to this email directly, <a href=\"%(offer_url)s\">view it on "
 "%(site_name)s</a>, or <a href=\"%(mute_url)s\">mute the conversation</a>."
 msgstr ""
-"Répondez directement à cet e-mail, <a href=\"%(offer_url)s\">affichez-le sur"
-" %(site_name)s</a>, ou <a href=\"%(mute_url)s\"> désactivez la "
-"conversation</a>."
 
 #: karrot/places/place_types.py:5
 msgid "Unspecified"
@@ -807,111 +736,103 @@ msgstr ""
 
 #: karrot/places/serializers.py:172
 msgid "Set at least one week in advance"
-msgstr "Une semaine en avance est minimum!"
+msgstr ""
 
 #: karrot/places/serializers.py:175
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
-msgstr "Ne paramètre pas plus de %(count)s semaines à l'avance"
+msgstr ""
 
 #: karrot/places/serializers.py:227
 msgid "You are already subscribed to this place"
-msgstr "Tu es déjà enregistré sur ce lieu"
+msgstr ""
 
 #: karrot/userauth/api.py:98 karrot/userauth/serializers.py:102
 #: karrot/userauth/serializers.py:151 karrot/userauth/serializers.py:172
 #: karrot/userauth/serializers.py:202 karrot/userauth/serializers.py:224
 msgid "We could not send you an e-mail."
-msgstr "Nous n'avons pas pu vous envoyer de email."
+msgstr ""
 
 #: karrot/userauth/permissions.py:6
 msgid "Mail is already verified."
-msgstr "Adresse mail est déjà verifiée."
+msgstr ""
 
 #: karrot/userauth/serializers.py:25
 msgid "Unable to log in with provided credentials."
 msgstr ""
-"Impossible de se connecter avec les informations d'identification fournies."
 
 #: karrot/userauth/serializers.py:89 karrot/userauth/serializers.py:189
 msgid "Similar e-mail exists: "
-msgstr "Un email similaire existe:"
+msgstr ""
 
 #: karrot/userauth/serializers.py:126
 msgid "Verification code is invalid"
-msgstr "Le code de vérification est valide"
+msgstr ""
 
 #: karrot/userauth/serializers.py:130
 msgid "Verification code has expired"
-msgstr "Le code de vérification a expiré"
+msgstr ""
 
 #: karrot/userauth/serializers.py:165 karrot/userauth/serializers.py:183
 msgid "Wrong password"
-msgstr "Le mot de passe est erroné"
+msgstr ""
 
 #: karrot/userauth/serializers.py:216
 msgid "Unknown e-mail address"
-msgstr "Adresse email inconnue"
+msgstr ""
 
 #: karrot/users/templates/accountdelete_request.html.jinja2:5
 #: karrot/users/templates/accountdelete_request.subject.jinja2:1
 msgid "Request to delete your account"
-msgstr "Demande d'effacer ton compte"
+msgstr ""
 
 #: karrot/users/templates/accountdelete_request.html.jinja2:170
 #, python-format
 msgid "You requested to delete your account on %(site_name)s!"
-msgstr "Tu as demandé à supprimer ton compte sur %(site_name)s !"
+msgstr ""
 
 #: karrot/users/templates/accountdelete_request.html.jinja2:178
 msgid ""
 "We're sad to hear that you want to delete your account, could we have done "
 "anything better?"
 msgstr ""
-"Nous sommes triste d'entendre que tu veux supprimer ton compte, pourrions "
-"nous faire quelque chose de mieux ?"
 
 #: karrot/users/templates/accountdelete_request.html.jinja2:179
 msgid "Anyhow, you can finish the deletion by clicking the link below:"
 msgstr ""
-"Dans tous les cas, tu peux terminer la suppression en cliquant sur le lien "
-"ci-dessous :"
 
 #: karrot/users/templates/accountdelete_request.html.jinja2:192
 msgid "Delete your account"
-msgstr "Supprimer ton compte"
+msgstr ""
 
 #: karrot/users/templates/accountdelete_request.html.jinja2:205
 msgid "If you changed your mind, you can simply ignore this e-mail."
-msgstr "Si tu change d'avis, tu peux simplement ignorer cet email."
+msgstr ""
 
 #: karrot/users/templates/accountdelete_success.html.jinja2:5
 #: karrot/users/templates/accountdelete_success.subject.jinja2:1
 msgid "Account successfully deleted"
-msgstr "Compte supprimé avec succès"
+msgstr ""
 
 #: karrot/users/templates/accountdelete_success.html.jinja2:170
 #, python-format
 msgid "Your account on %(site_name)s was successfully deleted!"
-msgstr "Ton compte sur %(site_name)s a été supprimé avec succès !"
+msgstr ""
 
 #: karrot/users/templates/accountdelete_success.html.jinja2:178
 msgid ""
 "We're still sad that you saw it necessary to delete your account, but we're "
 "happy to tell you that your request was met without any problems."
 msgstr ""
-"Nous sommes toujours désolé que tu es considéré comme nécessaire de "
-"supprimer ton compte, mais nous sommes heureux de te dire que ta demande a "
-"été effectuée sans aucun problème. "
 
 #: karrot/users/templates/accountdelete_success.html.jinja2:179
 msgid "Goodbye!"
-msgstr "Au revoir !"
+msgstr ""
 
 #: karrot/users/templates/changemail_request.html.jinja2:5
 #: karrot/users/templates/signup.html.jinja2:5
 msgid "Please verify your email"
-msgstr "Verifie ton email s'il te plaît"
+msgstr ""
 
 #: karrot/users/templates/changemail_request.html.jinja2:171
 #, python-format
@@ -919,98 +840,94 @@ msgid ""
 "You requested to change your email address from %(old_email)s to "
 "%(new_email)s"
 msgstr ""
-"Tu as demandé à changer ton adresse mail %(old_email)s par %(new_email)s "
 
 #: karrot/users/templates/changemail_request.html.jinja2:182
 #: karrot/users/templates/signup.html.jinja2:178
 msgid "Please click the following link to confirm your email:"
-msgstr "S'il te plaît clique sur le lien suivant pour confirmer ton email :"
+msgstr ""
 
 #: karrot/users/templates/changemail_request.html.jinja2:195
 #: karrot/users/templates/signup.html.jinja2:191
 msgid "Verify your email address"
-msgstr "Verifie ton adresse mail"
+msgstr ""
 
 #: karrot/users/templates/changemail_request.html.jinja2:208
 #: karrot/users/templates/passwordreset_request.html.jinja2:205
 msgid ""
 "If you did not request this change, you can safely ignore this message."
 msgstr ""
-"Si tu n'a pas demandé ce changement, tu peux bien sûr ignorer ce message."
 
 #: karrot/users/templates/changemail_request.subject.jinja2:1
 #: karrot/users/templates/signup.subject.jinja2:1
 msgid "Please verify your email address"
-msgstr "S'il te plaît vérifie ton adresse email"
+msgstr ""
 
 #: karrot/users/templates/changemail_success.html.jinja2:5
 msgid "Your email address changed"
-msgstr "Ton adresse email a été modifée"
+msgstr ""
 
 #: karrot/users/templates/changemail_success.html.jinja2:170
 #, python-format
 msgid "Your email address on %(site_name)s changed!"
-msgstr "Ton adresse email sur %(site_name)s a été modifiée !"
+msgstr ""
 
 #: karrot/users/templates/changemail_success.html.jinja2:178
 #, python-format
 msgid "Your new email address is %(new_email)s."
-msgstr "Ta nouvelle adresse email est %(new_email)s."
+msgstr ""
 
 #: karrot/users/templates/changemail_success.subject.jinja2:1
 msgid "Your email address changed!"
-msgstr "Ton adresse email a été modifiée !"
+msgstr ""
 
 #: karrot/users/templates/passwordreset_request.html.jinja2:5
 #: karrot/users/templates/passwordreset_request.subject.jinja2:1
 msgid "Request to reset your password"
-msgstr "Demande la réinitialisation de ton mot de passe"
+msgstr ""
 
 #: karrot/users/templates/passwordreset_request.html.jinja2:170
 #, python-format
 msgid "You requested to reset your password for %(site_name)s"
-msgstr "Tu as demandé à réinitialiser ton mot de passe pour %(site_name)s"
+msgstr ""
 
 #: karrot/users/templates/passwordreset_request.html.jinja2:178
 msgid "Did you forget your password? No problem!"
-msgstr "As tu oublié ton mot de passe ? Pas de problème !"
+msgstr ""
 
 #: karrot/users/templates/passwordreset_request.html.jinja2:179
 msgid "Click this link to change it:"
-msgstr "Clique sur ce lien lien pour le modifier :"
+msgstr ""
 
 #: karrot/users/templates/passwordreset_request.html.jinja2:192
 msgid "Change password"
-msgstr "Changer le mot de passe"
+msgstr ""
 
 #: karrot/users/templates/passwordreset_success.html.jinja2:5
 #: karrot/users/templates/passwordreset_success.subject.jinja2:1
 msgid "New password set!"
-msgstr "Nouveau mot de passe créé!"
+msgstr ""
 
 #: karrot/users/templates/passwordreset_success.html.jinja2:170
 #, python-format
 msgid "You set a new password for %(site_name)s"
-msgstr "Tu définis un nouveau mot de passe pour %(site_name)s"
+msgstr ""
 
 #: karrot/users/templates/passwordreset_success.html.jinja2:178
 msgid "Your password has been successfully changed!"
-msgstr "Ton mot de passe a été changé!"
+msgstr ""
 
 #: karrot/users/templates/signup.html.jinja2:170
 #, python-format
 msgid "Thank you for signing up to %(site_name)s"
-msgstr "Merci pour ton inscription à%(site_name)s"
+msgstr ""
 
 #: karrot/users/templates/signup.html.jinja2:204
 msgid ""
 "You can safely ignore this message if it wasn't you who signed up at our "
 "service using this email address."
 msgstr ""
-"Tu peux bien sûr ignorer ce message si ce n'est pas toi qui t'es abonné à "
-"notre service en utilisant cette adresse e-mail."
 
 #: karrot/utils/validators.py:10
 #, python-format
 msgid "%(value)s is a reserved name"
-msgstr "%(value)sest un nom déjà utilisé"
+msgstr ""
