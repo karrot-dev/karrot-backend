@@ -5,6 +5,7 @@
 # 
 # Translators:
 # Tilmann Becker <tilmann.becker+github@gmail.com>, 2019
+# Timur Arbaev, 2022
 # 
 #, fuzzy
 msgid ""
@@ -12,12 +13,12 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
-"Last-Translator: Tilmann Becker <tilmann.becker+github@gmail.com>, 2019\n"
+"Last-Translator: Timur Arbaev, 2022\n"
 "Language-Team: Russian (https://www.transifex.com/yunity-1/teams/68631/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.10.1\n"
+"Generated-By: Babel 2.10.3\n"
 "Language: ru\n"
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 
@@ -51,7 +52,7 @@ msgstr ""
 
 #: karrot/activities/serializers.py:140
 msgid "Must be a list with one or two values"
-msgstr ""
+msgstr "Должен быть список с одним или двумя значениями"
 
 #: karrot/activities/serializers.py:141
 msgid "Must pass start value"
@@ -99,7 +100,7 @@ msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:227
 msgid "Tomorrow"
-msgstr ""
+msgstr "Завтра"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:268
 msgid ""
@@ -114,11 +115,11 @@ msgstr ""
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:220
 #: karrot/offers/templates/new_offer.html.jinja2:233
 msgid "Click here to unsubscribe"
-msgstr ""
+msgstr "Кликните, чтобы отписаться"
 
 #: karrot/applications/api.py:27
 msgid "You need to have a verified email address"
-msgstr ""
+msgstr "Вам нужно иметь подтверждённый email"
 
 #: karrot/applications/api.py:36 karrot/groups/api.py:52
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
@@ -139,7 +140,7 @@ msgstr ""
 
 #: karrot/applications/serializers.py:41
 msgid "You are already member of the group"
-msgstr ""
+msgstr "Вы уже участник группы"
 
 #: karrot/applications/serializers.py:43
 msgid "You cannot apply to open groups"
@@ -177,7 +178,7 @@ msgstr ""
 
 #: karrot/applications/templates/new_application.html.jinja2:172
 msgid "Questions asked by your group"
-msgstr ""
+msgstr "Вопросы, заданные вашей группой"
 
 #: karrot/applications/templates/new_application.html.jinja2:177
 #, python-format
@@ -189,7 +190,7 @@ msgstr ""
 #: karrot/applications/templates/new_application.html.jinja2:179
 #, python-format
 msgid "Answers from %(user_name)s"
-msgstr ""
+msgstr "Ответы от %(user_name)s"
 
 #: karrot/applications/templates/new_application.html.jinja2:196
 msgid "View applications"
@@ -214,17 +215,19 @@ msgstr ""
 #: karrot/conversations/api.py:65 karrot/conversations/api.py:246
 #: karrot/conversations/api.py:429 karrot/conversations/serializers.py:187
 msgid "You are not in this conversation"
-msgstr ""
+msgstr "Вы не в этом диалоге"
 
 #: karrot/conversations/api.py:74
 msgid "You are not the author of this message"
-msgstr ""
+msgstr "Вы не автор этого сообщения"
 
 #: karrot/conversations/api.py:83
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
 msgstr ""
+"Вы не можете редактировать сообщение через %(days_number)sдней после его "
+"создания."
 
 #: karrot/conversations/api.py:357
 msgid "Must be first in thread"
@@ -256,7 +259,7 @@ msgstr ""
 
 #: karrot/conversations/serializers.py:189
 msgid "This conversation has been closed"
-msgstr ""
+msgstr "Эта беседа была закрыта"
 
 #: karrot/conversations/templates/conversation_message_notification.html.jinja2:149
 msgid ""
@@ -300,11 +303,11 @@ msgstr ""
 
 #: karrot/groups/api.py:31
 msgid "You are already a member."
-msgstr ""
+msgstr "Вы уже участник."
 
 #: karrot/groups/api.py:38
 msgid "You can only join open groups."
-msgstr ""
+msgstr "Вы можете присоединиться только к открытым группам."
 
 #: karrot/groups/api.py:45
 msgid "You cannot give trust to yourself"
@@ -316,7 +319,7 @@ msgstr ""
 
 #: karrot/groups/serializers.py:33
 msgid "Unknown timezone"
-msgstr ""
+msgstr "Неизвестный часовой пояс"
 
 #: karrot/groups/serializers.py:41
 msgid "Playground"
@@ -332,7 +335,7 @@ msgstr ""
 
 #: karrot/groups/serializers.py:247
 msgid "You are not in this group"
-msgstr ""
+msgstr "Вы не в этой группе"
 
 #: karrot/groups/templates/default_application_questions.nopreview.jinja2:1
 msgid ""
@@ -340,6 +343,9 @@ msgid ""
 "and your motivation. Please tell us how you got to know about us and what "
 "you wish to do here!"
 msgstr ""
+"Привет! Перед тем как вы присоединитесь к нашей группе, было бы здорово "
+"узнать побольше о вас и вашей мотивации. Пожалуйста, расскажите нам откуда "
+"вы узнали про нас и чем мы могли бы быть полезны друг другу!"
 
 #: karrot/groups/templates/group_summary.html.jinja2:5
 #: karrot/groups/templates/group_summary.html.jinja2:170
