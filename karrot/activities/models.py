@@ -4,19 +4,19 @@ import pytz
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrulestr
 from django.conf import settings
+from django.contrib.postgres.indexes import GistIndex
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.utils.translation import gettext as _
 from django.db import models
 from django.db import transaction
 from django.db.models import Count, DurationField, F, Q, Sum
 from django.utils import timezone
-from django.contrib.postgres.indexes import GistIndex
+from django.utils.translation import gettext as _
 
+from karrot.activities import stats
+from karrot.activities.utils import match_activities_with_dates, rrule_between_dates_in_local_time
 from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin
 from karrot.conversations.models import ConversationMixin
 from karrot.history.models import History, HistoryTypus
-from karrot.activities import stats
-from karrot.activities.utils import match_activities_with_dates, rrule_between_dates_in_local_time
 from karrot.places.models import PlaceStatus
 
 
@@ -452,3 +452,11 @@ class Feedback(BaseModel):
 
     class Meta:
         unique_together = ('about', 'given_by')
+
+
+class ICSAuthToken(BaseModel):
+    user = models.OneToOneField('users.User', on_delete=models.CASCADE)
+    token = models.TextField()
+
+    class Meta:
+        indexes = [models.Index(fields=['token'])]

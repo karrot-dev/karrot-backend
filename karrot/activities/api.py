@@ -1,11 +1,12 @@
 from django.db import transaction
 from django.db.models import F
+from django.utils.crypto import get_random_string
 from django_filters import rest_framework as filters
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins
 from rest_framework import viewsets
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, BaseAuthentication
 from rest_framework.decorators import action
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
@@ -16,7 +17,8 @@ from karrot.conversations.api import RetrieveConversationMixin
 from karrot.history.models import History, HistoryTypus
 from karrot.activities.filters import (ActivitiesFilter, ActivitySeriesFilter, FeedbackFilter, ActivityTypeFilter)
 from karrot.activities.models import (
-    Activity as ActivityModel, ActivitySeries as ActivitySeriesModel, Feedback as FeedbackModel, ActivityType
+    Activity as ActivityModel, ActivitySeries as ActivitySeriesModel, Feedback as FeedbackModel, ActivityType,
+    ICSAuthToken
 )
 from karrot.activities.permissions import (
     IsUpcoming, HasNotJoinedActivity, HasJoinedActivity, IsEmptyActivity, IsNotFull, IsSameParticipant,
@@ -31,6 +33,17 @@ from karrot.activities.serializers import (
 from karrot.activities.renderers import ICSCalendarRenderer
 from karrot.places.models import PlaceStatus
 from karrot.utils.mixins import PartialUpdateModelMixin
+
+
+class ICSQueryTokenAuthentication(BaseAuthentication):
+    def authenticate(self, request):
+        token = request.query_params.get('token', None)
+        try:
+            token = ICSAuthToken.objects.select_related('user').get(token=token)
+        except ICSAuthToken.DoesNotExist:
+            return None
+        user = token.user
+        return user, None
 
 
 class ActivityTypeViewSet(
@@ -281,7 +294,7 @@ class ActivityViewSet(
         renderer_classes=(ICSCalendarRenderer, ),
         serializer_class=ActivityICSSerializer,
         url_path='ics',
-        authentication_classes=[BasicAuthentication, SessionAuthentication],
+        authentication_classes=[BasicAuthentication, SessionAuthentication, ICSQueryTokenAuthentication],
         pagination_class=None
     )
     def ics_list(self, request):
@@ -289,3 +302,21 @@ class ActivityViewSet(
         filename = 'activities.ics'
         response['content-disposition'] = 'attachment; filename={filename}'.format(filename=filename)
         return response
+
+    @extend_schema(responses=OpenApiTypes.STR)
+    @action(detail=False, methods=['GET'], pagination_class=None)
+    def ics_token(self, request):
+        user = request.user
+        try:
+            token = ICSAuthToken.objects.get(user=user).token
+        except ICSAuthToken.DoesNotExist:
+            token = None
+        return Response(token)
+
+    @extend_schema(request=None, responses=OpenApiTypes.STR)
+    @action(detail=False, methods=['POST'], pagination_class=None)
+    def ics_token_refresh(self, request):
+        user = request.user
+        token = get_random_string(length=40)
+        ICSAuthToken.objects.update_or_create({'token': token}, user=user)
+        return Response(token)
