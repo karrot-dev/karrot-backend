@@ -22,7 +22,7 @@ from karrot.groups.models import Agreement, Group as GroupModel, GroupMembership
 from karrot.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer, GroupJoinSerializer, \
     GroupLeaveSerializer, TimezonesSerializer, GroupMembershipInfoSerializer, \
     AgreementSerializer, AgreementAgreeSerializer, GroupMembershipAddNotificationTypeSerializer, \
-    GroupMembershipRemoveNotificationTypeSerializer, GroupUserProfileSerializer
+    GroupMembershipRemoveNotificationTypeSerializer, GroupUserProfileSerializer, GroupMembershipSerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
 from karrot.utils.serializers import EmptySerializer
 
@@ -270,6 +270,24 @@ class GroupViewSet(
         context = self.get_serializer_context()
         context.update({'group': group})  # we need to add the group for UserProfileSerializer
         return Response(self.get_serializer(membership, context=context).data)
+
+    @action(
+        detail=True,
+        methods=['GET', 'PUT'],
+        permission_classes=(IsAuthenticated, ),
+        serializer_class=GroupMembershipSerializer,
+    )
+    def membership(self, request, pk):
+        self.check_permissions(request)
+        membership = get_object_or_404(GroupMembership.objects, group=self.get_object(), user=request.user)
+        self.check_object_permissions(request, membership)
+        if request.method == 'PUT':
+            serializer = self.get_serializer(membership, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+        else:
+            serializer = self.get_serializer(membership)
+        return Response(serializer.data)
 
 
 class AgreementViewSet(

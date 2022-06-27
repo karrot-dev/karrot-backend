@@ -422,17 +422,35 @@ class TimezonesSerializer(serializers.Serializer):
     all_timezones = serializers.ListField(child=serializers.CharField(), read_only=True)
 
 
+class ListMultipleChoiceField(serializers.MultipleChoiceField):
+    """same as MultipleChoiceField but returns list, not set"""
+    def to_internal_value(self, data):
+        return list(super().to_internal_value(data))
+
+
+notification_options = (
+    GroupNotificationType.WEEKLY_SUMMARY,
+    GroupNotificationType.DAILY_ACTIVITY_NOTIFICATION,
+    GroupNotificationType.NEW_APPLICATION,
+    GroupNotificationType.NEW_OFFER,
+    GroupNotificationType.CONFLICT_RESOLUTION,
+)
+
+
+class GroupMembershipSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GroupMembership
+        fields = [
+            'notification_types',
+            'is_email_visible',
+        ]
+
+    notification_types = ListMultipleChoiceField(choices=[(choice, choice) for choice in notification_options], )
+
+
 class GroupMembershipAddNotificationTypeSerializer(serializers.Serializer):
     notification_type = serializers.ChoiceField(
-        choices=[(choice, choice) for choice in (
-            GroupNotificationType.WEEKLY_SUMMARY,
-            GroupNotificationType.DAILY_ACTIVITY_NOTIFICATION,
-            GroupNotificationType.NEW_APPLICATION,
-            GroupNotificationType.NEW_OFFER,
-            GroupNotificationType.CONFLICT_RESOLUTION,
-        )],
-        required=True,
-        write_only=True
+        choices=[(choice, choice) for choice in notification_options], required=True, write_only=True
     )
 
     def update(self, instance, validated_data):
