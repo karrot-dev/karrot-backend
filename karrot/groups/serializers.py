@@ -19,6 +19,7 @@ from karrot.utils.misc import find_changed
 from karrot.utils.validators import prevent_reserved_names
 from . import roles
 from karrot.utils.geoip import geoip_is_available, get_client_ip, ip_to_lat_lon
+from karrot.users.serializers import UserProfileSerializer
 
 
 @extend_schema_field(OpenApiTypes.STR)
@@ -60,6 +61,18 @@ class GroupMembershipInfoSerializer(serializers.ModelSerializer):
 
     def get_active(self, membership):
         return membership.inactive_at is None
+
+
+class GroupUserProfileSerializer(serializers.ModelSerializer):
+    user = UserProfileSerializer()
+
+    class Meta:
+        model = GroupMembership
+        fields = [
+            'user',
+            'roles',
+            'is_email_visible',
+        ]
 
 
 class GroupHistorySerializer(GroupBaseSerializer):

@@ -22,9 +22,9 @@ from karrot.groups.models import Agreement, Group as GroupModel, GroupMembership
 from karrot.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer, GroupJoinSerializer, \
     GroupLeaveSerializer, TimezonesSerializer, GroupMembershipInfoSerializer, \
     AgreementSerializer, AgreementAgreeSerializer, GroupMembershipAddNotificationTypeSerializer, \
-    GroupMembershipRemoveNotificationTypeSerializer
-from karrot.utils.serializers import EmptySerializer
+    GroupMembershipRemoveNotificationTypeSerializer, GroupUserProfileSerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
+from karrot.utils.serializers import EmptySerializer
 
 
 class IsNotMember(BasePermission):
@@ -253,6 +253,23 @@ class GroupViewSet(
         self.perform_update(serializer)
 
         return Response(GroupMembershipInfoSerializer(membership).data)
+
+    @extend_schema(parameters=[OpenApiParameter('user_id', OpenApiTypes.INT, OpenApiParameter.PATH)])
+    @action(
+        detail=True,
+        methods=['GET'],
+        permission_classes=(IsAuthenticated, ),
+        url_name='user-profile',
+        url_path='users/(?P<user_id>[^/.]+)/profile',
+        serializer_class=GroupUserProfileSerializer,
+    )
+    def user_profile(self, request, pk, user_id):
+        self.check_permissions(request)
+        group = self.get_object()
+        membership = get_object_or_404(GroupMembership.objects, group=pk, user=user_id)
+        context = self.get_serializer_context()
+        context.update({'group': group})  # we need to add the group for UserProfileSerializer
+        return Response(self.get_serializer(membership, context=context).data)
 
 
 class AgreementViewSet(

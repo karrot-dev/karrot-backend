@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import TextField, DateTimeField, QuerySet, Count, Q, F, Exists, OuterRef, Value
+from django.db.models import BooleanField, TextField, DateTimeField, QuerySet, Count, Q, F, Exists, OuterRef, Value
 from django.db.models.manager import BaseManager
 from django.template.loader import render_to_string
 from django.utils import timezone as tz, timezone
@@ -296,6 +296,7 @@ class GroupMembership(BaseModel, DirtyFieldsMixin):
     inactive_at = DateTimeField(null=True)
     notification_types = ArrayField(TextField(), default=get_default_notification_types)
     removal_notification_at = DateTimeField(null=True)
+    is_email_visible = BooleanField(default=True)
 
     class Meta:
         db_table = 'groups_group_members'
