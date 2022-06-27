@@ -38,6 +38,8 @@ from karrot.utils.mixins import PartialUpdateModelMixin
 class ICSQueryTokenAuthentication(BaseAuthentication):
     def authenticate(self, request):
         token = request.query_params.get('token', None)
+        if not token:
+            return None
         try:
             token = ICSAuthToken.objects.select_related('user').get(token=token)
         except ICSAuthToken.DoesNotExist:
@@ -310,7 +312,7 @@ class ActivityViewSet(
         try:
             token = ICSAuthToken.objects.get(user=user).token
         except ICSAuthToken.DoesNotExist:
-            token = None
+            return self.ics_token_refresh(request)
         return Response(token)
 
     @extend_schema(request=None, responses=OpenApiTypes.STR)

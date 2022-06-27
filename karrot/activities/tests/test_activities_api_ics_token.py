@@ -24,7 +24,7 @@ class TestActivitiesAPIICSToken(APITestCase):
 
     def test_export_ics_with_token(self):
         self.client.force_login(self.member)
-        response = self.client.post('/api/activities/ics_token_refresh/')
+        response = self.client.get('/api/activities/ics_token/')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         token = response.data
 
