@@ -1,6 +1,6 @@
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import F
-from django.utils.crypto import get_random_string
 from django_filters import rest_framework as filters
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
@@ -43,6 +43,8 @@ class ICSQueryTokenAuthentication(BaseAuthentication):
         try:
             token = ICSAuthToken.objects.select_related('user').get(token=token)
         except ICSAuthToken.DoesNotExist:
+            return None
+        except ValidationError:
             return None
         user = token.user
         return user, None
@@ -319,6 +321,6 @@ class ActivityViewSet(
     @action(detail=False, methods=['POST'], pagination_class=None)
     def ics_token_refresh(self, request):
         user = request.user
-        token = get_random_string(length=40)
-        ICSAuthToken.objects.update_or_create({'token': token}, user=user)
+        ICSAuthToken.objects.filter(user=user).delete()
+        token = ICSAuthToken.objects.create(user=user).token
         return Response(token)

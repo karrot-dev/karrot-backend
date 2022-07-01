@@ -1,3 +1,4 @@
+import uuid
 from datetime import timedelta
 
 import pytz
@@ -14,7 +15,8 @@ from django.utils.translation import gettext as _
 
 from karrot.activities import stats
 from karrot.activities.utils import match_activities_with_dates, rrule_between_dates_in_local_time
-from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin
+from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin, \
+    NicelyFormattedModel
 from karrot.conversations.models import ConversationMixin
 from karrot.history.models import History, HistoryTypus
 from karrot.places.models import PlaceStatus
@@ -454,9 +456,7 @@ class Feedback(BaseModel):
         unique_together = ('about', 'given_by')
 
 
-class ICSAuthToken(BaseModel):
+class ICSAuthToken(NicelyFormattedModel):
+    token = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField('users.User', on_delete=models.CASCADE)
-    token = models.TextField()
-
-    class Meta:
-        indexes = [models.Index(fields=['token'])]
+    created_at = models.DateTimeField(default=timezone.now)
