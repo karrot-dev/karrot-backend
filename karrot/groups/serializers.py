@@ -445,7 +445,10 @@ class GroupMembershipSerializer(serializers.ModelSerializer):
             'is_email_visible',
         ]
 
-    notification_types = ListMultipleChoiceField(choices=[(choice, choice) for choice in notification_options], )
+    notification_types = ListMultipleChoiceField(
+        required=False,
+        choices=[(choice, choice) for choice in notification_options],
+    )
 
 
 class GroupMembershipAddNotificationTypeSerializer(serializers.Serializer):
