@@ -12,6 +12,7 @@
 # chandi <a.langecker@posteo.de>, 2020
 # Sebastian Blasius <sebastian.blasius@online.de>, 2020
 # Till R <transiflex@login.llit.eu>, 2021
+# Daniel Waxweiler, 2022
 # 
 #, fuzzy
 msgid ""
@@ -19,12 +20,12 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
-"Last-Translator: Till R <transiflex@login.llit.eu>, 2021\n"
+"Last-Translator: Daniel Waxweiler, 2022\n"
 "Language-Team: German (https://www.transifex.com/yunity-1/teams/68631/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.10.1\n"
+"Generated-By: Babel 2.10.3\n"
 "Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
@@ -287,11 +288,11 @@ msgstr "Du erhältst dies, weil du Teil der Unterhaltung bist."
 #: karrot/conversations/templates/mention_notification.subject.jinja2:1
 #, python-format
 msgid "You were mentioned by %(user_name)s"
-msgstr ""
+msgstr "Du wurdest von %(user_name)s erwähnt."
 
 #: karrot/conversations/templates/mention_notification.html.jinja2:155
 msgid "You are receiving this because you were mentioned."
-msgstr ""
+msgstr "Du erhälst dies, weil du erwähnt wurdest."
 
 #: karrot/conversations/templates/mention_notification.html.jinja2:156
 #, python-format
@@ -299,6 +300,8 @@ msgid ""
 "Reply to this email directly or <a href=\"%(conversation_url)s\">view it on "
 "%(site_name)s</a>."
 msgstr ""
+"Antworte direkt auf diese E-Mail oder <a href=\"%(conversation_url)s\">schau"
+" sie dir auf %(site_name)s an</a>."
 
 #: karrot/conversations/templates/thread_message_notification.html.jinja2:135
 msgid "In reply to:"
