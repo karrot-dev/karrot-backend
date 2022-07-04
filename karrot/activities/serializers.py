@@ -322,6 +322,7 @@ class ActivityUpdateSerializer(ActivitySerializer):
 
     date = DateTimeRangeField()
 
+    @transaction.atomic()
     def save(self, **kwargs):
         activity = self.instance
         changed_data = find_changed(activity, self.validated_data)
@@ -366,7 +367,6 @@ class ActivityUpdateSerializer(ActivitySerializer):
 
         return activity
 
-    @transaction.atomic()
     def update(self, instance, validated_data):
         activity = instance
         participant_types = validated_data.pop('participant_types', None)
@@ -703,6 +703,7 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
 
     duration = DurationInSecondsField(required=False, allow_null=True)
 
+    @transaction.atomic()
     def save(self, **kwargs):
         old = self.instance.old() if self.instance else None
         self._validated_data = find_changed(self.instance, self.validated_data)
@@ -713,9 +714,10 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
         series.update_activities(old)
         return series
 
-    @transaction.atomic()
     def update(self, series, validated_data):
         before_data = ActivitySeriesHistorySerializer(series).data
+
+        activities = None
 
         participant_types = validated_data.pop('participant_types', None)
         if participant_types:
@@ -740,6 +742,7 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
                         role = entry.get('role', None)
                         if role and role != participant_type.role:
                             # find all the participants who are missing the new role, and remove them...
+                            # TODO: is this a good way to go about it? at least document it...
                             users = series.place.group.members.filter(groupmembership__roles__contains=[role])
                             ActivityParticipant.objects.filter(
                                 activity__in=activities,
@@ -760,6 +763,11 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
                         )
 
         super().update(series, validated_data)
+
+        if activities:
+            # we've probably modified activities so ensure we trigger subscription updates for them
+            [activity.save() for activity in activities]
+
         after_data = ActivitySeriesHistorySerializer(series).data
 
         if before_data != after_data:
