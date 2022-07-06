@@ -14,7 +14,6 @@ argon2-cffi==21.3.0
 argon2-cffi-bindings==21.2.0
 asgiref==3.5.2
 async-timeout==4.0.2
-asynctest==0.13.0
 attrs==21.4.0
 autobahn==22.5.1
 autoflake==1.4
@@ -22,7 +21,7 @@ automat==20.2.0
 autopep8==1.6.0
 babel==2.10.3
 backcall==0.2.0
-backports-zoneinfo==0.2.1;python_version<"3.9"
+backports-zoneinfo==0.2.1
 bleach==5.0.0
 bleach-allowlist==1.0.3
 boltons==21.0.0
@@ -95,7 +94,7 @@ jedi==0.18.1
 jinja2==3.1.2
 jsonschema==4.6.0
 logging-tree==1.9
-lxml==4.9.0
+lxml==4.9.1
 markdown==3.3.7
 markupsafe==2.1.1
 matplotlib-inline==0.1.3
