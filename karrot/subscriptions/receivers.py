@@ -279,6 +279,10 @@ def send_group_membership_updates(sender, instance, created, **kwargs):
         # notification types are only visible to one user
         send_group_detail(group, user=membership.user)
 
+    if 'is_email_visible' in dirty_fields.keys():
+        # send user updates
+        send_user_updates(sender, membership.user)
+
 
 @receiver(post_save, sender=GroupMembership)
 @on_transaction_commit
