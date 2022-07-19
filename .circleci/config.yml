@@ -49,7 +49,7 @@ jobs:
       - image: karrot/python:2.10
         environment:
           PGHOST: 127.0.0.1
-      - image: circleci/postgres:11
+      - image: cimg/postgres:11
         environment:
           POSTGRES_USER: ubuntu
           POSTGRES_DB: karrot_test
