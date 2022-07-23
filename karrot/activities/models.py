@@ -219,8 +219,21 @@ class ActivityQuerySet(models.QuerySet):
 
     def done_not_full(self):
         return self.exclude_disabled() \
-            .annotate(participant_count=Count('participants')) \
-            .filter(date__startswith__lt=timezone.now(), participant_count__lt=F('max_participants'))
+            .annotate_num_participants() \
+            .filter(date__startswith__lt=timezone.now(), num_participants__lt=F('max_participants'))
+
+    def with_free_slots(self):
+        return self.exclude_disabled() \
+            .annotate_num_participants() \
+            .filter(num_participants__lt=F('max_participants'))
+
+    def empty(self):
+        return self.exclude_disabled() \
+            .annotate_num_participants() \
+            .filter(num_participants=0)
+
+    def with_participant(self, user):
+        return self.filter(participants=user)
 
     def upcoming(self):
         return self.filter(date__startswith__gt=timezone.now())
