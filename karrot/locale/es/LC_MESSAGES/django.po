@@ -10,6 +10,7 @@
 # Tilmann Becker <tilmann.becker+github@gmail.com>, 2019
 # Lea Nolte <lea.marie@gmx.net>, 2019
 # Carlos Pesquera Alonso <fydus@hotmail.com>, 2021
+# Sergio Varela <sergitroll9@gmail.com>, 2022
 # 
 #, fuzzy
 msgid ""
@@ -17,7 +18,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
-"Last-Translator: Carlos Pesquera Alonso <fydus@hotmail.com>, 2021\n"
+"Last-Translator: Sergio Varela <sergitroll9@gmail.com>, 2022\n"
 "Language-Team: Spanish (https://www.transifex.com/yunity-1/teams/68631/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -284,11 +285,11 @@ msgstr "Recibes esto porque te has suscrito a esta conversación."
 #: karrot/conversations/templates/mention_notification.subject.jinja2:1
 #, python-format
 msgid "You were mentioned by %(user_name)s"
-msgstr ""
+msgstr "Has sido mencionado por %(user_name)s"
 
 #: karrot/conversations/templates/mention_notification.html.jinja2:155
 msgid "You are receiving this because you were mentioned."
-msgstr ""
+msgstr "Has recibido esto porque has sido mencionado."
 
 #: karrot/conversations/templates/mention_notification.html.jinja2:156
 #, python-format
@@ -296,6 +297,8 @@ msgid ""
 "Reply to this email directly or <a href=\"%(conversation_url)s\">view it on "
 "%(site_name)s</a>."
 msgstr ""
+"Responde a este correo electrónico directamente o <a "
+"href=\"%(conversation_url)s\"> míralo en %(site_name)s</a>."
 
 #: karrot/conversations/templates/thread_message_notification.html.jinja2:135
 msgid "In reply to:"
@@ -538,6 +541,8 @@ msgid ""
 "You don't have enough trust from fellow group members anymore to grant you "
 "<strong>editing permissions</strong>."
 msgstr ""
+"Ya no tienes la suficiente confianza de los compañeros del grupo para "
+"concederte <strong>permisos de edición</strong>."
 
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:171
 msgid "Hey, we're really missing you!"
@@ -780,27 +785,27 @@ msgstr ""
 
 #: karrot/places/place_types.py:5
 msgid "Unspecified"
-msgstr ""
+msgstr "Sin especificar"
 
 #: karrot/places/place_types.py:6
 msgid "Store"
-msgstr ""
+msgstr "Tienda"
 
 #: karrot/places/place_types.py:7
 msgid "Sharing Point"
-msgstr ""
+msgstr "Punto de encuentro"
 
 #: karrot/places/place_types.py:8
 msgid "Meeting Place"
-msgstr ""
+msgstr "Lugar de encuentro"
 
 #: karrot/places/place_types.py:9
 msgid "Restaurant"
-msgstr ""
+msgstr "Restaurante"
 
 #: karrot/places/place_types.py:10
 msgid "Market"
-msgstr ""
+msgstr "Mercado"
 
 #: karrot/places/serializers.py:172
 msgid "Set at least one week in advance"
