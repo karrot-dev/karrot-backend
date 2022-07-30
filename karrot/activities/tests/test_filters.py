@@ -9,6 +9,7 @@ from karrot.groups.factories import GroupFactory
 from karrot.activities.filters import ActivitiesFilter
 from karrot.activities.models import Activity
 from karrot.places.factories import PlaceFactory
+from karrot.places.models import PlaceSubscription
 from karrot.users.factories import VerifiedUserFactory
 
 MockRequest = namedtuple('Request', ['user'])
@@ -37,6 +38,7 @@ class TestActivityFilters(TestCase):
         date_max=None,
         activity_type=None,
         slots=None,
+        places=None,
         user=None,
         results=None,
     ):
@@ -47,6 +49,7 @@ class TestActivityFilters(TestCase):
                 'date_max': date_max,
                 'activity_type': activity_type,
                 'slots': slots,
+                'places': places,
             },
             queryset=qs,
             request=MockRequest(user=user)
@@ -194,4 +197,17 @@ class TestActivityFilters(TestCase):
             user=self.other_member,
             slots='joined',
             results=[],
+        )
+
+    def test_with_subscribed_places(self):
+        self.expect_results(
+            user=self.member,
+            places='subscribed',
+            results=[],
+        )
+        PlaceSubscription.objects.create(place=self.place, user=self.member)
+        self.expect_results(
+            user=self.member,
+            places='subscribed',
+            results=[self.activity],
         )

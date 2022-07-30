@@ -33,6 +33,7 @@ class ActivitiesFilter(filters.FilterSet):
     joined = filters.BooleanFilter(method='filter_joined')
     activity_type = filters.NumberFilter(field_name='activity_type')
     slots = filters.ChoiceFilter(method='filter_slots', choices=[(val, val) for val in ('free', 'empty', 'joined')])
+    places = filters.ChoiceFilter(method='filter_places', choices=[(val, val) for val in ('subscribed', )])
 
     class Meta:
         model = Activity
@@ -45,6 +46,7 @@ class ActivitiesFilter(filters.FilterSet):
             'joined',
             'activity_type',
             'slots',
+            'places',
         ]
 
     def filter_feedback_possible(self, qs, name, value):
@@ -66,6 +68,11 @@ class ActivitiesFilter(filters.FilterSet):
             return qs.empty()
         elif value == 'joined':
             return qs.with_participant(self.request.user)
+        return qs
+
+    def filter_places(self, qs, name, value):
+        if value == 'subscribed':
+            return qs.filter(place__subscribers=self.request.user)
         return qs
 
 
