@@ -16,7 +16,7 @@ class TestGeoUtils(TestCase):
         self.assertTrue(geoip_is_available())
 
     def test_to_city_swallows_address_not_found_error(self, geoip):
-        geoip.city.side_effect = AddressNotFoundError
+        geoip.city.side_effect = AddressNotFoundError('not found')
         self.assertIsNone(ip_to_city('1.2.3.4'))
 
     def test_to_city_raises_other_errors(self, geoip):
@@ -25,7 +25,7 @@ class TestGeoUtils(TestCase):
             ip_to_city('1.2.3.4')
 
     def test_to_lat_lon_swallows_address_not_found_error(self, geoip):
-        geoip.lat_lon.side_effect = AddressNotFoundError
+        geoip.lat_lon.side_effect = AddressNotFoundError('not found')
         self.assertIsNone(ip_to_lat_lon('1.2.3.4'))
 
     def test_to_lat_lon_raises_other_errors(self, geoip):
