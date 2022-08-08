@@ -22,6 +22,7 @@ from karrot.utils.parsers import JSONWithFilesMultiPartParser
 
 class OfferPagination(CursorPagination):
     page_size = 20
+    page_size_query_param = 'page_size'
     ordering = '-created_at'
 
 

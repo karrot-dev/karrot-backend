@@ -43,21 +43,25 @@ class ConversationPagination(CursorPagination):
     # It stops us from using conversation__latest_message_id, so we annotate the value with a different name,
     # knowing that the order is not stable
     page_size = 10
+    page_size_query_param = 'page_size'
     ordering = '-conversation_latest_message_id'
 
 
 class ThreadPagination(CursorPagination):
     page_size = 10
+    page_size_query_param = 'page_size'
     ordering = '-latest_message_id'
 
 
 class MessagePagination(CursorPagination):
     page_size = 10
+    page_size_query_param = 'page_size'
     ordering = '-id'
 
 
 class ReverseMessagePagination(CursorPagination):
     page_size = 10
+    page_size_query_param = 'page_size'
     ordering = 'id'
 
 

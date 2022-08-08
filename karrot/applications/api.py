@@ -20,6 +20,7 @@ class ApplicationsPerDayThrottle(UserRateThrottle):
 
 class ApplicationPagination(CursorPagination):
     page_size = 20
+    page_size_query_param = 'page_size'
     ordering = '-id'
 
 
