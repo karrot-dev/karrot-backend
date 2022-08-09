@@ -114,6 +114,30 @@ class TestConversationsAPI(APITestCase):
         self.assertEqual(len(response.data['results']), 1)
         self.assertEqual(response.data['results'][0]['content'], 'hello')
 
+    def test_list_messages_newest_first(self):
+        conversation = ConversationFactory(participants=[self.participant1])
+        message1 = conversation.messages.create(author=self.participant1, content='yay')
+        message2 = conversation.messages.create(author=self.participant1, content='second!')
+        self.client.force_login(user=self.participant1)
+        response = self.client.get('/api/messages/', {'conversation': conversation.id, 'order': 'newest-first'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            [message['id'] for message in response.data['results']],
+            [message2.id, message1.id],
+        )
+
+    def test_list_messages_oldest_first(self):
+        conversation = ConversationFactory(participants=[self.participant1])
+        message1 = conversation.messages.create(author=self.participant1, content='yay')
+        message2 = conversation.messages.create(author=self.participant1, content='second!')
+        self.client.force_login(user=self.participant1)
+        response = self.client.get('/api/messages/', {'conversation': conversation.id, 'order': 'oldest-first'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            [message['id'] for message in response.data['results']],
+            [message1.id, message2.id],
+        )
+
     def test_get_message(self):
         self.client.force_login(user=self.participant1)
         message_id = self.conversation1.messages.first().id
