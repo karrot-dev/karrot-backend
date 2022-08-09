@@ -88,6 +88,7 @@ class ActivityTypeViewSet(
 
 class FeedbackPagination(CursorPagination):
     page_size = 10
+    max_page_size = 1200
     page_size_query_param = 'page_size'
     ordering = '-activity_date'
 
@@ -202,8 +203,8 @@ class ActivityPagination(CursorPagination):
     """Pagination with a high number of activities in order to not break
     frontend assumptions of getting all upcoming activities per group.
     Could be reduced and add pagination handling in frontend when speed becomes an issue"""
-    # TODO: we *really* need to add that pagination to the frontend! https://github.com/karrot-dev/karrot-frontend/issues/2388
     page_size = 1200
+    max_page_size = 1200
     page_size_query_param = 'page_size'
     ordering = 'date'
 
