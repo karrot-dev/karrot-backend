@@ -118,20 +118,20 @@ msgstr ""
 msgid "Click here to unsubscribe"
 msgstr "Kattints ide a leiratkozáshoz"
 
-#: karrot/applications/api.py:27
+#: karrot/applications/api.py:29
 msgid "You need to have a verified email address"
 msgstr "Megerősített email cím szükséges"
 
-#: karrot/applications/api.py:36 karrot/groups/api.py:52
+#: karrot/applications/api.py:38 karrot/groups/api.py:52
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
 msgid "You need to be a group editor"
 msgstr "Csoport szerkesztőnek kell lenned"
 
-#: karrot/applications/api.py:44
+#: karrot/applications/api.py:46
 msgid "You need to be the applicant"
 msgstr "Jelentkezőnek kell lenned"
 
-#: karrot/applications/api.py:52
+#: karrot/applications/api.py:54
 msgid "Application is not pending anymore"
 msgstr "A jelentkezés már nincs függőben"
 
@@ -221,16 +221,16 @@ msgstr ""
 " meg a(z) %(site_name)s oldalon</a>, vagy <a href=\"%(mute_url)s\">némítsd "
 "le a beszélgetést</a>."
 
-#: karrot/conversations/api.py:65 karrot/conversations/api.py:246
-#: karrot/conversations/api.py:429 karrot/conversations/serializers.py:187
+#: karrot/conversations/api.py:73 karrot/conversations/api.py:254
+#: karrot/conversations/api.py:444 karrot/conversations/serializers.py:187
 msgid "You are not in this conversation"
 msgstr "Nem vagy tagja ennek a beszélgetésnek"
 
-#: karrot/conversations/api.py:74
+#: karrot/conversations/api.py:82
 msgid "You are not the author of this message"
 msgstr "Nem te írtad ezt az üzenetet"
 
-#: karrot/conversations/api.py:83
+#: karrot/conversations/api.py:91
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
@@ -238,11 +238,11 @@ msgstr ""
 "Nem tudsz szerkeszteni üzeneteket több mint %(days_number)s nappal a "
 "küldésük után."
 
-#: karrot/conversations/api.py:357
+#: karrot/conversations/api.py:372
 msgid "Must be first in thread"
 msgstr "Elsőnek kell lennie a beszélgetésben"
 
-#: karrot/conversations/api.py:360
+#: karrot/conversations/api.py:375
 msgid "You are not a participant in this thread"
 msgstr "Nem vagy résztvevője ennek a beszélgetésnek"
 
@@ -735,11 +735,11 @@ msgstr "Ez a szavazás véget ért ekkor: %(expiry_date)s"
 msgid "A conflict resolution process was started with you"
 msgstr "Konfliktusmegoldási folyamat indult veled"
 
-#: karrot/offers/api.py:31
+#: karrot/offers/api.py:33
 msgid "You are not the owner of this offer"
 msgstr "Ez az ajánlat nem a tied"
 
-#: karrot/offers/api.py:93
+#: karrot/offers/api.py:95
 msgid "You can only archive an active offer"
 msgstr "Csak aktív ajánlatokat archiválhatsz"
 

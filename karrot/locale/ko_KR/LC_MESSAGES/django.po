@@ -116,20 +116,20 @@ msgstr "당신이 이 그룹의 <strong>활동 알림</strong> 이메일을 구�
 msgid "Click here to unsubscribe"
 msgstr "구독을 취소하려면 여기를 클릭하세요"
 
-#: karrot/applications/api.py:27
+#: karrot/applications/api.py:29
 msgid "You need to have a verified email address"
 msgstr "이메일 주소를 인증하셔야합니다"
 
-#: karrot/applications/api.py:36 karrot/groups/api.py:52
+#: karrot/applications/api.py:38 karrot/groups/api.py:52
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
 msgid "You need to be a group editor"
 msgstr "그룹 편집자가 되어야 합니다"
 
-#: karrot/applications/api.py:44
+#: karrot/applications/api.py:46
 msgid "You need to be the applicant"
 msgstr "신청자가 되어야 합니다"
 
-#: karrot/applications/api.py:52
+#: karrot/applications/api.py:54
 msgid "Application is not pending anymore"
 msgstr "지원서가 더이상 보류되지 않습니다"
 
@@ -213,26 +213,26 @@ msgstr ""
 "이메일에 직접 답하거나, <a href=\"%(conversation_url)s\">%(site_name)s에서 보거나</a>, <a "
 "href=\"%(mute_url)s\">대화를 음소거 하세요</a>."
 
-#: karrot/conversations/api.py:65 karrot/conversations/api.py:246
-#: karrot/conversations/api.py:429 karrot/conversations/serializers.py:187
+#: karrot/conversations/api.py:73 karrot/conversations/api.py:254
+#: karrot/conversations/api.py:444 karrot/conversations/serializers.py:187
 msgid "You are not in this conversation"
 msgstr "이 대화에 속하지 않았습니다"
 
-#: karrot/conversations/api.py:74
+#: karrot/conversations/api.py:82
 msgid "You are not the author of this message"
 msgstr "당신은 이 메시지의 작성자가 아닙니다."
 
-#: karrot/conversations/api.py:83
+#: karrot/conversations/api.py:91
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
 msgstr "당신은 메시지가 생성된지 %(days_number)s 일부터는 편집하실 수 없습니다."
 
-#: karrot/conversations/api.py:357
+#: karrot/conversations/api.py:372
 msgid "Must be first in thread"
 msgstr "쓰레드에서 첫 번째여야 합니다"
 
-#: karrot/conversations/api.py:360
+#: karrot/conversations/api.py:375
 msgid "You are not a participant in this thread"
 msgstr "이 쓰레드에 참여자가 아닙니다"
 
@@ -696,11 +696,11 @@ msgstr "투표가 %(expiry_date)s에 종료됩니다."
 msgid "A conflict resolution process was started with you"
 msgstr "갈등 해결 프로세스가 당신과 함께 시작되었습니다"
 
-#: karrot/offers/api.py:31
+#: karrot/offers/api.py:33
 msgid "You are not the owner of this offer"
 msgstr "당신은 이 제공 항목의 주인이 아닙니다"
 
-#: karrot/offers/api.py:93
+#: karrot/offers/api.py:95
 msgid "You can only archive an active offer"
 msgstr "활성화된 제공 항목만 기록하실 수 있습니다"
 
