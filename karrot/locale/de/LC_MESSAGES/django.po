@@ -126,20 +126,20 @@ msgstr ""
 msgid "Click here to unsubscribe"
 msgstr "Klicke hier um dich auszutragen"
 
-#: karrot/applications/api.py:27
+#: karrot/applications/api.py:29
 msgid "You need to have a verified email address"
 msgstr "Du brauchst eine bestätigte E-Mail-Adresse."
 
-#: karrot/applications/api.py:36 karrot/groups/api.py:52
+#: karrot/applications/api.py:38 karrot/groups/api.py:52
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
 msgid "You need to be a group editor"
 msgstr "Du brauchst Bearbeitungsrechte für diese Gruppe."
 
-#: karrot/applications/api.py:44
+#: karrot/applications/api.py:46
 msgid "You need to be the applicant"
 msgstr "Du kannst dies nur als Bewerber*in tun."
 
-#: karrot/applications/api.py:52
+#: karrot/applications/api.py:54
 msgid "Application is not pending anymore"
 msgstr "Bewerbung ist nicht mehr offen"
 
@@ -229,16 +229,16 @@ msgstr ""
 "besuchen</a> oder <a href=\"%(mute_url)s\">die Unterhaltung "
 "stummschalten</a>."
 
-#: karrot/conversations/api.py:65 karrot/conversations/api.py:246
-#: karrot/conversations/api.py:429 karrot/conversations/serializers.py:187
+#: karrot/conversations/api.py:73 karrot/conversations/api.py:254
+#: karrot/conversations/api.py:444 karrot/conversations/serializers.py:187
 msgid "You are not in this conversation"
 msgstr "Du bist nicht Teil dieser Unterhaltung"
 
-#: karrot/conversations/api.py:74
+#: karrot/conversations/api.py:82
 msgid "You are not the author of this message"
 msgstr "Du bist nicht Autor dieser Nachricht"
 
-#: karrot/conversations/api.py:83
+#: karrot/conversations/api.py:91
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
@@ -246,11 +246,11 @@ msgstr ""
 "Du kannst eine Nachricht nicht mehr als %(days_number)s Tage nach ihrer "
 "Erstellung bearbeiten."
 
-#: karrot/conversations/api.py:357
+#: karrot/conversations/api.py:372
 msgid "Must be first in thread"
 msgstr "Muss erste Nachricht im Thread sein"
 
-#: karrot/conversations/api.py:360
+#: karrot/conversations/api.py:375
 msgid "You are not a participant in this thread"
 msgstr "Du bist nicht Teil dieses Threads"
 
@@ -749,11 +749,11 @@ msgstr "Diese Abstimmungsrunde endet am %(expiry_date)s."
 msgid "A conflict resolution process was started with you"
 msgstr "Ein Konfliktlösungsprozess mit dir wurde gestartet"
 
-#: karrot/offers/api.py:31
+#: karrot/offers/api.py:33
 msgid "You are not the owner of this offer"
 msgstr "Du bist nicht der Eigentümer dieses Angebots"
 
-#: karrot/offers/api.py:93
+#: karrot/offers/api.py:95
 msgid "You can only archive an active offer"
 msgstr "Nur aktive Angebote können archiviert werden."
 
