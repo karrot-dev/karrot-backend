@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
@@ -39,38 +40,25 @@ class ConfigViewSet(GenericViewSet):
         return Response(serializer.data)
 
 
-class BootstrapViewSet(GenericViewSet):
-    serializer_class = BootstrapSerializer  # for OpenAPI generation with drf-spectacular
-
-    def list(self, request, *args, **kwargs):
-        fields = request.query_params.get('fields', 'server,config,geoip,user,groups').split(',')
-        user = request.user
-
-        data = {
-            'server': {
-                'revision': BACKEND_REVISION,
-            } if 'server' in fields else None,
-            'config': get_config_data() if 'config' in fields else None,
-            'geoip': self.get_geoip(request) if 'geoip' in fields else None,
-            'groups': self.get_groups(user) if 'groups' in fields else None,
+class BootstrapDataHandlers:
+    @staticmethod
+    def server(request):
+        return {
+            'revision': BACKEND_REVISION,
         }
 
-        if user.is_authenticated:
-            data.update({
-                'user': user if 'user' in fields else None,
-                'places': self.get_places(user) if 'places' in fields else None,
-                'users': self.get_users(user) if 'users' in fields else None,
-                'status': self.get_status(user) if 'status' in fields else None,
-                'activity_types': self.get_activity_types(user) if 'activity_types' in fields else None,
-            })
-
-        # only keep fields we want (others should be None anyway...)
-        data = {key: val for key, val in data.items() if key in fields}
-        serializer = BootstrapSerializer(data, context=self.get_serializer_context())
-        return Response(serializer.data)
+    @staticmethod
+    def config(request):
+        return get_config_data()
 
     @staticmethod
-    def get_geoip(request):
+    def user(request):
+        if not request.user.is_authenticated:
+            return None
+        return request.user
+
+    @staticmethod
+    def geoip(request):
         if geoip_is_available():
             client_ip = get_client_ip(request)
             if client_ip:
@@ -84,11 +72,17 @@ class BootstrapViewSet(GenericViewSet):
                     }
 
     @staticmethod
-    def get_groups(user):
-        return Group.objects.annotate_member_count().annotate_is_user_member(user)
+    def groups(request):
+        # anon is ok here
+        return Group.objects.annotate_member_count().annotate_is_user_member(request.user)
 
     @staticmethod
-    def get_users(user):
+    def users(request):
+        user = request.user
+
+        if not user.is_authenticated:
+            return None
+
         is_member_of_group = Q(groups__in=user.groups.all())
 
         is_self = Q(id=user.id)
@@ -102,13 +96,43 @@ class BootstrapViewSet(GenericViewSet):
             .distinct()
 
     @staticmethod
-    def get_status(user):
-        return status_data(user)
+    def status(request):
+        if not request.user.is_authenticated:
+            return None
+        return status_data(request.user)
 
     @staticmethod
-    def get_places(user):
-        return Place.objects.filter(group__members=user).prefetch_related('subscribers')
+    def places(request):
+        if not request.user.is_authenticated:
+            return None
+        return Place.objects.filter(group__members=request.user).prefetch_related('subscribers')
 
     @staticmethod
-    def get_activity_types(user):
-        return ActivityType.objects.filter(group__members=user)
+    def activity_types(request):
+        if not request.user.is_authenticated:
+            return None
+        return ActivityType.objects.filter(group__members=request.user)
+
+
+class BootstrapViewSet(GenericViewSet):
+    serializer_class = BootstrapSerializer  # for OpenAPI generation with drf-spectacular
+    handlers = BootstrapDataHandlers()
+    defaults = (
+        'server',
+        'config',
+        'geoip',
+        'user',
+        'groups',
+    )
+
+    def list(self, request, *args, **kwargs):
+        fields = request.query_params.get('fields').split(',') if 'fields' in request.query_params else self.defaults
+        valid_fields = dir(self.handlers)
+
+        invalid_fields = [field for field in fields if field not in valid_fields]
+        if invalid_fields:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data=f"invalid fields [{','.join(invalid_fields)}]")
+
+        data = {field: getattr(self.handlers, field)(request) for field in fields}
+        serializer = BootstrapSerializer(data, context=self.get_serializer_context())
+        return Response(serializer.data)
