@@ -377,6 +377,7 @@ def place_subscription_updated(sender, instance, **kwargs):
 
 # Activities
 @receiver(post_save, sender=Activity)
+@on_transaction_commit
 def send_activity_updates(sender, instance, **kwargs):
     activity = instance
     if activity.is_done:
@@ -390,6 +391,7 @@ def send_activity_updates(sender, instance, **kwargs):
 
 
 @receiver(pre_delete, sender=Activity)
+@on_transaction_commit
 def send_activity_deleted(sender, instance, **kwargs):
     activity = instance
     payload = ActivitySerializer(activity).data
@@ -400,6 +402,7 @@ def send_activity_deleted(sender, instance, **kwargs):
 
 @receiver(post_save, sender=ActivityParticipant)
 @receiver(post_delete, sender=ActivityParticipant)
+@on_transaction_commit
 def send_activity_participant_updates(sender, instance, **kwargs):
     activity = instance.activity
     payload = ActivitySerializer(activity).data
