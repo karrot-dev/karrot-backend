@@ -43,7 +43,8 @@ def _notify_multiple_devices(**kwargs):
     """
 
     if fcm is None:
-        return 0, 0
+        print('tried to send fcm messages, but fcm is not available')
+        return [], []
 
     response = fcm.notify_multiple_devices(**kwargs)
     sentry_sdk.set_context('fcm_response', response)
@@ -74,6 +75,7 @@ def _notify_multiple_devices(**kwargs):
     # tell Sentry if there were errors
     if len(failure_indices) > 0:
         sentry_sdk.capture_message('FCM error while sending', extras=response)
+        logger.error(response)
         logger.warning(
             'FCM error while sending: {} tokens successful, {} failed, {} removed from database'.format(
                 len(success_indices), len(failure_indices), len(cleanup_tokens)
