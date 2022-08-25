@@ -1102,6 +1102,25 @@ class IssueReceiverTest(WSTestCase):
 
 
 @patch('karrot.subscriptions.tasks.notify_subscribers')
+class PushWelcomeMessageTests(TestCase):
+    def setUp(self):
+        self.user = UserFactory()
+
+    def test_sends_a_welcome_push_message(self, notify_subscribers):
+        token = faker.uuid4()
+        subscription = PushSubscription.objects.create(
+            user=self.user,
+            token=token,
+            platform=PushSubscriptionPlatform.ANDROID.value,
+        )
+        self.assertEqual(notify_subscribers.call_count, 1)
+
+        kwargs = notify_subscribers.call_args_list[0][1]
+        self.assertEqual(list(kwargs['subscriptions']), [subscription])
+        self.assertEqual(kwargs['fcm_options']['message_title'], 'Push notifications are enabled!')
+
+
+@patch('karrot.subscriptions.tasks.notify_subscribers')
 class ReceiverPushTests(TestCase):
     def setUp(self):
         self.user = UserFactory()
