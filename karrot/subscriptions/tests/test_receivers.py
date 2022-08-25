@@ -8,7 +8,7 @@ from unittest.mock import patch
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 
@@ -123,7 +123,7 @@ class WSClient:
         }
 
 
-class WSTestCase(TestCase):
+class WSTransactionTestCase(TransactionTestCase):
     def setUp(self):
         super().setUp()
         self.send_in_channel_patcher = patch('karrot.subscriptions.receivers.send_in_channel')
@@ -134,6 +134,10 @@ class WSTestCase(TestCase):
         client = WSClient(self.send_in_channel_mock)
         client.connect_as(user)
         return client
+
+
+class WSTestCase(WSTransactionTestCase, TestCase):
+    pass
 
 
 class ConversationReceiverTests(WSTestCase):
@@ -752,7 +756,7 @@ class PlaceReceiverTests(WSTestCase):
         self.assertEqual(len(client.messages), 1)
 
 
-class ActivityReceiverTests(WSTestCase):
+class ActivityReceiverTests(WSTransactionTestCase):
     def setUp(self):
         super().setUp()
         self.member = UserFactory()
