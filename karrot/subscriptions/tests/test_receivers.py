@@ -8,9 +8,11 @@ from unittest.mock import patch
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
+from django.db.models.signals import post_save
 from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
 from django.utils.crypto import get_random_string
+from factory.django import mute_signals
 
 from karrot.applications.factories import ApplicationFactory
 from karrot.conversations.factories import ConversationFactory
@@ -1116,12 +1118,13 @@ class ReceiverPushTests(TestCase):
         self.place = PlaceFactory(group=self.group)
         self.other_conversation = self.place.conversation
 
-        # add a push subscriber
-        self.subscription = PushSubscription.objects.create(
-            user=self.user,
-            token=self.token,
-            platform=PushSubscriptionPlatform.ANDROID.value,
-        )
+        with mute_signals(post_save):
+            # add a push subscriber
+            self.subscription = PushSubscription.objects.create(
+                user=self.user,
+                token=self.token,
+                platform=PushSubscriptionPlatform.ANDROID.value,
+            )
 
     def test_sends_to_push_subscribers(self, notify_subscribers):
         # add a message to the conversation
@@ -1173,7 +1176,7 @@ class ReceiverPushTests(TestCase):
         self.assertEqual(notify_subscribers.call_count, 0)
 
     def test_sends_mentions_when_not_in_conversation(self, notify_subscribers):
-        content = 'hello @{} are are you?'.format(self.user.username)
+        content = 'hello @{} how are you?'.format(self.user.username)
 
         with self.captureOnCommitCallbacks(execute=True):
             ConversationMessage.objects.create(
@@ -1203,12 +1206,13 @@ class GroupConversationReceiverPushTests(TestCase):
 
         self.conversation = self.group.conversation
 
-        # add a push subscriber
-        self.subscription = PushSubscription.objects.create(
-            user=self.user,
-            token=self.token,
-            platform=PushSubscriptionPlatform.ANDROID.value,
-        )
+        with mute_signals(post_save):
+            # add a push subscriber
+            self.subscription = PushSubscription.objects.create(
+                user=self.user,
+                token=self.token,
+                platform=PushSubscriptionPlatform.ANDROID.value,
+            )
 
     def test_sends_to_push_subscribers(self, notify_subscribers):
         with self.captureOnCommitCallbacks(execute=True):

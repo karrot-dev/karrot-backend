@@ -4,8 +4,10 @@ from unittest.mock import patch
 
 from dateutil.relativedelta import relativedelta
 from django.core import mail
+from django.db.models.signals import post_save
 from django.test import TestCase
 from django.utils import timezone
+from factory.django import mute_signals
 from freezegun import freeze_time
 from rest_framework.test import APITestCase
 
@@ -38,9 +40,12 @@ class TestActivityReminderTask(TestCase):
         self.group = GroupFactory(members=[self.user, self.other_user])
         self.place = PlaceFactory(group=self.group, subscribers=[self.user, self.other_user])
         self.activity = ActivityFactory(place=self.place)
-        self.subscriptions = [
-            PushSubscription.objects.create(user=self.user, token='', platform=PushSubscriptionPlatform.ANDROID.value)
-        ]
+        with mute_signals(post_save):
+            self.subscriptions = [
+                PushSubscription.objects.create(
+                    user=self.user, token='', platform=PushSubscriptionPlatform.ANDROID.value
+                )
+            ]
 
     def test_activity_reminder_notifies_subscribers(self, notify_subscribers_by_device):
         participant = ActivityParticipant.objects.create(user=self.user, activity=self.activity)

@@ -1,3 +1,5 @@
+from django.db.models.signals import post_save
+from factory.django import mute_signals
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -7,6 +9,7 @@ from karrot.utils.tests.fake import faker
 
 
 class TestSubscriptionsAPI(APITestCase):
+    @mute_signals(post_save)
     def test_create_push_subscription(self):
         user = UserFactory()
         self.client.force_login(user=user)
@@ -17,6 +20,7 @@ class TestSubscriptionsAPI(APITestCase):
         self.assertEqual(response.data['token'], data['token'])
         self.assertEqual(response.data['platform'], data['platform'])
 
+    @mute_signals(post_save)
     def test_cannot_create_duplicate_tokens(self):
         user = UserFactory()
         self.client.force_login(user=user)
@@ -28,11 +32,13 @@ class TestSubscriptionsAPI(APITestCase):
         response = self.client.post('/api/subscriptions/push/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    @mute_signals(post_save)
     def test_can_list_subscriptions(self):
         user = UserFactory()
         self.client.force_login(user=user)
 
         data = {'token': faker.uuid4(), 'platform': 'android'}
+
         response = self.client.post('/api/subscriptions/push/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -42,6 +48,7 @@ class TestSubscriptionsAPI(APITestCase):
         self.assertEqual(response.data[0]['token'], data['token'])
         self.assertFalse(hasattr(response.data[0], 'user'))
 
+    @mute_signals(post_save)
     def test_retrieve_subscriptions(self):
         user = UserFactory()
         token = faker.uuid4()
@@ -58,9 +65,11 @@ class TestSubscriptionsAPI(APITestCase):
     def test_can_delete_subscriptions(self):
         user = UserFactory()
         token = faker.uuid4()
-        subscription = PushSubscription.objects.create(
-            user=user, token=token, platform=PushSubscriptionPlatform.ANDROID.value
-        )
+
+        with mute_signals(post_save):
+            subscription = PushSubscription.objects.create(
+                user=user, token=token, platform=PushSubscriptionPlatform.ANDROID.value
+            )
         self.client.force_login(user=user)
         response = self.client.delete('/api/subscriptions/push/{}/'.format(subscription.id))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
