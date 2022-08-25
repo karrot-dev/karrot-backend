@@ -184,7 +184,7 @@ def notify_subscribers_by_device(subscriptions, *, click_action=None, fcm_option
     android_subscriptions = [s for s in subscriptions if s.platform == PushSubscriptionPlatform.ANDROID.value]
     web_subscriptions = [s for s in subscriptions if s.platform == PushSubscriptionPlatform.WEB.value]
 
-    def android_click_action_options():
+    def get_android_click_action_options():
         if not click_action:
             return {}
         return {
@@ -196,7 +196,7 @@ def notify_subscribers_by_device(subscriptions, *, click_action=None, fcm_option
             },
         }
 
-    def web_click_action_options():
+    def get_web_click_action_options():
         if not click_action:
             return {}
         return {
@@ -207,7 +207,7 @@ def notify_subscribers_by_device(subscriptions, *, click_action=None, fcm_option
         notify_subscribers(
             subscriptions=android_subscriptions, fcm_options={
                 **fcm_options,
-                **android_click_action_options,
+                **get_android_click_action_options(),
             }
         )
 
@@ -217,7 +217,7 @@ def notify_subscribers_by_device(subscriptions, *, click_action=None, fcm_option
         notify_subscribers(
             subscriptions=web_subscriptions, fcm_options={
                 **fcm_options,
-                **web_click_action_options(),
+                **get_web_click_action_options(),
             }
         )
 
