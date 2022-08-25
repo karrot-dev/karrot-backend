@@ -86,7 +86,7 @@ class FCMTests(TestCase):
         with logger_warning_mock() as warning_mock, override_fcm_key():
             warning_mock.assert_called_with('Please configure FCM_SERVER_KEY in your settings to use push messaging')
             result = _notify_multiple_devices(registration_ids=['mytoken'])
-            self.assertEqual(result, (0, 0))
+            self.assertEqual(result, ([], []))
 
 
 class FCMNotifySubscribersTests(TestCase):
