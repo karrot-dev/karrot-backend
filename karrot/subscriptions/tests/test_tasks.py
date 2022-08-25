@@ -1,7 +1,9 @@
 from unittest.mock import patch, call
 
 from dateutil.parser import parse
+from django.db.models.signals import post_save
 from django.test import TestCase
+from factory.django import mute_signals
 
 from karrot.applications.factories import ApplicationFactory
 from karrot.issues.factories import IssueFactory
@@ -25,9 +27,10 @@ class TestMessagePushNotifications(TestCase):
         conversation = Conversation.objects.get_or_create_for_target(group)
         message = conversation.messages.create(author=author, content='bla')
 
-        subscriptions = [
-            PushSubscription.objects.create(user=user, token='', platform=PushSubscriptionPlatform.ANDROID.value)
-        ]
+        with mute_signals(post_save):
+            subscriptions = [
+                PushSubscription.objects.create(user=user, token='', platform=PushSubscriptionPlatform.ANDROID.value)
+            ]
 
         notify.reset_mock()
         notify_message_push_subscribers(message)
@@ -42,9 +45,12 @@ class TestMessagePushNotifications(TestCase):
         reply = ConversationMessage.objects.create(
             author=reply_author, conversation=conversation, thread=message, content='reply'
         )
-        subscriptions = [
-            PushSubscription.objects.create(user=author, token='', platform=PushSubscriptionPlatform.ANDROID.value)
-        ]
+        with mute_signals(post_save):
+            subscriptions = [
+                PushSubscription.objects.create(
+                    user=author, token='', platform=PushSubscriptionPlatform.ANDROID.value
+                )
+            ]
 
         notify.reset_mock()
         notify_message_push_subscribers(reply)
@@ -57,10 +63,11 @@ class TestMessagePushNotifications(TestCase):
         conversation = Conversation.objects.get_or_create_for_target(group)
         message = conversation.messages.create(author=author, content='bla')
 
-        subscriptions = [
-            PushSubscription.objects.create(user=u, token='', platform=PushSubscriptionPlatform.ANDROID.value)
-            for u in users
-        ]
+        with mute_signals(post_save):
+            subscriptions = [
+                PushSubscription.objects.create(user=u, token='', platform=PushSubscriptionPlatform.ANDROID.value)
+                for u in users
+            ]
 
         notify.reset_mock()
         notify_message_push_subscribers(message)
@@ -81,7 +88,8 @@ class TestMessagePushNotifications(TestCase):
         participant = ConversationParticipant.objects.get(user=user, conversation=conversation)
         participant.muted = True
         participant.save()
-        PushSubscription.objects.create(user=user, token='', platform=PushSubscriptionPlatform.ANDROID.value)
+        with mute_signals(post_save):
+            PushSubscription.objects.create(user=user, token='', platform=PushSubscriptionPlatform.ANDROID.value)
 
         notify.reset_mock()
         notify_message_push_subscribers(message)
@@ -100,7 +108,8 @@ class TestMessagePushNotifications(TestCase):
         participant = ConversationThreadParticipant.objects.get(user=author, thread=reply.thread)
         participant.muted = True
         participant.save()
-        PushSubscription.objects.create(user=author, token='', platform=PushSubscriptionPlatform.ANDROID.value)
+        with mute_signals(post_save):
+            PushSubscription.objects.create(user=author, token='', platform=PushSubscriptionPlatform.ANDROID.value)
 
         notify.reset_mock()
         notify_message_push_subscribers(reply)

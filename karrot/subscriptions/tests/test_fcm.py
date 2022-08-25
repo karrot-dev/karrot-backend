@@ -3,7 +3,9 @@ from importlib import reload
 from unittest.mock import patch
 
 import requests_mock
+from django.db.models.signals import post_save
 from django.test import TestCase
+from factory.django import mute_signals
 
 import karrot.subscriptions.fcm
 from karrot.subscriptions import fcm
@@ -53,7 +55,7 @@ class FCMTests(TestCase):
         _notify_multiple_devices(registration_ids=['mytoken'])
 
     def test_removes_invalid_subscriptions(self, m):
-        with logger_warning_mock() as warning_mock, override_fcm_key('something'):
+        with mute_signals(post_save), logger_warning_mock() as warning_mock, override_fcm_key('something'):
             valid = PushSubscriptionFactory()
             invalid = PushSubscriptionFactory()
             invalid2 = PushSubscriptionFactory()
@@ -86,15 +88,16 @@ class FCMTests(TestCase):
         with logger_warning_mock() as warning_mock, override_fcm_key():
             warning_mock.assert_called_with('Please configure FCM_SERVER_KEY in your settings to use push messaging')
             result = _notify_multiple_devices(registration_ids=['mytoken'])
-            self.assertEqual(result, (0, 0))
+            self.assertEqual(result, ([], []))
 
 
 class FCMNotifySubscribersTests(TestCase):
     @patch('karrot.subscriptions.stats.write_points')
     @patch('karrot.subscriptions.fcm._notify_multiple_devices')
     def test_notify_subscribers(self, _notify_multiple_devices, write_points):
-        web_subscriptions = [PushSubscriptionFactory(platform='web') for _ in range(3)]
-        android_subscriptions = [PushSubscriptionFactory(platform='android') for _ in range(5)]
+        with mute_signals(post_save):
+            web_subscriptions = [PushSubscriptionFactory(platform='web') for _ in range(3)]
+            android_subscriptions = [PushSubscriptionFactory(platform='android') for _ in range(5)]
         subscriptions = web_subscriptions + android_subscriptions
 
         write_points.reset_mock()
@@ -138,8 +141,9 @@ class FCMNotifySubscribersTests(TestCase):
     @patch('karrot.subscriptions.stats.write_points')
     @patch('karrot.subscriptions.fcm.fcm')
     def test_prevent_cleanup_and_stats_if_result_count_does_not_match(self, mock_fcm, write_points):
-        # we give it one subscription, and it gives us two responses!?
-        subscription = PushSubscriptionFactory()
+        with mute_signals(post_save):
+            # we give it one subscription, and it gives us two responses!?
+            subscription = PushSubscriptionFactory()
 
         mock_fcm.notify_multiple_devices.return_value = {
             'results': [

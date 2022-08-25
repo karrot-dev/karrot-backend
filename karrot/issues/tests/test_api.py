@@ -145,6 +145,32 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
             response = self.get_results('/api/issues/', {'group': self.group.id}, format='json')
         self.assertEqual(len(response.data), 3)
 
+    def test_list_with_multiple_status_values(self):
+
+        for _ in range(2):
+            self.create_issue(status=IssueStatus.ONGOING.value)
+        for _ in range(3):
+            self.create_issue(status=IssueStatus.DECIDED.value)
+        for _ in range(4):
+            self.create_issue(status=IssueStatus.CANCELLED.value)
+
+        self.client.force_login(user=self.member)
+
+        response = self.get_results(
+            '/api/issues/', {'status': [IssueStatus.ONGOING.value, IssueStatus.DECIDED.value]}, format='json'
+        )
+        self.assertEqual(len(response.data), 5)
+
+        response = self.get_results(
+            '/api/issues/', {'status': [IssueStatus.ONGOING.value, IssueStatus.CANCELLED.value]}, format='json'
+        )
+        self.assertEqual(len(response.data), 6)
+
+        response = self.get_results(
+            '/api/issues/', {'status': [IssueStatus.DECIDED.value, IssueStatus.CANCELLED.value]}, format='json'
+        )
+        self.assertEqual(len(response.data), 7)
+
 
 class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
     @classmethod
@@ -233,8 +259,7 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         self.create_issue()
         self.client.force_login(user=VerifiedUserFactory())
         response = self.get_results('/api/issues/?group={}'.format(self.group.id))
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data), 0)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_can_list_issues_as_newcomer(self):
         self.create_issue()

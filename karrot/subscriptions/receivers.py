@@ -7,6 +7,7 @@ from django.contrib.auth import user_logged_out
 from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
+from django.utils.translation import gettext as _
 
 from karrot.applications.models import Application
 from karrot.applications.serializers import ApplicationSerializer
@@ -38,7 +39,8 @@ from karrot.places.serializers import PlaceSerializer
 from karrot.status.helpers import unseen_notification_count, unread_conversations, pending_applications, \
     get_feedback_possible
 from karrot.subscriptions import tasks
-from karrot.subscriptions.models import ChannelSubscription
+from karrot.subscriptions.models import ChannelSubscription, PushSubscription
+from karrot.subscriptions.tasks import notify_subscribers_by_device
 from karrot.subscriptions.utils import send_in_channel, MockRequest
 from karrot.userauth.serializers import AuthUserSerializer
 from karrot.users.serializers import UserSerializer
@@ -377,6 +379,7 @@ def place_subscription_updated(sender, instance, **kwargs):
 
 # Activities
 @receiver(post_save, sender=Activity)
+@on_transaction_commit
 def send_activity_updates(sender, instance, **kwargs):
     activity = instance
     if activity.is_done:
@@ -390,6 +393,7 @@ def send_activity_updates(sender, instance, **kwargs):
 
 
 @receiver(pre_delete, sender=Activity)
+@on_transaction_commit
 def send_activity_deleted(sender, instance, **kwargs):
     activity = instance
     payload = ActivitySerializer(activity).data
@@ -400,6 +404,7 @@ def send_activity_deleted(sender, instance, **kwargs):
 
 @receiver(post_save, sender=ActivityParticipant)
 @receiver(post_delete, sender=ActivityParticipant)
+@on_transaction_commit
 def send_activity_participant_updates(sender, instance, **kwargs):
     activity = instance.activity
     payload = ActivitySerializer(activity).data
@@ -721,3 +726,14 @@ def send_feedback_possible_count(user):
 
     for subscription in ChannelSubscription.objects.recent().filter(user=user):
         send_in_channel(subscription.reply_channel, topic='status', payload=payload)
+
+
+@receiver(post_save, sender=PushSubscription)
+def push_subscription_created(sender, instance, created, **kwargs):
+    if not created:
+        return
+    subscription = instance
+    # send them a welcome push message!
+    notify_subscribers_by_device([subscription], fcm_options={
+        'message_title': _('Push notifications are enabled!'),
+    })

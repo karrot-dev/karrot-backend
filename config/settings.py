@@ -389,6 +389,11 @@ HOSTNAME = options['SITE_URL']
 SITE_NAME = options['SITE_NAME']
 MEDIA_ROOT = options['FILE_UPLOAD_DIR']
 
+if is_dev:
+    # in prod daphne (and I guess uvicorn) handle this
+    # but if using https during local dev we need this
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 if options['FILE_UPLOAD_PERMISSIONS']:
     FILE_UPLOAD_PERMISSIONS = int(options['FILE_UPLOAD_PERMISSIONS'], 8)  # e.g. 0o640
 

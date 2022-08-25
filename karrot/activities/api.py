@@ -228,7 +228,10 @@ class ActivityViewSet(
     pagination_class = ActivityPagination
 
     def get_queryset(self):
-        qs = self.queryset.filter(place__group__members=self.request.user, place__status=PlaceStatus.ACTIVE.value)
+        qs = self.queryset.filter(place__group__members=self.request.user)
+        if self.action == 'list':
+            # only filter list by active places, as we need to get activities for not active places
+            qs = qs.filter(place__status=PlaceStatus.ACTIVE.value)
         if self.action in ('retrieve', 'list'):
             # because we have participants field in the serializer
             # only prefetch on read_only actions, otherwise there are caching problems when participants get added
