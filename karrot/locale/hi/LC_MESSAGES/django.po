@@ -117,20 +117,20 @@ msgstr ""
 msgid "Click here to unsubscribe"
 msgstr "सदस्यता समाप्त करने के लिए यहां क्लिक करें"
 
-#: karrot/applications/api.py:27
+#: karrot/applications/api.py:29
 msgid "You need to have a verified email address"
 msgstr "आपके पास एक सत्यापित ईमेल पता होना जरूरी है"
 
-#: karrot/applications/api.py:36 karrot/groups/api.py:52
+#: karrot/applications/api.py:38 karrot/groups/api.py:52
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
 msgid "You need to be a group editor"
 msgstr "आपका समूह संपादक होना जरूरी है"
 
-#: karrot/applications/api.py:44
+#: karrot/applications/api.py:46
 msgid "You need to be the applicant"
 msgstr "आपका आवेदक होना जरूरी है"
 
-#: karrot/applications/api.py:52
+#: karrot/applications/api.py:54
 msgid "Application is not pending anymore"
 msgstr "अभी आवेदन लंबित नहीं है"
 
@@ -221,16 +221,16 @@ msgstr ""
 "%(site_name)s पर देखें</a>, या <a href=\"%(mute_url)s\">बातचीत को चुप "
 "करें</a>।"
 
-#: karrot/conversations/api.py:65 karrot/conversations/api.py:246
-#: karrot/conversations/api.py:429 karrot/conversations/serializers.py:187
+#: karrot/conversations/api.py:73 karrot/conversations/api.py:254
+#: karrot/conversations/api.py:444 karrot/conversations/serializers.py:187
 msgid "You are not in this conversation"
 msgstr "आप इस बातचीत में नहीं हैं |"
 
-#: karrot/conversations/api.py:74
+#: karrot/conversations/api.py:82
 msgid "You are not the author of this message"
 msgstr "आप इस संदेश के लेखक नहीं हैं"
 
-#: karrot/conversations/api.py:83
+#: karrot/conversations/api.py:91
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
@@ -238,11 +238,11 @@ msgstr ""
 "आप संदेश के निर्माण के %(days_number)s दिन से अधिक समय बाद संदेश संपादित "
 "नहीं कर सकते।"
 
-#: karrot/conversations/api.py:357
+#: karrot/conversations/api.py:372
 msgid "Must be first in thread"
 msgstr "बातचीत में पहले होना चाहिए"
 
-#: karrot/conversations/api.py:360
+#: karrot/conversations/api.py:375
 msgid "You are not a participant in this thread"
 msgstr "आप इस बातचीत में भागीदार नहीं हैं"
 
@@ -725,11 +725,11 @@ msgstr "यह मतदान दौर %(expiry_date)s को समाप्�
 msgid "A conflict resolution process was started with you"
 msgstr "आपके साथ एक संघर्ष समाधान प्रक्रिया शुरू की गई थी"
 
-#: karrot/offers/api.py:31
+#: karrot/offers/api.py:33
 msgid "You are not the owner of this offer"
 msgstr "आप इस प्रस्ताव के मालिक नहीं हैं"
 
-#: karrot/offers/api.py:93
+#: karrot/offers/api.py:95
 msgid "You can only archive an active offer"
 msgstr "आप केवल सक्रिय प्रस्ताव संग्रहीत कर सकते हैं"
 

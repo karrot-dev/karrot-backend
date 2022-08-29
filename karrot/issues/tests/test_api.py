@@ -11,7 +11,7 @@ from karrot.conversations.models import ConversationNotificationStatus
 from karrot.groups import roles
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupNotificationType
-from karrot.issues.factories import IssueFactory, vote_for_remove_user, vote_for_no_change, vote_for_further_discussion
+from karrot.issues.factories import IssueFactory, vote_for_no_change, vote_for_remove_user
 from karrot.issues.models import Vote, IssueStatus
 from karrot.issues.tasks import process_expired_votings
 from karrot.tests.utils import ExtractPaginationMixin
@@ -145,6 +145,32 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
             response = self.get_results('/api/issues/', {'group': self.group.id}, format='json')
         self.assertEqual(len(response.data), 3)
 
+    def test_list_with_multiple_status_values(self):
+
+        for _ in range(2):
+            self.create_issue(status=IssueStatus.ONGOING.value)
+        for _ in range(3):
+            self.create_issue(status=IssueStatus.DECIDED.value)
+        for _ in range(4):
+            self.create_issue(status=IssueStatus.CANCELLED.value)
+
+        self.client.force_login(user=self.member)
+
+        response = self.get_results(
+            '/api/issues/', {'status': [IssueStatus.ONGOING.value, IssueStatus.DECIDED.value]}, format='json'
+        )
+        self.assertEqual(len(response.data), 5)
+
+        response = self.get_results(
+            '/api/issues/', {'status': [IssueStatus.ONGOING.value, IssueStatus.CANCELLED.value]}, format='json'
+        )
+        self.assertEqual(len(response.data), 6)
+
+        response = self.get_results(
+            '/api/issues/', {'status': [IssueStatus.DECIDED.value, IssueStatus.CANCELLED.value]}, format='json'
+        )
+        self.assertEqual(len(response.data), 7)
+
 
 class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
     @classmethod
@@ -233,8 +259,7 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         self.create_issue()
         self.client.force_login(user=VerifiedUserFactory())
         response = self.get_results('/api/issues/?group={}'.format(self.group.id))
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data), 0)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_can_list_issues_as_newcomer(self):
         self.create_issue()
@@ -388,10 +413,15 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         response = self.get_results('/api/conversations/{}/'.format(issue.conversation.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
-    def test_what_happens_to_vote_when_user_leaves_group_voluntarily(self):
+    def test_removing_votes_when_user_leaves_group(self):
         issue = self.create_issue(affected_user=self.affected_member)
         voting = issue.latest_voting()
-        vote_for_further_discussion(voting=voting, user=self.other_member)
+
+        # before the user leaves, this would be a no_change outcome
+        # when the user leaves it'll cause a tie, which resolves to further_discussion
+        vote_for_remove_user(voting=voting, user=issue.created_by)
+        vote_for_no_change(voting=voting, user=self.affected_member)
+        vote_for_no_change(voting=voting, user=self.other_member)
 
         # other_member leaves the group voluntarily
         self.client.force_login(user=self.other_member)
@@ -402,6 +432,6 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
             process_expired_votings()
             voting.refresh_from_db()
             self.assertEqual(voting.accepted_option.type, 'further_discussion')
-            # TODO: should we keep the votes of users that since left the group?
+            # make sure all voting members are in the group
             for voting_user in get_user_model().objects.filter(votes_given__option__voting=voting).distinct():
-                self.assertFalse(issue.group.is_member(voting_user))
+                self.assertTrue(issue.group.is_member(voting_user))

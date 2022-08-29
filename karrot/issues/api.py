@@ -9,6 +9,7 @@ from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import GenericViewSet
 
 from karrot.conversations.api import RetrieveConversationMixin
+from karrot.issues.filters import IssuesFilter
 from karrot.issues.models import Issue
 from karrot.issues.serializers import IssueSerializer, VoteSerializer
 
@@ -26,6 +27,8 @@ class IssuesCreateThrottle(UserRateThrottle):
 
 class IssuePagination(CursorPagination):
     page_size = 10
+    max_page_size = 1200
+    page_size_query_param = 'page_size'
     ordering = 'id'
 
 
@@ -38,7 +41,7 @@ class IssuesViewSet(
 ):
     queryset = Issue.objects
     filter_backends = (filters.DjangoFilterBackend, )
-    filterset_fields = ('group', 'status')
+    filterset_class = IssuesFilter
     serializer_class = IssueSerializer
     permission_classes = (IsAuthenticated, )
     pagination_class = IssuePagination
@@ -89,7 +92,4 @@ class IssuesViewSet(
         if request.method == 'DELETE':
             deleted = voting.delete_votes(user=request.user)
 
-            return Response(
-                data={},
-                status=status.HTTP_204_NO_CONTENT if deleted else status.HTTP_404_NOT_FOUND,
-            )
+            return Response(status=status.HTTP_204_NO_CONTENT if deleted else status.HTTP_404_NOT_FOUND)

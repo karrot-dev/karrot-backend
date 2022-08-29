@@ -43,21 +43,29 @@ class ConversationPagination(CursorPagination):
     # It stops us from using conversation__latest_message_id, so we annotate the value with a different name,
     # knowing that the order is not stable
     page_size = 10
+    max_page_size = 1200
+    page_size_query_param = 'page_size'
     ordering = '-conversation_latest_message_id'
 
 
 class ThreadPagination(CursorPagination):
     page_size = 10
+    max_page_size = 1200
+    page_size_query_param = 'page_size'
     ordering = '-latest_message_id'
 
 
-class MessagePagination(CursorPagination):
+class NewestFirstMessagePagination(CursorPagination):
     page_size = 10
+    max_page_size = 1200
+    page_size_query_param = 'page_size'
     ordering = '-id'
 
 
-class ReverseMessagePagination(CursorPagination):
+class OldestFirstMessagePagination(CursorPagination):
     page_size = 10
+    max_page_size = 1200
+    page_size_query_param = 'page_size'
     ordering = 'id'
 
 
@@ -279,13 +287,20 @@ class ConversationMessageViewSet(
     )
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = ConversationMessageFilter
-    pagination_class = MessagePagination
+    pagination_class = NewestFirstMessagePagination
     parser_classes = [JSONWithFilesMultiPartParser, JSONParser]
 
     @property
     def paginator(self):
-        if self.request.query_params.get('thread', None):
-            self.pagination_class = ReverseMessagePagination
+        # optional 'order' query param to explicitly set the ordering
+        order = self.request.query_params.get('order', None)
+        if order == 'newest-first':
+            self.pagination_class = NewestFirstMessagePagination
+        elif order == 'oldest-first':
+            self.pagination_class = OldestFirstMessagePagination
+        # otherwise do what it did before the 'order' parameter existed
+        elif self.request.query_params.get('thread', None):
+            self.pagination_class = OldestFirstMessagePagination
         return super().paginator
 
     def get_queryset(self):

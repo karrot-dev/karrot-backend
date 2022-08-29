@@ -531,7 +531,7 @@ class TestEMailVerification(APITestCase):
     def test_verify_mail_succeeds(self):
         code = VerificationCode.objects.get(user=self.user, type=self.type).code
         response = self.client.post(self.url, {'code': code})
-        self.assertEqual(response.data, {})
+        self.assertEqual(response.data, None)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_verify_mail_fails_with_wrong_verification_code(self):

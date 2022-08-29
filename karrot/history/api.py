@@ -12,7 +12,9 @@ from karrot.history.serializers import HistorySerializer, HistoryExportRenderer,
 
 class HistoryPagination(CursorPagination):
     page_size = 10
-    ordering = '-id'
+    max_page_size = 1200
+    page_size_query_param = 'page_size'
+    ordering = '-date'
 
 
 class HistoryViewSet(viewsets.ReadOnlyModelViewSet):
