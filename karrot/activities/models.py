@@ -9,7 +9,7 @@ from django.contrib.postgres.indexes import GistIndex
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db import transaction
-from django.db.models import Count, DurationField, F, Q, Sum
+from django.db.models import Count, DurationField, F, FilteredRelation, Q, Sum
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
@@ -219,25 +219,34 @@ class ActivityQuerySet(models.QuerySet):
         return self.exclude_disabled().filter(date__startswith__lt=timezone.now())\
             .annotate_num_participants().filter(num_participants__gt=0)
 
-    # TODO/PR: does not consider participant types
-    def done_not_full(self):
-        return self.exclude_disabled() \
-            .annotate_num_participants() \
-            .filter(date__startswith__lt=timezone.now(), num_participants__lt=F('max_participants'))
-
-    # TODO/PR: does not consider participant types
-    def with_free_slots(self):
-        return self.exclude_disabled() \
+    def with_free_slots(self, user):
+        participant_types_with_free_slots = ParticipantType.objects \
             .annotate_num_participants() \
             .filter(num_participants__lt=F('max_participants'))
 
-    # TODO/PR: does not consider participant types
+        if user:
+            # check if the roles that are free actually match up with the users roles for that group
+            participant_types_with_free_slots = participant_types_with_free_slots \
+                .annotate(membership=FilteredRelation(
+                    'activity__place__group__groupmembership',
+                    condition=Q(activity__place__group__groupmembership__user=user)),
+                ) \
+                .filter(membership__roles__contains=[F('role')])
+
+        activities = self.exclude_disabled() \
+            .filter(participant_types__in=participant_types_with_free_slots)
+
+        if user:
+            # exclude activities the user is signed up to
+            activities = activities.exclude(participants=user)
+
+        return activities
+
     def empty(self):
         return self.exclude_disabled() \
             .annotate_num_participants() \
             .filter(num_participants=0)
 
-    # TODO/PR: does not consider participant types
     def with_participant(self, user):
         return self.filter(participants=user)
 
@@ -419,6 +428,7 @@ class Activity(BaseModel, ConversationMixin):
                 raise Exception('must pass participant_type as >1')
             participant_type = self.participant_types.first()
 
+        # this assumes the users group roles have already been checked
         participant, _ = ActivityParticipant.objects.get_or_create(
             activity=self,
             user=user,
@@ -462,10 +472,10 @@ class SeriesParticipantType(BaseModel):
 
 class ParticipantTypeQuerySet(models.QuerySet):
     def annotate_num_participants(self):
-        return self.annotate(num_participants=Count('activityparticipant'))
+        return self.annotate(num_participants=Count('participants'))
 
 
-class ParticipantTypeManager(models.Manager.from_queryset(ActivityQuerySet)):
+class ParticipantTypeManager(models.Manager.from_queryset(ParticipantTypeQuerySet)):
     pass
 
 
@@ -502,7 +512,12 @@ class ActivityParticipant(BaseModel):
     )
     feedback_dismissed = models.BooleanField(default=False)
     reminder_task_id = models.TextField(null=True)  # stores a huey task id
-    participant_type = models.ForeignKey(ParticipantType, on_delete=models.CASCADE, null=False)
+    participant_type = models.ForeignKey(
+        ParticipantType,
+        on_delete=models.CASCADE,
+        null=False,
+        related_name='participants',
+    )
 
     class Meta:
         db_table = 'activities_activity_participants'

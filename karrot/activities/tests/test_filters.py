@@ -4,7 +4,9 @@ from django.db import DataError
 from django.test import TestCase
 from django.utils import timezone
 
+from karrot.groups.models import GroupMembership
 from karrot.activities.factories import ActivityFactory
+from karrot.groups.roles import GROUP_MEMBER
 from karrot.groups.factories import GroupFactory
 from karrot.activities.filters import ActivitiesFilter
 from karrot.activities.models import Activity
@@ -25,7 +27,13 @@ class TestActivityFilters(TestCase):
         self.other_member = VerifiedUserFactory()
         self.group = GroupFactory(members=[self.member, self.other_member])
         self.place = PlaceFactory(group=self.group)
-        self.activity = ActivityFactory(place=self.place, max_participants=2)
+        self.activity = ActivityFactory(
+            place=self.place,
+            participant_types=[{
+                'role': GROUP_MEMBER,
+                'max_participants': 2
+            }],
+        )
 
     def test_with_no_parameters(self):
         qs = Activity.objects.filter(place=self.place)
@@ -151,18 +159,57 @@ class TestActivityFilters(TestCase):
 
     def test_with_slots_free(self):
         self.expect_results(
+            user=self.member,
             slots='free',
             results=[self.activity],
         )
         self.activity.add_participant(self.member)
         self.expect_results(
+            user=self.member,
+            slots='free',
+            results=[],
+        )
+        self.expect_results(
+            user=self.other_member,
             slots='free',
             results=[self.activity],
         )
         self.activity.add_participant(self.other_member)
         self.expect_results(
+            user=self.other_member,
             slots='free',
             results=[],
+        )
+
+    def test_slots_free_using_roles(self):
+        self.special_activity = ActivityFactory(
+            place=self.place,
+            participant_types=[{
+                'role': 'special_role',
+                'max_participants': 2
+            }],
+        )
+        self.expect_results(
+            user=self.member,
+            slots='free',
+            results=[self.activity],
+        )
+        membership = GroupMembership.objects.get(
+            user=self.member,
+            group=self.group,
+        )
+        membership.roles.append('special_role')
+        membership.save()
+        self.expect_results(
+            user=self.member,
+            slots='free',
+            results=[self.activity, self.special_activity],
+        )
+        self.special_activity.add_participant(self.member)
+        self.expect_results(
+            user=self.member,
+            slots='free',
+            results=[self.activity],
         )
 
     def test_with_slots_empty(self):

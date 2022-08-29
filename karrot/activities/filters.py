@@ -63,7 +63,7 @@ class ActivitiesFilter(filters.FilterSet):
 
     def filter_slots(self, qs, name, value):
         if value == 'free':
-            return qs.with_free_slots()
+            return qs.with_free_slots(self.request.user)
         elif value == 'empty':
             return qs.empty()
         elif value == 'joined':

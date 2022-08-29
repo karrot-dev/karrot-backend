@@ -739,7 +739,7 @@ class InvitationReceiverTests(WSTestCase):
         self.assertEqual(response['payload']['id'], id)
 
 
-class PlaceReceiverTests(WSTestCase):
+class PlaceReceiverTests(WSTransactionTestCase):
     def setUp(self):
         super().setUp()
         self.member = UserFactory()
@@ -823,7 +823,7 @@ class ActivityReceiverTests(WSTransactionTestCase):
         self.assertEqual(len(client.messages), 1)
 
 
-class ActivitySeriesReceiverTests(WSTestCase):
+class ActivitySeriesReceiverTests(WSTransactionTestCase):
     def setUp(self):
         super().setUp()
         self.member = UserFactory()
