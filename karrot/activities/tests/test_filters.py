@@ -167,7 +167,7 @@ class TestActivityFilters(TestCase):
         self.expect_results(
             user=self.member,
             slots='free',
-            results=[],
+            results=[self.activity],
         )
         self.expect_results(
             user=self.other_member,
@@ -209,7 +209,7 @@ class TestActivityFilters(TestCase):
         self.expect_results(
             user=self.member,
             slots='free',
-            results=[self.activity],
+            results=[self.activity, self.special_activity],
         )
 
     def test_with_slots_empty(self):

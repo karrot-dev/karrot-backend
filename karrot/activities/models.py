@@ -236,10 +236,6 @@ class ActivityQuerySet(models.QuerySet):
         activities = self.exclude_disabled() \
             .filter(participant_types__in=participant_types_with_free_slots)
 
-        if user:
-            # exclude activities the user is signed up to
-            activities = activities.exclude(participants=user)
-
         return activities
 
     def empty(self):
