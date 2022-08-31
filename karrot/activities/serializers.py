@@ -383,25 +383,31 @@ class ActivityUpdateSerializer(ActivitySerializer):
             for entry in participant_types:
                 pk = entry.pop('id', None)
                 if pk:
+                    # existing participant type
                     participant_type = ParticipantType.objects.get(pk=pk)
                     if entry.get('_removed', False):
+                        # existing participant type being deleted
                         # TODO: maybe send these users a notification to say they were removed?
                         activity.activityparticipant_set \
                             .filter(participant_type=participant_type) \
                             .delete()
                         participant_type.delete()
                     else:
+                        # existing participant type being edited
                         role = entry.get('role', None)
                         if role and role != participant_type.role:
                             # find all the participants who are missing the new role, and remove them...
+                            # TODO: perhaps a notification, or option, message...
                             users = activity.place.group.members.filter(groupmembership__roles__contains=[role])
                             activity.activityparticipant_set\
                                 .filter(participant_type=participant_type)\
                                 .exclude(user__in=users)\
                                 .delete()
 
+                        # update the rest of the fields
                         ParticipantType.objects.filter(pk=pk).update(**entry)
                 else:
+                    # new participant type \o/
                     ParticipantType.objects.create(activity=activity, **entry)
         return super().update(instance, validated_data)
 
@@ -765,8 +771,10 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
                 for entry in participant_types:
                     pk = entry.pop('id', None)
                     if pk:
+                        # existing series participant type
                         series_participant_type = SeriesParticipantType.objects.get(pk=pk)
                         if entry.get('_removed', False):
+                            # existing series participant type being deleted
                             # TODO: maybe send these users a notification to say they were removed?
                             ActivityParticipant.objects.filter(
                                 activity__in=activities,
@@ -778,19 +786,21 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
                             ).delete()
                             series_participant_type.delete()
                         else:
+                            # existing series participant type being edited
                             old_description = series_participant_type.description
                             description = entry.get('description', None)
-                            description_changed = description and description != old_description
+                            description_changed = 'description' in entry and description != old_description
 
                             old_max_participants = series_participant_type.max_participants
                             max_participants = entry.get('max_participants', None)
-                            max_participants_changed = max_participants and max_participants != old_max_participants
+                            max_participants_changed = 'max_participants' in entry and max_participants != old_max_participants
 
                             old_role = series_participant_type.role
                             role = entry.get('role', None)
-                            role_changed = role and role != old_role
+                            role_changed = 'role' in entry and role != old_role
 
                             if description_changed or max_participants_changed or role_changed:
+                                # now we go through all the related participant types for the individual activities
                                 for participant_type in ParticipantType.objects.filter(
                                         series_participant_type_id=pk,
                                         activity__in=activities,
@@ -811,10 +821,14 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
                                             activity__in=activities,
                                         ).exclude(user__in=users_with_new_role).delete()
                                     participant_type.save()
+
+                            # update the rest of the stuff
                             SeriesParticipantType.objects.filter(pk=pk).update(**entry)
                     else:
+                        # new series participant type \o/
                         series_participant_type = SeriesParticipantType.objects.create(activity_series=series, **entry)
                         for activity in activities:
+                            # propagate it to all the activities
                             ParticipantType.objects.create(
                                 activity=activity,
                                 series_participant_type=series_participant_type,
