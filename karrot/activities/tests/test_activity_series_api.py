@@ -15,6 +15,7 @@ from rest_framework.test import APITestCase
 from karrot.activities.tests.test_activities_api import APPROVED
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupStatus
+from karrot.activities.models import ActivitySeries
 from karrot.activities.factories import ActivitySeriesFactory, ActivityTypeFactory
 from karrot.groups.roles import GROUP_MEMBER
 from karrot.places.factories import PlaceFactory
@@ -132,6 +133,8 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
         for response_data_item, expected_date in zip(response.data, dates_list):
             self.assertEqual(parse(response_data_item['date'][0]), expected_date, response_data_item['date'])
 
+        series = ActivitySeries.objects.get(id=series_id)
+
         # verify non-date fields, don't need parsing
         for _ in response.data:
             del _['id']
@@ -139,21 +142,30 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
             del _['feedback_due']
         for _ in dates_list:
             created_activities.append({
-                'activity_type': self.activity_type.id,
-                'series': series_id,
+                'activity_type':
+                self.activity_type.id,
+                'series':
+                series_id,
                 'participants': [],
                 'participant_types': [{
                     'id': ANY,
-                    **o
-                } for o in participant_types],
-                'place': self.place.id,
-                'description': '',
+                    'series_participant_type': o.id,
+                    'description': o.description,
+                    'max_participants': o.max_participants,
+                    'role': o.role,
+                } for o in series.participant_types.all()],
+                'place':
+                self.place.id,
+                'description':
+                '',
                 'feedback_given_by': [],
                 'feedback_dismissed_by': [],
-                'is_disabled': False,
-                'has_duration': False,
-                'is_done': False,
-                'is_modified': False,
+                'is_disabled':
+                False,
+                'has_duration':
+                False,
+                'is_done':
+                False,
             })
         self.assertEqual(response.data, created_activities, response.data)
 
@@ -278,7 +290,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
     def test_modify_participant_type_role(self):
         self.client.force_login(user=self.member)
         pt = self.series.participant_types.get(role='approved')
-        activity = self.series.activities.not_modified().upcoming().first()
+        activity = self.series.activities.upcoming().first()
         pt_activity = activity.participant_types.get(series_participant_type=pt)
         activity.add_participant(self.member, participant_type=pt_activity)
         self.assertEqual(activity.participants.count(), 1)
@@ -672,24 +684,6 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(
             'You cannot modify the duration of activities that are part of a series', response.data['has_duration'][0]
         )
-
-    def test_marks_changed_activities_is_modified(self):
-        self.client.force_login(user=self.member)
-        activity = self.series.activities.last()
-        self.assertEqual(activity.is_modified, False)
-
-        response = self.client.patch(
-            '/api/activities/{}/'.format(activity.id),
-            {
-                'description': 'I changed it',
-            },
-            format='json',
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['is_modified'], True)
-        activity.refresh_from_db()
-        self.assertEqual(activity.is_modified, True)
 
 
 class TestActivitySeriesAPIAuth(APITestCase):

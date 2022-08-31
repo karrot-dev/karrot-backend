@@ -137,37 +137,13 @@ class ActivitySeries(BaseModel):
     def old(self):
         return type(self).objects.get(pk=self.pk) if self.pk else None
 
-    def update_activities(self, old=None):
-        """
-        create new activities and delete empty activities that don't match series
-        if you pass in an old activity (before you saved), it will update existing activities with changes
-        """
-        if not old or old.start_date != self.start_date or old.rule != self.rule:
-            for activity, date in self.get_matched_activities():
-                if not activity:
-                    self.create_activity(date)
-                elif not date:
-                    if activity.participants.count() < 1:
-                        activity.delete()
-
-        if old:
-            description_changed = old.description != self.description
-            duration_changed = old.duration != self.duration
-            if description_changed or duration_changed:
-                for activity in self.activities.not_modified().upcoming():
-                    activity.description = self.description
-                    if duration_changed:
-                        if self.duration:
-                            activity.has_duration = True
-                            activity.date = CustomDateTimeTZRange(
-                                activity.date.start, activity.date.start + self.duration
-                            )
-                        else:
-                            activity.has_duration = False
-                            activity.date = CustomDateTimeTZRange(
-                                activity.date.start, activity.date.start + default_duration
-                            )
-                    activity.save()
+    def update_activities(self):
+        for activity, date in self.get_matched_activities():
+            if not activity:
+                self.create_activity(date)
+            elif not date:
+                if activity.participants.count() < 1:
+                    activity.delete()
 
     def __str__(self):
         return 'ActivitySeries {} - {}'.format(self.rule, self.place)
@@ -248,9 +224,6 @@ class ActivityQuerySet(models.QuerySet):
 
     def upcoming(self):
         return self.filter(date__startswith__gt=timezone.now())
-
-    def not_modified(self):
-        return self.filter(is_modified=False)
 
     @transaction.atomic
     def process_finished_activities(self):
@@ -369,10 +342,6 @@ class Activity(BaseModel, ConversationMixin):
 
     is_done = models.BooleanField(default=False)
 
-    # if it's been modified from the series then mark it here
-    # this means we'll then not do further updates when changing the series
-    is_modified = models.BooleanField(default=False)
-
     @property
     def group(self):
         return self.place.group
@@ -456,6 +425,9 @@ class Activity(BaseModel, ConversationMixin):
 
 
 class SeriesParticipantType(BaseModel):
+    class Meta:
+        ordering = ['id']
+
     activity_series = models.ForeignKey(
         ActivitySeries,
         on_delete=models.CASCADE,
@@ -477,6 +449,9 @@ class ParticipantTypeManager(models.Manager.from_queryset(ParticipantTypeQuerySe
 
 class ParticipantType(BaseModel):
     objects = ParticipantTypeManager()
+
+    class Meta:
+        ordering = ['id']
 
     activity = models.ForeignKey(
         Activity,

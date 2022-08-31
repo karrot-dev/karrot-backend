@@ -22,7 +22,7 @@ from karrot.history.models import History, HistoryTypus
 from karrot.activities import stats
 from karrot.activities.models import (
     Activity as ActivityModel, Feedback as FeedbackModel, ActivitySeries as ActivitySeriesModel, ActivityType,
-    ActivityParticipant, ParticipantType, SeriesParticipantType
+    ActivityParticipant, ParticipantType, SeriesParticipantType, default_duration
 )
 from karrot.utils.date_utils import csv_datetime
 from karrot.utils.misc import find_changed
@@ -102,12 +102,6 @@ class ActivityTypeSerializer(serializers.ModelSerializer):
             after=ActivityTypeHistorySerializer(activity_type).data,
         )
         return activity_type
-
-
-class ActivityHistorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ActivityModel
-        fields = '__all__'
 
 
 class ActivityTypeHistorySerializer(serializers.ModelSerializer):
@@ -191,12 +185,21 @@ class ParticipantTypeSerializer(serializers.ModelSerializer):
             'id',
             'description',
             'max_participants',
+            'series_participant_type',
             'role',
             '_removed',
         ]
 
     id = serializers.IntegerField(required=False)
     _removed = serializers.BooleanField(required=False)
+
+
+class ActivityHistorySerializer(serializers.ModelSerializer):
+    participant_types = ParticipantTypeSerializer(many=True)
+
+    class Meta:
+        model = ActivityModel
+        fields = '__all__'
 
 
 class SeriesParticipantTypeSerializer(serializers.ModelSerializer):
@@ -232,13 +235,11 @@ class ActivitySerializer(serializers.ModelSerializer):
             'is_disabled',
             'has_duration',
             'is_done',
-            'is_modified',
         ]
         read_only_fields = [
             'id',
             'series',
             'is_done',
-            'is_modified',
         ]
 
     participants = ActivityParticipantSerializer(
@@ -299,6 +300,17 @@ class ActivitySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Duration must be at least one second.')
         return date
 
+    def validate_participant_types(self, participant_types):
+        for participant_type in participant_types:
+            series_participant_type = participant_type.get('series_participant_type', None)
+            if series_participant_type:
+                if not self.instance:
+                    # invalid to specify this, as these are only created by a karrot task, not by API
+                    raise serializers.ValidationError('Cannot specify series_participant_type for new activity.')
+                if series_participant_type.activity_series_id != self.instance.series_id:
+                    raise serializers.ValidationError('Wrong series.')
+        return participant_types
+
     def validate(self, data):
         def get_instance_attr(field):
             if self.instance is None:
@@ -332,9 +344,6 @@ class ActivityUpdateSerializer(ActivitySerializer):
             return self.instance
 
         before_data = ActivityHistorySerializer(activity).data
-        if activity.series:
-            # we're part of a series, but modifying the activity, so mark it as exempt from future changes
-            self.validated_data['is_modified'] = True
         activity = super().save(**kwargs)
         after_data = ActivityHistorySerializer(activity).data
 
@@ -590,6 +599,8 @@ class DurationInSecondsField(Field):
 
 
 class ActivitySeriesHistorySerializer(serializers.ModelSerializer):
+    participant_types = SeriesParticipantTypeSerializer(many=True)
+
     class Meta:
         model = ActivitySeriesModel
         fields = '__all__'
@@ -623,16 +634,6 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
     participant_types = SeriesParticipantTypeSerializer(many=True)
 
     duration = DurationInSecondsField(required=False, allow_null=True)
-
-    # def save(self, **kwargs):
-    #     raise Exception('now we do not go here? or is it for create too?')
-    #     old = self.instance.old() if self.instance else None
-    #     if old:
-    #         raise Exception('why is this not handled by the activityseriesupdateserializer?')
-    #     series = super().save(last_changed_by=self.context['request'].user)
-    #     # TODO: implement updating nested participant roles (see offer images for example how to do it)
-    #     series.update_activities(old)
-    #     return series
 
     @transaction.atomic()
     def create(self, validated_data):
@@ -705,69 +706,16 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
 
     @transaction.atomic()
     def save(self, **kwargs):
-        old = self.instance.old() if self.instance else None
-        self._validated_data = find_changed(self.instance, self.validated_data)
+        series = self.instance
+        old = self.instance.old() if series else None
+        changed_data = find_changed(series, self.validated_data)
+        self._validated_data = changed_data
         skip_update = len(self.validated_data.keys()) == 0
         if skip_update:
-            return self.instance
-        series = super().save(last_changed_by=self.context['request'].user)
-        series.update_activities(old)
-        return series
+            return series
 
-    def update(self, series, validated_data):
         before_data = ActivitySeriesHistorySerializer(series).data
-
-        activities = None
-
-        participant_types = validated_data.pop('participant_types', None)
-        if participant_types:
-            activities = series.activities.not_modified().upcoming()
-            for entry in participant_types:
-                pk = entry.pop('id', None)
-                if pk:
-                    participant_type = SeriesParticipantType.objects.get(pk=pk)
-                    if entry.get('_removed', False):
-                        # TODO: maybe send these users a notification to say they were removed?
-                        ActivityParticipant.objects.filter(
-                            activity__in=activities,
-                            participant_type__series_participant_type=participant_type,
-                        ).delete()
-                        ParticipantType.objects.filter(
-                            series_participant_type=participant_type,
-                            activity__in=activities,
-                        ).delete()
-                        # TODO: this delete should cascade anyway right?
-                        participant_type.delete()
-                    else:
-                        role = entry.get('role', None)
-                        if role and role != participant_type.role:
-                            # find all the participants who are missing the new role, and remove them...
-                            # TODO: is this a good way to go about it? at least document it...
-                            users = series.place.group.members.filter(groupmembership__roles__contains=[role])
-                            ActivityParticipant.objects.filter(
-                                activity__in=activities,
-                                participant_type__series_participant_type=participant_type,
-                            ).exclude(user__in=users).delete()
-                        SeriesParticipantType.objects.filter(pk=pk).update(**entry)
-                        ParticipantType.objects.filter(
-                            series_participant_type_id=pk,
-                            activity__in=activities,
-                        ).update(**entry)
-                else:
-                    participant_type = SeriesParticipantType.objects.create(activity_series=series, **entry)
-                    for activity in activities:
-                        ParticipantType.objects.create(
-                            activity=activity,
-                            series_participant_type=participant_type,
-                            **entry,
-                        )
-
-        super().update(series, validated_data)
-
-        if activities:
-            # we've probably modified activities so ensure we trigger subscription updates for them
-            [activity.save() for activity in activities]
-
+        series = super().save(last_changed_by=self.context['request'].user)
         after_data = ActivitySeriesHistorySerializer(series).data
 
         if before_data != after_data:
@@ -778,11 +726,108 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
                 series=series,
                 users=[self.context['request'].user],
                 payload={k: self.initial_data.get(k)
-                         for k in validated_data.keys()},
+                         for k in changed_data.keys()},
                 before=before_data,
                 after=after_data,
             )
+
         series.place.group.refresh_active_status()
+
+        if old.start_date != series.start_date or old.rule != series.rule:
+            series.update_activities()
+
+        return series
+
+    def update(self, series, validated_data):
+        activities = None
+
+        description = validated_data.get('description', None)
+        duration = validated_data.get('duration', None)
+        participant_types = validated_data.pop('participant_types', None)
+
+        description_changed = 'description' in validated_data and series.description != description
+        duration_changed = 'duration' in validated_data and series.duration != duration
+        if description_changed or duration_changed or participant_types:
+            activities = series.activities.upcoming()
+            for activity in activities:
+                if description_changed and series.description == activity.description:
+                    activity.description = description
+                if duration_changed:
+                    if duration:
+                        activity.has_duration = True
+                        activity.date = CustomDateTimeTZRange(activity.date.start, activity.date.start + duration)
+                    else:
+                        activity.has_duration = False
+                        activity.date = CustomDateTimeTZRange(
+                            activity.date.start, activity.date.start + default_duration
+                        )
+            if participant_types:
+                for entry in participant_types:
+                    pk = entry.pop('id', None)
+                    if pk:
+                        series_participant_type = SeriesParticipantType.objects.get(pk=pk)
+                        if entry.get('_removed', False):
+                            # TODO: maybe send these users a notification to say they were removed?
+                            ActivityParticipant.objects.filter(
+                                activity__in=activities,
+                                participant_type__series_participant_type=series_participant_type,
+                            ).delete()
+                            ParticipantType.objects.filter(
+                                series_participant_type=series_participant_type,
+                                activity__in=activities,
+                            ).delete()
+                            series_participant_type.delete()
+                        else:
+                            old_description = series_participant_type.description
+                            description = entry.get('description', None)
+                            description_changed = description and description != old_description
+
+                            old_max_participants = series_participant_type.max_participants
+                            max_participants = entry.get('max_participants', None)
+                            max_participants_changed = max_participants and max_participants != old_max_participants
+
+                            old_role = series_participant_type.role
+                            role = entry.get('role', None)
+                            role_changed = role and role != old_role
+
+                            if description_changed or max_participants_changed or role_changed:
+                                for participant_type in ParticipantType.objects.filter(
+                                        series_participant_type_id=pk,
+                                        activity__in=activities,
+                                ):
+                                    if description_changed and participant_type.description == old_description:
+                                        participant_type.description = description
+                                    if max_participants_changed and participant_type.max_participants == old_max_participants:
+                                        participant_type.max_participants = max_participants
+                                    if role_changed and participant_type.role == old_role:
+                                        participant_type.role = role
+                                        # find all the participants who are missing the new role, and remove them...
+                                        # TODO: is this a good way to go about it? at least document it...
+                                        users_with_new_role = series.place.group.members.filter(
+                                            groupmembership__roles__contains=[role]
+                                        )
+                                        ActivityParticipant.objects.filter(
+                                            participant_type=participant_type,
+                                            activity__in=activities,
+                                        ).exclude(user__in=users_with_new_role).delete()
+                                    participant_type.save()
+                            SeriesParticipantType.objects.filter(pk=pk).update(**entry)
+                    else:
+                        series_participant_type = SeriesParticipantType.objects.create(activity_series=series, **entry)
+                        for activity in activities:
+                            ParticipantType.objects.create(
+                                activity=activity,
+                                series_participant_type=series_participant_type,
+                                **entry,
+                            )
+
+        series = super().update(series, validated_data)
+
+        if activities:
+            # TODO: why do this after update not before?
+            # we will have modified nested info in activities so trigger updates
+            [activity.save() for activity in activities]
+
         return series
 
 

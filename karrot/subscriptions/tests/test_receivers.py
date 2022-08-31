@@ -839,9 +839,7 @@ class ActivitySeriesReceiverTests(WSTransactionTestCase):
 
         date = faker.future_datetime(end_date='+30d', tzinfo=timezone.utc) + relativedelta(months=2)
         self.series.start_date = date
-        old = self.series.old()
         self.series.save()
-        self.series.update_activities(old)
 
         response = client.messages_by_topic.get('activities:series')[0]
         self.assertEqual(parse(response['payload']['start_date']), date)
