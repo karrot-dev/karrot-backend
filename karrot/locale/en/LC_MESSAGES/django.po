@@ -40,15 +40,15 @@ msgstr ""
 msgid "Task"
 msgstr ""
 
-#: karrot/activities/serializers.py:140
+#: karrot/activities/serializers.py:134
 msgid "Must be a list"
 msgstr ""
 
-#: karrot/activities/serializers.py:141
+#: karrot/activities/serializers.py:135
 msgid "Must be a list with one or two values"
 msgstr ""
 
-#: karrot/activities/serializers.py:142
+#: karrot/activities/serializers.py:136
 msgid "Must pass start value"
 msgstr ""
 
