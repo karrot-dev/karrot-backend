@@ -24,7 +24,7 @@ def backfill_participant_type(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('activities', '0031_add_participant_types'),
+        ('activities', '0033_add_participant_types'),
     ]
 
     operations = [

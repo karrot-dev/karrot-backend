@@ -164,10 +164,10 @@ class TestAddParticipantTypes(TestMigrations):
         ('users', '0027_fix_usernames'),
         ('groups', '0046_groupmembership_must_have_member_role'),
         ('places', '0038_place_default_view'),
-        ('activities', '0031_add_participant_types'),
+        ('activities', '0033_add_participant_types'),
     ]
     migrate_to = [
-        ('activities', '0032_backfill_participant_role'),
+        ('activities', '0034_backfill_participant_role'),
     ]
 
     def setUpBeforeMigration(self, apps):
