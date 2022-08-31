@@ -469,6 +469,8 @@ class ParticipantType(BaseModel):
     role = models.CharField(max_length=100, default=GROUP_MEMBER)
 
     def is_full(self):
+        if not self.max_participants:
+            return False
         return self.activity.activityparticipant_set.filter(participant_type=self).count() >= self.max_participants
 
 
