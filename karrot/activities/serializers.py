@@ -839,6 +839,8 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
 
         if activities:
             # TODO: why do this after update not before?
+            # TODO: this sends a storm of activity updates, and the frontend re-requests activities loads of times
+            # ... could implement a bulk-update websocket message, would also need to for work update_activities()
             # we will have modified nested info in activities so trigger updates
             [activity.save() for activity in activities]
 
