@@ -14,6 +14,7 @@ from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.fields import CharField, DateTimeField, Field
+from rest_framework.serializers import Serializer
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework_csv.renderers import CSVRenderer
 
@@ -399,9 +400,9 @@ class ActivityUpdateSerializer(ActivitySerializer):
                             # find all the participants who are missing the new role, and remove them...
                             # TODO: perhaps a notification, or option, message...
                             users = activity.place.group.members.filter(groupmembership__roles__contains=[role])
-                            activity.activityparticipant_set\
-                                .filter(participant_type=participant_type)\
-                                .exclude(user__in=users)\
+                            activity.activityparticipant_set \
+                                .filter(participant_type=participant_type) \
+                                .exclude(user__in=users) \
                                 .delete()
 
                         # update the rest of the fields
@@ -628,6 +629,7 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             'id',
+            'activity_type',
         ]
 
     start_date = DateTimeFieldWithTimezone()
@@ -845,6 +847,81 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
             [activity.save() for activity in activities]
 
         return series
+
+
+class ActivitySeriesUpdateCheckSerializer(Serializer):
+    rule = serializers.CharField(write_only=True, required=False)
+    start_date = DateTimeFieldWithTimezone(write_only=True, required=False)
+    participant_types = SeriesParticipantTypeSerializer(many=True, write_only=True)
+
+    will_remove_count = serializers.IntegerField(read_only=True)
+
+    def update(self, instance, validated_data):
+        series = instance
+
+        will_remove_participant_ids = set()
+
+        if 'start_date' in validated_data or 'rule' in validated_data:
+            # we set the values on the series, so we can calculate the dates
+            # don't save it!!!
+            if 'start_date' in validated_data:
+                series.start_date = validated_data['start_date']
+            if 'rule' in validated_data:
+                series.rule = validated_data['rule']
+            for activity, date in series.get_matched_activities():
+                if activity and not date:
+                    if activity.activityparticipant_set.count() > 0:
+                        # would remove these participants!
+                        # will_remove_count += activity.participants.count()
+                        will_remove_participant_ids.update(
+                            activity.activityparticipant_set.values_list('id', flat=True)
+                        )
+
+        if 'participant_types' in validated_data:
+            activities = series.activities.upcoming()
+            for entry in validated_data['participant_types']:
+                pk = entry.pop('id', None)
+                if pk:
+                    # existing series participant type
+                    series_participant_type = SeriesParticipantType.objects.get(pk=pk)
+                    if entry.get('_removed', False):
+                        # existing series participant type would be deleted
+                        will_remove_participant_ids.update(
+                            ActivityParticipant.objects.filter(
+                                activity__in=activities,
+                                participant_type__series_participant_type=series_participant_type,
+                            ).values_list('id', flat=True)
+                        )
+                    else:
+                        old_role = series_participant_type.role
+                        role = entry.get('role', None)
+                        role_changed = 'role' in entry and role != old_role
+
+                        if role_changed:
+                            # now we go through all the related participant types for the individual activities
+                            for participant_type in ParticipantType.objects.filter(
+                                    series_participant_type_id=pk,
+                                    activity__in=activities,
+                            ):
+                                if role_changed and participant_type.role == old_role:
+                                    participant_type.role = role
+                                    # find all the participants who are missing the new role
+                                    users_with_new_role = series.place.group.members.filter(
+                                        groupmembership__roles__contains=[role]
+                                    )
+                                    will_remove_participant_ids.update(
+                                        ActivityParticipant.objects.filter(
+                                            participant_type=participant_type,
+                                            activity__in=activities,
+                                        ).exclude(user__in=users_with_new_role, ).values_list('id', flat=True)
+                                    )
+
+        return {
+            'will_remove_count': len(will_remove_participant_ids),
+        }
+
+    def create(self, validated_data):
+        pass
 
 
 class FeedbackSerializer(serializers.ModelSerializer):

@@ -28,7 +28,7 @@ from karrot.activities.serializers import (
     ActivityDismissFeedbackSerializer, ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer,
     ActivityLeaveSerializer, FeedbackSerializer, ActivityUpdateSerializer, ActivitySeriesUpdateSerializer,
     ActivitySeriesHistorySerializer, FeedbackExportSerializer, FeedbackExportRenderer, ActivityTypeSerializer,
-    ActivityTypeHistorySerializer, ActivityICSSerializer
+    ActivityTypeHistorySerializer, ActivityICSSerializer, ActivitySeriesUpdateCheckSerializer
 )
 from karrot.activities.renderers import ICSCalendarRenderer
 from karrot.places.models import PlaceStatus
@@ -197,6 +197,22 @@ class ActivitySeriesViewSet(
         )
         super().perform_destroy(series)
         series.place.group.refresh_active_status()
+
+    @action(
+        detail=True,
+        methods=['PATCH'],
+        permission_classes=(IsAuthenticated, ),
+        serializer_class=ActivitySeriesUpdateCheckSerializer,
+    )
+    def check(self, request, pk):
+        # will_remove_count = 24
+        self.check_permissions(request)
+        instance = self.get_object()
+        self.check_object_permissions(request, instance)
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(data=serializer.data)
 
 
 class ActivityPagination(CursorPagination):
