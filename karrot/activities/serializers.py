@@ -23,7 +23,7 @@ from karrot.history.models import History, HistoryTypus
 from karrot.activities import stats
 from karrot.activities.models import (
     Activity as ActivityModel, Feedback as FeedbackModel, ActivitySeries as ActivitySeriesModel, ActivityType,
-    ActivityParticipant, ParticipantType, SeriesParticipantType, default_duration
+    ActivityParticipant, ParticipantType, SeriesParticipantType, default_duration, Activity
 )
 from karrot.utils.date_utils import csv_datetime
 from karrot.utils.misc import find_changed
@@ -707,15 +707,16 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
 class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
     class Meta:
         model = ActivitySeriesModel
-        fields = ActivitySeriesSerializer.Meta.fields
+        fields = ActivitySeriesSerializer.Meta.fields + ['updated_message']
         read_only_fields = ActivitySeriesSerializer.Meta.read_only_fields + ['place']
 
     duration = DurationInSecondsField(required=False, allow_null=True)
+    updated_message = serializers.CharField(write_only=True, required=False)
 
     @transaction.atomic()
     def save(self, **kwargs):
         series = self.instance
-        old = self.instance.old() if series else None
+        updated_message = self.validated_data.pop('updated_message', None)
         changed_data = find_changed(series, self.validated_data)
         self._validated_data = changed_data
         skip_update = len(self.validated_data.keys()) == 0
@@ -723,10 +724,11 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
             return series
 
         before_data = ActivitySeriesHistorySerializer(series).data
-        series = super().save(last_changed_by=self.context['request'].user)
+        series = super().save(last_changed_by=self.context['request'].user, updated_message=updated_message)
         after_data = ActivitySeriesHistorySerializer(series).data
 
         if before_data != after_data:
+            # TODO: store who was removed?
             History.objects.create(
                 typus=HistoryTypus.SERIES_MODIFY,
                 group=series.place.group,
@@ -737,17 +739,24 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
                          for k in changed_data.keys()},
                 before=before_data,
                 after=after_data,
+                message=updated_message,
             )
 
         series.place.group.refresh_active_status()
 
-        if old.start_date != series.start_date or old.rule != series.rule:
-            series.update_activities()
-
         return series
 
     def update(self, series, validated_data):
-        activities = None
+        old = series.old() if series else None
+        updated_message = validated_data.pop('updated_message', None)
+
+        removed = []  # array of {'user': <User>, 'activity': <Activity> } objects
+
+        def add_removed(activity, user):
+            for entry in removed:
+                if entry['user'].id == user.id and entry['activity'].id == activity.id:
+                    return
+            removed.append({'user': user, 'activity': activity})
 
         description = validated_data.get('description', None)
         duration = validated_data.get('duration', None)
@@ -777,11 +786,13 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
                         series_participant_type = SeriesParticipantType.objects.get(pk=pk)
                         if entry.get('_removed', False):
                             # existing series participant type being deleted
-                            # TODO: maybe send these users a notification to say they were removed?
-                            ActivityParticipant.objects.filter(
+                            participants = ActivityParticipant.objects.filter(
                                 activity__in=activities,
                                 participant_type__series_participant_type=series_participant_type,
-                            ).delete()
+                            )
+                            for participant in participants:
+                                add_removed(participant.activity, participant.user)
+                            participants.delete()
                             ParticipantType.objects.filter(
                                 series_participant_type=series_participant_type,
                                 activity__in=activities,
@@ -814,14 +825,16 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
                                     if role_changed and participant_type.role == old_role:
                                         participant_type.role = role
                                         # find all the participants who are missing the new role, and remove them...
-                                        # TODO: is this a good way to go about it? at least document it...
                                         users_with_new_role = series.place.group.members.filter(
                                             groupmembership__roles__contains=[role]
                                         )
-                                        ActivityParticipant.objects.filter(
+                                        participants = ActivityParticipant.objects.filter(
                                             participant_type=participant_type,
                                             activity__in=activities,
-                                        ).exclude(user__in=users_with_new_role).delete()
+                                        ).exclude(user__in=users_with_new_role)
+                                        for participant in participants:
+                                            add_removed(participant.activity, participant.user)
+                                        participants.delete()
                                     participant_type.save()
 
                             # update the rest of the stuff
@@ -839,14 +852,37 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
 
         series = super().update(series, validated_data)
 
-        if activities:
-            # TODO: why do this after update not before?
-            # TODO: this sends a storm of activity updates, and the frontend re-requests activities loads of times
-            # ... could implement a bulk-update websocket message, would also need to for work update_activities()
-            # we will have modified nested info in activities so trigger updates
-            [activity.save() for activity in activities]
+        if old.start_date != series.start_date or old.rule != series.rule:
+            # we don't use series.update_activities() here because we want to remove and collect participants
+            for activity, date in series.get_matched_activities():
+                if not activity:
+                    series.create_activity(date)
+                elif not date:
+                    for participant in activity.participants:
+                        add_removed(participant.activity, participant.user)
+                    activity.delete()
+
+        # TODO: notify of removals, using updated_message if present... what if we have message but no removals? ah it's just for history...
+        if len(removed) > 0:
+            print('WOULD notify of removals with message', updated_message, removed)
+            # TODO: hmm, how do we notify in background, as we can't load activities as they are deleted... unless we notify before deleting things?
+            # yeah, maybe that is better, store up participant_ids to delete ... although that is still problematic for running task... as they will be gone there too...
+            # maybe the task can keep the activity data as dict...?
 
         return series
+
+
+class ActivityParticipantUpdateCheckSerializer(ActivityParticipantSerializer):
+    class Meta:
+        model = ActivityParticipant
+        fields = [
+            'user',
+            'activity',
+        ]
+        read_only_fields = [
+            'user',
+            'activity',
+        ]
 
 
 class ActivitySeriesUpdateCheckSerializer(Serializer):
@@ -854,7 +890,8 @@ class ActivitySeriesUpdateCheckSerializer(Serializer):
     start_date = DateTimeFieldWithTimezone(write_only=True, required=False)
     participant_types = SeriesParticipantTypeSerializer(many=True, write_only=True)
 
-    will_remove_count = serializers.IntegerField(read_only=True)
+    participants = ActivityParticipantUpdateCheckSerializer(many=True, read_only=True)
+    activities = ActivitySerializer(many=True, read_only=True)
 
     def update(self, instance, validated_data):
         series = instance
@@ -917,7 +954,8 @@ class ActivitySeriesUpdateCheckSerializer(Serializer):
                                     )
 
         return {
-            'will_remove_count': len(will_remove_participant_ids),
+            'participants': ActivityParticipant.objects.filter(id__in=will_remove_participant_ids),
+            'activities': Activity.objects.filter(activityparticipant__id__in=will_remove_participant_ids),
         }
 
     def create(self, validated_data):
