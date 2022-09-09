@@ -638,7 +638,7 @@ msgstr "Pokud se chcete připojit, klikněte prosím na níže uvedený odkaz:"
 msgid "Follow the invitation"
 msgstr "Postupujte podle pozvání"
 
-#: karrot/issues/api.py:17
+#: karrot/issues/api.py:18
 msgid "Can only modify vote for ongoing issues"
 msgstr "Hlas nelze upravovat pouze pro probíhající problémy"
 
@@ -810,6 +810,10 @@ msgstr "Nenastavujte více než %(count)s týdny předem"
 #: karrot/places/serializers.py:227
 msgid "You are already subscribed to this place"
 msgstr "Jste již přihlášeni k odběru tohoto místa"
+
+#: karrot/subscriptions/receivers.py:738
+msgid "Push notifications are enabled!"
+msgstr "Oznámení Push jsou povolena!"
 
 #: karrot/userauth/api.py:98 karrot/userauth/serializers.py:102
 #: karrot/userauth/serializers.py:151 karrot/userauth/serializers.py:172

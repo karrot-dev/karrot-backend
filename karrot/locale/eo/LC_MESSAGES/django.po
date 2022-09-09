@@ -627,7 +627,7 @@ msgstr "Se vi volas aliĝi, bonvolu alklaki la ligilon suban:"
 msgid "Follow the invitation"
 msgstr "Sekvi la inviton"
 
-#: karrot/issues/api.py:17
+#: karrot/issues/api.py:18
 msgid "Can only modify vote for ongoing issues"
 msgstr "Oni nur povas modifi voĉdonojn de nunaj konfliktoj"
 
@@ -800,6 +800,10 @@ msgstr "Ne agordu antaŭ pli ol %(count)ssemanjnoj"
 #: karrot/places/serializers.py:227
 msgid "You are already subscribed to this place"
 msgstr "Vi jam abonis tiun ĉi lokon"
+
+#: karrot/subscriptions/receivers.py:738
+msgid "Push notifications are enabled!"
+msgstr ""
 
 #: karrot/userauth/api.py:98 karrot/userauth/serializers.py:102
 #: karrot/userauth/serializers.py:151 karrot/userauth/serializers.py:172
