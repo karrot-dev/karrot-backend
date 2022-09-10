@@ -628,7 +628,7 @@ msgstr "यदि आप शामिल होना चाहते हैं,
 msgid "Follow the invitation"
 msgstr "निमंत्रण का अनुसरण करें"
 
-#: karrot/issues/api.py:17
+#: karrot/issues/api.py:18
 msgid "Can only modify vote for ongoing issues"
 msgstr "केवल चल रहे मुद्दों के लिए मत को बदल सकते हैं"
 
@@ -801,6 +801,10 @@ msgstr "%(count)s सप्ताह से अधिक पहले से स
 #: karrot/places/serializers.py:227
 msgid "You are already subscribed to this place"
 msgstr "आप इस स्थान पर पहले से ही सदस्य हैं"
+
+#: karrot/subscriptions/receivers.py:738
+msgid "Push notifications are enabled!"
+msgstr ""
 
 #: karrot/userauth/api.py:98 karrot/userauth/serializers.py:102
 #: karrot/userauth/serializers.py:151 karrot/userauth/serializers.py:172

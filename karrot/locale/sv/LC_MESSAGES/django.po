@@ -628,7 +628,7 @@ msgstr "Om du vill gå med, klicka på länken nedan:"
 msgid "Follow the invitation"
 msgstr "Följ inbjudan"
 
-#: karrot/issues/api.py:17
+#: karrot/issues/api.py:18
 msgid "Can only modify vote for ongoing issues"
 msgstr "Kan bara ändra omröstningen för pågående problem"
 
@@ -801,6 +801,10 @@ msgstr "Ställ inte in mer än %(count)s veckor i förväg"
 #: karrot/places/serializers.py:227
 msgid "You are already subscribed to this place"
 msgstr "Du är redan prenumererad på det här stället"
+
+#: karrot/subscriptions/receivers.py:738
+msgid "Push notifications are enabled!"
+msgstr ""
 
 #: karrot/userauth/api.py:98 karrot/userauth/serializers.py:102
 #: karrot/userauth/serializers.py:151 karrot/userauth/serializers.py:172

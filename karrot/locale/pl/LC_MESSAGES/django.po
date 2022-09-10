@@ -631,7 +631,7 @@ msgstr "Jeśli chcesz dołączyć, kliknij poniższy link:"
 msgid "Follow the invitation"
 msgstr "Opowiedz na zaproszenie"
 
-#: karrot/issues/api.py:17
+#: karrot/issues/api.py:18
 msgid "Can only modify vote for ongoing issues"
 msgstr "Możesz zmieniać głos tylko dla spraw w toku"
 
@@ -803,6 +803,10 @@ msgstr "Ustaw nie więcej niż %(count)s tygodni do przodu"
 #: karrot/places/serializers.py:227
 msgid "You are already subscribed to this place"
 msgstr "Już subskrybujesz to miejsce"
+
+#: karrot/subscriptions/receivers.py:738
+msgid "Push notifications are enabled!"
+msgstr ""
 
 #: karrot/userauth/api.py:98 karrot/userauth/serializers.py:102
 #: karrot/userauth/serializers.py:151 karrot/userauth/serializers.py:172

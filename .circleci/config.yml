@@ -1,7 +1,7 @@
 defaults: &defaults
   working_directory: ~/repo
   docker:
-    - image: karrot/python:2.10
+    - image: karrot/python:2.11
 
 aliases:
   - &restore-env-cache
