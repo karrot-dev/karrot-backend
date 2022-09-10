@@ -629,7 +629,7 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             'id',
-            'activity_type',
+            # 'activity_type',  TODO breaks create() because activity_type is missing from validated_data, can be removed again?
         ]
 
     start_date = DateTimeFieldWithTimezone()
@@ -858,8 +858,8 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
                 if not activity:
                     series.create_activity(date)
                 elif not date:
-                    for participant in activity.participants:
-                        add_removed(participant.activity, participant.user)
+                    for user in activity.participants.all():
+                        add_removed(activity, user)
                     activity.delete()
 
         # TODO: notify of removals, using updated_message if present... what if we have message but no removals? ah it's just for history...

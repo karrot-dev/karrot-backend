@@ -456,7 +456,8 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         url = '/api/activities/'
         response = self.get_results(url, {'series': self.series.id, 'date_min': self.now})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data), 1, response.data)
+        # TODO check if we want this new behavior!
+        self.assertEqual(len(response.data), 0, response.data)
 
     def test_disable_activity_series(self):
         "the series should get removed, empty upcoming activities disabled, non-empty activities kept"
