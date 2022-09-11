@@ -1,5 +1,6 @@
 from unittest.mock import ANY, patch
 
+from django.conf import settings
 from django.test import override_settings
 from geoip2.errors import AddressNotFoundError
 from rest_framework import status
@@ -10,8 +11,18 @@ from karrot.users.factories import UserFactory
 from karrot.utils.geoip import ip_to_city
 from karrot.utils.tests.fake import faker
 
+DEFAULT_SETTINGS = {
+    'SENTRY_CLIENT_DSN': settings.SENTRY_CLIENT_DSN,
+    'SENTRY_ENVIRONMENT': settings.SENTRY_ENVIRONMENT,
+    'FCM_CLIENT_API_KEY': settings.FCM_CLIENT_API_KEY,
+    'FCM_CLIENT_MESSAGING_SENDER_ID': settings.FCM_CLIENT_MESSAGING_SENDER_ID,
+    'FCM_CLIENT_PROJECT_ID': settings.FCM_CLIENT_PROJECT_ID,
+    'FCM_CLIENT_APP_ID': settings.FCM_CLIENT_APP_ID,
+}
+
 OVERRIDE_SETTINGS = {
     'SENTRY_CLIENT_DSN': faker.name(),
+    'SENTRY_ENVIRONMENT': faker.name(),
     'FCM_CLIENT_API_KEY': faker.name(),
     'FCM_CLIENT_MESSAGING_SENDER_ID': faker.name(),
     'FCM_CLIENT_PROJECT_ID': faker.name(),
@@ -19,9 +30,27 @@ OVERRIDE_SETTINGS = {
 }
 
 
-@override_settings(**OVERRIDE_SETTINGS)
 class TestConfigAPI(APITestCase):
-    def test_config(self):
+    def test_default_config(self):
+        response = self.client.get('/api/config/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data, {
+                'fcm': {
+                    'api_key': DEFAULT_SETTINGS['FCM_CLIENT_API_KEY'],
+                    'messaging_sender_id': DEFAULT_SETTINGS['FCM_CLIENT_MESSAGING_SENDER_ID'],
+                    'project_id': DEFAULT_SETTINGS['FCM_CLIENT_PROJECT_ID'],
+                    'app_id': DEFAULT_SETTINGS['FCM_CLIENT_APP_ID'],
+                },
+                'sentry': {
+                    'dsn': DEFAULT_SETTINGS['SENTRY_CLIENT_DSN'],
+                    'environment': DEFAULT_SETTINGS['SENTRY_ENVIRONMENT'],
+                },
+            }, response.data
+        )
+
+    @override_settings(**OVERRIDE_SETTINGS)
+    def test_config_with_overrides(self):
         response = self.client.get('/api/config/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
@@ -34,6 +63,7 @@ class TestConfigAPI(APITestCase):
                 },
                 'sentry': {
                     'dsn': OVERRIDE_SETTINGS['SENTRY_CLIENT_DSN'],
+                    'environment': OVERRIDE_SETTINGS['SENTRY_ENVIRONMENT'],
                 },
             }, response.data
         )
@@ -79,7 +109,7 @@ class TestBootstrapAPI(APITestCase):
 
     @patch('karrot.utils.geoip.geoip')
     def test_without_geoip(self, geoip):
-        geoip.city.side_effect = AddressNotFoundError
+        geoip.city.side_effect = AddressNotFoundError('not found')
         response = self.client.get(self.url, HTTP_X_FORWARDED_FOR=self.client_ip)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNone(response.data['geoip'])
@@ -90,3 +120,21 @@ class TestBootstrapAPI(APITestCase):
             response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['user']['id'], self.user.id)
+
+    def test_can_specify_selected_fields(self):
+        self.client.force_login(user=self.user)
+        response = self.client.get(self.url, {'fields': 'places,activity_types'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(list(response.data.keys()), ['places', 'activity_types'])
+
+    def test_can_specify_all_fields(self):
+        self.client.force_login(user=self.user)
+        fields = 'server,config,geoip,user,groups,places,users,status,activity_types'
+        response = self.client.get(self.url, {'fields': fields})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(sorted(list(response.data.keys())), sorted(fields.split(',')))
+
+    def test_complains_for_invalid_fields(self):
+        self.client.force_login(user=self.user)
+        response = self.client.get(self.url, {'fields': 'notafield,orthisone'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

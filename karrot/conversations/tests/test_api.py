@@ -114,6 +114,30 @@ class TestConversationsAPI(APITestCase):
         self.assertEqual(len(response.data['results']), 1)
         self.assertEqual(response.data['results'][0]['content'], 'hello')
 
+    def test_list_messages_newest_first(self):
+        conversation = ConversationFactory(participants=[self.participant1])
+        message1 = conversation.messages.create(author=self.participant1, content='yay')
+        message2 = conversation.messages.create(author=self.participant1, content='second!')
+        self.client.force_login(user=self.participant1)
+        response = self.client.get('/api/messages/', {'conversation': conversation.id, 'order': 'newest-first'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            [message['id'] for message in response.data['results']],
+            [message2.id, message1.id],
+        )
+
+    def test_list_messages_oldest_first(self):
+        conversation = ConversationFactory(participants=[self.participant1])
+        message1 = conversation.messages.create(author=self.participant1, content='yay')
+        message2 = conversation.messages.create(author=self.participant1, content='second!')
+        self.client.force_login(user=self.participant1)
+        response = self.client.get('/api/messages/', {'conversation': conversation.id, 'order': 'oldest-first'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            [message['id'] for message in response.data['results']],
+            [message1.id, message2.id],
+        )
+
     def test_get_message(self):
         self.client.force_login(user=self.participant1)
         message_id = self.conversation1.messages.first().id
@@ -573,6 +597,64 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
         ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
         self.assertEqual(len(mail.outbox), 0)
 
+    def test_notifies_mentions_when_not_in_conversation(self):
+        mentioned_user = VerifiedUserFactory()
+        self.group.add_member(mentioned_user)
+
+        # make a conversation they are not part of
+        place = PlaceFactory(group=self.group)
+        conversation = place.conversation
+
+        mail.outbox = []
+        with execute_scheduled_tasks_immediately():
+            ConversationMessage.objects.create(
+                author=self.user,
+                conversation=conversation,
+                content='hey @{} how are you?'.format(mentioned_user.username),
+            )
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('you were mentioned', mail.outbox[0].body)
+
+    def test_notifies_mentions_when_in_conversation(self):
+        mentioned_user = VerifiedUserFactory()
+        self.group.add_member(mentioned_user)
+
+        place = PlaceFactory(group=self.group)
+        conversation = place.conversation
+        conversation.join(mentioned_user)
+
+        mail.outbox = []
+        with execute_scheduled_tasks_immediately():
+            ConversationMessage.objects.create(
+                author=self.user,
+                conversation=conversation,
+                content='hey @{} how are you?'.format(mentioned_user.username),
+            )
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('you were mentioned', mail.outbox[0].body)
+
+    def test_does_not_notify_if_immediately_read(self):
+        mentioned_user = VerifiedUserFactory()
+        self.group.add_member(mentioned_user)
+
+        place = PlaceFactory(group=self.group)
+        conversation = place.conversation
+        conversation.join(mentioned_user)
+
+        mail.outbox = []
+        with execute_scheduled_tasks_immediately():
+            message = ConversationMessage.objects.create(
+                author=self.user,
+                conversation=conversation,
+                content='hey @{} how are you?'.format(mentioned_user.username),
+            )
+            # mark as read (tasks are only run at end of block)
+            participant = ConversationParticipant.objects.get(user=mentioned_user, conversation=conversation)
+            participant.notified_up_to = message
+            participant.save()
+
+        self.assertEqual(len(mail.outbox), 0)
+
 
 class TestConversationsMessageReactionsPostAPI(APITestCase):
     def setUp(self):
@@ -622,6 +704,13 @@ class TestConversationsMessageReactionsPostAPI(APITestCase):
         data = {'name': 'nonexistent_emoji'}
         response = self.client.post('/api/messages/{}/reactions/'.format(self.message.id), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_react_updated_emoji(self):
+        "Test if source-url has been updated to newest list of emojis"
+        self.client.force_login(user=self.user)
+        data = {'name': 'star_struck'}
+        response = self.client.post('/api/messages/{}/reactions/'.format(self.message.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_empty_request_fails(self):
         """If no emoji is given, the request should fail (respond 400)"""

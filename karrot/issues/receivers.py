@@ -1,9 +1,10 @@
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
+from django.utils import timezone
 
 from karrot.conversations.models import Conversation
 from karrot.groups.models import GroupNotificationType, GroupMembership
-from karrot.issues.models import Issue, Voting
+from karrot.issues.models import Issue, Vote, Voting
 from karrot.issues.tasks import notify_about_new_conflict_resolution, \
     notify_about_continued_conflict_resolution
 
@@ -58,3 +59,13 @@ def group_member_removed(sender, instance, **kwargs):
     # if user was affected by ongoing issue, cancel that issue
     for issue in group.issues.ongoing().filter(affected_user=user):
         issue.cancel()
+
+    # remove the users votes for ongoing votings in this group
+    Vote.objects.filter(
+        user=user,
+        option__voting__in=Voting.objects.filter(
+            expires_at__gte=timezone.now(),
+            accepted_option__isnull=True,
+            issue__in=group.issues.ongoing(),
+        ),
+    ).delete()

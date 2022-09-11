@@ -1,6 +1,7 @@
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
+from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -262,6 +263,17 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
         self.assertEqual(response.data['detail'], 'Activity is already full.')
 
+    def test_join_started_but_not_finished_activity(self):
+        activity = ActivityFactory(
+            place=self.place,
+            date=to_range(timezone.now(), hours=4),
+        )
+        # jump to 5 minutes after it starts
+        with freeze_time(activity.date.start + relativedelta(minutes=5), tick=True):
+            self.client.force_login(user=self.member)
+            response = self.client.post('/api/activities/{}/add/'.format(activity.id))
+            self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
     def test_join_past_activity_fails(self):
         self.client.force_login(user=self.member)
         response = self.client.post(self.past_join_url)
@@ -486,6 +498,16 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         response = self.client.get('/api/activities/{id}/ics/'.format(id=self.activity.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEquals(response.data['status'], 'CONFIRMED')
+
+    def test_export_ics_disabled_activity(self):
+        self.client.force_login(user=self.member)
+        self.activity.is_disabled = True
+        self.activity.save()
+        response = self.client.get('/api/activities/{id}/ics/'.format(id=self.activity.id))
+        # disabled activities are still visible
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEquals(response.data['status'], 'CANCELLED')
 
     def test_export_ics_activities_logged_out(self):
         response = self.get_results('/api/activities/ics/')
@@ -496,8 +518,18 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         response = self.get_results('/api/activities/ics/')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
+    def test_export_ics_activities_place(self):
+        self.client.force_login(user=self.member)
+        response = self.get_results('/api/activities/ics/', {'place': self.place.id})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
-class TestActivitiesListAPI(APITestCase, ExtractPaginationMixin):
+    def test_export_ics_activities_group(self):
+        self.client.force_login(user=self.member)
+        response = self.get_results('/api/activities/ics/', {'group': self.group.id})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+
+class TestActivitiesAPIWithInactivePlaces(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.url = '/api/activities/'
 
@@ -522,3 +554,9 @@ class TestActivitiesListAPI(APITestCase, ExtractPaginationMixin):
         response = self.get_results(self.url, {'place': self.inactive_place.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 0)
+
+    def test_get_activity_for_inactive_place(self):
+        self.client.force_login(user=self.member)
+        activity = self.inactive_place.activities.first()
+        response = self.client.get(f'/api/activities/{activity.id}/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

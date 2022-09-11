@@ -5,7 +5,7 @@
 -e git+https://github.com/tiltec/talon@80886cd#egg=talon
 
 # Common PyPI dependencies
-django[argon2]
+django[argon2] < 4 # for python 3.7 compatability
 django-cors-headers
 django-enumfield
 django-extensions
@@ -51,14 +51,15 @@ click
 httpx
 icalendar
 influxdb
+Unidecode
 
 # dev PyPI dependencies
 pip-tools
 factory-boy
-ipython
+ipython < 8 # for python 3.7 compatability
 requests-mock
 tblib
-flake8
+# flake8 # See https://github.com/karrot-dev/karrot-frontend/issues/2476
 autopep8
 autoflake
 pytest-asyncio

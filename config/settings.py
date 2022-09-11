@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import re
+
 import redis
 import sentry_sdk
 
@@ -55,6 +57,9 @@ RESERVED_NAMES = (
 EMAIL_VERIFICATION_TIME_LIMIT_HOURS = 7 * 24
 PASSWORD_RESET_TIME_LIMIT_MINUTES = 180
 ACCOUNT_DELETE_TIME_LIMIT_MINUTES = 180
+
+USERNAME_RE = re.compile(r'[a-zA-Z0-9_\-.]+')
+USERNAME_MENTION_RE = re.compile(r'@([a-zA-Z0-9_\-.]+)')
 
 # Groups
 GROUP_EDITOR_TRUST_MAX_THRESHOLD = 3
@@ -161,7 +166,7 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': """
 Welcome to our API documentation!
 
-Check out our code on [GitHub](https://github.com/yunity/karrot-frontend)
+Check out our code on [GitHub](https://github.com/karrot-dev/karrot-frontend)
 and talk with us on the [Foodsaving Worldwide Rocketchat](https://chat.foodsaving.world)!
     """,
     'VERSION': '0.1',
@@ -355,6 +360,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
 SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE   = True
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -382,6 +388,11 @@ DEFAULT_FROM_EMAIL = options['EMAIL_FROM']
 HOSTNAME = options['SITE_URL']
 SITE_NAME = options['SITE_NAME']
 MEDIA_ROOT = options['FILE_UPLOAD_DIR']
+
+if is_dev:
+    # in prod daphne (and I guess uvicorn) handle this
+    # but if using https during local dev we need this
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 if options['FILE_UPLOAD_PERMISSIONS']:
     FILE_UPLOAD_PERMISSIONS = int(options['FILE_UPLOAD_PERMISSIONS'], 8)  # e.g. 0o640
@@ -477,7 +488,7 @@ LISTEN_ENDPOINT = options['LISTEN_ENDPOINT']
 REQUEST_TIMEOUT_SECONDS = int(options['REQUEST_TIMEOUT_SECONDS'])
 
 # If you have the email_reply_trimmer_service running, set this to 'http://localhost:4567/trim' (or similar)
-# https://github.com/yunity/email_reply_trimmer_service
+# https://github.com/karrot-dev/email_reply_trimmer_service
 EMAIL_REPLY_TRIMMER_URL = options['EMAIL_REPLY_TRIMMER_URL']
 
 # NB: Keep this as the last line, and keep

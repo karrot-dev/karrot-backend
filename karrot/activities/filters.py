@@ -31,10 +31,23 @@ class ActivitiesFilter(filters.FilterSet):
     date = ISODateTimeRangeFromToRangeFilter(field_name='date', lookup_expr='overlap')
     feedback_possible = filters.BooleanFilter(method='filter_feedback_possible')
     joined = filters.BooleanFilter(method='filter_joined')
+    activity_type = filters.NumberFilter(field_name='activity_type')
+    slots = filters.ChoiceFilter(method='filter_slots', choices=[(val, val) for val in ('free', 'empty', 'joined')])
+    places = filters.ChoiceFilter(method='filter_places', choices=[(val, val) for val in ('subscribed', )])
 
     class Meta:
         model = Activity
-        fields = ['place', 'group', 'date', 'series', 'feedback_possible', 'joined']
+        fields = [
+            'place',
+            'group',
+            'date',
+            'series',
+            'feedback_possible',
+            'joined',
+            'activity_type',
+            'slots',
+            'places',
+        ]
 
     def filter_feedback_possible(self, qs, name, value):
         if value is True:
@@ -46,6 +59,20 @@ class ActivitiesFilter(filters.FilterSet):
             return qs.filter(participants=self.request.user)
         elif value is False:
             return qs.filter(~Q(participants=self.request.user))
+        return qs
+
+    def filter_slots(self, qs, name, value):
+        if value == 'free':
+            return qs.with_free_slots()
+        elif value == 'empty':
+            return qs.empty()
+        elif value == 'joined':
+            return qs.with_participant(self.request.user)
+        return qs
+
+    def filter_places(self, qs, name, value):
+        if value == 'subscribed':
+            return qs.filter(place__subscribers=self.request.user)
         return qs
 
 

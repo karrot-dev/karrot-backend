@@ -7,13 +7,14 @@ from django.contrib.auth import user_logged_out
 from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
+from django.utils.translation import gettext as _
 
 from karrot.applications.models import Application
 from karrot.applications.serializers import ApplicationSerializer
 from karrot.community_feed.models import CommunityFeedMeta
 from karrot.community_feed.serializers import CommunityFeedMetaSerializer
 from karrot.conversations.models import ConversationParticipant, ConversationMessage, ConversationMessageReaction, \
-    ConversationThreadParticipant, ConversationMeta
+    ConversationThreadParticipant, ConversationMeta, ConversationMessageMention
 from karrot.conversations.serializers import ConversationMessageSerializer, ConversationSerializer, \
     ConversationMetaSerializer
 from karrot.conversations.signals import thread_marked_seen, new_conversation_message, new_thread_message, \
@@ -38,7 +39,8 @@ from karrot.places.serializers import PlaceSerializer
 from karrot.status.helpers import unseen_notification_count, unread_conversations, pending_applications, \
     get_feedback_possible
 from karrot.subscriptions import tasks
-from karrot.subscriptions.models import ChannelSubscription
+from karrot.subscriptions.models import ChannelSubscription, PushSubscription
+from karrot.subscriptions.tasks import notify_subscribers_by_device
 from karrot.subscriptions.utils import send_in_channel, MockRequest
 from karrot.userauth.serializers import AuthUserSerializer
 from karrot.users.serializers import UserSerializer
@@ -130,6 +132,36 @@ def send_thread_update(sender, instance, created, **kwargs):
 
     for subscription in ChannelSubscription.objects.recent().filter(user=instance.user):
         send_in_channel(subscription.reply_channel, topic, payload)
+
+
+@receiver(post_save, sender=ConversationMessageMention)
+@on_transaction_commit
+def send_mention_push_message(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    mention = instance
+    message = mention.message
+    conversation = message.conversation
+    user = mention.user
+
+    if not conversation.supports_mentions():
+        return
+
+    if not conversation.group.is_member(user):
+        # don't notify anyone who isn't in the group
+        # we should not have created a mention though...
+        return
+
+    if user.id == message.author.id:
+        # ignore self-mentions
+        return
+
+    # check they are *not* in the conversation... (as will already get a push message for that case)
+    if conversation.conversationparticipant_set.filter(user=user).exists():
+        return
+
+    tasks.notify_mention_push_subscribers(mention)
 
 
 @receiver(post_save, sender=ConversationMessageReaction)
@@ -347,6 +379,7 @@ def place_subscription_updated(sender, instance, **kwargs):
 
 # Activities
 @receiver(post_save, sender=Activity)
+@on_transaction_commit
 def send_activity_updates(sender, instance, **kwargs):
     activity = instance
     if activity.is_done:
@@ -360,6 +393,7 @@ def send_activity_updates(sender, instance, **kwargs):
 
 
 @receiver(pre_delete, sender=Activity)
+@on_transaction_commit
 def send_activity_deleted(sender, instance, **kwargs):
     activity = instance
     payload = ActivitySerializer(activity).data
@@ -370,6 +404,7 @@ def send_activity_deleted(sender, instance, **kwargs):
 
 @receiver(post_save, sender=ActivityParticipant)
 @receiver(post_delete, sender=ActivityParticipant)
+@on_transaction_commit
 def send_activity_participant_updates(sender, instance, **kwargs):
     activity = instance.activity
     payload = ActivitySerializer(activity).data
@@ -691,3 +726,14 @@ def send_feedback_possible_count(user):
 
     for subscription in ChannelSubscription.objects.recent().filter(user=user):
         send_in_channel(subscription.reply_channel, topic='status', payload=payload)
+
+
+@receiver(post_save, sender=PushSubscription)
+def push_subscription_created(sender, instance, created, **kwargs):
+    if not created:
+        return
+    subscription = instance
+    # send them a welcome push message!
+    notify_subscribers_by_device([subscription], fcm_options={
+        'message_title': _('Push notifications are enabled!'),
+    })

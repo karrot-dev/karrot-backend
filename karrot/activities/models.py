@@ -1,21 +1,24 @@
+import uuid
 from datetime import timedelta
 
 import pytz
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrulestr
 from django.conf import settings
+from django.contrib.postgres.indexes import GistIndex
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.utils.translation import gettext as _
 from django.db import models
 from django.db import transaction
 from django.db.models import Count, DurationField, F, Q, Sum
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
-from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin
-from karrot.conversations.models import ConversationMixin
-from karrot.history.models import History, HistoryTypus
 from karrot.activities import stats
 from karrot.activities.utils import match_activities_with_dates, rrule_between_dates_in_local_time
+from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin, \
+    NicelyFormattedModel
+from karrot.conversations.models import ConversationMixin
+from karrot.history.models import History, HistoryTypus
 from karrot.places.models import PlaceStatus
 
 
@@ -216,8 +219,21 @@ class ActivityQuerySet(models.QuerySet):
 
     def done_not_full(self):
         return self.exclude_disabled() \
-            .annotate(participant_count=Count('participants')) \
-            .filter(date__startswith__lt=timezone.now(), participant_count__lt=F('max_participants'))
+            .annotate_num_participants() \
+            .filter(date__startswith__lt=timezone.now(), num_participants__lt=F('max_participants'))
+
+    def with_free_slots(self):
+        return self.exclude_disabled() \
+            .annotate_num_participants() \
+            .filter(num_participants__lt=F('max_participants'))
+
+    def empty(self):
+        return self.exclude_disabled() \
+            .annotate_num_participants() \
+            .filter(num_participants=0)
+
+    def with_participant(self, user):
+        return self.filter(participants=user)
 
     def upcoming(self):
         return self.filter(date__startswith__gt=timezone.now())
@@ -292,6 +308,8 @@ class Activity(BaseModel, ConversationMixin):
 
     class Meta:
         ordering = ['date']
+        # TODO: check this index is actually used
+        indexes = [GistIndex(fields=['date'])]
 
     activity_type = models.ForeignKey(
         ActivityType,
@@ -343,7 +361,7 @@ class Activity(BaseModel, ConversationMixin):
 
     @property
     def ended_at(self):
-        if self.is_upcoming():
+        if self.is_not_past():
             return None
         return self.date.end
 
@@ -362,6 +380,12 @@ class Activity(BaseModel, ConversationMixin):
 
     def is_upcoming(self):
         return self.date.start > timezone.now()
+
+    def is_past(self):
+        return self.date.end < timezone.now()
+
+    def is_not_past(self):
+        return not self.is_past()
 
     def is_full(self):
         if not self.max_participants:
@@ -443,3 +467,9 @@ class Feedback(BaseModel):
 
     class Meta:
         unique_together = ('about', 'given_by')
+
+
+class ICSAuthToken(NicelyFormattedModel):
+    token = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField('users.User', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(default=timezone.now)

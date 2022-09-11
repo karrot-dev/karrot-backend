@@ -94,7 +94,7 @@ class History(NicelyFormattedModel):
     class Meta:
         ordering = ['-date']
 
-    date = models.DateTimeField(default=timezone.now)
+    date = models.DateTimeField(default=timezone.now, db_index=True)
     typus = enum.EnumField(HistoryTypus)
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE)
     place = models.ForeignKey('places.Place', null=True, on_delete=models.CASCADE)

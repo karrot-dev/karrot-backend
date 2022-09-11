@@ -8,9 +8,11 @@ from unittest.mock import patch
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.test import TestCase
+from django.db.models.signals import post_save
+from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
 from django.utils.crypto import get_random_string
+from factory.django import mute_signals
 
 from karrot.applications.factories import ApplicationFactory
 from karrot.conversations.factories import ConversationFactory
@@ -123,7 +125,7 @@ class WSClient:
         }
 
 
-class WSTestCase(TestCase):
+class WSTransactionTestCase(TransactionTestCase):
     def setUp(self):
         super().setUp()
         self.send_in_channel_patcher = patch('karrot.subscriptions.receivers.send_in_channel')
@@ -134,6 +136,10 @@ class WSTestCase(TestCase):
         client = WSClient(self.send_in_channel_mock)
         client.connect_as(user)
         return client
+
+
+class WSTestCase(WSTransactionTestCase, TestCase):
+    pass
 
 
 class ConversationReceiverTests(WSTestCase):
@@ -752,7 +758,7 @@ class PlaceReceiverTests(WSTestCase):
         self.assertEqual(len(client.messages), 1)
 
 
-class ActivityReceiverTests(WSTestCase):
+class ActivityReceiverTests(WSTransactionTestCase):
     def setUp(self):
         super().setUp()
         self.member = UserFactory()
@@ -1096,10 +1102,30 @@ class IssueReceiverTest(WSTestCase):
 
 
 @patch('karrot.subscriptions.tasks.notify_subscribers')
+class PushWelcomeMessageTests(TestCase):
+    def setUp(self):
+        self.user = UserFactory()
+
+    def test_sends_a_welcome_push_message(self, notify_subscribers):
+        token = faker.uuid4()
+        subscription = PushSubscription.objects.create(
+            user=self.user,
+            token=token,
+            platform=PushSubscriptionPlatform.ANDROID.value,
+        )
+        self.assertEqual(notify_subscribers.call_count, 1)
+
+        kwargs = notify_subscribers.call_args_list[0][1]
+        self.assertEqual(list(kwargs['subscriptions']), [subscription])
+        self.assertEqual(kwargs['fcm_options']['message_title'], 'Push notifications are enabled!')
+
+
+@patch('karrot.subscriptions.tasks.notify_subscribers')
 class ReceiverPushTests(TestCase):
     def setUp(self):
         self.user = UserFactory()
         self.author = UserFactory()
+        self.group = GroupFactory(members=[self.user, self.author])
 
         self.token = faker.uuid4()
         self.content = faker.text()
@@ -1107,12 +1133,17 @@ class ReceiverPushTests(TestCase):
         # join a conversation
         self.conversation = ConversationFactory(participants=[self.user, self.author])
 
-        # add a push subscriber
-        self.subscription = PushSubscription.objects.create(
-            user=self.user,
-            token=self.token,
-            platform=PushSubscriptionPlatform.ANDROID.value,
-        )
+        # another conversation they are not subscribed to, but part of the group they are in
+        self.place = PlaceFactory(group=self.group)
+        self.other_conversation = self.place.conversation
+
+        with mute_signals(post_save):
+            # add a push subscriber
+            self.subscription = PushSubscription.objects.create(
+                user=self.user,
+                token=self.token,
+                platform=PushSubscriptionPlatform.ANDROID.value,
+            )
 
     def test_sends_to_push_subscribers(self, notify_subscribers):
         # add a message to the conversation
@@ -1121,7 +1152,7 @@ class ReceiverPushTests(TestCase):
                 conversation=self.conversation, content=self.content, author=self.author
             )
 
-        self.assertEqual(notify_subscribers.call_count, 2)
+        self.assertEqual(notify_subscribers.call_count, 1)
         kwargs = notify_subscribers.call_args_list[0][1]
         self.assertEqual(list(kwargs['subscriptions']), [self.subscription])
         self.assertEqual(kwargs['fcm_options']['message_title'], self.author.display_name)
@@ -1138,8 +1169,6 @@ class ReceiverPushTests(TestCase):
 
         kwargs = notify_subscribers.call_args_list[0][1]
         self.assertEqual(len(kwargs['subscriptions']), 1)
-        kwargs = notify_subscribers.call_args_list[1][1]
-        self.assertEqual(len(kwargs['subscriptions']), 0)
 
     def test_send_push_notification_if_channel_subscription_is_away(self, notify_subscribers):
         with self.captureOnCommitCallbacks(execute=True):
@@ -1151,11 +1180,35 @@ class ReceiverPushTests(TestCase):
                 conversation=self.conversation, content=self.content, author=self.author
             )
 
-        self.assertEqual(notify_subscribers.call_count, 2)
+        self.assertEqual(notify_subscribers.call_count, 1)
         kwargs = notify_subscribers.call_args_list[0][1]
         self.assertEqual(list(kwargs['subscriptions']), [self.subscription])
         self.assertEqual(kwargs['fcm_options']['message_title'], self.author.display_name)
         self.assertEqual(kwargs['fcm_options']['message_body'], self.content)
+
+    def test_does_not_send_to_push_subscribers_when_not_in_conversation(self, notify_subscribers):
+        with self.captureOnCommitCallbacks(execute=True):
+            ConversationMessage.objects.create(
+                conversation=self.other_conversation, content=self.content, author=self.author
+            )
+
+        self.assertEqual(notify_subscribers.call_count, 0)
+
+    def test_sends_mentions_when_not_in_conversation(self, notify_subscribers):
+        content = 'hello @{} how are you?'.format(self.user.username)
+
+        with self.captureOnCommitCallbacks(execute=True):
+            ConversationMessage.objects.create(
+                conversation=self.other_conversation, content=content, author=self.author
+            )
+
+        self.assertEqual(notify_subscribers.call_count, 1)
+        kwargs = notify_subscribers.call_args_list[0][1]
+        self.assertEqual(list(kwargs['subscriptions']), [self.subscription])
+        self.assertEqual(
+            kwargs['fcm_options']['message_title'], '{} / {}'.format(self.place.name, self.author.display_name)
+        )
+        self.assertEqual(kwargs['fcm_options']['message_body'], content)
 
 
 @patch('karrot.subscriptions.tasks.notify_subscribers')
@@ -1172,12 +1225,13 @@ class GroupConversationReceiverPushTests(TestCase):
 
         self.conversation = self.group.conversation
 
-        # add a push subscriber
-        self.subscription = PushSubscription.objects.create(
-            user=self.user,
-            token=self.token,
-            platform=PushSubscriptionPlatform.ANDROID.value,
-        )
+        with mute_signals(post_save):
+            # add a push subscriber
+            self.subscription = PushSubscription.objects.create(
+                user=self.user,
+                token=self.token,
+                platform=PushSubscriptionPlatform.ANDROID.value,
+            )
 
     def test_sends_to_push_subscribers(self, notify_subscribers):
         with self.captureOnCommitCallbacks(execute=True):
@@ -1186,7 +1240,7 @@ class GroupConversationReceiverPushTests(TestCase):
                 conversation=self.conversation, content=self.content, author=self.author
             )
 
-        self.assertEqual(notify_subscribers.call_count, 2)
+        self.assertEqual(notify_subscribers.call_count, 1)
         kwargs = notify_subscribers.call_args_list[0][1]
         self.assertEqual(list(kwargs['subscriptions']), [self.subscription])
         self.assertEqual(kwargs['fcm_options']['message_title'], self.group.name + ' / ' + self.author.display_name)

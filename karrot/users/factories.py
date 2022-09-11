@@ -12,6 +12,7 @@ class UserFactory(DjangoModelFactory):
 
     is_active = True
     is_staff = False
+    username = LazyAttribute(lambda _: faker.user_name())
     display_name = LazyAttribute(lambda _: faker.name())
     email = Sequence(lambda n: str(n) + faker.email())
     description = LazyAttribute(lambda _: faker.text())
