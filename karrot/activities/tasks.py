@@ -20,6 +20,7 @@ from karrot.subscriptions.tasks import notify_subscribers_by_device
 from karrot.users.models import User
 from karrot.utils import stats_utils, frontend_urls
 from karrot.utils.stats_utils import timer
+from karrot.notifications.models import Notification, NotificationType
 
 
 def is_today(dt):
@@ -112,6 +113,8 @@ def notify_participant_removals(data):
     for user_id in by_user.keys():
         activity_data_list = by_user[user_id]
         user = User.objects.get(id=user_id)
+
+        # email them
         prepare_participant_removed_email(
             user,
             group,
@@ -119,6 +122,34 @@ def notify_participant_removals(data):
             removed_by,
             message,
         ).send()
+
+        # also a notification
+        # TODO: am I allowed to create notifications here instead of doing them in karrot/notifications
+        Notification.objects.create(
+            type=NotificationType.PARTICIPANT_REMOVED.value,
+            user=user,
+            context={
+                'group': group.id,
+                'removed_by': removed_by.id,
+                # no interesting URL...
+                # 'url':
+            },
+        )
+
+        subscriptions = PushSubscription.objects.filter(user=user)
+        if subscriptions.count() > 0:
+            # and a puuuuuuuuuush message
+            title = _('You were removed from activities in %(group_name)s' % {'group_name': group.name})
+            notify_subscribers_by_device(
+                subscriptions,
+                # TODO: we've got nowhere interesting to send them, not great if message got truncated...
+                # click_action=
+                fcm_options={
+                    'message_title': title,
+                    # TODO: this isn't a great message no details about the activities...
+                    'message_body': Truncator(message).chars(num=1000),
+                }
+            )
 
 
 @db_periodic_task(crontab(minute='*'))  # every minute
