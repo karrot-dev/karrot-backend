@@ -40,21 +40,26 @@ msgstr ""
 msgid "Task"
 msgstr ""
 
-#: karrot/activities/serializers.py:135
+#: karrot/activities/serializers.py:137
 msgid "Must be a list"
 msgstr ""
 
-#: karrot/activities/serializers.py:136
+#: karrot/activities/serializers.py:138
 msgid "Must be a list with one or two values"
 msgstr ""
 
-#: karrot/activities/serializers.py:137
+#: karrot/activities/serializers.py:139
 msgid "Must pass start value"
 msgstr ""
 
-#: karrot/activities/tasks.py:71
+#: karrot/activities/tasks.py:75
 #, python-format
 msgid "Upcoming %(activity_type)s"
+msgstr ""
+
+#: karrot/activities/tasks.py:142
+#, python-format
+msgid "You were removed from activities in %(group_name)sgroup_name"
 msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:5
@@ -105,6 +110,39 @@ msgstr ""
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:220
 #: karrot/offers/templates/new_offer.html.jinja2:233
 msgid "Click here to unsubscribe"
+msgstr ""
+
+#: karrot/activities/templates/participant_removed.html.jinja2:5
+#: karrot/activities/templates/participant_removed.html.jinja2:123
+#: karrot/activities/templates/participant_removed.subject.jinja2:1
+#, python-format
+msgid "You were removed from activities in %(group_name)s"
+msgstr ""
+
+#: karrot/activities/templates/participant_removed.html.jinja2:139
+#, python-format
+msgid ""
+"Message from <a class=\"message-author\" href=\"%(url)s\" style=\"text-"
+"transform: uppercase; text-decoration: none; font-weight: 700; color: "
+"#4a982e;\">%(display_name)s</a>"
+msgstr ""
+
+#: karrot/activities/templates/participant_removed.html.jinja2:163
+#: karrot/groups/templates/user_became_editor.html.jinja2:221
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:221
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:217
+#, python-format
+msgid ""
+"You are receiving this because you are a member of "
+"<strong>%(group_name)s</strong>."
+msgstr ""
+
+#: karrot/activities/templates/participant_removed.html.jinja2:164
+#: karrot/groups/templates/user_became_editor.html.jinja2:222
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:222
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:218
+#, python-format
+msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
 msgstr ""
 
 #: karrot/applications/api.py:29
@@ -436,22 +474,6 @@ msgstr ""
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:180
 msgid "Use your power wisely!"
-msgstr ""
-
-#: karrot/groups/templates/user_became_editor.html.jinja2:221
-#: karrot/groups/templates/user_inactive_in_group.html.jinja2:221
-#: karrot/groups/templates/user_lost_editor_role.html.jinja2:217
-#, python-format
-msgid ""
-"You are receiving this because you are a member of "
-"<strong>%(group_name)s</strong>."
-msgstr ""
-
-#: karrot/groups/templates/user_became_editor.html.jinja2:222
-#: karrot/groups/templates/user_inactive_in_group.html.jinja2:222
-#: karrot/groups/templates/user_lost_editor_role.html.jinja2:218
-#, python-format
-msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
 msgstr ""
 
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:171
