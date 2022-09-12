@@ -1,3 +1,4 @@
+from django.core import mail
 from itertools import zip_longest
 from unittest.mock import ANY
 
@@ -21,6 +22,7 @@ from karrot.groups.roles import GROUP_MEMBER
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import UserFactory
+from karrot.utils.tests.fake import faker
 
 
 def shift_date_in_local_time(old_date, delta, tz):
@@ -294,19 +296,28 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         pt_activity = activity.participant_types.get(series_participant_type=pt)
         activity.add_participant(self.member, participant_type=pt_activity)
         self.assertEqual(activity.participants.count(), 1)
+        mail.outbox = []
+        message = faker.text()
         response = self.client.patch(
-            '/api/activity-series/{}/'.format(self.series.id),
-            {'participant_types': [{
-                'id': pt.id,
-                'role': 'driver',
-            }]},
+            '/api/activity-series/{}/'.format(self.series.id), {
+                'participant_types': [{
+                    'id': pt.id,
+                    'role': 'driver',
+                }],
+                'updated_message': message,
+            },
             format='json'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         pt_data = find_by_id(response.data['participant_types'], pt.id)
         self.assertEqual(pt_data['role'], 'driver')
+
         # our participant is kicked out too as they don't have the updated role
         self.assertEqual(activity.participants.count(), 0)
+
+        # ... and they got emailed about it too
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn(message.replace('\n', ' '), mail.outbox[0].body.replace('\n', ' '))
 
     def test_remove_participant_type(self):
         self.client.force_login(user=self.member)
@@ -442,12 +453,17 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         activity = self.series.activities.last()
         pt = activity.participant_types.get(role=GROUP_MEMBER)
         activity.add_participant(self.member, participant_type=pt)
+
+        mail.outbox = []
+
         # change rule
         url = '/api/activity-series/{}/'.format(self.series.id)
         rule = rrulestr(self.series.rule, dtstart=self.now) \
             .replace(until=self.now)
+        message = faker.text()
         response = self.client.patch(url, {
             'rule': str(rule),
+            'updated_message': message,
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data['rule'], str(rule))
@@ -456,7 +472,12 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         url = '/api/activities/'
         response = self.get_results(url, {'series': self.series.id, 'date_min': self.now})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data), 1, response.data)
+        self.assertEqual(len(response.data), 0, response.data)
+
+        # make sure we notified the person they got kicked out...
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, [self.member.email])
+        self.assertIn(message.replace('\n', ' '), mail.outbox[0].body.replace('\n', ' '))
 
     def test_disable_activity_series(self):
         "the series should get removed, empty upcoming activities disabled, non-empty activities kept"

@@ -5,6 +5,7 @@ import re
 from collections import namedtuple
 
 from dateutil.relativedelta import relativedelta
+from django.forms import model_to_dict
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
 from django.template.loader import render_to_string
 from django.template.utils import get_app_template_dirs
@@ -27,7 +28,7 @@ from karrot.invitations.models import Invitation
 from karrot.offers.emails import prepare_new_offer_notification_email
 from karrot.offers.factories import OfferFactory
 from karrot.offers.models import Offer
-from karrot.activities.emails import prepare_activity_notification_email
+from karrot.activities.emails import prepare_activity_notification_email, prepare_participant_removed_email
 from karrot.activities.models import Activity
 from karrot.users.factories import VerifiedUserFactory
 from karrot.users.models import User
@@ -243,6 +244,21 @@ class Handlers:
             tomorrow_user=[activity2],
             tomorrow_empty=[activity3],
             tomorrow_not_full=[activity4],
+        )
+
+    def participant_removed(self):
+        group = random_group()
+        user = random_user(group)
+        removed_by = random_user(group)
+
+        activities = Activity.objects.order_by('?')[:3]
+
+        return prepare_participant_removed_email(
+            user=user,
+            group=group,
+            activity_data_list=[model_to_dict(activity) for activity in activities],
+            removed_by=removed_by,
+            message=faker.text(),
         )
 
     def user_became_editor(self):

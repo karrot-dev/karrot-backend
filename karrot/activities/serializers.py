@@ -3,6 +3,7 @@ from typing import List
 import dateutil.rrule
 from datetime import timedelta, datetime
 
+from django.forms import model_to_dict
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from icalendar import vCalAddress, vText
@@ -18,6 +19,7 @@ from rest_framework.serializers import Serializer
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework_csv.renderers import CSVRenderer
 
+from karrot.activities.tasks import notify_participant_removals
 from karrot.base.base_models import CustomDateTimeTZRange
 from karrot.history.models import History, HistoryTypus
 from karrot.activities import stats
@@ -629,7 +631,6 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             'id',
-            'activity_type',
         ]
 
     start_date = DateTimeFieldWithTimezone()
@@ -858,16 +859,30 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
                 if not activity:
                     series.create_activity(date)
                 elif not date:
-                    for participant in activity.participants:
-                        add_removed(participant.activity, participant.user)
+                    for user in activity.participants.all():
+                        add_removed(activity, user)
                     activity.delete()
 
-        # TODO: notify of removals, using updated_message if present... what if we have message but no removals? ah it's just for history...
         if len(removed) > 0:
-            print('WOULD notify of removals with message', updated_message, removed)
-            # TODO: hmm, how do we notify in background, as we can't load activities as they are deleted... unless we notify before deleting things?
-            # yeah, maybe that is better, store up participant_ids to delete ... although that is still problematic for running task... as they will be gone there too...
-            # maybe the task can keep the activity data as dict...?
+            removed.sort(key=lambda val: val['activity'].date.start)
+            activities = {}
+            for entry in removed:
+                activity = entry['activity']
+                if activity.id not in activities:
+                    # we might have deleted some of the activities by the time the task is run, so store as dict
+                    activities[activity.id] = model_to_dict(activity)
+            notify_participant_removals({
+                'activities':
+                activities,
+                'participants': [{
+                    'user': entry['user'].id,
+                    'activity': entry['activity'].id
+                } for entry in removed],
+                'message':
+                updated_message,
+                'removed_by':
+                self.context['request'].user.id,
+            })
 
         return series
 

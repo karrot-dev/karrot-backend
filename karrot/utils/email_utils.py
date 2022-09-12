@@ -3,7 +3,7 @@ from email.utils import formataddr as real_formataddr
 import html2text
 from anymail.exceptions import AnymailAPIError
 from anymail.message import AnymailMessage
-from babel.dates import format_date, format_time
+from babel.dates import format_date, format_time, format_datetime
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string, get_template
 from django.utils import translation, timezone
@@ -14,7 +14,8 @@ from jinja2 import Environment
 
 from config import settings
 from karrot.utils import stats
-from karrot.utils.frontend_urls import place_url, user_url, absolute_url, group_photo_or_karrot_logo_url
+from karrot.utils.frontend_urls import place_url, user_url, absolute_url, group_photo_or_karrot_logo_url, \
+    group_wall_url
 
 
 def date_filter(value):
@@ -34,12 +35,23 @@ def time_filter(value):
     )
 
 
+def datetime_filter(value):
+    return format_datetime(
+        value,
+        format='medium',
+        locale=to_locale(get_language()),
+        tzinfo=get_current_timezone(),
+    )
+
+
 def jinja2_environment(**options):
     env = Environment(**options)
     env.filters['date'] = date_filter
     env.filters['time'] = time_filter
+    env.filters['datetime'] = datetime_filter
     env.globals['place_url'] = place_url
     env.globals['user_url'] = user_url
+    env.globals['group_wall_url'] = group_wall_url
     env.globals['absolute_url'] = absolute_url
     return env
 

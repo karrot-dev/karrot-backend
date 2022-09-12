@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from babel.dates import format_time, format_datetime
 from dateutil.relativedelta import relativedelta
 from django.db.models import F, Q, QuerySet
@@ -6,12 +8,13 @@ from django.utils.text import Truncator
 from django.utils.translation import gettext as _
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task, db_task
+from more_itertools import first
 
 from karrot.activities import stats
-from karrot.activities.emails import prepare_activity_notification_email
+from karrot.activities.emails import prepare_activity_notification_email, prepare_participant_removed_email
 from karrot.activities.models import Activity, ActivitySeries, ActivityParticipant, ParticipantType
 from karrot.groups.models import Group, GroupMembership, GroupNotificationType
-from karrot.places.models import PlaceStatus
+from karrot.places.models import PlaceStatus, Place
 from karrot.subscriptions.models import PushSubscription
 from karrot.subscriptions.tasks import notify_subscribers_by_device
 from karrot.users.models import User
@@ -84,6 +87,38 @@ def activity_reminder(participant_id):
                 'tag': 'activity:{}'.format(activity.id),
             }
         )
+
+
+@db_task()
+def notify_participant_removals(data):
+    # {
+    #   'activities': { <id>: {<dict data of activity info>}}
+    #   'participants': [{'user':<userid>,'activity':<activityid>}, ...],
+    #   'message': '<message>',
+    #   'removed_by': <userid>,
+    # }
+    message = data['message']
+    removed_by = User.objects.get(id=data['removed_by'])
+
+    # they will all have the same group so we can assume this...
+    group = Place.objects.get(id=first(data['activities'].values())['place']).group
+
+    # we want to send per-user messages
+    by_user = defaultdict(list)
+    for entry in data['participants']:
+        activity_data = data['activities'][entry['activity']]
+        by_user[entry['user']].append(activity_data)
+
+    for user_id in by_user.keys():
+        activity_data_list = by_user[user_id]
+        user = User.objects.get(id=user_id)
+        prepare_participant_removed_email(
+            user,
+            group,
+            activity_data_list,
+            removed_by,
+            message,
+        ).send()
 
 
 @db_periodic_task(crontab(minute='*'))  # every minute
