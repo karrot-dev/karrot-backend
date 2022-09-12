@@ -656,7 +656,7 @@ msgstr ""
 msgid "Follow the invitation"
 msgstr "Suivre l'invitation"
 
-#: karrot/issues/api.py:17
+#: karrot/issues/api.py:18
 msgid "Can only modify vote for ongoing issues"
 msgstr "Ne peut modifier le vote que pour les problèmes en cours"
 
@@ -833,6 +833,10 @@ msgstr "Ne paramètre pas plus de %(count)s semaines à l'avance"
 #: karrot/places/serializers.py:227
 msgid "You are already subscribed to this place"
 msgstr "Tu es déjà enregistré sur ce lieu"
+
+#: karrot/subscriptions/receivers.py:738
+msgid "Push notifications are enabled!"
+msgstr ""
 
 #: karrot/userauth/api.py:98 karrot/userauth/serializers.py:102
 #: karrot/userauth/serializers.py:151 karrot/userauth/serializers.py:172

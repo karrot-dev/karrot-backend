@@ -638,7 +638,7 @@ msgstr "Ha szeretnél csatlakozni, kattints a linkre:"
 msgid "Follow the invitation"
 msgstr "Meghívó követése"
 
-#: karrot/issues/api.py:17
+#: karrot/issues/api.py:18
 msgid "Can only modify vote for ongoing issues"
 msgstr "Csak folyamatban lévő ügyeknél módosítható a szavazat"
 
@@ -812,6 +812,10 @@ msgstr "Ne legyen több mint %(count)s héttel előre beállítva"
 #: karrot/places/serializers.py:227
 msgid "You are already subscribed to this place"
 msgstr "Már fel vagy iratkozva erre a helyre"
+
+#: karrot/subscriptions/receivers.py:738
+msgid "Push notifications are enabled!"
+msgstr ""
 
 #: karrot/userauth/api.py:98 karrot/userauth/serializers.py:102
 #: karrot/userauth/serializers.py:151 karrot/userauth/serializers.py:172

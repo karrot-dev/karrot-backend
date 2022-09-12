@@ -603,7 +603,7 @@ msgstr "만약 참가를 원하신다면 아래의 링크를 클릭해주세요:
 msgid "Follow the invitation"
 msgstr "초대에 응합니다"
 
-#: karrot/issues/api.py:17
+#: karrot/issues/api.py:18
 msgid "Can only modify vote for ongoing issues"
 msgstr "진행중인 쟁점의 투표만 수정할 수 있습니다"
 
@@ -770,6 +770,10 @@ msgstr "%(count)s주 이상 미리 설정해선 안됩니다"
 #: karrot/places/serializers.py:227
 msgid "You are already subscribed to this place"
 msgstr "이미 이 장소를 구독하셨습니다"
+
+#: karrot/subscriptions/receivers.py:738
+msgid "Push notifications are enabled!"
+msgstr ""
 
 #: karrot/userauth/api.py:98 karrot/userauth/serializers.py:102
 #: karrot/userauth/serializers.py:151 karrot/userauth/serializers.py:172

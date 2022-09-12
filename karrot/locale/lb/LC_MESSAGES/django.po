@@ -637,7 +637,7 @@ msgstr "Wann's du bäitriede wëlls, klick w.e.g. op de Link hei drënner:"
 msgid "Follow the invitation"
 msgstr "Der Aluedung nogoen"
 
-#: karrot/issues/api.py:17
+#: karrot/issues/api.py:18
 msgid "Can only modify vote for ongoing issues"
 msgstr "Et kann een d'Ofstëmmung just fir aktuell Konflikter änneren"
 
@@ -811,6 +811,10 @@ msgstr "Setz se net méi wéi %(count)s Wochen am Viraus"
 #: karrot/places/serializers.py:227
 msgid "You are already subscribed to this place"
 msgstr "Du hues dës Plaz schonn abonéiert"
+
+#: karrot/subscriptions/receivers.py:738
+msgid "Push notifications are enabled!"
+msgstr "Push-Matdeelungen sinn aktivéiert!"
 
 #: karrot/userauth/api.py:98 karrot/userauth/serializers.py:102
 #: karrot/userauth/serializers.py:151 karrot/userauth/serializers.py:172
