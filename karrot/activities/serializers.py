@@ -924,7 +924,6 @@ class ActivitySeriesUpdateCheckSerializer(Serializer):
                 if activity and not date:
                     if activity.activityparticipant_set.count() > 0:
                         # would remove these participants!
-                        # will_remove_count += activity.participants.count()
                         will_remove_participant_ids.update(
                             activity.activityparticipant_set.values_list('id', flat=True)
                         )

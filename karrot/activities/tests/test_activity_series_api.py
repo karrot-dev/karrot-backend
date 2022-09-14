@@ -273,7 +273,6 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
             list(self.series.participant_types.order_by('role').values_list('role', flat=True)),
             ['approved', 'driver', 'member'],
         )
-        self.series.activities.upcoming()
 
     def test_modify_participant_type_description(self):
         self.client.force_login(user=self.member)
@@ -539,7 +538,6 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         url = '/api/activities/{}/'.format(activity_under_test.id)
 
         # change setting of activity
-        # response = self.client.patch(url, {'max_participants': 666})
         pt = activity_under_test.participant_types.get(role=GROUP_MEMBER)
         response = self.client.patch(
             url, {'participant_types': [{

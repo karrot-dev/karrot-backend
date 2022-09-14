@@ -205,7 +205,6 @@ class ActivitySeriesViewSet(
         serializer_class=ActivitySeriesUpdateCheckSerializer,
     )
     def check(self, request, pk):
-        # will_remove_count = 24
         self.check_permissions(request)
         instance = self.get_object()
         self.check_object_permissions(request, instance)
