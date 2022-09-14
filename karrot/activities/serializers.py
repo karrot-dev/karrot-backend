@@ -332,14 +332,16 @@ class ActivitySerializer(serializers.ModelSerializer):
 class ActivityUpdateSerializer(ActivitySerializer):
     class Meta:
         model = ActivityModel
-        fields = ActivitySerializer.Meta.fields
+        fields = ActivitySerializer.Meta.fields + ['updated_message']
         read_only_fields = ActivitySerializer.Meta.read_only_fields + ['place']
 
     date = DateTimeRangeField()
+    updated_message = serializers.CharField(write_only=True, required=False)
 
     @transaction.atomic()
     def save(self, **kwargs):
         activity = self.instance
+        updated_message = self.validated_data.pop('updated_message', None)
         changed_data = find_changed(activity, self.validated_data)
         self._validated_data = changed_data
         skip_update = len(self.validated_data.keys()) == 0
@@ -347,7 +349,7 @@ class ActivityUpdateSerializer(ActivitySerializer):
             return self.instance
 
         before_data = ActivityHistorySerializer(activity).data
-        activity = super().save(**kwargs)
+        activity = super().save(**kwargs, updated_message=updated_message)
         after_data = ActivityHistorySerializer(activity).data
 
         if before_data != after_data:
@@ -374,12 +376,17 @@ class ActivityUpdateSerializer(ActivitySerializer):
                              for k in changed_data.keys()},
                     before=before_data,
                     after=after_data,
+                    message=updated_message,
                 )
         activity.place.group.refresh_active_status()
 
         return activity
 
     def update(self, instance, validated_data):
+        updated_message = validated_data.pop('updated_message', None)
+
+        removed_users = []
+
         activity = instance
         participant_types = validated_data.pop('participant_types', None)
         if participant_types:
@@ -390,29 +397,54 @@ class ActivityUpdateSerializer(ActivitySerializer):
                     participant_type = ParticipantType.objects.get(pk=pk)
                     if entry.get('_removed', False):
                         # existing participant type being deleted
-                        # TODO: maybe send these users a notification to say they were removed?
-                        activity.activityparticipant_set \
-                            .filter(participant_type=participant_type) \
-                            .delete()
+                        participants = activity.activityparticipant_set \
+                            .filter(participant_type=participant_type)
+
+                        for participant in participants:
+                            removed_users.append(participant.user)
+
+                        participants.delete()
                         participant_type.delete()
                     else:
                         # existing participant type being edited
                         role = entry.get('role', None)
                         if role and role != participant_type.role:
                             # find all the participants who are missing the new role, and remove them...
-                            # TODO: perhaps a notification, or option, message...
-                            users = activity.place.group.members.filter(groupmembership__roles__contains=[role])
-                            activity.activityparticipant_set \
+                            users_with_new_role = activity.place.group.members.filter(
+                                groupmembership__roles__contains=[role]
+                            )
+                            participants = activity.activityparticipant_set \
                                 .filter(participant_type=participant_type) \
-                                .exclude(user__in=users) \
-                                .delete()
+                                .exclude(user__in=users_with_new_role)
+                            for participant in participants:
+                                removed_users.append(participant.user)
+
+                            participants.delete()
 
                         # update the rest of the fields
                         ParticipantType.objects.filter(pk=pk).update(**entry)
                 else:
                     # new participant type \o/
                     ParticipantType.objects.create(activity=activity, **entry)
-        return super().update(instance, validated_data)
+
+        activity = super().update(instance, validated_data)
+
+        if len(removed_users) > 0:
+            notify_participant_removals({
+                'activities': {
+                    activity.id: model_to_dict(activity)
+                },
+                'participants': [{
+                    'user': user.id,
+                    'activity': activity.id
+                } for user in removed_users],
+                'message':
+                updated_message,
+                'removed_by':
+                self.context['request'].user.id,
+            })
+
+        return activity
 
     def validate_date(self, date):
         if self.instance.series is not None and abs((self.instance.date.start - date.start).total_seconds()) > 1:
@@ -423,6 +455,53 @@ class ActivityUpdateSerializer(ActivitySerializer):
         if self.instance.series is not None and has_duration != self.instance.has_duration:
             raise serializers.ValidationError('You cannot modify the duration of activities that are part of a series')
         return has_duration
+
+
+class ActivityUpdateCheckSerializer(Serializer):
+    # request fields
+    participant_types = ParticipantTypeSerializer(many=True, write_only=True, required=False)
+
+    # response fields
+    users = serializers.ListSerializer(read_only=True, child=serializers.IntegerField())
+
+    def update(self, instance, validated_data):
+
+        will_remove_user_ids = set()
+
+        activity = instance
+        participant_types = validated_data.pop('participant_types', None)
+        if participant_types:
+            for entry in participant_types:
+                pk = entry.pop('id', None)
+                if pk:
+                    # existing participant type
+                    participant_type = ParticipantType.objects.get(pk=pk)
+                    if entry.get('_removed', False):
+                        # existing participant type would be deleted
+                        participants = activity.activityparticipant_set \
+                            .filter(participant_type=participant_type)
+                        for participant in participants:
+                            will_remove_user_ids.add(participant.user.id)
+                    else:
+                        # existing participant type being edited
+                        role = entry.get('role', None)
+                        if role and role != participant_type.role:
+                            # find all the participants who are missing the new role
+                            users_with_new_role = activity.place.group.members.filter(
+                                groupmembership__roles__contains=[role]
+                            )
+                            participants = activity.activityparticipant_set \
+                                .filter(participant_type=participant_type) \
+                                .exclude(user__in=users_with_new_role)
+                            for participant in participants:
+                                will_remove_user_ids.add(participant.user.id)
+
+        return {
+            'users': will_remove_user_ids,
+        }
+
+    def create(self, validated_data):
+        pass
 
 
 class ActivityICSSerializer(serializers.ModelSerializer):
@@ -901,10 +980,12 @@ class ActivityParticipantUpdateCheckSerializer(ActivityParticipantSerializer):
 
 
 class ActivitySeriesUpdateCheckSerializer(Serializer):
+    # request fields
     rule = serializers.CharField(write_only=True, required=False)
     start_date = DateTimeFieldWithTimezone(write_only=True, required=False)
-    participant_types = SeriesParticipantTypeSerializer(many=True, write_only=True)
+    participant_types = SeriesParticipantTypeSerializer(many=True, write_only=True, required=False)
 
+    # response fields
     participants = ActivityParticipantUpdateCheckSerializer(many=True, read_only=True)
     activities = ActivitySerializer(many=True, read_only=True)
 

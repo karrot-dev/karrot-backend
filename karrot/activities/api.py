@@ -28,7 +28,8 @@ from karrot.activities.serializers import (
     ActivityDismissFeedbackSerializer, ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer,
     ActivityLeaveSerializer, FeedbackSerializer, ActivityUpdateSerializer, ActivitySeriesUpdateSerializer,
     ActivitySeriesHistorySerializer, FeedbackExportSerializer, FeedbackExportRenderer, ActivityTypeSerializer,
-    ActivityTypeHistorySerializer, ActivityICSSerializer, ActivitySeriesUpdateCheckSerializer
+    ActivityTypeHistorySerializer, ActivityICSSerializer, ActivitySeriesUpdateCheckSerializer,
+    ActivityUpdateCheckSerializer
 )
 from karrot.activities.renderers import ICSCalendarRenderer
 from karrot.places.models import PlaceStatus
@@ -284,6 +285,21 @@ class ActivityViewSet(
     )
     def remove(self, request, pk=None):
         return self.partial_update(request)
+
+    @action(
+        detail=True,
+        methods=['PATCH'],
+        permission_classes=(IsAuthenticated, ),
+        serializer_class=ActivityUpdateCheckSerializer,
+    )
+    def check(self, request, pk):
+        self.check_permissions(request)
+        instance = self.get_object()
+        self.check_object_permissions(request, instance)
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(data=serializer.data)
 
     @action(
         detail=True,
