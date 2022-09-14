@@ -28,7 +28,7 @@ from karrot.activities.serializers import (
     ActivityDismissFeedbackSerializer, ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer,
     ActivityLeaveSerializer, FeedbackSerializer, ActivityUpdateSerializer, ActivitySeriesUpdateSerializer,
     ActivitySeriesHistorySerializer, FeedbackExportSerializer, FeedbackExportRenderer, ActivityTypeSerializer,
-    ActivityTypeHistorySerializer, ActivityICSSerializer
+    ActivityICSSerializer
 )
 from karrot.activities.renderers import ICSCalendarRenderer
 from karrot.places.models import PlaceStatus
@@ -55,7 +55,6 @@ class ActivityTypeViewSet(
         mixins.RetrieveModelMixin,
         PartialUpdateModelMixin,
         mixins.ListModelMixin,
-        mixins.DestroyModelMixin,
         viewsets.GenericViewSet,
 ):
     serializer_class = ActivityTypeSerializer
@@ -71,19 +70,6 @@ class ActivityTypeViewSet(
 
     def get_queryset(self):
         return self.queryset.filter(group__members=self.request.user)
-
-    def perform_destroy(self, activity_type):
-        data = self.get_serializer(activity_type).data
-        History.objects.create(
-            typus=HistoryTypus.ACTIVITY_TYPE_DELETE,
-            group=activity_type.group,
-            users=[
-                self.request.user,
-            ],
-            payload=data,
-            before=ActivityTypeHistorySerializer(activity_type).data,
-        )
-        super().perform_destroy(activity_type)
 
 
 class FeedbackPagination(CursorPagination):
