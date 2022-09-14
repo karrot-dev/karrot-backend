@@ -10,12 +10,11 @@ from rest_framework.viewsets import GenericViewSet
 from karrot.activities.models import Activity
 from karrot.activities.permissions import CannotChangeGroup
 from karrot.conversations.api import RetrieveConversationMixin
-from karrot.history.models import History, HistoryTypus
 from karrot.places.filters import PlaceTypeFilter
 from karrot.places.models import Place as PlaceModel, PlaceSubscription, PlaceType
 from karrot.places.permissions import TypeHasNoPlaces, IsGroupEditor
 from karrot.places.serializers import PlaceSerializer, PlaceUpdateSerializer, PlaceSubscriptionSerializer, \
-    PlaceTypeSerializer, PlaceTypeHistorySerializer
+    PlaceTypeSerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
 
 
@@ -24,7 +23,6 @@ class PlaceTypeViewSet(
         mixins.RetrieveModelMixin,
         PartialUpdateModelMixin,
         mixins.ListModelMixin,
-        mixins.DestroyModelMixin,
         viewsets.GenericViewSet,
 ):
     serializer_class = PlaceTypeSerializer
@@ -40,19 +38,6 @@ class PlaceTypeViewSet(
 
     def get_queryset(self):
         return self.queryset.filter(group__members=self.request.user)
-
-    def perform_destroy(self, place_type):
-        data = self.get_serializer(place_type).data
-        History.objects.create(
-            typus=HistoryTypus.PLACE_TYPE_DELETE,
-            group=place_type.group,
-            users=[
-                self.request.user,
-            ],
-            payload=data,
-            before=PlaceTypeHistorySerializer(place_type).data,
-        )
-        super().perform_destroy(place_type)
 
 
 class PlaceViewSet(

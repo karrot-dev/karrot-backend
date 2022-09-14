@@ -5,7 +5,6 @@ from rest_framework.test import APITestCase
 
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
-from karrot.activities.factories import ActivityFactory
 from karrot.activities.models import to_range
 from karrot.groups.roles import GROUP_MEMBER
 from karrot.history.models import History, HistoryTypus
@@ -118,23 +117,6 @@ class TestActivitiesTypesAPI(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
-    def test_can_delete(self):
-        self.client.force_login(user=self.member)
-        activity_type = self.activity_types[0]
-        response = self.client.delete(f'/api/activity-types/{activity_type.id}/')
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.data)
-
-    def test_cannot_delete_with_activities(self):
-        self.client.force_login(user=self.member)
-        activity_type = self.activity_types[0]
-        activity = ActivityFactory(activity_type=activity_type)
-        response = self.client.delete(f'/api/activity-types/{activity_type.id}/')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
-        # make sure we can delete it if we get rid of the activity
-        activity.delete()
-        response = self.client.delete(f'/api/activity-types/{activity_type.id}/')
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.data)
-
     def test_adds_history_entry_on_create(self):
         self.client.force_login(user=self.member)
         response = self.client.post('/api/activity-types/', self.activity_type_data(), format='json')
@@ -166,10 +148,3 @@ class TestActivitiesTypesAPI(APITestCase):
         history = History.objects.filter(typus=HistoryTypus.ACTIVITY_TYPE_MODIFY).last()
         self.assertEqual(history.after['id'], response.data['id'])
         self.assertEqual(history.message, 'because it was a horrible colour before')
-
-    def test_adds_history_entry_on_delete(self):
-        self.client.force_login(user=self.member)
-        activity_type = self.activity_types[0]
-        self.client.delete(f'/api/activity-types/{activity_type.id}/')
-        history = History.objects.filter(typus=HistoryTypus.ACTIVITY_TYPE_DELETE).last()
-        self.assertEqual(history.before['id'], activity_type.id)
