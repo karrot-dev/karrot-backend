@@ -57,9 +57,9 @@ msgstr ""
 msgid "Upcoming %(activity_type)s"
 msgstr ""
 
-#: karrot/activities/tasks.py:142
+#: karrot/activities/tasks.py:152
 #, python-format
-msgid "You were removed from activities in %(group_name)sgroup_name"
+msgid "Your activities for %(place_name)s changedplace_name"
 msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:5
@@ -116,10 +116,14 @@ msgstr ""
 #: karrot/activities/templates/participant_removed.html.jinja2:123
 #: karrot/activities/templates/participant_removed.subject.jinja2:1
 #, python-format
-msgid "You were removed from activities in %(group_name)s"
+msgid "Your activities for %(place_name)s changed"
 msgstr ""
 
-#: karrot/activities/templates/participant_removed.html.jinja2:139
+#: karrot/activities/templates/participant_removed.html.jinja2:124
+msgid "The following activities are no longer available for you"
+msgstr ""
+
+#: karrot/activities/templates/participant_removed.html.jinja2:140
 #, python-format
 msgid ""
 "Message from <a class=\"message-author\" href=\"%(url)s\" style=\"text-"
