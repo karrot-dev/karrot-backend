@@ -261,12 +261,9 @@ class ActivitySerializer(serializers.ModelSerializer):
         # we are filtering in python to make use of prefetched data
         return [c.user_id for c in activity.activityparticipant_set.all() if c.feedback_dismissed]
 
-    def save(self, **kwargs):
-        return super().save(last_changed_by=self.context['request'].user)
-
     def create(self, validated_data):
         participant_types_data = validated_data.pop('participant_types')
-        activity = super().create(validated_data)
+        activity = super().create({**validated_data, 'last_changed_by': self.context['request'].user})
         for participant_type_data in participant_types_data:
             # creating the nested data
             activity.participant_types.create(**participant_type_data)
@@ -392,6 +389,7 @@ class ActivityUpdateSerializer(ActivitySerializer):
 
         update_data = validated_data.copy()
         update_data.pop('participant_types', None)
+        update_data['last_changed_by'] = self.context['request'].user
         activity = super().update(activity, update_data)
 
         after_data = ActivityHistorySerializer(activity).data
@@ -724,7 +722,7 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
     @transaction.atomic()
     def create(self, validated_data):
         participant_types_data = validated_data.pop('participant_types')
-        series = super().create(validated_data)
+        series = super().create({**validated_data, 'last_changed_by': self.context['request'].user})
         for participant_type_data in participant_types_data:
             # creating the nested data
             series.participant_types.create(**participant_type_data)
