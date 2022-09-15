@@ -339,56 +339,19 @@ class ActivityUpdateSerializer(ActivitySerializer):
     updated_message = serializers.CharField(write_only=True, required=False)
 
     @transaction.atomic()
-    def save(self, **kwargs):
-        activity = self.instance
-        updated_message = self.validated_data.pop('updated_message', None)
-        changed_data = find_changed(activity, self.validated_data)
-        self._validated_data = changed_data
-        skip_update = len(self.validated_data.keys()) == 0
+    def update(self, activity, validated_data):
+        # this is not part of the activity data itself, so pop it out...
+        updated_message = validated_data.pop('updated_message', None)
+        validated_data = find_changed(activity, validated_data)
+        skip_update = len(validated_data.keys()) == 0
         if skip_update:
-            return self.instance
+            return activity
 
         before_data = ActivityHistorySerializer(activity).data
-        activity = super().save(**kwargs, updated_message=updated_message)
-        after_data = ActivityHistorySerializer(activity).data
-
-        if before_data != after_data:
-            typus_list = []
-            if 'is_disabled' in changed_data:
-                if changed_data['is_disabled']:
-                    typus_list.append(HistoryTypus.ACTIVITY_DISABLE)
-                    stats.activity_disabled(activity)
-                else:
-                    typus_list.append(HistoryTypus.ACTIVITY_ENABLE)
-                    stats.activity_enabled(activity)
-
-            if len(set(changed_data.keys()).difference(['is_disabled'])) > 0:
-                typus_list.append(HistoryTypus.ACTIVITY_MODIFY)
-
-            for typus in typus_list:
-                History.objects.create(
-                    typus=typus,
-                    group=activity.place.group,
-                    place=activity.place,
-                    activity=activity,
-                    users=[self.context['request'].user],
-                    payload={k: self.initial_data.get(k)
-                             for k in changed_data.keys()},
-                    before=before_data,
-                    after=after_data,
-                    message=updated_message,
-                )
-        activity.place.group.refresh_active_status()
-
-        return activity
-
-    def update(self, instance, validated_data):
-        updated_message = validated_data.pop('updated_message', None)
 
         removed_users = []
 
-        activity = instance
-        participant_types = validated_data.pop('participant_types', None)
+        participant_types = validated_data.get('participant_types', None)
         if participant_types:
             for entry in participant_types:
                 pk = entry.pop('id', None)
@@ -427,22 +390,58 @@ class ActivityUpdateSerializer(ActivitySerializer):
                     # new participant type \o/
                     ParticipantType.objects.create(activity=activity, **entry)
 
-        activity = super().update(instance, validated_data)
+        update_data = validated_data.copy()
+        update_data.pop('participant_types', None)
+        activity = super().update(activity, update_data)
+
+        after_data = ActivityHistorySerializer(activity).data
+
+        history = None
+
+        if before_data != after_data:
+            typus_list = []
+            if 'is_disabled' in validated_data:
+                if validated_data['is_disabled']:
+                    typus_list.append(HistoryTypus.ACTIVITY_DISABLE)
+                    stats.activity_disabled(activity)
+                else:
+                    typus_list.append(HistoryTypus.ACTIVITY_ENABLE)
+                    stats.activity_enabled(activity)
+
+            if len(set(validated_data.keys()).difference(['is_disabled'])) > 0:
+                typus_list.append(HistoryTypus.ACTIVITY_MODIFY)
+
+            for typus in typus_list:
+                created_history = History.objects.create(
+                    typus=typus,
+                    group=activity.place.group,
+                    place=activity.place,
+                    activity=activity,
+                    users=[self.context['request'].user],
+                    payload={k: self.initial_data.get(k)
+                             for k in validated_data.keys()},
+                    before=before_data,
+                    after=after_data,
+                    message=updated_message,
+                )
+                if typus is HistoryTypus.ACTIVITY_MODIFY:
+                    history = created_history
 
         if len(removed_users) > 0:
-            notify_participant_removals({
-                'activities': {
-                    activity.id: model_to_dict(activity)
-                },
-                'participants': [{
+            notify_participant_removals(
+                activity_type_id=activity.activity_type.id,
+                place_id=activity.place.id,
+                activities_data=[model_to_dict(activity)],
+                participants=[{
                     'user': user.id,
-                    'activity': activity.id
+                    'activity': activity.id,
                 } for user in removed_users],
-                'message':
-                updated_message,
-                'removed_by':
-                self.context['request'].user.id,
-            })
+                message=updated_message,
+                removed_by_id=self.context['request'].user.id,
+                history_id=history.id if history else None,
+            )
+
+        activity.place.group.refresh_active_status()
 
         return activity
 
@@ -464,12 +463,11 @@ class ActivityUpdateCheckSerializer(Serializer):
     # response fields
     users = serializers.ListSerializer(read_only=True, child=serializers.IntegerField())
 
-    def update(self, instance, validated_data):
+    def update(self, activity, validated_data):
 
         will_remove_user_ids = set()
 
-        activity = instance
-        participant_types = validated_data.pop('participant_types', None)
+        participant_types = validated_data.get('participant_types', None)
         if participant_types:
             for entry in participant_types:
                 pk = entry.pop('id', None)
@@ -794,41 +792,17 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
     updated_message = serializers.CharField(write_only=True, required=False)
 
     @transaction.atomic()
-    def save(self, **kwargs):
-        series = self.instance
-        updated_message = self.validated_data.pop('updated_message', None)
-        changed_data = find_changed(series, self.validated_data)
-        self._validated_data = changed_data
-        skip_update = len(self.validated_data.keys()) == 0
+    def update(self, series, validated_data):
+        old = series.old() if series else None
+
+        # this is not part of the series data itself, so pop it out...
+        updated_message = validated_data.pop('updated_message', None)
+        validated_data = find_changed(series, validated_data)
+        skip_update = len(validated_data.keys()) == 0
         if skip_update:
             return series
 
         before_data = ActivitySeriesHistorySerializer(series).data
-        series = super().save(last_changed_by=self.context['request'].user, updated_message=updated_message)
-        after_data = ActivitySeriesHistorySerializer(series).data
-
-        if before_data != after_data:
-            # TODO: store who was removed?
-            History.objects.create(
-                typus=HistoryTypus.SERIES_MODIFY,
-                group=series.place.group,
-                place=series.place,
-                series=series,
-                users=[self.context['request'].user],
-                payload={k: self.initial_data.get(k)
-                         for k in changed_data.keys()},
-                before=before_data,
-                after=after_data,
-                message=updated_message,
-            )
-
-        series.place.group.refresh_active_status()
-
-        return series
-
-    def update(self, series, validated_data):
-        old = series.old() if series else None
-        updated_message = validated_data.pop('updated_message', None)
 
         removed = []  # array of {'user': <User>, 'activity': <Activity> } objects
 
@@ -840,7 +814,7 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
 
         description = validated_data.get('description', None)
         duration = validated_data.get('duration', None)
-        participant_types = validated_data.pop('participant_types', None)
+        participant_types = validated_data.get('participant_types', None)
 
         description_changed = 'description' in validated_data and series.description != description
         duration_changed = 'duration' in validated_data and series.duration != duration
@@ -930,7 +904,10 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
                                 **entry,
                             )
 
-        series = super().update(series, validated_data)
+        update_data = validated_data.copy()
+        update_data.pop('participant_types', None)
+        update_data['last_changed_by'] = self.context['request'].user
+        series = super().update(series, update_data)
 
         if old.start_date != series.start_date or old.rule != series.rule:
             # we don't use series.update_activities() here because we want to remove and collect participants
@@ -942,26 +919,51 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
                         add_removed(activity, user)
                     activity.delete()
 
+        after_data = ActivitySeriesHistorySerializer(series).data
+
+        history = None
+
+        if before_data != after_data:
+            # TODO: store who was removed?
+            history = History.objects.create(
+                typus=HistoryTypus.SERIES_MODIFY,
+                group=series.place.group,
+                place=series.place,
+                series=series,
+                users=[self.context['request'].user],
+                # TODO: this doesn't include the changed participant_types as we popped it above...
+                payload={k: self.initial_data.get(k)
+                         for k in validated_data.keys()},
+                before=before_data,
+                after=after_data,
+                message=updated_message,
+            )
+
         if len(removed) > 0:
             removed.sort(key=lambda val: val['activity'].date.start)
+
+            # collect unique activities
             activities = {}
             for entry in removed:
                 activity = entry['activity']
                 if activity.id not in activities:
                     # we might have deleted some of the activities by the time the task is run, so store as dict
                     activities[activity.id] = model_to_dict(activity)
-            notify_participant_removals({
-                'activities':
-                activities,
-                'participants': [{
+
+            notify_participant_removals(
+                activity_type_id=series.activity_type.id,
+                place_id=series.place.id,
+                activities_data=list(activities.values()),
+                participants=[{
                     'user': entry['user'].id,
                     'activity': entry['activity'].id
                 } for entry in removed],
-                'message':
-                updated_message,
-                'removed_by':
-                self.context['request'].user.id,
-            })
+                message=updated_message,
+                removed_by_id=self.context['request'].user.id,
+                history_id=history.id if history else None,
+            )
+
+        series.place.group.refresh_active_status()
 
         return series
 

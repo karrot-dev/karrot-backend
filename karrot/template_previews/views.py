@@ -5,7 +5,6 @@ import re
 from collections import namedtuple
 
 from dateutil.relativedelta import relativedelta
-from django.forms import model_to_dict
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
 from django.template.loader import render_to_string
 from django.template.utils import get_app_template_dirs
@@ -29,7 +28,7 @@ from karrot.offers.emails import prepare_new_offer_notification_email
 from karrot.offers.factories import OfferFactory
 from karrot.offers.models import Offer
 from karrot.activities.emails import prepare_activity_notification_email, prepare_participant_removed_email
-from karrot.activities.models import Activity
+from karrot.activities.models import Activity, ActivitySeries
 from karrot.users.factories import VerifiedUserFactory
 from karrot.users.models import User
 from karrot.utils.tests.fake import faker
@@ -251,12 +250,13 @@ class Handlers:
         user = random_user(group)
         removed_by = random_user(group)
 
+        series = ActivitySeries.objects.order_by('?').first()
         activities = Activity.objects.order_by('?')[:3]
 
         return prepare_participant_removed_email(
             user=user,
-            group=group,
-            activity_data_list=[model_to_dict(activity) for activity in activities],
+            place=series.place,
+            activities=activities,  # not exactly what the template gets passed in real-life, but close enough
             removed_by=removed_by,
             message=faker.text(),
         )
@@ -283,10 +283,8 @@ handlers = Handlers()
 def list_templates(request):
     template_dirs = [str(path) for path in get_app_template_dirs('templates') if re.match(r'.*/karrot/.*', str(path))]
 
-    template_names = set()
-
-    templates = {}
-
+    # collect template files
+    template_files = {}
     for directory in template_dirs:
         for directory, dirnames, filenames in os.walk(directory):
             relative_dir = directory[len(basedir) + 1:]
@@ -298,8 +296,6 @@ def list_templates(request):
                     name = re.sub(r'\..*$', '', os.path.basename(path))
 
                     if name != 'template_preview_list':
-                        template_names.add(name)
-
                         formats = []
 
                         for idx, s in enumerate(['subject', 'text', 'html']):
@@ -311,16 +307,28 @@ def list_templates(request):
                         # only include if some formats were defined (even empty ones would end up with autotext...)
                         if len(formats) > 1:
                             formats.append('raw')
+                            template_files[name] = formats
 
-                            templates[name] = {
-                                'name': name,
-                                'has_handler': name in dir(handlers),
-                                'formats': formats,
-                            }
+    templates = {}
+
+    for name in dir(handlers):
+        if name.startswith('_'):
+            continue
+        templates[name] = {
+            'name': name,
+            'has_handler': True,  # because we are listing the handlers :)
+            'formats': template_files.get(name, []),
+        }
+
+    missing_handlers = [name for name in template_files.keys() if name not in templates]
 
     return HttpResponse(
         render_to_string(
-            'template_preview_list.jinja2', {'templates': sorted(templates.values(), key=lambda t: t['name'])}
+            'template_preview_list.jinja2', {
+                'templates': templates.values(),
+                'missing_handlers': missing_handlers,
+                'views_filename': __file__,
+            }
         )
     )
 

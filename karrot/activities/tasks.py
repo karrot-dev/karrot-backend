@@ -8,11 +8,11 @@ from django.utils.text import Truncator
 from django.utils.translation import gettext as _
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task, db_task
-from more_itertools import first
 
 from karrot.activities import stats
-from karrot.activities.emails import prepare_activity_notification_email, prepare_participant_removed_email
-from karrot.activities.models import Activity, ActivitySeries, ActivityParticipant, ParticipantType
+from karrot.activities.emails import prepare_activity_notification_email, \
+    prepare_participant_removed_email
+from karrot.activities.models import Activity, ActivitySeries, ActivityParticipant, ParticipantType, ActivityType
 from karrot.groups.models import Group, GroupMembership, GroupNotificationType
 from karrot.places.models import PlaceStatus, Place
 from karrot.subscriptions.models import PushSubscription
@@ -91,55 +91,65 @@ def activity_reminder(participant_id):
 
 
 @db_task()
-def notify_participant_removals(data):
-    # {
-    #   'activities': { <id>: {<dict data of activity info>}}
-    #   'participants': [{'user':<userid>,'activity':<activityid>}, ...],
-    #   'message': '<message>',
-    #   'removed_by': <userid>,
-    # }
-    message = data['message']
-    removed_by = User.objects.get(id=data['removed_by'])
+def notify_participant_removals(
+    activity_type_id,
+    place_id,
+    activities_data,  # [<dict data of activity info>, ...]
+    participants,  # [{'user':<userid>,'activity':<activityid>}, ...],
+    message,
+    removed_by_id,
+    history_id,
+):
+    removed_by = User.objects.get(id=removed_by_id)
+    activity_type = ActivityType.objects.get(id=activity_type_id)
 
-    # they will all have the same group so we can assume this...
-    group = Place.objects.get(id=first(data['activities'].values())['place']).group
+    place = Place.objects.get(id=place_id)
+    group = place.group
 
-    # we want to send per-user messages
+    activities_by_id = {}
+    for entry in activities_data:
+        # activities doesn't include related fields, so flesh it out a bit
+        activities_by_id[entry['id']] = {
+            **entry,
+            'activity_type': ActivityType.objects.get(id=entry['activity_type']),
+            'place': Place.objects.get(id=entry['place']),
+        }
+
+    # collect activities affected per-user
     by_user = defaultdict(list)
-    for entry in data['participants']:
-        activity_data = data['activities'][entry['activity']]
-        by_user[entry['user']].append(activity_data)
+    for entry in participants:
+        by_user[entry['user']].append(activities_by_id[entry['activity']])
 
     for user_id in by_user.keys():
-        activity_data_list = by_user[user_id]
+        activities_for_user = by_user[user_id]
         user = User.objects.get(id=user_id)
 
         # email them
         prepare_participant_removed_email(
             user,
-            group,
-            activity_data_list,
+            place,
+            activities_for_user,
             removed_by,
             message,
         ).send()
 
-        # also a notification
-        # TODO: am I allowed to create notifications here instead of doing them in karrot/notifications
+        # send a notification
         Notification.objects.create(
             type=NotificationType.PARTICIPANT_REMOVED.value,
             user=user,
             context={
+                'activity_type': activity_type.id,
+                'place': place.id,
                 'group': group.id,
                 'removed_by': removed_by.id,
-                # no interesting URL...
-                # 'url':
+                'history': history_id,
             },
         )
 
+        # and a push message
         subscriptions = PushSubscription.objects.filter(user=user)
         if subscriptions.count() > 0:
-            # and a puuuuuuuuuush message
-            title = _('You were removed from activities in %(group_name)s' % {'group_name': group.name})
+            title = _('Your activities for %(place_name)s changed' % {'place_name': place.name})
             notify_subscribers_by_device(
                 subscriptions,
                 # TODO: we've got nowhere interesting to send them, not great if message got truncated...

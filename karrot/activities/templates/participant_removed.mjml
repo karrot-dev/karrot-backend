@@ -1,14 +1,15 @@
 <mjml>
     <mj-head>
         <mj-include path="../../base/templates/_base-head.mjml"/>
-        <mj-title>{% trans group_name=group.name %}You were removed from activities in {{ group_name }}{% endtrans %}</mj-title>
+        <mj-title>{% trans place_name=place.name %}Your activities for {{ place_name }} changed{% endtrans %}</mj-title>
     </mj-head>
     <mj-body>
         <mj-section>
             <mj-column>
                 <mj-text>
                     <h1>{{ group.name }}</h1>
-                    <p>{% trans group_name=group.name %}You were removed from activities in {{ group_name }}{% endtrans %}:</p>
+                    <p>{% trans place_name=place.name %}Your activities for {{ place_name }} changed{% endtrans %}.</p>
+                    <p>{% trans %}The following activities are no longer available for you{% endtrans %}:</p>
 
                     {% for activity in activities %}
                     <p>
@@ -23,10 +24,9 @@
                     </p>
                     {% endfor %}
 
-                    <div class="message">
-                        {% trans url=user_url(removed_by), display_name=removed_by.display_name %}Message from <a class="message-author" href="{{ url }}">{{ display_name }}</a>{% endtrans %}:<br>
-                        <p class="message-content">{{ message | safe }}</p>
-                    </div>
+                    <br/>
+                    <strong>{% trans url=user_url(removed_by), display_name=removed_by.display_name %}Message from <a class="message-author" href="{{ url }}">{{ display_name }}</a>{% endtrans %}:</strong><br />
+                    <p class="message-content">{{ message | safe }}</p>
 
                 </mj-text>
                 <mj-divider/>
