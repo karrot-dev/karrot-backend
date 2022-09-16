@@ -81,8 +81,8 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
         email_to_editor = next(email for email in mail.outbox if email.to[0] == notification_member.email)
         email_to_affected_user = next(email for email in mail.outbox if email.to[0] == self.affected_member.email)
         self.assertEqual(len(mail.outbox), 2)
-        self.assertIn('with you', email_to_affected_user.subject)
-        self.assertIn('with {}'.format(self.affected_member.display_name), email_to_editor.subject)
+        self.assertIn('your membership', email_to_affected_user.subject)
+        self.assertIn('for {}'.format(self.affected_member.display_name), email_to_editor.subject)
 
         # vote on option
         response = self.client.post(
