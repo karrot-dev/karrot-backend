@@ -226,6 +226,9 @@ class ActivityQuerySet(models.QuerySet):
     def upcoming(self):
         return self.filter(date__startswith__gt=timezone.now())
 
+    def is_public(self):
+        return self.filter(is_public=True)
+
     @transaction.atomic
     def process_finished_activities(self):
         """
@@ -333,6 +336,7 @@ class Activity(BaseModel, ConversationMixin):
     has_duration = models.BooleanField(default=False)
 
     is_public = models.BooleanField(default=False)
+    public_id = models.UUIDField(null=True, unique=True)
 
     description = models.TextField(blank=True)
     is_disabled = models.BooleanField(default=False)

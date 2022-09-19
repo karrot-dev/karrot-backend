@@ -8,6 +8,7 @@ from rest_framework import mixins
 from rest_framework import viewsets
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, BaseAuthentication
 from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import CursorPagination
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
@@ -16,7 +17,9 @@ from rest_framework.viewsets import GenericViewSet
 
 from karrot.conversations.api import RetrieveConversationMixin
 from karrot.history.models import History, HistoryTypus
-from karrot.activities.filters import (ActivitiesFilter, ActivitySeriesFilter, FeedbackFilter, ActivityTypeFilter)
+from karrot.activities.filters import (
+    ActivitiesFilter, ActivitySeriesFilter, FeedbackFilter, ActivityTypeFilter, PublicActivitiesFilter
+)
 from karrot.activities.models import (
     Activity as ActivityModel, ActivitySeries as ActivitySeriesModel, Feedback as FeedbackModel, ActivityType,
     ICSAuthToken
@@ -29,7 +32,7 @@ from karrot.activities.serializers import (
     ActivityDismissFeedbackSerializer, ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer,
     ActivityLeaveSerializer, FeedbackSerializer, ActivityUpdateSerializer, ActivitySeriesUpdateSerializer,
     ActivitySeriesHistorySerializer, FeedbackExportSerializer, FeedbackExportRenderer, ActivityTypeSerializer,
-    ActivityICSSerializer, ActivitySeriesUpdateCheckSerializer, ActivityUpdateCheckSerializer
+    ActivityICSSerializer, ActivitySeriesUpdateCheckSerializer, ActivityUpdateCheckSerializer, PublicActivitySerializer
 )
 from karrot.activities.renderers import ICSCalendarRenderer
 from karrot.places.models import PlaceStatus
@@ -210,6 +213,23 @@ class ActivityPagination(CursorPagination):
     max_page_size = 1200
     page_size_query_param = 'page_size'
     ordering = 'date'
+
+
+class PublicActivityViewSet(
+        GenericViewSet,
+        mixins.RetrieveModelMixin,
+        mixins.ListModelMixin,
+):
+    serializer_class = PublicActivitySerializer
+    queryset = ActivityModel.objects.is_public()
+    filter_backends = (filters.DjangoFilterBackend, )
+    filterset_class = PublicActivitiesFilter
+    pagination_class = ActivityPagination  # use the activities one seems ok
+
+    def get_object(self):
+        queryset = self.filter_queryset(self.get_queryset())
+        obj = get_object_or_404(queryset, public_id=self.kwargs['pk'])
+        return obj
 
 
 class ActivityViewSet(
