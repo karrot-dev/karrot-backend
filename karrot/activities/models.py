@@ -12,6 +12,7 @@ from django.db import transaction
 from django.db.models import Count, DurationField, F, FilteredRelation, Q, Sum
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from versatileimagefield.fields import VersatileImageField
 
 from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin
 from karrot.conversations.models import ConversationMixin
@@ -331,6 +332,8 @@ class Activity(BaseModel, ConversationMixin):
     date = CustomDateTimeRangeField(default=default_activity_date_range)
     has_duration = models.BooleanField(default=False)
 
+    is_public = models.BooleanField(default=False)
+
     description = models.TextField(blank=True)
     is_disabled = models.BooleanField(default=False)
     last_changed_by = models.ForeignKey(
@@ -341,6 +344,12 @@ class Activity(BaseModel, ConversationMixin):
     )
 
     is_done = models.BooleanField(default=False)
+
+    banner_image = VersatileImageField(
+        'BannerImage',
+        upload_to='activity__banner_images',
+        null=True,
+    )
 
     @property
     def group(self):

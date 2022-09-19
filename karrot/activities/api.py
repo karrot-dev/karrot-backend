@@ -9,6 +9,7 @@ from rest_framework import viewsets
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, BaseAuthentication
 from rest_framework.decorators import action
 from rest_framework.pagination import CursorPagination
+from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -33,6 +34,7 @@ from karrot.activities.serializers import (
 from karrot.activities.renderers import ICSCalendarRenderer
 from karrot.places.models import PlaceStatus
 from karrot.utils.mixins import PartialUpdateModelMixin
+from karrot.utils.parsers import JSONWithFilesMultiPartParser
 
 
 class ICSQueryTokenAuthentication(BaseAuthentication):
@@ -227,6 +229,7 @@ class ActivityViewSet(
     filterset_class = ActivitiesFilter
     permission_classes = (IsAuthenticated, IsUpcoming, IsGroupEditor, IsEmptyActivity)
     pagination_class = ActivityPagination
+    parser_classes = [JSONWithFilesMultiPartParser, JSONParser]
 
     def get_queryset(self):
         qs = self.queryset.filter(place__group__members=self.request.user)

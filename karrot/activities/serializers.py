@@ -20,6 +20,7 @@ from rest_framework.fields import CharField, DateTimeField, Field
 from rest_framework.serializers import Serializer
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework_csv.renderers import CSVRenderer
+from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from karrot.activities.tasks import notify_participant_removals
 from karrot.base.base_models import CustomDateTimeTZRange, Tstzrange
@@ -223,6 +224,11 @@ class SeriesParticipantTypeSerializer(serializers.ModelSerializer):
 
 
 class ActivitySerializer(serializers.ModelSerializer):
+    banner_image = VersatileImageFieldSerializer(
+        sizes='activity_banner_image', required=False, allow_null=True, write_only=True
+    )
+    banner_image_urls = VersatileImageFieldSerializer(sizes='activity_banner_image', source='banner_image')
+
     class Meta:
         model = ActivityModel
         fields = [
@@ -240,11 +246,15 @@ class ActivitySerializer(serializers.ModelSerializer):
             'is_disabled',
             'has_duration',
             'is_done',
+            'is_public',
+            'banner_image',
+            'banner_image_urls',
         ]
         read_only_fields = [
             'id',
             'series',
             'is_done',
+            'banner_image_urls',
         ]
 
     participants = ActivityParticipantSerializer(
@@ -393,6 +403,8 @@ class ActivityUpdateSerializer(ActivitySerializer):
         update_data.pop('participant_types', None)
         update_data['last_changed_by'] = self.context['request'].user
         activity = super().update(activity, update_data)
+
+        validated_data.pop('banner_image', None)  # can't store this in history, so remove it
 
         after_data = ActivityHistorySerializer(activity).data
 
