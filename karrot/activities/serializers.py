@@ -3,6 +3,8 @@ from typing import List
 import dateutil.rrule
 from datetime import timedelta, datetime
 
+from django.db.models import F
+from django.db.models.functions import Lower
 from django.forms import model_to_dict
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
@@ -20,7 +22,7 @@ from rest_framework.validators import UniqueTogetherValidator
 from rest_framework_csv.renderers import CSVRenderer
 
 from karrot.activities.tasks import notify_participant_removals
-from karrot.base.base_models import CustomDateTimeTZRange
+from karrot.base.base_models import CustomDateTimeTZRange, Tstzrange
 from karrot.history.models import History, HistoryTypus
 from karrot.activities import stats
 from karrot.activities.models import (
@@ -818,18 +820,17 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
         duration_changed = 'duration' in validated_data and series.duration != duration
         if description_changed or duration_changed or participant_types:
             activities = series.activities.upcoming()
-            for activity in activities:
-                if description_changed and series.description == activity.description:
-                    activity.description = description
-                if duration_changed:
-                    if duration:
-                        activity.has_duration = True
-                        activity.date = CustomDateTimeTZRange(activity.date.start, activity.date.start + duration)
-                    else:
-                        activity.has_duration = False
-                        activity.date = CustomDateTimeTZRange(
-                            activity.date.start, activity.date.start + default_duration
-                        )
+
+            if description_changed:
+                activities.filter(description=series.description).update(description=description)
+
+            if duration_changed:
+                activities.update(
+                    has_duration=duration is not None,
+                    date=Tstzrange(Lower(F('date')),
+                                   Lower(F('date')) + (duration or default_duration))
+                )
+
             if participant_types:
                 for entry in participant_types:
                     pk = entry.pop('id', None)
