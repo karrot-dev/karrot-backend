@@ -2,10 +2,12 @@ from collections import defaultdict
 
 from babel.dates import format_time, format_datetime
 from dateutil.relativedelta import relativedelta
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import F, Q, QuerySet
 from django.utils import timezone, translation
 from django.utils.text import Truncator
-from django.utils.translation import gettext as _
+from django.utils.timezone import get_current_timezone
+from django.utils.translation import gettext as _, to_locale, get_language
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task, db_task
 
@@ -124,42 +126,59 @@ def notify_participant_removals(
         activities_for_user = by_user[user_id]
         user = User.objects.get(id=user_id)
 
-        # email them
-        prepare_participant_removed_email(
-            user,
-            place,
-            activities_for_user,
-            removed_by,
-            message,
-        ).send()
+        language = user.language
+        tz = group.timezone
 
-        # send a notification
-        Notification.objects.create(
-            type=NotificationType.PARTICIPANT_REMOVED.value,
-            user=user,
-            context={
-                'activity_type': activity_type.id,
-                'place': place.id,
-                'group': group.id,
-                'removed_by': removed_by.id,
-                'history': history_id,
-            },
-        )
+        with translation.override(language), timezone.override(tz):
 
-        # and a push message
-        subscriptions = PushSubscription.objects.filter(user=user)
-        if subscriptions.count() > 0:
-            title = _('Your activities for %(place_name)s changed' % {'place_name': place.name})
-            notify_subscribers_by_device(
-                subscriptions,
-                # TODO: we've got nowhere interesting to send them, not great if message got truncated...
-                # click_action=
-                fcm_options={
-                    'message_title': title,
-                    # TODO: this isn't a great message no details about the activities...
-                    'message_body': Truncator(message).chars(num=1000),
-                }
-            )
+            # email them
+            prepare_participant_removed_email(
+                user,
+                place,
+                activities_for_user,
+                removed_by,
+                message,
+            ).send()
+
+            # send a notification and push message *per activity* so the user can see the details
+            for activity in activities_for_user:
+                Notification.objects.create(
+                    type=NotificationType.PARTICIPANT_REMOVED.value,
+                    user=user,
+                    context={
+                        'activity_type': activity_type.id,
+                        'place': place.id,
+                        'group': group.id,
+                        'activity_date': DjangoJSONEncoder().default(activity['date'].start),
+                        'removed_by': removed_by.id,
+                        'history': history_id,
+                    },
+                )
+
+                subscriptions = PushSubscription.objects.filter(user=user)
+                title = _(
+                    '%(activity_type)s no longer available - %(date_time)s' % {
+                        'activity_type':
+                        activity['activity_type'].get_translated_name(),
+                        'date_time':
+                        format_datetime(
+                            activity['date'].start,
+                            format='medium',
+                            locale=to_locale(get_language()),
+                            tzinfo=get_current_timezone(),
+                        ),
+                    }
+                )
+                body = removed_by.display_name + ':' + Truncator(message).chars(num=1000)
+                if subscriptions.count() > 0:
+                    notify_subscribers_by_device(
+                        subscriptions,
+                        click_action=frontend_urls.history_url(history_id),
+                        fcm_options={
+                            'message_title': title,
+                            'message_body': body,
+                        }
+                    )
 
 
 @db_periodic_task(crontab(minute='*'))  # every minute

@@ -45,9 +45,16 @@ def place_url(place):
 
 
 def user_url(user):
-    return '{hostname}/#/user/{user_id}/'.format(
+    return '{hostname}/#/user/{user_id}'.format(
         hostname=settings.HOSTNAME,
         user_id=user.id,
+    )
+
+
+def history_url(history_id):
+    return '{hostname}/#/history/{history_id}'.format(
+        hostname=settings.HOSTNAME,
+        history_id=history_id,
     )
 
 
