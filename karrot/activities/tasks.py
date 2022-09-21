@@ -156,19 +156,17 @@ def notify_participant_removals(
                 )
 
                 subscriptions = PushSubscription.objects.filter(user=user)
-                title = _(
-                    '%(activity_type)s no longer available - %(date_time)s' % {
-                        'activity_type':
-                        activity['activity_type'].get_translated_name(),
-                        'date_time':
-                        format_datetime(
-                            activity['date'].start,
-                            format='medium',
-                            locale=to_locale(get_language()),
-                            tzinfo=get_current_timezone(),
-                        ),
-                    }
+                activity_type_name = activity['activity_type'].get_translated_name()
+                formatted_date_time = format_datetime(
+                    activity['date'].start,
+                    format='medium',
+                    locale=to_locale(get_language()),
+                    tzinfo=get_current_timezone(),
                 )
+                title = _('%(activity_type)s no longer available - %(date_time)s') % {
+                    'activity_type': activity_type_name,
+                    'date_time': formatted_date_time,
+                }
                 body = removed_by.display_name + ':' + Truncator(message).chars(num=1000)
                 if subscriptions.count() > 0:
                     notify_subscribers_by_device(

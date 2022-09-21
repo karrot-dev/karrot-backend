@@ -40,26 +40,26 @@ msgstr ""
 msgid "Task"
 msgstr ""
 
-#: karrot/activities/serializers.py:137
+#: karrot/activities/serializers.py:139
 msgid "Must be a list"
 msgstr ""
 
-#: karrot/activities/serializers.py:138
+#: karrot/activities/serializers.py:140
 msgid "Must be a list with one or two values"
 msgstr ""
 
-#: karrot/activities/serializers.py:139
+#: karrot/activities/serializers.py:141
 msgid "Must pass start value"
 msgstr ""
 
-#: karrot/activities/tasks.py:75
+#: karrot/activities/tasks.py:77
 #, python-format
 msgid "Upcoming %(activity_type)s"
 msgstr ""
 
-#: karrot/activities/tasks.py:152
+#: karrot/activities/tasks.py:166
 #, python-format
-msgid "Your activities for %(place_name)s changedplace_name"
+msgid "%(activity_type)s no longer available - %(date_time)s"
 msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:5
