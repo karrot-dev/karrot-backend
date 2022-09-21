@@ -242,12 +242,12 @@ msgstr ""
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:289
+#: karrot/conversations/emails.py:290
 #, python-format
-msgid "New message in conflict resolution in %(group_name)s"
+msgid "New message in membership review of %(user_name)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:304
+#: karrot/conversations/emails.py:305
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr ""
