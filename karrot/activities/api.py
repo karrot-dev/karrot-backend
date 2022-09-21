@@ -21,14 +21,14 @@ from karrot.activities.models import (
     ICSAuthToken
 )
 from karrot.activities.permissions import (
-    IsUpcoming, HasNotJoinedActivity, HasJoinedActivity, IsEmptyActivity, IsNotFull, IsSameParticipant,
-    IsRecentActivity, IsGroupEditor, TypeHasNoActivities, CannotChangeGroup, IsNotUpcoming, IsNotPast
+    IsUpcoming, HasNotJoinedActivity, HasJoinedActivity, IsEmptyActivity, IsSameParticipant, IsRecentActivity,
+    IsGroupEditor, TypeHasNoActivities, CannotChangeGroup, IsNotUpcoming, IsNotPast
 )
 from karrot.activities.serializers import (
     ActivityDismissFeedbackSerializer, ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer,
     ActivityLeaveSerializer, FeedbackSerializer, ActivityUpdateSerializer, ActivitySeriesUpdateSerializer,
     ActivitySeriesHistorySerializer, FeedbackExportSerializer, FeedbackExportRenderer, ActivityTypeSerializer,
-    ActivityTypeHistorySerializer, ActivityICSSerializer
+    ActivityICSSerializer, ActivitySeriesUpdateCheckSerializer, ActivityUpdateCheckSerializer
 )
 from karrot.activities.renderers import ICSCalendarRenderer
 from karrot.places.models import PlaceStatus
@@ -55,7 +55,6 @@ class ActivityTypeViewSet(
         mixins.RetrieveModelMixin,
         PartialUpdateModelMixin,
         mixins.ListModelMixin,
-        mixins.DestroyModelMixin,
         viewsets.GenericViewSet,
 ):
     serializer_class = ActivityTypeSerializer
@@ -71,19 +70,6 @@ class ActivityTypeViewSet(
 
     def get_queryset(self):
         return self.queryset.filter(group__members=self.request.user)
-
-    def perform_destroy(self, activity_type):
-        data = self.get_serializer(activity_type).data
-        History.objects.create(
-            typus=HistoryTypus.ACTIVITY_TYPE_DELETE,
-            group=activity_type.group,
-            users=[
-                self.request.user,
-            ],
-            payload=data,
-            before=ActivityTypeHistorySerializer(activity_type).data,
-        )
-        super().perform_destroy(activity_type)
 
 
 class FeedbackPagination(CursorPagination):
@@ -125,10 +111,11 @@ class FeedbackViewSet(
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset()) \
             .select_related('about') \
-            .prefetch_related('about__activity_type', 'about__activityparticipant_set', 'about__feedback_given_by') \
+            .prefetch_related('about__activity_type', 'about__activityparticipant_set', 'about__feedback_given_by',
+                              'about__participant_types', 'about__activityparticipant_set__participant_type', ) \
             .annotate(
-              timezone=F('about__place__group__timezone'),
-              activity_date=F('about__date__startswith'))
+            timezone=F('about__place__group__timezone'),
+            activity_date=F('about__date__startswith'))
         feedback = self.paginate_queryset(queryset)
 
         activities = set()
@@ -168,7 +155,6 @@ class ActivitySeriesViewSet(
         mixins.DestroyModelMixin,
         viewsets.GenericViewSet,
 ):
-
     serializer_class = ActivitySeriesSerializer
     queryset = ActivitySeriesModel.objects
     filter_backends = (filters.DjangoFilterBackend, )
@@ -197,6 +183,21 @@ class ActivitySeriesViewSet(
         )
         super().perform_destroy(series)
         series.place.group.refresh_active_status()
+
+    @action(
+        detail=True,
+        methods=['PATCH'],
+        permission_classes=(IsAuthenticated, ),
+        serializer_class=ActivitySeriesUpdateCheckSerializer,
+    )
+    def check(self, request, pk):
+        self.check_permissions(request)
+        instance = self.get_object()
+        self.check_object_permissions(request, instance)
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(data=serializer.data)
 
 
 class ActivityPagination(CursorPagination):
@@ -235,7 +236,10 @@ class ActivityViewSet(
         if self.action in ('retrieve', 'list'):
             # because we have participants field in the serializer
             # only prefetch on read_only actions, otherwise there are caching problems when participants get added
-            qs = qs.select_related('activity_type').prefetch_related('activityparticipant_set', 'feedback_given_by')
+            qs = qs.select_related('activity_type').prefetch_related(
+                'activityparticipant_set', 'feedback_given_by', 'participant_types',
+                'activityparticipant_set__participant_type'
+            )
         if self.action == 'add':
             # Lock activity when adding a participant
             # This should prevent a race condition that would result in more participants than slots
@@ -250,7 +254,7 @@ class ActivityViewSet(
     @action(
         detail=True,
         methods=['POST'],
-        permission_classes=(IsAuthenticated, IsNotPast, HasNotJoinedActivity, IsNotFull),
+        permission_classes=(IsAuthenticated, IsNotPast, HasNotJoinedActivity),
         serializer_class=ActivityJoinSerializer
     )
     def add(self, request, pk=None):
@@ -266,6 +270,21 @@ class ActivityViewSet(
     )
     def remove(self, request, pk=None):
         return self.partial_update(request)
+
+    @action(
+        detail=True,
+        methods=['PATCH'],
+        permission_classes=(IsAuthenticated, ),
+        serializer_class=ActivityUpdateCheckSerializer,
+    )
+    def check(self, request, pk):
+        self.check_permissions(request)
+        instance = self.get_object()
+        self.check_object_permissions(request, instance)
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(data=serializer.data)
 
     @action(
         detail=True,

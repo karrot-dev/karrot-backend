@@ -57,6 +57,7 @@ Unidecode
 pip-tools
 factory-boy
 ipython < 8 # for python 3.7 compatability
+jedi==0.17.2 # https://github.com/ipython/ipython/issues/12740
 requests-mock
 tblib
 # flake8 # See https://github.com/karrot-dev/karrot-frontend/issues/2476
@@ -74,3 +75,4 @@ yapf
 importlib-metadata # for py3.7 compat
 pre-commit
 psutil
+sqlparse # for pretty-printing SQL in shell

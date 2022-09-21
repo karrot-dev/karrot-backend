@@ -68,7 +68,7 @@ class TestNotificationsAPI(APITestCase, ExtractPaginationMixin):
 
         self.client.force_login(self.user)
 
-        with self.assertNumQueries(11):
+        with self.assertNumQueries(12):
             response = self.get_results(notification_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['notifications']), 4)

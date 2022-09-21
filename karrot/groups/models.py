@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import TextField, DateTimeField, QuerySet, Count, Q, F, Exists, OuterRef, Value
+from django.db.models import TextField, DateTimeField, QuerySet, Count, Q, F, Exists, OuterRef, Value, CheckConstraint
 from django.db.models.manager import BaseManager
 from django.template.loader import render_to_string
 from django.utils import timezone as tz, timezone
@@ -15,7 +15,7 @@ from versatileimagefield.fields import VersatileImageField
 from karrot.activities.activity_types import default_activity_types
 from karrot.base.base_models import BaseModel, LocationModel
 from karrot.conversations.models import ConversationMixin
-from karrot.groups.roles import GROUP_EDITOR
+from karrot.groups.roles import GROUP_EDITOR, GROUP_MEMBER, GROUP_NEWCOMER
 from karrot.history.models import History, HistoryTypus
 from karrot.activities.models import Activity, ActivityType
 from karrot.places.models import PlaceType
@@ -233,6 +233,13 @@ class GroupNotificationType(object):
     NEW_OFFER = 'new_offer'
 
 
+def get_default_roles():
+    return [
+        GROUP_MEMBER,
+        GROUP_NEWCOMER,
+    ]
+
+
 def get_default_notification_types():
     return [
         GroupNotificationType.WEEKLY_SUMMARY,
@@ -272,7 +279,7 @@ class GroupMembershipQuerySet(QuerySet):
         return self.with_role(roles.GROUP_EDITOR)
 
     def newcomers(self):
-        return self.without_role(roles.GROUP_EDITOR)
+        return self.with_role(roles.GROUP_NEWCOMER)
 
     def exclude_playgrounds(self):
         return self.exclude(group__status=GroupStatus.PLAYGROUND)
@@ -295,7 +302,7 @@ class GroupMembership(BaseModel, DirtyFieldsMixin):
         null=True,
         related_name='groupmembership_added',
     )
-    roles = ArrayField(TextField(), default=list)
+    roles = ArrayField(TextField(), default=get_default_roles)
     lastseen_at = DateTimeField(default=tz.now)
     inactive_at = DateTimeField(null=True)
     notification_types = ArrayField(TextField(), default=get_default_notification_types)
@@ -304,16 +311,26 @@ class GroupMembership(BaseModel, DirtyFieldsMixin):
     class Meta:
         db_table = 'groups_group_members'
         unique_together = (('group', 'user'), )
+        constraints = [CheckConstraint(
+            check=Q(roles__contains=[GROUP_MEMBER]),
+            name='must_have_member_role',
+        )]
 
     def add_roles(self, roles):
         for role in roles:
             if role not in self.roles:
                 self.roles.append(role)
+        if self.roles == [GROUP_MEMBER]:
+            self.roles.append(GROUP_NEWCOMER)
+        else:
+            self.remove_roles([GROUP_NEWCOMER])
 
     def remove_roles(self, roles):
         for role in roles:
             while role in self.roles:
                 self.roles.remove(role)
+        if self.roles == [GROUP_MEMBER]:
+            self.roles.append(GROUP_NEWCOMER)
 
     def add_notification_types(self, notification_types):
         for notification_type in notification_types:

@@ -360,6 +360,7 @@ def send_invitation_accept(sender, instance, **kwargs):
 
 # Place
 @receiver(post_save, sender=Place)
+@on_transaction_commit
 def send_place_updates(sender, instance, **kwargs):
     place = instance
     for subscription in ChannelSubscription.objects.recent().filter(user__in=place.group.members.all()).distinct():
@@ -415,6 +416,7 @@ def send_activity_participant_updates(sender, instance, **kwargs):
 
 # Activity Series
 @receiver(post_save, sender=ActivitySeries)
+@on_transaction_commit
 def send_activity_series_updates(sender, instance, **kwargs):
     series = instance
     payload = ActivitySeriesSerializer(series).data

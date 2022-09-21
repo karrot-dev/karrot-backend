@@ -46,7 +46,7 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
         notification_member = VerifiedUserFactory()
         self.group.groupmembership_set.create(
             user=notification_member,
-            roles=[roles.GROUP_EDITOR],
+            roles=[roles.GROUP_MEMBER, roles.GROUP_EDITOR],
             notification_types=[GroupNotificationType.CONFLICT_RESOLUTION]
         )
         # add notification type to send out emails

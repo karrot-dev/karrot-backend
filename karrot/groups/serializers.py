@@ -227,7 +227,9 @@ class GroupDetailSerializer(GroupBaseSerializer):
         group = GroupModel.objects.create(**validated_data)
 
         # create first member and make it receive application notifications
-        membership = GroupMembership.objects.create(group=group, user=user, roles=[roles.GROUP_EDITOR])
+        membership = GroupMembership.objects.create(
+            group=group, user=user, roles=[roles.GROUP_MEMBER, roles.GROUP_EDITOR]
+        )
         membership.add_notification_types([GroupNotificationType.NEW_APPLICATION])
         membership.save()
 

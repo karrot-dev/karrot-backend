@@ -43,7 +43,7 @@ class NotificationViewSet(GenericViewSet):
         activities = Activity.objects. \
             filter(id__in=[n.context['activity'] for n in notifications if 'activity' in n.context]). \
             select_related('activity_type'). \
-            prefetch_related('activityparticipant_set', 'feedback_given_by')
+            prefetch_related('activityparticipant_set', 'feedback_given_by', 'participant_types',)
 
         applications = Application.objects. \
             filter(id__in=[n.context['application'] for n in notifications if 'application' in n.context]). \

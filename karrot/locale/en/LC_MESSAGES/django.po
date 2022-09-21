@@ -52,9 +52,14 @@ msgstr ""
 msgid "Must pass start value"
 msgstr ""
 
-#: karrot/activities/tasks.py:71
+#: karrot/activities/tasks.py:77
 #, python-format
 msgid "Upcoming %(activity_type)s"
+msgstr ""
+
+#: karrot/activities/tasks.py:166
+#, python-format
+msgid "%(activity_type)s no longer available - %(date_time)s"
 msgstr ""
 
 #: karrot/activities/templates/activity_notification.html.jinja2:5
@@ -110,6 +115,11 @@ msgstr ""
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:220
 #: karrot/offers/templates/new_offer.html.jinja2:233
 msgid "Click here to unsubscribe"
+msgstr ""
+
+#: karrot/activities/templates/participant_removed.subject.jinja2:1
+#, python-format
+msgid "Your activities for %(place_name)s changed"
 msgstr ""
 
 #: karrot/applications/api.py:29
@@ -208,8 +218,8 @@ msgid ""
 "conversation</a>."
 msgstr ""
 
-#: karrot/conversations/api.py:73 karrot/conversations/api.py:254
-#: karrot/conversations/api.py:444 karrot/conversations/serializers.py:187
+#: karrot/conversations/api.py:73 karrot/conversations/api.py:255
+#: karrot/conversations/api.py:445 karrot/conversations/serializers.py:187
 msgid "You are not in this conversation"
 msgstr ""
 
@@ -224,11 +234,11 @@ msgid ""
 "creation."
 msgstr ""
 
-#: karrot/conversations/api.py:372
+#: karrot/conversations/api.py:373
 msgid "Must be first in thread"
 msgstr ""
 
-#: karrot/conversations/api.py:375
+#: karrot/conversations/api.py:376
 msgid "You are not a participant in this thread"
 msgstr ""
 
@@ -315,7 +325,7 @@ msgstr ""
 msgid "Playground"
 msgstr ""
 
-#: karrot/groups/serializers.py:174 karrot/groups/serializers.py:273
+#: karrot/groups/serializers.py:174 karrot/groups/serializers.py:275
 msgid "You cannot manage agreements"
 msgstr ""
 
@@ -323,7 +333,7 @@ msgstr ""
 msgid "Agreement is not for this group"
 msgstr ""
 
-#: karrot/groups/serializers.py:271
+#: karrot/groups/serializers.py:273
 msgid "You are not in this group"
 msgstr ""
 
@@ -749,7 +759,7 @@ msgstr ""
 msgid "You are already subscribed to this place"
 msgstr ""
 
-#: karrot/subscriptions/receivers.py:738
+#: karrot/subscriptions/receivers.py:740
 msgid "Push notifications are enabled!"
 msgstr ""
 

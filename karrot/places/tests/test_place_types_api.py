@@ -3,6 +3,7 @@ from rest_framework.test import APITestCase
 
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
+from karrot.groups.roles import GROUP_MEMBER
 from karrot.history.models import HistoryTypus, History
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import ExtractPaginationMixin
@@ -19,8 +20,8 @@ class TestPlaceTypesAPI(APITestCase, ExtractPaginationMixin):
         self.place = PlaceFactory(group=self.group)
         self.place_type = self.group.place_types.first()
 
-        # remove all roles
-        GroupMembership.objects.filter(group=self.group, user=self.non_editor_member).update(roles=[])
+        # remove all non-member roles
+        GroupMembership.objects.filter(group=self.group, user=self.non_editor_member).update(roles=[GROUP_MEMBER])
 
     def test_can_list(self):
         self.client.force_login(user=self.member)
@@ -86,21 +87,6 @@ class TestPlaceTypesAPI(APITestCase, ExtractPaginationMixin):
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
-    def test_can_delete(self):
-        self.client.force_login(user=self.member)
-        response = self.client.delete(f'/api/place-types/{self.place_type.id}/')
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.data)
-
-    def test_cannot_delete_with_places(self):
-        self.client.force_login(user=self.member)
-        place = PlaceFactory(place_type=self.place_type)
-        response = self.client.delete(f'/api/place-types/{self.place_type.id}/')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
-        # make sure we can delete it if we get rid of the place
-        place.delete()
-        response = self.client.delete(f'/api/place-types/{self.place_type.id}/')
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.data)
-
     def test_adds_history_entry_on_create(self):
         self.client.force_login(user=self.member)
         response = self.client.post('/api/place-types/', self.place_type_data(), format='json')
@@ -130,12 +116,6 @@ class TestPlaceTypesAPI(APITestCase, ExtractPaginationMixin):
         history = History.objects.filter(typus=HistoryTypus.PLACE_TYPE_MODIFY).last()
         self.assertEqual(history.after['id'], response.data['id'])
         self.assertEqual(history.message, 'because it was a horrible icon before')
-
-    def test_adds_history_entry_on_delete(self):
-        self.client.force_login(user=self.member)
-        self.client.delete(f'/api/place-types/{self.place_type.id}/')
-        history = History.objects.filter(typus=HistoryTypus.PLACE_TYPE_DELETE).last()
-        self.assertEqual(history.before['id'], self.place_type.id)
 
     def place_type_data(self, extra=None):
         if extra is None:

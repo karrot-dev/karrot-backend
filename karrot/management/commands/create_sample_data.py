@@ -11,7 +11,7 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 
 from karrot.groups.models import Group, GroupMembership, GroupStatus
-from karrot.groups.roles import GROUP_EDITOR
+from karrot.groups.roles import GROUP_EDITOR, GROUP_MEMBER
 from karrot.activities.models import Activity, ActivitySeries, to_range, ActivityType
 from karrot.places.models import Place, PlaceType
 from karrot.users.models import User
@@ -131,7 +131,7 @@ class Command(BaseCommand):
 
             # make editor
             membership = GroupMembership.objects.get(user=user, group_id=group)
-            membership.roles.append(GROUP_EDITOR)
+            membership.add_roles([GROUP_EDITOR])
             membership.save()
 
             print('joined group {}'.format(group))
@@ -205,13 +205,20 @@ class Command(BaseCommand):
 
         def make_series(place, activity_type):
             response = c.post(
-                '/api/activity-series/', {
+                '/api/activity-series/',
+                {
                     'activity_type': activity_type.id,
                     'start_date': faker.date_time_between(start_date='now', end_date='+24h', tzinfo=pytz.utc),
                     'rule': 'FREQ=WEEKLY;BYDAY=MO,TU,SA',
-                    'max_participants': 10,
-                    'place': place
-                }
+                    'place': place,
+                    'participant_types': [
+                        {
+                            'role': GROUP_MEMBER,
+                            'max_participants': 10,
+                        },
+                    ],
+                },
+                format='json',
             )
             if response.status_code != 201:
                 raise Exception('could not make series', place, response.data)
@@ -246,7 +253,12 @@ class Command(BaseCommand):
                     'activity_type': activity_type.id,
                     'date': date.as_list(),
                     'place': place,
-                    'max_participants': 10
+                    'participant_types': [
+                        {
+                            'role': GROUP_MEMBER,
+                            'max_participants': 10,
+                        },
+                    ],
                 },
                 format='json',
             )
@@ -258,7 +270,18 @@ class Command(BaseCommand):
             return data
 
         def modify_activity(activity):
-            response = c.patch('/api/activities/{}/'.format(activity), {'max_participants': 3})
+            pt = activity.participant_types.first()
+            response = c.patch(
+                '/api/activities/{}/'.format(activity.id), {
+                    'participant_types': [
+                        {
+                            'id': pt.id,
+                            'max_participants': 3,
+                        },
+                    ],
+                },
+                format='json'
+            )
             if response.status_code != 200:
                 raise Exception('could not modify activity', activity, response.data)
             print('modified activity: ', activity)
@@ -303,8 +326,8 @@ class Command(BaseCommand):
                 activity_type=activity_type,
                 date=to_range(faker.date_time_between(start_date='-9d', end_date='-1d', tzinfo=pytz.utc), minutes=30),
                 place_id=place,
-                max_participants=10,
             )
+            activity.participant_types.create(role=GROUP_MEMBER, max_participants=10)
             activity.add_participant(User.objects.get(pk=user_id))
             print('created done activity: ', activity)
             return activity
@@ -382,7 +405,7 @@ class Command(BaseCommand):
             date__startswith__gte=timezone.now() + relativedelta(hours=1),
             place__group__in=Group.objects.user_is_editor(u)
         ).first()
-        modify_activity(o.id)
+        modify_activity(o)
 
         # leave
         u = login_user()
