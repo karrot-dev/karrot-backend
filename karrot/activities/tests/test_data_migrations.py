@@ -1,4 +1,5 @@
 import datetime
+from random import randint
 
 from django.utils import timezone
 from psycopg2.extras import DateTimeTZRange
@@ -156,3 +157,79 @@ class TestSetActivityTypes(TestMigrations):
         check_type('foodsaving', 'Pickup')
         check_type('bikekitchen', 'Activity')
         check_type('general', 'Activity')
+
+
+class TestAddParticipantTypes(TestMigrations):
+    migrate_from = [
+        ('users', '0027_fix_usernames'),
+        ('groups', '0046_groupmembership_must_have_member_role'),
+        ('places', '0038_place_default_view'),
+        ('activities', '0033_add_participant_types'),
+    ]
+    migrate_to = [
+        ('activities', '0034_backfill_participant_role'),
+    ]
+
+    def setUpBeforeMigration(self, apps):
+        User = apps.get_model('users', 'User')
+        Group = apps.get_model('groups', 'Group')
+        GroupMembership = apps.get_model('groups', 'GroupMembership')
+        PlaceType = apps.get_model('places', 'PlaceType')
+        Place = apps.get_model('places', 'Place')
+        ActivityType = apps.get_model('activities', 'ActivityType')
+        Activity = apps.get_model('activities', 'Activity')
+        ActivitySeries = apps.get_model('activities', 'ActivitySeries')
+        ActivityParticipant = apps.get_model('activities', 'ActivityParticipant')
+
+        group = Group.objects.create(name=faker.name())
+        place_type = PlaceType.objects.create(name=faker.name(), group=group)
+        place = Place.objects.create(name=faker.name(), group=group, place_type=place_type)
+        activity_type = ActivityType.objects.create(name=faker.name(), group=group)
+        user = User.objects.create(username=faker.user_name())
+        GroupMembership.objects.create(group=group, user=user)
+
+        for _ in range(5):
+            ActivitySeries.objects.create(
+                place=place,
+                start_date=timezone.now(),
+                activity_type=activity_type,
+            )
+
+        for _ in range(20):
+            activity = Activity.objects.create(
+                place=place,
+                date=to_range(timezone.now()),
+                activity_type=activity_type,
+                max_participants=randint(1, 12),
+            )
+            ActivityParticipant.objects.create(activity=activity, user=user)
+
+    def test_adds_default_participant_types(self):
+        Activity = self.apps.get_model('activities', 'Activity')
+        ActivitySeries = self.apps.get_model('activities', 'ActivitySeries')
+        ActivityParticipant = self.apps.get_model('activities', 'ActivityParticipant')
+        ParticipantType = self.apps.get_model('activities', 'ParticipantType')
+        SeriesParticipantType = self.apps.get_model('activities', 'SeriesParticipantType')
+
+        # every activity has at least one participant type
+        for activity in Activity.objects.all():
+            self.assertGreater(activity.participant_types.count(), 0)
+
+        # every series has at least one series participant type
+        for series in ActivitySeries.objects.all():
+            self.assertGreater(series.participant_types.count(), 0)
+
+        # every participant has a participant type
+        self.assertEqual(ActivityParticipant.objects.filter(participant_type=None).count(), 0)
+
+        for pt in ParticipantType.objects.all():
+            # all initial ones are for 'member' role
+            self.assertEqual(pt.role, 'member')
+            # and copy the max_participants from the activity
+            self.assertEqual(pt.max_participants, pt.activity.max_participants)
+
+        for spt in SeriesParticipantType.objects.all():
+            # all initial ones are for 'member' role
+            self.assertEqual(spt.role, 'member')
+            # and copy the max_participants from the series
+            self.assertEqual(spt.max_participants, spt.activity_series.max_participants)

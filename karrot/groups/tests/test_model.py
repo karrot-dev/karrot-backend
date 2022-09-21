@@ -10,6 +10,7 @@ from karrot.groups.factories import GroupFactory
 from karrot.groups.models import Group, get_default_notification_types
 from karrot.activities.factories import ActivityFactory
 from karrot.activities.models import to_range
+from karrot.groups.roles import GROUP_NEWCOMER, GROUP_MEMBER, GROUP_EDITOR
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory
 from karrot.groups import themes
@@ -73,6 +74,25 @@ class TestGroupMembershipModel(TestCase):
         )
         memberships = self.group.groupmembership_set.activity_active_within(days=7)
         self.assertEqual(memberships.count(), 0)
+
+    def test_has_correct_roles_by_default(self):
+        user = UserFactory()
+        membership = self.group.groupmembership_set.create(user=user)
+        self.assertEqual(membership.roles, [GROUP_MEMBER, GROUP_NEWCOMER])
+
+    def test_remove_newcomer_role(self):
+        user = UserFactory()
+        membership = self.group.groupmembership_set.create(user=user)
+        membership.add_roles(['random-other-role'])
+        membership.save()
+        self.assertEqual(membership.roles, [GROUP_MEMBER, 'random-other-role'])
+
+    def test_adds_newcomer_role(self):
+        membership = self.group.groupmembership_set.get(user=self.user)
+        self.assertEqual(membership.roles, [GROUP_MEMBER, GROUP_EDITOR])
+        membership.remove_roles([GROUP_EDITOR])
+        membership.save()
+        self.assertEqual(membership.roles, [GROUP_MEMBER, GROUP_NEWCOMER])
 
 
 class TestGroupManager(TestCase):

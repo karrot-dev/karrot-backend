@@ -33,6 +33,7 @@ class NotificationType(Enum):
     CONFLICT_RESOLUTION_YOU_WERE_REMOVED = 'conflict_resolution_you_were_removed'
     VOTING_ENDS_SOON = 'voting_ends_soon'
     MENTION = 'mention'
+    PARTICIPANT_REMOVED = 'participant_removed'
 
 
 class NotificationQuerySet(models.QuerySet):

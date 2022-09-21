@@ -253,7 +253,7 @@ class TestPlaceChangesActivitySeriesAPI(APITestCase, ExtractPaginationMixin):
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
         self.place_url = self.url + str(self.place.id) + '/'
-        self.series = ActivitySeriesFactory(max_participants=3, place=self.place)
+        self.series = ActivitySeriesFactory(place=self.place)
 
     def test_reduce_weeks_in_advance(self):
         self.client.force_login(user=self.member)

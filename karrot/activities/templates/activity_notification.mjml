@@ -9,7 +9,7 @@
             <mj-column>
                 <mj-text>
 
-                    {% macro activity_list(activities, show_empty_participants_count=false) -%}
+                    {% macro activity_list(activities) -%}
                         {% if activities and activities|length > 0 %}
                             <ul>
                                 {% for activity in activities %}
@@ -19,13 +19,6 @@
                                         <a href="{{ place_url(activity.place) }}">
                                             {{ activity.place.name }}
                                         </a>
-                                        {% if show_empty_participants_count %}
-                                            -
-                                            {% trans trimmed empty_participants_count=activity.empty_participants_count(),
-                                                    max_participants=activity.max_participants %}
-                                                {{ empty_participants_count }}/{{ max_participants }} remaining
-                                            {% endtrans %}
-                                        {% endif %}
                                     </li>
                                 {% endfor %}
                             </ul>
@@ -54,7 +47,7 @@
 
                         {% if tonight_not_full and tonight_not_full|length > 0 %}
                             {% trans %}There is still space available for{% endtrans %}:
-                            {{ activity_list(tonight_not_full, show_empty_participants_count=true) }}
+                            {{ activity_list(tonight_not_full) }}
                         {% endif %}
 
                     {% endif %}
@@ -82,7 +75,7 @@
 
                         {% if tomorrow_not_full and tomorrow_not_full|length > 0 %}
                             {% trans %}There is still space available for{% endtrans %}:
-                            {{ activity_list(tomorrow_not_full, show_empty_participants_count=true) }}
+                            {{ activity_list(tomorrow_not_full) }}
                         {% endif %}
 
                     {% endif %}

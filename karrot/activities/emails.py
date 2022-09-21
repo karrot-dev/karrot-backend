@@ -51,3 +51,28 @@ def prepare_activity_notification_email(
         },
         stats_category='activity_notification',
     )
+
+
+def prepare_participant_removed_email(
+    user,
+    place,
+    activities,
+    removed_by,
+    message,
+):
+
+    group = place.group
+
+    return prepare_email(
+        template='participant_removed',
+        user=user,
+        tz=group.timezone,
+        context={
+            'group': group,
+            'place': place,
+            'activities': activities,
+            'removed_by': removed_by,
+            'message': message,
+        },
+        stats_category='participant_removed',
+    )

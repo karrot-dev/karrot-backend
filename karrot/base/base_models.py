@@ -1,6 +1,6 @@
 from django.contrib.postgres.fields import DateTimeRangeField
 from django.db.backends.signals import connection_created
-from django.db.models import Model, AutoField, Field, DateTimeField, TextField, FloatField
+from django.db.models import Model, AutoField, Field, DateTimeField, TextField, FloatField, Func
 from django.db.models.fields.related import RelatedField
 from django.dispatch import receiver
 from django.utils import timezone
@@ -55,6 +55,10 @@ class LocationModel(Model):
     address = TextField(null=True)
     latitude = FloatField(null=True)
     longitude = FloatField(null=True)
+
+
+class Tstzrange(Func):
+    function = 'tstzrange'
 
 
 class CustomDateTimeTZRange(DateTimeTZRange):
