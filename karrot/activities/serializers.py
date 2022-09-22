@@ -4,6 +4,7 @@ from typing import List
 import dateutil.rrule
 from datetime import timedelta, datetime
 
+from django.core.files.uploadedfile import UploadedFile
 from django.db.models import F
 from django.db.models.functions import Lower
 from django.forms import model_to_dict
@@ -304,6 +305,8 @@ class ActivitySerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         participant_types_data = validated_data.pop('participant_types')
+        if 'is_public' in validated_data and validated_data['is_public']:
+            validated_data['public_id'] = uuid.uuid4()
         activity = super().create({**validated_data, 'last_changed_by': self.context['request'].user})
         for participant_type_data in participant_types_data:
             # creating the nested data
@@ -315,7 +318,11 @@ class ActivitySerializer(serializers.ModelSerializer):
             place=activity.place,
             activity=activity,
             users=[self.context['request'].user],
-            payload=self.initial_data,
+            payload={
+                # cannot serialize the UploadedFile data...
+                k: self.initial_data[k]
+                for k in self.initial_data.keys() if not isinstance(self.initial_data[k], UploadedFile)
+            },
             after=ActivityHistorySerializer(activity).data,
         )
         activity.place.group.refresh_active_status()
@@ -435,10 +442,6 @@ class ActivityUpdateSerializer(ActivitySerializer):
                 if not activity.public_id:
                     # create public id
                     update_data['public_id'] = uuid.uuid4()
-            else:
-                if activity.public_id:
-                    # clear public id
-                    update_data['public_id'] = None
 
         update_data.pop('participant_types', None)
         update_data['last_changed_by'] = self.context['request'].user

@@ -222,7 +222,7 @@ class PublicActivityViewSet(
         mixins.ListModelMixin,
 ):
     serializer_class = PublicActivitySerializer
-    queryset = ActivityModel.objects.is_public()
+    queryset = ActivityModel.objects.is_public().exclude_disabled()
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = PublicActivitiesFilter
     pagination_class = ActivityPagination  # use the activities one seems ok

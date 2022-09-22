@@ -9,7 +9,7 @@ from django.contrib.postgres.indexes import GistIndex
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db import transaction
-from django.db.models import Count, DurationField, F, FilteredRelation, Q, Sum
+from django.db.models import Count, DurationField, F, FilteredRelation, Q, Sum, CheckConstraint
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from versatileimagefield.fields import VersatileImageField
@@ -300,8 +300,14 @@ class Activity(BaseModel, ConversationMixin):
 
     class Meta:
         ordering = ['date']
-        # TODO: check this index is actually used
         indexes = [GistIndex(fields=['date'])]
+        constraints = [
+            CheckConstraint(
+                # if it's public it must have a public_id
+                check=Q(is_public=False) | Q(public_id__isnull=False),
+                name='public_activities_must_have_public_id',
+            )
+        ]
 
     activity_type = models.ForeignKey(
         ActivityType,
