@@ -180,6 +180,10 @@ class GroupDetailSerializer(GroupBaseSerializer):
     def get_memberships(self, group):
         return {m.user_id: GroupMembershipInfoSerializer(m).data for m in group.groupmembership_set.all()}
 
+    @extend_schema_field(OpenApiTypes.OBJECT)
+    def get_roles(self, group):
+        return [{'name': role} for role in group.roles]
+
     def get_notification_types(self, group) -> List[str]:
         user = self.context['request'].user
         membership = next(m for m in group.groupmembership_set.all() if m.user_id == user.id)
@@ -315,9 +319,8 @@ class TrustActionSerializer(serializers.ModelSerializer):
 
     def validate_role(self, role):
         group = self.instance.group
-        role_names = [r['name'] for r in group.roles]
-        if role not in role_names:
-            raise ValidationError(f'Invalid role "{role}" for group, available roles are {role_names}')
+        if role not in group.roles:
+            raise ValidationError(f'Invalid role "{role}" for group, available roles are {group.roles}')
         return role
 
     def update(self, membership, validated_data):

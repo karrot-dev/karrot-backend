@@ -24,6 +24,11 @@ from karrot.utils import markdown
 from karrot.groups import roles, themes
 
 
+def default_group_roles():
+    # contains the roles that group members can give trust for
+    return [GROUP_EDITOR]
+
+
 def default_group_features():
     return ['offers']
 
@@ -107,6 +112,7 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
         upload_to='group_photos',
         null=True,
     )
+    roles = ArrayField(TextField(), default=default_group_roles)  # valid roles for the group
     features = ArrayField(TextField(), default=default_group_features)
 
     @property
@@ -116,10 +122,6 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
     @property
     def conversation_supports_threads(self):
         return True
-
-    @property
-    def roles(self):
-        return [{'name': GROUP_EDITOR}]  # valid roles for the group
 
     def __str__(self):
         return 'Group {}'.format(self.name)

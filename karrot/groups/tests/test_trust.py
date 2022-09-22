@@ -1,4 +1,4 @@
-from unittest.mock import ANY, patch, PropertyMock
+from unittest.mock import ANY
 
 from dateutil.relativedelta import relativedelta
 from django.core import mail
@@ -9,7 +9,7 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
 
 from karrot.groups.factories import GroupFactory
-from karrot.groups.models import GroupMembership, Trust, Group
+from karrot.groups.models import GroupMembership, Trust
 from karrot.groups.roles import GROUP_EDITOR
 from karrot.history.models import History, HistoryTypus
 from karrot.users.factories import UserFactory
@@ -150,9 +150,9 @@ class TestTrustAPI(APITestCase):
             ).exists()
         )
 
-    @patch.object(Group, 'roles', new_callable=PropertyMock)
-    def test_give_trust_for_role(self, roles):
-        roles.return_value = [{'name': GROUP_EDITOR}, {'name': 'someotherrole'}]
+    def test_give_trust_for_role(self):
+        self.group.roles.append('someotherrole')
+        self.group.save()
         self.client.force_login(user=self.member1)
 
         url = reverse('group-trust-user', args=(self.group.id, self.member2.id))
@@ -210,9 +210,9 @@ class TestTrustAPI(APITestCase):
             ).exists()
         )
 
-    @patch.object(Group, 'roles', new_callable=PropertyMock)
-    def test_trust_can_be_revoked_for_role(self, roles):
-        roles.return_value = [{'name': GROUP_EDITOR}, {'name': 'someotherrole'}]
+    def test_trust_can_be_revoked_for_role(self):
+        self.group.roles.append('someotherrole')
+        self.group.save()
         membership = GroupMembership.objects.get(user=self.member2, group=self.group)
         Trust.objects.create(membership=membership, given_by=self.member1, role=GROUP_EDITOR)
         Trust.objects.create(membership=membership, given_by=self.member1, role='someotherrole')
