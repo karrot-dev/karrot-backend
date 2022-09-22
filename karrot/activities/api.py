@@ -32,7 +32,8 @@ from karrot.activities.serializers import (
     ActivityDismissFeedbackSerializer, ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer,
     ActivityLeaveSerializer, FeedbackSerializer, ActivityUpdateSerializer, ActivitySeriesUpdateSerializer,
     ActivitySeriesHistorySerializer, FeedbackExportSerializer, FeedbackExportRenderer, ActivityTypeSerializer,
-    ActivityICSSerializer, ActivitySeriesUpdateCheckSerializer, ActivityUpdateCheckSerializer, PublicActivitySerializer
+    ActivityICSSerializer, ActivitySeriesUpdateCheckSerializer, ActivityUpdateCheckSerializer,
+    PublicActivitySerializer, PublicActivityICSSerializer
 )
 from karrot.activities.renderers import ICSCalendarRenderer
 from karrot.places.models import PlaceStatus
@@ -230,6 +231,35 @@ class PublicActivityViewSet(
         queryset = self.filter_queryset(self.get_queryset())
         obj = get_object_or_404(queryset, public_id=self.kwargs['pk'])
         return obj
+
+    @extend_schema(responses=OpenApiTypes.STR)
+    @action(
+        detail=True,
+        methods=['GET'],
+        renderer_classes=(ICSCalendarRenderer, ),
+        serializer_class=PublicActivityICSSerializer,
+        url_path='ics'
+    )
+    def ics_detail(self, request, pk=None):
+        response = self.retrieve(request)
+        filename = 'activity-{pk}.ics'.format(pk=pk)
+        response['content-disposition'] = 'attachment; filename={filename}'.format(filename=filename)
+        return response
+
+    @extend_schema(operation_id='activities_ics_list', responses=OpenApiTypes.STR)
+    @action(
+        detail=False,
+        methods=['GET'],
+        renderer_classes=(ICSCalendarRenderer, ),
+        serializer_class=PublicActivityICSSerializer,
+        url_path='ics',
+        pagination_class=None
+    )
+    def ics_list(self, request):
+        response = self.list(request)
+        filename = 'activities.ics'
+        response['content-disposition'] = 'attachment; filename={filename}'.format(filename=filename)
+        return response
 
 
 class ActivityViewSet(

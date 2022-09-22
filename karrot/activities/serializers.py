@@ -635,6 +635,18 @@ class ActivityICSSerializer(serializers.ModelSerializer):
         return attendees
 
 
+class PublicActivityICSSerializer(ActivityICSSerializer):
+    def get_uid(self, activity):
+        request = self.context.get('request')
+        domain = 'karrot'
+        if request and request.META.get('HTTP_HOST'):
+            domain = request.META.get('HTTP_HOST')
+        return 'activity_{}@{}'.format(activity.public_id, domain)
+
+    def get_attendee(self, activity):
+        return []
+
+
 class ActivityJoinSerializer(serializers.ModelSerializer):
     class Meta:
         model = ActivityModel
