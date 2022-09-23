@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='activity',
-            name='image',
-            field=versatileimagefield.fields.VersatileImageField(null=True, upload_to='activity__images', verbose_name='Image'),
+            name='banner_image',
+            field=versatileimagefield.fields.VersatileImageField(null=True, upload_to='activity__banner_images', verbose_name='BannerImage'),
         ),
     ]
