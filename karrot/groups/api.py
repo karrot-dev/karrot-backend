@@ -18,10 +18,10 @@ from rest_framework.viewsets import GenericViewSet
 from karrot.conversations.api import RetrieveConversationMixin
 from karrot.groups import stats
 from karrot.groups.filters import GroupsFilter, GroupsInfoFilter
-from karrot.groups.models import Agreement, Group as GroupModel, GroupMembership, Trust
+from karrot.groups.models import Group as GroupModel, GroupMembership, Trust
 from karrot.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer, GroupJoinSerializer, \
     GroupLeaveSerializer, TimezonesSerializer, GroupMembershipInfoSerializer, \
-    AgreementSerializer, AgreementAgreeSerializer, GroupMembershipAddNotificationTypeSerializer, \
+    GroupMembershipAddNotificationTypeSerializer, \
     GroupMembershipRemoveNotificationTypeSerializer
 from karrot.utils.serializers import EmptySerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
@@ -253,26 +253,3 @@ class GroupViewSet(
         self.perform_update(serializer)
 
         return Response(GroupMembershipInfoSerializer(membership).data)
-
-
-class AgreementViewSet(
-        mixins.CreateModelMixin,
-        mixins.RetrieveModelMixin,
-        PartialUpdateModelMixin,
-        mixins.ListModelMixin,
-        GenericViewSet,
-):
-    queryset = Agreement.objects
-    serializer_class = AgreementSerializer
-    permission_classes = (IsAuthenticated, )
-
-    def get_queryset(self):
-        return self.queryset.filter(group__members=self.request.user)
-
-    @action(
-        detail=True,
-        methods=['POST'],
-        serializer_class=AgreementAgreeSerializer,
-    )
-    def agree(self, request, pk=None):
-        return self.partial_update(request)
