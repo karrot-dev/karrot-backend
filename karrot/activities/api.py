@@ -246,7 +246,7 @@ class PublicActivityViewSet(
         response['content-disposition'] = 'attachment; filename={filename}'.format(filename=filename)
         return response
 
-    @extend_schema(operation_id='activities_ics_list', responses=OpenApiTypes.STR)
+    @extend_schema(operation_id='public_activities_ics_list', responses=OpenApiTypes.STR)
     @action(
         detail=False,
         methods=['GET'],
