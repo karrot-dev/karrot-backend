@@ -31,6 +31,7 @@ from karrot.activities.models import Activity, to_range
 from karrot.places.factories import PlaceFactory
 from karrot.subscriptions.models import ChannelSubscription, \
     PushSubscription, PushSubscriptionPlatform
+from karrot.tests.utils import pluck
 from karrot.users.factories import UserFactory, VerifiedUserFactory
 from karrot.utils.geoip import ip_to_lat_lon
 from karrot.utils.tests.fake import faker
@@ -738,7 +739,7 @@ class InvitationReceiverTests(WSTestCase):
         self.assertEqual(response['payload']['id'], id)
 
 
-class PlaceReceiverTests(WSTestCase):
+class PlaceReceiverTests(WSTransactionTestCase):
     def setUp(self):
         super().setUp()
         self.member = UserFactory()
@@ -782,7 +783,7 @@ class ActivityReceiverTests(WSTransactionTestCase):
         self.activity.add_participant(self.member)
 
         response = client.messages_by_topic.get('activities:activity')[0]
-        self.assertEqual(response['payload']['participants'], [self.member.id])
+        self.assertEqual(pluck(response['payload']['participants'], 'user'), [self.member.id])
 
         response = client.messages_by_topic.get('conversations:conversation')[0]
         self.assertEqual(response['payload']['participants'], [self.member.id])
@@ -822,7 +823,7 @@ class ActivityReceiverTests(WSTransactionTestCase):
         self.assertEqual(len(client.messages), 1)
 
 
-class ActivitySeriesReceiverTests(WSTestCase):
+class ActivitySeriesReceiverTests(WSTransactionTestCase):
     def setUp(self):
         super().setUp()
         self.member = UserFactory()

@@ -184,6 +184,7 @@ class PlaceUpdateSerializer(PlaceSerializer):
         read_only_fields = PlaceSerializer.Meta.read_only_fields
         extra_kwargs = PlaceSerializer.Meta.extra_kwargs
 
+    @transaction.atomic()
     def save(self, **kwargs):
         self._validated_data = find_changed(self.instance, self.validated_data)
         skip_update = len(self.validated_data.keys()) == 0
@@ -191,7 +192,6 @@ class PlaceUpdateSerializer(PlaceSerializer):
             return self.instance
         return super().save(**kwargs)
 
-    @transaction.atomic()
     def update(self, place, validated_data):
         before_data = PlaceHistorySerializer(place).data
         place = super().update(place, validated_data)

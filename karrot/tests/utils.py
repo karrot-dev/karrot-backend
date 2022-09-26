@@ -75,3 +75,7 @@ def execute_scheduled_tasks_immediately(wait_till_end_of_block=True):
             task.execute()
 
     disconnect_signal(task_scheduled_handler)
+
+
+def pluck(entries, key):
+    return [entry[key] for entry in entries]

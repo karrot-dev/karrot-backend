@@ -3,6 +3,7 @@ from rest_framework.test import APITestCase
 
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
+from karrot.groups.roles import GROUP_MEMBER
 from karrot.history.models import HistoryTypus, History
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import ExtractPaginationMixin
@@ -19,8 +20,8 @@ class TestPlaceTypesAPI(APITestCase, ExtractPaginationMixin):
         self.place = PlaceFactory(group=self.group)
         self.place_type = self.group.place_types.first()
 
-        # remove all roles
-        GroupMembership.objects.filter(group=self.group, user=self.non_editor_member).update(roles=[])
+        # remove all non-member roles
+        GroupMembership.objects.filter(group=self.group, user=self.non_editor_member).update(roles=[GROUP_MEMBER])
 
     def test_can_list(self):
         self.client.force_login(user=self.member)

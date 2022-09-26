@@ -31,7 +31,7 @@ aliases:
         env/bin/pip install --upgrade pip-tools
         echo "source env/bin/activate" >> $BASH_ENV
         # quick fix. until debian package has got tz updates
-        ln -s /usr/share/zoneinfo/Pacific/Enderbury /usr/share/zoneinfo/Pacific/Kanton
+        test -f /usr/share/zoneinfo/Pacific/Kanton || ln -s /usr/share/zoneinfo/Pacific/Enderbury /usr/share/zoneinfo/Pacific/Kanton
 
   - &add-token-to-remote
     run:

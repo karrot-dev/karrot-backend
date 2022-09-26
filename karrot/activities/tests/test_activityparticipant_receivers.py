@@ -21,7 +21,7 @@ class TestPickUpParticipantReceivers(APITestCase):
         self.activity.conversation.messages.create(author=self.first_member, content='foo')
         self.activity.conversation.messages.create(author=self.first_member, content='bar')
 
-        ActivityParticipant.objects.create(user=self.second_member, activity=self.activity)
+        self.activity.add_participant(self.second_member)
 
         new_participant = ConversationParticipant.objects.get(
             user=self.second_member, conversation=self.activity.conversation
@@ -32,7 +32,7 @@ class TestPickUpParticipantReceivers(APITestCase):
     def test_new_participant_does_not_remove_conversation_subscribers(self):
         self.activity.conversation.join(self.second_member)
         self.assertIn(self.second_member, self.activity.conversation.participants.all())
-        ActivityParticipant.objects.create(user=self.third_member, activity=self.activity)
+        self.activity.add_participant(self.third_member)
         self.assertIn(self.second_member, self.activity.conversation.participants.all())
 
     def test_participant_leaving_does_not_remove_conversation_subscribers(self):
@@ -42,5 +42,5 @@ class TestPickUpParticipantReceivers(APITestCase):
         self.assertIn(self.second_member, self.activity.conversation.participants.all())
 
     def test_schedules_activity_reminder(self):
-        participant = ActivityParticipant.objects.create(user=self.second_member, activity=self.activity)
+        participant = self.activity.add_participant(self.second_member)
         self.assertIsNotNone(participant.reminder_task_id)

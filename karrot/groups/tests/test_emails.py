@@ -11,6 +11,7 @@ import karrot.groups.emails as group_emails
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupNotificationType, GroupMembership
 from karrot.activities.factories import ActivityFactory
+from karrot.groups.roles import GROUP_MEMBER
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import VerifiedUserFactory, UserFactory
 
@@ -119,7 +120,15 @@ class TestGroupSummaryEmails(APITestCase):
 
         with freeze_time(a_few_days_ago, tick=True):
             # fulfilled, but deleted
-            ActivityFactory(place=place, max_participants=1, participants=[user], is_disabled=True)
+            ActivityFactory(
+                place=place,
+                participant_types=[{
+                    'role': GROUP_MEMBER,
+                    'max_participants': 1
+                }],
+                participants=[user],
+                is_disabled=True,
+            )
 
         from_date, to_date = karrot.groups.emails.calculate_group_summary_dates(self.group)
         data = karrot.groups.emails.prepare_group_summary_data(self.group, from_date, to_date)
@@ -140,7 +149,14 @@ class TestGroupSummaryEmails(APITestCase):
             self.group.add_member(old_user)
             self.group.conversation.messages.create(author=old_user, content='old message')
             ActivityFactory(place=place)
-            ActivityFactory(place=place, max_participants=1, participants=[old_user])
+            ActivityFactory(
+                place=place,
+                participant_types=[{
+                    'role': GROUP_MEMBER,
+                    'max_participants': 1
+                }],
+                participants=[old_user],
+            )
 
         # should be included in summary email
         with freeze_time(a_few_days_ago, tick=True):
@@ -154,7 +170,14 @@ class TestGroupSummaryEmails(APITestCase):
             ActivityFactory(place=place)
 
             # a fulfilled activity
-            ActivityFactory(place=place, max_participants=1, participants=[user])
+            ActivityFactory(
+                place=place,
+                participant_types=[{
+                    'role': GROUP_MEMBER,
+                    'max_participants': 1
+                }],
+                participants=[user],
+            )
 
         from_date, to_date = karrot.groups.emails.calculate_group_summary_dates(self.group)
         data = karrot.groups.emails.prepare_group_summary_data(self.group, from_date, to_date)

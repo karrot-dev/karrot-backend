@@ -167,7 +167,8 @@ SPECTACULAR_SETTINGS = {
 Welcome to our API documentation!
 
 Check out our code on [GitHub](https://github.com/karrot-dev/karrot-frontend)
-and talk with us on the [Foodsaving Worldwide Rocketchat](https://chat.foodsaving.world)!
+or talk with us in our [Karrot Team & Feedback](https://karrot.world/#/groupPreview/191) group on Karrot
+or in our [Matrix chat room](https://chat.karrot.world)!
     """,
     'VERSION': '0.1',
     'SCHEMA_PATH_PREFIX': '/api/',
@@ -359,6 +360,10 @@ CORS_ORIGIN_WHITELIST = []
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
+if DEBUG:
+    # this is primarily to enable the /_templates pages to work properly
+    X_FRAME_OPTIONS = 'SAMEORIGIN'
+
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE   = True
 
@@ -490,6 +495,10 @@ REQUEST_TIMEOUT_SECONDS = int(options['REQUEST_TIMEOUT_SECONDS'])
 # If you have the email_reply_trimmer_service running, set this to 'http://localhost:4567/trim' (or similar)
 # https://github.com/karrot-dev/email_reply_trimmer_service
 EMAIL_REPLY_TRIMMER_URL = options['EMAIL_REPLY_TRIMMER_URL']
+
+SHELL_PLUS_IMPORTS = [
+    'from karrot.utils.shell_utils import *'
+]
 
 # NB: Keep this as the last line, and keep
 # local_settings.py out of version control

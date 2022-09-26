@@ -87,6 +87,10 @@
             font-size: 18px;
         }
 
+        .missing-handlers {
+            background-color: orchid;
+            padding: 20px;
+        }
 
     </style>
 
@@ -109,6 +113,17 @@
 
 <div id="wrapper">
     <div id="menu">
+        {% if missing_handlers|length > 0 %}
+            <div class="missing-handlers">
+                <p>Missing handlers for:</p>
+                <ul>
+                    {% for name in missing_handlers %}
+                        <li><code>{{ name }}</code></li>
+                    {%  endfor %}
+                </ul>
+                <p>You can add handler methods in <code>{{ views_filename }}</code></p>
+            </div>
+        {% endif %}
         <ul class="templates">
             {% for template in templates %}
                 <li class="template {{ 'handled' if template.has_handler else 'unhandled' }}">
