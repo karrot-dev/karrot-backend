@@ -40,15 +40,15 @@ msgstr ""
 msgid "Task"
 msgstr ""
 
-#: karrot/activities/serializers.py:139
+#: karrot/activities/serializers.py:143
 msgid "Must be a list"
 msgstr ""
 
-#: karrot/activities/serializers.py:140
+#: karrot/activities/serializers.py:144
 msgid "Must be a list with one or two values"
 msgstr ""
 
-#: karrot/activities/serializers.py:141
+#: karrot/activities/serializers.py:145
 msgid "Must pass start value"
 msgstr ""
 
@@ -761,16 +761,16 @@ msgstr ""
 msgid "Market"
 msgstr ""
 
-#: karrot/places/serializers.py:172
+#: karrot/places/serializers.py:190
 msgid "Set at least one week in advance"
 msgstr ""
 
-#: karrot/places/serializers.py:175
+#: karrot/places/serializers.py:193
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr ""
 
-#: karrot/places/serializers.py:227
+#: karrot/places/serializers.py:245
 msgid "You are already subscribed to this place"
 msgstr ""
 

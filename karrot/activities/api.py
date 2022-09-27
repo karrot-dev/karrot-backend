@@ -8,14 +8,18 @@ from rest_framework import mixins
 from rest_framework import viewsets
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, BaseAuthentication
 from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import CursorPagination
+from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from karrot.conversations.api import RetrieveConversationMixin
 from karrot.history.models import History, HistoryTypus
-from karrot.activities.filters import (ActivitiesFilter, ActivitySeriesFilter, FeedbackFilter, ActivityTypeFilter)
+from karrot.activities.filters import (
+    ActivitiesFilter, ActivitySeriesFilter, FeedbackFilter, ActivityTypeFilter, PublicActivitiesFilter
+)
 from karrot.activities.models import (
     Activity as ActivityModel, ActivitySeries as ActivitySeriesModel, Feedback as FeedbackModel, ActivityType,
     ICSAuthToken
@@ -28,11 +32,13 @@ from karrot.activities.serializers import (
     ActivityDismissFeedbackSerializer, ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer,
     ActivityLeaveSerializer, FeedbackSerializer, ActivityUpdateSerializer, ActivitySeriesUpdateSerializer,
     ActivitySeriesHistorySerializer, FeedbackExportSerializer, FeedbackExportRenderer, ActivityTypeSerializer,
-    ActivityICSSerializer, ActivitySeriesUpdateCheckSerializer, ActivityUpdateCheckSerializer
+    ActivityICSSerializer, ActivitySeriesUpdateCheckSerializer, ActivityUpdateCheckSerializer,
+    PublicActivitySerializer, PublicActivityICSSerializer
 )
 from karrot.activities.renderers import ICSCalendarRenderer
 from karrot.places.models import PlaceStatus
 from karrot.utils.mixins import PartialUpdateModelMixin
+from karrot.utils.parsers import JSONWithFilesMultiPartParser
 
 
 class ICSQueryTokenAuthentication(BaseAuthentication):
@@ -210,6 +216,52 @@ class ActivityPagination(CursorPagination):
     ordering = 'date'
 
 
+class PublicActivityViewSet(
+        GenericViewSet,
+        mixins.RetrieveModelMixin,
+        mixins.ListModelMixin,
+):
+    serializer_class = PublicActivitySerializer
+    queryset = ActivityModel.objects.is_public().exclude_disabled()
+    filter_backends = (filters.DjangoFilterBackend, )
+    filterset_class = PublicActivitiesFilter
+    pagination_class = ActivityPagination  # use the activities one seems ok
+
+    def get_object(self):
+        queryset = self.filter_queryset(self.get_queryset())
+        obj = get_object_or_404(queryset, public_id=self.kwargs['pk'])
+        return obj
+
+    @extend_schema(responses=OpenApiTypes.STR)
+    @action(
+        detail=True,
+        methods=['GET'],
+        renderer_classes=(ICSCalendarRenderer, ),
+        serializer_class=PublicActivityICSSerializer,
+        url_path='ics'
+    )
+    def ics_detail(self, request, pk=None):
+        response = self.retrieve(request)
+        filename = 'activity-{pk}.ics'.format(pk=pk)
+        response['content-disposition'] = 'attachment; filename={filename}'.format(filename=filename)
+        return response
+
+    @extend_schema(operation_id='public_activities_ics_list', responses=OpenApiTypes.STR)
+    @action(
+        detail=False,
+        methods=['GET'],
+        renderer_classes=(ICSCalendarRenderer, ),
+        serializer_class=PublicActivityICSSerializer,
+        url_path='ics',
+        pagination_class=None
+    )
+    def ics_list(self, request):
+        response = self.list(request)
+        filename = 'activities.ics'
+        response['content-disposition'] = 'attachment; filename={filename}'.format(filename=filename)
+        return response
+
+
 class ActivityViewSet(
         mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
@@ -227,6 +279,7 @@ class ActivityViewSet(
     filterset_class = ActivitiesFilter
     permission_classes = (IsAuthenticated, IsUpcoming, IsGroupEditor, IsEmptyActivity)
     pagination_class = ActivityPagination
+    parser_classes = [JSONWithFilesMultiPartParser, JSONParser]
 
     def get_queryset(self):
         qs = self.queryset.filter(place__group__members=self.request.user)

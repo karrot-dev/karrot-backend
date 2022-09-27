@@ -329,7 +329,11 @@ VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
         ('full_size', 'url'),
         ('200', 'thumbnail__200x200'),
         ('600', 'thumbnail__600x600'),
-    ]
+    ],
+    'activity_banner_image': [
+        # TODO: work out what to do here...
+        ('full_size', 'url'),
+    ],
 }
 
 # Silk profiler configuration

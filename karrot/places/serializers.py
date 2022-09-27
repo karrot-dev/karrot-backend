@@ -4,6 +4,7 @@ from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
+from karrot.groups.serializers import GroupPreviewSerializer
 from karrot.history.models import History, HistoryTypus
 from karrot.places.models import Place as PlaceModel, PlaceSubscription, PlaceType, PlaceStatus
 from karrot.utils.misc import find_changed
@@ -90,6 +91,23 @@ class PlaceHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = PlaceModel
         fields = '__all__'
+
+
+class PublicPlaceSerializer(serializers.ModelSerializer):
+    group = GroupPreviewSerializer()
+    place_type = PlaceTypeSerializer()
+
+    class Meta:
+        model = PlaceModel
+        fields = [
+            'place_type',
+            'name',
+            'group',
+            'address',
+            'latitude',
+            'longitude',
+        ]
+        read_only_fields = fields
 
 
 class PlaceSerializer(serializers.ModelSerializer):

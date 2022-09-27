@@ -1,8 +1,10 @@
+import uuid
 from typing import List
 
 import dateutil.rrule
 from datetime import timedelta, datetime
 
+from django.core.files.uploadedfile import UploadedFile
 from django.db.models import F
 from django.db.models.functions import Lower
 from django.forms import model_to_dict
@@ -20,6 +22,7 @@ from rest_framework.fields import CharField, DateTimeField, Field
 from rest_framework.serializers import Serializer
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework_csv.renderers import CSVRenderer
+from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from karrot.activities.tasks import notify_participant_removals
 from karrot.base.base_models import CustomDateTimeTZRange, Tstzrange
@@ -31,6 +34,7 @@ from karrot.activities.models import (
 )
 from karrot.utils.date_utils import csv_datetime
 from karrot.utils.misc import find_changed
+from karrot.places.serializers import PublicPlaceSerializer
 
 
 class ActivityTypeSerializer(serializers.ModelSerializer):
@@ -222,7 +226,37 @@ class SeriesParticipantTypeSerializer(serializers.ModelSerializer):
     _removed = serializers.BooleanField(required=False)
 
 
+class PublicActivitySerializer(serializers.ModelSerializer):
+    banner_image_urls = VersatileImageFieldSerializer(sizes='activity_banner_image', source='banner_image')
+    place = PublicPlaceSerializer()
+    activity_type = ActivityTypeSerializer()
+    date = DateTimeRangeField()
+
+    class Meta:
+        model = ActivityModel
+        fields = [
+            'public_id',
+            'activity_type',
+            'date',
+            'place',
+            'description',
+            'is_disabled',
+            'has_duration',
+            'is_done',
+            'is_public',
+            'banner_image_urls',
+        ]
+        read_only_fields = fields
+
+
 class ActivitySerializer(serializers.ModelSerializer):
+    banner_image = VersatileImageFieldSerializer(
+        sizes='activity_banner_image', required=False, allow_null=True, write_only=True
+    )
+    banner_image_urls = VersatileImageFieldSerializer(
+        sizes='activity_banner_image', source='banner_image', read_only=True
+    )
+
     class Meta:
         model = ActivityModel
         fields = [
@@ -240,11 +274,17 @@ class ActivitySerializer(serializers.ModelSerializer):
             'is_disabled',
             'has_duration',
             'is_done',
+            'is_public',
+            'public_id',
+            'banner_image',
+            'banner_image_urls',
         ]
         read_only_fields = [
             'id',
             'series',
             'is_done',
+            'banner_image_urls',
+            'public_id',
         ]
 
     participants = ActivityParticipantSerializer(
@@ -265,6 +305,8 @@ class ActivitySerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         participant_types_data = validated_data.pop('participant_types')
+        if 'is_public' in validated_data and validated_data['is_public']:
+            validated_data['public_id'] = uuid.uuid4()
         activity = super().create({**validated_data, 'last_changed_by': self.context['request'].user})
         for participant_type_data in participant_types_data:
             # creating the nested data
@@ -276,7 +318,11 @@ class ActivitySerializer(serializers.ModelSerializer):
             place=activity.place,
             activity=activity,
             users=[self.context['request'].user],
-            payload=self.initial_data,
+            payload={
+                # cannot serialize the UploadedFile data...
+                k: self.initial_data[k]
+                for k in self.initial_data.keys() if not isinstance(self.initial_data[k], UploadedFile)
+            },
             after=ActivityHistorySerializer(activity).data,
         )
         activity.place.group.refresh_active_status()
@@ -390,9 +436,16 @@ class ActivityUpdateSerializer(ActivitySerializer):
                     ParticipantType.objects.create(activity=activity, **entry)
 
         update_data = validated_data.copy()
+
+        if 'is_public' in update_data and update_data['is_public'] and not activity.public_id:
+                    # create public id
+                    update_data['public_id'] = uuid.uuid4()
+
         update_data.pop('participant_types', None)
         update_data['last_changed_by'] = self.context['request'].user
         activity = super().update(activity, update_data)
+
+        validated_data.pop('banner_image', None)  # can't store this in history, so remove it
 
         after_data = ActivityHistorySerializer(activity).data
 
@@ -581,6 +634,18 @@ class ActivityICSSerializer(serializers.ModelSerializer):
             address.params['partstat'] = vText('ACCEPTED')
             attendees.append(address)
         return attendees
+
+
+class PublicActivityICSSerializer(ActivityICSSerializer):
+    def get_uid(self, activity):
+        request = self.context.get('request')
+        domain = 'karrot'
+        if request and request.META.get('HTTP_HOST'):
+            domain = request.META.get('HTTP_HOST')
+        return 'activity_{}@{}'.format(activity.public_id, domain)
+
+    def get_attendee(self, activity):
+        return []
 
 
 class ActivityJoinSerializer(serializers.ModelSerializer):
