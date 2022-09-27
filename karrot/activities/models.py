@@ -9,9 +9,10 @@ from django.contrib.postgres.indexes import GistIndex
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db import transaction
-from django.db.models import Count, DurationField, F, FilteredRelation, Q, Sum
+from django.db.models import Count, DurationField, F, FilteredRelation, Q, Sum, CheckConstraint
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from versatileimagefield.fields import VersatileImageField
 
 from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin
 from karrot.conversations.models import ConversationMixin
@@ -225,6 +226,9 @@ class ActivityQuerySet(models.QuerySet):
     def upcoming(self):
         return self.filter(date__startswith__gt=timezone.now())
 
+    def is_public(self):
+        return self.filter(is_public=True)
+
     @transaction.atomic
     def process_finished_activities(self):
         """
@@ -296,8 +300,14 @@ class Activity(BaseModel, ConversationMixin):
 
     class Meta:
         ordering = ['date']
-        # TODO: check this index is actually used
         indexes = [GistIndex(fields=['date'])]
+        constraints = [
+            CheckConstraint(
+                # if it's public it must have a public_id
+                check=Q(is_public=False) | Q(public_id__isnull=False),
+                name='public_activities_must_have_public_id',
+            )
+        ]
 
     activity_type = models.ForeignKey(
         ActivityType,
@@ -331,6 +341,9 @@ class Activity(BaseModel, ConversationMixin):
     date = CustomDateTimeRangeField(default=default_activity_date_range)
     has_duration = models.BooleanField(default=False)
 
+    is_public = models.BooleanField(default=False)
+    public_id = models.UUIDField(null=True, unique=True)
+
     description = models.TextField(blank=True)
     is_disabled = models.BooleanField(default=False)
     last_changed_by = models.ForeignKey(
@@ -341,6 +354,12 @@ class Activity(BaseModel, ConversationMixin):
     )
 
     is_done = models.BooleanField(default=False)
+
+    banner_image = VersatileImageField(
+        'BannerImage',
+        upload_to='activity__banner_images',
+        null=True,
+    )
 
     @property
     def group(self):
