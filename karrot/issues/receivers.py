@@ -3,7 +3,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 from karrot.conversations.models import Conversation
-from karrot.groups.models import GroupNotificationType, GroupMembership
+from karrot.groups.models import GroupMembership
 from karrot.issues.models import Issue, Vote, Voting
 from karrot.issues.tasks import notify_about_new_conflict_resolution, \
     notify_about_continued_conflict_resolution
@@ -15,20 +15,13 @@ def issue_created(sender, instance, created, **kwargs):
         return
 
     issue = instance
-    group = instance.group
 
     # add conversation
     conversation = Conversation.objects.get_or_create_for_target(issue)
-    for membership in group.groupmembership_set.all():
-        notifications_enabled = GroupNotificationType.CONFLICT_RESOLUTION in membership.notification_types
-        if notifications_enabled:
-            conversation.join(membership.user, muted=False)
 
-    # make sure affected user is in conversation and has email notifications enabled
-    conversation.join(issue.affected_user)
-    participant = conversation.conversationparticipant_set.get(user=issue.affected_user)
-    participant.muted = False
-    participant.save()
+    # initially we only add the two people involved, the initiator, and the affected user
+    conversation.join(issue.created_by, muted=False)
+    conversation.join(issue.affected_user, muted=False)
 
 
 @receiver(post_save, sender=Voting)
