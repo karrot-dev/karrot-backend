@@ -279,12 +279,12 @@ msgstr ""
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:289
+#: karrot/conversations/emails.py:290
 #, python-format
-msgid "New message in conflict resolution in %(group_name)s"
+msgid "New message in membership review of %(user_name)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:304
+#: karrot/conversations/emails.py:305
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr ""
@@ -617,23 +617,11 @@ msgstr ""
 msgid "Provided score is outside of allowed range"
 msgstr ""
 
-#: karrot/issues/serializers.py:132
-msgid "Topic cannot be empty"
-msgstr ""
-
-#: karrot/issues/serializers.py:139
-msgid "Affected user is not part of that group"
-msgstr ""
-
-#: karrot/issues/serializers.py:141
-msgid "A conflict resolution about that user has already been started"
-msgstr ""
-
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:5
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:170
 #: karrot/issues/templates/conflict_resolution_continued.subject.jinja2:1
 #, python-format
-msgid "Keep discussing about the conflict with %(affected_user_name)s"
+msgid "The membership review of %(affected_user_name)s continues"
 msgstr ""
 
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:171
@@ -659,21 +647,21 @@ msgstr ""
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:212
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:219
 msgid ""
-"You are receiving this because you are subscribed to <strong>Conflict "
-"Resolution</strong> emails for this group."
+"You are receiving this because you are subscribed to <strong>Membership "
+"Review</strong> emails for this group."
 msgstr ""
 
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:5
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:170
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.subject.jinja2:1
-msgid "Keep discussing about the conflict with you"
+msgid "Your membership review continues"
 msgstr ""
 
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:5
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:170
 #: karrot/issues/templates/new_conflict_resolution.subject.jinja2:1
 #, python-format
-msgid "A conflict resolution process was started with %(affected_user_name)s"
+msgid "A membership review was started for %(affected_user_name)s"
 msgstr ""
 
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:178
@@ -690,7 +678,7 @@ msgstr ""
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:5
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:170
 #: karrot/issues/templates/new_conflict_resolution_affected_user.subject.jinja2:1
-msgid "A conflict resolution process was started with you"
+msgid "A review of your membership was started"
 msgstr ""
 
 #: karrot/offers/api.py:33
@@ -766,7 +754,7 @@ msgstr ""
 msgid "You are already subscribed to this place"
 msgstr ""
 
-#: karrot/subscriptions/receivers.py:740
+#: karrot/subscriptions/receivers.py:756
 msgid "Push notifications are enabled!"
 msgstr ""
 

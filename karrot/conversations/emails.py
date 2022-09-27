@@ -286,8 +286,9 @@ def prepare_issue_message_notification(user, messages):
             user,
             messages,
             group=issue.group,
-            conversation_name=_('New message in conflict resolution in %(group_name)s') % {
-                'group_name': issue.group.name,
+            # TODO: also add some context text that can be passed in to explain that it's not a private message...
+            conversation_name=_('New message in membership review of %(user_name)s') % {
+                'user_name': user.display_name,
             },
             conversation_url=issue_url(issue),
             stats_category='issue_message'

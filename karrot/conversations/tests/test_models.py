@@ -278,12 +278,17 @@ class TestActivityConversations(TestCase):
 class TestIssueConversations(TestCase):
     def setUp(self):
         self.user = VerifiedUserFactory()
+        self.affected_user = VerifiedUserFactory()
         self.more_users = [VerifiedUserFactory() for _ in range(2)]
         self.group = GroupFactory(members=[self.user, *self.more_users])
         for membership in self.group.groupmembership_set.all():
             membership.add_notification_types([GroupNotificationType.CONFLICT_RESOLUTION])
             membership.save()
-        self.issue = IssueFactory(group=self.group, created_by=self.user)
+        self.issue = IssueFactory(
+            group=self.group,
+            created_by=self.user,
+            affected_user=self.affected_user,
+        )
         self.conversation = self.issue.conversation
         mail.outbox = []
 
@@ -291,10 +296,12 @@ class TestIssueConversations(TestCase):
         with execute_scheduled_tasks_immediately():
             ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
 
-        self.assertEqual(len(mail.outbox), 2)
+        # only the affected user should get it
+        # (the author won't get their own message, nor will the other users)
+        self.assertEqual(len(mail.outbox), 1)
 
         actual_recipients = set(m.to[0] for m in mail.outbox)
-        expected_recipients = set(u.email for u in self.more_users)
+        expected_recipients = {self.issue.affected_user.email}
 
         self.assertEqual(actual_recipients, expected_recipients)
 
