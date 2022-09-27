@@ -437,9 +437,7 @@ class ActivityUpdateSerializer(ActivitySerializer):
 
         update_data = validated_data.copy()
 
-        if 'is_public' in update_data:
-            if update_data['is_public']:
-                if not activity.public_id:
+        if 'is_public' in update_data and update_data['is_public'] and not activity.public_id:
                     # create public id
                     update_data['public_id'] = uuid.uuid4()
 
