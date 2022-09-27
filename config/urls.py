@@ -12,6 +12,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 
+from karrot.agreements.api import AgreementViewSet
 from karrot.applications.api import ApplicationViewSet
 from karrot.bootstrap.api import BootstrapViewSet, ConfigViewSet
 from karrot.community_feed.api import CommunityFeedViewSet
@@ -44,6 +45,8 @@ router.register('groups-info', GroupInfoViewSet, basename='groupinfo')
 router.register('applications', ApplicationViewSet, basename='application')
 router.register('community-feed', CommunityFeedViewSet, basename='community-feed')
 router.register('issues', IssuesViewSet, basename='issues')
+
+router.register('agreements', AgreementViewSet)
 
 # User endpoints
 router.register('users', UserViewSet)

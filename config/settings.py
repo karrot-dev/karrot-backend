@@ -132,6 +132,7 @@ INSTALLED_APPS = (
     'karrot.template_previews',
     'karrot.webhooks.WebhooksConfig',
     'karrot.notifications.NotificationsConfig',
+    'karrot.agreements.AgreementsConfig',
     'karrot.stats',
     'karrot.status.StatusConfig',
     'karrot.utils',
