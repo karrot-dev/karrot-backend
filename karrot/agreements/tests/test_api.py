@@ -93,19 +93,27 @@ class TestReadAgreements(APITestCase):
         self.newcomer = VerifiedUserFactory()
         self.group = GroupFactory(members=[self.editor], newcomers=[self.newcomer])
         self.other_group = GroupFactory(members=[self.editor], newcomers=[self.newcomer])
-        self.agreements = [self.group.agreements.create(**create_agreement_content()) for _ in range(8)]
-        self.expired_agreements = [
+
+        # active
+        for _ in range(3):
+            self.group.agreements.create(**create_agreement_content(review_at=timezone.now() + relativedelta(weeks=4)))
+
+        # active and review due
+        for _ in range(5):
+            self.group.agreements.create(**create_agreement_content(review_at=timezone.now() - relativedelta(days=2)))
+
+        # expired
+        for _ in range(12):
             self.group.agreements.create(
                 **create_agreement_content(
                     active_from=timezone.now() - relativedelta(weeks=3),
                     active_until=timezone.now() - relativedelta(weeks=1),
                 )
-            ) for _ in range(12)
-        ]
+            )
 
     def test_can_get_agreement(self):
         self.client.force_login(user=self.newcomer)
-        agreement = self.agreements[0]
+        agreement = self.group.agreements.first()
         response = self.client.get(f'/api/agreements/{agreement.id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(
@@ -126,7 +134,7 @@ class TestReadAgreements(APITestCase):
 
     def test_can_list_agreements(self):
         self.client.force_login(user=self.newcomer)
-        response = self.client.get('/api/agreements/', {'group': self.group.id})
+        response = self.client.get('/api/agreements/')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data['results']), 20)
 
@@ -139,8 +147,7 @@ class TestReadAgreements(APITestCase):
     def test_can_filter_by_active(self):
         self.client.force_login(user=self.newcomer)
         response = self.client.get('/api/agreements/', {
-            'group': self.group.id,
-            'active': True,
+            'active': 'true',
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data['results']), 8)
@@ -148,8 +155,15 @@ class TestReadAgreements(APITestCase):
     def test_can_filter_by_inactive(self):
         self.client.force_login(user=self.newcomer)
         response = self.client.get('/api/agreements/', {
-            'group': self.group.id,
-            'active': False,
+            'active': 'false',
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data['results']), 12)
+
+    def test_can_filter_by_review_due(self):
+        self.client.force_login(user=self.newcomer)
+        response = self.client.get('/api/agreements/', {
+            'review_due': True,
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data['results']), 5)

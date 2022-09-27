@@ -18,6 +18,13 @@ def filter_active(qs, name, value):
     return qs
 
 
+def filter_review_due(qs, name, value):
+    if value is True:
+        qs = qs.filter(review_at__lte=timezone.now())
+    return qs
+
+
 class AgreementFilter(filters.FilterSet):
     group = ModelChoiceFilter(queryset=groups_queryset)
     active = filters.BooleanFilter(method=filter_active)
+    review_due = filters.BooleanFilter(method=filter_review_due)
