@@ -197,7 +197,7 @@ class GroupViewSet(
         serializer_class=TrustActionSerializer
     )
     def trust_user(self, request, pk, user_id):
-        """trust the user in a group"""
+        """trust the user in a group for a given role. role defaults to 'editor'"""
         self.check_permissions(request)
         membership = get_object_or_404(GroupMembership.objects, group=pk, user=user_id)
         self.check_object_permissions(request, membership)
@@ -209,7 +209,7 @@ class GroupViewSet(
     @extend_schema(parameters=[OpenApiParameter('user_id', OpenApiTypes.INT, OpenApiParameter.PATH)])
     @trust_user.mapping.delete
     def revoke_trust(self, request, pk, user_id):
-        """revoke trust for a user in a group"""
+        """revoke trust for a user in a group for a given role. role defaults to 'editor'"""
         self.check_permissions(request)
         membership = get_object_or_404(GroupMembership.objects, group=pk, user=user_id)
         self.check_object_permissions(request, membership)
