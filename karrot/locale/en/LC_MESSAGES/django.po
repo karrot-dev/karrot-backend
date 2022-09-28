@@ -133,6 +133,7 @@ msgstr ""
 
 #: karrot/activities/templates/participant_removed.html.jinja2:163
 #: karrot/groups/templates/user_became_editor.html.jinja2:221
+#: karrot/groups/templates/user_got_role.html.jinja2:221
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:221
 #: karrot/groups/templates/user_lost_editor_role.html.jinja2:217
 #, python-format
@@ -143,6 +144,7 @@ msgstr ""
 
 #: karrot/activities/templates/participant_removed.html.jinja2:164
 #: karrot/groups/templates/user_became_editor.html.jinja2:222
+#: karrot/groups/templates/user_got_role.html.jinja2:222
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:222
 #: karrot/groups/templates/user_lost_editor_role.html.jinja2:218
 #, python-format
@@ -187,6 +189,7 @@ msgstr ""
 
 #: karrot/applications/templates/application_accepted.html.jinja2:188
 #: karrot/groups/templates/user_became_editor.html.jinja2:194
+#: karrot/groups/templates/user_got_role.html.jinja2:194
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:194
 #: karrot/groups/templates/user_lost_editor_role.html.jinja2:190
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:192
@@ -474,6 +477,20 @@ msgstr ""
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:180
 msgid "Use your power wisely!"
+msgstr ""
+
+#: karrot/groups/templates/user_got_role.html.jinja2:5
+#: karrot/groups/templates/user_got_role.html.jinja2:171
+#: karrot/groups/templates/user_got_role.subject.jinja2:1
+#, python-format
+msgid "You got role \"%(role_name)s\" in %(group_name)s!"
+msgstr ""
+
+#: karrot/groups/templates/user_got_role.html.jinja2:174
+#, python-format
+msgid ""
+"You received enough trust from fellow group members to now have the "
+"\"%(role_name)s\" role. Here's what this is about:"
 msgstr ""
 
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:171

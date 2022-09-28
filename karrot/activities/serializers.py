@@ -438,8 +438,8 @@ class ActivityUpdateSerializer(ActivitySerializer):
         update_data = validated_data.copy()
 
         if 'is_public' in update_data and update_data['is_public'] and not activity.public_id:
-                    # create public id
-                    update_data['public_id'] = uuid.uuid4()
+            # create public id
+            update_data['public_id'] = uuid.uuid4()
 
         update_data.pop('participant_types', None)
         update_data['last_changed_by'] = self.context['request'].user
