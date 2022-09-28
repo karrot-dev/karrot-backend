@@ -9,12 +9,12 @@ def groups_queryset(request):
 
 def filter_active(qs, name, value):
     if value is True:
-        # agreements that are currently valid
+        # agreements that are currently active
         qs = qs.filter(active_from__lte=timezone.now())
-        qs = qs.filter(Q(active_until__isnull=True) | Q(active_until__gte=timezone.now()))
+        qs = qs.filter(Q(active_to__isnull=True) | Q(active_to__gte=timezone.now()))
     elif value is False:
-        # agreements that are not currently valid
-        qs = qs.filter(Q(active_from__gte=timezone.now()) | Q(active_until__lte=timezone.now()))
+        # agreements that are not currently active
+        qs = qs.filter(Q(active_from__gte=timezone.now()) | Q(active_to__lte=timezone.now()))
     return qs
 
 

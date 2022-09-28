@@ -13,7 +13,7 @@ class AgreementSerializer(ModelSerializer):
             'summary',
             'content',
             'active_from',
-            'active_until',
+            'active_to',
             'review_at',
             'group',
             'created_by',

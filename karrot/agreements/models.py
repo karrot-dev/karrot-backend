@@ -12,7 +12,7 @@ class Agreement(BaseModel):
     content = models.TextField()
 
     active_from = models.DateTimeField()
-    active_until = models.DateTimeField(null=True)
+    active_to = models.DateTimeField(null=True)
     review_at = models.DateTimeField(null=True)
 
     created_by = models.ForeignKey(

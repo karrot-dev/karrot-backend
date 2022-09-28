@@ -107,7 +107,7 @@ class TestReadAgreements(APITestCase):
             self.group.agreements.create(
                 **create_agreement_content(
                     active_from=timezone.now() - relativedelta(weeks=3),
-                    active_until=timezone.now() - relativedelta(weeks=1),
+                    active_to=timezone.now() - relativedelta(weeks=1),
                 )
             )
 
@@ -123,7 +123,7 @@ class TestReadAgreements(APITestCase):
                 'summary',
                 'content',
                 'active_from',
-                'active_until',
+                'active_to',
                 'review_at',
                 'group',
             }
