@@ -129,16 +129,16 @@ class IssueSerializer(serializers.ModelSerializer):
 
     def validate_topic(self, topic):
         if len(topic) < 1:
-            raise serializers.ValidationError(_('Topic cannot be empty'))
+            raise serializers.ValidationError('Topic cannot be empty')
         return topic
 
     def validate(self, attrs):
         group = attrs['group']
         affected_user = attrs['affected_user']
         if not group.is_member(affected_user):
-            raise serializers.ValidationError(_('Affected user is not part of that group'))
+            raise serializers.ValidationError('Affected user is not part of that group')
         if Issue.objects.ongoing().filter(group=group, affected_user=affected_user).exists():
-            raise serializers.ValidationError(_('A conflict resolution about that user has already been started'))
+            raise serializers.ValidationError('A conflict resolution about that user has already been started')
         return attrs
 
     def save(self, **kwargs):

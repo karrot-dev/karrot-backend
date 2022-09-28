@@ -9,6 +9,7 @@ from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext as _
 
+from karrot.issues.models import Issue
 from karrot.applications.models import Application
 from karrot.applications.serializers import ApplicationSerializer
 from karrot.community_feed.models import CommunityFeedMeta
@@ -37,7 +38,7 @@ from karrot.activities.serializers import ActivitySerializer, ActivitySeriesSeri
 from karrot.places.models import Place, PlaceSubscription
 from karrot.places.serializers import PlaceSerializer
 from karrot.status.helpers import unseen_notification_count, unread_conversations, pending_applications, \
-    get_feedback_possible
+    get_feedback_possible, ongoing_issues
 from karrot.subscriptions import tasks
 from karrot.subscriptions.models import ChannelSubscription, PushSubscription
 from karrot.subscriptions.tasks import notify_subscribers_by_device
@@ -557,6 +558,21 @@ def send_issue_updates(sender, issue, **kwargs):
                                                                     ).distinct():
         payload = IssueSerializer(issue, context={'request': MockRequest(user=subscription.user)}).data
         send_in_channel(subscription.reply_channel, topic='issues:issue', payload=payload)
+
+
+@receiver(post_save, sender=Issue)
+def issue_saved(sender, instance, **kwargs):
+    issue = instance
+    for user, subscriptions in groupby(sorted(list(
+            ChannelSubscription.objects.recent().filter(user__in=issue.group.members.all())), key=lambda x: x.user.id),
+                                       key=lambda x: x.user):
+
+        groups = defaultdict(dict)
+        for group_id, ongoing_issue_count in ongoing_issues(user):
+            groups[group_id]['ongoing_issue_count'] = ongoing_issue_count
+
+        for subscription in subscriptions:
+            send_in_channel(subscription.reply_channel, topic='status', payload={'groups': groups})
 
 
 # Community Feed

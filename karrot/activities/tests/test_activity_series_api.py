@@ -168,6 +168,11 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
                 False,
                 'is_done':
                 False,
+                'is_public':
+                False,
+                'public_id':
+                None,
+                'banner_image_urls': {},
             })
         self.assertEqual(response.data, created_activities, response.data)
 

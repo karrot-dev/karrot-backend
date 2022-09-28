@@ -25,6 +25,11 @@ class ActivitySeriesFilter(filters.FilterSet):
         ]
 
 
+class PublicActivitiesFilter(filters.FilterSet):
+    group = filters.NumberFilter(field_name='place__group')
+    date = ISODateTimeRangeFromToRangeFilter(field_name='date', lookup_expr='overlap')
+
+
 class ActivitiesFilter(filters.FilterSet):
     place = filters.NumberFilter(field_name='place')
     group = filters.NumberFilter(field_name='place__group')
