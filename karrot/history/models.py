@@ -47,6 +47,7 @@ class HistoryTypus(enum.Enum):
     USER_LOST_EDITOR_ROLE = 28
     PLACE_TYPE_CREATE = 29
     PLACE_TYPE_MODIFY = 30
+    MEMBER_GOT_ROLE = 32
 
 
 class HistoryQuerySet(models.QuerySet):

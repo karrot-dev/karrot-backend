@@ -24,11 +24,6 @@ from karrot.utils import markdown
 from karrot.groups import roles, themes
 
 
-def default_group_roles():
-    # contains the roles that group members can give trust for
-    return [GROUP_EDITOR]
-
-
 def default_group_features():
     return ['offers']
 
@@ -112,12 +107,15 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
         upload_to='group_photos',
         null=True,
     )
-    roles = ArrayField(TextField(), default=default_group_roles)  # valid roles for the group
     features = ArrayField(TextField(), default=default_group_features)
 
     @property
     def group(self):
         return self
+
+    @property
+    def roles(self):
+        return [GROUP_EDITOR] + [r.name for r in self.custom_roles.all()]
 
     @property
     def conversation_supports_threads(self):
@@ -352,3 +350,14 @@ class Trust(BaseModel):
 
     class Meta:
         unique_together = (('membership', 'given_by', 'role'), )
+
+
+class CustomRole(BaseModel):
+    name = models.TextField()
+    description = models.TextField()
+    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='custom_roles')
+
+    # TODO: maybe index by name?
+
+    class Meta:
+        unique_together = (('name', 'group'))

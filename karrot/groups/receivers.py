@@ -7,7 +7,8 @@ from django.dispatch import receiver
 
 from karrot.conversations.models import Conversation
 from karrot.groups import roles, stats
-from karrot.groups.emails import prepare_user_became_editor_email, prepare_user_lost_editor_role_email
+from karrot.groups.emails import prepare_user_became_editor_email, prepare_user_lost_editor_role_email, \
+    prepare_user_got_role_email
 from karrot.groups.models import Group, GroupMembership, Trust
 from karrot.groups.roles import GROUP_EDITOR
 from karrot.history.models import History, HistoryTypus
@@ -85,6 +86,24 @@ def trust_given(sender, instance, created, **kwargs):
             prepare_user_became_editor_email(user=membership.user, group=membership.group).send()
 
             stats.member_became_editor(membership.group)
+
+    else:
+        # trust for some other role, grant immediately
+        membership = trust.membership
+        membership.add_roles([trust.role])
+        membership.save()
+
+        History.objects.create(
+            typus=HistoryTypus.MEMBER_GOT_ROLE,
+            group=membership.group,
+            users=[membership.user],
+        )
+
+        role = membership.group.custom_roles.get(name=trust.role)
+
+        prepare_user_got_role_email(user=membership.user, group=membership.group, role=role).send()
+
+        # TODO: stats
 
     stats.trust_given(trust)
 

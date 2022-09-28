@@ -154,3 +154,19 @@ def prepare_user_lost_editor_role_email(user, group):
         },
         stats_category='user_lost_editor_role',
     )
+
+
+def prepare_user_got_role_email(user, group, role):
+    return prepare_email(
+        template='user_got_role',
+        user=user,
+        tz=group.timezone,
+        context={
+            'group_name': group.name,
+            'role_name': role.name,
+            'role_description': role.description,
+            'group_url': group_wall_url(group),
+            'group': group,
+        },
+        stats_category='user_got_role',
+    )
