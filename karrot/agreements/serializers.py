@@ -1,7 +1,15 @@
+from django.db import transaction
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.serializers import ModelSerializer
 
+from karrot.history.models import History, HistoryTypus
 from karrot.agreements.models import Agreement
+
+
+class AgreementHistorySerializer(ModelSerializer):
+    class Meta:
+        model = Agreement
+        fields = '__all__'
 
 
 class AgreementSerializer(ModelSerializer):
@@ -32,9 +40,40 @@ class AgreementSerializer(ModelSerializer):
             raise PermissionDenied('You need to be a group editor')
         return group
 
+    @transaction.atomic
     def save(self, **kwargs):
         current_user = self.context['request'].user
         extra_kwargs = dict(last_changed_by=current_user)
         if self.instance is None:
             extra_kwargs.update(created_by=current_user)
         return super().save(**kwargs, **extra_kwargs)
+
+    def create(self, validated_data):
+        agreement = super().create(validated_data)
+        History.objects.create(
+            typus=HistoryTypus.AGREEMENT_CREATE,
+            group=agreement.group,
+            agreement=agreement,
+            users=[
+                self.context['request'].user,
+            ],
+            payload=self.initial_data,
+            after=AgreementHistorySerializer(agreement).data,
+        )
+        return agreement
+
+    def update(self, agreement, validated_data):
+        before_data = AgreementHistorySerializer(agreement).data
+        agreement = super().update(agreement, validated_data)
+        History.objects.create(
+            typus=HistoryTypus.AGREEMENT_MODIFY,
+            group=agreement.group,
+            agreement=agreement,
+            users=[
+                self.context['request'].user,
+            ],
+            payload=self.initial_data,
+            before=before_data,
+            after=AgreementHistorySerializer(agreement).data,
+        )
+        return agreement

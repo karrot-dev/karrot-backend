@@ -18,14 +18,35 @@ class HistorySerializer(serializers.ModelSerializer):
             'typus',
             'group',
             'place',
+            'agreement',
             'users',
             'payload',
             'message',
             'after',
+            'changes',
         ]
 
     typus = SerializerMethodField()
     after = SerializerMethodField()
+
+    changes = SerializerMethodField()
+
+    def get_changes(self, obj):
+        if obj.typus == HistoryTypus.AGREEMENT_MODIFY:
+            changes = {}
+            for k in (
+                    'title',
+                    'summary',
+                    'content',
+            ):
+                if obj.before[k] != obj.after[k]:
+                    changes[k] = {
+                        'before': obj.before[k],
+                        'after': obj.after[k],
+                    }
+            if changes:
+                return changes
+        return None
 
     @extend_schema_field(OpenApiTypes.STR)
     def get_typus(self, obj):
