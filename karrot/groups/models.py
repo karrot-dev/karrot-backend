@@ -114,8 +114,8 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
         return self
 
     @property
-    def roles(self):
-        return [GROUP_EDITOR] + [r.name for r in self.custom_roles.all()]
+    def all_role_names(self):
+        return [GROUP_EDITOR] + [r.name for r in self.roles.all()]
 
     @property
     def conversation_supports_threads(self):
@@ -352,10 +352,12 @@ class Trust(BaseModel):
         unique_together = (('membership', 'given_by', 'role'), )
 
 
-class CustomRole(BaseModel):
-    name = models.TextField()
+class Role(BaseModel):
+    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='roles')
+    name = models.CharField(max_length=100)
+    display_name = models.TextField()
     description = models.TextField()
-    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='custom_roles')
+    threshold = models.IntegerField(default=1)
 
     # TODO: maybe index by name?
 

@@ -1,7 +1,7 @@
 <mjml>
     <mj-head>
         <mj-include path="../../base/templates/_base-head.mjml"/>
-        <mj-title>{% trans %}You got role "{{ role_name }}" in {{ group_name }}!{% endtrans %}</mj-title>
+        <mj-title>{% trans %}You received a new role in {{ group_name }}!{% endtrans %}</mj-title>
     </mj-head>
     <mj-body>
         <mj-include path="../../base/templates/_header.mjml"/>
@@ -9,11 +9,11 @@
             <mj-column>
                 <mj-text>
                     <h1>
-                        {% trans %}You got role "{{ role_name }}" in {{ group_name }}!{% endtrans %}
+                        {% trans %}You received a new role in {{ group_name }}!{% endtrans %}
                     </h1>
                     <p>
                         {% trans trimmed %}
-                            You received enough trust from fellow group members to now have the "{{ role_name }}" role.
+                            You received enough trust from fellow group members to now have the role: {{ role_name }}
                             Here's what this is about:
                         {% endtrans %}
                     </p>

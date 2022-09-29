@@ -151,7 +151,7 @@ class TestTrustAPI(APITestCase):
         )
 
     def test_give_trust_for_role(self):
-        self.group.custom_roles.create(name='someotherrole', description='nothing')
+        self.group.roles.create(name='someotherrole', description='nothing')
         self.group.save()
         self.client.force_login(user=self.member1)
         mail.outbox = []
@@ -169,7 +169,7 @@ class TestTrustAPI(APITestCase):
             ).exists()
         )
 
-        self.assertIn('You got role "someotherrole" in', mail.outbox[0].subject)
+        self.assertIn('You received a new role in', mail.outbox[0].subject)
 
     def test_can_only_give_trust_once(self):
         membership = GroupMembership.objects.get(user=self.member2, group=self.group)
@@ -214,7 +214,7 @@ class TestTrustAPI(APITestCase):
         )
 
     def test_trust_can_be_revoked_for_role(self):
-        self.group.custom_roles.create(name='someotherrole', description='nothing')
+        self.group.roles.create(name='someotherrole', description='nothing')
         self.group.save()
         membership = GroupMembership.objects.get(user=self.member2, group=self.group)
         Trust.objects.create(membership=membership, given_by=self.member1, role=GROUP_EDITOR)
@@ -263,7 +263,7 @@ class TestTrustList(APITestCase):
         Trust.objects.create(membership=membership, given_by=self.member1)
         membership = GroupMembership.objects.get(user=self.member1, group=self.group)
         Trust.objects.create(membership=membership, given_by=self.member2)
-        self.group.custom_roles.create(name='anotherrole', description='nothing')
+        self.group.roles.create(name='anotherrole', description='nothing')
         Trust.objects.create(membership=membership, given_by=self.member3, role='anotherrole')
 
     def test_list_trust_for_group(self):

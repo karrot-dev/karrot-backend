@@ -67,10 +67,10 @@ def trust_given(sender, instance, created, **kwargs):
 
     if trust.role == GROUP_EDITOR:
         membership = trust.membership
-        relevant_trust = Trust.objects.filter(membership=membership, role=GROUP_EDITOR)
+        relevant_trust_count = Trust.objects.filter(membership=membership, role=GROUP_EDITOR).count()
         trust_threshold = membership.group.trust_threshold_for_newcomer()
 
-        if relevant_trust.count() >= trust_threshold and roles.GROUP_EDITOR not in membership.roles:
+        if relevant_trust_count >= trust_threshold and roles.GROUP_EDITOR not in membership.roles:
             membership.add_roles([roles.GROUP_EDITOR])
             membership.save()
 
@@ -88,22 +88,26 @@ def trust_given(sender, instance, created, **kwargs):
             stats.member_became_editor(membership.group)
 
     else:
-        # trust for some other role, grant immediately
+        # trust for some other role
         membership = trust.membership
-        membership.add_roles([trust.role])
-        membership.save()
+        relevant_trust_count = Trust.objects.filter(membership=membership, role=trust.role).count()
+        role = membership.group.roles.get(name=trust.role)
 
-        History.objects.create(
-            typus=HistoryTypus.MEMBER_GOT_ROLE,
-            group=membership.group,
-            users=[membership.user],
-        )
+        if relevant_trust_count >= role.threshold:
+            membership.add_roles([trust.role])
+            membership.save()
 
-        role = membership.group.custom_roles.get(name=trust.role)
+            History.objects.create(
+                typus=HistoryTypus.MEMBER_GOT_ROLE,
+                group=membership.group,
+                users=[membership.user],
+            )
 
-        prepare_user_got_role_email(user=membership.user, group=membership.group, role=role).send()
+            role = membership.group.roles.get(name=trust.role)
 
-        # TODO: stats
+            prepare_user_got_role_email(user=membership.user, group=membership.group, role=role).send()
+
+            # TODO: stats
 
     stats.trust_given(trust)
 

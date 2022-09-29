@@ -24,7 +24,7 @@ class TestGroupSerializer(TestCase):
         self.assertEqual(
             sorted(list(serializer.data['memberships'].keys())), sorted([_.id for _ in self.group.members.all()])
         )
-        self.assertEqual(serializer.data['roles'], ['editor'])
+        self.assertEqual(serializer.data['roles'], {})
 
     def test_preview(self):
         serializer = GroupPreviewSerializer(self.group)

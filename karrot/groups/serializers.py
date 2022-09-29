@@ -166,6 +166,8 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'features',
         ]
 
+    roles = serializers.SerializerMethodField()
+
     def validate_active_agreement(self, active_agreement):
         user = self.context['request'].user
         group = self.instance
@@ -182,7 +184,15 @@ class GroupDetailSerializer(GroupBaseSerializer):
 
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_roles(self, group):
-        return [{'name': role} for role in group.roles]
+        # does not include 'editor', as it is a built-in role right now
+        return {
+            role.name: {
+                'display_name': role.display_name,
+                'description': role.description,
+                'threshold': role.threshold,
+            }
+            for role in group.roles.all()
+        }
 
     def get_notification_types(self, group) -> List[str]:
         user = self.context['request'].user
@@ -319,8 +329,8 @@ class TrustActionSerializer(serializers.ModelSerializer):
 
     def validate_role(self, role):
         group = self.instance.group
-        if role not in group.roles:
-            raise ValidationError(f'Invalid role "{role}" for group, available roles are {group.roles}')
+        if role not in group.all_role_names:
+            raise ValidationError(f'Invalid role "{role}" for group, available roles are {group.all_role_names}')
         return role
 
     def update(self, membership, validated_data):
