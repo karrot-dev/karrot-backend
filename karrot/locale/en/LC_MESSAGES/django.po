@@ -481,20 +481,16 @@ msgstr ""
 
 #: karrot/groups/templates/user_got_role.html.jinja2:5
 #: karrot/groups/templates/user_got_role.html.jinja2:171
+#: karrot/groups/templates/user_got_role.subject.jinja2:1
 #, python-format
-msgid "You got role \"%(role_name)s\" in %(group_name)s!"
+msgid "You received a new role in %(group_name)s!"
 msgstr ""
 
 #: karrot/groups/templates/user_got_role.html.jinja2:174
 #, python-format
 msgid ""
-"You received enough trust from fellow group members to now have the "
-"\"%(role_name)s\" role. Here's what this is about:"
-msgstr ""
-
-#: karrot/groups/templates/user_got_role.subject.jinja2:1
-#, python-format
-msgid "You received a new role in %(group_name)s!"
+"You received enough trust from fellow group members to now have the role:"
+" %(role_name)s Here's what this is about:"
 msgstr ""
 
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:171
