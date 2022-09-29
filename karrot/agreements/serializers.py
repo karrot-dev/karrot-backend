@@ -1,5 +1,5 @@
 from django.db import transaction
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.serializers import ModelSerializer
 
 from karrot.history.models import History, HistoryTypus
@@ -33,7 +33,7 @@ class AgreementSerializer(ModelSerializer):
 
     def validate_group(self, group):
         if self.instance is not None:
-            raise PermissionDenied('You cannot change the group')
+            raise ValidationError('You cannot change the group')
         if not group.is_member(self.context['request'].user):
             raise PermissionDenied('You are not a member of this group.')
         if not group.is_editor(self.context['request'].user):

@@ -76,6 +76,27 @@ class TestUpdateAgreement(APITestCase):
         self.agreement.refresh_from_db()
         self.assertEqual(self.agreement.content, new_content)
 
+    def test_updates_last_changed_by(self):
+        self.client.force_login(user=self.editor)
+        self.assertEqual(self.agreement.last_changed_by, None)
+        self.client.patch(
+            f'/api/agreements/{self.agreement.id}/', {
+                'content': faker.text(),
+            }, format='json'
+        )
+        self.agreement.refresh_from_db()
+        self.assertEqual(self.agreement.last_changed_by, self.editor)
+
+    def test_cannot_update_agreement_as_newcomer(self):
+        self.client.force_login(user=self.newcomer)
+        new_content = faker.text()
+        response = self.client.patch(
+            f'/api/agreements/{self.agreement.id}/', {
+                'content': new_content,
+            }, format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
     def test_cannot_change_group(self):
         other_group = GroupFactory(members=[self.editor])
         self.client.force_login(user=self.editor)
@@ -84,7 +105,7 @@ class TestUpdateAgreement(APITestCase):
                 'group': other_group.id,
             }, format='json'
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
 
 class TestReadAgreements(APITestCase):
@@ -126,6 +147,8 @@ class TestReadAgreements(APITestCase):
                 'active_to',
                 'review_at',
                 'group',
+                'last_changed_by',
+                'created_by',
             }
         )
         check_fields = {'id', 'title', 'summary', 'content'}

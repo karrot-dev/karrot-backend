@@ -4,6 +4,7 @@ from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
+from karrot.agreements.permissions import IsGroupEditor
 from karrot.agreements.filters import AgreementFilter
 from karrot.agreements.serializers import AgreementSerializer
 from karrot.agreements.models import Agreement
@@ -28,7 +29,10 @@ class AgreementViewSet(
     queryset = Agreement.objects
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = AgreementFilter
-    permission_classes = (IsAuthenticated, )  # TODO(PR) check editor permissions...
+    permission_classes = (
+        IsAuthenticated,
+        IsGroupEditor,
+    )
     pagination_class = AgreementPagination
 
     def get_queryset(self):
