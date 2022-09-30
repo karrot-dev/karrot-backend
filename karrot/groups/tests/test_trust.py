@@ -183,7 +183,8 @@ class TestTrustAPI(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(
-            response.data['role'][0], 'Role "special_role" can only be trusted for by users with "editor" role'
+            response.data['role'][0],
+            'Trust for role "special_role" can only be given by users with "editor" role',
         )
         self.assertFalse(
             Trust.objects.filter(
