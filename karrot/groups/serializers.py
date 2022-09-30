@@ -179,6 +179,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
                 'display_name': role.display_name,
                 'description': role.description,
                 'threshold': role.threshold,
+                'role_required_for_trust': role.role_required_for_trust,
             }
             for role in group.roles.all()
         }

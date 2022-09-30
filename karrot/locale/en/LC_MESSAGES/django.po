@@ -355,7 +355,7 @@ msgstr ""
 msgid "Playground"
 msgstr ""
 
-#: karrot/groups/serializers.py:254
+#: karrot/groups/serializers.py:255
 msgid "You are not in this group"
 msgstr ""
 
