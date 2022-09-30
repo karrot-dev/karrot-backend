@@ -101,6 +101,12 @@ def trust_given(sender, instance, created, **kwargs):
                 typus=HistoryTypus.MEMBER_GOT_ROLE,
                 group=membership.group,
                 users=[membership.user],
+                payload={
+                    'role': {
+                        'name': role.name,
+                        'display_name': role.display_name,
+                    },
+                }
             )
 
             role = membership.group.roles.get(name=trust.role)
