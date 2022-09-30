@@ -14,12 +14,13 @@
                     <p>
                         {% trans trimmed %}
                             You received enough trust from fellow group members to now have the role: {{ role_name }}
-                            Here's what this is about:
                         {% endtrans %}
                     </p>
-                    <p>
-                        {{ role_description }}
-                    </p>
+                    {% if role_description %}
+                        <p>
+                            {{ role_description }}
+                        </p>
+                    {% endif %}
                 </mj-text>
                 <mj-button href="{{ group_url }}">
                     {% trans %}Visit {{ group_name }}{% endtrans %}
