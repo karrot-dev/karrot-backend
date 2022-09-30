@@ -133,6 +133,7 @@ msgstr ""
 
 #: karrot/activities/templates/participant_removed.html.jinja2:163
 #: karrot/groups/templates/user_became_editor.html.jinja2:221
+#: karrot/groups/templates/user_got_role.html.jinja2:222
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:221
 #: karrot/groups/templates/user_lost_editor_role.html.jinja2:217
 #, python-format
@@ -143,6 +144,7 @@ msgstr ""
 
 #: karrot/activities/templates/participant_removed.html.jinja2:164
 #: karrot/groups/templates/user_became_editor.html.jinja2:222
+#: karrot/groups/templates/user_got_role.html.jinja2:223
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:222
 #: karrot/groups/templates/user_lost_editor_role.html.jinja2:218
 #, python-format
@@ -153,7 +155,7 @@ msgstr ""
 msgid "You need to have a verified email address"
 msgstr ""
 
-#: karrot/applications/api.py:38 karrot/groups/api.py:52
+#: karrot/applications/api.py:38 karrot/groups/api.py:51
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
 msgid "You need to be a group editor"
 msgstr ""
@@ -187,6 +189,7 @@ msgstr ""
 
 #: karrot/applications/templates/application_accepted.html.jinja2:188
 #: karrot/groups/templates/user_became_editor.html.jinja2:194
+#: karrot/groups/templates/user_got_role.html.jinja2:195
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:194
 #: karrot/groups/templates/user_lost_editor_role.html.jinja2:190
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:192
@@ -332,31 +335,27 @@ msgid ""
 "%(site_name)s</a>, or <a href=\"%(mute_url)s\">mute further replies</a>."
 msgstr ""
 
-#: karrot/groups/api.py:31
+#: karrot/groups/api.py:30
 msgid "You are already a member."
 msgstr ""
 
-#: karrot/groups/api.py:38
+#: karrot/groups/api.py:37
 msgid "You can only join open groups."
 msgstr ""
 
-#: karrot/groups/api.py:45
+#: karrot/groups/api.py:44
 msgid "You cannot give trust to yourself"
 msgstr ""
 
-#: karrot/groups/api.py:210
-msgid "You already gave trust to this user"
-msgstr ""
-
-#: karrot/groups/serializers.py:33
+#: karrot/groups/serializers.py:34
 msgid "Unknown timezone"
 msgstr ""
 
-#: karrot/groups/serializers.py:41
+#: karrot/groups/serializers.py:42
 msgid "Playground"
 msgstr ""
 
-#: karrot/groups/serializers.py:216
+#: karrot/groups/serializers.py:256
 msgid "You are not in this group"
 msgstr ""
 
@@ -470,6 +469,20 @@ msgstr ""
 
 #: karrot/groups/templates/user_became_editor.html.jinja2:180
 msgid "Use your power wisely!"
+msgstr ""
+
+#: karrot/groups/templates/user_got_role.html.jinja2:5
+#: karrot/groups/templates/user_got_role.html.jinja2:171
+#: karrot/groups/templates/user_got_role.subject.jinja2:1
+#, python-format
+msgid "You received a new role in %(group_name)s!"
+msgstr ""
+
+#: karrot/groups/templates/user_got_role.html.jinja2:174
+#, python-format
+msgid ""
+"You received enough trust from fellow group members to now have the role:"
+" %(role_name)s"
 msgstr ""
 
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:171

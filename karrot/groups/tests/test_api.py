@@ -175,7 +175,7 @@ class TestGroupsAPI(APITestCase):
 
     def test_list_groups(self):
         self.client.force_login(user=self.member)
-        with self.assertNumQueries(5):
+        with self.assertNumQueries(6):
             response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data[0]['id'], self.group.id)
@@ -189,7 +189,7 @@ class TestGroupsAPI(APITestCase):
     def test_retrieve_group_as_member(self):
         self.client.force_login(user=self.member)
         url = self.url + str(self.group.id) + '/'
-        with self.assertNumQueries(5):
+        with self.assertNumQueries(6):
             response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('photo_urls', response.data)

@@ -15,7 +15,7 @@ from versatileimagefield.fields import VersatileImageField
 from karrot.activities.activity_types import default_activity_types
 from karrot.base.base_models import BaseModel, LocationModel
 from karrot.conversations.models import ConversationMixin
-from karrot.groups.roles import GROUP_MEMBER, GROUP_NEWCOMER
+from karrot.groups.roles import GROUP_EDITOR, GROUP_MEMBER, GROUP_NEWCOMER
 from karrot.history.models import History, HistoryTypus
 from karrot.activities.models import Activity, ActivityType
 from karrot.places.models import PlaceType
@@ -106,6 +106,10 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
     @property
     def group(self):
         return self
+
+    @property
+    def all_role_names(self):
+        return [GROUP_EDITOR] + [r.name for r in self.roles.all()]
 
     @property
     def conversation_supports_threads(self):
@@ -280,7 +284,6 @@ class GroupMembership(BaseModel, DirtyFieldsMixin):
         null=True,
         related_name='groupmembership_added',
     )
-    trusted_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='membership', through='Trust')
     roles = ArrayField(TextField(), default=get_default_roles)
     lastseen_at = DateTimeField(default=tz.now)
     inactive_at = DateTimeField(null=True)
@@ -325,6 +328,21 @@ class GroupMembership(BaseModel, DirtyFieldsMixin):
 class Trust(BaseModel):
     membership = models.ForeignKey('groups.GroupMembership', on_delete=models.CASCADE)
     given_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='trust_given')
+    role = models.CharField(max_length=100, default=GROUP_EDITOR)
 
     class Meta:
-        unique_together = (('membership', 'given_by'), )
+        unique_together = (('membership', 'given_by', 'role'), )
+
+
+class Role(BaseModel):
+    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='roles')
+    name = models.CharField(max_length=100)
+    display_name = models.TextField()
+    description = models.TextField()
+    threshold = models.IntegerField(default=1)
+    role_required_for_trust = models.CharField(max_length=100, null=True)
+
+    # TODO: maybe index by name?
+
+    class Meta:
+        unique_together = (('name', 'group'))
