@@ -37,7 +37,6 @@ class HistoryTypus(enum.Enum):
     ACTIVITY_DISABLE = 19
     ACTIVITY_ENABLE = 20
     GROUP_LEAVE_INACTIVE = 21
-    PLACE_TYPE_DELETE = 31
     GROUP_CHANGE_PHOTO = 22
     GROUP_DELETE_PHOTO = 23
     MEMBER_REMOVED = 24
@@ -47,6 +46,9 @@ class HistoryTypus(enum.Enum):
     USER_LOST_EDITOR_ROLE = 28
     PLACE_TYPE_CREATE = 29
     PLACE_TYPE_MODIFY = 30
+    PLACE_TYPE_DELETE = 31
+    AGREEMENT_CREATE = 32
+    AGREEMENT_MODIFY = 33
 
 
 class HistoryQuerySet(models.QuerySet):
@@ -100,6 +102,7 @@ class History(NicelyFormattedModel):
     place = models.ForeignKey('places.Place', null=True, on_delete=models.CASCADE)
     activity = models.ForeignKey('activities.Activity', null=True, on_delete=models.SET_NULL)
     series = models.ForeignKey('activities.ActivitySeries', null=True, on_delete=models.SET_NULL)
+    agreement = models.ForeignKey('agreements.Agreement', null=True, on_delete=models.SET_NULL)
     users = models.ManyToManyField('users.User')
     payload = JSONField(null=True)
     before = JSONField(null=True)

@@ -356,15 +356,7 @@ msgstr ""
 msgid "Playground"
 msgstr ""
 
-#: karrot/groups/serializers.py:150 karrot/groups/serializers.py:251
-msgid "You cannot manage agreements"
-msgstr ""
-
-#: karrot/groups/serializers.py:152
-msgid "Agreement is not for this group"
-msgstr ""
-
-#: karrot/groups/serializers.py:249
+#: karrot/groups/serializers.py:216
 msgid "You are not in this group"
 msgstr ""
 
@@ -762,7 +754,7 @@ msgstr ""
 msgid "You are already subscribed to this place"
 msgstr ""
 
-#: karrot/subscriptions/receivers.py:756
+#: karrot/subscriptions/receivers.py:767
 msgid "Push notifications are enabled!"
 msgstr ""
 

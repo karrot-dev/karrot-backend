@@ -9,6 +9,8 @@ from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext as _
 
+from karrot.agreements.serializers import AgreementSerializer
+from karrot.agreements.models import Agreement
 from karrot.issues.models import Issue
 from karrot.applications.models import Application
 from karrot.applications.serializers import ApplicationSerializer
@@ -478,6 +480,15 @@ def send_offer_delete(sender, instance, **kwargs):
     payload = OfferSerializer(offer).data
     for subscription in ChannelSubscription.objects.recent().filter(user__in=offer.group.members.all()).distinct():
         send_in_channel(subscription.reply_channel, topic='offers:offer_deleted', payload=payload)
+
+
+@receiver(post_save, sender=Agreement)
+@on_transaction_commit
+def send_agreement_updates(sender, instance, created, **kwargs):
+    agreement = instance
+    payload = AgreementSerializer(agreement).data
+    for subscription in ChannelSubscription.objects.recent().filter(user__in=agreement.group.members.all()).distinct():
+        send_in_channel(subscription.reply_channel, topic='agreements:agreement', payload=payload)
 
 
 # Feedback
