@@ -358,6 +358,7 @@ class Role(BaseModel):
     display_name = models.TextField()
     description = models.TextField()
     threshold = models.IntegerField(default=1)
+    role_required_for_trust = models.CharField(max_length=100, null=True)
 
     # TODO: maybe index by name?
 

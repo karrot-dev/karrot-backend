@@ -327,11 +327,19 @@ class TrustActionSerializer(serializers.ModelSerializer):
     # default so it works with non-trust-for-role aware frontend
     role = serializers.CharField(default=GROUP_EDITOR)
 
-    def validate_role(self, role):
+    def validate_role(self, role_name):
         group = self.instance.group
-        if role not in group.all_role_names:
-            raise ValidationError(f'Invalid role "{role}" for group, available roles are {group.all_role_names}')
-        return role
+        if role_name not in group.all_role_names:
+            raise ValidationError(f'Invalid role "{role_name}" for group, available roles are {group.all_role_names}')
+        if role_name != 'editor':
+            role = group.roles.get(name=role_name)
+            if role.role_required_for_trust and not group.is_member_with_role(self.context['request'].user,
+                                                                              role.role_required_for_trust):
+                raise ValidationError(
+                    f'Trust for role "{role_name}" can only be given by users with "{role.role_required_for_trust}" role'
+                )
+
+        return role_name
 
     def update(self, membership, validated_data):
         request = self.context['request']

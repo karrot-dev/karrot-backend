@@ -171,6 +171,29 @@ class TestTrustAPI(APITestCase):
 
         self.assertIn('You received a new role in', mail.outbox[0].subject)
 
+    def test_give_trust_for_role_with_role_requirement(self):
+        self.group.roles.create(name='special_role', description='nothing', role_required_for_trust='editor')
+        self.group.save()
+        newcomer = UserFactory()
+        self.group.add_member(newcomer)
+        self.client.force_login(user=newcomer)
+
+        url = reverse('group-trust-user', args=(self.group.id, self.member2.id))
+        response = self.client.post(url, {'role': 'special_role'})
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+        self.assertEqual(
+            response.data['role'][0], 'Role "special_role" can only be trusted for by users with "editor" role'
+        )
+        self.assertFalse(
+            Trust.objects.filter(
+                membership__group=self.group,
+                membership__user=self.member2,
+                given_by=self.member1,
+                role='special_role',
+            ).exists()
+        )
+
     def test_can_only_give_trust_once(self):
         membership = GroupMembership.objects.get(user=self.member2, group=self.group)
         Trust.objects.create(membership=membership, given_by=self.member1)
