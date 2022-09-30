@@ -176,6 +176,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
         # does not include 'editor', as it is a built-in role right now
         return {
             role.name: {
+                'name': role.name,
                 'display_name': role.display_name,
                 'description': role.description,
                 'threshold': role.threshold,
