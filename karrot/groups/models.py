@@ -94,12 +94,6 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
     )
     sent_summary_up_to = DateTimeField(null=True)
     timezone = TimeZoneField(default='Europe/Berlin', null=True, blank=True)
-    active_agreement = models.OneToOneField(
-        'groups.Agreement',
-        related_name='active_group',
-        null=True,
-        on_delete=models.SET_NULL,
-    )
     last_active_at = DateTimeField(default=tz.now)
     is_open = models.BooleanField(default=False)
     photo = VersatileImageField(
@@ -211,18 +205,6 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
         # place types
         for name, options in default_place_types.items():
             PlaceType.objects.get_or_create(name=name, group=self, defaults=options)
-
-
-class Agreement(BaseModel):
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)
-    title = TextField()
-    content = TextField()
-    users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='agreements', through='UserAgreement')
-
-
-class UserAgreement(BaseModel):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    agreement = models.ForeignKey(Agreement, on_delete=models.CASCADE)
 
 
 class GroupNotificationType(object):

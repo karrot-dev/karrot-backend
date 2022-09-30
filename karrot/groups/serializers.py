@@ -12,7 +12,7 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.fields import Field
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
-from karrot.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
+from karrot.groups.models import Group as GroupModel, GroupMembership, \
     GroupNotificationType, Trust
 from karrot.history.models import History, HistoryTypus
 from karrot.utils.misc import find_changed
@@ -130,7 +130,6 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'latitude',
             'longitude',
             'timezone',
-            'active_agreement',
             'status',
             'theme',
             'features',
@@ -167,16 +166,6 @@ class GroupDetailSerializer(GroupBaseSerializer):
         ]
 
     roles = serializers.SerializerMethodField()
-
-    def validate_active_agreement(self, active_agreement):
-        user = self.context['request'].user
-        group = self.instance
-        membership = GroupMembership.objects.filter(user=user, group=group).first()
-        if roles.GROUP_AGREEMENT_MANAGER not in membership.roles:
-            raise PermissionDenied(_('You cannot manage agreements'))
-        if active_agreement and active_agreement.group != group:
-            raise ValidationError(_('Agreement is not for this group'))
-        return active_agreement
 
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_memberships(self, group):
@@ -259,63 +248,11 @@ class GroupDetailSerializer(GroupBaseSerializer):
         )
         return group
 
-
-class AgreementSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Agreement
-        fields = [
-            'id',
-            'title',
-            'content',
-            'group',
-            'agreed',
-        ]
-        extra_kwargs = {
-            'agreed': {
-                'read_only': True
-            },
-        }
-
-    agreed = serializers.SerializerMethodField()
-
-    def get_agreed(self, agreement) -> bool:
-        return UserAgreement.objects.filter(user=self.context['request'].user, agreement=agreement).exists()
-
     def validate_group(self, group):
         membership = GroupMembership.objects.filter(user=self.context['request'].user, group=group).first()
         if not membership:
             raise PermissionDenied(_('You are not in this group'))
-        if roles.GROUP_AGREEMENT_MANAGER not in membership.roles:
-            raise PermissionDenied(_('You cannot manage agreements'))
         return group
-
-
-class AgreementAgreeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Agreement
-        fields = [
-            'id',
-            'title',
-            'content',
-            'group',
-            'agreed',
-        ]
-        extra_kwargs = {
-            'agreed': {
-                'read_only': True
-            },
-        }
-
-    agreed = serializers.SerializerMethodField()
-
-    def get_agreed(self, agreement) -> bool:
-        return UserAgreement.objects.filter(user=self.context['request'].user, agreement=agreement).exists()
-
-    def update(self, instance, validated_data):
-        user = self.context['request'].user
-        if not UserAgreement.objects.filter(user=user, agreement=instance).exists():
-            UserAgreement.objects.create(user=user, agreement=instance)
-        return instance
 
 
 class TrustActionSerializer(serializers.ModelSerializer):

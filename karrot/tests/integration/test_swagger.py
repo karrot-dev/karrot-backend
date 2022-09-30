@@ -13,7 +13,6 @@ class TestSwaggerAPI(APITestCase):
         response = self.client.get('/docs/schema/')
         self.assertEqual(response.accepted_media_type, 'application/vnd.oai.openapi')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('/api/agreements/', response.data['paths'])
         self.assertIn('/api/groups/', response.data['paths'])
 
     def test_swagger_html(self):
