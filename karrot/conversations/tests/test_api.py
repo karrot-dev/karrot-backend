@@ -1,4 +1,5 @@
 from datetime import timedelta
+from email.utils import parseaddr
 
 from dateutil.parser import parse
 from django.core import mail
@@ -19,6 +20,7 @@ from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import execute_scheduled_tasks_immediately
 from karrot.users.factories import UserFactory, VerifiedUserFactory
 from karrot.utils.tests.images import encode_data_with_images, image_path, image_upload_for
+from karrot.webhooks.utils import parse_local_part
 
 
 class TestConversationsAPI(APITestCase):
@@ -654,6 +656,28 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
             participant.save()
 
         self.assertEqual(len(mail.outbox), 0)
+
+    def test_mention_notification_replies_to_thread(self):
+        mentioned_user = VerifiedUserFactory()
+        self.group.add_member(mentioned_user)
+
+        place = PlaceFactory(group=self.group)
+        conversation = place.conversation
+        conversation.join(mentioned_user)
+
+        mail.outbox = []
+        with execute_scheduled_tasks_immediately():
+            ConversationMessage.objects.create(
+                author=self.user,
+                conversation=conversation,
+                content='hey @{} how are you?'.format(mentioned_user.username),
+            )
+
+        self.assertEqual(len(mail.outbox), 1)
+        reply_to = parseaddr(mail.outbox[0].reply_to[0])[1]
+        local_part = reply_to.split('@')[0]
+        conversation_id, user_id, thread_id = parse_local_part(local_part)
+        self.assertIsNotNone(thread_id)
 
 
 class TestConversationsMessageReactionsPostAPI(APITestCase):

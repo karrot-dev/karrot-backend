@@ -317,8 +317,14 @@ def prepare_mention_notification(mention):
     conversation = message.conversation
     tz = get_timezone(user, conversation.group)
 
+    thread = message.thread
+
+    if not thread:
+        # If the conversation supports threads, replies should go into a thread, not the main conversation
+        thread = message if conversation.target and conversation.target.conversation_supports_threads else None
+
     reply_to_name = message.author.display_name
-    local_part = make_local_part(conversation, user, message.thread)
+    local_part = make_local_part(conversation, user, thread)
     reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.EMAIL_REPLY_DOMAIN)))
 
     from_text = message.author.display_name
