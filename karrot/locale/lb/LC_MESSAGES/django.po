@@ -45,71 +45,71 @@ msgstr "Aktivitéit"
 msgid "Task"
 msgstr "Aufgab"
 
-#: karrot/activities/serializers.py:139
+#: karrot/activities/serializers.py:143
 msgid "Must be a list"
 msgstr "Muss eng Lëscht sinn"
 
-#: karrot/activities/serializers.py:140
+#: karrot/activities/serializers.py:144
 msgid "Must be a list with one or two values"
 msgstr "Muss eng Lëscht mat een oder zwee Wäerter sinn"
 
-#: karrot/activities/serializers.py:141
+#: karrot/activities/serializers.py:145
 msgid "Must pass start value"
 msgstr "Ee Start-Wäert muss ugi ginn."
 
-#: karrot/activities/tasks.py:71
+#: karrot/activities/tasks.py:77
 #, python-format
 msgid "Upcoming %(activity_type)s"
 msgstr "Zukünfteg %(activity_type)s"
 
+#: karrot/activities/tasks.py:166
+#, python-format
+msgid "%(activity_type)s no longer available - %(date_time)s"
+msgstr "%(activity_type)s net méi disponibel - %(date_time)s"
+
 #: karrot/activities/templates/activity_notification.html.jinja2:5
-#: karrot/activities/templates/activity_notification.html.jinja2:193
+#: karrot/activities/templates/activity_notification.html.jinja2:186
 #: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s upcoming activities"
 msgstr "Zukünfteg Ofhuelungen vu %(group_name)s"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:182
-#, python-format
-msgid "%(empty_participants_count)s/%(max_participants)s remaining"
-msgstr "%(empty_participants_count)s/%(max_participants)s bleiwen"
-
-#: karrot/activities/templates/activity_notification.html.jinja2:197
+#: karrot/activities/templates/activity_notification.html.jinja2:190
 msgid "Tonight"
 msgstr "Haut den Owend"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:201
+#: karrot/activities/templates/activity_notification.html.jinja2:194
 msgid "The day is not over, there are still activities to be done!"
 msgstr "Den Dag ass net eriwwer, et ginn nach Aktivitéiten ze maachen!"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:204
-#: karrot/activities/templates/activity_notification.html.jinja2:232
+#: karrot/activities/templates/activity_notification.html.jinja2:197
+#: karrot/activities/templates/activity_notification.html.jinja2:225
 msgid "You are signed up for"
 msgstr "Du bass ugemellt fir"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:209
-#: karrot/activities/templates/activity_notification.html.jinja2:237
+#: karrot/activities/templates/activity_notification.html.jinja2:202
+#: karrot/activities/templates/activity_notification.html.jinja2:230
 msgid "No-one is yet signed up for"
 msgstr "Nach keen ass ugemellt fir"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:214
-#: karrot/activities/templates/activity_notification.html.jinja2:242
+#: karrot/activities/templates/activity_notification.html.jinja2:207
+#: karrot/activities/templates/activity_notification.html.jinja2:235
 msgid "There is still space available for"
 msgstr "Et ass nach Plaz fir"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:227
+#: karrot/activities/templates/activity_notification.html.jinja2:220
 msgid "Tomorrow"
 msgstr "Muer"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:268
+#: karrot/activities/templates/activity_notification.html.jinja2:261
 msgid ""
 "You are receiving this because you are subscribed to\n"
 "                            <strong>Activity notification</strong> emails for this group."
 msgstr ""
-"Du kriss dëst well's du <strong>Benoriichtegungen iwwert "
+"Du kriss dëst well s du <strong>Benoriichtegungen iwwert "
 "d'Aktivitéiten</strong> per E-Mail fir dëse Grupp abonéiert hues."
 
-#: karrot/activities/templates/activity_notification.html.jinja2:270
+#: karrot/activities/templates/activity_notification.html.jinja2:263
 #: karrot/applications/templates/new_application.html.jinja2:224
 #: karrot/groups/templates/group_summary.html.jinja2:266
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:213
@@ -118,11 +118,55 @@ msgstr ""
 msgid "Click here to unsubscribe"
 msgstr "Klick hei fir dech ze desabonéieren"
 
+#: karrot/activities/templates/participant_removed.html.jinja2:5
+#: karrot/activities/templates/participant_removed.html.jinja2:123
+#: karrot/activities/templates/participant_removed.subject.jinja2:1
+#, python-format
+msgid "Your activities for %(place_name)s changed"
+msgstr "Deng Aktivitéite fir %(place_name)s hu geännert"
+
+#: karrot/activities/templates/participant_removed.html.jinja2:124
+msgid "The following activities are no longer available for you"
+msgstr "Déi folgend Aktivitéite sinn net méi disponibel fir dech"
+
+#: karrot/activities/templates/participant_removed.html.jinja2:140
+#, python-format
+msgid ""
+"Message from <a class=\"message-author\" href=\"%(url)s\" style=\"text-"
+"transform: uppercase; text-decoration: none; font-weight: 700; color: "
+"#4a982e;\">%(display_name)s</a>"
+msgstr ""
+"Noriicht vum <a class=\"message-author\" href=\"%(url)s\" style=\"text-"
+"transform: uppercase; text-decoration: none; font-weight: 700; color: "
+"#4a982e;\">%(display_name)s</a>"
+
+#: karrot/activities/templates/participant_removed.html.jinja2:163
+#: karrot/groups/templates/user_became_editor.html.jinja2:221
+#: karrot/groups/templates/user_got_role.html.jinja2:222
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:221
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:217
+#, python-format
+msgid ""
+"You are receiving this because you are a member of "
+"<strong>%(group_name)s</strong>."
+msgstr ""
+"Du kriss dëst well s du e Member vu <strong>%(group_name)s</strong> bass."
+
+#: karrot/activities/templates/participant_removed.html.jinja2:164
+#: karrot/groups/templates/user_became_editor.html.jinja2:222
+#: karrot/groups/templates/user_got_role.html.jinja2:223
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:222
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:218
+#, python-format
+msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
+msgstr ""
+"Du kanns d'Grupp op der <a href=\"%(group_url)s\">Grupp-Säit</a> verloossen."
+
 #: karrot/applications/api.py:29
 msgid "You need to have a verified email address"
 msgstr "Du muss eng verifizéiert E-Mail-Adress hunn"
 
-#: karrot/applications/api.py:38 karrot/groups/api.py:52
+#: karrot/applications/api.py:38 karrot/groups/api.py:51
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
 msgid "You need to be a group editor"
 msgstr "Du muss eng Persoun sinn, déi beaarbechten duerf"
@@ -156,6 +200,7 @@ msgstr "Deng Bewerbung fir %(group_name)s bäizetriede gouf ugeholl"
 
 #: karrot/applications/templates/application_accepted.html.jinja2:188
 #: karrot/groups/templates/user_became_editor.html.jinja2:194
+#: karrot/groups/templates/user_got_role.html.jinja2:195
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:194
 #: karrot/groups/templates/user_lost_editor_role.html.jinja2:190
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:192
@@ -204,7 +249,7 @@ msgid ""
 "You are receiving this because you are subscribed to <strong>User "
 "application</strong> emails for this group."
 msgstr ""
-"Du kriss dëst well's du <strong>Benoriichtegungen iwwert nei "
+"Du kriss dëst well s du <strong>Benoriichtegungen iwwert nei "
 "Bewerbungen</strong> per E-Mail abonéiert hues. "
 
 #: karrot/applications/templates/new_application.html.jinja2:227
@@ -220,8 +265,8 @@ msgstr ""
 "%(site_name)s</a> oder <a href=\"%(mute_url)s\">schalt d'Ënnerhalung op "
 "stomm</a>."
 
-#: karrot/conversations/api.py:73 karrot/conversations/api.py:254
-#: karrot/conversations/api.py:444 karrot/conversations/serializers.py:187
+#: karrot/conversations/api.py:73 karrot/conversations/api.py:255
+#: karrot/conversations/api.py:445 karrot/conversations/serializers.py:187
 msgid "You are not in this conversation"
 msgstr "Du bass net an dëser Ënnerhalung"
 
@@ -237,11 +282,11 @@ msgstr ""
 "Du kanns eng Noriicht net méi wéi %(days_number)s Deeg no senger Erstellung "
 "beaarbechten."
 
-#: karrot/conversations/api.py:372
+#: karrot/conversations/api.py:373
 msgid "Must be first in thread"
 msgstr "Muss als éischt am Thread sinn"
 
-#: karrot/conversations/api.py:375
+#: karrot/conversations/api.py:376
 msgid "You are not a participant in this thread"
 msgstr "Du bass kee Member vun dëser Ënnerhalung"
 
@@ -255,12 +300,13 @@ msgstr "Nei Noriicht op deng Bewerbung bei %(group_name)s"
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr "Nei Noriicht an der Bewerbung vum %(user_name)s bei %(group_name)s"
 
-#: karrot/conversations/emails.py:289
+#: karrot/conversations/emails.py:290
 #, python-format
-msgid "New message in conflict resolution in %(group_name)s"
-msgstr "Nei Noriicht am Konflikt-Léisungsprozess bei %(group_name)s"
+msgid "New message in membership review of %(user_name)s"
+msgstr ""
+"Nei Noriicht am Kritik-Prozess iwwert d'Memberschaft vum %(user_name)s"
 
-#: karrot/conversations/emails.py:304
+#: karrot/conversations/emails.py:305
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr "Nei Norricht fir d'Offer %(offer_name)s bei %(group_name)s"
@@ -272,7 +318,7 @@ msgstr "Dës Ënnerhalung gouf zougemaach"
 #: karrot/conversations/templates/conversation_message_notification.html.jinja2:149
 msgid ""
 "You are receiving this because you are subscribed to this conversation."
-msgstr "Du kriss dëst well's du dës Ënnerhalung abonéiert hues."
+msgstr "Du kriss dëst well s du dës Ënnerhalung abonéiert hues."
 
 #: karrot/conversations/templates/mention_notification.html.jinja2:5
 #: karrot/conversations/templates/mention_notification.html.jinja2:122
@@ -303,7 +349,7 @@ msgid ""
 "You are receiving this because you are subscribed to replies in this "
 "conversation."
 msgstr ""
-"Du kriss dëst well's du Äntwerten an dëser Ënnerhalung abonéiert hues."
+"Du kriss dëst well s du Äntwerten an dëser Ënnerhalung abonéiert hues."
 
 #: karrot/conversations/templates/thread_message_notification.html.jinja2:162
 #, python-format
@@ -315,39 +361,27 @@ msgstr ""
 "%(site_name)s</a> oder <a href=\"%(mute_url)s\">schalt fir weider Äntwerten "
 "op stomm</a>."
 
-#: karrot/groups/api.py:31
+#: karrot/groups/api.py:30
 msgid "You are already a member."
 msgstr "Du bass schonn e Member."
 
-#: karrot/groups/api.py:38
+#: karrot/groups/api.py:37
 msgid "You can only join open groups."
 msgstr "Du kanns just oppe Gruppe bäitrieden."
 
-#: karrot/groups/api.py:45
+#: karrot/groups/api.py:44
 msgid "You cannot give trust to yourself"
 msgstr "Du kanns dir selwer kee Vertraue ginn"
 
-#: karrot/groups/api.py:210
-msgid "You already gave trust to this user"
-msgstr "Du hues dësem Benotzer scho Vertraue ginn"
-
-#: karrot/groups/serializers.py:33
+#: karrot/groups/serializers.py:34
 msgid "Unknown timezone"
 msgstr "Onbekannten Zäitzon"
 
-#: karrot/groups/serializers.py:41
+#: karrot/groups/serializers.py:42
 msgid "Playground"
 msgstr "Spillplaz"
 
-#: karrot/groups/serializers.py:150 karrot/groups/serializers.py:249
-msgid "You cannot manage agreements"
-msgstr "Du kanns Ofkommes net verwalten"
-
-#: karrot/groups/serializers.py:152
-msgid "Agreement is not for this group"
-msgstr "D'Ofkommes ass net fir dës Grupp"
-
-#: karrot/groups/serializers.py:247
+#: karrot/groups/serializers.py:256
 msgid "You are not in this group"
 msgstr "Du bass net an dëser Grupp"
 
@@ -357,9 +391,9 @@ msgid ""
 "and your motivation. Please tell us how you got to know about us and what "
 "you wish to do here!"
 msgstr ""
-"Hallo! Ier's du eiser Grupp bäitriede kanns, wëlle mir e bësse méi iwwert "
-"dech an deng Motivatioun wëssen. Erziel eis w.e.g. wéi's du vun eis héieren "
-"hues a wat's du hei maache wëlls!"
+"Hallo! Ier s du eiser Grupp bäitriede kanns, wëlle mir e bësse méi iwwert "
+"dech an deng Motivatioun wëssen. Erziel eis w.e.g. wéi s du vun eis héieren "
+"hues a wat s du hei maache wëlls!"
 
 #: karrot/groups/templates/group_summary.html.jinja2:5
 #: karrot/groups/templates/group_summary.html.jinja2:170
@@ -434,7 +468,7 @@ msgid ""
 "You are receiving this because you are subscribed to <strong>Weekly "
 "summary</strong> emails for this group."
 msgstr ""
-"Du kriss dëst well's du <strong>d'Zesummefaassung vun der Woch </strong> per"
+"Du kriss dëst well s du <strong>d'Zesummefaassung vun der Woch </strong> per"
 " E-Mail abonéiert hues. "
 
 #: karrot/groups/templates/group_summary.subject.jinja2:1
@@ -477,23 +511,21 @@ msgstr ""
 msgid "Use your power wisely!"
 msgstr "Benotz deng Power weise!"
 
-#: karrot/groups/templates/user_became_editor.html.jinja2:221
-#: karrot/groups/templates/user_inactive_in_group.html.jinja2:221
-#: karrot/groups/templates/user_lost_editor_role.html.jinja2:217
+#: karrot/groups/templates/user_got_role.html.jinja2:5
+#: karrot/groups/templates/user_got_role.html.jinja2:171
+#: karrot/groups/templates/user_got_role.subject.jinja2:1
+#, python-format
+msgid "You received a new role in %(group_name)s!"
+msgstr "Du hues eng nei Roll kritt an der Grupp %(group_name)s!"
+
+#: karrot/groups/templates/user_got_role.html.jinja2:174
 #, python-format
 msgid ""
-"You are receiving this because you are a member of "
-"<strong>%(group_name)s</strong>."
+"You received enough trust from fellow group members to now have the role: "
+"%(role_name)s"
 msgstr ""
-"Du kriss dëst well's du e Member vu <strong>%(group_name)s</strong> bass."
-
-#: karrot/groups/templates/user_became_editor.html.jinja2:222
-#: karrot/groups/templates/user_inactive_in_group.html.jinja2:222
-#: karrot/groups/templates/user_lost_editor_role.html.jinja2:218
-#, python-format
-msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
-msgstr ""
-"Du kanns d'Grupp op der <a href=\"%(group_url)s\">Grupp-Säit</a> verloossen."
+"Du hues genuch Vertraue vun anere Membere kritt fir déi folgend Roll ze "
+"kréien: %(role_name)s"
 
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:171
 msgid "Hey, we're missing you!"
@@ -506,7 +538,7 @@ msgid ""
 "                            <a href=\"%(group_url)s\">%(group_name)s</a> group for over %(num_days_inactive)s\n"
 "                            days."
 msgstr ""
-"Et gesäit esou aus wéi wann's du d'Grupp\n"
+"Et gesäit esou aus wéi wann s du d'Grupp\n"
 "                            <a href=\"%(group_url)s\">%(group_name)s</a> fir iwwert %(num_days_inactive)s\n"
 "                            Deeg net méi besicht hues."
 
@@ -515,7 +547,7 @@ msgid ""
 "We've marked you as inactive, but you can reactivate by simply visiting the group\n"
 "                            again."
 msgstr ""
-"Mir hunn dech als inaktiv markéiert, mä du kanns dech reaktivéieren andeem's du d'Grupp\n"
+"Mir hunn dech als inaktiv markéiert, mä du kanns dech reaktivéieren andeem s du d'Grupp\n"
 "                            nees besichs."
 
 #: karrot/groups/templates/user_inactive_in_group.subject.jinja2:1
@@ -554,7 +586,7 @@ msgstr ""
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:178
 msgid "If you want to stay part of the group, just visit the group again!"
 msgstr ""
-"Wann's du Deel vun der Grupp wëlls bleiwen, besich d'Grupp einfach nees!"
+"Wann s du Deel vun der Grupp wëlls bleiwen, besich d'Grupp einfach nees!"
 
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:206
 #, python-format
@@ -570,7 +602,7 @@ msgid ""
 "You are receiving this because you are a member of <strong>%(group_name)s</strong>\n"
 "                            ."
 msgstr ""
-"Du kriss dëst well's du e Member vu <strong>%(group_name)s</strong> bass."
+"Du kriss dëst well s du e Member vu <strong>%(group_name)s</strong> bass."
 
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:232
 #, python-format
@@ -589,7 +621,7 @@ msgstr "%(group_name)s vermësst dech wierklech!"
 msgid ""
 "Invitation to this email address was sent recently, wait before resending"
 msgstr ""
-"D'Aluedung un dës E-Mail-Adress gouf viru Kuerzem geschéckt. Waart ier's de "
+"D'Aluedung un dës E-Mail-Adress gouf viru Kuerzem geschéckt. Waart ier s de "
 "se nach eng Kéier schécks."
 
 #: karrot/invitations/serializers.py:20
@@ -631,7 +663,7 @@ msgstr ""
 
 #: karrot/invitations/templates/emailinvitation.html.jinja2:179
 msgid "If you'd like to join, please click the link below:"
-msgstr "Wann's du bäitriede wëlls, klick w.e.g. op de Link hei drënner:"
+msgstr "Wann s du bäitriede wëlls, klick w.e.g. op de Link hei drënner:"
 
 #: karrot/invitations/templates/emailinvitation.html.jinja2:192
 msgid "Follow the invitation"
@@ -653,24 +685,14 @@ msgstr "Dës Optioun ass net Deel vun dëser Ofstëmmung"
 msgid "Provided score is outside of allowed range"
 msgstr "Dës Bewäertung ass ausserhalb vun dem erlaabten Intervall"
 
-#: karrot/issues/serializers.py:132
-msgid "Topic cannot be empty"
-msgstr "D'Thema kann net eidel sinn"
-
-#: karrot/issues/serializers.py:139
-msgid "Affected user is not part of that group"
-msgstr "De betraffene Benotzer ass net Deel vun där Grupp"
-
-#: karrot/issues/serializers.py:141
-msgid "A conflict resolution about that user has already been started"
-msgstr "Ee Konflikt-Léisungsprozess iwwert dëse Benotzer gouf scho gestart"
-
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:5
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:170
 #: karrot/issues/templates/conflict_resolution_continued.subject.jinja2:1
 #, python-format
-msgid "Keep discussing about the conflict with %(affected_user_name)s"
-msgstr "Diskutéier weider iwwert de Konflikt mam %(affected_user_name)s"
+msgid "The membership review of %(affected_user_name)s continues"
+msgstr ""
+"De Kritik-Prozess iwwert d'Memberschaft vu %(affected_user_name)s geet "
+"weider"
 
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:171
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:171
@@ -697,24 +719,26 @@ msgstr "Diskussioun kucken"
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:212
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:219
 msgid ""
-"You are receiving this because you are subscribed to <strong>Conflict "
-"Resolution</strong> emails for this group."
+"You are receiving this because you are subscribed to <strong>Membership "
+"Review</strong> emails for this group."
 msgstr ""
-"Du kriss dëst well's du <strong>Benoriichtegungen iwwert nei Konflikt-"
-"Léisungsprozesser</strong> per E-Mail abonéiert hues. "
+"Du kriss dëst well s du Benoriichtegungen iwwert <strong>Kritik-Prozesser "
+"iwwert d'Memberschaft</strong> per E-Mail abonéiert hues."
 
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:5
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:170
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.subject.jinja2:1
-msgid "Keep discussing about the conflict with you"
-msgstr "Diskutéier weider iwwert de Konflikt mat dir"
+msgid "Your membership review continues"
+msgstr "Däi Kritik-Prozess iwwert d'Memberschaft geet weider"
 
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:5
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:170
 #: karrot/issues/templates/new_conflict_resolution.subject.jinja2:1
 #, python-format
-msgid "A conflict resolution process was started with %(affected_user_name)s"
-msgstr "Ee Konflikt-Léisungsprozess mam %(affected_user_name)s gouf gestart"
+msgid "A membership review was started for %(affected_user_name)s"
+msgstr ""
+"Ee Kritik-Prozess iwwert d'Memberschaft gouf gestart fir "
+"%(affected_user_name)s"
 
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:178
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:178
@@ -731,8 +755,8 @@ msgstr "Dës Ofstëmmungsronn geet den %(expiry_date)s eriwwer."
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:5
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:170
 #: karrot/issues/templates/new_conflict_resolution_affected_user.subject.jinja2:1
-msgid "A conflict resolution process was started with you"
-msgstr "Ee Konflikt-Léisungsprozess mat dir gouf gestart"
+msgid "A review of your membership was started"
+msgstr "Ee Kritik-Prozess iwwert deng Memberschaft gouf gestart"
 
 #: karrot/offers/api.py:33
 msgid "You are not the owner of this offer"
@@ -762,7 +786,7 @@ msgid ""
 "You are receiving this because you are subscribed to <strong>New "
 "Offer</strong> emails for this group."
 msgstr ""
-"Du kriss dëst well's du <strong>Benoriichtegungen iwwert nei Offere</strong>"
+"Du kriss dëst well s du <strong>Benoriichtegungen iwwert nei Offere</strong>"
 " per E-Mail abonéiert hues. "
 
 #: karrot/offers/templates/new_offer.html.jinja2:236
@@ -799,20 +823,20 @@ msgstr "Restaurant"
 msgid "Market"
 msgstr "Maart"
 
-#: karrot/places/serializers.py:172
+#: karrot/places/serializers.py:190
 msgid "Set at least one week in advance"
 msgstr "Setz se mindestens eng Woch am Viraus"
 
-#: karrot/places/serializers.py:175
+#: karrot/places/serializers.py:193
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr "Setz se net méi wéi %(count)s Wochen am Viraus"
 
-#: karrot/places/serializers.py:227
+#: karrot/places/serializers.py:245
 msgid "You are already subscribed to this place"
 msgstr "Du hues dës Plaz schonn abonéiert"
 
-#: karrot/subscriptions/receivers.py:738
+#: karrot/subscriptions/receivers.py:767
 msgid "Push notifications are enabled!"
 msgstr "Push-Matdeelungen sinn aktivéiert!"
 
@@ -871,7 +895,7 @@ msgstr ""
 #: karrot/users/templates/accountdelete_request.html.jinja2:179
 msgid "Anyhow, you can finish the deletion by clicking the link below:"
 msgstr ""
-"Egalwéi kanns du d'Läschen ofschléissen andeem's du op de Link hei drënner "
+"Egalwéi kanns du d'Läschen ofschléissen andeem s du op de Link hei drënner "
 "klicks:"
 
 #: karrot/users/templates/accountdelete_request.html.jinja2:192
@@ -881,7 +905,7 @@ msgstr "Däi Konto läschen"
 #: karrot/users/templates/accountdelete_request.html.jinja2:205
 msgid "If you changed your mind, you can simply ignore this e-mail."
 msgstr ""
-"Wann's du deng Meenung geännert hues, kanns du dës E-Mail einfach "
+"Wann s du deng Meenung geännert hues, kanns du dës E-Mail einfach "
 "ignoréieren."
 
 #: karrot/users/templates/accountdelete_success.html.jinja2:5
@@ -936,7 +960,7 @@ msgstr "Verifizéier deng E-Mail-Adress"
 msgid ""
 "If you did not request this change, you can safely ignore this message."
 msgstr ""
-"Wann's du dës Ännerung net gefrot hues, kanns du dës Noriicht ouni Problemer"
+"Wann s du dës Ännerung net gefrot hues, kanns du dës Noriicht ouni Problemer"
 " ignoréieren."
 
 #: karrot/users/templates/changemail_request.subject.jinja2:1
@@ -1008,7 +1032,7 @@ msgid ""
 "You can safely ignore this message if it wasn't you who signed up at our "
 "service using this email address."
 msgstr ""
-"Du kanns dës E-Mail einfach ignoréiere wann's du dech net selwer mat dëser "
+"Du kanns dës E-Mail einfach ignoréiere wann s du dech net selwer mat dëser "
 "E-Mail-Adress bei eisem Déngscht ugemellt hues."
 
 #: karrot/utils/validators.py:10

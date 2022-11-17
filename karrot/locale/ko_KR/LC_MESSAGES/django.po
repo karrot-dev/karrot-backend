@@ -45,69 +45,69 @@ msgstr "활동"
 msgid "Task"
 msgstr "업무"
 
-#: karrot/activities/serializers.py:139
+#: karrot/activities/serializers.py:143
 msgid "Must be a list"
 msgstr "목록이어야 합니다"
 
-#: karrot/activities/serializers.py:140
+#: karrot/activities/serializers.py:144
 msgid "Must be a list with one or two values"
 msgstr "하나 혹은 두 값의 목록이어야 합니다"
 
-#: karrot/activities/serializers.py:141
+#: karrot/activities/serializers.py:145
 msgid "Must pass start value"
 msgstr "시작 값을 통과해야 합니다"
 
-#: karrot/activities/tasks.py:71
+#: karrot/activities/tasks.py:77
 #, python-format
 msgid "Upcoming %(activity_type)s"
 msgstr "예정된 %(activity_type)s"
 
+#: karrot/activities/tasks.py:166
+#, python-format
+msgid "%(activity_type)s no longer available - %(date_time)s"
+msgstr ""
+
 #: karrot/activities/templates/activity_notification.html.jinja2:5
-#: karrot/activities/templates/activity_notification.html.jinja2:193
+#: karrot/activities/templates/activity_notification.html.jinja2:186
 #: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s upcoming activities"
 msgstr "%(group_name)s의 예정된 활동"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:182
-#, python-format
-msgid "%(empty_participants_count)s/%(max_participants)s remaining"
-msgstr "%(empty_participants_count)s/%(max_participants)s 남음"
-
-#: karrot/activities/templates/activity_notification.html.jinja2:197
+#: karrot/activities/templates/activity_notification.html.jinja2:190
 msgid "Tonight"
 msgstr "오늘밤"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:201
+#: karrot/activities/templates/activity_notification.html.jinja2:194
 msgid "The day is not over, there are still activities to be done!"
 msgstr "하루가 끝나지 않았습니다. 아직 해야 할 활동이 있습니다!"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:204
-#: karrot/activities/templates/activity_notification.html.jinja2:232
+#: karrot/activities/templates/activity_notification.html.jinja2:197
+#: karrot/activities/templates/activity_notification.html.jinja2:225
 msgid "You are signed up for"
 msgstr "당신이 가입했습니다"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:209
-#: karrot/activities/templates/activity_notification.html.jinja2:237
+#: karrot/activities/templates/activity_notification.html.jinja2:202
+#: karrot/activities/templates/activity_notification.html.jinja2:230
 msgid "No-one is yet signed up for"
 msgstr "아직 아무도 가입하지 않았습니다"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:214
-#: karrot/activities/templates/activity_notification.html.jinja2:242
+#: karrot/activities/templates/activity_notification.html.jinja2:207
+#: karrot/activities/templates/activity_notification.html.jinja2:235
 msgid "There is still space available for"
 msgstr "이때 사용할 수 있는 공간이 아직 있습니다"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:227
+#: karrot/activities/templates/activity_notification.html.jinja2:220
 msgid "Tomorrow"
 msgstr "내일"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:268
+#: karrot/activities/templates/activity_notification.html.jinja2:261
 msgid ""
 "You are receiving this because you are subscribed to\n"
 "                            <strong>Activity notification</strong> emails for this group."
 msgstr "당신이 이 그룹의 <strong>활동 알림</strong> 이메일을 구독하셨기에 이 알림을 받았습니다."
 
-#: karrot/activities/templates/activity_notification.html.jinja2:270
+#: karrot/activities/templates/activity_notification.html.jinja2:263
 #: karrot/applications/templates/new_application.html.jinja2:224
 #: karrot/groups/templates/group_summary.html.jinja2:266
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:213
@@ -116,11 +116,50 @@ msgstr "당신이 이 그룹의 <strong>활동 알림</strong> 이메일을 구�
 msgid "Click here to unsubscribe"
 msgstr "구독을 취소하려면 여기를 클릭하세요"
 
+#: karrot/activities/templates/participant_removed.html.jinja2:5
+#: karrot/activities/templates/participant_removed.html.jinja2:123
+#: karrot/activities/templates/participant_removed.subject.jinja2:1
+#, python-format
+msgid "Your activities for %(place_name)s changed"
+msgstr ""
+
+#: karrot/activities/templates/participant_removed.html.jinja2:124
+msgid "The following activities are no longer available for you"
+msgstr ""
+
+#: karrot/activities/templates/participant_removed.html.jinja2:140
+#, python-format
+msgid ""
+"Message from <a class=\"message-author\" href=\"%(url)s\" style=\"text-"
+"transform: uppercase; text-decoration: none; font-weight: 700; color: "
+"#4a982e;\">%(display_name)s</a>"
+msgstr ""
+
+#: karrot/activities/templates/participant_removed.html.jinja2:163
+#: karrot/groups/templates/user_became_editor.html.jinja2:221
+#: karrot/groups/templates/user_got_role.html.jinja2:222
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:221
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:217
+#, python-format
+msgid ""
+"You are receiving this because you are a member of "
+"<strong>%(group_name)s</strong>."
+msgstr "당신이 <strong>%(group_name)s</strong>의 구성원이기에 이 알림을 받았습니다."
+
+#: karrot/activities/templates/participant_removed.html.jinja2:164
+#: karrot/groups/templates/user_became_editor.html.jinja2:222
+#: karrot/groups/templates/user_got_role.html.jinja2:223
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:222
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:218
+#, python-format
+msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
+msgstr "<a href=\"%(group_url)s\">그룹 페이지</a>에서 그룹을 떠날 수 있습니다."
+
 #: karrot/applications/api.py:29
 msgid "You need to have a verified email address"
 msgstr "이메일 주소를 인증하셔야합니다"
 
-#: karrot/applications/api.py:38 karrot/groups/api.py:52
+#: karrot/applications/api.py:38 karrot/groups/api.py:51
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
 msgid "You need to be a group editor"
 msgstr "그룹 편집자가 되어야 합니다"
@@ -154,6 +193,7 @@ msgstr "%(group_name)s에 참가하기 위한 지원서가 수락되었습니다
 
 #: karrot/applications/templates/application_accepted.html.jinja2:188
 #: karrot/groups/templates/user_became_editor.html.jinja2:194
+#: karrot/groups/templates/user_got_role.html.jinja2:195
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:194
 #: karrot/groups/templates/user_lost_editor_role.html.jinja2:190
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:192
@@ -213,8 +253,8 @@ msgstr ""
 "이메일에 직접 답하거나, <a href=\"%(conversation_url)s\">%(site_name)s에서 보거나</a>, <a "
 "href=\"%(mute_url)s\">대화를 음소거 하세요</a>."
 
-#: karrot/conversations/api.py:73 karrot/conversations/api.py:254
-#: karrot/conversations/api.py:444 karrot/conversations/serializers.py:187
+#: karrot/conversations/api.py:73 karrot/conversations/api.py:255
+#: karrot/conversations/api.py:445 karrot/conversations/serializers.py:187
 msgid "You are not in this conversation"
 msgstr "이 대화에 속하지 않았습니다"
 
@@ -228,11 +268,11 @@ msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
 msgstr "당신은 메시지가 생성된지 %(days_number)s 일부터는 편집하실 수 없습니다."
 
-#: karrot/conversations/api.py:372
+#: karrot/conversations/api.py:373
 msgid "Must be first in thread"
 msgstr "쓰레드에서 첫 번째여야 합니다"
 
-#: karrot/conversations/api.py:375
+#: karrot/conversations/api.py:376
 msgid "You are not a participant in this thread"
 msgstr "이 쓰레드에 참여자가 아닙니다"
 
@@ -246,12 +286,12 @@ msgstr "%(group_name)s에 보낸 지원서의 새로운 메시지"
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr "%(user_name)s가 %(group_name)s에 보낸 지원서의 새로운 메시지"
 
-#: karrot/conversations/emails.py:289
+#: karrot/conversations/emails.py:290
 #, python-format
-msgid "New message in conflict resolution in %(group_name)s"
-msgstr "%(group_name)s의 갈등 해결에서의 새로운 메시지"
+msgid "New message in membership review of %(user_name)s"
+msgstr ""
 
-#: karrot/conversations/emails.py:304
+#: karrot/conversations/emails.py:305
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr "%(group_name)s에서 %(offer_name)s 제공품의 새로운 메시지"
@@ -302,39 +342,27 @@ msgstr ""
 "이메일에 직접 답하거나, <a href=\"%(thread_url)s\">%(site_name)s에서 답변을 보거나</a>, <a "
 "href=\"%(mute_url)s\">답변을 음소거 하세요</a>."
 
-#: karrot/groups/api.py:31
+#: karrot/groups/api.py:30
 msgid "You are already a member."
 msgstr "당신은 이미 구성원입니다."
 
-#: karrot/groups/api.py:38
+#: karrot/groups/api.py:37
 msgid "You can only join open groups."
 msgstr "당신은 공개 그룹에만 참가할 수 있습니다"
 
-#: karrot/groups/api.py:45
+#: karrot/groups/api.py:44
 msgid "You cannot give trust to yourself"
 msgstr "당신 스스로에게 신뢰를 할 순 없습니다"
 
-#: karrot/groups/api.py:210
-msgid "You already gave trust to this user"
-msgstr "당신은 이미 이 사용자를 신뢰하고있습니다."
-
-#: karrot/groups/serializers.py:33
+#: karrot/groups/serializers.py:34
 msgid "Unknown timezone"
 msgstr "알려지지않은 시간대"
 
-#: karrot/groups/serializers.py:41
+#: karrot/groups/serializers.py:42
 msgid "Playground"
 msgstr "놀이터"
 
-#: karrot/groups/serializers.py:150 karrot/groups/serializers.py:249
-msgid "You cannot manage agreements"
-msgstr "합의를 관리하실 수 없습니다"
-
-#: karrot/groups/serializers.py:152
-msgid "Agreement is not for this group"
-msgstr "이 그룹을 위한 합의가 아닙니다"
-
-#: karrot/groups/serializers.py:247
+#: karrot/groups/serializers.py:256
 msgid "You are not in this group"
 msgstr "이 그룹에 속하지 않았습니다"
 
@@ -458,21 +486,19 @@ msgstr ""
 msgid "Use your power wisely!"
 msgstr "당신의 힘을 지혜롭게 사용하세요!"
 
-#: karrot/groups/templates/user_became_editor.html.jinja2:221
-#: karrot/groups/templates/user_inactive_in_group.html.jinja2:221
-#: karrot/groups/templates/user_lost_editor_role.html.jinja2:217
+#: karrot/groups/templates/user_got_role.html.jinja2:5
+#: karrot/groups/templates/user_got_role.html.jinja2:171
+#: karrot/groups/templates/user_got_role.subject.jinja2:1
+#, python-format
+msgid "You received a new role in %(group_name)s!"
+msgstr ""
+
+#: karrot/groups/templates/user_got_role.html.jinja2:174
 #, python-format
 msgid ""
-"You are receiving this because you are a member of "
-"<strong>%(group_name)s</strong>."
-msgstr "당신이 <strong>%(group_name)s</strong>의 구성원이기에 이 알림을 받았습니다."
-
-#: karrot/groups/templates/user_became_editor.html.jinja2:222
-#: karrot/groups/templates/user_inactive_in_group.html.jinja2:222
-#: karrot/groups/templates/user_lost_editor_role.html.jinja2:218
-#, python-format
-msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
-msgstr "<a href=\"%(group_url)s\">그룹 페이지</a>에서 그룹을 떠날 수 있습니다."
+"You received enough trust from fellow group members to now have the role: "
+"%(role_name)s"
+msgstr ""
 
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:171
 msgid "Hey, we're missing you!"
@@ -619,24 +645,12 @@ msgstr "제공된 옵션은 이 투표에 포함되지 않습니다"
 msgid "Provided score is outside of allowed range"
 msgstr "매겨진 점수는 허용 범위를 넘어섰습니다"
 
-#: karrot/issues/serializers.py:132
-msgid "Topic cannot be empty"
-msgstr "주제는 비울 수 없습니다"
-
-#: karrot/issues/serializers.py:139
-msgid "Affected user is not part of that group"
-msgstr "영향을 받는 사용자가 해당 그룹에 속하지 않음"
-
-#: karrot/issues/serializers.py:141
-msgid "A conflict resolution about that user has already been started"
-msgstr "사용자가 이미 시작한 갈등 해결"
-
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:5
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:170
 #: karrot/issues/templates/conflict_resolution_continued.subject.jinja2:1
 #, python-format
-msgid "Keep discussing about the conflict with %(affected_user_name)s"
-msgstr "갈등에 대해 %(affected_user_name)s과(와) 상의되고있습니다"
+msgid "The membership review of %(affected_user_name)s continues"
+msgstr ""
 
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:171
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:171
@@ -661,23 +675,22 @@ msgstr "의논 보기"
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:212
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:219
 msgid ""
-"You are receiving this because you are subscribed to <strong>Conflict "
-"Resolution</strong> emails for this group."
+"You are receiving this because you are subscribed to <strong>Membership "
+"Review</strong> emails for this group."
 msgstr ""
-"당신이 이 그룹의 <strong>Conflict Resolution</strong>의 이메일을 구독하였기에 이 알림을 받았습니다."
 
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:5
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:170
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.subject.jinja2:1
-msgid "Keep discussing about the conflict with you"
-msgstr "갈등에 대해 당신과 상의되고있습니다"
+msgid "Your membership review continues"
+msgstr ""
 
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:5
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:170
 #: karrot/issues/templates/new_conflict_resolution.subject.jinja2:1
 #, python-format
-msgid "A conflict resolution process was started with %(affected_user_name)s"
-msgstr "갈등 해결 프로세스가 %(affected_user_name)s와(과) 함께 시작되었습니다"
+msgid "A membership review was started for %(affected_user_name)s"
+msgstr ""
 
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:178
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:178
@@ -693,8 +706,8 @@ msgstr "투표가 %(expiry_date)s에 종료됩니다."
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:5
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:170
 #: karrot/issues/templates/new_conflict_resolution_affected_user.subject.jinja2:1
-msgid "A conflict resolution process was started with you"
-msgstr "갈등 해결 프로세스가 당신과 함께 시작되었습니다"
+msgid "A review of your membership was started"
+msgstr ""
 
 #: karrot/offers/api.py:33
 msgid "You are not the owner of this offer"
@@ -758,20 +771,20 @@ msgstr "식당"
 msgid "Market"
 msgstr "가게"
 
-#: karrot/places/serializers.py:172
+#: karrot/places/serializers.py:190
 msgid "Set at least one week in advance"
 msgstr "적어도 일주일 전에 미리 설정해주세요"
 
-#: karrot/places/serializers.py:175
+#: karrot/places/serializers.py:193
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr "%(count)s주 이상 미리 설정해선 안됩니다"
 
-#: karrot/places/serializers.py:227
+#: karrot/places/serializers.py:245
 msgid "You are already subscribed to this place"
 msgstr "이미 이 장소를 구독하셨습니다"
 
-#: karrot/subscriptions/receivers.py:738
+#: karrot/subscriptions/receivers.py:767
 msgid "Push notifications are enabled!"
 msgstr ""
 

@@ -45,63 +45,63 @@ msgstr "Activivaĵoj"
 msgid "Task"
 msgstr "Taskoj"
 
-#: karrot/activities/serializers.py:139
+#: karrot/activities/serializers.py:143
 msgid "Must be a list"
 msgstr "Ĝi devas esti listo"
 
-#: karrot/activities/serializers.py:140
+#: karrot/activities/serializers.py:144
 msgid "Must be a list with one or two values"
 msgstr "Ĝi devas esti listo kun unu aŭ du valoroj"
 
-#: karrot/activities/serializers.py:141
+#: karrot/activities/serializers.py:145
 msgid "Must pass start value"
 msgstr "Ĝi devas meti komencan valoron"
 
-#: karrot/activities/tasks.py:71
+#: karrot/activities/tasks.py:77
 #, python-format
 msgid "Upcoming %(activity_type)s"
 msgstr "Venontaj %(activity_type)s"
 
+#: karrot/activities/tasks.py:166
+#, python-format
+msgid "%(activity_type)s no longer available - %(date_time)s"
+msgstr ""
+
 #: karrot/activities/templates/activity_notification.html.jinja2:5
-#: karrot/activities/templates/activity_notification.html.jinja2:193
+#: karrot/activities/templates/activity_notification.html.jinja2:186
 #: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s upcoming activities"
 msgstr "%(group_name)s-aj venontaj aktivaĵoj"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:182
-#, python-format
-msgid "%(empty_participants_count)s/%(max_participants)s remaining"
-msgstr "Restas %(empty_participants_count)s/%(max_participants)s"
-
-#: karrot/activities/templates/activity_notification.html.jinja2:197
+#: karrot/activities/templates/activity_notification.html.jinja2:190
 msgid "Tonight"
 msgstr "Ĉivespere"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:201
+#: karrot/activities/templates/activity_notification.html.jinja2:194
 msgid "The day is not over, there are still activities to be done!"
 msgstr "La tago ne finiĝis, ankoraŭ restas aktivaĵoj por plenumi!"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:204
-#: karrot/activities/templates/activity_notification.html.jinja2:232
+#: karrot/activities/templates/activity_notification.html.jinja2:197
+#: karrot/activities/templates/activity_notification.html.jinja2:225
 msgid "You are signed up for"
 msgstr "Vi registriĝis"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:209
-#: karrot/activities/templates/activity_notification.html.jinja2:237
+#: karrot/activities/templates/activity_notification.html.jinja2:202
+#: karrot/activities/templates/activity_notification.html.jinja2:230
 msgid "No-one is yet signed up for"
 msgstr "Neniu registriĝis"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:214
-#: karrot/activities/templates/activity_notification.html.jinja2:242
+#: karrot/activities/templates/activity_notification.html.jinja2:207
+#: karrot/activities/templates/activity_notification.html.jinja2:235
 msgid "There is still space available for"
 msgstr "Ankoraŭ restas disponeblaj spacoj"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:227
+#: karrot/activities/templates/activity_notification.html.jinja2:220
 msgid "Tomorrow"
 msgstr "Morgaŭ"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:268
+#: karrot/activities/templates/activity_notification.html.jinja2:261
 msgid ""
 "You are receiving this because you are subscribed to\n"
 "                            <strong>Activity notification</strong> emails for this group."
@@ -109,7 +109,7 @@ msgstr ""
 "Vi ricevas tion ĉi ĉar vi abonis\n"
 "                            retmesaĝojn pri<strong>Aktivaĵaj sciigoj</strong> de tiu ĉi grupo."
 
-#: karrot/activities/templates/activity_notification.html.jinja2:270
+#: karrot/activities/templates/activity_notification.html.jinja2:263
 #: karrot/applications/templates/new_application.html.jinja2:224
 #: karrot/groups/templates/group_summary.html.jinja2:266
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:213
@@ -118,11 +118,50 @@ msgstr ""
 msgid "Click here to unsubscribe"
 msgstr "Alklaku ĉi tie por malaboni"
 
+#: karrot/activities/templates/participant_removed.html.jinja2:5
+#: karrot/activities/templates/participant_removed.html.jinja2:123
+#: karrot/activities/templates/participant_removed.subject.jinja2:1
+#, python-format
+msgid "Your activities for %(place_name)s changed"
+msgstr ""
+
+#: karrot/activities/templates/participant_removed.html.jinja2:124
+msgid "The following activities are no longer available for you"
+msgstr ""
+
+#: karrot/activities/templates/participant_removed.html.jinja2:140
+#, python-format
+msgid ""
+"Message from <a class=\"message-author\" href=\"%(url)s\" style=\"text-"
+"transform: uppercase; text-decoration: none; font-weight: 700; color: "
+"#4a982e;\">%(display_name)s</a>"
+msgstr ""
+
+#: karrot/activities/templates/participant_removed.html.jinja2:163
+#: karrot/groups/templates/user_became_editor.html.jinja2:221
+#: karrot/groups/templates/user_got_role.html.jinja2:222
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:221
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:217
+#, python-format
+msgid ""
+"You are receiving this because you are a member of "
+"<strong>%(group_name)s</strong>."
+msgstr "Vi ricevas tion ĉi ĉar vi anas en <strong>%(group_name)s</strong>."
+
+#: karrot/activities/templates/participant_removed.html.jinja2:164
+#: karrot/groups/templates/user_became_editor.html.jinja2:222
+#: karrot/groups/templates/user_got_role.html.jinja2:223
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:222
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:218
+#, python-format
+msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
+msgstr "Vi povas foriti la grupon de la <a href=\"%(group_url)s\">grupa paĝo</a>."
+
 #: karrot/applications/api.py:29
 msgid "You need to have a verified email address"
 msgstr "Vi bezonas havi kontrolitan retadreson"
 
-#: karrot/applications/api.py:38 karrot/groups/api.py:52
+#: karrot/applications/api.py:38 karrot/groups/api.py:51
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
 msgid "You need to be a group editor"
 msgstr "Vi bezonas esti grupa redaktoro"
@@ -156,6 +195,7 @@ msgstr "Via kandidatiĝo aliĝi %(group_name)s estis akceptita"
 
 #: karrot/applications/templates/application_accepted.html.jinja2:188
 #: karrot/groups/templates/user_became_editor.html.jinja2:194
+#: karrot/groups/templates/user_got_role.html.jinja2:195
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:194
 #: karrot/groups/templates/user_lost_editor_role.html.jinja2:190
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:192
@@ -220,8 +260,8 @@ msgstr ""
 "ĝin en %(site_name)s</a> aŭ <a href=\"%(mute_url)s\">silentigu la "
 "konversacion </a>."
 
-#: karrot/conversations/api.py:73 karrot/conversations/api.py:254
-#: karrot/conversations/api.py:444 karrot/conversations/serializers.py:187
+#: karrot/conversations/api.py:73 karrot/conversations/api.py:255
+#: karrot/conversations/api.py:445 karrot/conversations/serializers.py:187
 msgid "You are not in this conversation"
 msgstr "Vi ne estas en tiu ĉi konversacio"
 
@@ -235,11 +275,11 @@ msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
 msgstr "Vi ne povas redakti la mesaĝon pli ol %(days_number)s post la kreado."
 
-#: karrot/conversations/api.py:372
+#: karrot/conversations/api.py:373
 msgid "Must be first in thread"
 msgstr "Ĝi devas unue esti en diskuto"
 
-#: karrot/conversations/api.py:375
+#: karrot/conversations/api.py:376
 msgid "You are not a participant in this thread"
 msgstr "Vi ne partoprenas en tiu ĉi diskuto"
 
@@ -253,12 +293,12 @@ msgstr "Nova mesaĝo en via kandidatiĝo al %(group_name)s"
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr "Nova mesaĝo en kandidatiĝo de %(user_name)s al %(group_name)s"
 
-#: karrot/conversations/emails.py:289
+#: karrot/conversations/emails.py:290
 #, python-format
-msgid "New message in conflict resolution in %(group_name)s"
-msgstr "Nova mesaĝo pri problemsolvado en %(group_name)s"
+msgid "New message in membership review of %(user_name)s"
+msgstr ""
 
-#: karrot/conversations/emails.py:304
+#: karrot/conversations/emails.py:305
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr "Nova mesaĝo por oferto %(offer_name)s en %(group_name)s"
@@ -310,39 +350,27 @@ msgstr ""
 "respondojn en %(site_name)s</a> aŭ <a href=\"%(mute_url)s\">silentigu "
 "estontajn respondojn </a>."
 
-#: karrot/groups/api.py:31
+#: karrot/groups/api.py:30
 msgid "You are already a member."
 msgstr "Vi jam estas ano"
 
-#: karrot/groups/api.py:38
+#: karrot/groups/api.py:37
 msgid "You can only join open groups."
 msgstr "Vi nur povas aliĝi malfermajn grupon."
 
-#: karrot/groups/api.py:45
+#: karrot/groups/api.py:44
 msgid "You cannot give trust to yourself"
 msgstr "Vi ne povas fidi vin mem"
 
-#: karrot/groups/api.py:210
-msgid "You already gave trust to this user"
-msgstr "Vi jam fidis tiun ĉi uzanton"
-
-#: karrot/groups/serializers.py:33
+#: karrot/groups/serializers.py:34
 msgid "Unknown timezone"
 msgstr "Nekonata horzono"
 
-#: karrot/groups/serializers.py:41
+#: karrot/groups/serializers.py:42
 msgid "Playground"
 msgstr "Relaksujo"
 
-#: karrot/groups/serializers.py:150 karrot/groups/serializers.py:249
-msgid "You cannot manage agreements"
-msgstr "Vi ne povas agordi akordojn"
-
-#: karrot/groups/serializers.py:152
-msgid "Agreement is not for this group"
-msgstr "La akordo ne estas por tiu ĉi grupo"
-
-#: karrot/groups/serializers.py:247
+#: karrot/groups/serializers.py:256
 msgid "You are not in this group"
 msgstr "Vi ne estas en ĉi tiu grupo"
 
@@ -469,21 +497,19 @@ msgstr ""
 msgid "Use your power wisely!"
 msgstr "Uzu vian povon saĝe!"
 
-#: karrot/groups/templates/user_became_editor.html.jinja2:221
-#: karrot/groups/templates/user_inactive_in_group.html.jinja2:221
-#: karrot/groups/templates/user_lost_editor_role.html.jinja2:217
+#: karrot/groups/templates/user_got_role.html.jinja2:5
+#: karrot/groups/templates/user_got_role.html.jinja2:171
+#: karrot/groups/templates/user_got_role.subject.jinja2:1
+#, python-format
+msgid "You received a new role in %(group_name)s!"
+msgstr ""
+
+#: karrot/groups/templates/user_got_role.html.jinja2:174
 #, python-format
 msgid ""
-"You are receiving this because you are a member of "
-"<strong>%(group_name)s</strong>."
-msgstr "Vi ricevas tion ĉi ĉar vi anas en <strong>%(group_name)s</strong>."
-
-#: karrot/groups/templates/user_became_editor.html.jinja2:222
-#: karrot/groups/templates/user_inactive_in_group.html.jinja2:222
-#: karrot/groups/templates/user_lost_editor_role.html.jinja2:218
-#, python-format
-msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
-msgstr "Vi povas foriti la grupon de la <a href=\"%(group_url)s\">grupa paĝo</a>."
+"You received enough trust from fellow group members to now have the role: "
+"%(role_name)s"
+msgstr ""
 
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:171
 msgid "Hey, we're missing you!"
@@ -643,24 +669,12 @@ msgstr "La elekto ne estas parto de ĉi tiu voĉdono"
 msgid "Provided score is outside of allowed range"
 msgstr "Proponita eblo estas for de la permesita rango"
 
-#: karrot/issues/serializers.py:132
-msgid "Topic cannot be empty"
-msgstr "La temo ne povas esti malplena"
-
-#: karrot/issues/serializers.py:139
-msgid "Affected user is not part of that group"
-msgstr "La uzanto ne estas parto de tiu grupo"
-
-#: karrot/issues/serializers.py:141
-msgid "A conflict resolution about that user has already been started"
-msgstr "Problemsolvado pri tiu uzanto jam komenciĝis"
-
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:5
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:170
 #: karrot/issues/templates/conflict_resolution_continued.subject.jinja2:1
 #, python-format
-msgid "Keep discussing about the conflict with %(affected_user_name)s"
-msgstr "Daŭrigu la diskuton pri problemo kun %(affected_user_name)s"
+msgid "The membership review of %(affected_user_name)s continues"
+msgstr ""
 
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:171
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:171
@@ -687,24 +701,22 @@ msgstr "Legi diskuton"
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:212
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:219
 msgid ""
-"You are receiving this because you are subscribed to <strong>Conflict "
-"Resolution</strong> emails for this group."
+"You are receiving this because you are subscribed to <strong>Membership "
+"Review</strong> emails for this group."
 msgstr ""
-"Vi ricevas tion ĉi ĉar vi abonis retmesaĝojn "
-"<strong>Problemsolvadon</strong> de tiu ĉi grupo."
 
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:5
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:170
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.subject.jinja2:1
-msgid "Keep discussing about the conflict with you"
-msgstr "Daŭrigu la diskuton pri problemo kun vi"
+msgid "Your membership review continues"
+msgstr ""
 
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:5
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:170
 #: karrot/issues/templates/new_conflict_resolution.subject.jinja2:1
 #, python-format
-msgid "A conflict resolution process was started with %(affected_user_name)s"
-msgstr "Problemsolvada proceso pri %(affected_user_name)s komenciĝis"
+msgid "A membership review was started for %(affected_user_name)s"
+msgstr ""
 
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:178
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:178
@@ -720,8 +732,8 @@ msgstr "Ĉi tiu voĉdona rondo finas la %(expiry_date)s."
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:5
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:170
 #: karrot/issues/templates/new_conflict_resolution_affected_user.subject.jinja2:1
-msgid "A conflict resolution process was started with you"
-msgstr "Problemsolvada proceso pri vi komenciĝis"
+msgid "A review of your membership was started"
+msgstr ""
 
 #: karrot/offers/api.py:33
 msgid "You are not the owner of this offer"
@@ -788,20 +800,20 @@ msgstr ""
 msgid "Market"
 msgstr ""
 
-#: karrot/places/serializers.py:172
+#: karrot/places/serializers.py:190
 msgid "Set at least one week in advance"
 msgstr "Fiksu ĝin almenaŭ antaŭ unu semajno"
 
-#: karrot/places/serializers.py:175
+#: karrot/places/serializers.py:193
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr "Ne agordu antaŭ pli ol %(count)ssemanjnoj"
 
-#: karrot/places/serializers.py:227
+#: karrot/places/serializers.py:245
 msgid "You are already subscribed to this place"
 msgstr "Vi jam abonis tiun ĉi lokon"
 
-#: karrot/subscriptions/receivers.py:738
+#: karrot/subscriptions/receivers.py:767
 msgid "Push notifications are enabled!"
 msgstr ""
 
