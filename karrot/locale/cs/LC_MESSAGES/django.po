@@ -46,63 +46,63 @@ msgstr "Aktivita"
 msgid "Task"
 msgstr "Úkol"
 
-#: karrot/activities/serializers.py:139
+#: karrot/activities/serializers.py:143
 msgid "Must be a list"
 msgstr "Musí to být seznam"
 
-#: karrot/activities/serializers.py:140
+#: karrot/activities/serializers.py:144
 msgid "Must be a list with one or two values"
 msgstr "Musí to být seznam s jednou nebo dvěma hodnotami"
 
-#: karrot/activities/serializers.py:141
+#: karrot/activities/serializers.py:145
 msgid "Must pass start value"
 msgstr "Musí předat počáteční hodnotu"
 
-#: karrot/activities/tasks.py:71
+#: karrot/activities/tasks.py:77
 #, python-format
 msgid "Upcoming %(activity_type)s"
 msgstr "Připravujeme %(activity_type)s"
 
+#: karrot/activities/tasks.py:166
+#, python-format
+msgid "%(activity_type)s no longer available - %(date_time)s"
+msgstr "%(activity_type)s již není k dispozici - %(date_time)s"
+
 #: karrot/activities/templates/activity_notification.html.jinja2:5
-#: karrot/activities/templates/activity_notification.html.jinja2:193
+#: karrot/activities/templates/activity_notification.html.jinja2:186
 #: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s upcoming activities"
 msgstr "nadcházející aktivity %(group_name)s"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:182
-#, python-format
-msgid "%(empty_participants_count)s/%(max_participants)s remaining"
-msgstr "%(empty_participants_count)sze%(max_participants)s zbývá"
-
-#: karrot/activities/templates/activity_notification.html.jinja2:197
+#: karrot/activities/templates/activity_notification.html.jinja2:190
 msgid "Tonight"
 msgstr "Dnes večer"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:201
+#: karrot/activities/templates/activity_notification.html.jinja2:194
 msgid "The day is not over, there are still activities to be done!"
 msgstr "Den ještě neskončil, zbývají ještě aktivity!"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:204
-#: karrot/activities/templates/activity_notification.html.jinja2:232
+#: karrot/activities/templates/activity_notification.html.jinja2:197
+#: karrot/activities/templates/activity_notification.html.jinja2:225
 msgid "You are signed up for"
 msgstr "Jste přihlášeni"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:209
-#: karrot/activities/templates/activity_notification.html.jinja2:237
+#: karrot/activities/templates/activity_notification.html.jinja2:202
+#: karrot/activities/templates/activity_notification.html.jinja2:230
 msgid "No-one is yet signed up for"
 msgstr "Zatím nikdo není zaregistrován"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:214
-#: karrot/activities/templates/activity_notification.html.jinja2:242
+#: karrot/activities/templates/activity_notification.html.jinja2:207
+#: karrot/activities/templates/activity_notification.html.jinja2:235
 msgid "There is still space available for"
 msgstr "Stále existuje prostor pro"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:227
+#: karrot/activities/templates/activity_notification.html.jinja2:220
 msgid "Tomorrow"
 msgstr "Zítra"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:268
+#: karrot/activities/templates/activity_notification.html.jinja2:261
 msgid ""
 "You are receiving this because you are subscribed to\n"
 "                            <strong>Activity notification</strong> emails for this group."
@@ -110,7 +110,7 @@ msgstr ""
 "Toto dostáváte, protože jste přihlášeni k odběru\n"
 "                    E-mailů s <strong>upozorněním na aktivitu</strong> pro tuto skupinu."
 
-#: karrot/activities/templates/activity_notification.html.jinja2:270
+#: karrot/activities/templates/activity_notification.html.jinja2:263
 #: karrot/applications/templates/new_application.html.jinja2:224
 #: karrot/groups/templates/group_summary.html.jinja2:266
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:213
@@ -119,11 +119,55 @@ msgstr ""
 msgid "Click here to unsubscribe"
 msgstr "Klikněte zde pro odhlášení odběru"
 
+#: karrot/activities/templates/participant_removed.html.jinja2:5
+#: karrot/activities/templates/participant_removed.html.jinja2:123
+#: karrot/activities/templates/participant_removed.subject.jinja2:1
+#, python-format
+msgid "Your activities for %(place_name)s changed"
+msgstr "Vaše aktivity pro %(place_name)s se změnily"
+
+#: karrot/activities/templates/participant_removed.html.jinja2:124
+msgid "The following activities are no longer available for you"
+msgstr "Následující aktivity již nejsou k dispozici"
+
+#: karrot/activities/templates/participant_removed.html.jinja2:140
+#, python-format
+msgid ""
+"Message from <a class=\"message-author\" href=\"%(url)s\" style=\"text-"
+"transform: uppercase; text-decoration: none; font-weight: 700; color: "
+"#4a982e;\">%(display_name)s</a>"
+msgstr ""
+"Zpráva od <a class=\"message-author\" href=\"%(url)s\" style=\"text-"
+"transform: uppercase; text-decoration: none; font-weight: 700; color: "
+"#4a982e;\">%(display_name)s</a>"
+
+#: karrot/activities/templates/participant_removed.html.jinja2:163
+#: karrot/groups/templates/user_became_editor.html.jinja2:221
+#: karrot/groups/templates/user_got_role.html.jinja2:222
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:221
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:217
+#, python-format
+msgid ""
+"You are receiving this because you are a member of "
+"<strong>%(group_name)s</strong>."
+msgstr ""
+"Toto jste obdrželi, protože jste členem skupiny "
+"<strong>%(group_name)s</strong>."
+
+#: karrot/activities/templates/participant_removed.html.jinja2:164
+#: karrot/groups/templates/user_became_editor.html.jinja2:222
+#: karrot/groups/templates/user_got_role.html.jinja2:223
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:222
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:218
+#, python-format
+msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
+msgstr "Skupinu můžete opustit ze <a href=\"%(group_url)s\">stránky skupiny</a>."
+
 #: karrot/applications/api.py:29
 msgid "You need to have a verified email address"
 msgstr "Musíte mít ověřenou e-mailovou adresu"
 
-#: karrot/applications/api.py:38 karrot/groups/api.py:52
+#: karrot/applications/api.py:38 karrot/groups/api.py:51
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
 msgid "You need to be a group editor"
 msgstr "Musíte být editorem skupiny"
@@ -157,6 +201,7 @@ msgstr "Vaše žádost o připojení k %(group_name)s byla přijata"
 
 #: karrot/applications/templates/application_accepted.html.jinja2:188
 #: karrot/groups/templates/user_became_editor.html.jinja2:194
+#: karrot/groups/templates/user_got_role.html.jinja2:195
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:194
 #: karrot/groups/templates/user_lost_editor_role.html.jinja2:190
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:192
@@ -221,8 +266,8 @@ msgstr ""
 "jej na straně %(site_name)s</a>, nebo <a href=\"%(mute_url)s\">ignorujte "
 "konverzaci</a>."
 
-#: karrot/conversations/api.py:73 karrot/conversations/api.py:254
-#: karrot/conversations/api.py:444 karrot/conversations/serializers.py:187
+#: karrot/conversations/api.py:73 karrot/conversations/api.py:255
+#: karrot/conversations/api.py:445 karrot/conversations/serializers.py:187
 msgid "You are not in this conversation"
 msgstr "Nejste v této konverzaci"
 
@@ -237,11 +282,11 @@ msgid ""
 msgstr ""
 "Zprávu nelze upravovat déle než %(days_number)s dny po jejím vytvoření."
 
-#: karrot/conversations/api.py:372
+#: karrot/conversations/api.py:373
 msgid "Must be first in thread"
 msgstr "Musí být první v podprocesu"
 
-#: karrot/conversations/api.py:375
+#: karrot/conversations/api.py:376
 msgid "You are not a participant in this thread"
 msgstr "Nejste účastníkem tohoto vlákna"
 
@@ -255,12 +300,12 @@ msgstr "Nová zpráva k vaší žádosti o připojení k  %(group_name)s"
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr "Nová zpráva od %(user_name)s k žádosti o připojení do %(group_name)s"
 
-#: karrot/conversations/emails.py:289
+#: karrot/conversations/emails.py:290
 #, python-format
-msgid "New message in conflict resolution in %(group_name)s"
-msgstr "Nová zpráva při řešení konfliktů ve skupině %(group_name)s"
+msgid "New message in membership review of %(user_name)s"
+msgstr "Nová zpráva k přezkumu členství %(user_name)s"
 
-#: karrot/conversations/emails.py:304
+#: karrot/conversations/emails.py:305
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr "Nová zpráva pro nabídku %(offer_name)s v  %(group_name)s"
@@ -316,39 +361,27 @@ msgstr ""
 "odpovědi na webu %(site_name)s</a>,  nebo <a href=\"%(mute_url)s\">ignorujte"
 " další odpovědi</a>."
 
-#: karrot/groups/api.py:31
+#: karrot/groups/api.py:30
 msgid "You are already a member."
 msgstr "Jste již členem."
 
-#: karrot/groups/api.py:38
+#: karrot/groups/api.py:37
 msgid "You can only join open groups."
 msgstr "Můžete se připojit pouze k otevřeným skupinám."
 
-#: karrot/groups/api.py:45
+#: karrot/groups/api.py:44
 msgid "You cannot give trust to yourself"
 msgstr "Nemůžete dát důvěru sám sobě"
 
-#: karrot/groups/api.py:210
-msgid "You already gave trust to this user"
-msgstr "Tomuto uživateli jste již důvěřovali"
-
-#: karrot/groups/serializers.py:33
+#: karrot/groups/serializers.py:34
 msgid "Unknown timezone"
 msgstr "Neznámé časové pásmo"
 
-#: karrot/groups/serializers.py:41
+#: karrot/groups/serializers.py:42
 msgid "Playground"
 msgstr "Playground"
 
-#: karrot/groups/serializers.py:150 karrot/groups/serializers.py:249
-msgid "You cannot manage agreements"
-msgstr "Nemůžete spravovat dohody"
-
-#: karrot/groups/serializers.py:152
-msgid "Agreement is not for this group"
-msgstr "Dohoda není pro tuto skupinu"
-
-#: karrot/groups/serializers.py:247
+#: karrot/groups/serializers.py:256
 msgid "You are not in this group"
 msgstr "Nejste v této skupině"
 
@@ -478,23 +511,21 @@ msgstr ""
 msgid "Use your power wisely!"
 msgstr "Využijte svou sílu moudře!"
 
-#: karrot/groups/templates/user_became_editor.html.jinja2:221
-#: karrot/groups/templates/user_inactive_in_group.html.jinja2:221
-#: karrot/groups/templates/user_lost_editor_role.html.jinja2:217
+#: karrot/groups/templates/user_got_role.html.jinja2:5
+#: karrot/groups/templates/user_got_role.html.jinja2:171
+#: karrot/groups/templates/user_got_role.subject.jinja2:1
+#, python-format
+msgid "You received a new role in %(group_name)s!"
+msgstr "Obdrželi jste novou roli v %(group_name)s!"
+
+#: karrot/groups/templates/user_got_role.html.jinja2:174
 #, python-format
 msgid ""
-"You are receiving this because you are a member of "
-"<strong>%(group_name)s</strong>."
+"You received enough trust from fellow group members to now have the role: "
+"%(role_name)s"
 msgstr ""
-"Toto jste obdrželi, protože jste členem skupiny "
-"<strong>%(group_name)s</strong>."
-
-#: karrot/groups/templates/user_became_editor.html.jinja2:222
-#: karrot/groups/templates/user_inactive_in_group.html.jinja2:222
-#: karrot/groups/templates/user_lost_editor_role.html.jinja2:218
-#, python-format
-msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
-msgstr "Skupinu můžete opustit ze <a href=\"%(group_url)s\">stránky skupiny</a>."
+"Získali jste dostatečnou důvěru od ostatních členů skupiny, abyste nyní "
+"mohli zastávat tuto roli: %(role_name)s"
 
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:171
 msgid "Hey, we're missing you!"
@@ -654,24 +685,12 @@ msgstr "Poskytovaná možnost není součástí tohoto hlasování"
 msgid "Provided score is outside of allowed range"
 msgstr "Poskytnuté skóre je mimo povolený rozsah"
 
-#: karrot/issues/serializers.py:132
-msgid "Topic cannot be empty"
-msgstr "Téma nemůže být prázdné"
-
-#: karrot/issues/serializers.py:139
-msgid "Affected user is not part of that group"
-msgstr "Dotčený uživatel není součástí této skupiny"
-
-#: karrot/issues/serializers.py:141
-msgid "A conflict resolution about that user has already been started"
-msgstr "Řešení konfliktů o tomto uživateli již bylo zahájeno"
-
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:5
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:170
 #: karrot/issues/templates/conflict_resolution_continued.subject.jinja2:1
 #, python-format
-msgid "Keep discussing about the conflict with %(affected_user_name)s"
-msgstr "Pokračujte v diskusi o konfliktu s %(affected_user_name)s"
+msgid "The membership review of %(affected_user_name)s continues"
+msgstr "Přezkum členství %(affected_user_name)s pokračuje"
 
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:171
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:171
@@ -698,24 +717,24 @@ msgstr "Zobrazit diskusi"
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:212
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:219
 msgid ""
-"You are receiving this because you are subscribed to <strong>Conflict "
-"Resolution</strong> emails for this group."
+"You are receiving this because you are subscribed to <strong>Membership "
+"Review</strong> emails for this group."
 msgstr ""
-"Toto jste obdrželi, protože jste přihlášeni k odběru e-mailů pro "
-"<strong>řešení konfliktů</strong> pro tuto skupinu."
+"Tuto zprávu dostáváte, protože jste přihlášeni k odběru e-mailů "
+"<strong>Přezkum členství</strong> pro tuto skupinu."
 
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:5
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:170
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.subject.jinja2:1
-msgid "Keep discussing about the conflict with you"
-msgstr "Pokračujte v diskusi o konfliktu s vámi"
+msgid "Your membership review continues"
+msgstr "Vaše přezkoumání členství pokračuje"
 
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:5
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:170
 #: karrot/issues/templates/new_conflict_resolution.subject.jinja2:1
 #, python-format
-msgid "A conflict resolution process was started with %(affected_user_name)s"
-msgstr "Byl zahájen proces řešení konfliktů  s %(affected_user_name)s"
+msgid "A membership review was started for %(affected_user_name)s"
+msgstr "Byla zahájena revize členství pro %(affected_user_name)s"
 
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:178
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:178
@@ -731,8 +750,8 @@ msgstr "Toto kolo hlasování končí v %(expiry_date)s."
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:5
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:170
 #: karrot/issues/templates/new_conflict_resolution_affected_user.subject.jinja2:1
-msgid "A conflict resolution process was started with you"
-msgstr "Byl s vámi zahájen proces řešení konfliktů"
+msgid "A review of your membership was started"
+msgstr "Bylo zahájeno přezkoumání vašeho členství"
 
 #: karrot/offers/api.py:33
 msgid "You are not the owner of this offer"
@@ -798,20 +817,20 @@ msgstr "Restaurace"
 msgid "Market"
 msgstr "Tržiště"
 
-#: karrot/places/serializers.py:172
+#: karrot/places/serializers.py:190
 msgid "Set at least one week in advance"
 msgstr "Nastavte alespoň týden předem"
 
-#: karrot/places/serializers.py:175
+#: karrot/places/serializers.py:193
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr "Nenastavujte více než %(count)s týdny předem"
 
-#: karrot/places/serializers.py:227
+#: karrot/places/serializers.py:245
 msgid "You are already subscribed to this place"
 msgstr "Jste již přihlášeni k odběru tohoto místa"
 
-#: karrot/subscriptions/receivers.py:738
+#: karrot/subscriptions/receivers.py:767
 msgid "Push notifications are enabled!"
 msgstr "Oznámení Push jsou povolena!"
 

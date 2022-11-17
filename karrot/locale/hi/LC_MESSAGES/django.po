@@ -46,69 +46,69 @@ msgstr ""
 msgid "Task"
 msgstr ""
 
-#: karrot/activities/serializers.py:139
+#: karrot/activities/serializers.py:143
 msgid "Must be a list"
 msgstr "सूची होनी चाहिए"
 
-#: karrot/activities/serializers.py:140
+#: karrot/activities/serializers.py:144
 msgid "Must be a list with one or two values"
 msgstr "एक या दो मूल्यों वाली सूची होनी चाहिए"
 
-#: karrot/activities/serializers.py:141
+#: karrot/activities/serializers.py:145
 msgid "Must pass start value"
 msgstr "शुरुवाती राशि चाहिए"
 
-#: karrot/activities/tasks.py:71
+#: karrot/activities/tasks.py:77
 #, python-format
 msgid "Upcoming %(activity_type)s"
 msgstr ""
 
+#: karrot/activities/tasks.py:166
+#, python-format
+msgid "%(activity_type)s no longer available - %(date_time)s"
+msgstr ""
+
 #: karrot/activities/templates/activity_notification.html.jinja2:5
-#: karrot/activities/templates/activity_notification.html.jinja2:193
+#: karrot/activities/templates/activity_notification.html.jinja2:186
 #: karrot/activities/templates/activity_notification.subject.jinja2:1
 #, python-format
 msgid "%(group_name)s upcoming activities"
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:182
-#, python-format
-msgid "%(empty_participants_count)s/%(max_participants)s remaining"
-msgstr ""
-
-#: karrot/activities/templates/activity_notification.html.jinja2:197
+#: karrot/activities/templates/activity_notification.html.jinja2:190
 msgid "Tonight"
 msgstr "आज रात"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:201
+#: karrot/activities/templates/activity_notification.html.jinja2:194
 msgid "The day is not over, there are still activities to be done!"
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:204
-#: karrot/activities/templates/activity_notification.html.jinja2:232
+#: karrot/activities/templates/activity_notification.html.jinja2:197
+#: karrot/activities/templates/activity_notification.html.jinja2:225
 msgid "You are signed up for"
 msgstr "आप इन के लिए जुड़े हुए है "
 
-#: karrot/activities/templates/activity_notification.html.jinja2:209
-#: karrot/activities/templates/activity_notification.html.jinja2:237
+#: karrot/activities/templates/activity_notification.html.jinja2:202
+#: karrot/activities/templates/activity_notification.html.jinja2:230
 msgid "No-one is yet signed up for"
 msgstr "अभी तक कोई जुड़े नहीं है "
 
-#: karrot/activities/templates/activity_notification.html.jinja2:214
-#: karrot/activities/templates/activity_notification.html.jinja2:242
+#: karrot/activities/templates/activity_notification.html.jinja2:207
+#: karrot/activities/templates/activity_notification.html.jinja2:235
 msgid "There is still space available for"
 msgstr "अभी भी जगह उपलब्ध है"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:227
+#: karrot/activities/templates/activity_notification.html.jinja2:220
 msgid "Tomorrow"
 msgstr "आने वाला कल"
 
-#: karrot/activities/templates/activity_notification.html.jinja2:268
+#: karrot/activities/templates/activity_notification.html.jinja2:261
 msgid ""
 "You are receiving this because you are subscribed to\n"
 "                            <strong>Activity notification</strong> emails for this group."
 msgstr ""
 
-#: karrot/activities/templates/activity_notification.html.jinja2:270
+#: karrot/activities/templates/activity_notification.html.jinja2:263
 #: karrot/applications/templates/new_application.html.jinja2:224
 #: karrot/groups/templates/group_summary.html.jinja2:266
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:213
@@ -117,11 +117,52 @@ msgstr ""
 msgid "Click here to unsubscribe"
 msgstr "सदस्यता समाप्त करने के लिए यहां क्लिक करें"
 
+#: karrot/activities/templates/participant_removed.html.jinja2:5
+#: karrot/activities/templates/participant_removed.html.jinja2:123
+#: karrot/activities/templates/participant_removed.subject.jinja2:1
+#, python-format
+msgid "Your activities for %(place_name)s changed"
+msgstr ""
+
+#: karrot/activities/templates/participant_removed.html.jinja2:124
+msgid "The following activities are no longer available for you"
+msgstr ""
+
+#: karrot/activities/templates/participant_removed.html.jinja2:140
+#, python-format
+msgid ""
+"Message from <a class=\"message-author\" href=\"%(url)s\" style=\"text-"
+"transform: uppercase; text-decoration: none; font-weight: 700; color: "
+"#4a982e;\">%(display_name)s</a>"
+msgstr ""
+
+#: karrot/activities/templates/participant_removed.html.jinja2:163
+#: karrot/groups/templates/user_became_editor.html.jinja2:221
+#: karrot/groups/templates/user_got_role.html.jinja2:222
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:221
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:217
+#, python-format
+msgid ""
+"You are receiving this because you are a member of "
+"<strong>%(group_name)s</strong>."
+msgstr ""
+"आप इसे प्राप्त कर रहे हैं क्योंकि आप <strong>%(group_name)s</strong> के "
+"सदस्य हैं।"
+
+#: karrot/activities/templates/participant_removed.html.jinja2:164
+#: karrot/groups/templates/user_became_editor.html.jinja2:222
+#: karrot/groups/templates/user_got_role.html.jinja2:223
+#: karrot/groups/templates/user_inactive_in_group.html.jinja2:222
+#: karrot/groups/templates/user_lost_editor_role.html.jinja2:218
+#, python-format
+msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
+msgstr "आप समूह को <a href=\"%(group_url)s\">समूह पृष्ठ</a> से छोड़ सकते हैं।"
+
 #: karrot/applications/api.py:29
 msgid "You need to have a verified email address"
 msgstr "आपके पास एक सत्यापित ईमेल पता होना जरूरी है"
 
-#: karrot/applications/api.py:38 karrot/groups/api.py:52
+#: karrot/applications/api.py:38 karrot/groups/api.py:51
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
 msgid "You need to be a group editor"
 msgstr "आपका समूह संपादक होना जरूरी है"
@@ -156,6 +197,7 @@ msgstr ""
 
 #: karrot/applications/templates/application_accepted.html.jinja2:188
 #: karrot/groups/templates/user_became_editor.html.jinja2:194
+#: karrot/groups/templates/user_got_role.html.jinja2:195
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:194
 #: karrot/groups/templates/user_lost_editor_role.html.jinja2:190
 #: karrot/groups/templates/user_removal_from_group.html.jinja2:192
@@ -221,8 +263,8 @@ msgstr ""
 "%(site_name)s पर देखें</a>, या <a href=\"%(mute_url)s\">बातचीत को चुप "
 "करें</a>।"
 
-#: karrot/conversations/api.py:73 karrot/conversations/api.py:254
-#: karrot/conversations/api.py:444 karrot/conversations/serializers.py:187
+#: karrot/conversations/api.py:73 karrot/conversations/api.py:255
+#: karrot/conversations/api.py:445 karrot/conversations/serializers.py:187
 msgid "You are not in this conversation"
 msgstr "आप इस बातचीत में नहीं हैं |"
 
@@ -238,11 +280,11 @@ msgstr ""
 "आप संदेश के निर्माण के %(days_number)s दिन से अधिक समय बाद संदेश संपादित "
 "नहीं कर सकते।"
 
-#: karrot/conversations/api.py:372
+#: karrot/conversations/api.py:373
 msgid "Must be first in thread"
 msgstr "बातचीत में पहले होना चाहिए"
 
-#: karrot/conversations/api.py:375
+#: karrot/conversations/api.py:376
 msgid "You are not a participant in this thread"
 msgstr "आप इस बातचीत में भागीदार नहीं हैं"
 
@@ -256,12 +298,12 @@ msgstr "%(group_name)s के लिए अपने आवेदन में �
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr "%(user_name)s से %(group_name)s के लिए आवेदन में नया संदेश"
 
-#: karrot/conversations/emails.py:289
+#: karrot/conversations/emails.py:290
 #, python-format
-msgid "New message in conflict resolution in %(group_name)s"
-msgstr "%(group_name)s में संघर्ष समाधान में नया संदेश"
+msgid "New message in membership review of %(user_name)s"
+msgstr ""
 
-#: karrot/conversations/emails.py:304
+#: karrot/conversations/emails.py:305
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr "%(offer_name)s में %(group_name)s के लिए नया संदेश"
@@ -314,39 +356,27 @@ msgstr ""
 "इस ईमेल का उत्तर सीधे दें, <a href=\"%(thread_url)s\">%(site_name)s पर उत्तर"
 " दें</a>, या <a href=\"%(mute_url)s\">आगे उत्तरो को चुप करे</a>।"
 
-#: karrot/groups/api.py:31
+#: karrot/groups/api.py:30
 msgid "You are already a member."
 msgstr "आप पहले से ही एक सदस्य हैं"
 
-#: karrot/groups/api.py:38
+#: karrot/groups/api.py:37
 msgid "You can only join open groups."
 msgstr "आप केवल खुले समूहों में शामिल हो सकते हैं।"
 
-#: karrot/groups/api.py:45
+#: karrot/groups/api.py:44
 msgid "You cannot give trust to yourself"
 msgstr "आप खुद को भरोसा नहीं दे सकते"
 
-#: karrot/groups/api.py:210
-msgid "You already gave trust to this user"
-msgstr "आपने पहले ही इस उपयोगकर्ता को भरोसा दिया है"
-
-#: karrot/groups/serializers.py:33
+#: karrot/groups/serializers.py:34
 msgid "Unknown timezone"
 msgstr "अज्ञात समयक्षेत्र"
 
-#: karrot/groups/serializers.py:41
+#: karrot/groups/serializers.py:42
 msgid "Playground"
 msgstr "खेल-मैदान"
 
-#: karrot/groups/serializers.py:150 karrot/groups/serializers.py:249
-msgid "You cannot manage agreements"
-msgstr "आप समझौतों का प्रबंधन नहीं कर सकते"
-
-#: karrot/groups/serializers.py:152
-msgid "Agreement is not for this group"
-msgstr "समझौता इस समूह के लिए नहीं है"
-
-#: karrot/groups/serializers.py:247
+#: karrot/groups/serializers.py:256
 msgid "You are not in this group"
 msgstr "आप इस समूह में नहीं हैं"
 
@@ -473,23 +503,19 @@ msgstr ""
 msgid "Use your power wisely!"
 msgstr "अपनी शक्ति का बुद्धिमानी से उपयोग करें!"
 
-#: karrot/groups/templates/user_became_editor.html.jinja2:221
-#: karrot/groups/templates/user_inactive_in_group.html.jinja2:221
-#: karrot/groups/templates/user_lost_editor_role.html.jinja2:217
+#: karrot/groups/templates/user_got_role.html.jinja2:5
+#: karrot/groups/templates/user_got_role.html.jinja2:171
+#: karrot/groups/templates/user_got_role.subject.jinja2:1
+#, python-format
+msgid "You received a new role in %(group_name)s!"
+msgstr ""
+
+#: karrot/groups/templates/user_got_role.html.jinja2:174
 #, python-format
 msgid ""
-"You are receiving this because you are a member of "
-"<strong>%(group_name)s</strong>."
+"You received enough trust from fellow group members to now have the role: "
+"%(role_name)s"
 msgstr ""
-"आप इसे प्राप्त कर रहे हैं क्योंकि आप <strong>%(group_name)s</strong> के "
-"सदस्य हैं।"
-
-#: karrot/groups/templates/user_became_editor.html.jinja2:222
-#: karrot/groups/templates/user_inactive_in_group.html.jinja2:222
-#: karrot/groups/templates/user_lost_editor_role.html.jinja2:218
-#, python-format
-msgid "You can leave the group from the <a href=\"%(group_url)s\">group page</a>."
-msgstr "आप समूह को <a href=\"%(group_url)s\">समूह पृष्ठ</a> से छोड़ सकते हैं।"
 
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:171
 msgid "Hey, we're missing you!"
@@ -644,25 +670,12 @@ msgstr "चुना हुआ विकल्प इस मतदान का 
 msgid "Provided score is outside of allowed range"
 msgstr "चुना हुआ स्कोर अनुमत सीमा के बाहर है"
 
-#: karrot/issues/serializers.py:132
-msgid "Topic cannot be empty"
-msgstr "विषय खाली नहीं हो सकता"
-
-#: karrot/issues/serializers.py:139
-msgid "Affected user is not part of that group"
-msgstr "प्रभावित उपयोगकर्ता उस समूह का हिस्सा नहीं है"
-
-#: karrot/issues/serializers.py:141
-msgid "A conflict resolution about that user has already been started"
-msgstr ""
-"उस उपयोगकर्ता के बारे में एक संघर्ष प्रस्ताव पहले ही शुरू किया जा चुका है"
-
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:5
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:170
 #: karrot/issues/templates/conflict_resolution_continued.subject.jinja2:1
 #, python-format
-msgid "Keep discussing about the conflict with %(affected_user_name)s"
-msgstr "%(affected_user_name)s के साथ संघर्ष के बारे में चर्चा करते रहें"
+msgid "The membership review of %(affected_user_name)s continues"
+msgstr ""
 
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:171
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:171
@@ -689,24 +702,22 @@ msgstr "चर्चा देखें"
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:212
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:219
 msgid ""
-"You are receiving this because you are subscribed to <strong>Conflict "
-"Resolution</strong> emails for this group."
+"You are receiving this because you are subscribed to <strong>Membership "
+"Review</strong> emails for this group."
 msgstr ""
-"आप इसे प्राप्त कर रहे हैं क्योंकि आप इस समूह के लिए <strong>संघर्ष "
-"समाधान</strong> ईमेल के सदस्य हैं।"
 
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:5
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:170
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.subject.jinja2:1
-msgid "Keep discussing about the conflict with you"
-msgstr "अपने साथ हुए संघर्ष के बारे में चर्चा करते रहें"
+msgid "Your membership review continues"
+msgstr ""
 
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:5
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:170
 #: karrot/issues/templates/new_conflict_resolution.subject.jinja2:1
 #, python-format
-msgid "A conflict resolution process was started with %(affected_user_name)s"
-msgstr "%(affected_user_name)s के साथ संघर्ष समाधान प्रक्रिया शुरू की गई थी"
+msgid "A membership review was started for %(affected_user_name)s"
+msgstr ""
 
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:178
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:178
@@ -722,8 +733,8 @@ msgstr "यह मतदान दौर %(expiry_date)s को समाप्�
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:5
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:170
 #: karrot/issues/templates/new_conflict_resolution_affected_user.subject.jinja2:1
-msgid "A conflict resolution process was started with you"
-msgstr "आपके साथ एक संघर्ष समाधान प्रक्रिया शुरू की गई थी"
+msgid "A review of your membership was started"
+msgstr ""
 
 #: karrot/offers/api.py:33
 msgid "You are not the owner of this offer"
@@ -789,20 +800,20 @@ msgstr ""
 msgid "Market"
 msgstr ""
 
-#: karrot/places/serializers.py:172
+#: karrot/places/serializers.py:190
 msgid "Set at least one week in advance"
 msgstr "कम से कम एक हफ्ते पहले सेट करें |"
 
-#: karrot/places/serializers.py:175
+#: karrot/places/serializers.py:193
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr "%(count)s सप्ताह से अधिक पहले से सेट न करें"
 
-#: karrot/places/serializers.py:227
+#: karrot/places/serializers.py:245
 msgid "You are already subscribed to this place"
 msgstr "आप इस स्थान पर पहले से ही सदस्य हैं"
 
-#: karrot/subscriptions/receivers.py:738
+#: karrot/subscriptions/receivers.py:767
 msgid "Push notifications are enabled!"
 msgstr ""
 
