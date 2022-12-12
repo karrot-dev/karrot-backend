@@ -272,22 +272,22 @@ msgstr ""
 msgid "You are not a participant in this thread"
 msgstr ""
 
-#: karrot/conversations/emails.py:263
+#: karrot/conversations/emails.py:265
 #, python-format
 msgid "New message in your application to %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:267
+#: karrot/conversations/emails.py:269
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:290
+#: karrot/conversations/emails.py:292
 #, python-format
 msgid "New message in membership review of %(user_name)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:305
+#: karrot/conversations/emails.py:307
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr ""
