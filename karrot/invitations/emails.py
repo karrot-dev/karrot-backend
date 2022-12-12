@@ -6,6 +6,7 @@ def prepare_emailinvitation_email(invitation):
     return prepare_email(
         template='emailinvitation',
         user=None,
+        group=invitation.group,
         tz=invitation.group.timezone,
         context={
             'group_name': invitation.group.name,

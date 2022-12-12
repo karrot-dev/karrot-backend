@@ -96,6 +96,7 @@ class CustomAnymailMessage(AnymailMessage):
 def prepare_email(
     template,
     user=None,
+    group=None,
     context=None,
     to=None,
     language=None,
@@ -115,6 +116,9 @@ def prepare_email(
             'user': user,
             'user_display_name': user.get_full_name(),
         })
+
+    if group:
+        default_context.update({'group_name': group.name})
 
     # Merge context, but fail if a default key was redefined
     redefined_keys = set(default_context.keys()).intersection(context.keys())
@@ -138,7 +142,16 @@ def prepare_email(
 
     subject, text_content, html_content = prepare_email_content(template, context, tz, language)
 
-    from_email = formataddr((settings.SITE_NAME, settings.DEFAULT_FROM_EMAIL))
+    # add group prefix to subject
+    if group:
+        subject = f"[{group.name}] {subject}"
+
+    if 'from_email' in kwargs:
+        from_email = kwargs.pop('from_email')
+        # add the via bit
+        from_email = f"{from_email} via {settings.SITE_NAME}"
+    else:
+        from_email = formataddr((settings.SITE_NAME, settings.DEFAULT_FROM_EMAIL))
 
     headers = {}
 

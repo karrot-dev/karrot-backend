@@ -22,6 +22,7 @@ def prepare_new_application_notification_email(user, application):
         template='new_application',
         from_email=from_email,
         user=user,
+        group=application.group,
         tz=application.group.timezone,
         reply_to=[reply_to],
         unsubscribe_url=unsubscribe_url,
@@ -44,6 +45,7 @@ def prepare_application_accepted_email(application):
     return prepare_email(
         template='application_accepted',
         user=application.user,
+        group=application.group,
         tz=application.group.timezone,
         context={
             'group': application.group,
@@ -57,6 +59,7 @@ def prepare_application_declined_email(application):
     return prepare_email(
         template='application_declined',
         user=application.user,
+        group=application.group,
         tz=application.group.timezone,
         context={
             'group': application.group,

@@ -34,6 +34,7 @@ def prepare_activity_notification_email(
     return prepare_email(
         template='activity_notification',
         user=user,
+        group=group,
         tz=group.timezone,
         context={
             'unsubscribe_url': unsubscribe_url,
@@ -66,6 +67,7 @@ def prepare_participant_removed_email(
     return prepare_email(
         template='participant_removed',
         user=user,
+        group=group,
         tz=group.timezone,
         context={
             'group': group,

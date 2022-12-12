@@ -21,6 +21,7 @@ def prepare_new_offer_notification_email(user, offer):
         template='new_offer',
         from_email=from_email,
         user=user,
+        group=offer.group,
         tz=offer.group.timezone,
         reply_to=[reply_to],
         unsubscribe_url=unsubscribe_url,

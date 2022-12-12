@@ -69,6 +69,7 @@ def prepare_group_summary_emails(group, context):
     return [
         prepare_email(
             template='group_summary',
+            group=group,
             tz=group.timezone,
             context={
                 'unsubscribe_url': group_summary_unsubscribe_url(member, group),
@@ -101,6 +102,7 @@ def prepare_user_inactive_in_group_email(user, group):
     return prepare_email(
         template='user_inactive_in_group',
         user=user,
+        group=group,
         tz=group.timezone,
         context={
             'group_name': group.name,
@@ -116,6 +118,7 @@ def prepare_user_removal_from_group_email(user, group):
     return prepare_email(
         template='user_removal_from_group',
         user=user,
+        group=group,
         tz=group.timezone,
         context={
             'group_name': group.name,
@@ -132,6 +135,7 @@ def prepare_user_became_editor_email(user, group):
     return prepare_email(
         template='user_became_editor',
         user=user,
+        group=group,
         tz=group.timezone,
         context={
             'group_name': group.name,
@@ -146,6 +150,7 @@ def prepare_user_lost_editor_role_email(user, group):
     return prepare_email(
         template='user_lost_editor_role',
         user=user,
+        group=group,
         tz=group.timezone,
         context={
             'group_name': group.name,
@@ -160,6 +165,7 @@ def prepare_user_got_role_email(user, group, role):
     return prepare_email(
         template='user_got_role',
         user=user,
+        group=group,
         tz=group.timezone,
         context={
             'group_name': group.name,
