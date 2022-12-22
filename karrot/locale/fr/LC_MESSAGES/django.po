@@ -11,6 +11,7 @@
 # Sandro Eiler <sandro.eiler@posteo.de>, 2020
 # Clément Chedmail <clement.chedmail@laposte.net>, 2020
 # Jean-Bernard Marcon, 2022
+# Téo Haÿs, 2022
 # 
 #, fuzzy
 msgid ""
@@ -18,7 +19,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
-"Last-Translator: Jean-Bernard Marcon, 2022\n"
+"Last-Translator: Téo Haÿs, 2022\n"
 "Language-Team: French (https://www.transifex.com/yunity-1/teams/68631/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -71,7 +72,7 @@ msgstr "%(activity_type)sà venir"
 #: karrot/activities/tasks.py:166
 #, python-format
 msgid "%(activity_type)s no longer available - %(date_time)s"
-msgstr ""
+msgstr "%(activity_type)sn'est plus disponible - %(date_time)s"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:5
 #: karrot/activities/templates/activity_notification.html.jinja2:186
@@ -131,11 +132,11 @@ msgstr "Cliquez ici pour vous désabonner"
 #: karrot/activities/templates/participant_removed.subject.jinja2:1
 #, python-format
 msgid "Your activities for %(place_name)s changed"
-msgstr ""
+msgstr "Vos activités pour %(place_name)sont changé"
 
 #: karrot/activities/templates/participant_removed.html.jinja2:124
 msgid "The following activities are no longer available for you"
-msgstr ""
+msgstr "Les activités suivantes ne sont plus disponibles pour vous"
 
 #: karrot/activities/templates/participant_removed.html.jinja2:140
 #, python-format
@@ -144,6 +145,9 @@ msgid ""
 "transform: uppercase; text-decoration: none; font-weight: 700; color: "
 "#4a982e;\">%(display_name)s</a>"
 msgstr ""
+"Message de <a class=\"message-author\" href=\"%(url)s\" style=\"text-"
+"transform: uppercase; text-decoration: none; font-weight: 700; color: "
+"#4a982e;\">%(display_name)s</a>"
 
 #: karrot/activities/templates/participant_removed.html.jinja2:163
 #: karrot/groups/templates/user_became_editor.html.jinja2:221
@@ -310,7 +314,7 @@ msgstr ""
 #: karrot/conversations/emails.py:290
 #, python-format
 msgid "New message in membership review of %(user_name)s"
-msgstr ""
+msgstr "Nouveau message sur la revue de candidature de %(user_name)s"
 
 #: karrot/conversations/emails.py:305
 #, python-format
@@ -523,7 +527,7 @@ msgstr "Utilise ton pouvoir à bon escient !"
 #: karrot/groups/templates/user_got_role.subject.jinja2:1
 #, python-format
 msgid "You received a new role in %(group_name)s!"
-msgstr ""
+msgstr "Vous avez reçu un nouveau rôle dans %(group_name)s!"
 
 #: karrot/groups/templates/user_got_role.html.jinja2:174
 #, python-format
@@ -531,6 +535,8 @@ msgid ""
 "You received enough trust from fellow group members to now have the role: "
 "%(role_name)s"
 msgstr ""
+"Les membres du groupe vous accordent assez de confiance pour avoir le rôle :"
+" %(role_name)s"
 
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:171
 msgid "Hey, we're missing you!"
@@ -700,7 +706,7 @@ msgstr "Le score suivant est en dehors des valeurs permises"
 #: karrot/issues/templates/conflict_resolution_continued.subject.jinja2:1
 #, python-format
 msgid "The membership review of %(affected_user_name)s continues"
-msgstr ""
+msgstr "La candidature de membre de %(affected_user_name)scontinue"
 
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:171
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:171
@@ -730,19 +736,21 @@ msgid ""
 "You are receiving this because you are subscribed to <strong>Membership "
 "Review</strong> emails for this group."
 msgstr ""
+"Vous recevez ça car vous êtes abonnés au emails <strong>Revues des "
+"membres</strong> pour ce groupe"
 
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:5
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:170
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.subject.jinja2:1
 msgid "Your membership review continues"
-msgstr ""
+msgstr "Votre revue de candidature continue"
 
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:5
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:170
 #: karrot/issues/templates/new_conflict_resolution.subject.jinja2:1
 #, python-format
 msgid "A membership review was started for %(affected_user_name)s"
-msgstr ""
+msgstr "Une revue de candidature a commencé pour %(affected_user_name)s"
 
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:178
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:178
@@ -759,7 +767,7 @@ msgstr "Ce tour de vote se termine le %(expiry_date)s."
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:170
 #: karrot/issues/templates/new_conflict_resolution_affected_user.subject.jinja2:1
 msgid "A review of your membership was started"
-msgstr ""
+msgstr "Une revue de votre candidature a commencé"
 
 #: karrot/offers/api.py:33
 msgid "You are not the owner of this offer"
@@ -841,7 +849,7 @@ msgstr "Tu es déjà enregistré sur ce lieu"
 
 #: karrot/subscriptions/receivers.py:767
 msgid "Push notifications are enabled!"
-msgstr ""
+msgstr "Les notifications push sont activées !"
 
 #: karrot/userauth/api.py:98 karrot/userauth/serializers.py:102
 #: karrot/userauth/serializers.py:151 karrot/userauth/serializers.py:172
