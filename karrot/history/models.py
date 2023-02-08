@@ -47,6 +47,9 @@ class HistoryTypus(enum.Enum):
     PLACE_TYPE_CREATE = 29
     PLACE_TYPE_MODIFY = 30
     PLACE_TYPE_DELETE = 31
+    AGREEMENT_CREATE = 32
+    AGREEMENT_MODIFY = 33
+    MEMBER_GOT_ROLE = 34
 
 
 class HistoryQuerySet(models.QuerySet):
@@ -94,12 +97,13 @@ class History(NicelyFormattedModel):
     class Meta:
         ordering = ['-date']
 
-    date = models.DateTimeField(default=timezone.now)
+    date = models.DateTimeField(default=timezone.now, db_index=True)
     typus = enum.EnumField(HistoryTypus)
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE)
     place = models.ForeignKey('places.Place', null=True, on_delete=models.CASCADE)
     activity = models.ForeignKey('activities.Activity', null=True, on_delete=models.SET_NULL)
     series = models.ForeignKey('activities.ActivitySeries', null=True, on_delete=models.SET_NULL)
+    agreement = models.ForeignKey('agreements.Agreement', null=True, on_delete=models.SET_NULL)
     users = models.ManyToManyField('users.User')
     payload = JSONField(null=True)
     before = JSONField(null=True)

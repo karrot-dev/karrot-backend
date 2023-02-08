@@ -1,5 +1,6 @@
 import html
 import os
+import random
 import re
 from collections import namedtuple
 
@@ -8,7 +9,6 @@ from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadReque
 from django.template.loader import render_to_string
 from django.template.utils import get_app_template_dirs
 from django.utils import timezone
-from django.views.decorators.clickjacking import xframe_options_exempt
 
 import karrot.applications.emails
 import karrot.issues.emails
@@ -19,7 +19,7 @@ from config import settings
 from karrot.applications.factories import ApplicationFactory
 from karrot.applications.models import Application
 from karrot.issues.factories import IssueFactory
-from karrot.conversations.models import ConversationMessage
+from karrot.conversations.models import ConversationMessage, Conversation
 from karrot.groups.emails import prepare_user_inactive_in_group_email, prepare_group_summary_emails, \
     prepare_group_summary_data, prepare_user_became_editor_email, prepare_user_removal_from_group_email
 from karrot.groups.models import Group
@@ -27,18 +27,21 @@ from karrot.invitations.models import Invitation
 from karrot.offers.emails import prepare_new_offer_notification_email
 from karrot.offers.factories import OfferFactory
 from karrot.offers.models import Offer
-from karrot.activities.emails import prepare_activity_notification_email
-from karrot.activities.models import Activity
+from karrot.activities.emails import prepare_activity_notification_email, prepare_participant_removed_email
+from karrot.activities.models import Activity, ActivitySeries
 from karrot.users.factories import VerifiedUserFactory
 from karrot.users.models import User
 from karrot.utils.tests.fake import faker
+from karrot.conversations.emails import prepare_mention_notification
 
 basedir = os.path.abspath(os.path.join(settings.BASE_DIR, 'karrot'))
 
 MockVerificationCode = namedtuple('VerificationCode', ['code'])
 
 
-def random_user():
+def random_user(group=None):
+    if group:
+        return group.members.order_by('?').first()
     return User.objects.order_by('?').first()
 
 
@@ -52,6 +55,10 @@ def shuffle_groups():
 
 def random_issue():
     return IssueFactory(group=random_group(), created_by=random_user(), affected_user=random_user())
+
+
+def random_conversation():
+    return Conversation.objects.order_by('?').first()
 
 
 def random_message():
@@ -102,6 +109,21 @@ def get_or_create_offer():
         offer = OfferFactory(group=group, user=user, images=[image_path])
 
     return offer
+
+
+def get_or_create_mention():
+    group = random_group()
+    author = random_user(group)
+    mentioned_user = random_user(group)
+    conversation = group.conversation
+
+    # insert a mention into some faker text
+    parts = faker.text().split(' ')
+    parts.insert(random.randint(0, len(parts)), '@{}'.format(mentioned_user.username))
+    content = ' '.join(parts)
+
+    message = conversation.messages.create(author=author, content=content)
+    return message.mentions.first()
 
 
 class Handlers:
@@ -200,7 +222,8 @@ class Handlers:
         return karrot.users.emails.prepare_passwordreset_success_email(user=random_user())
 
     def activity_notification(self):
-        user = random_user()
+        group = random_group()
+        user = random_user(group)
 
         activity1 = Activity.objects.order_by('?').first()
         activity2 = Activity.objects.order_by('?').first()
@@ -222,6 +245,22 @@ class Handlers:
             tomorrow_not_full=[activity4],
         )
 
+    def participant_removed(self):
+        group = random_group()
+        user = random_user(group)
+        removed_by = random_user(group)
+
+        series = ActivitySeries.objects.order_by('?').first()
+        activities = Activity.objects.order_by('?')[:3]
+
+        return prepare_participant_removed_email(
+            user=user,
+            place=series.place,
+            activities=activities,  # not exactly what the template gets passed in real-life, but close enough
+            removed_by=removed_by,
+            message=faker.text(),
+        )
+
     def user_became_editor(self):
         return prepare_user_became_editor_email(user=random_user(), group=random_group())
 
@@ -234,18 +273,18 @@ class Handlers:
     def new_offer(self):
         return prepare_new_offer_notification_email(user=random_user(), offer=get_or_create_offer())
 
+    def mention_notification(self):
+        return prepare_mention_notification(get_or_create_mention())
+
 
 handlers = Handlers()
 
 
-@xframe_options_exempt
 def list_templates(request):
     template_dirs = [str(path) for path in get_app_template_dirs('templates') if re.match(r'.*/karrot/.*', str(path))]
 
-    template_names = set()
-
-    templates = {}
-
+    # collect template files
+    template_files = {}
     for directory in template_dirs:
         for directory, dirnames, filenames in os.walk(directory):
             relative_dir = directory[len(basedir) + 1:]
@@ -257,8 +296,6 @@ def list_templates(request):
                     name = re.sub(r'\..*$', '', os.path.basename(path))
 
                     if name != 'template_preview_list':
-                        template_names.add(name)
-
                         formats = []
 
                         for idx, s in enumerate(['subject', 'text', 'html']):
@@ -270,21 +307,32 @@ def list_templates(request):
                         # only include if some formats were defined (even empty ones would end up with autotext...)
                         if len(formats) > 1:
                             formats.append('raw')
+                            template_files[name] = formats
 
-                            templates[name] = {
-                                'name': name,
-                                'has_handler': name in dir(handlers),
-                                'formats': formats,
-                            }
+    templates = {}
+
+    for name in dir(handlers):
+        if name.startswith('_'):
+            continue
+        templates[name] = {
+            'name': name,
+            'has_handler': True,  # because we are listing the handlers :)
+            'formats': template_files.get(name, []),
+        }
+
+    missing_handlers = [name for name in template_files.keys() if name not in templates]
 
     return HttpResponse(
         render_to_string(
-            'template_preview_list.jinja2', {'templates': sorted(templates.values(), key=lambda t: t['name'])}
+            'template_preview_list.jinja2', {
+                'templates': templates.values(),
+                'missing_handlers': missing_handlers,
+                'views_filename': __file__,
+            }
         )
     )
 
 
-@xframe_options_exempt
 def show_template(request):
     name = request.GET.get('name')
     format = request.GET.get('format', 'html')

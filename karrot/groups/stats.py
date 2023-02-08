@@ -12,6 +12,12 @@ def group_tags(group):
     }
 
 
+def trust_tags(trust):
+    tags = group_tags(trust.membership.group)
+    tags.update({'trust_role': trust.role})
+    return tags
+
+
 def group_joined(group):
     write_points([{
         'measurement': 'karrot.events',
@@ -79,20 +85,20 @@ def group_summary_email(group, **extra_fields):
     }])
 
 
-def trust_given(group):
+def trust_given(trust):
     write_points([{
         'measurement': 'karrot.events',
-        'tags': group_tags(group),
+        'tags': trust_tags(trust),
         'fields': {
             'trust_given': 1
         },
     }])
 
 
-def trust_revoked(group):
+def trust_revoked(trust):
     write_points([{
         'measurement': 'karrot.events',
-        'tags': group_tags(group),
+        'tags': trust_tags(trust),
         'fields': {
             'trust_revoked': 1
         },

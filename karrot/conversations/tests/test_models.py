@@ -86,6 +86,64 @@ class ConversationModelTests(TestCase):
             ConversationParticipant.objects.create(conversation=conversation, user=user)
 
 
+class ConversationMessageMentionTests(TestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.user2 = UserFactory()
+        self.group = GroupFactory(members=[self.user, self.user2])
+        self.conversation = self.group.conversation
+
+        self.user_in_other_group = UserFactory()
+        self.other_group = GroupFactory(members=[self.user_in_other_group])
+
+    def create_message(self, **kwargs):
+        return ConversationMessage.objects.create(
+            **kwargs,
+            conversation=self.conversation,
+            author=self.user,
+        )
+
+    def test_mentions(self):
+        message = self.create_message(content='some message with a mention for @{} yay!'.format(self.user2.username))
+        self.assertEqual(message.mentions.count(), 1)
+        self.assertEqual(message.mentions.first().user, self.user2)
+
+    def test_mentions_for_user_in_other_group(self):
+        message = self.create_message(content='hey @{} in other group!'.format(self.user_in_other_group.username))
+        self.assertEqual(message.mentions.count(), 0)
+
+    def test_mentions_for_non_user(self):
+        message = self.create_message(content='hello @probablynotauser how are you?', )
+        self.assertEqual(message.mentions.count(), 0)
+
+    def test_update_removes_mentions(self):
+        message = self.create_message(content='some message with a mention for @{} yay!'.format(self.user2.username))
+        self.assertEqual(message.mentions.count(), 1)
+        message.content = 'nobody to mention any more'
+        message.save()
+        self.assertEqual(message.mentions.count(), 0)
+
+    def test_update_adds_mentions(self):
+        message = self.create_message(content='no mentions to see here', )
+        self.assertEqual(message.mentions.count(), 0)
+        message.content = 'oh actually I can mention @{} now'.format(self.user2.username)
+        message.save()
+        self.assertEqual(message.mentions.count(), 1)
+
+    def test_creates_bell_notification(self):
+        self.assertEqual(self.user2.notification_set.filter(type='mention').count(), 0)
+        message = self.create_message(content='some message with a mention for @{} yay!'.format(self.user2.username))
+        self.assertEqual(self.user2.notification_set.filter(type='mention').count(), 1)
+
+    def test_removes_bell_notification(self):
+        self.assertEqual(self.user2.notification_set.filter(type='mention').count(), 0)
+        message = self.create_message(content='some message with a mention for @{} yay!'.format(self.user2.username))
+        self.assertEqual(self.user2.notification_set.filter(type='mention').count(), 1)
+        message.content = 'no mentions'
+        message.save()
+        self.assertEqual(self.user2.notification_set.filter(type='mention').count(), 0)
+
+
 class ConversationThreadModelTests(TestCase):
     def setUp(self):
         self.user = UserFactory()
@@ -186,12 +244,11 @@ class TestPlaceConversations(TestCase):
     def test_reply_email_notifications(self):
         with execute_scheduled_tasks_immediately():
             message = self.conversation.messages.create(author=self.user, content='asdf')
-            mail.outbox = []
             reply = self.conversation.messages.create(author=self.user2, thread=message, content='my reply')
 
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertIn(message.content, mail.outbox[0].subject)
-        self.assertIn(reply.content, mail.outbox[0].body)
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertIn(message.content, mail.outbox[1].subject)
+        self.assertIn(reply.content, mail.outbox[1].body)
 
 
 class TestActivityConversations(TestCase):
@@ -221,12 +278,17 @@ class TestActivityConversations(TestCase):
 class TestIssueConversations(TestCase):
     def setUp(self):
         self.user = VerifiedUserFactory()
+        self.affected_user = VerifiedUserFactory()
         self.more_users = [VerifiedUserFactory() for _ in range(2)]
         self.group = GroupFactory(members=[self.user, *self.more_users])
         for membership in self.group.groupmembership_set.all():
             membership.add_notification_types([GroupNotificationType.CONFLICT_RESOLUTION])
             membership.save()
-        self.issue = IssueFactory(group=self.group, created_by=self.user)
+        self.issue = IssueFactory(
+            group=self.group,
+            created_by=self.user,
+            affected_user=self.affected_user,
+        )
         self.conversation = self.issue.conversation
         mail.outbox = []
 
@@ -234,10 +296,12 @@ class TestIssueConversations(TestCase):
         with execute_scheduled_tasks_immediately():
             ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
 
-        self.assertEqual(len(mail.outbox), 2)
+        # only the affected user should get it
+        # (the author won't get their own message, nor will the other users)
+        self.assertEqual(len(mail.outbox), 1)
 
         actual_recipients = set(m.to[0] for m in mail.outbox)
-        expected_recipients = set(u.email for u in self.more_users)
+        expected_recipients = {self.issue.affected_user.email}
 
         self.assertEqual(actual_recipients, expected_recipients)
 

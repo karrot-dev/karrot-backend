@@ -51,17 +51,31 @@ class ExtractPaginationMixin(object):
 
 
 @contextmanager
-def execute_scheduled_tasks_immediately():
+def execute_scheduled_tasks_immediately(wait_till_end_of_block=True):
+    """
+    Collects tasks scheduled within the block, then runs them in order at the end of the block.
+    Or, if wait_till_end_of_block=True, will run them immediately when called.
+    """
+    tasks = []
+
     @signal(SIGNAL_SCHEDULED)
     def task_scheduled_handler(signal, task, exc=None):
-        task.execute()
+        if wait_till_end_of_block:
+            tasks.append(task)
+        else:
+            task.execute()
 
     yield
+
+    def sort_key(task):
+        return task.eta
+
+    if wait_till_end_of_block:
+        for task in sorted(tasks, key=sort_key):
+            task.execute()
 
     disconnect_signal(task_scheduled_handler)
 
 
-@contextmanager
-def run_deferred_tasks(self):
-    with execute_scheduled_tasks_immediately(), self.captureOnCommitCallbacks(execute=True):
-        yield
+def pluck(entries, key):
+    return [entry[key] for entry in entries]

@@ -107,10 +107,13 @@ class TestPublicUserProfilesAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), len(self.users))
         user_response = next(r for r in response.data if r['id'] == self.user.id)
-        self.assertEqual(user_response, {
-            'display_name': self.user.display_name,
-            'id': self.user.id,
-        })
+        self.assertEqual(
+            user_response, {
+                'display_name': self.user.display_name,
+                'username': self.user.username,
+                'id': self.user.id,
+            }
+        )
         self.assertFalse(any(r['id'] == self.user_not_in_conversation.id for r in response.data))
 
     def test_access_forbidden_if_not_logged_in(self):

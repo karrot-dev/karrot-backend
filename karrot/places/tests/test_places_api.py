@@ -167,6 +167,16 @@ class TestPlacesAPI(APITestCase, ExtractPaginationMixin):
         response = self.client.patch(self.place_url, {'status': 'foobar'}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_default_view(self):
+        self.client.force_login(user=self.member)
+        response = self.client.patch(self.place_url, {'default_view': 'wall'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_invalid_default_view(self):
+        self.client.force_login(user=self.member)
+        response = self.client.patch(self.place_url, {'default_view': 'ceiling'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_change_group_as_member_in_one(self):
         self.client.force_login(user=self.member)
         response = self.client.patch(self.place_url, {'group': self.different_group.id}, format='json')
@@ -243,7 +253,7 @@ class TestPlaceChangesActivitySeriesAPI(APITestCase, ExtractPaginationMixin):
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
         self.place_url = self.url + str(self.place.id) + '/'
-        self.series = ActivitySeriesFactory(max_participants=3, place=self.place)
+        self.series = ActivitySeriesFactory(place=self.place)
 
     def test_reduce_weeks_in_advance(self):
         self.client.force_login(user=self.member)

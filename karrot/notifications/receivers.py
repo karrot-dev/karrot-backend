@@ -13,7 +13,7 @@ from pytz import utc
 from karrot.applications.models import Application, ApplicationStatus
 from karrot.issues.models import Issue, Voting, OptionTypes
 from karrot.notifications.models import Notification, NotificationType, NotificationMeta
-from karrot.groups.models import GroupMembership
+from karrot.groups.models import GroupMembership, get_default_roles
 from karrot.groups.roles import GROUP_EDITOR
 from karrot.invitations.models import Invitation
 from karrot.activities.models import Activity, ActivityParticipant
@@ -22,34 +22,63 @@ from karrot.users.models import User
 
 
 @receiver(pre_save, sender=GroupMembership)
-def user_became_editor(sender, instance, **kwargs):
+def user_got_role(sender, instance, **kwargs):
     membership = instance
-    if GROUP_EDITOR not in membership.roles:
+    if not membership.id:
+        # membership was just created, skip notifications
         return
 
-    if membership.id:
+    if membership.roles == get_default_roles():
+        return
+
+    old = GroupMembership.objects.get(id=membership.id)
+    new_roles = set(membership.roles).difference(old.roles)
+
+    if len(new_roles) < 1:
         # skip if role was not changed
-        old = GroupMembership.objects.get(id=membership.id)
-        if GROUP_EDITOR in old.roles:
-            return
+        return
 
-    Notification.objects.create(
-        type=NotificationType.YOU_BECAME_EDITOR.value,
-        user=membership.user,
-        context={
-            'group': membership.group.id,
-        },
-    )
-
-    for member in membership.group.members.exclude(id=membership.user_id):
+    if GROUP_EDITOR in new_roles:
         Notification.objects.create(
-            type=NotificationType.USER_BECAME_EDITOR.value,
-            user=member,
+            type=NotificationType.YOU_BECAME_EDITOR.value,
+            user=membership.user,
             context={
                 'group': membership.group.id,
-                'user': membership.user.id,
             },
         )
+
+        for member in membership.group.members.exclude(id=membership.user_id):
+            Notification.objects.create(
+                type=NotificationType.USER_BECAME_EDITOR.value,
+                user=member,
+                context={
+                    'group': membership.group.id,
+                    'user': membership.user.id,
+                },
+            )
+
+    other_roles = new_roles.difference([GROUP_EDITOR])
+
+    for role in other_roles:
+        Notification.objects.create(
+            type=NotificationType.YOU_GOT_ROLE.value,
+            user=membership.user,
+            context={
+                'group': membership.group.id,
+                'role': role,
+            },
+        )
+
+        for member in membership.group.members.exclude(id=membership.user_id):
+            Notification.objects.create(
+                type=NotificationType.USER_GOT_ROLE.value,
+                user=member,
+                context={
+                    'group': membership.group.id,
+                    'user': membership.user.id,
+                    'role': role,
+                },
+            )
 
 
 @receiver(post_save, sender=Application)

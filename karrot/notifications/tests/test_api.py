@@ -3,8 +3,12 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from karrot.activities.factories import ActivityFactory
+from karrot.applications.factories import ApplicationFactory
 from karrot.groups.factories import GroupFactory
+from karrot.issues.factories import IssueFactory
 from karrot.notifications.models import Notification, NotificationType
+from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import UserFactory
 
@@ -21,14 +25,60 @@ class TestNotificationsAPI(APITestCase, ExtractPaginationMixin):
             user=self.user, type=NotificationType.USER_BECAME_EDITOR.value, context={'group': self.group.id}
         )
 
-    def test_list_with_meta(self):
+    def test_list_with_meta_efficiently(self):
         self.create_any_notification()
         self.client.force_login(self.user)
 
-        response = self.get_results(notification_url)
+        with self.assertNumQueries(3):
+            response = self.get_results(notification_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['notifications']), 1)
         self.assertEqual(response.data['meta'], {'marked_at': '0001-01-01T00:00:00Z'})
+
+    def test_list_with_meta_and_related_data(self):
+        self.create_any_notification()
+        place = PlaceFactory(group=self.group)
+        activity = ActivityFactory(place=place)
+        Notification.objects.create(
+            user=self.user,
+            type=NotificationType.ACTIVITY_UPCOMING,
+            context={
+                'group': self.group.id,
+                'activity': activity.id
+            }
+        )
+        issue = IssueFactory(group=self.group)
+        Notification.objects.create(
+            user=self.user,
+            type=NotificationType.CONFLICT_RESOLUTION_CREATED,
+            context={
+                'group': self.group.id,
+                'issue': issue.id
+            }
+        )
+        application = ApplicationFactory(group=self.group, user=UserFactory())
+        Notification.objects.create(
+            user=self.user,
+            type=NotificationType.NEW_APPLICANT,
+            context={
+                'group': self.group.id,
+                'application': application.id
+            }
+        )
+
+        self.client.force_login(self.user)
+
+        with self.assertNumQueries(12):
+            response = self.get_results(notification_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['notifications']), 4)
+        self.assertEqual(response.data['meta'], {'marked_at': '0001-01-01T00:00:00Z'})
+        self.assertEqual(len(response.data['applications']), 1)
+        self.assertEqual(response.data['applications'][0]['id'], application.id)
+        self.assertEqual(len(response.data['activities']), 1)
+        self.assertEqual(response.data['activities'][0]['id'], activity.id)
+        self.assertEqual(len(response.data['issues']), 1)
+        self.assertEqual(response.data['issues'][0]['id'], issue.id)
 
     def test_list_with_already_marked(self):
         self.create_any_notification()

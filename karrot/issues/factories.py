@@ -24,7 +24,7 @@ class IssueFactory(DjangoModelFactory):
     @post_generation
     def add_members(self, create, extracted, **kwargs):
         GroupMembership.objects.update_or_create(
-            {'roles': [roles.GROUP_EDITOR]},
+            {'roles': [roles.GROUP_MEMBER, roles.GROUP_EDITOR]},
             user=self.created_by,
             group=self.group,
         )

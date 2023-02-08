@@ -12,17 +12,19 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 
+from karrot.agreements.api import AgreementViewSet
 from karrot.applications.api import ApplicationViewSet
 from karrot.bootstrap.api import BootstrapViewSet, ConfigViewSet
 from karrot.community_feed.api import CommunityFeedViewSet
 from karrot.conversations.api import ConversationMessageViewSet, ConversationViewSet
-from karrot.groups.api import GroupViewSet, AgreementViewSet, GroupInfoViewSet
+from karrot.groups.api import GroupViewSet, GroupInfoViewSet
 from karrot.history.api import HistoryViewSet
 from karrot.invitations.api import InvitationsViewSet, InvitationAcceptViewSet
 from karrot.issues.api import IssuesViewSet
 from karrot.notifications.api import NotificationViewSet
 from karrot.offers.api import OfferViewSet
-from karrot.activities.api import ActivityViewSet, ActivitySeriesViewSet, FeedbackViewSet, ActivityTypeViewSet
+from karrot.activities.api import ActivityViewSet, ActivitySeriesViewSet, FeedbackViewSet, ActivityTypeViewSet, \
+    PublicActivityViewSet
 from karrot.places.api import PlaceViewSet, PlaceTypeViewSet
 from karrot.stats.api import FrontendStatsView, ActivityHistoryStatsViewSet
 from karrot.status.api import StatusView
@@ -42,9 +44,10 @@ router.register('bootstrap', BootstrapViewSet, basename='bootstrap')
 router.register('groups', GroupViewSet)
 router.register('groups-info', GroupInfoViewSet, basename='groupinfo')
 router.register('applications', ApplicationViewSet, basename='application')
-router.register('agreements', AgreementViewSet)
 router.register('community-feed', CommunityFeedViewSet, basename='community-feed')
 router.register('issues', IssuesViewSet, basename='issues')
+
+router.register('agreements', AgreementViewSet)
 
 # User endpoints
 router.register('users', UserViewSet)
@@ -54,6 +57,7 @@ router.register('users-info', UserInfoViewSet)
 router.register('activity-series', ActivitySeriesViewSet)
 router.register('activities', ActivityViewSet)
 router.register('activity-types', ActivityTypeViewSet)
+router.register('public-activities', PublicActivityViewSet)
 
 # Conversation/Message endpoints
 router.register('conversations', ConversationViewSet)

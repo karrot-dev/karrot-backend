@@ -1,8 +1,13 @@
+import uuid
 from typing import List
 
 import dateutil.rrule
 from datetime import timedelta, datetime
 
+from django.core.files.uploadedfile import UploadedFile
+from django.db.models import F
+from django.db.models.functions import Lower
+from django.forms import model_to_dict
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from icalendar import vCalAddress, vText
@@ -13,18 +18,23 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.fields import DateTimeField, Field, CharField
+from rest_framework.fields import CharField, DateTimeField, Field
+from rest_framework.serializers import Serializer
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework_csv.renderers import CSVRenderer
+from versatileimagefield.serializers import VersatileImageFieldSerializer
 
-from karrot.base.base_models import CustomDateTimeTZRange
+from karrot.activities.tasks import notify_participant_removals
+from karrot.base.base_models import CustomDateTimeTZRange, Tstzrange
 from karrot.history.models import History, HistoryTypus
 from karrot.activities import stats
 from karrot.activities.models import (
-    Activity as ActivityModel, Feedback as FeedbackModel, ActivitySeries as ActivitySeriesModel, ActivityType
+    Activity as ActivityModel, Feedback as FeedbackModel, ActivitySeries as ActivitySeriesModel, ActivityType,
+    ActivityParticipant, ParticipantType, SeriesParticipantType, default_duration, Activity
 )
 from karrot.utils.date_utils import csv_datetime
 from karrot.utils.misc import find_changed
+from karrot.places.serializers import PublicPlaceSerializer
 
 
 class ActivityTypeSerializer(serializers.ModelSerializer):
@@ -103,12 +113,6 @@ class ActivityTypeSerializer(serializers.ModelSerializer):
         return activity_type
 
 
-class ActivityHistorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ActivityModel
-        fields = '__all__'
-
-
 class ActivityTypeHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ActivityType
@@ -168,7 +172,91 @@ class DateTimeRangeField(serializers.ListField):
         return CustomDateTimeTZRange(lower, upper)
 
 
+class ActivityParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ActivityParticipant
+        fields = [
+            'user',
+            'participant_type',
+            'created_at',
+        ]
+        read_only_fields = [
+            'user',
+            'participant_type',
+            'created_at',
+        ]
+
+
+class ParticipantTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ParticipantType
+        fields = [
+            'id',
+            'description',
+            'max_participants',
+            'series_participant_type',
+            'role',
+            '_removed',
+        ]
+
+    id = serializers.IntegerField(required=False)
+    _removed = serializers.BooleanField(required=False)
+
+
+class ActivityHistorySerializer(serializers.ModelSerializer):
+    participant_types = ParticipantTypeSerializer(many=True)
+
+    class Meta:
+        model = ActivityModel
+        fields = '__all__'
+
+
+class SeriesParticipantTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SeriesParticipantType
+        fields = [
+            'id',
+            'description',
+            'max_participants',
+            'role',
+            '_removed',
+        ]
+
+    id = serializers.IntegerField(required=False)
+    _removed = serializers.BooleanField(required=False)
+
+
+class PublicActivitySerializer(serializers.ModelSerializer):
+    banner_image_urls = VersatileImageFieldSerializer(sizes='activity_banner_image', source='banner_image')
+    place = PublicPlaceSerializer()
+    activity_type = ActivityTypeSerializer()
+    date = DateTimeRangeField()
+
+    class Meta:
+        model = ActivityModel
+        fields = [
+            'public_id',
+            'activity_type',
+            'date',
+            'place',
+            'description',
+            'is_disabled',
+            'has_duration',
+            'is_done',
+            'is_public',
+            'banner_image_urls',
+        ]
+        read_only_fields = fields
+
+
 class ActivitySerializer(serializers.ModelSerializer):
+    banner_image = VersatileImageFieldSerializer(
+        sizes='activity_banner_image', required=False, allow_null=True, write_only=True
+    )
+    banner_image_urls = VersatileImageFieldSerializer(
+        sizes='activity_banner_image', source='banner_image', read_only=True
+    )
+
     class Meta:
         model = ActivityModel
         fields = [
@@ -177,7 +265,7 @@ class ActivitySerializer(serializers.ModelSerializer):
             'date',
             'series',
             'place',
-            'max_participants',
+            'participant_types',
             'participants',
             'description',
             'feedback_due',
@@ -186,39 +274,55 @@ class ActivitySerializer(serializers.ModelSerializer):
             'is_disabled',
             'has_duration',
             'is_done',
+            'is_public',
+            'public_id',
+            'banner_image',
+            'banner_image_urls',
         ]
         read_only_fields = [
             'id',
             'series',
-            'participants',
             'is_done',
+            'banner_image_urls',
+            'public_id',
         ]
 
-    participants = serializers.SerializerMethodField()
+    participants = ActivityParticipantSerializer(
+        read_only=True,
+        source='activityparticipant_set',
+        many=True,
+    )
+    participant_types = ParticipantTypeSerializer(many=True)
+
     feedback_dismissed_by = serializers.SerializerMethodField()
     feedback_due = DateTimeFieldWithTimezone(read_only=True, allow_null=True)
 
     date = DateTimeRangeField()
 
-    def get_participants(self, activity) -> List[int]:
-        return [c.user_id for c in activity.activityparticipant_set.all()]
-
     def get_feedback_dismissed_by(self, activity) -> List[int]:
         # we are filtering in python to make use of prefetched data
         return [c.user_id for c in activity.activityparticipant_set.all() if c.feedback_dismissed]
 
-    def save(self, **kwargs):
-        return super().save(last_changed_by=self.context['request'].user)
-
     def create(self, validated_data):
-        activity = super().create(validated_data)
+        participant_types_data = validated_data.pop('participant_types')
+        if 'is_public' in validated_data and validated_data['is_public']:
+            validated_data['public_id'] = uuid.uuid4()
+        activity = super().create({**validated_data, 'last_changed_by': self.context['request'].user})
+        for participant_type_data in participant_types_data:
+            # creating the nested data
+            activity.participant_types.create(**participant_type_data)
+
         History.objects.create(
             typus=HistoryTypus.ACTIVITY_CREATE,
             group=activity.place.group,
             place=activity.place,
             activity=activity,
             users=[self.context['request'].user],
-            payload=self.initial_data,
+            payload={
+                # cannot serialize the UploadedFile data...
+                k: self.initial_data[k]
+                for k in self.initial_data.keys() if not isinstance(self.initial_data[k], UploadedFile)
+            },
             after=ActivityHistorySerializer(activity).data,
         )
         activity.place.group.refresh_active_status()
@@ -244,6 +348,17 @@ class ActivitySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Duration must be at least one second.')
         return date
 
+    def validate_participant_types(self, participant_types):
+        for participant_type in participant_types:
+            series_participant_type = participant_type.get('series_participant_type', None)
+            if series_participant_type:
+                if not self.instance:
+                    # invalid to specify this, as these are only created by a karrot task, not by API
+                    raise serializers.ValidationError('Cannot specify series_participant_type for new activity.')
+                if series_participant_type.activity_series_id != self.instance.series_id:
+                    raise serializers.ValidationError('Wrong series.')
+        return participant_types
+
     def validate(self, data):
         def get_instance_attr(field):
             if self.instance is None:
@@ -262,48 +377,123 @@ class ActivitySerializer(serializers.ModelSerializer):
 class ActivityUpdateSerializer(ActivitySerializer):
     class Meta:
         model = ActivityModel
-        fields = ActivitySerializer.Meta.fields
+        fields = ActivitySerializer.Meta.fields + ['updated_message']
         read_only_fields = ActivitySerializer.Meta.read_only_fields + ['place']
 
     date = DateTimeRangeField()
+    updated_message = serializers.CharField(write_only=True, required=False)
 
-    def save(self, **kwargs):
-        activity = self.instance
-        changed_data = find_changed(activity, self.validated_data)
-        self._validated_data = changed_data
-        skip_update = len(self.validated_data.keys()) == 0
+    @transaction.atomic()
+    def update(self, activity, validated_data):
+        # this is not part of the activity data itself, so pop it out...
+        updated_message = validated_data.pop('updated_message', None)
+        validated_data = find_changed(activity, validated_data)
+        skip_update = len(validated_data.keys()) == 0
         if skip_update:
-            return self.instance
+            return activity
 
         before_data = ActivityHistorySerializer(activity).data
-        activity = super().save(**kwargs)
+
+        removed_users = []
+
+        participant_types = validated_data.get('participant_types', None)
+        if participant_types:
+            for entry in participant_types:
+                pk = entry.pop('id', None)
+                if pk:
+                    # existing participant type
+                    participant_type = ParticipantType.objects.get(pk=pk)
+                    if entry.get('_removed', False):
+                        # existing participant type being deleted
+                        participants = activity.activityparticipant_set \
+                            .filter(participant_type=participant_type)
+
+                        for participant in participants:
+                            removed_users.append(participant.user)
+
+                        participants.delete()
+                        participant_type.delete()
+                    else:
+                        # existing participant type being edited
+                        role = entry.get('role', None)
+                        if role and role != participant_type.role:
+                            # find all the participants who are missing the new role, and remove them...
+                            users_with_new_role = activity.place.group.members.filter(
+                                groupmembership__roles__contains=[role]
+                            )
+                            participants = activity.activityparticipant_set \
+                                .filter(participant_type=participant_type) \
+                                .exclude(user__in=users_with_new_role)
+                            for participant in participants:
+                                removed_users.append(participant.user)
+
+                            participants.delete()
+
+                        # update the rest of the fields
+                        ParticipantType.objects.filter(pk=pk).update(**entry)
+                else:
+                    # new participant type \o/
+                    ParticipantType.objects.create(activity=activity, **entry)
+
+        update_data = validated_data.copy()
+
+        if 'is_public' in update_data and update_data['is_public'] and not activity.public_id:
+            # create public id
+            update_data['public_id'] = uuid.uuid4()
+
+        update_data.pop('participant_types', None)
+        update_data['last_changed_by'] = self.context['request'].user
+        activity = super().update(activity, update_data)
+
+        validated_data.pop('banner_image', None)  # can't store this in history, so remove it
+
         after_data = ActivityHistorySerializer(activity).data
+
+        history = None
 
         if before_data != after_data:
             typus_list = []
-            if 'is_disabled' in changed_data:
-                if changed_data['is_disabled']:
+            if 'is_disabled' in validated_data:
+                if validated_data['is_disabled']:
                     typus_list.append(HistoryTypus.ACTIVITY_DISABLE)
                     stats.activity_disabled(activity)
                 else:
                     typus_list.append(HistoryTypus.ACTIVITY_ENABLE)
                     stats.activity_enabled(activity)
 
-            if len(set(changed_data.keys()).difference(['is_disabled'])) > 0:
+            if len(set(validated_data.keys()).difference(['is_disabled'])) > 0:
                 typus_list.append(HistoryTypus.ACTIVITY_MODIFY)
 
             for typus in typus_list:
-                History.objects.create(
+                created_history = History.objects.create(
                     typus=typus,
                     group=activity.place.group,
                     place=activity.place,
                     activity=activity,
                     users=[self.context['request'].user],
                     payload={k: self.initial_data.get(k)
-                             for k in changed_data.keys()},
+                             for k in validated_data.keys()},
                     before=before_data,
                     after=after_data,
+                    message=updated_message,
                 )
+                if typus is HistoryTypus.ACTIVITY_MODIFY:
+                    history = created_history
+
+        if len(removed_users) > 0:
+            notify_participant_removals(
+                activity_type_id=activity.activity_type.id,
+                place_id=activity.place.id,
+                activities_data=[model_to_dict(activity)],
+                participants=[{
+                    'user': user.id,
+                    'activity': activity.id,
+                } for user in removed_users],
+                message=updated_message,
+                removed_by_id=self.context['request'].user.id,
+                history_id=history.id if history else None,
+            )
+
         activity.place.group.refresh_active_status()
 
         return activity
@@ -319,6 +509,52 @@ class ActivityUpdateSerializer(ActivitySerializer):
         return has_duration
 
 
+class ActivityUpdateCheckSerializer(Serializer):
+    # request fields
+    participant_types = ParticipantTypeSerializer(many=True, write_only=True, required=False)
+
+    # response fields
+    users = serializers.ListSerializer(read_only=True, child=serializers.IntegerField())
+
+    def update(self, activity, validated_data):
+
+        will_remove_user_ids = set()
+
+        participant_types = validated_data.get('participant_types', None)
+        if participant_types:
+            for entry in participant_types:
+                pk = entry.pop('id', None)
+                if pk:
+                    # existing participant type
+                    participant_type = ParticipantType.objects.get(pk=pk)
+                    if entry.get('_removed', False):
+                        # existing participant type would be deleted
+                        participants = activity.activityparticipant_set \
+                            .filter(participant_type=participant_type)
+                        for participant in participants:
+                            will_remove_user_ids.add(participant.user.id)
+                    else:
+                        # existing participant type being edited
+                        role = entry.get('role', None)
+                        if role and role != participant_type.role:
+                            # find all the participants who are missing the new role
+                            users_with_new_role = activity.place.group.members.filter(
+                                groupmembership__roles__contains=[role]
+                            )
+                            participants = activity.activityparticipant_set \
+                                .filter(participant_type=participant_type) \
+                                .exclude(user__in=users_with_new_role)
+                            for participant in participants:
+                                will_remove_user_ids.add(participant.user.id)
+
+        return {
+            'users': will_remove_user_ids,
+        }
+
+    def create(self, validated_data):
+        pass
+
+
 class ActivityICSSerializer(serializers.ModelSerializer):
     """serializes an activity to the ICS format, in conjunction with the ICSEventRenderer.
 
@@ -328,13 +564,15 @@ class ActivityICSSerializer(serializers.ModelSerializer):
         model = ActivityModel
         fields = [
             'uid', 'dtstamp', 'summary', 'description', 'dtstart', 'dtend', 'transp', 'categories', 'location', 'geo',
-            'attendee'
+            'attendee', 'status'
         ]
 
     # date of generation of the ICS representation of the event
     dtstamp = serializers.SerializerMethodField()
     # unique id, of the form uid@domain.com
     uid = serializers.SerializerMethodField()
+    # status, one of "CONFIRMED", "TENTATIVE" or "CANCELLED"
+    status = serializers.SerializerMethodField()
 
     # title (short description)
     summary = serializers.SerializerMethodField()
@@ -368,6 +606,9 @@ class ActivityICSSerializer(serializers.ModelSerializer):
             domain = request.META.get('HTTP_HOST')
         return 'activity_{}@{}'.format(activity.id, domain)
 
+    def get_status(self, activity):
+        return 'CANCELLED' if activity.is_disabled else 'CONFIRMED'
+
     def get_summary(self, activity):
         return '{}: {}'.format(activity.activity_type.name, activity.place.name)
 
@@ -395,28 +636,64 @@ class ActivityICSSerializer(serializers.ModelSerializer):
         return attendees
 
 
+class PublicActivityICSSerializer(ActivityICSSerializer):
+    def get_uid(self, activity):
+        request = self.context.get('request')
+        domain = 'karrot'
+        if request and request.META.get('HTTP_HOST'):
+            domain = request.META.get('HTTP_HOST')
+        return 'activity_{}@{}'.format(activity.public_id, domain)
+
+    def get_attendee(self, activity):
+        return []
+
+
 class ActivityJoinSerializer(serializers.ModelSerializer):
     class Meta:
         model = ActivityModel
-        fields = []
+        fields = [
+            'participant_type',
+        ]
+
+    participant_type = serializers.IntegerField(write_only=True, default=None)
 
     def update(self, activity, validated_data):
         user = self.context['request'].user
-        activity.add_participant(user)
+        place = activity.place
+        group = place.group
+
+        pt_id = validated_data.get('participant_type', None)
+        if pt_id:
+            participant_type = activity.participant_types.get(id=pt_id)
+        else:
+            # if not supplied, and the activity has only 1, use that one
+            if activity.participant_types.count() > 1:
+                raise PermissionDenied('Must supply participant_type')
+            participant_type = activity.participant_types.first()
+
+        # check the user has the role
+        if not group.is_member_with_role(user, participant_type.role):
+            raise PermissionDenied('You do not have the required role.')
+
+        # check there is space available
+        if participant_type.is_full():
+            raise PermissionDenied('Activity is already full.')
+
+        activity.add_participant(user, participant_type)
 
         stats.activity_joined(activity)
 
         History.objects.create(
             typus=HistoryTypus.ACTIVITY_JOIN,
-            group=activity.place.group,
-            place=activity.place,
+            group=group,
+            place=place,
             activity=activity,
             users=[
                 user,
             ],
             payload=ActivitySerializer(instance=activity).data,
         )
-        activity.place.group.refresh_active_status()
+        group.refresh_active_status()
         return activity
 
 
@@ -473,6 +750,8 @@ class DurationInSecondsField(Field):
 
 
 class ActivitySeriesHistorySerializer(serializers.ModelSerializer):
+    participant_types = SeriesParticipantTypeSerializer(many=True)
+
     class Meta:
         model = ActivitySeriesModel
         fields = '__all__'
@@ -484,7 +763,7 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'activity_type',
-            'max_participants',
+            'participant_types',
             'place',
             'rule',
             'start_date',
@@ -503,14 +782,18 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
         source='dates',
     )
 
-    duration = DurationInSecondsField(required=False, allow_null=True)
+    participant_types = SeriesParticipantTypeSerializer(many=True)
 
-    def save(self, **kwargs):
-        return super().save(last_changed_by=self.context['request'].user)
+    duration = DurationInSecondsField(required=False, allow_null=True)
 
     @transaction.atomic()
     def create(self, validated_data):
-        series = super().create(validated_data)
+        participant_types_data = validated_data.pop('participant_types')
+        series = super().create({**validated_data, 'last_changed_by': self.context['request'].user})
+        for participant_type_data in participant_types_data:
+            # creating the nested data
+            series.participant_types.create(**participant_type_data)
+        series.update_activities()
 
         History.objects.create(
             typus=HistoryTypus.SERIES_CREATE,
@@ -567,38 +850,277 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
 class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
     class Meta:
         model = ActivitySeriesModel
-        fields = ActivitySeriesSerializer.Meta.fields
+        fields = ActivitySeriesSerializer.Meta.fields + ['updated_message']
         read_only_fields = ActivitySeriesSerializer.Meta.read_only_fields + ['place']
 
     duration = DurationInSecondsField(required=False, allow_null=True)
-
-    def save(self, **kwargs):
-        self._validated_data = find_changed(self.instance, self.validated_data)
-        skip_update = len(self.validated_data.keys()) == 0
-        if skip_update:
-            return self.instance
-        return super().save(**kwargs)
+    updated_message = serializers.CharField(write_only=True, required=False)
 
     @transaction.atomic()
     def update(self, series, validated_data):
+        old = series.old() if series else None
+
+        # this is not part of the series data itself, so pop it out...
+        updated_message = validated_data.pop('updated_message', None)
+        validated_data = find_changed(series, validated_data)
+        skip_update = len(validated_data.keys()) == 0
+        if skip_update:
+            return series
+
         before_data = ActivitySeriesHistorySerializer(series).data
-        super().update(series, validated_data)
+
+        removed = []  # array of {'user': <User>, 'activity': <Activity> } objects
+
+        def add_removed(activity, user):
+            for entry in removed:
+                if entry['user'].id == user.id and entry['activity'].id == activity.id:
+                    return
+            removed.append({'user': user, 'activity': activity})
+
+        description = validated_data.get('description', None)
+        duration = validated_data.get('duration', None)
+        participant_types = validated_data.get('participant_types', None)
+
+        description_changed = 'description' in validated_data and series.description != description
+        duration_changed = 'duration' in validated_data and series.duration != duration
+        if description_changed or duration_changed or participant_types:
+            activities = series.activities.upcoming()
+
+            if description_changed:
+                activities.filter(description=series.description).update(description=description)
+
+            if duration_changed:
+                activities.update(
+                    has_duration=duration is not None,
+                    date=Tstzrange(Lower(F('date')),
+                                   Lower(F('date')) + (duration or default_duration))
+                )
+
+            if participant_types:
+                for entry in participant_types:
+                    pk = entry.pop('id', None)
+                    if pk:
+                        # existing series participant type
+                        series_participant_type = SeriesParticipantType.objects.get(pk=pk)
+                        if entry.get('_removed', False):
+                            # existing series participant type being deleted
+                            participants = ActivityParticipant.objects.filter(
+                                activity__in=activities,
+                                participant_type__series_participant_type=series_participant_type,
+                            )
+                            for participant in participants:
+                                add_removed(participant.activity, participant.user)
+                            participants.delete()
+                            ParticipantType.objects.filter(
+                                series_participant_type=series_participant_type,
+                                activity__in=activities,
+                            ).delete()
+                            series_participant_type.delete()
+                        else:
+                            # existing series participant type being edited
+                            old_description = series_participant_type.description
+                            description = entry.get('description', None)
+                            description_changed = 'description' in entry and description != old_description
+
+                            old_max_participants = series_participant_type.max_participants
+                            max_participants = entry.get('max_participants', None)
+                            max_participants_changed = 'max_participants' in entry and max_participants != old_max_participants
+
+                            old_role = series_participant_type.role
+                            role = entry.get('role', None)
+                            role_changed = 'role' in entry and role != old_role
+
+                            if description_changed or max_participants_changed or role_changed:
+                                # now we go through all the related participant types for the individual activities
+                                for participant_type in ParticipantType.objects.filter(
+                                        series_participant_type_id=pk,
+                                        activity__in=activities,
+                                ):
+                                    if description_changed and participant_type.description == old_description:
+                                        participant_type.description = description
+                                    if max_participants_changed and participant_type.max_participants == old_max_participants:
+                                        participant_type.max_participants = max_participants
+                                    if role_changed and participant_type.role == old_role:
+                                        participant_type.role = role
+                                        # find all the participants who are missing the new role, and remove them...
+                                        users_with_new_role = series.place.group.members.filter(
+                                            groupmembership__roles__contains=[role]
+                                        )
+                                        participants = ActivityParticipant.objects.filter(
+                                            participant_type=participant_type,
+                                            activity__in=activities,
+                                        ).exclude(user__in=users_with_new_role)
+                                        for participant in participants:
+                                            add_removed(participant.activity, participant.user)
+                                        participants.delete()
+                                    participant_type.save()
+
+                            # update the rest of the stuff
+                            SeriesParticipantType.objects.filter(pk=pk).update(**entry)
+                    else:
+                        # new series participant type \o/
+                        series_participant_type = SeriesParticipantType.objects.create(activity_series=series, **entry)
+                        for activity in activities:
+                            # propagate it to all the activities
+                            ParticipantType.objects.create(
+                                activity=activity,
+                                series_participant_type=series_participant_type,
+                                **entry,
+                            )
+
+        update_data = validated_data.copy()
+        update_data.pop('participant_types', None)
+        update_data['last_changed_by'] = self.context['request'].user
+        series = super().update(series, update_data)
+
+        if old.start_date != series.start_date or old.rule != series.rule:
+            # we don't use series.update_activities() here because we want to remove and collect participants
+            for activity, date in series.get_matched_activities():
+                if not activity:
+                    series.create_activity(date)
+                elif not date:
+                    for user in activity.participants.all():
+                        add_removed(activity, user)
+                    activity.delete()
+
         after_data = ActivitySeriesHistorySerializer(series).data
 
+        history = None
+
         if before_data != after_data:
-            History.objects.create(
+            # TODO: store who was removed?
+            history = History.objects.create(
                 typus=HistoryTypus.SERIES_MODIFY,
                 group=series.place.group,
                 place=series.place,
                 series=series,
                 users=[self.context['request'].user],
+                # TODO: this doesn't include the changed participant_types as we popped it above...
                 payload={k: self.initial_data.get(k)
                          for k in validated_data.keys()},
                 before=before_data,
                 after=after_data,
+                message=updated_message,
             )
+
+        if len(removed) > 0:
+            removed.sort(key=lambda val: val['activity'].date.start)
+
+            # collect unique activities
+            activities = {}
+            for entry in removed:
+                activity = entry['activity']
+                if activity.id not in activities:
+                    # we might have deleted some of the activities by the time the task is run, so store as dict
+                    activities[activity.id] = model_to_dict(activity)
+
+            notify_participant_removals(
+                activity_type_id=series.activity_type.id,
+                place_id=series.place.id,
+                activities_data=list(activities.values()),
+                participants=[{
+                    'user': entry['user'].id,
+                    'activity': entry['activity'].id
+                } for entry in removed],
+                message=updated_message,
+                removed_by_id=self.context['request'].user.id,
+                history_id=history.id if history else None,
+            )
+
         series.place.group.refresh_active_status()
+
         return series
+
+
+class ActivityParticipantUpdateCheckSerializer(ActivityParticipantSerializer):
+    class Meta:
+        model = ActivityParticipant
+        fields = [
+            'user',
+            'activity',
+        ]
+        read_only_fields = [
+            'user',
+            'activity',
+        ]
+
+
+class ActivitySeriesUpdateCheckSerializer(Serializer):
+    # request fields
+    rule = serializers.CharField(write_only=True, required=False)
+    start_date = DateTimeFieldWithTimezone(write_only=True, required=False)
+    participant_types = SeriesParticipantTypeSerializer(many=True, write_only=True, required=False)
+
+    # response fields
+    participants = ActivityParticipantUpdateCheckSerializer(many=True, read_only=True)
+    activities = ActivitySerializer(many=True, read_only=True)
+
+    def update(self, instance, validated_data):
+        series = instance
+
+        will_remove_participant_ids = set()
+
+        if 'start_date' in validated_data or 'rule' in validated_data:
+            # we set the values on the series, so we can calculate the dates
+            # don't save it!!!
+            if 'start_date' in validated_data:
+                series.start_date = validated_data['start_date']
+            if 'rule' in validated_data:
+                series.rule = validated_data['rule']
+            for activity, date in series.get_matched_activities():
+                if activity and not date:
+                    if activity.activityparticipant_set.count() > 0:
+                        # would remove these participants!
+                        will_remove_participant_ids.update(
+                            activity.activityparticipant_set.values_list('id', flat=True)
+                        )
+
+        if 'participant_types' in validated_data:
+            activities = series.activities.upcoming()
+            for entry in validated_data['participant_types']:
+                pk = entry.pop('id', None)
+                if pk:
+                    # existing series participant type
+                    series_participant_type = SeriesParticipantType.objects.get(pk=pk)
+                    if entry.get('_removed', False):
+                        # existing series participant type would be deleted
+                        will_remove_participant_ids.update(
+                            ActivityParticipant.objects.filter(
+                                activity__in=activities,
+                                participant_type__series_participant_type=series_participant_type,
+                            ).values_list('id', flat=True)
+                        )
+                    else:
+                        old_role = series_participant_type.role
+                        role = entry.get('role', None)
+                        role_changed = 'role' in entry and role != old_role
+
+                        if role_changed:
+                            # now we go through all the related participant types for the individual activities
+                            for participant_type in ParticipantType.objects.filter(
+                                    series_participant_type_id=pk,
+                                    activity__in=activities,
+                            ):
+                                if role_changed and participant_type.role == old_role:
+                                    participant_type.role = role
+                                    # find all the participants who are missing the new role
+                                    users_with_new_role = series.place.group.members.filter(
+                                        groupmembership__roles__contains=[role]
+                                    )
+                                    will_remove_participant_ids.update(
+                                        ActivityParticipant.objects.filter(
+                                            participant_type=participant_type,
+                                            activity__in=activities,
+                                        ).exclude(user__in=users_with_new_role, ).values_list('id', flat=True)
+                                    )
+
+        return {
+            'participants': ActivityParticipant.objects.filter(id__in=will_remove_participant_ids),
+            'activities': Activity.objects.filter(activityparticipant__id__in=will_remove_participant_ids),
+        }
+
+    def create(self, validated_data):
+        pass
 
 
 class FeedbackSerializer(serializers.ModelSerializer):

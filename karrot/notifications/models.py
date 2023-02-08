@@ -16,6 +16,8 @@ class NotificationType(Enum):
     APPLICATION_DECLINED = 'application_declined'
     USER_BECAME_EDITOR = 'user_became_editor'
     YOU_BECAME_EDITOR = 'you_became_editor'
+    USER_GOT_ROLE = 'user_got_role'
+    YOU_GOT_ROLE = 'you_got_role'
     FEEDBACK_POSSIBLE = 'feedback_possible'
     NEW_PLACE = 'new_place'
     NEW_MEMBER = 'new_member'
@@ -33,6 +35,8 @@ class NotificationType(Enum):
     CONFLICT_RESOLUTION_DECIDED_ABOUT_YOU = 'conflict_resolution_decided_about_you'
     CONFLICT_RESOLUTION_YOU_WERE_REMOVED = 'conflict_resolution_you_were_removed'
     VOTING_ENDS_SOON = 'voting_ends_soon'
+    MENTION = 'mention'
+    PARTICIPANT_REMOVED = 'participant_removed'
 
 
 class NotificationQuerySet(models.QuerySet):

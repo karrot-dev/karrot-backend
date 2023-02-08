@@ -30,6 +30,21 @@ class ActivityFactory(DjangoModelFactory):
         model = ActivityModel
 
     @post_generation
+    def participant_types(self, created, participant_types, **kwargs):
+        if not created:
+            return
+        if not participant_types:
+            # default set...
+            participant_types = [
+                {
+                    'role': 'member',
+                    'max_participants': 5,
+                },
+            ]
+        for participant_type in participant_types:
+            self.participant_types.create(**participant_type)
+
+    @post_generation
     def participants(self, created, participants, **kwargs):
         if not created:
             return
@@ -40,12 +55,30 @@ class ActivityFactory(DjangoModelFactory):
     activity_type = SubFactory(ActivityTypeFactory, group=SelfAttribute('..place.group'))
     place = SubFactory(PlaceFactory)
     date = LazyFunction(in_one_day)
-    max_participants = 5
 
 
 class ActivitySeriesFactory(DjangoModelFactory):
     class Meta:
         model = ActivitySeriesModel
+
+    @post_generation
+    def participant_types(self, created, participant_types, **kwargs):
+        if not created:
+            return
+        if not participant_types:
+            # default set...
+            participant_types = [
+                {
+                    'role': 'member',
+                    'max_participants': 5,
+                },
+            ]
+        for participant_type in participant_types:
+            self.participant_types.create(**participant_type)
+
+    @post_generation
+    def update_activities(self, created, ignored, **kwargs):
+        self.update_activities()
 
     activity_type = SubFactory(ActivityTypeFactory, group=SelfAttribute('..place.group'))
     place = SubFactory(PlaceFactory)

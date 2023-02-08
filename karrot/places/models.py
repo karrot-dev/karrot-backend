@@ -14,6 +14,11 @@ class PlaceStatus(models.TextChoices):
     ARCHIVED = 'archived'
 
 
+class PlaceDefaultView(models.TextChoices):
+    ACTIVITIES = 'activities'
+    WALL = 'wall'
+
+
 class PlaceTypeStatus(models.TextChoices):
     ACTIVE = 'active'
     ARCHIVED = 'archived'
@@ -45,12 +50,14 @@ class Place(BaseModel, LocationModel, ConversationMixin):
         unique_together = ('group', 'name')
 
     DEFAULT_STATUS = PlaceStatus.CREATED.value
+    DEFAULT_DEFAULT_VIEW = PlaceDefaultView.ACTIVITIES.value
 
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='places')
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH)
     description = models.TextField(blank=True)
     weeks_in_advance = models.PositiveIntegerField(default=4)
     status = models.CharField(choices=PlaceStatus.choices, max_length=20, default=DEFAULT_STATUS)
+    default_view = models.CharField(choices=PlaceDefaultView.choices, max_length=20, default=DEFAULT_DEFAULT_VIEW)
 
     place_type = models.ForeignKey(
         PlaceType,

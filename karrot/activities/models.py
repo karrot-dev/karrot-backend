@@ -1,21 +1,29 @@
+import uuid
 from datetime import timedelta
 
 import pytz
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrulestr
 from django.conf import settings
+from django.contrib.postgres.indexes import GistIndex
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.utils.translation import gettext as _
 from django.db import models
 from django.db import transaction
-from django.db.models import Count, DurationField, F, Q, Sum
+from django.db.models import Count, DurationField, F, FilteredRelation, Q, Sum, CheckConstraint
 from django.utils import timezone
+from django.utils.translation import gettext as _
+from versatileimagefield.fields import VersatileImageField
 
 from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin
 from karrot.conversations.models import ConversationMixin
+from karrot.groups.roles import GROUP_MEMBER
 from karrot.history.models import History, HistoryTypus
 from karrot.activities import stats
 from karrot.activities.utils import match_activities_with_dates, rrule_between_dates_in_local_time
+from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin, \
+    NicelyFormattedModel
+from karrot.conversations.models import ConversationMixin
+from karrot.history.models import History, HistoryTypus
 from karrot.places.models import PlaceStatus
 
 
@@ -67,7 +75,6 @@ class ActivitySeries(BaseModel):
     objects = ActivitySeriesManager()
 
     place = models.ForeignKey('places.Place', related_name='series', on_delete=models.CASCADE)
-    max_participants = models.PositiveIntegerField(blank=True, null=True)
     rule = models.TextField()
     start_date = models.DateTimeField()
     description = models.TextField(blank=True)
@@ -87,16 +94,23 @@ class ActivitySeries(BaseModel):
     )
 
     def create_activity(self, date):
-        return self.activities.create(
+        activity = self.activities.create(
             activity_type=self.activity_type,
             date=CustomDateTimeTZRange(date, date + (self.duration or default_duration)),
             has_duration=self.duration is not None,
-            max_participants=self.max_participants,
             series=self,
             place=self.place,
             description=self.description,
             last_changed_by=self.last_changed_by,
         )
+        for participant_type in self.participant_types.all():
+            activity.participant_types.create(
+                role=participant_type.role,
+                max_participants=participant_type.max_participants,
+                description=participant_type.description,
+                series_participant_type=participant_type,
+            )
+        return activity
 
     def period_start(self):
         # shift start time slightly into future to avoid activities which are only valid for very short time
@@ -121,11 +135,10 @@ class ActivitySeries(BaseModel):
             new_dates=self.dates(),
         )
 
-    def update_activities(self):
-        """
-        create new activities and delete empty activities that don't match series
-        """
+    def old(self):
+        return type(self).objects.get(pk=self.pk) if self.pk else None
 
+    def update_activities(self):
         for activity, date in self.get_matched_activities():
             if not activity:
                 self.create_activity(date)
@@ -135,37 +148,6 @@ class ActivitySeries(BaseModel):
 
     def __str__(self):
         return 'ActivitySeries {} - {}'.format(self.rule, self.place)
-
-    def save(self, *args, **kwargs):
-        old = type(self).objects.get(pk=self.pk) if self.pk else None
-
-        super().save(*args, **kwargs)
-
-        if not old or old.start_date != self.start_date or old.rule != self.rule:
-            self.update_activities()
-
-        if old:
-            description_changed = old.description != self.description
-            max_participants_changed = old.max_participants != self.max_participants
-            duration_changed = old.duration != self.duration
-            if description_changed or max_participants_changed or duration_changed:
-                for activity in self.activities.upcoming():
-                    if description_changed and old.description == activity.description:
-                        activity.description = self.description
-                    if max_participants_changed and old.max_participants == activity.max_participants:
-                        activity.max_participants = self.max_participants
-                    if duration_changed:
-                        if self.duration:
-                            activity.has_duration = True
-                            activity.date = CustomDateTimeTZRange(
-                                activity.date.start, activity.date.start + self.duration
-                            )
-                        else:
-                            activity.has_duration = False
-                            activity.date = CustomDateTimeTZRange(
-                                activity.date.start, activity.date.start + default_duration
-                            )
-                    activity.save()
 
     def delete(self, **kwargs):
         self.rule = str(rrulestr(self.rule).replace(dtstart=self.start_date, until=timezone.now()))
@@ -189,7 +171,7 @@ class ActivityQuerySet(models.QuerySet):
         return self.filter(~self._feedback_possible_q(user))
 
     def annotate_num_participants(self):
-        return self.annotate(num_participants=Count('participants'))
+        return self.annotate(num_participants=Count('activityparticipant'))
 
     def annotate_timezone(self):
         return self.annotate(timezone=F('place__group__timezone'))
@@ -214,13 +196,38 @@ class ActivityQuerySet(models.QuerySet):
         return self.exclude_disabled().filter(date__startswith__lt=timezone.now())\
             .annotate_num_participants().filter(num_participants__gt=0)
 
-    def done_not_full(self):
+    def with_free_slots(self, user):
+        participant_types_with_free_slots = ParticipantType.objects \
+            .annotate_num_participants() \
+            .filter(num_participants__lt=F('max_participants'))
+
+        if user:
+            # check if the roles that are free actually match up with the users roles for that group
+            participant_types_with_free_slots = participant_types_with_free_slots \
+                .annotate(membership=FilteredRelation(
+                    'activity__place__group__groupmembership',
+                    condition=Q(activity__place__group__groupmembership__user=user)),
+                ) \
+                .filter(membership__roles__contains=[F('role')])
+
+        activities = self.exclude_disabled() \
+            .filter(participant_types__in=participant_types_with_free_slots)
+
+        return activities
+
+    def empty(self):
         return self.exclude_disabled() \
-            .annotate(participant_count=Count('participants')) \
-            .filter(date__startswith__lt=timezone.now(), participant_count__lt=F('max_participants'))
+            .annotate_num_participants() \
+            .filter(num_participants=0)
+
+    def with_participant(self, user):
+        return self.filter(participants=user)
 
     def upcoming(self):
         return self.filter(date__startswith__gt=timezone.now())
+
+    def is_public(self):
+        return self.filter(is_public=True)
 
     @transaction.atomic
     def process_finished_activities(self):
@@ -242,8 +249,9 @@ class ActivityQuerySet(models.QuerySet):
             payload['activity_date'] = activity.id
             if activity.series:
                 payload['series'] = activity.series.id
-            if activity.max_participants:
-                payload['max_participants'] = activity.max_participants
+            max_participants = activity.get_total_max_participants()
+            if max_participants:
+                payload['max_participants'] = max_participants
             if activity.participants.count() == 0:
                 stats.activity_missed(activity)
                 History.objects.create(
@@ -292,6 +300,14 @@ class Activity(BaseModel, ConversationMixin):
 
     class Meta:
         ordering = ['date']
+        indexes = [GistIndex(fields=['date'])]
+        constraints = [
+            CheckConstraint(
+                # if it's public it must have a public_id
+                check=Q(is_public=False) | Q(public_id__isnull=False),
+                name='public_activities_must_have_public_id',
+            )
+        ]
 
     activity_type = models.ForeignKey(
         ActivityType,
@@ -325,8 +341,10 @@ class Activity(BaseModel, ConversationMixin):
     date = CustomDateTimeRangeField(default=default_activity_date_range)
     has_duration = models.BooleanField(default=False)
 
+    is_public = models.BooleanField(default=False)
+    public_id = models.UUIDField(null=True, unique=True)
+
     description = models.TextField(blank=True)
-    max_participants = models.PositiveIntegerField(null=True)
     is_disabled = models.BooleanField(default=False)
     last_changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -337,13 +355,19 @@ class Activity(BaseModel, ConversationMixin):
 
     is_done = models.BooleanField(default=False)
 
+    banner_image = VersatileImageField(
+        'BannerImage',
+        upload_to='activity__banner_images',
+        null=True,
+    )
+
     @property
     def group(self):
         return self.place.group
 
     @property
     def ended_at(self):
-        if self.is_upcoming():
+        if self.is_not_past():
             return None
         return self.date.end
 
@@ -363,27 +387,36 @@ class Activity(BaseModel, ConversationMixin):
     def is_upcoming(self):
         return self.date.start > timezone.now()
 
-    def is_full(self):
-        if not self.max_participants:
-            return False
-        return self.participants.count() >= self.max_participants
+    def is_past(self):
+        return self.date.end < timezone.now()
+
+    def is_not_past(self):
+        return not self.is_past()
 
     def is_participant(self, user):
         return self.participants.filter(id=user.id).exists()
 
-    def is_empty(self):
-        return self.participants.count() == 0
-
     def is_recent(self):
         return self.date.start >= timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
-    def empty_participants_count(self):
-        return max(0, self.max_participants - self.participants.count())
+    def get_total_max_participants(self):
+        values = [entry.max_participants for entry in self.participant_types.all()]
+        if None in values:
+            return None
+        return sum(values)
 
-    def add_participant(self, user):
+    def add_participant(self, user, participant_type=None):
+        if not participant_type:
+            # make it work without passing participant_type for the simple case
+            if self.participant_types.count() > 1:
+                raise Exception('must pass participant_type as >1')
+            participant_type = self.participant_types.first()
+
+        # this assumes the users group roles have already been checked
         participant, _ = ActivityParticipant.objects.get_or_create(
             activity=self,
             user=user,
+            participant_type=participant_type,
         )
         return participant
 
@@ -410,6 +443,56 @@ class Activity(BaseModel, ConversationMixin):
         super().save(*args, **kwargs)
 
 
+class SeriesParticipantType(BaseModel):
+    class Meta:
+        ordering = ['id']
+
+    activity_series = models.ForeignKey(
+        ActivitySeries,
+        on_delete=models.CASCADE,
+        related_name='participant_types',
+    )
+    description = models.TextField(blank=True)
+    max_participants = models.PositiveIntegerField(null=True)
+    role = models.CharField(max_length=100, default=GROUP_MEMBER)
+
+
+class ParticipantTypeQuerySet(models.QuerySet):
+    def annotate_num_participants(self):
+        return self.annotate(num_participants=Count('participants'))
+
+
+class ParticipantTypeManager(models.Manager.from_queryset(ParticipantTypeQuerySet)):
+    pass
+
+
+class ParticipantType(BaseModel):
+    objects = ParticipantTypeManager()
+
+    class Meta:
+        ordering = ['id']
+
+    activity = models.ForeignKey(
+        Activity,
+        on_delete=models.CASCADE,
+        related_name='participant_types',
+    )
+    series_participant_type = models.ForeignKey(
+        SeriesParticipantType,
+        on_delete=models.SET_NULL,
+        related_name='participant_types',
+        null=True,
+    )
+    description = models.TextField(blank=True)
+    max_participants = models.PositiveIntegerField(null=True)
+    role = models.CharField(max_length=100, default=GROUP_MEMBER)
+
+    def is_full(self):
+        if not self.max_participants:
+            return False
+        return self.activity.activityparticipant_set.filter(participant_type=self).count() >= self.max_participants
+
+
 class ActivityParticipant(BaseModel):
     activity = models.ForeignKey(
         Activity,
@@ -421,6 +504,12 @@ class ActivityParticipant(BaseModel):
     )
     feedback_dismissed = models.BooleanField(default=False)
     reminder_task_id = models.TextField(null=True)  # stores a huey task id
+    participant_type = models.ForeignKey(
+        ParticipantType,
+        on_delete=models.CASCADE,
+        null=False,
+        related_name='participants',
+    )
 
     class Meta:
         db_table = 'activities_activity_participants'
@@ -443,3 +532,9 @@ class Feedback(BaseModel):
 
     class Meta:
         unique_together = ('about', 'given_by')
+
+
+class ICSAuthToken(NicelyFormattedModel):
+    token = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField('users.User', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(default=timezone.now)

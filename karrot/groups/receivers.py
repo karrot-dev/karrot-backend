@@ -7,9 +7,10 @@ from django.dispatch import receiver
 
 from karrot.conversations.models import Conversation
 from karrot.groups import roles, stats
-from karrot.groups.emails import prepare_user_became_editor_email, prepare_user_lost_editor_role_email
+from karrot.groups.emails import prepare_user_became_editor_email, prepare_user_lost_editor_role_email, \
+    prepare_user_got_role_email
 from karrot.groups.models import Group, GroupMembership, Trust
-from karrot.groups.signals import roles_changed
+from karrot.groups.roles import GROUP_EDITOR
 from karrot.history.models import History, HistoryTypus
 from karrot.utils import frontend_urls
 
@@ -62,58 +63,88 @@ def trust_given(sender, instance, created, **kwargs):
     if not created:
         return
 
-    membership = instance.membership
-    relevant_trust = Trust.objects.filter(membership=membership)
-    trust_threshold = membership.group.trust_threshold_for_newcomer()
+    trust = instance
 
-    if relevant_trust.count() >= trust_threshold and roles.GROUP_EDITOR not in membership.roles:
-        membership.add_roles([roles.GROUP_EDITOR])
-        membership.save()
+    if trust.role == GROUP_EDITOR:
+        membership = trust.membership
+        relevant_trust_count = Trust.objects.filter(membership=membership, role=GROUP_EDITOR).count()
+        trust_threshold = membership.group.trust_threshold_for_newcomer()
 
-        History.objects.create(
-            typus=HistoryTypus.MEMBER_BECAME_EDITOR,
-            group=membership.group,
-            users=[membership.user],
-            payload={
-                'threshold': trust_threshold,
-            },
-        )
+        if relevant_trust_count >= trust_threshold and roles.GROUP_EDITOR not in membership.roles:
+            membership.add_roles([roles.GROUP_EDITOR])
+            membership.save()
 
-        prepare_user_became_editor_email(user=membership.user, group=membership.group).send()
+            History.objects.create(
+                typus=HistoryTypus.MEMBER_BECAME_EDITOR,
+                group=membership.group,
+                users=[membership.user],
+                payload={
+                    'threshold': trust_threshold,
+                },
+            )
 
-        roles_changed.send(sender=GroupMembership.__class__, instance=membership)
+            prepare_user_became_editor_email(user=membership.user, group=membership.group).send()
 
-        stats.member_became_editor(membership.group)
+            stats.member_became_editor(membership.group)
 
-    stats.trust_given(membership.group)
+    else:
+        # trust for some other role
+        membership = trust.membership
+        relevant_trust_count = Trust.objects.filter(membership=membership, role=trust.role).count()
+        role = membership.group.roles.get(name=trust.role)
+
+        if relevant_trust_count >= role.threshold:
+            membership.add_roles([trust.role])
+            membership.save()
+
+            History.objects.create(
+                typus=HistoryTypus.MEMBER_GOT_ROLE,
+                group=membership.group,
+                users=[membership.user],
+                payload={
+                    'role': {
+                        'name': role.name,
+                        'display_name': role.display_name,
+                    },
+                }
+            )
+
+            role = membership.group.roles.get(name=trust.role)
+
+            prepare_user_got_role_email(user=membership.user, group=membership.group, role=role).send()
+
+            # TODO: stats
+
+    stats.trust_given(trust)
 
 
 @receiver(post_delete, sender=Trust)
 def trust_revoked(sender, instance, **kwargs):
-    membership = instance.membership
-    relevant_trust = Trust.objects.filter(membership=membership)
-    trust_threshold = membership.group.trust_threshold_for_newcomer()
+    trust = instance
 
-    if relevant_trust.count() < trust_threshold and roles.GROUP_EDITOR in membership.roles:
-        membership.remove_roles([roles.GROUP_EDITOR])
-        membership.save()
+    if trust.role == GROUP_EDITOR:
+        membership = trust.membership
+        relevant_trust = Trust.objects.filter(membership=membership, role=GROUP_EDITOR)
+        trust_threshold = membership.group.trust_threshold_for_newcomer()
 
-        History.objects.create(
-            typus=HistoryTypus.USER_LOST_EDITOR_ROLE,
-            group=membership.group,
-            users=[membership.user],
-            payload={
-                'threshold': trust_threshold,
-            },
-        )
+        if relevant_trust.count() < trust_threshold and roles.GROUP_EDITOR in membership.roles:
+            membership.remove_roles([roles.GROUP_EDITOR])
+            membership.save()
 
-        prepare_user_lost_editor_role_email(user=membership.user, group=membership.group).send()
+            History.objects.create(
+                typus=HistoryTypus.USER_LOST_EDITOR_ROLE,
+                group=membership.group,
+                users=[membership.user],
+                payload={
+                    'threshold': trust_threshold,
+                },
+            )
 
-        roles_changed.send(sender=GroupMembership.__class__, instance=membership)
+            prepare_user_lost_editor_role_email(user=membership.user, group=membership.group).send()
 
-        stats.user_lost_editor_role(membership.group)
+            stats.user_lost_editor_role(membership.group)
 
-    stats.trust_revoked(membership.group)
+    stats.trust_revoked(trust)
 
 
 @receiver(pre_delete, sender=GroupMembership)

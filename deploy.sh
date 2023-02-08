@@ -11,7 +11,7 @@ fi
 
 echo "deploying branch [$name]"
 
-git clone https://github.com/yunity/yuca yuca
+git clone https://github.com/karrot-dev/yuca yuca
 
 export ANSIBLE_HOST_KEY_CHECKING=False
 ansible-playbook -i yuca/inventory -u "$name"-deploy --become-user "$name"-deploy yuca/playbooks/"$name"/deploy.playbook.yml

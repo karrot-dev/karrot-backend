@@ -8,7 +8,6 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, BasePermission
@@ -18,11 +17,11 @@ from rest_framework.viewsets import GenericViewSet
 from karrot.conversations.api import RetrieveConversationMixin
 from karrot.groups import stats
 from karrot.groups.filters import GroupsFilter, GroupsInfoFilter
-from karrot.groups.models import Agreement, Group as GroupModel, GroupMembership, Trust
+from karrot.groups.models import Group as GroupModel, GroupMembership, Trust
 from karrot.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer, GroupJoinSerializer, \
     GroupLeaveSerializer, TimezonesSerializer, GroupMembershipInfoSerializer, \
-    AgreementSerializer, AgreementAgreeSerializer, GroupMembershipAddNotificationTypeSerializer, \
-    GroupMembershipRemoveNotificationTypeSerializer
+    GroupMembershipAddNotificationTypeSerializer, \
+    GroupMembershipRemoveNotificationTypeSerializer, TrustActionSerializer
 from karrot.utils.serializers import EmptySerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
 
@@ -140,7 +139,8 @@ class GroupViewSet(
             qs = qs.annotate_yesterdays_member_count().prefetch_related(
                 'members',
                 'groupmembership_set',
-                'groupmembership_set__trusted_by',
+                'groupmembership_set__trust_set',
+                'groupmembership_set__trust_set__given_by',
             )
 
         if self.action != 'join':
@@ -194,37 +194,29 @@ class GroupViewSet(
         permission_classes=(IsAuthenticated, IsOtherUser),
         url_name='trust-user',
         url_path='users/(?P<user_id>[^/.]+)/trust',
-        serializer_class=EmptySerializer
+        serializer_class=TrustActionSerializer
     )
     def trust_user(self, request, pk, user_id):
-        """trust the user in a group"""
+        """trust the user in a group for a given role. role defaults to 'editor'"""
         self.check_permissions(request)
         membership = get_object_or_404(GroupMembership.objects, group=pk, user=user_id)
         self.check_object_permissions(request, membership)
-
-        trust, created = Trust.objects.get_or_create(
-            membership=membership,
-            given_by=self.request.user,
-        )
-        if not created:
-            raise ValidationError(_('You already gave trust to this user'))
-
+        serializer = self.get_serializer(membership, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
         return Response(data={})
 
     @extend_schema(parameters=[OpenApiParameter('user_id', OpenApiTypes.INT, OpenApiParameter.PATH)])
     @trust_user.mapping.delete
     def revoke_trust(self, request, pk, user_id):
-        """revoke trust for a user in a group"""
+        """revoke trust for a user in a group for a given role. role defaults to 'editor'"""
         self.check_permissions(request)
         membership = get_object_or_404(GroupMembership.objects, group=pk, user=user_id)
         self.check_object_permissions(request, membership)
+        serializer = self.get_serializer(membership, data=request.data)
+        serializer.is_valid(raise_exception=True)
         try:
-            trust = Trust.objects.get(
-                membership=membership,
-                given_by=self.request.user,
-            )
-            trust.delete()
-
+            self.perform_update(serializer)
             return Response(data={})
         except Trust.DoesNotExist:
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -253,26 +245,3 @@ class GroupViewSet(
         self.perform_update(serializer)
 
         return Response(GroupMembershipInfoSerializer(membership).data)
-
-
-class AgreementViewSet(
-        mixins.CreateModelMixin,
-        mixins.RetrieveModelMixin,
-        PartialUpdateModelMixin,
-        mixins.ListModelMixin,
-        GenericViewSet,
-):
-    queryset = Agreement.objects
-    serializer_class = AgreementSerializer
-    permission_classes = (IsAuthenticated, )
-
-    def get_queryset(self):
-        return self.queryset.filter(group__members=self.request.user)
-
-    @action(
-        detail=True,
-        methods=['POST'],
-        serializer_class=AgreementAgreeSerializer,
-    )
-    def agree(self, request, pk=None):
-        return self.partial_update(request)

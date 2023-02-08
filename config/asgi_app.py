@@ -24,6 +24,10 @@ def setup_postgres(connection, **kwargs):
 
 api_app = get_asgi_application()
 api_prefixes = ['/api/', '/docs/', '/api-auth/']
+
+if settings.DEBUG:
+    api_prefixes.append('/_templates')
+
 media_app = StaticFiles(directory=settings.MEDIA_ROOT)
 
 frontend_app = None
@@ -32,7 +36,7 @@ community_proxy_app = None
 
 if settings.DEBUG:
     # in DEBUG mode they are served by the main api app via config/urls.py
-    api_prefixes += ['/static/']
+    api_prefixes += ['/static/', '/_templates']
 else:
     static_app = StaticFiles(directory=settings.STATIC_ROOT)
 

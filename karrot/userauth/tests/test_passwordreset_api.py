@@ -21,7 +21,7 @@ class TestPasswordReset(APITestCase):
 
     def test_request_password_reset_succeeds(self):
         response = self.client.post(self.url_request_password_reset, {'email': self.verified_user.email})
-        self.assertEqual(response.data, {})
+        self.assertEqual(response.data, None)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn('Request to reset your password', mail.outbox[0].subject)
@@ -48,7 +48,7 @@ class TestPasswordReset(APITestCase):
     def test_request_password_reset_twice_succeeds(self):
         self.client.post(self.url_request_password_reset, {'email': self.verified_user.email})
         response = self.client.post(self.url_request_password_reset, {'email': self.verified_user.email})
-        self.assertEqual(response.data, {})
+        self.assertEqual(response.data, None)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(mail.outbox), 2)
 

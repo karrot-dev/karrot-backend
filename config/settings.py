@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import re
+
 import redis
 import sentry_sdk
 
@@ -55,6 +57,9 @@ RESERVED_NAMES = (
 EMAIL_VERIFICATION_TIME_LIMIT_HOURS = 7 * 24
 PASSWORD_RESET_TIME_LIMIT_MINUTES = 180
 ACCOUNT_DELETE_TIME_LIMIT_MINUTES = 180
+
+USERNAME_RE = re.compile(r'[a-zA-Z0-9_\-.]+')
+USERNAME_MENTION_RE = re.compile(r'@([a-zA-Z0-9_\-.]+)')
 
 # Groups
 GROUP_EDITOR_TRUST_MAX_THRESHOLD = 3
@@ -127,6 +132,7 @@ INSTALLED_APPS = (
     'karrot.template_previews',
     'karrot.webhooks.WebhooksConfig',
     'karrot.notifications.NotificationsConfig',
+    'karrot.agreements.AgreementsConfig',
     'karrot.stats',
     'karrot.status.StatusConfig',
     'karrot.utils',
@@ -161,8 +167,9 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': """
 Welcome to our API documentation!
 
-Check out our code on [GitHub](https://github.com/yunity/karrot-frontend)
-and talk with us on the [Foodsaving Worldwide Rocketchat](https://chat.foodsaving.world)!
+Check out our code on [GitHub](https://github.com/karrot-dev/karrot-frontend)
+or talk with us in our [Karrot Team & Feedback](https://karrot.world/#/groupPreview/191) group on Karrot
+or in our [Matrix chat room](https://chat.karrot.world)!
     """,
     'VERSION': '0.1',
     'SCHEMA_PATH_PREFIX': '/api/',
@@ -322,7 +329,11 @@ VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
         ('full_size', 'url'),
         ('200', 'thumbnail__200x200'),
         ('600', 'thumbnail__600x600'),
-    ]
+    ],
+    'activity_banner_image': [
+        # TODO: work out what to do here...
+        ('full_size', 'url'),
+    ],
 }
 
 # Silk profiler configuration
@@ -354,6 +365,10 @@ CORS_ORIGIN_WHITELIST = []
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
+if DEBUG:
+    # this is primarily to enable the /_templates pages to work properly
+    X_FRAME_OPTIONS = 'SAMEORIGIN'
+
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE   = True
 
@@ -383,6 +398,11 @@ DEFAULT_FROM_EMAIL = options['EMAIL_FROM']
 HOSTNAME = options['SITE_URL']
 SITE_NAME = options['SITE_NAME']
 MEDIA_ROOT = options['FILE_UPLOAD_DIR']
+
+if is_dev:
+    # in prod daphne (and I guess uvicorn) handle this
+    # but if using https during local dev we need this
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 if options['FILE_UPLOAD_PERMISSIONS']:
     FILE_UPLOAD_PERMISSIONS = int(options['FILE_UPLOAD_PERMISSIONS'], 8)  # e.g. 0o640
@@ -478,8 +498,12 @@ LISTEN_ENDPOINT = options['LISTEN_ENDPOINT']
 REQUEST_TIMEOUT_SECONDS = int(options['REQUEST_TIMEOUT_SECONDS'])
 
 # If you have the email_reply_trimmer_service running, set this to 'http://localhost:4567/trim' (or similar)
-# https://github.com/yunity/email_reply_trimmer_service
+# https://github.com/karrot-dev/email_reply_trimmer_service
 EMAIL_REPLY_TRIMMER_URL = options['EMAIL_REPLY_TRIMMER_URL']
+
+SHELL_PLUS_IMPORTS = [
+    'from karrot.utils.shell_utils import *'
+]
 
 # NB: Keep this as the last line, and keep
 # local_settings.py out of version control

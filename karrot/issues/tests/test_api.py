@@ -1,5 +1,6 @@
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
+from django.contrib.auth import get_user_model
 from django.core import mail
 from django.utils import timezone
 from freezegun import freeze_time
@@ -10,7 +11,7 @@ from karrot.conversations.models import ConversationNotificationStatus
 from karrot.groups import roles
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupNotificationType
-from karrot.issues.factories import IssueFactory, vote_for_remove_user, vote_for_no_change
+from karrot.issues.factories import IssueFactory, vote_for_no_change, vote_for_remove_user
 from karrot.issues.models import Vote, IssueStatus
 from karrot.issues.tasks import process_expired_votings
 from karrot.tests.utils import ExtractPaginationMixin
@@ -45,7 +46,7 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
         notification_member = VerifiedUserFactory()
         self.group.groupmembership_set.create(
             user=notification_member,
-            roles=[roles.GROUP_EDITOR],
+            roles=[roles.GROUP_MEMBER, roles.GROUP_EDITOR],
             notification_types=[GroupNotificationType.CONFLICT_RESOLUTION]
         )
         # add notification type to send out emails
@@ -80,8 +81,8 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
         email_to_editor = next(email for email in mail.outbox if email.to[0] == notification_member.email)
         email_to_affected_user = next(email for email in mail.outbox if email.to[0] == self.affected_member.email)
         self.assertEqual(len(mail.outbox), 2)
-        self.assertIn('with you', email_to_affected_user.subject)
-        self.assertIn('with {}'.format(self.affected_member.display_name), email_to_editor.subject)
+        self.assertIn('your membership', email_to_affected_user.subject)
+        self.assertIn('for {}'.format(self.affected_member.display_name), email_to_editor.subject)
 
         # vote on option
         response = self.client.post(
@@ -144,6 +145,32 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
             response = self.get_results('/api/issues/', {'group': self.group.id}, format='json')
         self.assertEqual(len(response.data), 3)
 
+    def test_list_with_multiple_status_values(self):
+
+        for _ in range(2):
+            self.create_issue(status=IssueStatus.ONGOING.value)
+        for _ in range(3):
+            self.create_issue(status=IssueStatus.DECIDED.value)
+        for _ in range(4):
+            self.create_issue(status=IssueStatus.CANCELLED.value)
+
+        self.client.force_login(user=self.member)
+
+        response = self.get_results(
+            '/api/issues/', {'status': [IssueStatus.ONGOING.value, IssueStatus.DECIDED.value]}, format='json'
+        )
+        self.assertEqual(len(response.data), 5)
+
+        response = self.get_results(
+            '/api/issues/', {'status': [IssueStatus.ONGOING.value, IssueStatus.CANCELLED.value]}, format='json'
+        )
+        self.assertEqual(len(response.data), 6)
+
+        response = self.get_results(
+            '/api/issues/', {'status': [IssueStatus.DECIDED.value, IssueStatus.CANCELLED.value]}, format='json'
+        )
+        self.assertEqual(len(response.data), 7)
+
 
 class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
     @classmethod
@@ -151,8 +178,9 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         cls.member = VerifiedUserFactory()
         cls.newcomer = VerifiedUserFactory()
         cls.affected_member = VerifiedUserFactory()
+        cls.other_member = VerifiedUserFactory()
         cls.group = GroupFactory(
-            members=[cls.member, cls.affected_member],
+            members=[cls.member, cls.affected_member, cls.other_member],
             newcomers=[cls.newcomer],
         )
 
@@ -231,8 +259,7 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         self.create_issue()
         self.client.force_login(user=VerifiedUserFactory())
         response = self.get_results('/api/issues/?group={}'.format(self.group.id))
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data), 0)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_can_list_issues_as_newcomer(self):
         self.create_issue()
@@ -385,3 +412,26 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         # cannot access conversation
         response = self.get_results('/api/conversations/{}/'.format(issue.conversation.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
+
+    def test_removing_votes_when_user_leaves_group(self):
+        issue = self.create_issue(affected_user=self.affected_member)
+        voting = issue.latest_voting()
+
+        # before the user leaves, this would be a no_change outcome
+        # when the user leaves it'll cause a tie, which resolves to further_discussion
+        vote_for_remove_user(voting=voting, user=issue.created_by)
+        vote_for_no_change(voting=voting, user=self.affected_member)
+        vote_for_no_change(voting=voting, user=self.other_member)
+
+        # other_member leaves the group voluntarily
+        self.client.force_login(user=self.other_member)
+        response = self.client.post('/api/groups/{}/leave/'.format(self.group.id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        with self.fast_forward_to_voting_expiration(voting):
+            process_expired_votings()
+            voting.refresh_from_db()
+            self.assertEqual(voting.accepted_option.type, 'further_discussion')
+            # make sure all voting members are in the group
+            for voting_user in get_user_model().objects.filter(votes_given__option__voting=voting).distinct():
+                self.assertTrue(issue.group.is_member(voting_user))

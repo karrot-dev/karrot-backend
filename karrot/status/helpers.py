@@ -4,6 +4,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from karrot.issues.models import IssueStatus
 from karrot.applications.models import ApplicationStatus
 from karrot.conversations.models import ConversationParticipant, ConversationThreadParticipant
 from karrot.groups.models import Group
@@ -71,6 +72,12 @@ def unread_conversations(user):
     }
 
 
+def ongoing_issues(user):
+    return Group.objects.filter(members=user).annotate(
+        ongoing_issue_count=Count('issues', filter=Q(issues__status=IssueStatus.ONGOING.value))
+    ).values_list('id', 'ongoing_issue_count')
+
+
 def pending_applications(user):
     return Group.objects.filter(members=user).annotate(
         pending_application_count=Count('application', filter=Q(application__status=ApplicationStatus.PENDING.value))
@@ -117,6 +124,7 @@ class StatusSerializer(serializers.Serializer):
     def get_groups(data):
         conversations = data.get('conversations')
         applications = data.get('applications')
+        issues = data.get('issues')
         feedback_possible = data.get('feedback_possible')
         groups = defaultdict(dict)
         for group_id, conversation_data in conversations['groups'].items():
@@ -129,6 +137,9 @@ class StatusSerializer(serializers.Serializer):
 
         for group_id, feedback_possible_count in feedback_possible:
             groups[group_id]['feedback_possible_count'] = feedback_possible_count
+
+        for group_id, ongoing_issue_count in issues:
+            groups[group_id]['ongoing_issue_count'] = ongoing_issue_count
 
         return groups
 
@@ -148,6 +159,7 @@ def status_data(user):
     return {
         'conversations': unread_conversations(user),
         'applications': pending_applications(user),
+        'issues': ongoing_issues(user),
         'feedback_possible': get_feedback_possible(user),
         'unseen_notification_count': unseen_notification_count(user),
     }

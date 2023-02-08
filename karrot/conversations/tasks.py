@@ -11,6 +11,7 @@ from karrot.conversations.emails import (
     prepare_conversation_message_notification,
     prepare_group_conversation_message_notification,
     prepare_place_conversation_message_notification,
+    prepare_mention_notification,
 )
 from karrot.conversations.models import ConversationParticipant, ConversationThreadParticipant, Conversation
 from karrot.users.models import User
@@ -132,6 +133,29 @@ def notify_participants(message):
             message=message,
             email=email,
         )
+
+
+@db_task()
+def notify_mention(mention):
+    email = prepare_mention_notification(mention)
+    message = mention.message
+    user = mention.user
+    conversation = message.conversation
+    participant = conversation.conversationparticipant_set.filter(user=user).first()
+    if participant:
+        if participant.notified_up_to_id and participant.notified_up_to_id >= message.id:
+            # they've already read the message, so don't send out a notification
+            return
+
+        # they are in the conversation
+        # we mark it, so we won't send out a normal message notification later
+        send_and_mark(
+            participant=participant,
+            message=message,
+            email=email,
+        )
+    else:
+        email.send()
 
 
 @db_periodic_task(crontab(hour=3, minute=9))  # around 3am every day

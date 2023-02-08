@@ -12,14 +12,14 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.fields import Field
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
-from karrot.groups.models import Group as GroupModel, GroupMembership, Agreement, UserAgreement, \
-    GroupNotificationType
+from karrot.groups.models import Group as GroupModel, GroupMembership, \
+    GroupNotificationType, Trust
 from karrot.history.models import History, HistoryTypus
 from karrot.utils.misc import find_changed
 from karrot.utils.validators import prevent_reserved_names
 from . import roles
 from karrot.utils.geoip import geoip_is_available, get_client_ip, ip_to_lat_lon
-from .signals import notification_type_changed
+from .roles import GROUP_EDITOR
 
 
 @extend_schema_field(OpenApiTypes.STR)
@@ -54,13 +54,34 @@ class GroupMembershipInfoSerializer(serializers.ModelSerializer):
             'roles',
             'active',
             'trusted_by',
+            'trust',
         )
-        read_only_fields = ['created_at', 'roles', 'added_by']
+        read_only_fields = ['created_at', 'roles', 'added_by', 'trust']
 
     active = serializers.SerializerMethodField()
+    trusted_by = serializers.SerializerMethodField()
+    trust = serializers.SerializerMethodField()
 
     def get_active(self, membership):
         return membership.inactive_at is None
+
+    def get_trusted_by(self, membership):
+        # make it mean what the old trusted_by field meant: user ids that trusted them for editor role
+        return [t.given_by_id for t in membership.trust_set.all() if t.role == GROUP_EDITOR]
+
+    @extend_schema_field(OpenApiTypes.OBJECT)
+    def get_trust(self, membership):
+        return [GroupMembershipTrustSerializer(t).data for t in membership.trust_set.all()]
+
+
+class GroupMembershipTrustSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Trust
+        fields = (
+            'given_by',
+            'role',
+            'created_at',
+        )
 
 
 class GroupHistorySerializer(GroupBaseSerializer):
@@ -104,11 +125,11 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'application_questions_default',
             'members',
             'memberships',
+            'roles',
             'address',
             'latitude',
             'longitude',
             'timezone',
-            'active_agreement',
             'status',
             'theme',
             'features',
@@ -137,25 +158,32 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'active',
             'members',
             'memberships',
+            'roles',
             'notification_types',
             'is_open',
             'theme',
             'features',
         ]
 
-    def validate_active_agreement(self, active_agreement):
-        user = self.context['request'].user
-        group = self.instance
-        membership = GroupMembership.objects.filter(user=user, group=group).first()
-        if roles.GROUP_AGREEMENT_MANAGER not in membership.roles:
-            raise PermissionDenied(_('You cannot manage agreements'))
-        if active_agreement and active_agreement.group != group:
-            raise ValidationError(_('Agreement is not for this group'))
-        return active_agreement
+    roles = serializers.SerializerMethodField()
 
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_memberships(self, group):
         return {m.user_id: GroupMembershipInfoSerializer(m).data for m in group.groupmembership_set.all()}
+
+    @extend_schema_field(OpenApiTypes.OBJECT)
+    def get_roles(self, group):
+        # does not include 'editor', as it is a built-in role right now
+        return {
+            role.name: {
+                'name': role.name,
+                'display_name': role.display_name,
+                'description': role.description,
+                'threshold': role.threshold,
+                'role_required_for_trust': role.role_required_for_trust,
+            }
+            for role in group.roles.all()
+        }
 
     def get_notification_types(self, group) -> List[str]:
         user = self.context['request'].user
@@ -204,7 +232,9 @@ class GroupDetailSerializer(GroupBaseSerializer):
         group = GroupModel.objects.create(**validated_data)
 
         # create first member and make it receive application notifications
-        membership = GroupMembership.objects.create(group=group, user=user, roles=[roles.GROUP_EDITOR])
+        membership = GroupMembership.objects.create(
+            group=group, user=user, roles=[roles.GROUP_MEMBER, roles.GROUP_EDITOR]
+        )
         membership.add_notification_types([GroupNotificationType.NEW_APPLICATION])
         membership.save()
 
@@ -220,63 +250,54 @@ class GroupDetailSerializer(GroupBaseSerializer):
         )
         return group
 
-
-class AgreementSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Agreement
-        fields = [
-            'id',
-            'title',
-            'content',
-            'group',
-            'agreed',
-        ]
-        extra_kwargs = {
-            'agreed': {
-                'read_only': True
-            },
-        }
-
-    agreed = serializers.SerializerMethodField()
-
-    def get_agreed(self, agreement) -> bool:
-        return UserAgreement.objects.filter(user=self.context['request'].user, agreement=agreement).exists()
-
     def validate_group(self, group):
         membership = GroupMembership.objects.filter(user=self.context['request'].user, group=group).first()
         if not membership:
             raise PermissionDenied(_('You are not in this group'))
-        if roles.GROUP_AGREEMENT_MANAGER not in membership.roles:
-            raise PermissionDenied(_('You cannot manage agreements'))
         return group
 
 
-class AgreementAgreeSerializer(serializers.ModelSerializer):
+class TrustActionSerializer(serializers.ModelSerializer):
+    """Responsible for both creating and destroying trust"""
     class Meta:
-        model = Agreement
-        fields = [
-            'id',
-            'title',
-            'content',
-            'group',
-            'agreed',
-        ]
-        extra_kwargs = {
-            'agreed': {
-                'read_only': True
-            },
-        }
+        model = GroupMembership
+        fields = ('role', )
 
-    agreed = serializers.SerializerMethodField()
+    # default so it works with non-trust-for-role aware frontend
+    role = serializers.CharField(default=GROUP_EDITOR)
 
-    def get_agreed(self, agreement) -> bool:
-        return UserAgreement.objects.filter(user=self.context['request'].user, agreement=agreement).exists()
+    def validate_role(self, role_name):
+        group = self.instance.group
+        if role_name not in group.all_role_names:
+            raise ValidationError(f'Invalid role "{role_name}" for group, available roles are {group.all_role_names}')
+        if role_name != 'editor':
+            role = group.roles.get(name=role_name)
+            if role.role_required_for_trust and not group.is_member_with_role(self.context['request'].user,
+                                                                              role.role_required_for_trust):
+                raise ValidationError(
+                    f'Trust for role "{role_name}" can only be given by users with "{role.role_required_for_trust}" role'
+                )
 
-    def update(self, instance, validated_data):
-        user = self.context['request'].user
-        if not UserAgreement.objects.filter(user=user, agreement=instance).exists():
-            UserAgreement.objects.create(user=user, agreement=instance)
-        return instance
+        return role_name
+
+    def update(self, membership, validated_data):
+        request = self.context['request']
+        user = request.user
+        params = dict(
+            membership=membership,
+            given_by=user,
+            role=validated_data['role'],
+        )
+
+        if request.method == 'POST':
+            trust, created = Trust.objects.get_or_create(**params)
+            if not created:
+                raise ValidationError('You already gave trust to this user')
+
+        elif request.method == 'DELETE':
+            Trust.objects.get(**params).delete()
+
+        return membership
 
 
 @extend_schema_field(OpenApiTypes.INT)
@@ -427,8 +448,6 @@ class GroupMembershipAddNotificationTypeSerializer(serializers.Serializer):
         notification_type = validated_data['notification_type']
         instance.add_notification_types([notification_type])
         instance.save()
-
-        notification_type_changed.send(sender=GroupMembership.__class__, instance=instance)
         return instance
 
 
@@ -439,6 +458,4 @@ class GroupMembershipRemoveNotificationTypeSerializer(serializers.Serializer):
         notification_type = validated_data['notification_type']
         instance.remove_notification_types([notification_type])
         instance.save()
-
-        notification_type_changed.send(sender=GroupMembership.__class__, instance=instance)
         return instance

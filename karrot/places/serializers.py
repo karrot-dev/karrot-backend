@@ -4,6 +4,7 @@ from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
+from karrot.groups.serializers import GroupPreviewSerializer
 from karrot.history.models import History, HistoryTypus
 from karrot.places.models import Place as PlaceModel, PlaceSubscription, PlaceType, PlaceStatus
 from karrot.utils.misc import find_changed
@@ -92,6 +93,23 @@ class PlaceHistorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class PublicPlaceSerializer(serializers.ModelSerializer):
+    group = GroupPreviewSerializer()
+    place_type = PlaceTypeSerializer()
+
+    class Meta:
+        model = PlaceModel
+        fields = [
+            'place_type',
+            'name',
+            'group',
+            'address',
+            'latitude',
+            'longitude',
+        ]
+        read_only_fields = fields
+
+
 class PlaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlaceModel
@@ -108,6 +126,7 @@ class PlaceSerializer(serializers.ModelSerializer):
             'is_subscribed',
             'subscribers',
             'place_type',
+            'default_view',
         ]
         extra_kwargs = {
             'name': {
@@ -183,6 +202,7 @@ class PlaceUpdateSerializer(PlaceSerializer):
         read_only_fields = PlaceSerializer.Meta.read_only_fields
         extra_kwargs = PlaceSerializer.Meta.extra_kwargs
 
+    @transaction.atomic()
     def save(self, **kwargs):
         self._validated_data = find_changed(self.instance, self.validated_data)
         skip_update = len(self.validated_data.keys()) == 0
@@ -190,7 +210,6 @@ class PlaceUpdateSerializer(PlaceSerializer):
             return self.instance
         return super().save(**kwargs)
 
-    @transaction.atomic()
     def update(self, place, validated_data):
         before_data = PlaceHistorySerializer(place).data
         place = super().update(place, validated_data)

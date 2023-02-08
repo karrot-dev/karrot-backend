@@ -81,7 +81,7 @@ class AuthUserView(generics.GenericAPIView):
         serializer.context['type'] = VerificationCode.ACCOUNT_DELETE
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(status=status.HTTP_204_NO_CONTENT, data={})
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class RequestDeleteUserView(views.APIView):
@@ -97,7 +97,7 @@ class RequestDeleteUserView(views.APIView):
         except AnymailAPIError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={_('We could not send you an e-mail.')})
         stats.account_deletion_requested()
-        return Response(status=status.HTTP_204_NO_CONTENT, data={})
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class VerifyMailView(generics.GenericAPIView):
@@ -114,7 +114,7 @@ class VerifyMailView(generics.GenericAPIView):
         serializer.context['type'] = VerificationCode.EMAIL_VERIFICATION
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(status=status.HTTP_204_NO_CONTENT, data={})
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ResendMailVerificationCodeView(views.APIView):
@@ -131,7 +131,7 @@ class ResendMailVerificationCodeView(views.APIView):
             user.send_welcome_email()
         else:
             user.start_update_email()
-        return Response(status=status.HTTP_204_NO_CONTENT, data={})
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class RequestResetPasswordView(generics.GenericAPIView):
@@ -145,7 +145,7 @@ class RequestResetPasswordView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(status=status.HTTP_204_NO_CONTENT, data={})
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ResetPasswordView(generics.GenericAPIView):
@@ -160,7 +160,7 @@ class ResetPasswordView(generics.GenericAPIView):
         serializer.context['type'] = VerificationCode.PASSWORD_RESET
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(status=status.HTTP_204_NO_CONTENT, data={})
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ChangePasswordView(generics.GenericAPIView):
@@ -179,7 +179,7 @@ class ChangePasswordView(generics.GenericAPIView):
         # Keep the user logged in
         update_session_auth_hash(request, user)
 
-        return Response(status=status.HTTP_204_NO_CONTENT, data={})
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ChangeMailView(generics.GenericAPIView):
@@ -194,11 +194,13 @@ class ChangeMailView(generics.GenericAPIView):
         serializer = self.get_serializer(request.user, request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(status=status.HTTP_204_NO_CONTENT, data={})
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class FailedEmailDeliveryPagination(CursorPagination):
     page_size = 10
+    max_page_size = 1200
+    page_size_query_param = 'page_size'
     ordering = '-id'
 
 
