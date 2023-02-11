@@ -13,8 +13,8 @@ anyio==3.6.1
 argon2-cffi==21.3.0
 argon2-cffi-bindings==21.2.0
 asgiref==3.5.2
+asttokens==2.2.1
 async-timeout==4.0.2
-asynctest==0.13.0
 attrs==22.1.0
 autobahn==22.7.1
 autoflake==1.4
@@ -22,7 +22,7 @@ automat==20.2.0
 autopep8==1.6.0
 babel==2.10.3
 backcall==0.2.0
-backports-zoneinfo==0.2.1;python_version<"3.9"
+backports-zoneinfo==0.2.1
 bleach==5.0.1
 bleach-allowlist==1.0.3
 boltons==21.0.0
@@ -61,6 +61,7 @@ djangorestframework==3.13.1
 djangorestframework-csv==2.1.1
 drf-spectacular==0.23.1
 execnet==1.9.0
+executing==1.2.0
 face==20.1.1
 factory-boy==3.2.1
 faker==13.15.1
@@ -91,8 +92,8 @@ incremental==21.3.0
 inflection==0.5.1
 influxdb==5.3.1
 iniconfig==1.1.1
-ipython==7.34.0
-jedi==0.18.1
+ipython==8.10.0
+jedi==0.17.2
 jinja2==3.1.2
 jsonschema==4.9.1
 logging-tree==1.9
@@ -107,7 +108,7 @@ multidict==6.0.2
 nodeenv==1.7.0
 orderedmultidict==1.0.1
 packaging==21.3
-parso==0.8.3
+parso==0.7.1
 pep517==0.13.0
 pexpect==4.8.0
 pickleshare==0.7.5
@@ -121,6 +122,7 @@ prompt-toolkit==3.0.30
 psutil==5.9.1
 psycopg2-binary==2.9.3
 ptyprocess==0.7.0
+pure-eval==0.2.2
 py==1.11.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
@@ -155,6 +157,7 @@ shiv==1.0.1
 six==1.16.0
 sniffio==1.2.0
 sqlparse==0.4.2
+stack-data==0.6.2
 starlette==0.20.4
 tblib==1.7.0
 toml==0.10.2

@@ -56,7 +56,7 @@ Unidecode
 # dev PyPI dependencies
 pip-tools
 factory-boy
-ipython < 8 # for python 3.7 compatability
+ipython < 9 # for python 3.7 compatability
 jedi==0.17.2 # https://github.com/ipython/ipython/issues/12740
 requests-mock
 tblib
