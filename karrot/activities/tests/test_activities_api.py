@@ -721,8 +721,27 @@ class TestActivitiesListAPI(APITestCase, ExtractPaginationMixin):
         self.active_place = PlaceFactory(group=self.group, status='active')
         self.inactive_place = PlaceFactory(group=self.group, status='created')
 
-        ActivityFactory(activity_type=self.activity_type, place=self.active_place)
-        ActivityFactory(activity_type=self.activity_type, place=self.inactive_place)
+        participant_types = [
+            {
+                'role': 'member',
+                'max_participants': 5,
+            },
+            {
+                'role': 'member',
+                'max_participants': 5,
+            },
+        ]
+
+        ActivityFactory(
+            activity_type=self.activity_type,
+            place=self.active_place,
+            participant_types=participant_types,
+        )
+        ActivityFactory(
+            activity_type=self.activity_type,
+            place=self.inactive_place,
+            participant_types=participant_types,
+        )
 
     def test_list_activities_for_active_place(self):
         self.client.force_login(user=self.member)
@@ -741,3 +760,9 @@ class TestActivitiesListAPI(APITestCase, ExtractPaginationMixin):
         activity = self.inactive_place.activities.first()
         response = self.client.get(f'/api/activities/{activity.id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_activities_with_free_slots(self):
+        self.client.force_login(user=self.member)
+        response = self.get_results(self.url, {'place': self.active_place.id, 'slots': 'free'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
