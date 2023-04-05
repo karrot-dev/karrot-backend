@@ -211,7 +211,8 @@ class ActivityQuerySet(models.QuerySet):
                 .filter(membership__roles__contains=[F('role')])
 
         activities = self.exclude_disabled() \
-            .filter(participant_types__in=participant_types_with_free_slots)
+            .filter(participant_types__in=participant_types_with_free_slots) \
+            .distinct()
 
         return activities
 
