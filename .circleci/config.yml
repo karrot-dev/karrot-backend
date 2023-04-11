@@ -172,7 +172,9 @@ jobs:
       - checkout
       - *restore-env-cache
       - *setup-env
-      - *add-token-to-remote
+      - add_ssh_keys:
+          fingerprints:
+            - "94:fd:41:49:16:77:99:2a:c3:a5:5f:62:54:5e:b1:22"
       - run:
           name: update dependencies and make pull request
           environment:
