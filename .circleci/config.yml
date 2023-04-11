@@ -33,10 +33,10 @@ aliases:
         # quick fix. until debian package has got tz updates
         test -f /usr/share/zoneinfo/Pacific/Kanton || ln -s /usr/share/zoneinfo/Pacific/Enderbury /usr/share/zoneinfo/Pacific/Kanton
 
-  - &add-token-to-remote
-    run:
-      name: set git remote to include token
-      command: git remote set-url origin https://${GITHUB_TOKEN}@github.com/karrot-dev/karrot-backend.git
+  - &setup-ssh-keys
+    add_ssh_keys:
+      fingerprints:
+        - "94:fd:41:49:16:77:99:2a:c3:a5:5f:62:54:5e:b1:22"
 
 version: 2.1
 jobs:
@@ -148,7 +148,7 @@ jobs:
       - run:
           name: install tx client
           command: env/bin/pip install transifex-client
-      - *add-token-to-remote
+      - *setup-ssh-keys
       - run:
           name: update locales and make pull request
           environment:
@@ -172,7 +172,7 @@ jobs:
       - checkout
       - *restore-env-cache
       - *setup-env
-      - *add-token-to-remote
+      - *setup-ssh-keys
       - run:
           name: update dependencies and make pull request
           environment:
