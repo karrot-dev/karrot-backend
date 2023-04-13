@@ -44,6 +44,7 @@ orbs:
 jobs:
   test:
     <<: *defaults
+    resource_class: large
     environment:
       LC_ALL: C.UTF-8
       LANG: C.UTF-8
