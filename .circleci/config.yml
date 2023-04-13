@@ -90,7 +90,7 @@ jobs:
           name: run tests
           command: |
             mkdir -p test-reports
-            pytest -n 4 --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
+            pytest -n 5 --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
       - codecov/upload
       - run:
           name: build
