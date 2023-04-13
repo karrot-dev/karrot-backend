@@ -39,6 +39,8 @@ aliases:
         - "94:fd:41:49:16:77:99:2a:c3:a5:5f:62:54:5e:b1:22"
 
 version: 2.1
+orbs:
+  codecov: codecov/codecov@3.2.4
 jobs:
   test:
     <<: *defaults
@@ -89,11 +91,7 @@ jobs:
           command: |
             mkdir -p test-reports
             pytest -n 4 --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
-      - run:
-          name: upload coverage
-          command: |
-            pip install codecov
-            codecov
+      - codecov/upload
       - run:
           name: build
           environment:
