@@ -36,7 +36,7 @@ aliases:
   - &setup-ssh-keys
     add_ssh_keys:
       fingerprints:
-        - "94:fd:41:49:16:77:99:2a:c3:a5:5f:62:54:5e:b1:22"
+        - "26:b2:3f:e0:9b:d7:8d:51:27:97:ed:65:ff:c1:93:57"
 
 version: 2.1
 orbs:
