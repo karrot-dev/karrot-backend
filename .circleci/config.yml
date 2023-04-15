@@ -1,7 +1,7 @@
 defaults: &defaults
   working_directory: ~/repo
   docker:
-    - image: karrot/python:2.11
+    - image: karrot/python:3
 
 aliases:
   - &restore-env-cache
@@ -116,19 +116,11 @@ jobs:
       - checkout
       - *restore-env-cache
       - run:
-          name: install transifex client
-          command: |
-            set -xe
-            wget https://github.com/transifex/cli/releases/download/v1.6.7/tx-linux-amd64.tar.gz
-            tar -xzf tx-linux-amd64.tar.gz
-            mv tx /
-            rm tx-linux-amd64.tar.gz
-      - run:
           name: push source messages to transifex
           command: |
             set -xe
             source env/bin/activate
-            /tx push -s
+            tx push -s
 
   deploy-dev:
     <<: *defaults
@@ -149,14 +141,6 @@ jobs:
       - *restore-env-cache
       - *setup-env
       - *save-env-cache
-      - run:
-          name: install tx client
-          command: |
-            set -xe
-            wget https://github.com/transifex/cli/releases/download/v1.6.7/tx-linux-amd64.tar.gz
-            tar -xzf tx-linux-amd64.tar.gz
-            mv tx /
-            rm tx-linux-amd64.tar.gz
       - *setup-ssh-keys
       - run:
           name: update locales and make pull request
@@ -169,7 +153,7 @@ jobs:
             git config user.name "CircleCI"
             git branch --delete --force $BRANCH || true
             git checkout -b $BRANCH
-            /tx pull -a --force --workers 20
+            tx pull -a --force --workers 20
             git add karrot/locale
             git commit -m "[CI] update locales" || exit 0
             git push --force origin $BRANCH
