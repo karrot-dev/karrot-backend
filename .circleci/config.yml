@@ -1,7 +1,7 @@
 defaults: &defaults
   working_directory: ~/repo
   docker:
-    - image: karrot/python:3
+    - image: karrot/python:3.1
 
 aliases:
   - &restore-env-cache
@@ -49,7 +49,7 @@ jobs:
       LC_ALL: C.UTF-8
       LANG: C.UTF-8
     docker:
-      - image: karrot/python:3
+      - image: karrot/python:3.1
         environment:
           PGHOST: 127.0.0.1
       - image: cimg/postgres:11.16
