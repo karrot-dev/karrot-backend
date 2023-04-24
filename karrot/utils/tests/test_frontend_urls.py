@@ -5,7 +5,7 @@ from karrot.groups.factories import GroupFactory
 from karrot.offers.factories import OfferFactory
 from karrot.utils.frontend_urls import absolute_url, offer_image_url, group_photo_url, group_photo_or_karrot_logo_url, \
     karrot_logo_url
-from karrot.utils.tests.images import image_path
+from karrot.utils.tests.upload_utils import image_path
 
 
 class TestAbsoluteURL(TestCase):

@@ -19,7 +19,7 @@ from karrot.activities.factories import ActivityFactory
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import execute_scheduled_tasks_immediately
 from karrot.users.factories import UserFactory, VerifiedUserFactory
-from karrot.utils.tests.images import encode_upload_data, image_path, image_upload_for
+from karrot.utils.tests.upload_utils import encode_upload_data, image_path, uploaded_file_for, pdf_file_path
 from karrot.webhooks.utils import parse_local_part
 
 
@@ -194,7 +194,47 @@ class TestConversationsAPI(APITestCase):
             response = self.client.post('/api/messages/', data=encode_upload_data(data))
             self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
             self.assertEqual(response.data['content'], data['content'])
+            self.assertEqual(len(response.data['attachments']), 1)
+            self.assertEqual(len(response.data['images']), 1)
             self.assertTrue('full_size' in response.data['attachments'][0]['image_urls'])
+
+    def test_create_message_with_file(self):
+        conversation = ConversationFactory(participants=[self.participant1])
+
+        self.client.force_login(user=self.participant1)
+        with open(pdf_file_path, 'rb') as file:
+            data = {
+                'conversation': conversation.id,
+                'content': 'a nice message',
+                'attachments': [{
+                    'position': 0,
+                    'file': file,
+                }],
+            }
+            response = self.client.post('/api/messages/', data=encode_upload_data(data))
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+            self.assertEqual(response.data['content'], data['content'])
+            self.assertEqual(len(response.data['attachments']), 1)
+            self.assertEqual(len(response.data['images']), 0)
+            self.assertEqual(response.data['attachments'][0]['content_type'], 'application/pdf')
+
+    def test_create_message_with_image_using_legacy_api(self):
+        conversation = ConversationFactory(participants=[self.participant1])
+
+        self.client.force_login(user=self.participant1)
+        with open(image_path, 'rb') as image_file:
+            data = {
+                'conversation': conversation.id,
+                'content': 'a nice message',
+                'images': [{
+                    'position': 0,
+                    'image': image_file
+                }],
+            }
+            response = self.client.post('/api/messages/', data=encode_upload_data(data))
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+            self.assertEqual(response.data['content'], data['content'])
+            self.assertTrue('full_size' in response.data['images'][0]['image_urls'])
 
     def test_cannot_create_message_without_specifying_conversation(self):
         self.client.force_login(user=self.participant1)
@@ -966,7 +1006,7 @@ class TestConversationsMessageEditAPI(APITestCase):
             self.assertTrue('full_size' in response.data['attachments'][0]['image_urls'])
 
     def test_update_message_remove_image(self):
-        self.message.attachments.create(image=image_upload_for(image_path), position=0)
+        self.message.attachments.create(image=uploaded_file_for(image_path), position=0)
 
         self.client.force_login(user=self.user)
         data = {

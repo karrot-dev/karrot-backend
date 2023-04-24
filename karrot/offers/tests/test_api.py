@@ -7,7 +7,7 @@ from karrot.groups.factories import GroupFactory
 from karrot.offers.factories import OfferFactory
 from karrot.users.factories import UserFactory, VerifiedUserFactory
 from karrot.utils.tests.fake import faker
-from karrot.utils.tests.images import image_path, encode_upload_data
+from karrot.utils.tests.upload_utils import image_path, encode_upload_data
 
 
 class TestOffersAPI(APITestCase):

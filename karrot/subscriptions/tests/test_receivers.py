@@ -35,7 +35,7 @@ from karrot.tests.utils import pluck
 from karrot.users.factories import UserFactory, VerifiedUserFactory
 from karrot.utils.geoip import ip_to_lat_lon
 from karrot.utils.tests.fake import faker
-from karrot.utils.tests.images import image_path
+from karrot.utils.tests.upload_utils import image_path
 
 
 def parse_dates(data):

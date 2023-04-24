@@ -5,7 +5,7 @@ from karrot.groups.factories import GroupFactory
 from karrot.offers.factories import OfferFactory
 from karrot.tests.utils import execute_scheduled_tasks_immediately
 from karrot.users.factories import VerifiedUserFactory
-from karrot.utils.tests.images import image_path
+from karrot.utils.tests.upload_utils import image_path
 
 
 class TestTasks(TestCase):

@@ -116,6 +116,8 @@ class ConversationMessageAttachmentSerializer(serializers.ModelSerializer):
             'position',
             'image',
             'image_urls',
+            'file',
+            'content_type',
             '_removed',
         )
 
@@ -124,14 +126,18 @@ class ConversationMessageAttachmentSerializer(serializers.ModelSerializer):
 
     image = VersatileImageFieldSerializer(
         sizes='conversation_message_image',
-        required=True,
-        allow_null=False,
+        required=False,
+        default='',
         write_only=True,
     )
     image_urls = VersatileImageFieldSerializer(
         sizes='conversation_message_image',
         source='image',
         read_only=True,
+    )
+    file = serializers.FileField(
+        required=False,
+        default='',
     )
 
 
@@ -165,10 +171,15 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
 
     thread_meta = serializers.SerializerMethodField()
     attachments = ConversationMessageAttachmentSerializer(many=True, default=list)
-    images = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField(read_only=True)
 
-    def get_images(self, message) -> list:
-        return []  # TODO: make it return what the current API does for images...
+    @staticmethod
+    def get_images(message) -> list:
+        # return what the old images API would return
+        return [
+            ConversationMessageAttachmentSerializer(attachment).data for attachment in message.attachments.all()
+            if attachment.image
+        ]
 
     @extend_schema_field(ConversationThreadSerializer)
     def get_thread_meta(self, message):
@@ -219,30 +230,62 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        attachments = validated_data.pop('attachments', [])
-        # Save the offer and its associated images in one transaction
+        attachments = self.get_attachment_data(validated_data)
+        # Save the message and its associated attachments in one transaction
         # Allows us to trigger the notifications in the receiver only after all is saved
         with transaction.atomic():
             user = self.context['request'].user
             message = ConversationMessage.objects.create(author=user, **validated_data)
             for attachment in attachments:
+                if '_new' in attachment:  # frontend shouldn't send this, but does
+                    del attachment['_new']
                 ConversationMessageAttachment.objects.create(message=message, **attachment)
         return message
 
     def update(self, instance, validated_data):
         message = instance
-        attachments = validated_data.pop('attachments', None)
-        if attachments:
-            for attachment in attachments:
-                pk = attachment.pop('id', None)
-                if pk:
-                    if attachment.get('_removed', False):
-                        ConversationMessageAttachment.objects.filter(pk=pk).delete()
-                    else:
-                        ConversationMessageAttachment.objects.filter(pk=pk).update(**attachment)
+        attachments = self.get_attachment_data(validated_data)
+        for attachment in attachments:
+            pk = attachment.pop('id', None)
+            if pk:
+                if attachment.get('_removed', False):
+                    ConversationMessageAttachment.objects.filter(pk=pk).delete()
                 else:
-                    ConversationMessageAttachment.objects.create(message=message, **attachment)
+                    ConversationMessageAttachment.objects.filter(pk=pk).update(**attachment)
+            else:
+                ConversationMessageAttachment.objects.create(message=message, **attachment)
         return serializers.ModelSerializer.update(self, instance, validated_data)
+
+    def get_attachment_data(self, validated_data):
+        # two sources of attachments
+        attachments = (
+            # current API
+            validated_data.pop('attachments', []) +
+            # legacy API
+            self.initial_data.copy().pop('images', [])
+        )
+        for attachment in attachments:
+            # frontend shouldn't send this, but does/might
+            if '_new' in attachment:
+                del attachment['_new']
+
+            # API returns data that has null for the field which is _not_ used
+            # and the frontend passes that as-is back to us, here we remove those null
+            # fields that we don't need
+            for field in ('file', 'image'):
+                if field in attachment and attachment[field] is None:
+                    del attachment[field]
+
+            if 'content_type' not in attachment:
+                # maybe should "trust but verify" these content types?
+                # see https://docs.djangoproject.com/en/4.2/ref/files/uploads/#django.core.files.uploadedfile.UploadedFile.content_type
+                if 'file' in attachment and hasattr(attachment['file'], 'content_type'):
+                    attachment['content_type'] = attachment['file'].content_type
+
+                if 'image' in attachment and hasattr(attachment['image'], 'content_type'):
+                    attachment['content_type'] = attachment['image'].content_type
+
+        return attachments
 
 
 class ConversationSerializer(serializers.ModelSerializer):

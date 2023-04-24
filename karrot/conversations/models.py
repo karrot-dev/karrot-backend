@@ -455,6 +455,15 @@ class ConversationMessageAttachment(BaseModel):
     class Meta:
         ordering = ['position']
 
+        # TODO: hmmm not sure why this doesn't work...
+        # must have exactly one of image or file field set
+        constraints = [
+            models.CheckConstraint(
+                name="%(app_label)s_%(class)s_image_or_file",
+                check=(Q(Q(image='') & ~Q(file='')) | Q(Q(file='') & ~Q(image=''))),
+            )
+        ]
+
     message = models.ForeignKey(
         ConversationMessage,
         related_name='attachments',
@@ -463,6 +472,17 @@ class ConversationMessageAttachment(BaseModel):
     image = VersatileImageField(
         'ConversationMessage Image',
         upload_to='conversation_message_images',
-        null=False,
+        blank=True,
+        default='',
+    )
+    file = models.FileField(
+        'ConversationMessage File',
+        upload_to='conversation_message_files',
+        blank=True,
+        default='',
     )
     position = IntegerField(default=0)
+    content_type = models.CharField(
+        max_length=120,
+        null=True,
+    )
