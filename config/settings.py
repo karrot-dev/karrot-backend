@@ -23,6 +23,7 @@ from sentry_sdk.integrations.redis import RedisIntegration
 from karrot.groups import themes
 from config.options import get_options
 
+
 load_dotenv()
 
 options = get_options()
@@ -97,59 +98,6 @@ ASGI_APPLICATION = 'config.asgi_app.application'
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Django configuration
-INSTALLED_APPS = (
-    # Should be loaded first
-    'channels',
-
-    # core Django
-    'django.contrib.admin',
-    'django.contrib.admindocs',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.staticfiles',
-    'django.contrib.messages',
-    'django.contrib.postgres',
-
-    # Application
-    'karrot',
-    'karrot.applications.ApplicationsConfig',
-    'karrot.base.BaseConfig',
-    'karrot.bootstrap.BootstrapConfig',
-    'karrot.community_feed.CommunityFeedConfig',
-    'karrot.issues.IssuesConfig',
-    'karrot.userauth.UserAuthConfig',
-    'karrot.subscriptions.SubscriptionsConfig',
-    'karrot.users.UsersConfig',
-    'karrot.conversations.ConversationsConfig',
-    'karrot.history.HistoryConfig',
-    'karrot.groups.GroupsConfig',
-    'karrot.places.PlacesConfig',
-    'karrot.unsubscribe',
-    'karrot.offers.OffersConfig',
-    'karrot.activities.ActivitiesConfig',
-    'karrot.invitations.InvitationsConfig',
-    'karrot.template_previews',
-    'karrot.webhooks.WebhooksConfig',
-    'karrot.notifications.NotificationsConfig',
-    'karrot.agreements.AgreementsConfig',
-    'karrot.stats',
-    'karrot.status.StatusConfig',
-    'karrot.utils',
-
-    # Django packages
-    'django_extensions',
-    'corsheaders',
-    'rest_framework',
-    'rest_framework.authtoken',
-    'drf_spectacular',
-    'anymail',
-    'timezone_field',
-    'django_jinja',
-    'versatileimagefield',
-    'huey.contrib.djhuey',
-    'silk',
-)
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny', ),

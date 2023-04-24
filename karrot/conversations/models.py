@@ -451,13 +451,13 @@ class ConversationMessageReaction(BaseModel):
         unique_together = ['user', 'name', 'message']
 
 
-class ConversationMessageImage(BaseModel):
+class ConversationMessageAttachment(BaseModel):
     class Meta:
         ordering = ['position']
 
     message = models.ForeignKey(
         ConversationMessage,
-        related_name='images',
+        related_name='attachments',
         on_delete=models.CASCADE,
     )
     image = VersatileImageField(

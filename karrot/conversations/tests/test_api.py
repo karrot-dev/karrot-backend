@@ -19,7 +19,7 @@ from karrot.activities.factories import ActivityFactory
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import execute_scheduled_tasks_immediately
 from karrot.users.factories import UserFactory, VerifiedUserFactory
-from karrot.utils.tests.images import encode_data_with_images, image_path, image_upload_for
+from karrot.utils.tests.images import encode_upload_data, image_path, image_upload_for
 from karrot.webhooks.utils import parse_local_part
 
 
@@ -186,15 +186,15 @@ class TestConversationsAPI(APITestCase):
             data = {
                 'conversation': conversation.id,
                 'content': 'a nice message',
-                'images': [{
+                'attachments': [{
                     'position': 0,
                     'image': image_file
                 }],
             }
-            response = self.client.post('/api/messages/', data=encode_data_with_images(data))
+            response = self.client.post('/api/messages/', data=encode_upload_data(data))
             self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
             self.assertEqual(response.data['content'], data['content'])
-            self.assertTrue('full_size' in response.data['images'][0]['image_urls'])
+            self.assertTrue('full_size' in response.data['attachments'][0]['image_urls'])
 
     def test_cannot_create_message_without_specifying_conversation(self):
         self.client.force_login(user=self.participant1)
@@ -956,32 +956,30 @@ class TestConversationsMessageEditAPI(APITestCase):
         self.client.force_login(user=self.user)
         with open(image_path, 'rb') as image_file:
             data = {
-                'images': [{
+                'attachments': [{
                     'position': 0,
                     'image': image_file
                 }],
             }
-            response = self.client.patch(
-                '/api/messages/{}/'.format(self.message.id), data=encode_data_with_images(data)
-            )
+            response = self.client.patch('/api/messages/{}/'.format(self.message.id), data=encode_upload_data(data))
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-            self.assertTrue('full_size' in response.data['images'][0]['image_urls'])
+            self.assertTrue('full_size' in response.data['attachments'][0]['image_urls'])
 
     def test_update_message_remove_image(self):
-        self.message.images.create(image=image_upload_for(image_path), position=0)
+        self.message.attachments.create(image=image_upload_for(image_path), position=0)
 
         self.client.force_login(user=self.user)
         data = {
-            'images': [{
-                'id': self.message.images.first().id,
+            'attachments': [{
+                'id': self.message.attachments.first().id,
                 '_removed': True
             }],
         }
         response = self.client.patch(
-            '/api/messages/{}/'.format(self.message.id), encode_data_with_images(data), format='multipart'
+            '/api/messages/{}/'.format(self.message.id), encode_upload_data(data), format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['images']), 0)
+        self.assertEqual(len(response.data['attachments']), 0)
 
 
 class TestWallMessagesUpdateStatus(APITestCase):

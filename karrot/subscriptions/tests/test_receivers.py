@@ -58,6 +58,7 @@ def make_conversation_message_broadcast(message, **kwargs):
             'edited_at': message.edited_at,
             'received_via': '',
             'reactions': [],
+            'attachments': [],
             'images': [],
             'is_editable': False,
             'thread': None,

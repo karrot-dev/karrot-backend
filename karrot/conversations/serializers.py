@@ -12,7 +12,7 @@ from versatileimagefield.serializers import VersatileImageFieldSerializer
 from karrot.conversations.helpers import normalize_emoji_name
 from karrot.conversations.models import (
     ConversationMessage, ConversationParticipant, ConversationMessageReaction, ConversationThreadParticipant,
-    ConversationMeta, ConversationNotificationStatus, ConversationMessageImage
+    ConversationMeta, ConversationNotificationStatus, ConversationMessageAttachment
 )
 
 
@@ -108,9 +108,9 @@ class ConversationThreadSerializer(serializers.ModelSerializer):
         return participant
 
 
-class ConversationMessageImageSerializer(serializers.ModelSerializer):
+class ConversationMessageAttachmentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ConversationMessageImage
+        model = ConversationMessageAttachment
         fields = (
             'id',
             'position',
@@ -151,7 +151,8 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
             'is_editable',
             'thread',  # ideally would only be writable on create
             'thread_meta',
-            'images',
+            'attachments',
+            'images',  # for backwards compatibility
         ]
         read_only_fields = (
             'author',
@@ -163,7 +164,11 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
         )
 
     thread_meta = serializers.SerializerMethodField()
-    images = ConversationMessageImageSerializer(many=True, default=list)
+    attachments = ConversationMessageAttachmentSerializer(many=True, default=list)
+    images = serializers.SerializerMethodField()
+
+    def get_images(self, message) -> list:
+        return []  # TODO: make it return what the current API does for images...
 
     @extend_schema_field(ConversationThreadSerializer)
     def get_thread_meta(self, message):
@@ -214,29 +219,29 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        images = validated_data.pop('images', [])
+        attachments = validated_data.pop('attachments', [])
         # Save the offer and its associated images in one transaction
         # Allows us to trigger the notifications in the receiver only after all is saved
         with transaction.atomic():
             user = self.context['request'].user
             message = ConversationMessage.objects.create(author=user, **validated_data)
-            for image in images:
-                ConversationMessageImage.objects.create(message=message, **image)
+            for attachment in attachments:
+                ConversationMessageAttachment.objects.create(message=message, **attachment)
         return message
 
     def update(self, instance, validated_data):
         message = instance
-        images = validated_data.pop('images', None)
-        if images:
-            for image in images:
-                pk = image.pop('id', None)
+        attachments = validated_data.pop('attachments', None)
+        if attachments:
+            for attachment in attachments:
+                pk = attachment.pop('id', None)
                 if pk:
-                    if image.get('_removed', False):
-                        ConversationMessageImage.objects.filter(pk=pk).delete()
+                    if attachment.get('_removed', False):
+                        ConversationMessageAttachment.objects.filter(pk=pk).delete()
                     else:
-                        ConversationMessageImage.objects.filter(pk=pk).update(**image)
+                        ConversationMessageAttachment.objects.filter(pk=pk).update(**attachment)
                 else:
-                    ConversationMessageImage.objects.create(message=message, **image)
+                    ConversationMessageAttachment.objects.create(message=message, **attachment)
         return serializers.ModelSerializer.update(self, instance, validated_data)
 
 
