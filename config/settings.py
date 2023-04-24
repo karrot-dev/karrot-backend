@@ -22,7 +22,7 @@ from sentry_sdk.integrations.redis import RedisIntegration
 
 from karrot.groups import themes
 from config.options import get_options
-
+from config.installed_apps import INSTALLED_APPS  # noqa: F401
 
 load_dotenv()
 
