@@ -116,6 +116,12 @@ INSTALLED_APPS = (
 
     # Application
     'karrot',
+    # can exclude the extensions if in an environment where the db user
+    # does not have permission to install extensions
+    # in that case you need to install them using another mechanism
+    *(() if os.environ.get(
+        'EXCLUDE_EXTENSION_MIGRATIONS',
+    ) else 'karrot.dbextensions', ),
     'karrot.applications.ApplicationsConfig',
     'karrot.base.BaseConfig',
     'karrot.bootstrap.BootstrapConfig',
