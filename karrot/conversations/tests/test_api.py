@@ -19,7 +19,8 @@ from karrot.activities.factories import ActivityFactory
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import execute_scheduled_tasks_immediately
 from karrot.users.factories import UserFactory, VerifiedUserFactory
-from karrot.utils.tests.images import encode_data_with_images, image_path, image_upload_for
+from karrot.utils.tests.uploads import encode_data_with_images, image_path, uploaded_file_for, pdf_attachment_path, \
+    encode_data_with_attachments
 from karrot.webhooks.utils import parse_local_part
 
 
@@ -76,7 +77,7 @@ class TestConversationsAPI(APITestCase):
         [c.messages.create(content='hey', author=user) for c in conversations]
 
         self.client.force_login(user=user)
-        with self.assertNumQueries(17):
+        with self.assertNumQueries(18):
             response = self.client.get('/api/conversations/', {'group': group.id}, format='json')
         results = response.data['results']
 
@@ -110,7 +111,7 @@ class TestConversationsAPI(APITestCase):
 
     def test_list_messages(self):
         self.client.force_login(user=self.participant1)
-        with self.assertNumQueries(7):
+        with self.assertNumQueries(8):
             response = self.client.get('/api/messages/?conversation={}'.format(self.conversation1.id), format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 1)
@@ -195,6 +196,26 @@ class TestConversationsAPI(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
             self.assertEqual(response.data['content'], data['content'])
             self.assertTrue('full_size' in response.data['images'][0]['image_urls'])
+
+    def test_create_message_with_attachment(self):
+        conversation = ConversationFactory(participants=[self.participant1])
+
+        self.client.force_login(user=self.participant1)
+        with open(pdf_attachment_path, 'rb') as file:
+            data = {
+                'conversation': conversation.id,
+                'content': 'a nice message',
+                'attachments': [{
+                    'position': 0,
+                    'file': file,
+                }],
+            }
+            response = self.client.post('/api/messages/', data=encode_data_with_attachments(data))
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+            self.assertEqual(response.data['content'], data['content'])
+            self.assertEqual(len(response.data['attachments']), 1)
+            self.assertEqual(len(response.data['images']), 0)
+            self.assertEqual(response.data['attachments'][0]['content_type'], 'application/pdf')
 
     def test_cannot_create_message_without_specifying_conversation(self):
         self.client.force_login(user=self.participant1)
@@ -309,7 +330,7 @@ class TestConversationThreadsAPI(APITestCase):
         self.create_reply(thread=most_recent_thread)
 
         self.client.force_login(user=self.user)
-        with self.assertNumQueries(6):
+        with self.assertNumQueries(7):
             response = self.client.get('/api/messages/my_threads/', format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -968,7 +989,7 @@ class TestConversationsMessageEditAPI(APITestCase):
             self.assertTrue('full_size' in response.data['images'][0]['image_urls'])
 
     def test_update_message_remove_image(self):
-        self.message.images.create(image=image_upload_for(image_path), position=0)
+        self.message.images.create(image=uploaded_file_for(image_path), position=0)
 
         self.client.force_login(user=self.user)
         data = {

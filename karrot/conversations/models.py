@@ -466,3 +466,24 @@ class ConversationMessageImage(BaseModel):
         null=False,
     )
     position = IntegerField(default=0)
+
+
+class ConversationMessageAttachment(BaseModel):
+    class Meta:
+        ordering = ['position']
+
+    message = models.ForeignKey(
+        ConversationMessage,
+        related_name='attachments',
+        on_delete=models.CASCADE,
+    )
+    file = VersatileImageField(
+        'ConversationMessage Attachment',
+        upload_to='conversation_message_attachments',
+        null=False,
+    )
+    position = IntegerField(default=0)
+    content_type = models.CharField(
+        max_length=120,
+        null=True,
+    )

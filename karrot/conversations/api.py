@@ -154,6 +154,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
             .prefetch_related(
                 'conversation__latest_message__reactions',
                 'conversation__latest_message__images',
+                'conversation__latest_message__attachments',
                 'conversation__participants',
              ) \
             .order_by('-conversation__latest_message_id')
@@ -327,7 +328,7 @@ class ConversationMessageViewSet(
             .annotate_replies_count()\
             .annotate_unread_replies_count_for(request.user)\
             .order_by(self.pagination_class.ordering)\
-            .prefetch_related('reactions', 'participants', 'images')
+            .prefetch_related('reactions', 'participants', 'images', 'attachments')
 
         serializer = self.get_serializer(messages, many=True)
         return self.get_paginated_response(serializer.data)
@@ -357,6 +358,7 @@ class ConversationMessageViewSet(
 
         prefetch_related_objects(threads + messages, 'reactions')
         prefetch_related_objects(threads + messages, 'images')
+        prefetch_related_objects(threads + messages, 'attachments')
 
         serializer = self.get_serializer(threads, many=True)
         message_serializer = self.get_serializer(messages, many=True)

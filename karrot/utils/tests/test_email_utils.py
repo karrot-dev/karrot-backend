@@ -19,7 +19,7 @@ from karrot.users.factories import UserFactory
 from karrot.utils.email_utils import time_filter, date_filter, generate_plaintext_from_html, prepare_email, \
     CustomAnymailMessage
 from karrot.utils.frontend_urls import group_photo_url, karrot_logo_url
-from karrot.utils.tests.images import image_path
+from karrot.utils.tests.uploads import image_path
 
 
 class TestEmailUtils(TestCase):

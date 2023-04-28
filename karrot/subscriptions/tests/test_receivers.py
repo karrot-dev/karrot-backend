@@ -35,7 +35,7 @@ from karrot.tests.utils import pluck
 from karrot.users.factories import UserFactory, VerifiedUserFactory
 from karrot.utils.geoip import ip_to_lat_lon
 from karrot.utils.tests.fake import faker
-from karrot.utils.tests.images import image_path
+from karrot.utils.tests.uploads import image_path
 
 
 def parse_dates(data):
@@ -59,6 +59,7 @@ def make_conversation_message_broadcast(message, **kwargs):
             'received_via': '',
             'reactions': [],
             'images': [],
+            'attachments': [],
             'is_editable': False,
             'thread': None,
             'thread_meta': None,
