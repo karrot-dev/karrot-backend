@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "dependencies": {
     "find": "^0.3.0",
-    "mjml": "^4.13.0",
-    "ws": "^8.8.1"
+    "mjml": "^4.14.1",
+    "ws": "^8.13.0"
   },
   "devDependencies": {
     "node-watch": "^0.7.3"
