@@ -16,7 +16,7 @@ from karrot.agreements.api import AgreementViewSet
 from karrot.applications.api import ApplicationViewSet
 from karrot.bootstrap.api import BootstrapViewSet, ConfigViewSet
 from karrot.community_feed.api import CommunityFeedViewSet
-from karrot.conversations.api import ConversationMessageViewSet, ConversationViewSet
+from karrot.conversations.api import ConversationMessageViewSet, ConversationViewSet, AttachmentViewSet
 from karrot.groups.api import GroupViewSet, GroupInfoViewSet
 from karrot.history.api import HistoryViewSet
 from karrot.invitations.api import InvitationsViewSet, InvitationAcceptViewSet
@@ -62,6 +62,7 @@ router.register('public-activities', PublicActivityViewSet)
 # Conversation/Message endpoints
 router.register('conversations', ConversationViewSet)
 router.register('messages', ConversationMessageViewSet)
+router.register('attachments', AttachmentViewSet)
 
 # Notification endpoints
 router.register('notifications', NotificationViewSet)

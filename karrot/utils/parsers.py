@@ -60,17 +60,15 @@ class JSONWithFilesMultiPartParser(MultiPartParser):
 
         data = {}
 
-        # Find any JSON content first
+        # Find any JSON document content first
         for name, content in parsed.files.items():
-            if content.content_type != 'application/json':
-                continue
-            data.update(**json.load(content.file))
+            if name == 'document' and content.content_type == 'application/json':
+                data.update(**json.load(content.file))
 
         # Now get any other content
         for name, content in parsed.files.items():
-            if content.content_type == 'application/json':
-                continue
-            # name is the path into the object to assign
-            glom.assign(data, name, content)
+            if name != 'document':
+                # name is the path into the object to assign
+                glom.assign(data, name, content)
 
         return data

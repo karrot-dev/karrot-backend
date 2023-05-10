@@ -1,3 +1,4 @@
+from os.path import basename
 from typing import List
 
 from django.db import transaction
@@ -142,14 +143,33 @@ class ConversationMessageAttachmentSerializer(serializers.ModelSerializer):
             'id',
             'position',
             'file',
+            'download_url',
+            'filename',
+            'size',
             'content_type',
             '_removed',
         )
 
     id = serializers.IntegerField(required=False)
     _removed = serializers.BooleanField(required=False)
+    file = serializers.FileField(write_only=True)
+    size = serializers.SerializerMethodField()
+    download_url = serializers.SerializerMethodField()
 
-    file = serializers.FileField()
+    @staticmethod
+    def get_size(attachment):
+        return attachment.file.size
+
+    @staticmethod
+    def get_download_url(attachment):
+        return f"/api/attachments/{attachment.id}/download/"
+
+    def to_representation(self, attachment):
+        data = super().to_representation(attachment)
+        if not data['filename']:
+            # if we don't have a custom filename, use the basename of the stored file
+            data['filename'] = basename(attachment.file.path)
+        return data
 
 
 class ConversationMessageSerializer(serializers.ModelSerializer):

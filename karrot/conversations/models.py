@@ -477,10 +477,14 @@ class ConversationMessageAttachment(BaseModel):
         related_name='attachments',
         on_delete=models.CASCADE,
     )
-    file = VersatileImageField(
+    file = models.FileField(
         'ConversationMessage Attachment',
         upload_to='conversation_message_attachments',
         null=False,
+    )
+    filename = models.CharField(
+        max_length=255,
+        null=True,
     )
     position = IntegerField(default=0)
     content_type = models.CharField(

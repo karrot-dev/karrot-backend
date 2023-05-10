@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import prefetch_related_objects, F
-from django.http import Http404
+from django.http import FileResponse, Http404
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
@@ -22,11 +22,12 @@ from rest_framework.viewsets import GenericViewSet
 from karrot.applications.models import Application
 from karrot.applications.serializers import ApplicationSerializer
 from karrot.conversations.models import (
-    Conversation, ConversationMessage, ConversationMessageReaction, ConversationParticipant, ConversationMeta
+    Conversation, ConversationMessage, ConversationMessageReaction, ConversationParticipant, ConversationMeta,
+    ConversationMessageAttachment
 )
 from karrot.conversations.serializers import (
     ConversationSerializer, ConversationMessageSerializer, ConversationMessageReactionSerializer, EmojiField,
-    ConversationThreadSerializer, ConversationMetaSerializer
+    ConversationThreadSerializer, ConversationMetaSerializer, ConversationMessageAttachmentSerializer
 )
 from karrot.issues.models import Issue
 from karrot.issues.serializers import IssueSerializer
@@ -108,6 +109,26 @@ class ConversationFilter(filters.FilterSet):
     class Meta:
         model = ConversationParticipant
         fields = ['exclude_read']
+
+
+class AttachmentViewSet(mixins.RetrieveModelMixin, GenericViewSet):
+    queryset = ConversationMessageAttachment.objects
+    serializer_class = ConversationMessageAttachmentSerializer
+
+    def get_queryset(self):
+        return self.queryset.filter(message__conversation__group__groupmembership__user=self.request.user)
+
+    @action(detail=True, methods=['GET'])
+    def download(self, request, pk=None):
+        attachment = self.get_object()
+        return FileResponse(
+            open(attachment.file.path, 'rb'),
+            as_attachment=True,
+            filename=attachment.filename,
+            headers={
+                'Content-Type': attachment.content_type,
+            },
+        )
 
 
 class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, GenericViewSet):
