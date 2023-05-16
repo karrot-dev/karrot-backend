@@ -52,12 +52,12 @@ jobs:
       - image: karrot/python:3.1
         environment:
           PGHOST: 127.0.0.1
-      - image: cimg/postgres:11.16
+      - image: cimg/postgres:13.11
         environment:
           POSTGRES_USER: ubuntu
           POSTGRES_DB: karrot_test
           POSTGRES_HOST_AUTH_METHOD: trust
-      - image: redis:5.0.3
+      - image: redis:6.0.16
     steps:
       - checkout
       - *restore-env-cache
