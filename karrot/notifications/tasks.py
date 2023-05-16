@@ -1,5 +1,5 @@
-from django.contrib.postgres.fields.jsonb import KeyTextTransform
 from django.db.models import IntegerField
+from django.db.models.fields.json import KeyTextTransform
 from django.db.models.functions import Cast
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task

@@ -412,7 +412,8 @@ class Command(BaseCommand):
         o = Activity.objects.filter(
             date__startswith__gte=timezone.now() + relativedelta(minutes=10), participants=u
         ).first()
-        leave_activity(o.id)
+        if o:
+            leave_activity(o.id)
 
         # activity done
         # We join an activity and shift it back
