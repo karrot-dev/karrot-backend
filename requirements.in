@@ -71,8 +71,8 @@ pytest-cov
 freezegun
 logging_tree
 django-silk
-# transifex-client # disabled to prevent pulling in urllib<1.24.1
 yapf
 pre-commit
 psutil
 sqlparse # for pretty-printing SQL in shell
+importlib-metadata # for py3.9 compat

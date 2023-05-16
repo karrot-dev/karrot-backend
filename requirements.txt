@@ -84,6 +84,7 @@ hyperlink==21.0.0
 icalendar==5.0.5
 identify==2.5.24
 idna==3.4
+importlib-metadata==6.6.0
 incremental==22.10.0
 inflection==0.5.1
 influxdb==5.3.1
@@ -171,6 +172,7 @@ websockets==11.0.3
 wheel==0.40.0
 yapf==0.33.0
 yarl==1.9.2
+zipp==3.15.0
 zope-event==4.6
 zope-interface==6.0
 
