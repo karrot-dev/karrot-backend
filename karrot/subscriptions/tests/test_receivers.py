@@ -89,7 +89,7 @@ def make_conversation_broadcast(conversation, **kwargs):
 
 
 def generate_channel_name():
-    return get_random_string()
+    return get_random_string(length=32)
 
 
 class WSClient:

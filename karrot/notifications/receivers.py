@@ -2,8 +2,8 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.contrib.postgres.fields.jsonb import KeyTextTransform
 from django.db.models import IntegerField, Q
+from django.db.models.fields.json import KeyTextTransform
 from django.db.models.functions import Cast
 from django.db.models.signals import post_save, pre_save, pre_delete, post_delete
 from django.dispatch import receiver

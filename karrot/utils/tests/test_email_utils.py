@@ -148,7 +148,7 @@ class TestJinjaFilters(TestCase):
         offset_hours = int(tz.utcoffset(datetime.utcnow()).total_seconds() / 3600)
         with timezone.override(tz), translation.override('en'):
             val = time_filter(datetime)
-            self.assertEqual(val, '{}:00 AM'.format(hour + offset_hours))
+            self.assertEqual(val, '{}:00 AM'.format(hour + offset_hours))
 
     def test_date_filter_uses_timezone(self):
         # 11pm on Sunday UTC

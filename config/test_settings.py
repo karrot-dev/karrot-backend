@@ -25,10 +25,11 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
 ]
 
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache"
-    },
-}
+# Some tests fail when this is active... needs investigation
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django.core.cache.backends.locmem.LocMemCache"
+#     },
+# }
 
 EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
