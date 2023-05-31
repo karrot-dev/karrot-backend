@@ -197,7 +197,36 @@ class TestConversationsAPI(APITestCase):
             self.assertEqual(response.data['content'], data['content'])
             self.assertTrue('full_size' in response.data['images'][0]['image_urls'])
 
-    def test_create_message_with_attachment(self):
+    def test_create_message_with_image_attachment(self):
+        conversation = ConversationFactory(participants=[self.participant1])
+
+        self.client.force_login(user=self.participant1)
+        with open(image_path, 'rb') as file:
+            data = {
+                'conversation': conversation.id,
+                'content': 'a nice message',
+                'attachments': [{
+                    'position': 0,
+                    'file': file,
+                    'content_type': 'image/jpeg',
+                }],
+            }
+            response = self.client.post('/api/messages/', data=encode_data_with_attachments(data))
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+            self.assertEqual(response.data['content'], data['content'])
+            self.assertEqual(len(response.data['attachments']), 1)
+            self.assertEqual(len(response.data['images']), 0)
+            attachment_id = response.data['attachments'][0]['id']
+            self.assertEqual(response.data['attachments'][0]['content_type'], 'image/jpeg')
+            self.assertEqual(
+                response.data['attachments'][0]['urls'], {
+                    'download': f"/api/attachments/{attachment_id}/download/",
+                    "preview": f"/api/attachments/{attachment_id}/preview/",
+                    "thumbnail": f"/api/attachments/{attachment_id}/thumbnail/",
+                }
+            )
+
+    def test_create_message_with_pdf_attachment(self):
         conversation = ConversationFactory(participants=[self.participant1])
 
         self.client.force_login(user=self.participant1)

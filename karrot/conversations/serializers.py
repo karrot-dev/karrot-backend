@@ -144,6 +144,7 @@ class ConversationMessageAttachmentSerializer(serializers.ModelSerializer):
             'position',
             'file',
             'download_url',
+            'urls',
             'filename',
             'size',
             'content_type',
@@ -155,6 +156,16 @@ class ConversationMessageAttachmentSerializer(serializers.ModelSerializer):
     file = serializers.FileField(write_only=True)
     size = serializers.SerializerMethodField()
     download_url = serializers.SerializerMethodField()
+    urls = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_urls(attachment):
+        attachment.ensure_images(save=True)
+        return {
+            'download': f"/api/attachments/{attachment.id}/download/",
+            'preview': f"/api/attachments/{attachment.id}/preview/" if attachment.preview else None,
+            'thumbnail': f"/api/attachments/{attachment.id}/thumbnail/" if attachment.thumbnail else None,
+        }
 
     @staticmethod
     def get_size(attachment):

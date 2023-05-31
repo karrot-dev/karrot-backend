@@ -1,9 +1,13 @@
 from enum import Enum
+from io import BytesIO
+from typing import Tuple
 
+from PIL import Image
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.core.files import File
 from django.db import models
 from django.db.models import Count, F, IntegerField, Q
 from django.db.models.manager import BaseManager
@@ -482,6 +486,16 @@ class ConversationMessageAttachment(BaseModel):
         upload_to='conversation_message_attachments',
         null=False,
     )
+
+    preview = models.ImageField(
+        upload_to='conversation_message_attachment_preview',
+        null=True,
+    )
+    thumbnail = models.ImageField(
+        upload_to='conversation_message_attachment_thumbnail',
+        null=True,
+    )
+
     filename = models.CharField(
         max_length=255,
         null=True,
@@ -491,3 +505,36 @@ class ConversationMessageAttachment(BaseModel):
         max_length=120,
         null=True,
     )
+
+    def save(self, update_fields=None, **kwargs):
+        self.ensure_images(save=False)  # about to save, so don't save here
+        return super().save(**kwargs)
+
+    def ensure_images(self, *, save: bool):
+        """Ensure we have the preview and thumbnail images if possible
+
+        You can pass the "save" parameter to decide whether to also save
+        the underlying model. If it is part of an existing call to save, you want false.
+        """
+        if (  # we have a main file to generate a preview for
+                self.file and  # we are missing either the preview or thumbnail
+            (not self.preview or not self.thumbnail) and  # it's an image
+                # TODO: in future generate previews for other file types
+                self.content_type.lower().startswith('image/')):
+            with Image.open(self.file.file) as image:
+                if not self.preview:
+                    self.preview.save('preview.jpg', resize(image, (1200, 1200)), save)
+                if not self.thumbnail:
+                    self.thumbnail.save('thumbnail.jpg', resize(image, (200, 200)), save)
+
+
+def resize(image: Image, size: Tuple[int, int]) -> File:
+    # remove alpha if it has it
+    if image.mode in ["RGBA", "P"]:
+        image = image.convert('RGB')
+    else:
+        image = image.copy()
+    image.thumbnail(size)
+    io = BytesIO()
+    image.save(io, 'JPEG')
+    return File(io)

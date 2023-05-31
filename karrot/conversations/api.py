@@ -119,6 +119,28 @@ class AttachmentViewSet(mixins.RetrieveModelMixin, GenericViewSet):
         return self.queryset.filter(message__conversation__group__groupmembership__user=self.request.user)
 
     @action(detail=True, methods=['GET'])
+    def preview(self, request, pk=None):
+        attachment = self.get_object()
+        return FileResponse(
+            open(attachment.preview.path, 'rb'),
+            filename=attachment.filename,
+            headers={
+                'Content-Type': 'image/jpeg',
+            },
+        )
+
+    @action(detail=True, methods=['GET'])
+    def thumbnail(self, request, pk=None):
+        attachment = self.get_object()
+        return FileResponse(
+            open(attachment.thumbnail.path, 'rb'),
+            filename=attachment.filename,
+            headers={
+                'Content-Type': 'image/jpeg',
+            },
+        )
+
+    @action(detail=True, methods=['GET'])
     def download(self, request, pk=None):
         attachment = self.get_object()
         return FileResponse(
