@@ -101,6 +101,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 # Django configuration
 INSTALLED_APPS = (
     # Should be loaded first
+    'daphne',
     'channels',
 
     # core Django
