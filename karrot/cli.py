@@ -106,7 +106,6 @@ def server_uvicorn():
 
 def server_daphne():
     args = []
-    args += ['--ws-protocol', 'karrot.token']
     args += ['--proxy-headers']
 
     if settings.REQUEST_TIMEOUT_SECONDS:
