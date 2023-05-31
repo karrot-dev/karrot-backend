@@ -248,8 +248,8 @@ msgid ""
 "conversation</a>."
 msgstr ""
 
-#: karrot/conversations/api.py:74 karrot/conversations/api.py:277
-#: karrot/conversations/api.py:468 karrot/conversations/serializers.py:226
+#: karrot/conversations/api.py:74 karrot/conversations/api.py:299
+#: karrot/conversations/api.py:490 karrot/conversations/serializers.py:237
 msgid "You are not in this conversation"
 msgstr ""
 
@@ -264,11 +264,11 @@ msgid ""
 "creation."
 msgstr ""
 
-#: karrot/conversations/api.py:396
+#: karrot/conversations/api.py:418
 msgid "Must be first in thread"
 msgstr ""
 
-#: karrot/conversations/api.py:399
+#: karrot/conversations/api.py:421
 msgid "You are not a participant in this thread"
 msgstr ""
 
@@ -292,7 +292,7 @@ msgstr ""
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/serializers.py:228
+#: karrot/conversations/serializers.py:239
 msgid "This conversation has been closed"
 msgstr ""
 
