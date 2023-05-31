@@ -128,6 +128,7 @@ def server_uvicorn():
     options = {
         'workers': settings.LISTEN_CONCURRENCY,
         'worker_class': 'karrot.cli.KarrotUvicornWorker',
+        'accesslog': '-',  # write access logs to stdout
     }
 
     if settings.REQUEST_TIMEOUT_SECONDS:
@@ -185,16 +186,19 @@ class KarrotUvicornWorker(UvicornWorker):
     See available settings:
     https://www.uvicorn.org/settings/
     """
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+
+    CONFIG_KWARGS = {
+        **UvicornWorker.CONFIG_KWARGS,
+        'log_level': 'info',
 
         # gets rid of "'lifespan' protocol appears unsupported." message
-        self.config.lifespan = 'off'
+        'lifespan': 'off',
 
         # settings suitable for proxy deployment, e.g. nginx, see:
         # https://www.uvicorn.org/deployment/#running-behind-nginx
-        self.config.proxy_headers = True
-        self.config.forwarded_allow_ips = '*'
+        'proxy_headers': True,
+        'forwarded_allow_ips': '*',
+    }
 
 
 run = cli
