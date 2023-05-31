@@ -10,7 +10,6 @@ from django.conf import settings
 import django
 from django.core.management import execute_from_command_line
 from dotenv import load_dotenv
-from config.asgi import application
 
 from config.options import get_options
 
@@ -156,6 +155,7 @@ def server_uvicorn():
     if len(bind) > 0:
         options['bind'] = bind
 
+    from config.asgi import application
     KarrotGunicornApplication(application, options).run()
 
 
