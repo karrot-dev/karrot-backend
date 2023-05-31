@@ -72,6 +72,7 @@ gevent==22.10.2
 glom==23.3.0
 gprof2dot==2022.7.29
 greenlet==2.0.2
+gunicorn==20.1.0
 h11==0.14.0
 hiredis==2.2.3
 html2text==2020.1.16

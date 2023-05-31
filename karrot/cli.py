@@ -1,7 +1,8 @@
 import os
 
 import click
-import uvicorn
+from uvicorn.workers import UvicornWorker
+from gunicorn.app.base import BaseApplication
 from click import pass_context
 from daphne.cli import CommandLineInterface
 from django.core import management
@@ -9,6 +10,7 @@ from django.conf import settings
 import django
 from django.core.management import execute_from_command_line
 from dotenv import load_dotenv
+from config.asgi import application
 
 from config.options import get_options
 
@@ -82,29 +84,9 @@ def config():
         print(key + '=' + (value if value else ''))
 
 
-def server_uvicorn():
-    # https://www.uvicorn.org/settings/
-    # TODO: do I need to have '--ws-protocol karrot.token' somehow?
-    options = {
-        'log_level': 'info',
-        'workers': settings.LISTEN_CONCURRENCY,
-    }
-    if settings.LISTEN_FD:
-        options['fd'] = int(settings.LISTEN_FD)
-
-    if settings.LISTEN_HOST:
-        options['host'] = settings.LISTEN_HOST
-
-    if settings.LISTEN_PORT:
-        options['port'] = int(settings.LISTEN_PORT)
-
-    if settings.LISTEN_SOCKET:
-        options['uds'] = settings.LISTEN_SOCKET
-
-    uvicorn.run("config.asgi:application", **options)
-
-
 def server_daphne():
+    """Run server using daphne"""
+
     args = []
     args += ['--proxy-headers']
 
@@ -132,6 +114,87 @@ def server_daphne():
     args += ['config.asgi:application']
 
     CommandLineInterface().run(args)
+
+
+def server_uvicorn():
+    """Run server using uvicorn worker and gunicorn manager
+    
+    As recommended by:
+    https://www.uvicorn.org/deployment/#using-a-process-manager
+
+    See available settings:
+    https://docs.gunicorn.org/en/stable/settings.html
+    """
+
+    options = {
+        'workers': settings.LISTEN_CONCURRENCY,
+        'worker_class': 'karrot.cli.KarrotUvicornWorker',
+    }
+
+    if settings.REQUEST_TIMEOUT_SECONDS:
+        options['timeout'] = settings.REQUEST_TIMEOUT_SECONDS
+
+    bind = []
+
+    if settings.LISTEN_FD:
+        bind.append(f"fd://{settings.LISTEN_FD}")
+
+    if settings.LISTEN_HOST:
+        if settings.LISTEN_PORT:
+            bind.append(':'.join([
+                settings.LISTEN_HOST,
+                settings.LISTEN_PORT,
+            ]))
+        else:
+            bind.append(settings.LISTEN_HOST)
+    elif settings.LISTEN_PORT:
+        bind.append(f"127.0.0.1:{settings.LISTEN_PORT}")
+
+    if settings.LISTEN_SOCKET:
+        bind.append(f"unix:{settings.LISTEN_SOCKET}")
+
+    if len(bind) > 0:
+        options['bind'] = bind
+
+    KarrotGunicornApplication(application, options).run()
+
+
+class KarrotGunicornApplication(BaseApplication):
+    """Allows us to run gunicorn application programmatically
+
+    See:
+    https://docs.gunicorn.org/en/stable/custom.html
+    """
+    def __init__(self, app, options):
+        self.application = app
+        self.options = options or {}
+        super().__init__()
+
+    def load_config(self):
+        config = {key: value for key, value in self.options.items() if key in self.cfg.settings and value is not None}
+        for key, value in config.items():
+            self.cfg.set(key.lower(), value)
+
+    def load(self):
+        return self.application
+
+
+class KarrotUvicornWorker(UvicornWorker):
+    """A uvicorn worker with the settings as we want
+    
+    See available settings:
+    https://www.uvicorn.org/settings/
+    """
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+        # gets rid of "'lifespan' protocol appears unsupported." message
+        self.config.lifespan = 'off'
+
+        # settings suitable for proxy deployment, e.g. nginx, see:
+        # https://www.uvicorn.org/deployment/#running-behind-nginx
+        self.config.proxy_headers = True
+        self.config.forwarded_allow_ips = '*'
 
 
 run = cli

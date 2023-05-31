@@ -490,7 +490,7 @@ LISTEN_SOCKET = options['LISTEN_SOCKET']
 
 LISTEN_SERVER = options['LISTEN_SERVER']
 
-# how many workers (uvicorn)
+# how many workers (gunicorn/uvicorn)
 LISTEN_CONCURRENCY = int(options['LISTEN_CONCURRENCY'])
 
 # twisted endpoint (for daphne)
