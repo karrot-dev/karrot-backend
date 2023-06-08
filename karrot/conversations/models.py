@@ -3,6 +3,7 @@ from io import BytesIO
 from typing import Tuple
 
 from PIL import Image, UnidentifiedImageError
+from PIL.ImageOps import exif_transpose
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -532,11 +533,11 @@ class ConversationMessageAttachment(BaseModel):
 
 
 def resize(image: Image, size: Tuple[int, int]) -> File:
+    # processes rotation if present
+    image = exif_transpose(image)
     # remove alpha if it has it
     if image.mode in ["RGBA", "P"]:
         image = image.convert('RGB')
-    else:
-        image = image.copy()
     image.thumbnail(size)
     io = BytesIO()
     image.save(io, 'JPEG')
