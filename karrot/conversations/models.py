@@ -2,7 +2,7 @@ from enum import Enum
 from io import BytesIO
 from typing import Tuple
 
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -516,16 +516,19 @@ class ConversationMessageAttachment(BaseModel):
         You can pass the "save" parameter to decide whether to also save
         the underlying model. If it is part of an existing call to save, you want false.
         """
-        if (  # we have a main file to generate a preview for
-                self.file and  # we are missing either the preview or thumbnail
-            (not self.preview or not self.thumbnail) and  # it's an image
-                # TODO: in future generate previews for other file types
-                self.content_type.lower().startswith('image/')):
-            with Image.open(self.file.file) as image:
-                if not self.preview:
-                    self.preview.save('preview.jpg', resize(image, (1200, 1200)), save)
-                if not self.thumbnail:
-                    self.thumbnail.save('thumbnail.jpg', resize(image, (200, 200)), save)
+        # TODO: in future generate previews for other file types
+        if self.file and (not self.preview or not self.thumbnail) and self.content_type.lower().startswith('image/'):
+            if 'svg' in self.content_type or 'xcf' in self.content_type:
+                # pillow doesn't handle svgs or xcf, and they are usually small so we can display the original
+                return
+            try:
+                with Image.open(self.file.file) as image:
+                    if not self.preview:
+                        self.preview.save('preview.jpg', resize(image, (1600, 1600)), save)
+                    if not self.thumbnail:
+                        self.thumbnail.save('thumbnail.jpg', resize(image, (200, 200)), save)
+            except UnidentifiedImageError:
+                pass
 
 
 def resize(image: Image, size: Tuple[int, int]) -> File:

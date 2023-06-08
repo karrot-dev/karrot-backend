@@ -120,36 +120,37 @@ class AttachmentViewSet(mixins.RetrieveModelMixin, GenericViewSet):
 
     @action(detail=True, methods=['GET'])
     def preview(self, request, pk=None):
-        attachment = self.get_object()
-        return FileResponse(
-            open(attachment.preview.path, 'rb'),
-            filename=attachment.filename,
-            headers={
-                'Content-Type': 'image/jpeg',
-            },
-        )
+        return AttachmentResponse(self.get_object(), preview=True)
 
     @action(detail=True, methods=['GET'])
     def thumbnail(self, request, pk=None):
-        attachment = self.get_object()
-        return FileResponse(
-            open(attachment.thumbnail.path, 'rb'),
-            filename=attachment.filename,
-            headers={
-                'Content-Type': 'image/jpeg',
-            },
-        )
+        return AttachmentResponse(self.get_object(), thumbnail=True)
+
+    @action(detail=True, methods=['GET'])
+    def original(self, request, pk=None):
+        return AttachmentResponse(self.get_object())
 
     @action(detail=True, methods=['GET'])
     def download(self, request, pk=None):
-        attachment = self.get_object()
-        return FileResponse(
-            open(attachment.file.path, 'rb'),
-            as_attachment=True,
-            filename=attachment.filename,
-            headers={
-                'Content-Type': attachment.content_type,
-            },
+        return AttachmentResponse(self.get_object(), download=True)
+
+
+class AttachmentResponse(FileResponse):
+    """An HTTP response to serve an attachment"""
+    def __init__(self, attachment, download=False, thumbnail=False, preview=False):
+        file = attachment.file
+        filename = attachment.filename
+        content_type = attachment.content_type
+        if thumbnail:
+            file = attachment.thumbnail
+            filename = 'thumbnail.jpg'
+            content_type = 'image/jpeg'
+        elif preview:
+            file = attachment.preview
+            filename = 'preview.jpg'
+            content_type = 'image/jpeg'
+        super().__init__(
+            open(file.path, 'rb'), as_attachment=download, filename=filename, headers={'Content-Type': content_type}
         )
 
 

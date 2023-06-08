@@ -143,7 +143,6 @@ class ConversationMessageAttachmentSerializer(serializers.ModelSerializer):
             'id',
             'position',
             'file',
-            'download_url',
             'urls',
             'filename',
             'size',
@@ -155,25 +154,30 @@ class ConversationMessageAttachmentSerializer(serializers.ModelSerializer):
     _removed = serializers.BooleanField(required=False)
     file = serializers.FileField(write_only=True)
     size = serializers.SerializerMethodField()
-    download_url = serializers.SerializerMethodField()
     urls = serializers.SerializerMethodField()
 
     @staticmethod
     def get_urls(attachment):
         attachment.ensure_images(save=True)
-        return {
-            'download': f"/api/attachments/{attachment.id}/download/",
-            'preview': f"/api/attachments/{attachment.id}/preview/" if attachment.preview else None,
-            'thumbnail': f"/api/attachments/{attachment.id}/thumbnail/" if attachment.thumbnail else None,
-        }
+
+        def url(variant):
+            return f"/api/attachments/{attachment.id}/{variant}/"
+
+        variants = [
+            'download',
+            'original',
+        ]
+        if attachment.preview:
+            variants.append('preview')
+
+        if attachment.thumbnail:
+            variants.append('thumbnail')
+
+        return {variant: url(variant) for variant in variants}
 
     @staticmethod
     def get_size(attachment):
         return attachment.file.size
-
-    @staticmethod
-    def get_download_url(attachment):
-        return f"/api/attachments/{attachment.id}/download/"
 
     def to_representation(self, attachment):
         data = super().to_representation(attachment)
