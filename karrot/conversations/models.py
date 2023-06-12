@@ -1,25 +1,22 @@
 from enum import Enum
-from io import BytesIO
-from typing import Tuple
 
 from PIL import Image, UnidentifiedImageError
-from PIL.ImageOps import exif_transpose
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.core.files import File
 from django.db import models
 from django.db.models import Count, F, IntegerField, Q
 from django.db.models.manager import BaseManager
 from django.utils import timezone
 from versatileimagefield.fields import VersatileImageField
 
+from config.settings import USERNAME_MENTION_RE
 from karrot.base.base_models import BaseModel, UpdatedAtMixin
 from karrot.conversations.signals import new_conversation_message, new_thread_message, conversation_marked_seen, \
     thread_marked_seen
-from config.settings import USERNAME_MENTION_RE
 from karrot.utils import markdown
+from karrot.utils.image_utils import resize_image, is_supported_content_type
 
 
 class ConversationQuerySet(models.QuerySet):
@@ -517,28 +514,18 @@ class ConversationMessageAttachment(BaseModel):
         You can pass the "save" parameter to decide whether to also save
         the underlying model. If it is part of an existing call to save, you want false.
         """
-        # TODO: in future generate previews for other file types
-        if self.file and (not self.preview or not self.thumbnail) and self.content_type.lower().startswith('image/'):
-            if 'svg' in self.content_type or 'xcf' in self.content_type:
-                # pillow doesn't handle svgs or xcf, and they are usually small so we can display the original
-                return
+        if (self.file and (not self.preview or not self.thumbnail) and is_supported_content_type(self.content_type)):
+
             try:
+                preview_size = 1600
+                thumbnail_size = 200
                 with Image.open(self.file.file) as image:
-                    if not self.preview:
-                        self.preview.save('preview.jpg', resize(image, (1600, 1600)), save)
-                    if not self.thumbnail:
-                        self.thumbnail.save('thumbnail.jpg', resize(image, (200, 200)), save)
+                    width, height = image.size
+                    if not self.preview and (width > preview_size or height > preview_size):
+                        self.preview.save('preview.jpg', resize_image(image, (preview_size, preview_size)), save)
+                    if not self.thumbnail and (width > thumbnail_size or height > thumbnail_size):
+                        self.thumbnail.save(
+                            'thumbnail.jpg', resize_image(image, (thumbnail_size, thumbnail_size)), save
+                        )
             except UnidentifiedImageError:
                 pass
-
-
-def resize(image: Image, size: Tuple[int, int]) -> File:
-    # processes rotation if present
-    image = exif_transpose(image)
-    # remove alpha if it has it
-    if image.mode in ["RGBA", "P"]:
-        image = image.convert('RGB')
-    image.thumbnail(size)
-    io = BytesIO()
-    image.save(io, 'JPEG')
-    return File(io)
