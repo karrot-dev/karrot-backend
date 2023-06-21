@@ -1,7 +1,12 @@
+import logging
+import os
+from datetime import timedelta
+
 import sentry_sdk
 from anymail.exceptions import AnymailAPIError
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
+from django.core.files.storage import default_storage
 from django.db.models import Q, F
 from django.utils import timezone
 from huey import crontab
@@ -13,10 +18,13 @@ from karrot.conversations.emails import (
     prepare_place_conversation_message_notification,
     prepare_mention_notification,
 )
-from karrot.conversations.models import ConversationParticipant, ConversationThreadParticipant, Conversation
+from karrot.conversations.models import ConversationParticipant, ConversationThreadParticipant, Conversation, \
+    ConversationMessageAttachment
 from karrot.users.models import User
 from karrot.utils import stats_utils
 from karrot.utils.stats_utils import timer
+
+logger = logging.getLogger(__name__)
 
 
 def get_participants_to_notify(message):
@@ -172,3 +180,66 @@ def mark_conversations_as_closed():
                 conversation.save()
 
     stats_utils.periodic_task('conversations__mark_conversations_as_closed', seconds=t.elapsed_seconds)
+
+
+@db_periodic_task(crontab(hour=4, minute=23))  # around 4am every day
+def delete_orphaned_attachment_files():
+    """Remove attachment files that are not longer present in the database
+
+    Django does not do this automatically.
+
+    See https://docs.djangoproject.com/en/4.2/ref/models/fields/#django.db.models.fields.files.FieldFile.delete
+
+        "Note that when a model is deleted, related files are not deleted.
+        If you need to cleanup orphaned files, you’ll need to handle it
+        yourself (for instance, with a custom management command that can
+        be run manually or scheduled to run periodically via e.g. cron)."
+
+    """
+    # this is an assumption that the default storage is being used
+    storage = default_storage
+
+    def walk(current_dir, field):
+        try:
+            dirs, file_names = storage.listdir(current_dir)
+
+            # if it's empty, remove it
+            if len(dirs) + len(file_names) == 0:
+                storage.delete(current_dir)
+                return
+
+            for next_dir in dirs:
+                walk(os.path.join(current_dir, next_dir), field)
+
+            entries = set(f'{current_dir}/{name}' for name in file_names)
+            entries_in_use = set(
+                ConversationMessageAttachment.objects.filter(**{
+                    f'{field}__in': entries
+                }).values_list(field, flat=True)
+            )
+            entries_to_remove = entries.difference(entries_in_use)
+
+            for name in entries_to_remove:
+                created_time = storage.get_created_time(name)
+                # just be cautious and only remove them if they are a bit older
+                if created_time < timezone.now() - timedelta(minutes=5):
+                    logger.info(f'Removing orphaned attachment {field}: {name}')
+                    storage.delete(name)
+
+            # check again
+            dirs, file_names = storage.listdir(current_dir)
+
+            # if it's empty, remove it
+            if len(dirs) + len(file_names) == 0:
+                storage.delete(current_dir)
+
+        except FileNotFoundError:
+            pass
+
+    with timer() as t:
+        # these have to match what is configured in the model
+        walk('conversation_message_attachment_files', 'file')
+        walk('conversation_message_attachment_previews', 'preview')
+        walk('conversation_message_attachment_thumbnails', 'thumbnail')
+
+    stats_utils.periodic_task('conversations__delete_orphaned_attachment_files', seconds=t.elapsed_seconds)

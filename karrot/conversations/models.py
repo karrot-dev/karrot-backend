@@ -1,4 +1,5 @@
 from enum import Enum
+from uuid import uuid4
 
 from PIL import Image, UnidentifiedImageError
 from dateutil.relativedelta import relativedelta
@@ -481,16 +482,16 @@ class ConversationMessageAttachment(BaseModel):
     )
     file = models.FileField(
         'ConversationMessage Attachment',
-        upload_to='conversation_message_attachments',
+        upload_to='conversation_message_attachment_files',
         null=False,
     )
 
     preview = models.ImageField(
-        upload_to='conversation_message_attachment_preview',
+        upload_to='conversation_message_attachment_previews',
         null=True,
     )
     thumbnail = models.ImageField(
-        upload_to='conversation_message_attachment_thumbnail',
+        upload_to='conversation_message_attachment_thumbnails',
         null=True,
     )
 
@@ -522,10 +523,10 @@ class ConversationMessageAttachment(BaseModel):
                 with Image.open(self.file.file) as image:
                     width, height = image.size
                     if not self.preview and (width > preview_size or height > preview_size):
-                        self.preview.save('preview.jpg', resize_image(image, (preview_size, preview_size)), save)
+                        self.preview.save(f'{uuid4()}.jpg', resize_image(image, (preview_size, preview_size)), save)
                     if not self.thumbnail and (width > thumbnail_size or height > thumbnail_size):
                         self.thumbnail.save(
-                            'thumbnail.jpg', resize_image(image, (thumbnail_size, thumbnail_size)), save
+                            f'{uuid4()}.jpg', resize_image(image, (thumbnail_size, thumbnail_size)), save
                         )
             except UnidentifiedImageError:
                 pass

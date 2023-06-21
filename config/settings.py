@@ -256,6 +256,20 @@ DATABASES = {
 
 REQUEST_DATABASE_TIMEOUT_MILLISECONDS = int(options['REQUEST_DATABASE_TIMEOUT_SECONDS']) * 1000
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+}
+
 REDIS_HOST = options['REDIS_HOST']
 REDIS_PORT = options['REDIS_PORT']
 REDIS_DB = options['REDIS_DB']
@@ -509,7 +523,7 @@ REQUEST_TIMEOUT_SECONDS = int(options['REQUEST_TIMEOUT_SECONDS'])
 EMAIL_REPLY_TRIMMER_URL = options['EMAIL_REPLY_TRIMMER_URL']
 
 SHELL_PLUS_IMPORTS = [
-    'from karrot.utils.shell_utils import *'
+    'from karrot.utils.shell_utils import *',
 ]
 
 # NB: Keep this as the last line, and keep

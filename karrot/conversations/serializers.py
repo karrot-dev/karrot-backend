@@ -1,3 +1,4 @@
+import logging
 from os.path import basename
 from typing import List
 
@@ -15,6 +16,8 @@ from karrot.conversations.models import (
     ConversationMessage, ConversationParticipant, ConversationMessageReaction, ConversationThreadParticipant,
     ConversationMeta, ConversationNotificationStatus, ConversationMessageImage, ConversationMessageAttachment
 )
+
+logger = logging.getLogger(__name__)
 
 
 @extend_schema_field(OpenApiTypes.STR)

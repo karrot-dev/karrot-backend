@@ -1,17 +1,20 @@
+import logging
 from datetime import datetime
 
-from django.db.models.signals import post_save, pre_delete, pre_save
+from django.db.models.signals import post_save, pre_delete, pre_save, post_delete
 from django.dispatch import receiver
 from pytz import utc
 
 from karrot.conversations import tasks, stats
 from karrot.conversations.models import (
     ConversationParticipant, ConversationMessage, ConversationMessageReaction, ConversationThreadParticipant,
-    ConversationMeta, ConversationMessageMention
+    ConversationMeta, ConversationMessageMention, ConversationMessageAttachment
 )
 from karrot.notifications.models import Notification, NotificationType
 from karrot.users.models import User
 from karrot.utils.frontend_urls import conversation_url
+
+logger = logging.getLogger(__name__)
 
 
 @receiver(pre_save, sender=ConversationMessage)
@@ -167,3 +170,13 @@ def make_conversation_meta(sender, instance, created, **kwargs):
         },
         user=user,
     )
+
+
+@receiver(post_delete, sender=ConversationMessageAttachment)
+def delete_attachment_files(sender, instance, **kwargs):
+    for file in [instance.file, instance.preview, instance.thumbnail]:
+        if file:
+            try:
+                file.delete(save=False)
+            except Exception as ex:
+                logger.error(ex)
