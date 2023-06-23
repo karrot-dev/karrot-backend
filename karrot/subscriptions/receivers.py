@@ -4,6 +4,7 @@ from itertools import groupby
 
 from django.conf import settings
 from django.contrib.auth import user_logged_out
+from django.db import transaction
 from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
@@ -397,13 +398,21 @@ def send_activity_updates(sender, instance, **kwargs):
 
 
 @receiver(pre_delete, sender=Activity)
-@on_transaction_commit
 def send_activity_deleted(sender, instance, **kwargs):
     activity = instance
     payload = ActivitySerializer(activity).data
-    for subscription in ChannelSubscription.objects.recent().filter(user__in=activity.place.group.members.all()
-                                                                    ).distinct():
-        send_in_channel(subscription.reply_channel, topic='activities:activity_deleted', payload=payload)
+
+    def send():
+        for subscription in ChannelSubscription.objects.recent().filter(user__in=activity.place.group.members.all()
+                                                                        ).distinct():
+            send_in_channel(subscription.reply_channel, topic='activities:activity_deleted', payload=payload)
+
+    # can't use @on_transaction_commit for pre_delete
+    # as instance won't have an id after it's deleted
+    # and the serializer can't go and fetch what it needs
+    # so we create the payload first, and send it after
+    # not 100% sure this is right, but yeah...
+    transaction.on_commit(send)
 
 
 @receiver(post_save, sender=ActivityParticipant)
