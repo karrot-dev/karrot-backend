@@ -8,7 +8,7 @@ from pytz import utc
 from karrot.conversations import tasks, stats
 from karrot.conversations.models import (
     ConversationParticipant, ConversationMessage, ConversationMessageReaction, ConversationThreadParticipant,
-    ConversationMeta, ConversationMessageMention, ConversationMessageAttachment
+    ConversationMeta, ConversationMessageMention, ConversationMessageAttachment, ConversationMessageImage
 )
 from karrot.notifications.models import Notification, NotificationType
 from karrot.users.models import User
@@ -172,8 +172,14 @@ def make_conversation_meta(sender, instance, created, **kwargs):
     )
 
 
+@receiver(post_delete, sender=ConversationMessageImage)
+def delete_message_image_files(sender, instance, **kwargs):
+    instance.image.delete_all_created_images()
+    instance.image.delete(save=False)
+
+
 @receiver(post_delete, sender=ConversationMessageAttachment)
-def delete_attachment_files(sender, instance, **kwargs):
+def delete_message_attachment_files(sender, instance, **kwargs):
     for file in [instance.file, instance.preview, instance.thumbnail]:
         if file:
             try:

@@ -516,7 +516,6 @@ class ConversationMessageAttachment(BaseModel):
         the underlying model. If it is part of an existing call to save, you want false.
         """
         if (self.file and (not self.preview or not self.thumbnail) and is_supported_content_type(self.content_type)):
-
             try:
                 preview_size = 1600
                 thumbnail_size = 200

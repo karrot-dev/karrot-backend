@@ -1,5 +1,6 @@
 from datetime import timedelta
 from email.utils import parseaddr
+from os.path import isfile
 
 from dateutil.parser import parse
 from django.core import mail
@@ -221,6 +222,7 @@ class TestConversationsAPI(APITestCase):
             self.assertEqual(
                 response.data['attachments'][0]['urls'], {
                     'download': f"/api/attachments/{attachment_id}/download/",
+                    'original': f"/api/attachments/{attachment_id}/original/",
                     "preview": f"/api/attachments/{attachment_id}/preview/",
                     "thumbnail": f"/api/attachments/{attachment_id}/thumbnail/",
                 }
@@ -245,6 +247,13 @@ class TestConversationsAPI(APITestCase):
             self.assertEqual(len(response.data['attachments']), 1)
             self.assertEqual(len(response.data['images']), 0)
             self.assertEqual(response.data['attachments'][0]['content_type'], 'application/pdf')
+            attachment_id = response.data['attachments'][0]['id']
+            self.assertEqual(
+                response.data['attachments'][0]['urls'], {
+                    'download': f"/api/attachments/{attachment_id}/download/",
+                    'original': f"/api/attachments/{attachment_id}/original/",
+                }
+            )
 
     def test_cannot_create_message_without_specifying_conversation(self):
         self.client.force_login(user=self.participant1)
@@ -1020,10 +1029,13 @@ class TestConversationsMessageEditAPI(APITestCase):
     def test_update_message_remove_image(self):
         self.message.images.create(image=uploaded_file_for(image_path), position=0)
 
+        image = self.message.images.first()
+        path = image.image.path
+        self.assertTrue(isfile(path))
         self.client.force_login(user=self.user)
         data = {
             'images': [{
-                'id': self.message.images.first().id,
+                'id': image.id,
                 '_removed': True
             }],
         }
@@ -1032,6 +1044,28 @@ class TestConversationsMessageEditAPI(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data['images']), 0)
+        self.assertFalse(isfile(path))
+
+    def test_update_message_remove_attachment(self):
+        self.message.attachments.create(
+            file=uploaded_file_for(pdf_attachment_path), position=0, content_type='application/pdf'
+        )
+        attachment = self.message.attachments.first()
+        path = attachment.file.path
+        self.assertTrue(isfile(path))
+        self.client.force_login(user=self.user)
+        data = {
+            'attachments': [{
+                'id': attachment.id,
+                '_removed': True
+            }],
+        }
+        response = self.client.patch(
+            '/api/messages/{}/'.format(self.message.id), encode_data_with_images(data), format='multipart'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data['attachments']), 0)
+        self.assertFalse(isfile(path))
 
 
 class TestWallMessagesUpdateStatus(APITestCase):
