@@ -2,12 +2,13 @@ import logging
 from os.path import basename
 from typing import List
 
+from django.conf import settings
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.fields import DateTimeField
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
@@ -188,6 +189,12 @@ class ConversationMessageAttachmentSerializer(serializers.ModelSerializer):
             # if we don't have a custom filename, use the basename of the stored file
             data['filename'] = basename(attachment.file.path)
         return data
+
+    @staticmethod
+    def validate_file(file):
+        if file.size > settings.FILE_UPLOAD_MAX_SIZE:
+            raise ValidationError(f'Max upload file size is {settings.FILE_UPLOAD_MAX_SIZE}')
+        return file
 
 
 class ConversationMessageSerializer(serializers.ModelSerializer):

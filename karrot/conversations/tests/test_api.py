@@ -5,6 +5,7 @@ from os.path import isfile
 from dateutil.parser import parse
 from django.core import mail
 from django.utils import timezone
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -254,6 +255,24 @@ class TestConversationsAPI(APITestCase):
                     'original': f"/api/attachments/{attachment_id}/original/",
                 }
             )
+
+    @override_settings(FILE_UPLOAD_MAX_SIZE=0)
+    def test_max_attachment_size(self):
+        conversation = ConversationFactory(participants=[self.participant1])
+
+        self.client.force_login(user=self.participant1)
+        with open(pdf_attachment_path, 'rb') as file:
+            data = {
+                'conversation': conversation.id,
+                'content': 'a nice message',
+                'attachments': [{
+                    'position': 0,
+                    'file': file,
+                }],
+            }
+            response = self.client.post('/api/messages/', data=encode_data_with_attachments(data))
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
+            self.assertEqual(response.data['attachments'][0]['file'][0], 'Max upload file size is 0')
 
     def test_cannot_create_message_without_specifying_conversation(self):
         self.client.force_login(user=self.participant1)
