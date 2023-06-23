@@ -249,7 +249,7 @@ msgid ""
 msgstr ""
 
 #: karrot/conversations/api.py:74 karrot/conversations/api.py:300
-#: karrot/conversations/api.py:491 karrot/conversations/serializers.py:244
+#: karrot/conversations/api.py:491 karrot/conversations/serializers.py:257
 msgid "You are not in this conversation"
 msgstr ""
 
@@ -292,7 +292,7 @@ msgstr ""
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/serializers.py:246
+#: karrot/conversations/serializers.py:259
 msgid "This conversation has been closed"
 msgstr ""
 
@@ -576,7 +576,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr ""
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
-#: karrot/offers/serializers.py:91
+#: karrot/offers/serializers.py:98
 msgid "You are not a member of this group."
 msgstr ""
 
@@ -767,7 +767,7 @@ msgstr ""
 msgid "You are already subscribed to this place"
 msgstr ""
 
-#: karrot/subscriptions/receivers.py:767
+#: karrot/subscriptions/receivers.py:776
 msgid "Push notifications are enabled!"
 msgstr ""
 
