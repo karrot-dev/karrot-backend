@@ -1,7 +1,8 @@
+from django.conf import settings
 from django.db import transaction
 from django.utils.translation import gettext as _
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from karrot.offers import stats
@@ -33,6 +34,12 @@ class OfferImageSerializer(serializers.ModelSerializer):
         source='image',
         read_only=True,
     )
+
+    @staticmethod
+    def validate_image(image):
+        if image.size > settings.FILE_UPLOAD_MAX_SIZE:
+            raise ValidationError(f'Max upload file size is {settings.FILE_UPLOAD_MAX_SIZE}')
+        return image
 
 
 class OfferSerializer(serializers.ModelSerializer):

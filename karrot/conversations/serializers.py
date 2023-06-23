@@ -139,6 +139,12 @@ class ConversationMessageImageSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
+    @staticmethod
+    def validate_image(image):
+        if image.size > settings.FILE_UPLOAD_MAX_SIZE:
+            raise ValidationError(f'Max upload file size is {settings.FILE_UPLOAD_MAX_SIZE}')
+        return image
+
 
 class ConversationMessageAttachmentSerializer(serializers.ModelSerializer):
     class Meta:
