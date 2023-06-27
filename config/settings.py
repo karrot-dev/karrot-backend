@@ -121,7 +121,7 @@ INSTALLED_APPS = (
     # in that case you need to install them using another mechanism
     *(() if os.environ.get(
         'EXCLUDE_EXTENSION_MIGRATIONS',
-    ) else 'karrot.dbextensions', ),
+    ) else ('karrot.dbextensions',)),
     'karrot.applications.ApplicationsConfig',
     'karrot.base.BaseConfig',
     'karrot.bootstrap.BootstrapConfig',
