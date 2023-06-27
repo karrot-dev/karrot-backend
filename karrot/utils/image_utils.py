@@ -25,5 +25,10 @@ def resize_image(image: Image, size: Tuple[int, int]) -> File:
         image = image.convert('RGB')
     image.thumbnail(size)
     io = BytesIO()
-    image.save(io, 'JPEG')
+    image.save(
+        io,
+        format='JPEG',
+        optimize=True,
+        progressive=True,
+    )
     return File(io)
