@@ -1,5 +1,7 @@
 from enum import Enum
+from uuid import uuid4
 
+from PIL import Image, UnidentifiedImageError
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -10,11 +12,12 @@ from django.db.models.manager import BaseManager
 from django.utils import timezone
 from versatileimagefield.fields import VersatileImageField
 
+from config.settings import USERNAME_MENTION_RE
 from karrot.base.base_models import BaseModel, UpdatedAtMixin
 from karrot.conversations.signals import new_conversation_message, new_thread_message, conversation_marked_seen, \
     thread_marked_seen
-from config.settings import USERNAME_MENTION_RE
 from karrot.utils import markdown
+from karrot.utils.image_utils import resize_image, is_supported_content_type
 
 
 class ConversationQuerySet(models.QuerySet):
@@ -466,3 +469,63 @@ class ConversationMessageImage(BaseModel):
         null=False,
     )
     position = IntegerField(default=0)
+
+
+class ConversationMessageAttachment(BaseModel):
+    class Meta:
+        ordering = ['position']
+
+    message = models.ForeignKey(
+        ConversationMessage,
+        related_name='attachments',
+        on_delete=models.CASCADE,
+    )
+    file = models.FileField(
+        'ConversationMessage Attachment',
+        upload_to='conversation_message_attachment_files',
+        null=False,
+    )
+
+    preview = models.ImageField(
+        upload_to='conversation_message_attachment_previews',
+        null=True,
+    )
+    thumbnail = models.ImageField(
+        upload_to='conversation_message_attachment_thumbnails',
+        null=True,
+    )
+
+    filename = models.CharField(
+        max_length=255,
+        null=True,
+    )
+    position = IntegerField(default=0)
+    content_type = models.CharField(
+        max_length=120,
+        null=True,
+    )
+
+    def save(self, update_fields=None, **kwargs):
+        self.ensure_images(save=False)  # about to save, so don't save here
+        return super().save(**kwargs)
+
+    def ensure_images(self, *, save: bool):
+        """Ensure we have the preview and thumbnail images if possible
+
+        You can pass the "save" parameter to decide whether to also save
+        the underlying model. If it is part of an existing call to save, you want false.
+        """
+        if (self.file and (not self.preview or not self.thumbnail) and is_supported_content_type(self.content_type)):
+            try:
+                preview_size = 1600
+                thumbnail_size = 200
+                with Image.open(self.file.file) as image:
+                    width, height = image.size
+                    if not self.preview and (width > preview_size or height > preview_size):
+                        self.preview.save(f'{uuid4()}.jpg', resize_image(image, (preview_size, preview_size)), save)
+                    if not self.thumbnail and (width > thumbnail_size or height > thumbnail_size):
+                        self.thumbnail.save(
+                            f'{uuid4()}.jpg', resize_image(image, (thumbnail_size, thumbnail_size)), save
+                        )
+            except UnidentifiedImageError:
+                pass

@@ -117,7 +117,7 @@ def server_daphne():
 
 def server_uvicorn():
     """Run server using uvicorn worker and gunicorn manager
-    
+
     As recommended by:
     https://www.uvicorn.org/deployment/#using-a-process-manager
 
@@ -182,7 +182,7 @@ class KarrotGunicornApplication(BaseApplication):
 
 class KarrotUvicornWorker(UvicornWorker):
     """A uvicorn worker with the settings as we want
-    
+
     See available settings:
     https://www.uvicorn.org/settings/
     """

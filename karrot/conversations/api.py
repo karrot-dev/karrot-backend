@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import prefetch_related_objects, F
-from django.http import Http404
+from django.http import FileResponse, Http404
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
@@ -22,11 +22,12 @@ from rest_framework.viewsets import GenericViewSet
 from karrot.applications.models import Application
 from karrot.applications.serializers import ApplicationSerializer
 from karrot.conversations.models import (
-    Conversation, ConversationMessage, ConversationMessageReaction, ConversationParticipant, ConversationMeta
+    Conversation, ConversationMessage, ConversationMessageReaction, ConversationParticipant, ConversationMeta,
+    ConversationMessageAttachment
 )
 from karrot.conversations.serializers import (
     ConversationSerializer, ConversationMessageSerializer, ConversationMessageReactionSerializer, EmojiField,
-    ConversationThreadSerializer, ConversationMetaSerializer
+    ConversationThreadSerializer, ConversationMetaSerializer, ConversationMessageAttachmentSerializer
 )
 from karrot.issues.models import Issue
 from karrot.issues.serializers import IssueSerializer
@@ -110,6 +111,49 @@ class ConversationFilter(filters.FilterSet):
         fields = ['exclude_read']
 
 
+class AttachmentViewSet(mixins.RetrieveModelMixin, GenericViewSet):
+    queryset = ConversationMessageAttachment.objects
+    serializer_class = ConversationMessageAttachmentSerializer
+
+    def get_queryset(self):
+        return self.queryset.filter(message__conversation__group__groupmembership__user=self.request.user)
+
+    @action(detail=True, methods=['GET'])
+    def preview(self, request, pk=None):
+        return AttachmentResponse(self.get_object(), preview=True)
+
+    @action(detail=True, methods=['GET'])
+    def thumbnail(self, request, pk=None):
+        return AttachmentResponse(self.get_object(), thumbnail=True)
+
+    @action(detail=True, methods=['GET'])
+    def original(self, request, pk=None):
+        return AttachmentResponse(self.get_object())
+
+    @action(detail=True, methods=['GET'])
+    def download(self, request, pk=None):
+        return AttachmentResponse(self.get_object(), download=True)
+
+
+class AttachmentResponse(FileResponse):
+    """An HTTP response to serve an attachment"""
+    def __init__(self, attachment, download=False, thumbnail=False, preview=False):
+        file = attachment.file
+        filename = attachment.filename
+        content_type = attachment.content_type
+        if thumbnail:
+            file = attachment.thumbnail
+            filename = 'thumbnail.jpg'
+            content_type = 'image/jpeg'
+        elif preview:
+            file = attachment.preview
+            filename = 'preview.jpg'
+            content_type = 'image/jpeg'
+        super().__init__(
+            open(file.path, 'rb'), as_attachment=download, filename=filename, headers={'Content-Type': content_type}
+        )
+
+
 class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, GenericViewSet):
     """
     Conversations
@@ -154,6 +198,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
             .prefetch_related(
                 'conversation__latest_message__reactions',
                 'conversation__latest_message__images',
+                'conversation__latest_message__attachments',
                 'conversation__participants',
              ) \
             .order_by('-conversation__latest_message_id')
@@ -327,7 +372,7 @@ class ConversationMessageViewSet(
             .annotate_replies_count()\
             .annotate_unread_replies_count_for(request.user)\
             .order_by(self.pagination_class.ordering)\
-            .prefetch_related('reactions', 'participants', 'images')
+            .prefetch_related('reactions', 'participants', 'images', 'attachments')
 
         serializer = self.get_serializer(messages, many=True)
         return self.get_paginated_response(serializer.data)
@@ -357,6 +402,7 @@ class ConversationMessageViewSet(
 
         prefetch_related_objects(threads + messages, 'reactions')
         prefetch_related_objects(threads + messages, 'images')
+        prefetch_related_objects(threads + messages, 'attachments')
 
         serializer = self.get_serializer(threads, many=True)
         message_serializer = self.get_serializer(messages, many=True)

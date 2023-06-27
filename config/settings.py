@@ -116,6 +116,12 @@ INSTALLED_APPS = (
 
     # Application
     'karrot',
+    # can exclude the extensions if in an environment where the db user
+    # does not have permission to install extensions
+    # in that case you need to install them using another mechanism
+    *(() if os.environ.get(
+        'EXCLUDE_EXTENSION_MIGRATIONS',
+    ) else 'karrot.dbextensions', ),
     'karrot.applications.ApplicationsConfig',
     'karrot.base.BaseConfig',
     'karrot.bootstrap.BootstrapConfig',
@@ -249,6 +255,20 @@ DATABASES = {
 }
 
 REQUEST_DATABASE_TIMEOUT_MILLISECONDS = int(options['REQUEST_DATABASE_TIMEOUT_SECONDS']) * 1000
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+}
 
 REDIS_HOST = options['REDIS_HOST']
 REDIS_PORT = options['REDIS_PORT']
@@ -400,6 +420,25 @@ HOSTNAME = options['SITE_URL']
 SITE_NAME = options['SITE_NAME']
 MEDIA_ROOT = options['FILE_UPLOAD_DIR']
 
+def parse_max_file_size(size: str):
+    """Parses things like 10m, 34k, etc. returns size in bytes"""
+    m = re.match(r'^([0-9]+)(k|m|g)?$', size.lower())
+    if not m:
+        raise ValueError('file size must be a number with optional unit (k, m, or g)')
+    number = int(m.group(1))
+    unit = m.group(2)
+    if unit == 'k':
+        number *= 1024
+    if unit == 'm':
+        number *= (1024 * 1024)
+    if unit == 'g':
+        number *= (1024 * 1024 * 1024)
+
+    return number
+
+
+FILE_UPLOAD_MAX_SIZE = parse_max_file_size(options['FILE_UPLOAD_MAX_SIZE'])
+
 if is_dev:
     # in prod daphne (and I guess uvicorn) handle this
     # but if using https during local dev we need this
@@ -503,7 +542,7 @@ REQUEST_TIMEOUT_SECONDS = int(options['REQUEST_TIMEOUT_SECONDS'])
 EMAIL_REPLY_TRIMMER_URL = options['EMAIL_REPLY_TRIMMER_URL']
 
 SHELL_PLUS_IMPORTS = [
-    'from karrot.utils.shell_utils import *'
+    'from karrot.utils.shell_utils import *',
 ]
 
 # NB: Keep this as the last line, and keep

@@ -17,7 +17,7 @@ from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory
 from karrot.utils.geoip import ip_to_lat_lon
 from karrot.utils.tests.fake import faker
-from karrot.utils.tests.images import image_path
+from karrot.utils.tests.uploads import image_path
 
 
 class TestGroupsInfoAPI(APITestCase):

@@ -1,19 +1,24 @@
+import logging
+from os.path import basename
 from typing import List
 
+from django.conf import settings
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.fields import DateTimeField
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from karrot.conversations.helpers import normalize_emoji_name
 from karrot.conversations.models import (
     ConversationMessage, ConversationParticipant, ConversationMessageReaction, ConversationThreadParticipant,
-    ConversationMeta, ConversationNotificationStatus, ConversationMessageImage
+    ConversationMeta, ConversationNotificationStatus, ConversationMessageImage, ConversationMessageAttachment
 )
+
+logger = logging.getLogger(__name__)
 
 
 @extend_schema_field(OpenApiTypes.STR)
@@ -134,6 +139,73 @@ class ConversationMessageImageSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
+    @staticmethod
+    def validate_image(image):
+        if image.size > settings.FILE_UPLOAD_MAX_SIZE:
+            raise ValidationError(
+                f'Max upload file size is {settings.FILE_UPLOAD_MAX_SIZE}, your file has size {image.size}'
+            )
+        return image
+
+
+class ConversationMessageAttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConversationMessageAttachment
+        fields = (
+            'id',
+            'position',
+            'file',
+            'urls',
+            'filename',
+            'size',
+            'content_type',
+            '_removed',
+        )
+
+    id = serializers.IntegerField(required=False)
+    _removed = serializers.BooleanField(required=False)
+    file = serializers.FileField(write_only=True)
+    size = serializers.SerializerMethodField()
+    urls = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_urls(attachment):
+        attachment.ensure_images(save=True)
+
+        def url(variant):
+            return f"/api/attachments/{attachment.id}/{variant}/"
+
+        variants = [
+            'download',
+            'original',
+        ]
+        if attachment.preview:
+            variants.append('preview')
+
+        if attachment.thumbnail:
+            variants.append('thumbnail')
+
+        return {variant: url(variant) for variant in variants}
+
+    @staticmethod
+    def get_size(attachment):
+        return attachment.file.size
+
+    def to_representation(self, attachment):
+        data = super().to_representation(attachment)
+        if not data['filename']:
+            # if we don't have a custom filename, use the basename of the stored file
+            data['filename'] = basename(attachment.file.path)
+        return data
+
+    @staticmethod
+    def validate_file(file):
+        if file.size > settings.FILE_UPLOAD_MAX_SIZE:
+            raise ValidationError(
+                f'Max upload file size is {settings.FILE_UPLOAD_MAX_SIZE}, your file has size {file.size}'
+            )
+        return file
+
 
 class ConversationMessageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -152,6 +224,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
             'thread',  # ideally would only be writable on create
             'thread_meta',
             'images',
+            'attachments',
         ]
         read_only_fields = (
             'author',
@@ -164,6 +237,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
 
     thread_meta = serializers.SerializerMethodField()
     images = ConversationMessageImageSerializer(many=True, default=list)
+    attachments = ConversationMessageAttachmentSerializer(many=True, default=list)
 
     @extend_schema_field(ConversationThreadSerializer)
     def get_thread_meta(self, message):
@@ -215,6 +289,7 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         images = validated_data.pop('images', [])
+        attachments = validated_data.pop('attachments', [])
         # Save the offer and its associated images in one transaction
         # Allows us to trigger the notifications in the receiver only after all is saved
         with transaction.atomic():
@@ -222,22 +297,46 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
             message = ConversationMessage.objects.create(author=user, **validated_data)
             for image in images:
                 ConversationMessageImage.objects.create(message=message, **image)
+            for attachment in attachments:
+                maybe_add_content_type_to_attachment(attachment)
+                ConversationMessageAttachment.objects.create(message=message, **attachment)
         return message
 
     def update(self, instance, validated_data):
         message = instance
-        images = validated_data.pop('images', None)
-        if images:
-            for image in images:
-                pk = image.pop('id', None)
-                if pk:
-                    if image.get('_removed', False):
-                        ConversationMessageImage.objects.filter(pk=pk).delete()
-                    else:
-                        ConversationMessageImage.objects.filter(pk=pk).update(**image)
+        images = validated_data.pop('images', [])
+        attachments = validated_data.pop('attachments', [])
+
+        for image in images:
+            pk = image.pop('id', None)
+            if pk:
+                if image.get('_removed', False):
+                    ConversationMessageImage.objects.filter(pk=pk).delete()
                 else:
-                    ConversationMessageImage.objects.create(message=message, **image)
+                    ConversationMessageImage.objects.filter(pk=pk).update(**image)
+            else:
+                ConversationMessageImage.objects.create(message=message, **image)
+
+        for attachment in attachments:
+            maybe_add_content_type_to_attachment(attachment)
+            pk = attachment.pop('id', None)
+            if pk:
+                if attachment.get('_removed', False):
+                    ConversationMessageAttachment.objects.filter(pk=pk).delete()
+                else:
+                    ConversationMessageAttachment.objects.filter(pk=pk).update(**attachment)
+            else:
+                ConversationMessageAttachment.objects.create(message=message, **attachment)
+
         return serializers.ModelSerializer.update(self, instance, validated_data)
+
+
+def maybe_add_content_type_to_attachment(attachment):
+    if 'content_type' not in attachment:
+        # maybe should "trust but verify" these content types?
+        # see https://docs.djangoproject.com/en/4.2/ref/files/uploads/#django.core.files.uploadedfile.UploadedFile.content_type
+        if 'file' in attachment and hasattr(attachment['file'], 'content_type'):
+            attachment['content_type'] = attachment['file'].content_type
 
 
 class ConversationSerializer(serializers.ModelSerializer):

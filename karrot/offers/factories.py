@@ -5,7 +5,7 @@ from karrot.groups.factories import GroupFactory
 from karrot.offers.models import Offer
 from karrot.users.factories import UserFactory
 from karrot.utils.tests.fake import faker
-from karrot.utils.tests.images import image_upload_for
+from karrot.utils.tests.uploads import uploaded_file_for
 
 
 class OfferFactory(DjangoModelFactory):
@@ -22,4 +22,4 @@ class OfferFactory(DjangoModelFactory):
     def images(self, created, extracted, **kwargs):
         if created and extracted:
             for index, image_path in enumerate(extracted):
-                self.images.create(image=image_upload_for(image_path), position=index)
+                self.images.create(image=uploaded_file_for(image_path), position=index)

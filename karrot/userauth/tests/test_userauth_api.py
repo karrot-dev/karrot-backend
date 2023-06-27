@@ -21,7 +21,7 @@ from karrot.userauth.models import VerificationCode
 from karrot.users.factories import UserFactory, VerifiedUserFactory
 from karrot.utils import email_utils
 from karrot.utils.tests.fake import faker
-from karrot.utils.tests.images import image_path
+from karrot.utils.tests.uploads import image_path
 from karrot.webhooks.models import EmailEvent
 
 
