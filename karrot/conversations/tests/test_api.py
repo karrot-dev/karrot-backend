@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta
 from email.utils import parseaddr
 from os.path import isfile
@@ -272,7 +273,10 @@ class TestConversationsAPI(APITestCase):
             }
             response = self.client.post('/api/messages/', data=encode_data_with_attachments(data))
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-            self.assertEqual(response.data['attachments'][0]['file'][0], 'Max upload file size is 0')
+            self.assertEqual(
+                str(response.data['attachments'][0]['file'][0]),
+                f'Max upload file size is 0, your file has size {os.path.getsize(pdf_attachment_path)}'
+            )
 
     def test_cannot_create_message_without_specifying_conversation(self):
         self.client.force_login(user=self.participant1)
