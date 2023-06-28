@@ -438,6 +438,7 @@ def parse_max_file_size(size: str):
 
 
 FILE_UPLOAD_MAX_SIZE = parse_max_file_size(options['FILE_UPLOAD_MAX_SIZE'])
+FILE_UPLOAD_USE_ACCEL_REDIRECT = options['FILE_UPLOAD_USE_ACCEL_REDIRECT'] == 'true'
 
 if is_dev:
     # in prod daphne (and I guess uvicorn) handle this

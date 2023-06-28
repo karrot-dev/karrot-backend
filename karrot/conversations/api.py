@@ -1,9 +1,16 @@
+import hashlib
+import logging
+import os
+from os.path import abspath
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import prefetch_related_objects, F
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, HttpResponse
 from django.utils import timezone
+from django.utils.cache import get_conditional_response
+from django.utils.http import content_disposition_header, quote_etag
 from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
 from drf_spectacular.types import OpenApiTypes
@@ -38,6 +45,8 @@ from karrot.activities.models import Activity
 from karrot.activities.serializers import ActivitySerializer
 from karrot.users.serializers import UserInfoSerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
+
+logger = logging.getLogger(__name__)
 
 
 class ConversationPagination(CursorPagination):
@@ -120,38 +129,19 @@ class AttachmentViewSet(mixins.RetrieveModelMixin, GenericViewSet):
 
     @action(detail=True, methods=['GET'])
     def preview(self, request, pk=None):
-        return AttachmentResponse(self.get_object(), preview=True)
+        return send_attachment(request, self.get_object(), preview=True)
 
     @action(detail=True, methods=['GET'])
     def thumbnail(self, request, pk=None):
-        return AttachmentResponse(self.get_object(), thumbnail=True)
+        return send_attachment(request, self.get_object(), thumbnail=True)
 
     @action(detail=True, methods=['GET'])
     def original(self, request, pk=None):
-        return AttachmentResponse(self.get_object())
+        return send_attachment(request, self.get_object())
 
     @action(detail=True, methods=['GET'])
     def download(self, request, pk=None):
-        return AttachmentResponse(self.get_object(), download=True)
-
-
-class AttachmentResponse(FileResponse):
-    """An HTTP response to serve an attachment"""
-    def __init__(self, attachment, download=False, thumbnail=False, preview=False):
-        file = attachment.file
-        filename = attachment.filename
-        content_type = attachment.content_type
-        if thumbnail:
-            file = attachment.thumbnail
-            filename = 'thumbnail.jpg'
-            content_type = 'image/jpeg'
-        elif preview:
-            file = attachment.preview
-            filename = 'preview.jpg'
-            content_type = 'image/jpeg'
-        super().__init__(
-            open(file.path, 'rb'), as_attachment=download, filename=filename, headers={'Content-Type': content_type}
-        )
+        return send_attachment(request, self.get_object(), download=True)
 
 
 class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, GenericViewSet):
@@ -505,3 +495,80 @@ class RetrievePrivateConversationMixin(object):
         participant = conversation.conversationparticipant_set.get(user=request.user)
         serializer = ConversationSerializer(participant, context=self.get_serializer_context())
         return Response(serializer.data)
+
+
+def send_attachment(request, attachment, download=False, thumbnail=False, preview=False):
+    file, filename, content_type = get_attachment_info(attachment, thumbnail, preview)
+
+    if not file:
+        return Http404()
+
+    etag = quote_etag(file_digest(file))  # would be better to save this in the db
+
+    response = get_conditional_response(
+        request,
+        etag=etag,
+    )
+    if response is None:
+        if settings.FILE_UPLOAD_USE_ACCEL_REDIRECT:
+            response = AttachmentAccelRedirectResponse(file, filename, content_type, download)
+        else:
+            response = AttachmentResponse(file, filename, content_type, download)
+
+    if request.method in ("GET", "HEAD"):
+        if etag:
+            response.headers.setdefault("ETag", etag)
+
+    return response
+
+
+class AttachmentResponse(FileResponse):
+    """An HTTP response to serve an attachment"""
+    def __init__(self, file, filename, content_type, download):
+        super().__init__(
+            open(file.path, 'rb'),
+            as_attachment=download,
+            filename=filename,
+            headers={
+                'Content-Type': content_type,
+            },
+        )
+
+
+class AttachmentAccelRedirectResponse(HttpResponse):
+    """Sends an attachment as an nginx X-Accel-Redirect thing"""
+    def __init__(self, file, filename, content_type, download):
+        super().__init__()
+        attachment_path = abspath(str(file.path))
+        media_root = abspath(settings.MEDIA_ROOT)
+        if not attachment_path.startswith(media_root):
+            raise ValueError('path is not within media root :/')
+        accel_redirect_location = '/uploads'  # this is what you set as nginx location
+        accel_redirect_path = os.path.join(accel_redirect_location, attachment_path[len(media_root) + 1:])
+        self.headers['Content-Type'] = content_type
+        self.headers["Content-Disposition"] = content_disposition_header(download, filename)
+        self.headers['X-Accel-Redirect'] = accel_redirect_path
+
+
+def get_attachment_info(attachment, thumbnail=False, preview=False):
+    """Gets attachment info """
+    file = attachment.file
+    filename = attachment.filename
+    content_type = attachment.content_type
+    if thumbnail:
+        file = attachment.thumbnail
+        filename = 'thumbnail.jpg'
+        content_type = 'image/jpeg'
+    elif preview:
+        file = attachment.preview
+        filename = 'preview.jpg'
+        content_type = 'image/jpeg'
+    return file, filename, content_type
+
+
+def file_digest(file):
+    sha256_hash = hashlib.sha256()
+    # Read and update hash string value in blocks of 4K
+    for byte_block in iter(lambda: file.read(4096), b""):
+        sha256_hash.update(byte_block)
+    return sha256_hash.hexdigest()
