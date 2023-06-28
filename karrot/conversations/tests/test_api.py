@@ -23,7 +23,7 @@ from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import execute_scheduled_tasks_immediately
 from karrot.users.factories import UserFactory, VerifiedUserFactory
 from karrot.utils.tests.uploads import encode_data_with_images, image_path, uploaded_file_for, pdf_attachment_path, \
-    encode_data_with_attachments
+    encode_data_with_attachments, read_response
 from karrot.webhooks.utils import parse_local_part
 
 
@@ -277,6 +277,38 @@ class TestConversationsAPI(APITestCase):
                 str(response.data['attachments'][0]['file'][0]),
                 f'Max upload file size is 0, your file has size {os.path.getsize(pdf_attachment_path)}'
             )
+
+    def test_get_attachment_original(self):
+        conversation = ConversationFactory(participants=[self.participant1])
+        message = conversation.messages.create(author=self.participant1, content='hello')
+        attachment = message.attachments.create(
+            file=uploaded_file_for(pdf_attachment_path), position=0, content_type='application/pdf'
+        )
+        attachment_id = attachment.id
+        self.client.force_login(user=self.participant1)
+        response = self.client.get(f"/api/attachments/{attachment_id}/original/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.headers['Content-Type'], 'application/pdf')
+        data = read_response(response)
+        self.assertEqual(len(data), os.path.getsize(pdf_attachment_path))
+        with open(pdf_attachment_path, 'rb') as file:
+            self.assertEqual(data, file.read())
+
+    def test_get_attachment_download(self):
+        conversation = ConversationFactory(participants=[self.participant1])
+        message = conversation.messages.create(author=self.participant1, content='hello')
+        attachment = message.attachments.create(
+            file=uploaded_file_for(image_path), position=0, content_type='image/jpeg'
+        )
+        attachment_id = attachment.id
+        self.client.force_login(user=self.participant1)
+        response = self.client.get(f"/api/attachments/{attachment_id}/download/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.headers['Content-Type'], 'image/jpeg')
+        data = read_response(response)
+        self.assertEqual(len(data), os.path.getsize(image_path))
+        with open(image_path, 'rb') as file:
+            self.assertEqual(data, file.read())
 
     def test_cannot_create_message_without_specifying_conversation(self):
         self.client.force_login(user=self.participant1)

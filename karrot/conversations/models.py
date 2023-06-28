@@ -471,9 +471,21 @@ class ConversationMessageImage(BaseModel):
     position = IntegerField(default=0)
 
 
+class ConversationMessageAttachmentQuerySet(models.QuerySet):
+    def with_conversation_access(self, user):
+        # Note: this is needed if ConversationQuerySet.with_access is too slow
+        # should contain the same logic
+        return self.filter(
+            Q(message__conversation__participants=user) |
+            Q(message__conversation__group__groupmembership__user=user, message__conversation__group__isnull=False)
+        )
+
+
 class ConversationMessageAttachment(BaseModel):
     class Meta:
         ordering = ['position']
+
+    objects = ConversationMessageAttachmentQuerySet.as_manager()
 
     message = models.ForeignKey(
         ConversationMessage,

@@ -40,3 +40,12 @@ def uploaded_file_for(path):
             content=file.read(),
             content_type='image/jpeg',
         )
+
+
+def read_response(response) -> bytes:
+    if not response.streaming:
+        raise AssertionError('must be a streaming response')
+    data = b''
+    for chunk in response:
+        data += chunk
+    return data

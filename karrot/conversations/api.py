@@ -116,7 +116,7 @@ class AttachmentViewSet(mixins.RetrieveModelMixin, GenericViewSet):
     serializer_class = ConversationMessageAttachmentSerializer
 
     def get_queryset(self):
-        return self.queryset.filter(message__conversation__group__groupmembership__user=self.request.user)
+        return self.queryset.with_conversation_access(self.request.user).distinct()
 
     @action(detail=True, methods=['GET'])
     def preview(self, request, pk=None):
