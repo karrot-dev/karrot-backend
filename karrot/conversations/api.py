@@ -123,6 +123,7 @@ class ConversationFilter(filters.FilterSet):
 class AttachmentViewSet(mixins.RetrieveModelMixin, GenericViewSet):
     queryset = ConversationMessageAttachment.objects
     serializer_class = ConversationMessageAttachmentSerializer
+    permission_classes = (IsAuthenticated, )
 
     def get_queryset(self):
         return self.queryset.with_conversation_access(self.request.user).distinct()
