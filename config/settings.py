@@ -420,6 +420,9 @@ HOSTNAME = options['SITE_URL']
 SITE_NAME = options['SITE_NAME']
 MEDIA_ROOT = options['FILE_UPLOAD_DIR']
 
+if options['FILE_UPLOAD_TEMP_DIR']:
+    FILE_UPLOAD_TEMP_DIR = options['FILE_UPLOAD_TEMP_DIR']
+
 def parse_max_file_size(size: str):
     """Parses things like 10m, 34k, etc. returns size in bytes"""
     m = re.match(r'^([0-9]+)(k|m|g)?$', size.lower())
