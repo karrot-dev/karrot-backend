@@ -503,17 +503,17 @@ def send_attachment(request, attachment, download=False, thumbnail=False, previe
     if not file:
         return Http404()
 
-    etag = quote_etag(file_digest(file))  # would be better to save this in the db
+    if settings.FILE_UPLOAD_USE_ACCEL_REDIRECT:
+        return AttachmentAccelRedirectResponse(file, filename, content_type, download)
+
+    etag = quote_etag(file_digest(file))  # could save this in the db to not calculate it each time
 
     response = get_conditional_response(
         request,
         etag=etag,
     )
     if response is None:
-        if settings.FILE_UPLOAD_USE_ACCEL_REDIRECT:
-            response = AttachmentAccelRedirectResponse(file, filename, content_type, download)
-        else:
-            response = AttachmentResponse(file, filename, content_type, download)
+        response = AttachmentResponse(file, filename, content_type, download)
 
     if request.method in ("GET", "HEAD"):
         if etag:
