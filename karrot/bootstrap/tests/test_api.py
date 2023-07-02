@@ -18,6 +18,7 @@ DEFAULT_SETTINGS = {
     'FCM_CLIENT_MESSAGING_SENDER_ID': settings.FCM_CLIENT_MESSAGING_SENDER_ID,
     'FCM_CLIENT_PROJECT_ID': settings.FCM_CLIENT_PROJECT_ID,
     'FCM_CLIENT_APP_ID': settings.FCM_CLIENT_APP_ID,
+    'FILE_UPLOAD_MAX_SIZE': settings.FILE_UPLOAD_MAX_SIZE,
 }
 
 OVERRIDE_SETTINGS = {
@@ -27,6 +28,7 @@ OVERRIDE_SETTINGS = {
     'FCM_CLIENT_MESSAGING_SENDER_ID': faker.name(),
     'FCM_CLIENT_PROJECT_ID': faker.name(),
     'FCM_CLIENT_APP_ID': faker.name(),
+    'FILE_UPLOAD_MAX_SIZE': 12345
 }
 
 
@@ -46,6 +48,9 @@ class TestConfigAPI(APITestCase):
                     'dsn': DEFAULT_SETTINGS['SENTRY_CLIENT_DSN'],
                     'environment': DEFAULT_SETTINGS['SENTRY_ENVIRONMENT'],
                 },
+                'upload': {
+                    'max_size': DEFAULT_SETTINGS['FILE_UPLOAD_MAX_SIZE'],
+                }
             }, response.data
         )
 
@@ -64,6 +69,9 @@ class TestConfigAPI(APITestCase):
                 'sentry': {
                     'dsn': OVERRIDE_SETTINGS['SENTRY_CLIENT_DSN'],
                     'environment': OVERRIDE_SETTINGS['SENTRY_ENVIRONMENT'],
+                },
+                'upload': {
+                    'max_size': OVERRIDE_SETTINGS['FILE_UPLOAD_MAX_SIZE'],
                 },
             }, response.data
         )
