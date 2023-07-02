@@ -28,6 +28,9 @@ def get_config_data():
             'dsn': settings.SENTRY_CLIENT_DSN,
             'environment': settings.SENTRY_ENVIRONMENT,
         },
+        'upload': {
+            'max_size': settings.FILE_UPLOAD_MAX_SIZE,
+        },
     }
 
 

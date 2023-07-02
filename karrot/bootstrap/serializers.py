@@ -31,9 +31,14 @@ class SentryClientConfigSerializer(serializers.Serializer):
     environment = serializers.CharField()
 
 
+class UploadConfigSerializer(serializers.Serializer):
+    max_size = serializers.IntegerField()
+
+
 class ConfigSerializer(serializers.Serializer):
     fcm = FCMClientConfigSerializer()
     sentry = SentryClientConfigSerializer()
+    upload = UploadConfigSerializer()
 
 
 class BootstrapSerializer(serializers.Serializer):
