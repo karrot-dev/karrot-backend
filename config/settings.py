@@ -324,6 +324,9 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.BCryptPasswordHasher',
 ]
 
+PREVIEW_SIZE = 1600
+THUMBNAIL_SIZE = 200
+
 VERSATILEIMAGEFIELD_SETTINGS = {
     # TODO: implement the proper way of auto creating images
     # See https://django-versatileimagefield.readthedocs.io/en/latest/improving_performance.html#auto-creating-sets-of-images-on-post-save
@@ -332,20 +335,25 @@ VERSATILEIMAGEFIELD_SETTINGS = {
     'create_images_on_demand': True,
 }
 
+VERSATILEIMAGE_PREVIEW = f'thumbnail__{PREVIEW_SIZE}x{PREVIEW_SIZE}'
+VERSATILEIMAGE_THUMBNAIL = f'thumbnail__{THUMBNAIL_SIZE}x{THUMBNAIL_SIZE}'
+
 VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
     'user_profile': [
         ('full_size', 'url'),
-        ('thumbnail', 'thumbnail__120x120'),
         ('600', 'thumbnail__600x600'),
+        ('thumbnail', VERSATILEIMAGE_THUMBNAIL),
     ],
     'group_logo': [
         ('full_size', 'url'),
-        ('thumbnail', 'thumbnail__120x120'),
-        ('200', 'thumbnail__200x200'),
         ('600', 'thumbnail__600x600'),
+        ('200', VERSATILEIMAGE_THUMBNAIL),
+        ('thumbnail', VERSATILEIMAGE_THUMBNAIL),
     ],
     'offer_image': [
         ('full_size', 'url'),
+        ('preview', VERSATILEIMAGE_PREVIEW),
+        ('thumbnail', VERSATILEIMAGE_THUMBNAIL),
         ('600', 'thumbnail__600x600'),
     ],
     'conversation_message_image': [
@@ -354,8 +362,8 @@ VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
         ('600', 'thumbnail__600x600'),
     ],
     'activity_banner_image': [
-        # TODO: work out what to do here...
         ('full_size', 'url'),
+        ('preview', VERSATILEIMAGE_PREVIEW),
     ],
 }
 
