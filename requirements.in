@@ -13,7 +13,7 @@ django-redis
 django-dirtyfields
 djangorestframework
 djangorestframework-csv
-drf-spectacular
+drf-spectacular[sidecar]
 django-jinja
 hiredis
 markdown

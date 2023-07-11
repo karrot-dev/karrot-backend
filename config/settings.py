@@ -152,6 +152,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework.authtoken',
     'drf_spectacular',
+    'drf_spectacular_sidecar',
     'anymail',
     'timezone_field',
     'django_jinja',
@@ -181,8 +182,13 @@ or talk with us in our [Karrot Team & Feedback](https://karrot.world/#/groupPrev
 or in our [Matrix chat room](https://chat.karrot.world)!
     """,
     'VERSION': '0.1',
+    # hide all the auth options
+    # we add a link to drf auth in custom-auth.html
+    'AUTHENTICATION_WHITELIST': [],
     'SCHEMA_PATH_PREFIX': '/api/',
-    'SWAGGER_UI_FAVICON_HREF': '/favicon.ico',
+    'SWAGGER_UI_DIST': 'SIDECAR',
+    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+    'REDOC_DIST': 'SIDECAR',
     'SWAGGER_UI_SETTINGS': {
         'deepLinking': True,
         'defaultModelsExpandDepth': 0,

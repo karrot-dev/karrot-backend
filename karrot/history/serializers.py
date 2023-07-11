@@ -1,3 +1,5 @@
+from typing import Optional
+
 from django.utils.dateparse import parse_datetime
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
@@ -31,7 +33,7 @@ class HistorySerializer(serializers.ModelSerializer):
 
     changes = SerializerMethodField()
 
-    def get_changes(self, obj):
+    def get_changes(self, obj) -> Optional[dict]:
         if obj.typus == HistoryTypus.AGREEMENT_MODIFY:
             changes = {}
             for k in (
@@ -48,12 +50,10 @@ class HistorySerializer(serializers.ModelSerializer):
                 return changes
         return None
 
-    @extend_schema_field(OpenApiTypes.STR)
-    def get_typus(self, obj):
+    def get_typus(self, obj) -> str:
         return HistoryTypus.name(obj.typus)
 
-    @extend_schema_field(OpenApiTypes.OBJECT)
-    def get_after(self, obj):
+    def get_after(self, obj) -> Optional[dict]:
         # It's limited to these types as if we just generally return it we might send
         # internal/private data back to the client. This is a bit of technical debt as
         # we should rethink the history data a bit to ensure we always have what we need.
