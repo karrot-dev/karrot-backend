@@ -12,7 +12,7 @@ from karrot.conversations.models import (
 )
 from karrot.notifications.models import Notification, NotificationType
 from karrot.users.models import User
-from karrot.utils.frontend_urls import conversation_url
+from karrot.utils.frontend_urls import message_url
 
 logger = logging.getLogger(__name__)
 
@@ -122,7 +122,7 @@ def user_mentioned(sender, instance, created, **kwargs):
             'mention': mention.id,
             'group': conversation.group.id,
             'user': message.author.id,
-            'url': conversation_url(conversation, user),
+            'url': message_url(message),
         },
     )
 
