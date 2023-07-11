@@ -529,8 +529,8 @@ class ConversationMessageAttachment(BaseModel):
         """
         if (self.file and (not self.preview or not self.thumbnail) and is_supported_content_type(self.content_type)):
             try:
-                preview_size = 1600
-                thumbnail_size = 200
+                preview_size = settings.PREVIEW_SIZE
+                thumbnail_size = settings.THUMBNAIL_SIZE
                 with Image.open(self.file.file) as image:
                     width, height = image.size
                     if not self.preview and (width > preview_size or height > preview_size):
