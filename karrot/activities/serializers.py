@@ -441,6 +441,9 @@ class ActivityUpdateSerializer(ActivitySerializer):
             # create public id
             update_data['public_id'] = uuid.uuid4()
 
+        if 'banner_image' in validated_data:
+            activity.delete_banner_image()
+
         update_data.pop('participant_types', None)
         update_data['last_changed_by'] = self.context['request'].user
         activity = super().update(activity, update_data)
