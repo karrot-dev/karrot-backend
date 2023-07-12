@@ -35,10 +35,16 @@ class UploadConfigSerializer(serializers.Serializer):
     max_size = serializers.IntegerField()
 
 
+class ForumConfigSerializer(serializers.Serializer):
+    banner_topic_id = serializers.IntegerField()
+    discussions_feed = serializers.CharField()
+
+
 class ConfigSerializer(serializers.Serializer):
     fcm = FCMClientConfigSerializer()
     sentry = SentryClientConfigSerializer()
     upload = UploadConfigSerializer()
+    forum = ForumConfigSerializer()
 
 
 class BootstrapSerializer(serializers.Serializer):

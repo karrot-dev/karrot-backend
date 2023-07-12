@@ -31,6 +31,10 @@ def get_config_data():
         'upload': {
             'max_size': settings.FILE_UPLOAD_MAX_SIZE,
         },
+        'forum': {
+            'banner_topic_id': settings.FORUM_BANNER_TOPIC_ID,
+            'discussions_feed': settings.FORUM_DISCUSSIONS_FEED,
+        },
     }
 
 

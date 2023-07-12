@@ -555,6 +555,13 @@ LISTEN_ENDPOINT = options['LISTEN_ENDPOINT']
 
 REQUEST_TIMEOUT_SECONDS = int(options['REQUEST_TIMEOUT_SECONDS'])
 
+# forum settings
+
+if options['FORUM_BANNER_TOPIC_ID']:
+    FORUM_BANNER_TOPIC_ID = int(options['FORUM_BANNER_TOPIC_ID'])
+
+FORUM_DISCUSSIONS_FEED = options['FORUM_DISCUSSIONS_FEED']
+
 # If you have the email_reply_trimmer_service running, set this to 'http://localhost:4567/trim' (or similar)
 # https://github.com/karrot-dev/email_reply_trimmer_service
 EMAIL_REPLY_TRIMMER_URL = options['EMAIL_REPLY_TRIMMER_URL']

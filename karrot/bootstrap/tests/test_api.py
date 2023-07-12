@@ -19,6 +19,8 @@ DEFAULT_SETTINGS = {
     'FCM_CLIENT_PROJECT_ID': settings.FCM_CLIENT_PROJECT_ID,
     'FCM_CLIENT_APP_ID': settings.FCM_CLIENT_APP_ID,
     'FILE_UPLOAD_MAX_SIZE': settings.FILE_UPLOAD_MAX_SIZE,
+    'FORUM_BANNER_TOPIC_ID': settings.FORUM_BANNER_TOPIC_ID,
+    'FORUM_DISCUSSIONS_FEED': settings.FORUM_DISCUSSIONS_FEED,
 }
 
 OVERRIDE_SETTINGS = {
@@ -28,7 +30,9 @@ OVERRIDE_SETTINGS = {
     'FCM_CLIENT_MESSAGING_SENDER_ID': faker.name(),
     'FCM_CLIENT_PROJECT_ID': faker.name(),
     'FCM_CLIENT_APP_ID': faker.name(),
-    'FILE_UPLOAD_MAX_SIZE': 12345
+    'FILE_UPLOAD_MAX_SIZE': 12345,
+    'FORUM_BANNER_TOPIC_ID': 444,
+    'FORUM_DISCUSSIONS_FEED': 'something/else.json',
 }
 
 
@@ -50,7 +54,11 @@ class TestConfigAPI(APITestCase):
                 },
                 'upload': {
                     'max_size': DEFAULT_SETTINGS['FILE_UPLOAD_MAX_SIZE'],
-                }
+                },
+                'forum': {
+                    'banner_topic_id': DEFAULT_SETTINGS['FORUM_BANNER_TOPIC_ID'],
+                    'discussions_feed': DEFAULT_SETTINGS['FORUM_DISCUSSIONS_FEED'],
+                },
             }, response.data
         )
 
@@ -72,6 +80,10 @@ class TestConfigAPI(APITestCase):
                 },
                 'upload': {
                     'max_size': OVERRIDE_SETTINGS['FILE_UPLOAD_MAX_SIZE'],
+                },
+                'forum': {
+                    'banner_topic_id': OVERRIDE_SETTINGS['FORUM_BANNER_TOPIC_ID'],
+                    'discussions_feed': OVERRIDE_SETTINGS['FORUM_DISCUSSIONS_FEED'],
                 },
             }, response.data
         )
