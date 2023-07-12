@@ -169,12 +169,13 @@ def user_detail_url(user):
 
 
 def thread_url(thread):
-    """
-    Assumes that thread.conversation.target is a group
-    """
+    # there should _always_ be a group, the types of conversations that don't have one, don't have threads...
+    group = thread.conversation.find_group()
+    if not group:
+        raise Exception(f'cannot find group for thread: {thread.id}')
     return '{hostname}/#/group/{group_id}/message/{message_id}/replies'.format(
         hostname=settings.HOSTNAME,
-        group_id=thread.conversation.target_id,
+        group_id=group.id,
         message_id=thread.id,
     )
 
