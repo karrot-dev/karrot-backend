@@ -1,57 +1,51 @@
 <!DOCTYPE html>
+<!--
+
+  Hello future Karrot developers
+
+  This is the swagger_ui.html template copied from
+  drf-spectacular then a few changes made.
+
+  Actually, the only change is this added just after the
+  opening body tag:
+
+      {% include 'custom-auth.html' %}
+
+  The purpose is to remove the default authentication options
+  and replace it with a link to the django rest framework login.
+
+  If drf-spectacular changes, you might need to re-copy the
+  swagger_ui.html from the library and make the same modification.
+
+-->
 <html>
-<head>
-  <title>Karrot API Documentation</title>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  {% if favicon_href %}
-    <link rel="icon" type="image/png" href="{{favicon_href}}"/>
-  {% endif %}
-  <link rel="stylesheet" type="text/css" href="{{dist}}/swagger-ui.css" />
-  <style>
-    /* hide swagger-ui login options, they don't help us very much */
-    .scheme-container {
-      display: none;
-    }
-    .django-auth-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      padding-top: 5px;
-      padding-bottom: 15px;
-      border-bottom: 1px lightgrey solid;
-    }
-  </style>
-</head>
-<body>
-<div class="swagger-ui">
-  <div class="wrapper">
-    <div class="django-auth-bar">
-      <div>
-        {% if request.user.is_authenticated %}
-          You are logged in as: <strong>{{ request.user }}</strong>
-        {% else %}
-          Viewing as an anonymous user
-        {% endif %}
-      </div>
-      <div>
-        {% if request.user.is_authenticated %}
-          <a class="btn" style="text-decoration: none" href="{% url 'rest_framework:logout' %}?next={{ request.path }}">Logout</a>
-        {% else %}
-          <a class="btn" style="text-decoration: none" href="{% url 'rest_framework:login' %}?next={{ request.path }}">Session Login</a>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-</div>
-<div id="swagger-ui"></div>
-<script src="{{dist}}/swagger-ui-bundle.js"></script>
-{% if script_url %}
-  <script src="{{script_url|safe}}"></script>
-{% else %}
-  <script>
+  <head>
+    {% block head %}
+    <title>{{ title|default:"Swagger" }}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% if favicon_href %}<link rel="icon" href="{{ favicon_href }}">{% endif %}
+    <link rel="stylesheet" href="{{ swagger_ui_css }}">
+    <style>
+      html { box-sizing: border-box; overflow-y: scroll; }
+      *, *:after, *:before { box-sizing: inherit; }
+      body { background: #fafafa; margin: 0; }
+    </style>
+    {% endblock head %}
+  </head>
+  <body>
+    {% include 'custom-auth.html' %}
+    {% block body %}
+    <div id="swagger-ui"></div>
+    <script src="{{ swagger_ui_bundle }}"></script>
+    <script src="{{ swagger_ui_standalone }}"></script>
+    {% if script_url %}
+    <script src="{{ script_url }}"></script>
+    {% else %}
+    <script>
     {% include template_name_js %}
-  </script>
-{% endif %}
-</body>
+    </script>
+    {% endif %}
+    {% endblock %}
+  </body>
 </html>

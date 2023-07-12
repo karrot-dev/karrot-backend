@@ -435,6 +435,14 @@ class Activity(BaseModel, ConversationMixin):
         activity_participant.feedback_dismissed = True
         activity_participant.save()
 
+    def delete_banner_image(self):
+        if self.banner_image.name is None:
+            return
+        # Deletes Image Renditions
+        self.banner_image.delete_all_created_images()
+        # Deletes Original Image
+        self.banner_image.delete(save=False)
+
     def save(self, *args, **kwargs):
         if not self.has_duration:
             # reset duration to default if activity has no explicit duration

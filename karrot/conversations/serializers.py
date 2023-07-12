@@ -1,6 +1,7 @@
 import logging
+from dataclasses import dataclass, asdict
 from os.path import basename
-from typing import List
+from typing import List, Optional
 
 from django.conf import settings
 from django.db import transaction
@@ -148,6 +149,14 @@ class ConversationMessageImageSerializer(serializers.ModelSerializer):
         return image
 
 
+@dataclass
+class AttachmentURLs:
+    download: str
+    original: str
+    preview: Optional[str] = None
+    thumbnail: Optional[str] = None
+
+
 class ConversationMessageAttachmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConversationMessageAttachment
@@ -169,26 +178,27 @@ class ConversationMessageAttachmentSerializer(serializers.ModelSerializer):
     urls = serializers.SerializerMethodField()
 
     @staticmethod
-    def get_urls(attachment):
+    def get_urls(attachment) -> dict:
         attachment.ensure_images(save=True)
 
         def url(variant):
             return f"/api/attachments/{attachment.id}/{variant}/"
 
-        variants = [
-            'download',
-            'original',
-        ]
+        urls = AttachmentURLs(
+            original=url('original'),
+            download=url('download'),
+        )
+
         if attachment.preview:
-            variants.append('preview')
+            urls.preview = url('preview')
 
         if attachment.thumbnail:
-            variants.append('thumbnail')
+            urls.thumbnail = url('thumbnail')
 
-        return {variant: url(variant) for variant in variants}
+        return asdict(urls)
 
     @staticmethod
-    def get_size(attachment):
+    def get_size(attachment) -> int:
         return attachment.file.size
 
     def to_representation(self, attachment):

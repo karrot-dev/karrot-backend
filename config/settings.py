@@ -152,6 +152,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework.authtoken',
     'drf_spectacular',
+    'drf_spectacular_sidecar',
     'anymail',
     'timezone_field',
     'django_jinja',
@@ -181,8 +182,13 @@ or talk with us in our [Karrot Team & Feedback](https://karrot.world/#/groupPrev
 or in our [Matrix chat room](https://chat.karrot.world)!
     """,
     'VERSION': '0.1',
+    # hide all the auth options
+    # we add a link to drf auth in custom-auth.html
+    'AUTHENTICATION_WHITELIST': [],
     'SCHEMA_PATH_PREFIX': '/api/',
-    'SWAGGER_UI_FAVICON_HREF': '/favicon.ico',
+    'SWAGGER_UI_DIST': 'SIDECAR',
+    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+    'REDOC_DIST': 'SIDECAR',
     'SWAGGER_UI_SETTINGS': {
         'deepLinking': True,
         'defaultModelsExpandDepth': 0,
@@ -281,6 +287,7 @@ CACHES = {
         "LOCATION": REDIS_URL,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PARSER_CLASS": "redis.connection.HiredisParser",
         }
     }
 }
@@ -323,8 +330,10 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.BCryptPasswordHasher',
 ]
 
+PREVIEW_SIZE = 1600
+THUMBNAIL_SIZE = 200
+
 VERSATILEIMAGEFIELD_SETTINGS = {
-    'image_key_post_processor': 'versatileimagefield.processors.md5',
     # TODO: implement the proper way of auto creating images
     # See https://django-versatileimagefield.readthedocs.io/en/latest/improving_performance.html#auto-creating-sets-of-images-on-post-save
     # I previously had it locally set to False to not get exceptions for missing images
@@ -332,20 +341,25 @@ VERSATILEIMAGEFIELD_SETTINGS = {
     'create_images_on_demand': True,
 }
 
+VERSATILEIMAGE_PREVIEW = f'thumbnail__{PREVIEW_SIZE}x{PREVIEW_SIZE}'
+VERSATILEIMAGE_THUMBNAIL = f'thumbnail__{THUMBNAIL_SIZE}x{THUMBNAIL_SIZE}'
+
 VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
     'user_profile': [
         ('full_size', 'url'),
-        ('thumbnail', 'thumbnail__120x120'),
         ('600', 'thumbnail__600x600'),
+        ('thumbnail', VERSATILEIMAGE_THUMBNAIL),
     ],
     'group_logo': [
         ('full_size', 'url'),
-        ('thumbnail', 'thumbnail__120x120'),
-        ('200', 'thumbnail__200x200'),
         ('600', 'thumbnail__600x600'),
+        ('200', VERSATILEIMAGE_THUMBNAIL),
+        ('thumbnail', VERSATILEIMAGE_THUMBNAIL),
     ],
     'offer_image': [
         ('full_size', 'url'),
+        ('preview', VERSATILEIMAGE_PREVIEW),
+        ('thumbnail', VERSATILEIMAGE_THUMBNAIL),
         ('600', 'thumbnail__600x600'),
     ],
     'conversation_message_image': [
@@ -354,8 +368,8 @@ VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
         ('600', 'thumbnail__600x600'),
     ],
     'activity_banner_image': [
-        # TODO: work out what to do here...
         ('full_size', 'url'),
+        ('preview', VERSATILEIMAGE_PREVIEW),
     ],
 }
 

@@ -254,6 +254,8 @@ class TestConversationsAPI(APITestCase):
                 response.data['attachments'][0]['urls'], {
                     'download': f"/api/attachments/{attachment_id}/download/",
                     'original': f"/api/attachments/{attachment_id}/original/",
+                    'preview': None,
+                    'thumbnail': None,
                 }
             )
 
