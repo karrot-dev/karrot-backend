@@ -1,0 +1,3 @@
+web: ./manage.py migrate && ./manage.py runserver
+huey: ./manage.py run_huey
+mjml: ./mjml/convert --watch
