@@ -44,3 +44,4 @@ karrot/frontend/static/*
 
 # Maxmind geoip data
 /maxmind-data/*.mmdb
+karrot/static

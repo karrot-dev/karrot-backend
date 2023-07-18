@@ -1,13 +1,14 @@
 import os
 import subprocess
+from typing import Literal
 
 from dotenv import dotenv_values
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def get_defaults():
-    return dotenv_values(os.path.join(BASE_DIR, 'config', 'options.env'))
+def get_defaults(filename: Literal['options.env', 'dev.env']):
+    return dotenv_values(os.path.join(BASE_DIR, 'config', filename))
 
 
 def get_git_rev():
@@ -35,22 +36,18 @@ def get_git_rev():
 
 def get_options():
     options = {}
-    defaults = get_defaults()
+    defaults = get_defaults('options.env')
+
+    is_dev = os.environ.get('MODE', defaults['MODE']) == 'dev'
+
+    if is_dev:
+        defaults.update(get_defaults('dev.env'))
 
     for key, default in defaults.items():
         value = os.environ.get(key, default)
         options[key] = value if value else None
 
-    is_dev = options['MODE'] == 'dev'
-
     # some more complex defaults that depend on other values
-
-    if not options['WORKER_IMMEDIATE']:
-        # three possiblities:
-        # - set explicitly
-        # - if MODE=dev, default to true
-        # - otherwise default to false
-        options['WORKER_IMMEDIATE'] = 'true' if is_dev else 'false'
 
     if not options['LISTEN_CONCURRENCY']:
         # WEB_CONCURRENCY is something uvicorn recognises, maybe others too?

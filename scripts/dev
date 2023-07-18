@@ -1,0 +1,29 @@
+#!/bin/bash
+
+start_services() {
+  # run them in the background
+  # must have podman installed
+  # TODO: check if podman is installed
+  # podman-compose is in our python deps
+  (cd scripts/services && podman-compose up -d)
+}
+
+stop_services() {
+  (cd scripts/services && podman-compose down)
+}
+
+on_exit() {
+  read -p "Do you want to stop the services? " -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    stop_services
+  fi
+}
+
+trap on_exit EXIT
+
+# ensure services are started
+start_services
+
+# run all our app things
+honcho --procfile scripts/Procfile start
