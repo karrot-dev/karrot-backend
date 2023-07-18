@@ -11,8 +11,6 @@ options = get_options()
 
 command = sys.argv[1] if len(sys.argv) > 1 else None
 
-print('COMMAND IS', command)
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
