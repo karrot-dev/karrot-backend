@@ -24,10 +24,12 @@ on_exit() {
 
 trap on_exit EXIT
 
-echo
-echo " ★ Starting services"
-echo
-start_services
+if [[ $(podman pod ps --format '{{.Status}}' --filter "name=karrot-services") != "Running" ]]; then
+  echo
+  echo " ★ Starting services"
+  echo
+  start_services
+fi
 
 echo
 echo " ★ Starting application"
