@@ -45,13 +45,6 @@ def get_options():
 
     # some more complex defaults that depend on other values
 
-    if not options['WORKER_IMMEDIATE']:
-        # three possiblities:
-        # - set explicitly
-        # - if MODE=dev, default to true
-        # - otherwise default to false
-        options['WORKER_IMMEDIATE'] = 'true' if is_dev else 'false'
-
     if not options['LISTEN_CONCURRENCY']:
         # WEB_CONCURRENCY is something uvicorn recognises, maybe others too?
         options['LISTEN_CONCURRENCY'] = os.environ.get('WEB_CONCURRENCY', '1')

@@ -33,3 +33,7 @@ MIDDLEWARE_CLASSES = [
 # }
 
 EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
+
+HUEY = {
+    'immediate': True,  # immediate for testing, seperate runner otherwise
+}
