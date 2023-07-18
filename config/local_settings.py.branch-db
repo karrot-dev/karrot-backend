@@ -1,7 +1,3 @@
-# You can use this to have one database per git branch
-# Useful if you work on many branches at the same time
-# To use copy it to config/local_settings.py
-
 import os
 import subprocess
 import re
@@ -13,7 +9,9 @@ from config.options import get_options
 
 options = get_options()
 
-TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
+command = sys.argv[1] if len(sys.argv) > 1 else None
+
+print('COMMAND IS', command)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -42,9 +40,6 @@ def run_command(*args: str) -> str:
 
 
 def ensure_db(db_name):
-    if TESTING:
-        db_name = f"test_{db_name}"
-
     exists = run_sql(f"SELECT 1 FROM pg_database WHERE datname = '{db_name}'", True)
     if not exists:
         run_sql(f"""
@@ -66,4 +61,7 @@ DATABASES = {
     }
 }
 
-ensure_db(branch_based_db_name)
+if command in ('migrate', 'runserver'):
+  ensure_db(branch_based_db_name)
+elif command == 'test':
+  ensure_db(f"test_{branch_based_db_name}")
