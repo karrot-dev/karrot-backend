@@ -1,29 +1,35 @@
 #!/bin/bash
 
+set -eu
+
 start_services() {
-  # run them in the background
-  # must have podman installed
-  # TODO: check if podman is installed
-  # podman-compose is in our python deps
-  (cd scripts/services && podman-compose up -d)
+  (cd scripts/services && podman kube play services.yml --replace)
 }
 
 stop_services() {
-  (cd scripts/services && podman-compose down)
+  (cd scripts/services && podman kube down services.yml)
 }
 
 on_exit() {
+  echo
   read -p "Do you want to stop the services? " -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo
+    echo " ★ Stopping services"
+    echo
     stop_services
   fi
 }
 
 trap on_exit EXIT
 
-# ensure services are started
+echo
+echo " ★ Starting services"
+echo
 start_services
 
-# run all our app things
+echo
+echo " ★ Starting application"
+echo
 honcho --procfile scripts/Procfile start
