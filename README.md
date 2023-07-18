@@ -97,12 +97,10 @@ If you spend too much time typing those long commands, consider creating your ow
 
 When running tests, use `./scripts/test`, which will configure the test runner to use [config/test_settings.py](config/test_settings.py). It is much faster.
 
-*Parallel testing:* Running the tests in parallel process can increase testing
-speed significantly. To execute the whole test suite on a CPU with 4 kernels,
-you may want to use:
+*Parallel testing:* Running the tests in parallel process can increase testing speed significantly:
 
 ```
-./scripts/test --parallel 4
+./scripts/test --parallel auto
 ```
 
 *Run tests selectively:* If you want to run only a single test, let's say
