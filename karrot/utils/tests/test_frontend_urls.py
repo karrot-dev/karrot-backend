@@ -3,8 +3,9 @@ from django.test import TestCase, override_settings
 
 from karrot.groups.factories import GroupFactory
 from karrot.offers.factories import OfferFactory
+from karrot.users.factories import VerifiedUserFactory
 from karrot.utils.frontend_urls import absolute_url, offer_image_url, group_photo_url, group_photo_or_karrot_logo_url, \
-    karrot_logo_url
+    karrot_logo_url, message_url
 from karrot.utils.tests.uploads import image_path
 
 
@@ -61,3 +62,22 @@ class TestAbsoluteURL(TestCase):
         offer = OfferFactory()
         url = offer_image_url(offer)
         self.assertEqual(url, None)
+
+    def test_wall_message_url(self):
+        user = VerifiedUserFactory()
+        group = GroupFactory(members=[user])
+        message = group.conversation.messages.create(author=user, content='yay')
+        self.assertEqual(
+            message_url(message),
+            f'{settings.HOSTNAME}/#/group/{group.id}/wall',
+        )
+
+    def test_wall_message_reply_url(self):
+        user = VerifiedUserFactory()
+        group = GroupFactory(members=[user])
+        message = group.conversation.messages.create(author=user, content='yay')
+        reply = group.conversation.messages.create(author=user, content='yay to you too', thread=message)
+        self.assertEqual(
+            message_url(reply),
+            f'{settings.HOSTNAME}/#/group/{group.id}/message/{message.id}/replies',
+        )
