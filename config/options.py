@@ -38,8 +38,7 @@ def get_options():
     options = {}
     defaults = get_defaults('options.env')
 
-    # we assume this has been set early...
-    is_dev = os.environ.get('MODE') == 'dev'
+    is_dev = os.environ.get('MODE', defaults['MODE']) == 'dev'
 
     if is_dev:
         defaults.update(get_defaults('dev.env'))
