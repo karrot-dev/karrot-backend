@@ -20,11 +20,11 @@ services:
       - "6379:6379"
 
   maildev:
-    image: "docker.io/maildev/maildev:1.1.0"
+    image: "docker.io/maildev/maildev:2.0.5"
     restart: "unless-stopped"
     ports:
-      - "1080:80"
-      - "1025:25"
+      - "1080:1080"
+      - "1025:1025"
 
   pgweb:
     image: "docker.io/sosedoff/pgweb:0.14.1"
