@@ -19,6 +19,13 @@ services:
     ports:
       - "6379:6379"
 
+  maildev:
+    image: "docker.io/maildev/maildev:1.1.0"
+    restart: "unless-stopped"
+    ports:
+      - "1080:80"
+      - "1025:25"
+
 volumes:
   db:
     name: ${DB_VOLUME_NAME:-db}

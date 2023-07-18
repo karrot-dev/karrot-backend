@@ -26,4 +26,4 @@ trap on_exit EXIT
 start_services
 
 # run all our app things
-honcho --procfile scripts/Procfile start
+MODE=dev honcho --procfile scripts/Procfile start
