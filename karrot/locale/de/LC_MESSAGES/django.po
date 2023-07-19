@@ -272,16 +272,16 @@ msgstr ""
 "besuchen</a> oder <a href=\"%(mute_url)s\">die Unterhaltung "
 "stummschalten</a>."
 
-#: karrot/conversations/api.py:73 karrot/conversations/api.py:255
-#: karrot/conversations/api.py:445 karrot/conversations/serializers.py:187
+#: karrot/conversations/api.py:83 karrot/conversations/api.py:291
+#: karrot/conversations/api.py:482 karrot/conversations/serializers.py:271
 msgid "You are not in this conversation"
 msgstr "Du bist nicht Teil dieser Unterhaltung"
 
-#: karrot/conversations/api.py:82
+#: karrot/conversations/api.py:92
 msgid "You are not the author of this message"
 msgstr "Du bist nicht Autor dieser Nachricht"
 
-#: karrot/conversations/api.py:91
+#: karrot/conversations/api.py:101
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
@@ -289,11 +289,11 @@ msgstr ""
 "Du kannst eine Nachricht nicht mehr als %(days_number)s Tage nach ihrer "
 "Erstellung bearbeiten."
 
-#: karrot/conversations/api.py:373
+#: karrot/conversations/api.py:410
 msgid "Must be first in thread"
 msgstr "Muss erste Nachricht im Thread sein"
 
-#: karrot/conversations/api.py:376
+#: karrot/conversations/api.py:413
 msgid "You are not a participant in this thread"
 msgstr "Du bist nicht Teil dieses Threads"
 
@@ -317,7 +317,7 @@ msgstr ""
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr "Neue Nachricht für Angebot %(offer_name)s in %(group_name)s"
 
-#: karrot/conversations/serializers.py:189
+#: karrot/conversations/serializers.py:273
 msgid "This conversation has been closed"
 msgstr "Diese Unterhaltung wurde beendet"
 
@@ -634,7 +634,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "Eine Einladung wurde bereits an diese E-Mail-Adresse versendet"
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
-#: karrot/offers/serializers.py:91
+#: karrot/offers/serializers.py:98
 msgid "You are not a member of this group."
 msgstr "Du bist kein Mitglied dieser Gruppe."
 
@@ -836,7 +836,7 @@ msgstr "Nicht mehr als %(count)s Wochen im Voraus setzen"
 msgid "You are already subscribed to this place"
 msgstr "Du hast diesen Ort bereits abonniert"
 
-#: karrot/subscriptions/receivers.py:767
+#: karrot/subscriptions/receivers.py:776
 msgid "Push notifications are enabled!"
 msgstr ""
 
