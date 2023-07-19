@@ -32,11 +32,11 @@ def encode_data_with_attachments(data):
     return post_data
 
 
-def uploaded_file_for(path):
+def uploaded_file_for(path, filename=None):
     """Gives you something you can pass into an models image field from a path to a file"""
     with open(path, 'rb') as file:
         return SimpleUploadedFile(
-            name=os.path.basename(path),
+            name=filename if filename else os.path.basename(path),
             content=file.read(),
             content_type='image/jpeg',
         )

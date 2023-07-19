@@ -2,6 +2,7 @@ import hashlib
 import logging
 import os
 from os.path import abspath
+from urllib.parse import quote
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -548,7 +549,7 @@ class AttachmentAccelRedirectResponse(HttpResponse):
         accel_redirect_path = os.path.join(accel_redirect_location, attachment_path[len(media_root) + 1:])
         self.headers['Content-Type'] = content_type
         self.headers["Content-Disposition"] = content_disposition_header(download, filename)
-        self.headers['X-Accel-Redirect'] = accel_redirect_path
+        self.headers['X-Accel-Redirect'] = quote(accel_redirect_path)
 
 
 def get_attachment_info(attachment, thumbnail=False, preview=False):

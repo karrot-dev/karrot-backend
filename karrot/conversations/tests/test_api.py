@@ -1,7 +1,8 @@
 import os
 from datetime import timedelta
 from email.utils import parseaddr
-from os.path import isfile
+from os.path import isfile, basename
+from urllib.parse import quote
 
 from dateutil.parser import parse
 from django.core import mail
@@ -311,6 +312,26 @@ class TestConversationsAPI(APITestCase):
         self.assertEqual(len(data), os.path.getsize(image_path))
         with open(image_path, 'rb') as file:
             self.assertEqual(data, file.read())
+
+    @override_settings(FILE_UPLOAD_USE_ACCEL_REDIRECT=True)
+    def test_attachment_accel_redirect_header(self):
+        conversation = ConversationFactory(participants=[self.participant1])
+        message = conversation.messages.create(author=self.participant1, content='hello')
+        attachment = message.attachments.create(
+            file=uploaded_file_for(pdf_attachment_path, 'Framtidsbara staden externa aktörer.pdf'),
+            position=0,
+            content_type='application/pdf'
+        )
+        attachment_id = attachment.id
+        self.client.force_login(user=self.participant1)
+        response = self.client.get(f"/api/attachments/{attachment_id}/download/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.headers['Content-Type'], 'application/pdf')
+        filename = basename(attachment.file.path)
+        escaped_filename = quote(filename)
+        self.assertEqual(
+            response.headers['X-Accel-Redirect'], f'/uploads/conversation_message_attachment_files/{escaped_filename}'
+        )
 
     def test_cannot_create_message_without_specifying_conversation(self):
         self.client.force_login(user=self.participant1)
