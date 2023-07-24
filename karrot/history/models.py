@@ -120,8 +120,12 @@ class History(NicelyFormattedModel):
         changed_keys = [k for k in keys if before.get(k) != after.get(k)]
 
         return {
-            'before': {k: before.get(k)
-                       for k in changed_keys if k in before},
-            'after': {k: after.get(k)
-                      for k in changed_keys if k in after},
+            'before': {
+                k: before.get(k)
+                for k in changed_keys if k in before
+            },
+            'after': {
+                k: after.get(k)
+                for k in changed_keys if k in after
+            },
         }

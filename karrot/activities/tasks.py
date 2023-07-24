@@ -205,8 +205,10 @@ def daily_activity_notifications():
                 for data in fetch_activity_notification_data_for_group(group):
                     prepare_activity_notification_email(**data).send()
                     stats.activity_notification_email(
-                        group=data['group'], **{k: v.count()
-                                                for k, v in data.items() if isinstance(v, QuerySet)}
+                        group=data['group'], **{
+                            k: v.count()
+                            for k, v in data.items() if isinstance(v, QuerySet)
+                        }
                     )
 
     stats_utils.periodic_task('activities__daily_activity_notifications', seconds=t.elapsed_seconds)
