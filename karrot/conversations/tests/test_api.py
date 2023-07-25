@@ -3,6 +3,7 @@ from datetime import timedelta
 from email.utils import parseaddr
 from os.path import isfile, basename
 from urllib.parse import quote
+from freezegun import freeze_time
 
 from dateutil.parser import parse
 from django.core import mail
@@ -16,7 +17,7 @@ from karrot.conversations.factories import ConversationFactory
 from karrot.conversations.models import ConversationParticipant, Conversation, ConversationMessage, \
     ConversationMessageReaction, ConversationNotificationStatus
 from karrot.groups.factories import GroupFactory
-from karrot.groups.models import GroupStatus
+from karrot.groups.models import GroupStatus, GroupMembership
 from karrot.issues.factories import IssueFactory
 from karrot.offers.factories import OfferFactory
 from karrot.activities.factories import ActivityFactory
@@ -1174,6 +1175,44 @@ class TestClosedConversation(APITestCase):
         self.client.force_login(user=self.user)
         response = self.client.post('/api/messages/', {'conversation': self.conversation.id, 'content': 'hello'})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+
+class TestLeavingGroupLeavesConversations(APITestCase):
+    def setUp(self):
+        self.user = VerifiedUserFactory()
+        self.other_user = VerifiedUserFactory()
+        self.group = GroupFactory(members=[self.user, self.other_user])
+        self.place = PlaceFactory(group=self.group, subscribers=[self.user])
+        self.activity = ActivityFactory(place=self.place)
+        self.membership = GroupMembership.objects.get(group=self.group, user=self.user)
+
+    def test_leaves_all_conversations_when_leaving_group(self):
+        self.client.force_login(user=self.user)
+        self.assertTrue(self.group.conversation.participants.filter(pk=self.user.id).exists())
+        self.assertTrue(self.place.conversation.participants.filter(pk=self.user.id).exists())
+
+        self.activity.add_participant(self.user)
+        self.assertTrue(self.activity.conversation.participants.filter(pk=self.user.id).exists())
+
+        self.membership.delete()
+
+        self.assertFalse(self.group.members.filter(pk=self.user.id).exists())
+        self.assertFalse(self.group.conversation.participants.filter(pk=self.user.id).exists())
+        self.assertFalse(self.place.conversation.participants.filter(pk=self.user.id).exists())
+        self.assertFalse(self.activity.conversation.participants.filter(pk=self.user.id).exists())
+
+    def test_leaves_past_activity_conversations(self):
+        self.client.force_login(user=self.user)
+        self.activity.add_participant(self.user)
+        self.assertTrue(self.activity.conversation.participants.filter(pk=self.user.id).exists())
+
+        after_the_activity_is_over = self.activity.date.end + timedelta(hours=2)
+
+        # wind forward time past the activity
+        with freeze_time(after_the_activity_is_over, tick=True):
+            self.membership.delete()
+            self.assertFalse(self.group.members.filter(pk=self.user.id).exists())
+            self.assertFalse(self.activity.conversation.participants.filter(pk=self.user.id).exists())
 
 
 class TestPrivateConversationAPI(APITestCase):

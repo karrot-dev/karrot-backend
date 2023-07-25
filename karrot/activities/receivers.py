@@ -17,11 +17,16 @@ from karrot.places.models import Place, PlaceStatus
 def leave_group_handler(sender, instance, **kwargs):
     group = instance.group
     user = instance.user
-    for _ in Activity.objects. \
-            filter(date__startswith__gte=timezone.now()). \
+    for activity in Activity.objects. \
             filter(participants__in=[user, ]). \
             filter(place__group=group):
-        _.remove_participant(user)
+        if activity.date.start >= timezone.now():
+            # for future activities, remove from entire activity
+            # (will also remove them from the chat)
+            activity.remove_participant(user)
+        else:
+            # for past ones just remove from the chat
+            activity.conversation.leave(user)
 
 
 @receiver(post_save, sender=Feedback)
