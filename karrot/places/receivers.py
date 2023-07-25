@@ -1,3 +1,4 @@
+from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
@@ -47,6 +48,16 @@ def subscription_removed(sender, instance, **kwargs):
 @receiver(pre_delete, sender=GroupMembership)
 def group_member_removed(sender, instance, **kwargs):
     membership = instance
+    group = membership.group
+    user = membership.user
 
     for subscription in PlaceSubscription.objects.filter(place__group=membership.group, user=membership.user):
         subscription.delete()
+
+    # ... also remove from place conversations which they were part of, but maybe not subscribed
+    for conversation in Conversation.objects.filter(
+            target_type=ContentType.objects.get_for_model(Place),
+            target_id__in=Place.objects.filter(group=group),
+            participants__in=[user],
+    ):
+        conversation.leave(user)
