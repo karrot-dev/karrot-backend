@@ -1187,20 +1187,27 @@ class TestLeavingGroupLeavesConversations(APITestCase):
         self.activity = ActivityFactory(place=self.place)
         self.membership = GroupMembership.objects.get(group=self.group, user=self.user)
 
-    def test_leaves_all_conversations_when_leaving_group(self):
+    def test_leaves_group_wall_conversation(self):
         self.client.force_login(user=self.user)
-        self.assertTrue(self.group.conversation.participants.filter(pk=self.user.id).exists())
-        self.assertTrue(self.place.conversation.participants.filter(pk=self.user.id).exists())
-
-        self.activity.add_participant(self.user)
-        self.assertTrue(self.activity.conversation.participants.filter(pk=self.user.id).exists())
-
+        query = self.group.conversation.participants.filter(pk=self.user.id)
+        self.assertTrue(query.exists())
         self.membership.delete()
+        self.assertFalse(query.exists())
 
-        self.assertFalse(self.group.members.filter(pk=self.user.id).exists())
-        self.assertFalse(self.group.conversation.participants.filter(pk=self.user.id).exists())
-        self.assertFalse(self.place.conversation.participants.filter(pk=self.user.id).exists())
-        self.assertFalse(self.activity.conversation.participants.filter(pk=self.user.id).exists())
+    def test_leaves_place_wall_conversation(self):
+        self.client.force_login(user=self.user)
+        query = self.place.conversation.participants.filter(pk=self.user.id)
+        self.assertTrue(query.exists())
+        self.membership.delete()
+        self.assertFalse(query.exists())
+
+    def test_leaves_activity_conversation(self):
+        self.client.force_login(user=self.user)
+        self.activity.add_participant(self.user)
+        query = self.activity.conversation.participants.filter(pk=self.user.id)
+        self.assertTrue(query.exists())
+        self.membership.delete()
+        self.assertFalse(query.exists())
 
     def test_leaves_past_activity_conversations(self):
         self.client.force_login(user=self.user)

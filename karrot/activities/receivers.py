@@ -18,15 +18,10 @@ def leave_group_handler(sender, instance, **kwargs):
     group = instance.group
     user = instance.user
     for activity in Activity.objects. \
+            filter(date__startswith__gte=timezone.now()). \
             filter(participants__in=[user, ]). \
             filter(place__group=group):
-        if activity.date.start >= timezone.now():
-            # for future activities, remove from entire activity
-            # (will also remove them from the chat)
-            activity.remove_participant(user)
-        else:
-            # for past ones just remove from the chat
-            activity.conversation.leave(user)
+        activity.remove_participant(user)
 
 
 @receiver(post_save, sender=Feedback)
