@@ -1,4 +1,5 @@
 from enum import Enum
+from silk.profiling.profiler import silk_profile
 
 from django.conf import settings
 from django.db import models, transaction
@@ -60,16 +61,22 @@ class Application(BaseModel, ConversationMixin):
         self.status = ApplicationStatus.ACCEPTED.value
         self.decided_by = accepted_by
         self.decided_at = timezone.now()
-        self.save()
-        self.group.add_member(
-            self.user,
-            added_by=accepted_by,
-            history_payload={
-                'accepted_by': accepted_by.id,
-                'application_date': self.created_at.isoformat(),
-            }
-        )
-        notify_about_accepted_application(self)
+
+        with silk_profile('save application'):
+            self.save()
+
+        with silk_profile('add group member'):
+            self.group.add_member(
+                self.user,
+                added_by=accepted_by,
+                history_payload={
+                    'accepted_by': accepted_by.id,
+                    'application_date': self.created_at.isoformat(),
+                }
+            )
+
+        with silk_profile('notify accepted application'):
+            notify_about_accepted_application(self)
 
     @transaction.atomic
     def decline(self, declined_by):

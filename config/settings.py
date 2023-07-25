@@ -381,6 +381,10 @@ SILKY_AUTHORISATION = True
 # for now, log only requests that have recording enabled
 SILKY_INTERCEPT_FUNC = lambda request: 'silky_record_requests' in request.COOKIES  # noqa: E731
 
+# silk profiling
+SILKY_PYTHON_PROFILER = True
+SILKY_PYTHON_PROFILER_FUNC = lambda request: 'silky_record_requests' in request.COOKIES  # noqa: E731
+
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
 

@@ -23,7 +23,7 @@ def setup_postgres(connection, **kwargs):
 
 
 api_app = get_asgi_application()
-api_prefixes = ['/api/', '/docs/', '/api-auth/']
+api_prefixes = ['/api/', '/docs/', '/api-auth/', '/silk/']
 
 if settings.DEBUG:
     api_prefixes.append('/_templates')
