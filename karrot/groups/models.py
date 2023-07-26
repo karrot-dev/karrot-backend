@@ -26,7 +26,7 @@ from karrot.groups import roles, themes
 
 
 def default_group_features():
-    return ['offers']
+    return ['offers', 'agreements', 'participant-types']
 
 
 class GroupStatus(models.TextChoices):
