@@ -17,11 +17,11 @@ from karrot.places.models import Place, PlaceStatus
 def leave_group_handler(sender, instance, **kwargs):
     group = instance.group
     user = instance.user
-    for _ in Activity.objects. \
+    for activity in Activity.objects. \
             filter(date__startswith__gte=timezone.now()). \
             filter(participants__in=[user, ]). \
             filter(place__group=group):
-        _.remove_participant(user)
+        activity.remove_participant(user)
 
 
 @receiver(post_save, sender=Feedback)

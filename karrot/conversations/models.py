@@ -95,6 +95,8 @@ class Conversation(BaseModel, UpdatedAtMixin):
         return participant
 
     def leave(self, user):
+        if self.target and self.target.conversation_supports_threads:
+            ConversationThreadParticipant.objects.filter(user=user, thread__conversation=self).delete()
         self.conversationparticipant_set.filter(user=user).delete()
 
     def sync_users(self, desired_users):

@@ -3,6 +3,7 @@ from datetime import timedelta
 from email.utils import parseaddr
 from os.path import isfile, basename
 from urllib.parse import quote
+from freezegun import freeze_time
 
 from dateutil.parser import parse
 from django.core import mail
@@ -14,9 +15,9 @@ from rest_framework.test import APITestCase
 from karrot.applications.factories import ApplicationFactory
 from karrot.conversations.factories import ConversationFactory
 from karrot.conversations.models import ConversationParticipant, Conversation, ConversationMessage, \
-    ConversationMessageReaction, ConversationNotificationStatus
+    ConversationMessageReaction, ConversationNotificationStatus, ConversationThreadParticipant
 from karrot.groups.factories import GroupFactory
-from karrot.groups.models import GroupStatus
+from karrot.groups.models import GroupStatus, GroupMembership
 from karrot.issues.factories import IssueFactory
 from karrot.offers.factories import OfferFactory
 from karrot.activities.factories import ActivityFactory
@@ -1174,6 +1175,81 @@ class TestClosedConversation(APITestCase):
         self.client.force_login(user=self.user)
         response = self.client.post('/api/messages/', {'conversation': self.conversation.id, 'content': 'hello'})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
+
+class TestLeavingGroupLeavesConversations(APITestCase):
+    def setUp(self):
+        self.user = VerifiedUserFactory()
+        self.other_user = VerifiedUserFactory()
+        self.group = GroupFactory(members=[self.user, self.other_user])
+        self.other_group = GroupFactory(members=[self.user, self.other_user])
+        self.place = PlaceFactory(group=self.group, subscribers=[self.user])
+        self.activity = ActivityFactory(place=self.place)
+        self.membership = GroupMembership.objects.get(group=self.group, user=self.user)
+
+    def test_leaves_group_wall_conversation(self):
+        self.client.force_login(user=self.user)
+        query = self.group.conversation.participants.filter(pk=self.user.id)
+        self.assertTrue(query.exists())
+        self.membership.delete()
+        self.assertFalse(query.exists())
+
+    def test_leaves_place_wall_conversation(self):
+        self.client.force_login(user=self.user)
+        query = self.place.conversation.participants.filter(pk=self.user.id)
+        self.assertTrue(query.exists())
+        self.membership.delete()
+        self.assertFalse(query.exists())
+
+    def test_leaves_activity_conversation(self):
+        self.client.force_login(user=self.user)
+        self.activity.add_participant(self.user)
+        query = self.activity.conversation.participants.filter(pk=self.user.id)
+        self.assertTrue(query.exists())
+        self.membership.delete()
+        self.assertFalse(query.exists())
+
+    def test_leaves_past_activity_conversations(self):
+        self.client.force_login(user=self.user)
+        self.activity.add_participant(self.user)
+        self.assertTrue(self.activity.conversation.participants.filter(pk=self.user.id).exists())
+
+        after_the_activity_is_over = self.activity.date.end + timedelta(hours=2)
+
+        # wind forward time past the activity
+        with freeze_time(after_the_activity_is_over, tick=True):
+            self.membership.delete()
+            self.assertFalse(self.group.members.filter(pk=self.user.id).exists())
+            self.assertFalse(self.activity.conversation.participants.filter(pk=self.user.id).exists())
+
+    def test_leaves_non_subscribed_place_conversations(self):
+        place = PlaceFactory(group=self.group)  # not a subscriber
+        place.conversation.join(self.user)
+
+        other_group_place = PlaceFactory(group=self.other_group)
+        other_group_place.conversation.join(self.user)
+
+        self.membership.delete()
+        self.assertFalse(place.conversation.participants.filter(pk=self.user.id).exists())
+
+        # still in convo for other group, just to make sure :)
+        self.assertTrue(other_group_place.conversation.participants.filter(pk=self.user.id).exists())
+
+    def test_leaves_offer_conversations(self):
+        offer = OfferFactory(group=self.group)
+        offer.conversation.join(self.user)
+        self.membership.delete()
+        self.assertFalse(offer.conversation.participants.filter(pk=self.user.id).exists())
+
+    def test_leaves_threads(self):
+        conversation = self.group.conversation
+        message = conversation.messages.create(author=self.user, content='bla')
+        reply = ConversationMessage.objects.create(
+            author=self.user, conversation=conversation, thread=message, content='reply'
+        )
+        self.assertTrue(ConversationThreadParticipant.objects.filter(user=self.user, thread=reply.thread).exists())
+        self.membership.delete()
+        self.assertFalse(ConversationThreadParticipant.objects.filter(user=self.user, thread=reply.thread).exists())
 
 
 class TestPrivateConversationAPI(APITestCase):

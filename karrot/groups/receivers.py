@@ -51,8 +51,9 @@ def group_member_added(sender, instance, created, **kwargs):
 def group_member_removed(sender, instance, **kwargs):
     group = instance.group
     user = instance.user
-    conversation = Conversation.objects.get_for_target(group)
-    if conversation:
+
+    # leave all conversations related to this group
+    for conversation in Conversation.objects.filter(group=group, participants__in=[user]):
         conversation.leave(user)
 
     stats.group_left(group)
