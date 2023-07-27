@@ -2,7 +2,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
 from karrot.conversations.models import Conversation
-from karrot.offers.models import Offer, OfferImage
+from karrot.offers.models import Offer, OfferImage, create_offer_image_warmer
 from karrot.offers.tasks import notify_members_about_new_offer
 from karrot.utils.misc import on_transaction_commit
 
@@ -21,3 +21,8 @@ def offer_saved(sender, instance, created, **kwargs):
 def delete_offer_image_files(sender, instance, **kwargs):
     instance.image.delete_all_created_images()
     instance.image.delete(save=False)
+
+
+@receiver(post_save, sender=OfferImage)
+def warm_activity_banner_image(sender, instance, **kwargs):
+    create_offer_image_warmer(instance).warm()

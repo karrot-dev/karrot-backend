@@ -9,7 +9,7 @@ from karrot.conversations.models import Conversation
 from karrot.groups import roles, stats
 from karrot.groups.emails import prepare_user_became_editor_email, prepare_user_lost_editor_role_email, \
     prepare_user_got_role_email
-from karrot.groups.models import Group, GroupMembership, Trust
+from karrot.groups.models import Group, GroupMembership, Trust, create_group_photo_warmer
 from karrot.groups.roles import GROUP_EDITOR
 from karrot.history.models import History, HistoryTypus
 from karrot.utils import frontend_urls
@@ -174,3 +174,9 @@ def notify_chat_on_group_creation(sender, instance, created, **kwargs):
 
     response = requests.post(webhook_url, data=json.dumps(message_data), headers={'Content-Type': 'application/json'})
     response.raise_for_status()
+
+
+@receiver(post_save, sender=Group)
+def warm_group_photo(sender, instance, **kwargs):
+    if instance.photo:
+        create_group_photo_warmer(instance).warm()

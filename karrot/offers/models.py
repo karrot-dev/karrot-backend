@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models import IntegerField, DateTimeField
 from django.utils import timezone
 from versatileimagefield.fields import VersatileImageField
+from versatileimagefield.image_warmer import VersatileImageFieldWarmer
 
 from karrot.base.base_models import BaseModel
 from karrot.conversations.models import ConversationMixin
@@ -54,3 +55,12 @@ class OfferImage(BaseModel):
         null=False,
     )
     position = IntegerField(default=0)
+
+
+def create_offer_image_warmer(instance_or_queryset, *, verbose=False):
+    return VersatileImageFieldWarmer(
+        instance_or_queryset=instance_or_queryset,
+        rendition_key_set='offer_image',
+        image_attr='image',
+        verbose=verbose,
+    )

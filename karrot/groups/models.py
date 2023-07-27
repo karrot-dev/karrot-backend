@@ -1,6 +1,7 @@
 from datetime import timedelta
 from dirtyfields import DirtyFieldsMixin
 
+from versatileimagefield.image_warmer import VersatileImageFieldWarmer
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
@@ -346,3 +347,12 @@ class Role(BaseModel):
 
     class Meta:
         unique_together = (('name', 'group'))
+
+
+def create_group_photo_warmer(instance_or_queryset, *, verbose=False):
+    return VersatileImageFieldWarmer(
+        instance_or_queryset=instance_or_queryset,
+        rendition_key_set='group_logo',
+        image_attr='photo',
+        verbose=verbose,
+    )
