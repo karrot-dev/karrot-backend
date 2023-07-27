@@ -7,7 +7,7 @@ from django.utils import timezone
 from huey.contrib.djhuey import revoke_by_id
 
 from karrot.activities import stats, tasks
-from karrot.activities.models import Activity, Feedback, ActivityParticipant
+from karrot.activities.models import Activity, Feedback, ActivityParticipant, create_activity_banner_image_warmer
 from karrot.conversations.models import Conversation
 from karrot.groups.models import GroupMembership
 from karrot.places.models import Place, PlaceStatus
@@ -105,3 +105,9 @@ def update_activity_series_when_place_changes(sender, instance, **kwargs):
     if place_became_active or weeks_in_advance_changed:
         for series in place.series.all():
             series.update_activities()
+
+
+@receiver(post_save, sender=Activity)
+def warm_activity_banner_image(sender, instance, **kwargs):
+    if instance.banner_image:
+        create_activity_banner_image_warmer(instance).warm()

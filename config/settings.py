@@ -334,11 +334,8 @@ PREVIEW_SIZE = 1600
 THUMBNAIL_SIZE = 200
 
 VERSATILEIMAGEFIELD_SETTINGS = {
-    # TODO: implement the proper way of auto creating images
-    # See https://django-versatileimagefield.readthedocs.io/en/latest/improving_performance.html#auto-creating-sets-of-images-on-post-save
-    # I previously had it locally set to False to not get exceptions for missing images
-    # See https://github.com/respondcreate/django-versatileimagefield/issues/24#issuecomment-160674807
-    'create_images_on_demand': True,
+    # need to always create them on save
+    'create_images_on_demand': False,
 }
 
 VERSATILEIMAGE_PREVIEW = f'thumbnail__{PREVIEW_SIZE}x{PREVIEW_SIZE}'

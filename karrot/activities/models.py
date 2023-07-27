@@ -13,6 +13,7 @@ from django.db.models import Count, DurationField, F, FilteredRelation, Q, Sum, 
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from versatileimagefield.fields import VersatileImageField
+from versatileimagefield.image_warmer import VersatileImageFieldWarmer
 
 from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDateTimeRangeField, UpdatedAtMixin
 from karrot.conversations.models import ConversationMixin
@@ -547,3 +548,12 @@ class ICSAuthToken(NicelyFormattedModel):
     token = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField('users.User', on_delete=models.CASCADE)
     created_at = models.DateTimeField(default=timezone.now)
+
+
+def create_activity_banner_image_warmer(instance_or_queryset, *, verbose=False):
+    return VersatileImageFieldWarmer(
+        instance_or_queryset=instance_or_queryset,
+        rendition_key_set='activity_banner_image',
+        image_attr='banner_image',
+        verbose=verbose,
+    )

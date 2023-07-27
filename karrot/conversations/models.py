@@ -11,6 +11,7 @@ from django.db.models import Count, F, IntegerField, Q
 from django.db.models.manager import BaseManager
 from django.utils import timezone
 from versatileimagefield.fields import VersatileImageField
+from versatileimagefield.image_warmer import VersatileImageFieldWarmer
 
 from config.settings import USERNAME_MENTION_RE
 from karrot.base.base_models import BaseModel, UpdatedAtMixin
@@ -543,3 +544,12 @@ class ConversationMessageAttachment(BaseModel):
                         )
             except UnidentifiedImageError:
                 pass
+
+
+def create_conversation_message_image_warmer(instance_or_queryset, *, verbose=False):
+    return VersatileImageFieldWarmer(
+        instance_or_queryset=instance_or_queryset,
+        rendition_key_set='conversation_message_image',
+        image_attr='image',
+        verbose=verbose,
+    )

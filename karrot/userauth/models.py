@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models import CharField, ForeignKey
 from django.utils import crypto, timezone
+from versatileimagefield.image_warmer import VersatileImageFieldWarmer
 
 from karrot.base.base_models import BaseModel
 
@@ -57,3 +58,12 @@ class VerificationCode(BaseModel):
         True if the expiration date lies in the past.
         """
         return self.created_at + timedelta(seconds=self._get_validity_time_limit()) < timezone.now()
+
+
+def create_user_photo_warmer(instance_or_queryset, *, verbose=False):
+    return VersatileImageFieldWarmer(
+        instance_or_queryset=instance_or_queryset,
+        rendition_key_set='user_profile',
+        image_attr='photo',
+        verbose=verbose,
+    )
