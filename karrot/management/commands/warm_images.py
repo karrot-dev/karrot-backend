@@ -13,21 +13,21 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print('Warming user photos')
         succeeded, failed = create_user_photo_warmer(
-            get_user_model().objects.filter(~Q(photo='')),
+            get_user_model().objects.filter(~Q(photo='') & ~Q(photo=None)),
             verbose=True,
         ).warm()
         print('succeeded', succeeded, 'failed', len(failed))
 
         print('Warming group photos')
         succeeded, failed = create_group_photo_warmer(
-            Group.objects.filter(~Q(photo='')),
+            Group.objects.filter(~Q(photo='') & ~Q(photo=None)),
             verbose=True,
         ).warm()
         print('succeeded', succeeded, 'failed', len(failed))
 
         print('Warming activity banner images')
         succeeded, failed = create_activity_banner_image_warmer(
-            Activity.objects.filter(~Q(banner_image='')),
+            Activity.objects.filter(~Q(banner_image='') & ~Q(banner_image=None)),
             verbose=True,
         ).warm()
         print('succeeded', succeeded, 'failed', len(failed))
