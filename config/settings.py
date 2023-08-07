@@ -159,6 +159,7 @@ INSTALLED_APPS = (
     'versatileimagefield',
     'huey.contrib.djhuey',
     'silk',
+    'cachalot',
 )
 
 REST_FRAMEWORK = {
@@ -280,6 +281,8 @@ REDIS_HOST = options['REDIS_HOST']
 REDIS_PORT = options['REDIS_PORT']
 REDIS_DB = options['REDIS_DB']
 REDIS_URL = "redis://{}:{}/{}".format(REDIS_HOST, REDIS_PORT, REDIS_DB)
+
+CACHALOT_ENABLED = options['CACHALOT_ENABLED'] == 'true'
 
 CACHES = {
     "default": {
