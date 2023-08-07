@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 import os
 import re
 
+import orjson
 import redis
 import sentry_sdk
 
@@ -164,13 +165,16 @@ INSTALLED_APPS = (
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny', ),
-    'DEFAULT_RENDERER_CLASSES': ('rest_framework.renderers.JSONRenderer', ),
+    'DEFAULT_RENDERER_CLASSES': ('drf_orjson_renderer.renderers.ORJSONRenderer', ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ),
     'EXCEPTION_HANDLER': 'karrot.utils.misc.custom_exception_handler',
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "ORJSON_RENDERER_OPTIONS": (
+        orjson.OPT_NON_STR_KEYS,
+    ),
 }
 
 SPECTACULAR_SETTINGS = {

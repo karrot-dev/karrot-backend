@@ -15,6 +15,7 @@ djangorestframework
 djangorestframework-csv
 django-cachalot
 drf-spectacular[sidecar]
+drf_orjson_renderer
 django-jinja
 hiredis
 markdown

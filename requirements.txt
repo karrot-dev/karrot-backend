@@ -57,6 +57,7 @@ django-timezone-field==5.0
 django-versatileimagefield==3.0
 djangorestframework==3.14.0
 djangorestframework-csv==2.1.1
+drf-orjson-renderer==1.7.1
 drf-spectacular[sidecar]==0.26.2
 drf-spectacular-sidecar==2023.7.1
 exceptiongroup==1.1.1
@@ -108,6 +109,7 @@ msgpack==1.0.5
 multidict==6.0.4
 nodeenv==1.8.0
 orderedmultidict==1.0.1
+orjson==3.9.3
 packaging==23.1
 parso==0.8.3
 pexpect==4.8.0
