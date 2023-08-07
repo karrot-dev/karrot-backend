@@ -36,4 +36,5 @@ fi
 echo
 echo " ★ Starting application"
 echo
-honcho --procfile scripts/Procfile start
+
+PYTHONUNBUFFERED=1 honcho --procfile scripts/Procfile start

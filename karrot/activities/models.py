@@ -180,6 +180,9 @@ class ActivityQuerySet(models.QuerySet):
     def annotate_feedback_weight(self):
         return self.annotate(feedback_weight=Sum('feedback__weight'))
 
+    def annotate_feedback_count(self):
+        return self.annotate(feedback_count=Count('feedback'))
+
     def exclude_disabled(self):
         return self.filter(is_disabled=False)
 
