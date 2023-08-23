@@ -1,5 +1,5 @@
 import uuid
-from typing import List
+from typing import List, Optional
 
 import dateutil.rrule
 from datetime import timedelta, datetime
@@ -33,7 +33,7 @@ from karrot.activities.models import (
     ActivityParticipant, ParticipantType, SeriesParticipantType, default_duration, Activity
 )
 from karrot.utils.date_utils import csv_datetime
-from karrot.utils.misc import find_changed
+from karrot.utils.misc import find_changed, is_prefetched
 from karrot.places.serializers import PublicPlaceSerializer
 
 
@@ -425,23 +425,28 @@ class ActivitySerializer(serializers.ModelSerializer):
     feedback_dismissed_by = serializers.SerializerMethodField()
     feedback_given_by = serializers.SerializerMethodField()
     feedback_due = DateTimeFieldWithTimezone(read_only=True, allow_null=True)
-    feedback = FeedbackSerializer(
-        read_only=True,
-        source='feedback_set',
-        many=True,
-    )
+
+    feedback = serializers.SerializerMethodField()
 
     date = DateTimeRangeField()
 
     @staticmethod
-    def get_feedback_given_by(activity) -> List[int]:
-        # we are filtering in python to make use of prefetched data
-        return [f.given_by_id for f in activity.feedback_set.all()]
+    def get_feedback_given_by(activity) -> Optional[List[int]]:
+        # assume we only need it if we've prefetched it
+        if is_prefetched(activity, 'feedback_set'):
+            return [f.given_by_id for f in activity.feedback_set.all()]
+        return None
 
     @staticmethod
-    def get_feedback_dismissed_by(activity) -> List[int]:
-        # we are filtering in python to make use of prefetched data
+    def get_feedback_dismissed_by(activity) -> Optional[List[int]]:
+        # ensure we use prefetched data
         return [c.user_id for c in activity.activityparticipant_set.all() if c.feedback_dismissed]
+
+    def get_feedback(self, activity) -> Optional[List]:
+        # assume we only need it if we've prefetched it
+        if is_prefetched(activity, 'feedback_set'):
+            return FeedbackSerializer(activity.feedback_set.all(), many=True, context=self.context).data
+        return None
 
     def create(self, validated_data):
         participant_types_data = validated_data.pop('participant_types')

@@ -59,6 +59,7 @@ class TestConfigAPI(APITestCase):
                     'banner_topic_id': DEFAULT_SETTINGS['FORUM_BANNER_TOPIC_ID'],
                     'discussions_feed': DEFAULT_SETTINGS['FORUM_DISCUSSIONS_FEED'],
                 },
+                'feedback_possible_days': 30,
             }, response.data
         )
 
@@ -85,6 +86,7 @@ class TestConfigAPI(APITestCase):
                     'banner_topic_id': OVERRIDE_SETTINGS['FORUM_BANNER_TOPIC_ID'],
                     'discussions_feed': OVERRIDE_SETTINGS['FORUM_DISCUSSIONS_FEED'],
                 },
+                'feedback_possible_days': 30,
             }, response.data
         )
 

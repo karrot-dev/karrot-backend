@@ -45,6 +45,7 @@ class ConfigSerializer(serializers.Serializer):
     sentry = SentryClientConfigSerializer()
     upload = UploadConfigSerializer()
     forum = ForumConfigSerializer()
+    feedback_possible_days = serializers.IntegerField()
 
 
 class BootstrapSerializer(serializers.Serializer):

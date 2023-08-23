@@ -3,6 +3,7 @@ from unittest.mock import ANY
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -12,7 +13,7 @@ from karrot.conversations.models import ConversationNotificationStatus
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupStatus
 from karrot.activities.factories import ActivityFactory, ActivityTypeFactory
-from karrot.activities.models import to_range, ActivityParticipant
+from karrot.activities.models import to_range, ActivityParticipant, Feedback
 from karrot.groups.roles import GROUP_MEMBER
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import ExtractPaginationMixin, pluck
@@ -144,6 +145,31 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
             response = self.get_results(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 2)
+
+    def test_list_activities_ordering(self):
+        self.client.force_login(user=self.member)
+        response = self.get_results(self.url, {'ordering': 'date'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(parse_datetime(response.data[0]['date'][0]), self.past_activity.date.start)
+        self.assertEqual(parse_datetime(response.data[1]['date'][0]), self.activity.date.start)
+
+    def test_list_activities_reverse_ordering(self):
+        self.client.force_login(user=self.member)
+        response = self.get_results(self.url, {'ordering': '-date'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(parse_datetime(response.data[0]['date'][0]), self.activity.date.start)
+        self.assertEqual(parse_datetime(response.data[1]['date'][0]), self.past_activity.date.start)
+
+    def test_list_activities_with_feedback(self):
+        self.client.force_login(user=self.member)
+        feedback = Feedback.objects.create(given_by=self.member, about=self.past_activity, comment='hello')
+        with self.assertNumQueries(5):
+            response = self.get_results(self.url, {'has_feedback': True})
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['feedback'][0]['id'], feedback.id)
 
     def test_retrieve_activities(self):
         response = self.client.get(self.activity_url)

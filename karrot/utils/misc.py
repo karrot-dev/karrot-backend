@@ -34,3 +34,9 @@ def custom_exception_handler(exc, context):
 def find_changed(obj, data_dict):
     """compare data_dict keys to object properties and return a dict of changed values"""
     return {key: value for (key, value) in data_dict.items() if getattr(obj, key) != value}
+
+
+def is_prefetched(instance, field) -> bool:
+    if hasattr(instance, '_prefetched_objects_cache'):
+        return field in instance._prefetched_objects_cache
+    return False

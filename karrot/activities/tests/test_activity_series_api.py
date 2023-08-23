@@ -162,6 +162,7 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
                 '',
                 'feedback_given_by': [],
                 'feedback_dismissed_by': [],
+                'feedback': [],
                 'is_disabled':
                 False,
                 'has_duration':
