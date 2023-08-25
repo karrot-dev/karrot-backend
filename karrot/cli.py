@@ -126,7 +126,7 @@ def server_uvicorn():
     """
 
     options = {
-        'preload': True,
+        'preload_app': True,
         'workers': settings.LISTEN_CONCURRENCY,
         'worker_class': 'karrot.cli.KarrotUvicornWorker',
         'accesslog': '-',  # write access logs to stdout
