@@ -130,6 +130,8 @@ def server_uvicorn():
         'workers': settings.LISTEN_CONCURRENCY,
         'worker_class': 'karrot.cli.KarrotUvicornWorker',
         'accesslog': '-',  # write access logs to stdout
+        'max_requests': 1000,  # restart workers to avoid memory growing
+        'max_requests_jitter': 50,
     }
 
     if settings.REQUEST_TIMEOUT_SECONDS:
