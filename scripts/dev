@@ -2,12 +2,14 @@
 
 set -eu
 
+DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+
 start_services() {
-  (cd scripts/services && podman kube play services.yml --replace)
+  $DIR/services/start
 }
 
 stop_services() {
-  (cd scripts/services && podman kube down services.yml)
+  $DIR/services/stop
 }
 
 on_exit() {

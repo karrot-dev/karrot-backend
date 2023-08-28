@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -eu
+
+# wait for database!
+# if db container isn't running it will error, so you need to have at least started the service first
+
+podman exec karrot-services-db sh -c 'timeout 60s sh -c "until pg_isready >/dev/null; do sleep 1; done"'
