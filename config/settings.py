@@ -282,8 +282,14 @@ LOGGING = {
 
 REDIS_HOST = options['REDIS_HOST']
 REDIS_PORT = options['REDIS_PORT']
+REDIS_SOCKET = options['REDIS_SOCKET']
+
 REDIS_DB = options['REDIS_DB']
-REDIS_URL = "redis://{}:{}/{}".format(REDIS_HOST, REDIS_PORT, REDIS_DB)
+
+if REDIS_SOCKET:
+    REDIS_URL = "unix://{}?db={}".format(REDIS_SOCKET, REDIS_DB)
+else:
+    REDIS_URL = "redis://{}:{}/{}".format(REDIS_HOST, REDIS_PORT, REDIS_DB)
 
 CACHES = {
     "default": {
