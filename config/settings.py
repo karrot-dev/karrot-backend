@@ -260,7 +260,8 @@ DATABASES = {
         'USER': options['DATABASE_USER'],
         'PASSWORD': options['DATABASE_PASSWORD'],
         'HOST': options['DATABASE_HOST'],
-        'PORT': options['DATABASE_PORT']
+        'PORT': options['DATABASE_PORT'],
+        'CONN_MAX_AGE': int(options['DATABASE_CONN_MAX_AGE']),
     }
 }
 
