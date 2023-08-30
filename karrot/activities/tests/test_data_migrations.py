@@ -1,8 +1,8 @@
 import datetime
 from random import randint
 
+from django.db.backends.postgresql.psycopg_any import DateTimeTZRange
 from django.utils import timezone
-from psycopg2.extras import DateTimeTZRange
 
 from karrot.tests.utils import TestMigrations
 from karrot.utils.tests.fake import faker

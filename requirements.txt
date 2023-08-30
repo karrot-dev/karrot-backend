@@ -120,7 +120,8 @@ pluggy==1.0.0
 pre-commit==3.3.1
 prompt-toolkit==3.0.38
 psutil==5.9.5
-psycopg2-binary==2.9.6
+psycopg[binary]==3.1.10
+psycopg-binary==3.1.10
 ptyprocess==0.7.0
 pure-eval==0.2.2
 pyasn1==0.5.0
