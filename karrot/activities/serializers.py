@@ -1,5 +1,5 @@
 import uuid
-from typing import List
+from typing import List, Optional
 
 import dateutil.rrule
 from datetime import timedelta, datetime
@@ -33,8 +33,135 @@ from karrot.activities.models import (
     ActivityParticipant, ParticipantType, SeriesParticipantType, default_duration, Activity
 )
 from karrot.utils.date_utils import csv_datetime
-from karrot.utils.misc import find_changed
+from karrot.utils.misc import find_changed, is_prefetched
 from karrot.places.serializers import PublicPlaceSerializer
+
+
+class FeedbackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FeedbackModel
+        fields = [
+            'id',
+            'weight',
+            'comment',
+            'about',
+            'given_by',
+            'created_at',
+            'is_editable',
+        ]
+        read_only_fields = ['given_by', 'created_at']
+        extra_kwargs = {'given_by': {'default': serializers.CurrentUserDefault()}}
+        validators = [
+            UniqueTogetherValidator(
+                queryset=FeedbackModel.objects.all(), fields=FeedbackModel._meta.unique_together[0]
+            )
+        ]
+
+    is_editable = serializers.SerializerMethodField()
+
+    def create(self, validated_data):
+        feedback = super().create(validated_data)
+        feedback.about.place.group.refresh_active_status()
+        return feedback
+
+    def update(self, feedback, validated_data):
+        super().update(feedback, validated_data)
+        feedback.about.place.group.refresh_active_status()
+        return feedback
+
+    def get_is_editable(self, feedback) -> bool:
+        return feedback.about.is_recent() and feedback.given_by_id == self.context['request'].user.id
+
+    def validate_about(self, about):
+        user = self.context['request'].user
+        group = about.place.group
+        if not group.is_member(user):
+            raise serializers.ValidationError('You are not member of the place\'s group.')
+        if about.is_upcoming():
+            raise serializers.ValidationError('The activity is not done yet')
+        if not about.is_participant(user):
+            raise serializers.ValidationError('You aren\'t assigned to the activity.')
+        if not about.is_recent():
+            raise serializers.ValidationError(
+                'You can\'t give feedback for activities more than {} days ago.'.format(
+                    settings.FEEDBACK_POSSIBLE_DAYS
+                )
+            )
+        return about
+
+    def validate(self, data):
+        def get_instance_attr(field):
+            if self.instance is None:
+                return None
+            return getattr(self.instance, field)
+
+        activity_type = data.get('about', get_instance_attr('about')).activity_type
+
+        comment = data.get('comment', get_instance_attr('comment'))
+        weight = data.get('weight', get_instance_attr('weight'))
+
+        if not activity_type.has_feedback:
+            raise serializers.ValidationError(
+                'You cannot give feedback to an activity of type {}.'.format(activity_type.name)
+            )
+
+        if weight is not None and not activity_type.has_feedback_weight:
+            raise serializers.ValidationError(
+                'You cannot give weight feedback to an activity of type {}.'.format(activity_type.name)
+            )
+
+        if (comment is None or comment == '') and weight is None:
+            raise serializers.ValidationError('Both comment and weight cannot be blank.')
+
+        data['given_by'] = self.context['request'].user
+        return data
+
+
+class FeedbackExportSerializer(FeedbackSerializer):
+    class Meta:
+        model = FeedbackModel
+        fields = [
+            'id',
+            'about_place',
+            'given_by',
+            'about',
+            'created_at',
+            'about_date',
+            'weight',
+            'comment',
+        ]
+
+    about_date = serializers.SerializerMethodField()
+    about_place = serializers.SerializerMethodField()
+    created_at = serializers.SerializerMethodField()
+
+    @extend_schema_field(OpenApiTypes.DATETIME)
+    def get_about_date(self, feedback):
+        activity = feedback.about
+        group = activity.place.group
+
+        return csv_datetime(activity.date.start.astimezone(group.timezone))
+
+    @extend_schema_field(OpenApiTypes.INT)
+    def get_about_place(self, feedback):
+        return feedback.about.place_id
+
+    @extend_schema_field(OpenApiTypes.DATETIME)
+    def get_created_at(self, feedback):
+        activity = feedback.about
+        group = activity.place.group
+
+        return csv_datetime(feedback.created_at.astimezone(group.timezone))
+
+
+class FeedbackExportRenderer(CSVRenderer):
+    header = FeedbackExportSerializer.Meta.fields
+    labels = {
+        'about_place': 'place_id',
+        'about': 'activity_id',
+        'given_by': 'user_id',
+        'about_date': 'date',
+    }
 
 
 class ActivityTypeSerializer(serializers.ModelSerializer):
@@ -271,6 +398,7 @@ class ActivitySerializer(serializers.ModelSerializer):
             'feedback_due',
             'feedback_given_by',
             'feedback_dismissed_by',
+            'feedback',
             'is_disabled',
             'has_duration',
             'is_done',
@@ -295,13 +423,30 @@ class ActivitySerializer(serializers.ModelSerializer):
     participant_types = ParticipantTypeSerializer(many=True)
 
     feedback_dismissed_by = serializers.SerializerMethodField()
+    feedback_given_by = serializers.SerializerMethodField()
     feedback_due = DateTimeFieldWithTimezone(read_only=True, allow_null=True)
+
+    feedback = serializers.SerializerMethodField()
 
     date = DateTimeRangeField()
 
-    def get_feedback_dismissed_by(self, activity) -> List[int]:
-        # we are filtering in python to make use of prefetched data
+    @staticmethod
+    def get_feedback_given_by(activity) -> Optional[List[int]]:
+        # assume we only need it if we've prefetched it
+        if is_prefetched(activity, 'feedback_set'):
+            return [f.given_by_id for f in activity.feedback_set.all()]
+        return None
+
+    @staticmethod
+    def get_feedback_dismissed_by(activity) -> Optional[List[int]]:
+        # ensure we use prefetched data
         return [c.user_id for c in activity.activityparticipant_set.all() if c.feedback_dismissed]
+
+    def get_feedback(self, activity) -> Optional[List]:
+        # assume we only need it if we've prefetched it
+        if is_prefetched(activity, 'feedback_set'):
+            return FeedbackSerializer(activity.feedback_set.all(), many=True, context=self.context).data
+        return None
 
     def create(self, validated_data):
         participant_types_data = validated_data.pop('participant_types')
@@ -1124,130 +1269,3 @@ class ActivitySeriesUpdateCheckSerializer(Serializer):
 
     def create(self, validated_data):
         pass
-
-
-class FeedbackSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FeedbackModel
-        fields = [
-            'id',
-            'weight',
-            'comment',
-            'about',
-            'given_by',
-            'created_at',
-            'is_editable',
-        ]
-        read_only_fields = ['given_by', 'created_at']
-        extra_kwargs = {'given_by': {'default': serializers.CurrentUserDefault()}}
-        validators = [
-            UniqueTogetherValidator(
-                queryset=FeedbackModel.objects.all(), fields=FeedbackModel._meta.unique_together[0]
-            )
-        ]
-
-    is_editable = serializers.SerializerMethodField()
-
-    def create(self, validated_data):
-        feedback = super().create(validated_data)
-        feedback.about.place.group.refresh_active_status()
-        return feedback
-
-    def update(self, feedback, validated_data):
-        super().update(feedback, validated_data)
-        feedback.about.place.group.refresh_active_status()
-        return feedback
-
-    def get_is_editable(self, feedback) -> bool:
-        return feedback.about.is_recent() and feedback.given_by_id == self.context['request'].user.id
-
-    def validate_about(self, about):
-        user = self.context['request'].user
-        group = about.place.group
-        if not group.is_member(user):
-            raise serializers.ValidationError('You are not member of the place\'s group.')
-        if about.is_upcoming():
-            raise serializers.ValidationError('The activity is not done yet')
-        if not about.is_participant(user):
-            raise serializers.ValidationError('You aren\'t assigned to the activity.')
-        if not about.is_recent():
-            raise serializers.ValidationError(
-                'You can\'t give feedback for activities more than {} days ago.'.format(
-                    settings.FEEDBACK_POSSIBLE_DAYS
-                )
-            )
-        return about
-
-    def validate(self, data):
-        def get_instance_attr(field):
-            if self.instance is None:
-                return None
-            return getattr(self.instance, field)
-
-        activity_type = data.get('about', get_instance_attr('about')).activity_type
-
-        comment = data.get('comment', get_instance_attr('comment'))
-        weight = data.get('weight', get_instance_attr('weight'))
-
-        if not activity_type.has_feedback:
-            raise serializers.ValidationError(
-                'You cannot give feedback to an activity of type {}.'.format(activity_type.name)
-            )
-
-        if weight is not None and not activity_type.has_feedback_weight:
-            raise serializers.ValidationError(
-                'You cannot give weight feedback to an activity of type {}.'.format(activity_type.name)
-            )
-
-        if (comment is None or comment == '') and weight is None:
-            raise serializers.ValidationError('Both comment and weight cannot be blank.')
-
-        data['given_by'] = self.context['request'].user
-        return data
-
-
-class FeedbackExportSerializer(FeedbackSerializer):
-    class Meta:
-        model = FeedbackModel
-        fields = [
-            'id',
-            'about_place',
-            'given_by',
-            'about',
-            'created_at',
-            'about_date',
-            'weight',
-            'comment',
-        ]
-
-    about_date = serializers.SerializerMethodField()
-    about_place = serializers.SerializerMethodField()
-    created_at = serializers.SerializerMethodField()
-
-    @extend_schema_field(OpenApiTypes.DATETIME)
-    def get_about_date(self, feedback):
-        activity = feedback.about
-        group = activity.place.group
-
-        return csv_datetime(activity.date.start.astimezone(group.timezone))
-
-    @extend_schema_field(OpenApiTypes.INT)
-    def get_about_place(self, feedback):
-        return feedback.about.place_id
-
-    @extend_schema_field(OpenApiTypes.DATETIME)
-    def get_created_at(self, feedback):
-        activity = feedback.about
-        group = activity.place.group
-
-        return csv_datetime(feedback.created_at.astimezone(group.timezone))
-
-
-class FeedbackExportRenderer(CSVRenderer):
-    header = FeedbackExportSerializer.Meta.fields
-    labels = {
-        'about_place': 'place_id',
-        'about': 'activity_id',
-        'given_by': 'user_id',
-        'about_date': 'date',
-    }

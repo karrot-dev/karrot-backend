@@ -35,6 +35,7 @@ class ActivitiesFilter(filters.FilterSet):
     group = filters.NumberFilter(field_name='place__group')
     date = ISODateTimeRangeFromToRangeFilter(field_name='date', lookup_expr='overlap')
     feedback_possible = filters.BooleanFilter(method='filter_feedback_possible')
+    has_feedback = filters.BooleanFilter(method='filter_has_feedback')
     joined = filters.BooleanFilter(method='filter_joined')
     activity_type = filters.NumberFilter(field_name='activity_type')
     slots = filters.ChoiceFilter(method='filter_slots', choices=[(val, val) for val in ('free', 'empty', 'joined')])
@@ -58,6 +59,13 @@ class ActivitiesFilter(filters.FilterSet):
         if value is True:
             return qs.only_feedback_possible(self.request.user)
         return qs.exclude_feedback_possible(self.request.user)
+
+    def filter_has_feedback(self, qs, name, value):
+        if value is True:
+            return qs.annotate_feedback_count().filter(feedback_count__gt=0)
+        elif value is False:
+            return qs.annotate_feedback_count().filter(feedback_count=0)
+        return qs
 
     def filter_joined(self, qs, name, value):
         if value is True:

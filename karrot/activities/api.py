@@ -8,6 +8,7 @@ from rest_framework import mixins
 from rest_framework import viewsets
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, BaseAuthentication
 from rest_framework.decorators import action
+from rest_framework.filters import OrderingFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import CursorPagination
 from rest_framework.parsers import JSONParser
@@ -207,13 +208,9 @@ class ActivitySeriesViewSet(
 
 
 class ActivityPagination(CursorPagination):
-    """Pagination with a high number of activities in order to not break
-    frontend assumptions of getting all upcoming activities per group.
-    Could be reduced and add pagination handling in frontend when speed becomes an issue"""
-    page_size = 1200
+    page_size = 30
     max_page_size = 1200
     page_size_query_param = 'page_size'
-    ordering = 'date'
 
 
 class PublicActivityViewSet(
@@ -275,11 +272,16 @@ class ActivityViewSet(
     """
     serializer_class = ActivitySerializer
     queryset = ActivityModel.objects
-    filter_backends = (filters.DjangoFilterBackend, )
+    filter_backends = (
+        filters.DjangoFilterBackend,
+        OrderingFilter,
+    )
     filterset_class = ActivitiesFilter
     permission_classes = (IsAuthenticated, IsUpcoming, IsGroupEditor, IsEmptyActivity)
     pagination_class = ActivityPagination
     parser_classes = [JSONWithFilesMultiPartParser, JSONParser]
+    ordering_fields = ['date']
+    ordering = ['date']
 
     def get_queryset(self):
         qs = self.queryset.filter(place__group__members=self.request.user)
@@ -290,7 +292,7 @@ class ActivityViewSet(
             # because we have participants field in the serializer
             # only prefetch on read_only actions, otherwise there are caching problems when participants get added
             qs = qs.select_related('activity_type').prefetch_related(
-                'activityparticipant_set', 'feedback_given_by', 'participant_types',
+                'activityparticipant_set', 'feedback_set', 'participant_types',
                 'activityparticipant_set__participant_type'
             )
         if self.action == 'add':

@@ -35,6 +35,7 @@ def get_config_data():
             'banner_topic_id': settings.FORUM_BANNER_TOPIC_ID,
             'discussions_feed': settings.FORUM_DISCUSSIONS_FEED,
         },
+        'feedback_possible_days': settings.FEEDBACK_POSSIBLE_DAYS,
     }
 
 
