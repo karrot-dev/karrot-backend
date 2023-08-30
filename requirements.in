@@ -18,7 +18,7 @@ drf_orjson_renderer
 django-jinja
 hiredis
 markdown
-psycopg2-binary
+psycopg[binary]
 redis
 pytz
 django-filter

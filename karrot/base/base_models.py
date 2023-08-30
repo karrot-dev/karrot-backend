@@ -1,10 +1,11 @@
 from django.contrib.postgres.fields import DateTimeRangeField
+from django.db.backends.postgresql.psycopg_any import DateTimeTZRange
 from django.db.backends.signals import connection_created
 from django.db.models import Model, AutoField, Field, DateTimeField, TextField, FloatField, Func
 from django.db.models.fields.related import RelatedField
 from django.dispatch import receiver
 from django.utils import timezone
-from psycopg2.extras import DateTimeTZRange, register_range
+from psycopg.types.range import TimestampTZRangeLoader
 
 
 class NicelyFormattedModel(Model):
@@ -63,7 +64,7 @@ class Tstzrange(Func):
 
 class CustomDateTimeTZRange(DateTimeTZRange):
     """
-    Similar to psycopg2.extras.DateTimeTZRange but with extra helpers
+    Similar to psycopg.types.range.Range but with extra helpers
     """
     @property
     def start(self):
@@ -75,12 +76,16 @@ class CustomDateTimeTZRange(DateTimeTZRange):
 
     def __add__(self, delta):
         return CustomDateTimeTZRange(
-            self.lower + delta if self.lower else None, self.upper + delta if self.upper else None
+            self.lower + delta if self.lower else None,
+            self.upper + delta if self.upper else None,
+            self.bounds,
         )
 
     def __sub__(self, delta):
         return CustomDateTimeTZRange(
-            self.lower - delta if self.lower else None, self.upper - delta if self.upper else None
+            self.lower - delta if self.lower else None,
+            self.upper - delta if self.upper else None,
+            self.bounds,
         )
 
     def as_list(self):
@@ -89,7 +94,8 @@ class CustomDateTimeTZRange(DateTimeTZRange):
     def astimezone(self, tz):
         return CustomDateTimeTZRange(
             self.lower.astimezone(tz) if self.lower else None,
-            self.upper.astimezone(tz) if self.upper else None
+            self.upper.astimezone(tz) if self.upper else None,
+            self.bounds,
         )
 
 
@@ -97,6 +103,13 @@ class CustomDateTimeRangeField(DateTimeRangeField):
     range_type = CustomDateTimeTZRange
 
 
+class CustomTimestampTZRangeLoader(TimestampTZRangeLoader):
+    def load(self, data):
+        range = super().load(data)
+        return CustomDateTimeTZRange(range.lower, range.upper, range.bounds)
+
+
 @receiver(connection_created)
 def register_custom_date_time_tz_range(sender, connection, **kwargs):
-    register_range('pg_catalog.tstzrange', CustomDateTimeTZRange, connection.connection, True)
+    psycopg_connection = connection.connection
+    psycopg_connection.adapters.register_loader("tstzrange", CustomTimestampTZRangeLoader)

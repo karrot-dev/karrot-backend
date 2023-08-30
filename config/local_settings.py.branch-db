@@ -3,7 +3,7 @@ import subprocess
 import re
 import sys
 
-from psycopg2 import connect
+from psycopg import connect
 
 from config.options import get_options
 
