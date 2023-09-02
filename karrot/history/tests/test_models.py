@@ -31,10 +31,12 @@ class HistoryQuerySetTests(TestCase):
     def test_activity_left_late(self):
         leave_seconds_before_activity = 324
         history = self.create_history(date=self.activity.date.start - timedelta(seconds=leave_seconds_before_activity))
-        annotated = History.objects.annotate_activity_leave_seconds().get(pk=history.id)
-        self.assertEqual(annotated.activity_leave_seconds, leave_seconds_before_activity)
-        self.assertEqual(History.objects.activity_left_late(seconds=leave_seconds_before_activity).count(), 1)
-        self.assertEqual(History.objects.activity_left_late(seconds=leave_seconds_before_activity - 1).count(), 0)
+        late = History.objects.annotate_activity_leave_late(seconds=leave_seconds_before_activity)
+        not_late = History.objects.annotate_activity_leave_late(seconds=leave_seconds_before_activity - 1)
+        self.assertEqual(late.get(pk=history.id).activity_leave_late, True)
+        self.assertEqual(not_late.get(pk=history.id).activity_leave_late, False)
+        self.assertEqual(late.filter(activity_leave_late=True).count(), 1)
+        self.assertEqual(not_late.filter(activity_leave_late=True).count(), 0)
 
 
 class HistoryTypusTests(TestCase):
