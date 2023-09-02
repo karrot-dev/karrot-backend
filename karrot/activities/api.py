@@ -220,9 +220,14 @@ class PublicActivityViewSet(
 ):
     serializer_class = PublicActivitySerializer
     queryset = ActivityModel.objects.is_public().exclude_disabled()
-    filter_backends = (filters.DjangoFilterBackend, )
+    filter_backends = (
+        filters.DjangoFilterBackend,
+        OrderingFilter,
+    )
     filterset_class = PublicActivitiesFilter
     pagination_class = ActivityPagination  # use the activities one seems ok
+    ordering_fields = ['date']
+    ordering = ['date']
 
     def get_object(self):
         queryset = self.filter_queryset(self.get_queryset())
