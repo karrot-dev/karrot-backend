@@ -1,9 +1,8 @@
 from datetime import timedelta
 
-from django.db.models import JSONField
+from django.db.models import JSONField, Index, BooleanField
 from django.db import models
-from django.db.models import IntegerField
-from django.db.models.expressions import RawSQL, When, Case
+from django.db.models.expressions import RawSQL
 from django.dispatch import Signal
 from django.utils import timezone
 from django_enumfield import enum
@@ -63,13 +62,12 @@ class HistoryQuerySet(models.QuerySet):
         return entry
 
     def activity_left_late(self, **kwargs):
-        return self.annotate_activity_leave_seconds().filter(
-            typus=HistoryTypus.ACTIVITY_LEAVE,
-            activity_leave_seconds__lte=timedelta(**kwargs).total_seconds(),
-        )
+        return self.annotate_activity_leave_late(**kwargs).filter(activity_leave_late=True)
 
-    def annotate_activity_leave_seconds(self):
+    def annotate_activity_leave_late(self, **kwargs):
         sql = f"""
+            "{History._meta.db_table}"."typus" = %s
+            AND
             ROUND (
                 EXTRACT (
                     EPOCH FROM (
@@ -78,16 +76,17 @@ class HistoryQuerySet(models.QuerySet):
                 )
                 -
                 EXTRACT (EPOCH FROM "{History._meta.db_table}"."date")
-            )
+            ) <= %s
         """
         return self.annotate(
-            activity_leave_seconds=Case(
-                When(
-                    typus=HistoryTypus.ACTIVITY_LEAVE,
-                    then=RawSQL(sql, [], output_field=IntegerField()),
-                ),
-                default=None,
-            ),
+            activity_leave_late=RawSQL(
+                sql,
+                [
+                    HistoryTypus.ACTIVITY_LEAVE.value,
+                    timedelta(**kwargs).total_seconds(),
+                ],
+                output_field=BooleanField(),
+            )
         )
 
 
@@ -96,6 +95,7 @@ class History(NicelyFormattedModel):
 
     class Meta:
         ordering = ['-date']
+        indexes = [Index(fields=['typus'])]
 
     date = models.DateTimeField(default=timezone.now, db_index=True)
     typus = enum.EnumField(HistoryTypus)

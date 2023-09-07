@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Q, Sum
@@ -14,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import GenericViewSet
 
-from karrot.activities.models import Activity, ActivityType
+from karrot.activities.models import ActivityType
 from karrot.history.models import HistoryTypus, History
 from karrot.stats import stats
 from karrot.stats.serializers import FrontendStatsSerializer, ActivityHistoryStatsSerializer
@@ -55,6 +53,9 @@ class ActivityHistoryStatsViewSet(ListModelMixin, GenericViewSet):
     permission_classes = (IsAuthenticated, )
 
     def get_queryset(self):
+        # ActivityHistoryStatsFilter has already used the "user" param
+        # to filter the history, but we want to pull it out again for filtering
+        # other things too
         user_id = self.request.query_params.get('user', None)
 
         feedback_filter = Q(typus=HistoryTypus.ACTIVITY_DONE)
@@ -62,8 +63,12 @@ class ActivityHistoryStatsViewSet(ListModelMixin, GenericViewSet):
         if user_id:
             feedback_filter &= Q(activity__feedback__given_by=user_id)
 
+        # these are activities missed by anyone
+        # which is used to match up with activities that people left
+        all_missed_activities = History.objects.filter(typus=HistoryTypus.ACTIVITY_MISSED).values_list('activity')
+
         return self.filter_queryset(super().get_queryset()) \
-            .annotate_activity_leave_seconds() \
+            .annotate_activity_leave_late(hours=settings.ACTIVITY_LEAVE_LATE_HOURS) \
             .values('place', 'group') \
             .filter(typus__in=[
                 HistoryTypus.ACTIVITY_DONE,
@@ -81,18 +86,16 @@ class ActivityHistoryStatsViewSet(ListModelMixin, GenericViewSet):
                     typus=HistoryTypus.ACTIVITY_LEAVE,
                 )),
                 leave_late_count=Count('activity', distinct=True, filter=Q(
-                    typus=HistoryTypus.ACTIVITY_LEAVE,
-                    activity_leave_seconds__lte=timedelta(hours=settings.ACTIVITY_LEAVE_LATE_HOURS).total_seconds()),
-                ),
+                    activity_leave_late=True,
+                )),
                 leave_missed_count=Count('activity', distinct=True, filter=Q(
                     typus=HistoryTypus.ACTIVITY_LEAVE,
-                    activity__in=Activity.objects.missed(),
+                    activity__in=all_missed_activities,
                 )),
                 leave_missed_late_count=Count('activity', distinct=True, filter=Q(
-                    typus=HistoryTypus.ACTIVITY_LEAVE,
-                    activity__in=Activity.objects.missed(),
-                    activity_leave_seconds__lte=timedelta(hours=settings.ACTIVITY_LEAVE_LATE_HOURS).total_seconds()),
-                ),
+                    activity_leave_late=True,
+                    activity__in=all_missed_activities,
+                )),
                 feedback_count=Count('activity__feedback', filter=feedback_filter),
                 feedback_weight=Coalesce(Sum('activity__feedback__weight', filter=feedback_filter), 0.0)) \
             .filter(

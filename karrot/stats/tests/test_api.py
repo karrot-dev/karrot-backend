@@ -12,6 +12,7 @@ from karrot.activities.models import to_range, Activity, Feedback
 from karrot.groups.factories import GroupFactory
 from karrot.groups.roles import GROUP_MEMBER
 from karrot.places.factories import PlaceFactory
+from karrot.places.models import PlaceStatus
 from karrot.users.factories import VerifiedUserFactory
 from karrot.utils.tests.fake import faker
 
@@ -322,6 +323,22 @@ class TestActivityHistoryStatsAPI(APITestCase):
                 }
             )
             self.assertEqual(len(response.data), 0, response.data)
+
+    def test_with_archived_place(self):
+        self.setup_activity()
+        self.client.force_login(user=self.user)
+        self.client.post(f'/api/activities/{self.activity.id}/add/')
+        with freeze_time(self.after_the_activity_is_over, tick=True):
+            Activity.objects.process_finished_activities()
+
+            self.place.status = PlaceStatus.ARCHIVED.value
+            self.place.save()
+
+            response = self.client.get('/api/stats/activity-history/', {'group': self.group.id, 'user': self.user.id})
+            self.assertEqual(len(response.data), 1)
+            self.assertEqual([dict(entry) for entry in response.data], [self.expected_entry({
+                'done_count': 1,
+            })], response.data)
 
     def expected_entry(self, data=None):
         return {
