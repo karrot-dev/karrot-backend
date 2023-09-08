@@ -656,6 +656,26 @@ class TestConversationsSeenUpToAPI(APITestCase):
         self.participant.refresh_from_db()
         self.assertEqual(self.participant.seen_up_to, message)
 
+    def test_mark_seen_up_to_does_not_create_participant(self):
+        # create a conversation in a group to allow 'user' to see the conversation without being a participant
+        user = UserFactory()
+        group = GroupFactory(members=[self.user2, user])
+        conversation = ConversationFactory(group=group, participants=[self.user2])
+        message = conversation.messages.create(author=self.user2, content='yay')
+        self.client.force_login(user=user)
+
+        response = self.client.get('/api/conversations/{}/'.format(conversation.id), format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['seen_up_to'], None)
+        self.assertFalse(ConversationParticipant.objects.filter(conversation=conversation.id, user=user.id).exists())
+
+        data = {'seen_up_to': message.id}
+        response = self.client.patch('/api/conversations/{}/'.format(conversation.id), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data[0], 'Cannot mark seen_up_to without subscribing to notifications')
+
+        self.assertFalse(ConversationParticipant.objects.filter(conversation=conversation.id, user=user.id).exists())
+
     def test_mark_seen_up_to_fails_for_invalid_id(self):
         self.client.force_login(user=self.user)
         data = {'seen_up_to': 9817298172}

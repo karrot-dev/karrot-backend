@@ -407,6 +407,10 @@ class ConversationSerializer(serializers.ModelSerializer):
 
     def update(self, participant, validated_data):
         notifications = validated_data.get('notifications', None)
+        if notifications is None and participant.notifications == ConversationNotificationStatus.NONE.value:
+            if 'seen_up_to' in validated_data:
+                raise serializers.ValidationError('Cannot mark seen_up_to without subscribing to notifications')
+            return participant
         if notifications == ConversationNotificationStatus.NONE.value:
             if participant.id is not None:
                 # delete participant
