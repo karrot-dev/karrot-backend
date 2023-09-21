@@ -56,6 +56,7 @@ influxdb
 Unidecode
 tzdata # for systems where zoneinfo is missing
 urllib3<2 # sentry-sdk does not support urllib3 yet: https://github.com/getsentry/sentry-python/issues/2070
+pywebpush
 
 # dev PyPI dependencies
 pip-tools

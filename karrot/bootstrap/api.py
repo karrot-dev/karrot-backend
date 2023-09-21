@@ -36,6 +36,9 @@ def get_config_data():
             'discussions_feed': settings.FORUM_DISCUSSIONS_FEED,
         },
         'feedback_possible_days': settings.FEEDBACK_POSSIBLE_DAYS,
+        'web_push': {
+            'vapid_public_key': getattr(settings, 'VAPID_PUBLIC_KEY', None),
+        },
     }
 
 

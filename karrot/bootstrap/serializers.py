@@ -40,12 +40,17 @@ class ForumConfigSerializer(serializers.Serializer):
     discussions_feed = serializers.CharField()
 
 
+class WebPushConfigSerializer(serializers.Serializer):
+    vapid_public_key = serializers.CharField()
+
+
 class ConfigSerializer(serializers.Serializer):
     fcm = FCMClientConfigSerializer()
     sentry = SentryClientConfigSerializer()
     upload = UploadConfigSerializer()
     forum = ForumConfigSerializer()
     feedback_possible_days = serializers.IntegerField()
+    web_push = WebPushConfigSerializer()
 
 
 class BootstrapSerializer(serializers.Serializer):

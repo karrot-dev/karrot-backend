@@ -27,6 +27,7 @@ class ChannelSubscription(BaseModel):
 
 
 class PushSubscriptionPlatform(Enum):
+    # these are both fcm
     ANDROID = 'android'
     WEB = 'web'
 
@@ -43,3 +44,17 @@ class PushSubscription(BaseModel):
         choices=[(platform.value, platform.value) for platform in PushSubscriptionPlatform],
         max_length=100,
     )
+
+
+class WebPushSubscription(BaseModel):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    # subscription info
+    endpoint = models.URLField(max_length=500)
+    keys = models.JSONField()
+
+    # extra info
+    mobile = models.BooleanField()
+    browser = models.CharField()
+    version = models.CharField()
+    os = models.CharField()

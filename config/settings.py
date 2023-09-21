@@ -521,6 +521,11 @@ FCM_CLIENT_API_KEY = options['FCM_CLIENT_API_KEY']
 FCM_CLIENT_PROJECT_ID = options['FCM_CLIENT_PROJECT_ID']
 FCM_CLIENT_APP_ID = options['FCM_CLIENT_APP_ID']
 
+# TODO: add this to options
+# generated from https://web-push-codelab.glitch.me/
+VAPID_PUBLIC_KEY = "BFMNtOXEKV96Y-ZLNQThfEMxOgYp4NWj7yyHoAXgter8hrlZe7ziYEo-V1ETJZNvWS-budEn8Nm6rZEy7JzfrKI"
+VAPID_PRIVATE_KEY = ""
+VAPID_ADMIN_EMAIL = "info@karrot.world"
 
 ADMIN_CHAT_WEBHOOK = options['ADMIN_CHAT_WEBHOOK']
 
