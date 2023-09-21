@@ -1,4 +1,5 @@
 import json
+from typing import TypedDict
 
 import sentry_sdk
 from asgiref.sync import async_to_sync
@@ -6,11 +7,20 @@ from channels.exceptions import ChannelFull
 from channels.layers import get_channel_layer
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
+from typing_extensions import NotRequired
 
 from karrot.subscriptions import stats
 
 channel_layer = get_channel_layer()
 channel_layer_send_sync = async_to_sync(channel_layer.send)
+
+
+class PushNotifyOptions(TypedDict):
+    message_title: str
+    message_body: str
+    tag: NotRequired[str]
+    click_action: NotRequired[str]
+    image_url: NotRequired[str]
 
 
 def send_in_channel(channel, topic, payload):

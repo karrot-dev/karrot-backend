@@ -1,4 +1,5 @@
 from itertools import groupby
+from typing import List
 
 from babel.dates import format_date, format_time
 from django.utils import timezone, translation
@@ -10,7 +11,10 @@ from huey.contrib.djhuey import db_task, db_periodic_task
 from karrot.applications.models import ApplicationStatus
 from karrot.groups.models import GroupMembership, GroupNotificationType
 from karrot.subscriptions.fcm import notify_subscribers
-from karrot.subscriptions.models import PushSubscription, PushSubscriptionPlatform, ChannelSubscription
+from karrot.subscriptions.models import PushSubscription, PushSubscriptionPlatform, ChannelSubscription, \
+    WebPushSubscription
+from karrot.subscriptions.utils import PushNotifyOptions
+from karrot.subscriptions.web_push import notify_web_push_subscribers
 from karrot.utils import frontend_urls, stats_utils
 from karrot.utils.stats_utils import timer
 
@@ -18,12 +22,12 @@ from karrot.utils.stats_utils import timer
 @db_task()
 def notify_message_push_subscribers(message):
     if message.is_thread_reply():
-        subscriptions = PushSubscription.objects.filter(
+        subscriptions = WebPushSubscription.objects.filter(
             user__conversationthreadparticipant__thread=message.thread,
             user__conversationthreadparticipant__muted=False,
         )
     else:
-        subscriptions = PushSubscription.objects.filter(
+        subscriptions = WebPushSubscription.objects.filter(
             user__conversationparticipant__conversation=message.conversation,
             user__conversationparticipant__muted=False,
         )
@@ -137,7 +141,9 @@ def notify_mention_push_subscribers(mention):
     if conversation.conversationparticipant_set.filter(user=user).exists():
         return
 
-    notify_message_push_subscribers_with_language(message, PushSubscription.objects.filter(user=user), user.language)
+    notify_message_push_subscribers_with_language(
+        message, WebPushSubscription.objects.filter(user=user), user.language
+    )
 
 
 @db_task()
@@ -147,7 +153,7 @@ def notify_new_offer_push_subscribers(offer):
         groupmembership__in=GroupMembership.objects.active().with_notification_type(GroupNotificationType.NEW_OFFER),
     )
 
-    subscriptions = PushSubscription.objects.filter(
+    subscriptions = WebPushSubscription.objects.filter(
         user__in=users,
     ).\
         exclude(user=offer.user). \
@@ -180,7 +186,15 @@ def notify_new_offer_push_subscribers_with_language(offer, subscriptions, langua
     )
 
 
-def notify_subscribers_by_device(subscriptions, *, click_action=None, fcm_options):
+def notify_subscribers_by_device(
+    subscriptions: List[WebPushSubscription], *, click_action=None, fcm_options: PushNotifyOptions
+):
+    notify_web_push_subscribers(subscriptions, fcm_options)
+
+
+def notify_fcm_subscribers_by_device(
+    subscriptions: List[PushSubscription], *, click_action=None, fcm_options: PushNotifyOptions
+):
     android_subscriptions = [s for s in subscriptions if s.platform == PushSubscriptionPlatform.ANDROID.value]
     web_subscriptions = [s for s in subscriptions if s.platform == PushSubscriptionPlatform.WEB.value]
 
