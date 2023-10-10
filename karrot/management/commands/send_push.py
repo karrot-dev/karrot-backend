@@ -2,7 +2,7 @@ from django.core.management import BaseCommand
 
 from karrot.subscriptions.models import WebPushSubscription
 from karrot.subscriptions.utils import PushNotifyOptions
-from karrot.subscriptions.web_push import notify_web_push_subscribers
+from karrot.subscriptions.web_push import notify_subscribers
 
 
 class Command(BaseCommand):
@@ -21,7 +21,7 @@ class Command(BaseCommand):
             "image_url": "/media/__sized__/group_photos/photo_8s1U3PJ-thumbnail-200x200-70.jpg"
         }
 
-        notify_web_push_subscribers(
+        notify_subscribers(
             WebPushSubscription.objects.all(),
             options,
         )

@@ -27,7 +27,6 @@ django-timezone-field
 django-anymail
 sentry-sdk
 furl
-pyfcm
 django-versatileimagefield
 html2text
 babel

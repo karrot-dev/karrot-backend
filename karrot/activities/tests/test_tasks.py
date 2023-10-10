@@ -21,7 +21,7 @@ from karrot.activities.tasks import daily_activity_notifications, fetch_activity
 from karrot.groups.roles import GROUP_MEMBER, GROUP_EDITOR
 from karrot.places.factories import PlaceFactory
 from karrot.places.models import PlaceStatus, PlaceSubscription
-from karrot.subscriptions.models import PushSubscription, PushSubscriptionPlatform
+from karrot.subscriptions.factories import WebPushSubscriptionFactory
 from karrot.users.factories import VerifiedUserFactory, UserFactory
 from karrot.utils.frontend_urls import place_url
 
@@ -43,11 +43,7 @@ class TestActivityReminderTask(TestCase):
         self.place = PlaceFactory(group=self.group, subscribers=[self.user, self.other_user])
         self.activity = ActivityFactory(place=self.place)
         with mute_signals(post_save):
-            self.subscriptions = [
-                PushSubscription.objects.create(
-                    user=self.user, token='', platform=PushSubscriptionPlatform.ANDROID.value
-                )
-            ]
+            self.subscriptions = [WebPushSubscriptionFactory(user=self.user)]
 
     def test_activity_reminder_notifies_subscribers(self, notify_subscribers_by_device):
         participant = self.activity.add_participant(self.user)

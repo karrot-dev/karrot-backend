@@ -29,8 +29,8 @@ from karrot.activities.factories import FeedbackFactory, ActivityFactory, \
     ActivitySeriesFactory
 from karrot.activities.models import Activity, to_range
 from karrot.places.factories import PlaceFactory
-from karrot.subscriptions.models import ChannelSubscription, \
-    PushSubscription, PushSubscriptionPlatform
+from karrot.subscriptions.factories import WebPushSubscriptionFactory
+from karrot.subscriptions.models import ChannelSubscription
 from karrot.tests.utils import pluck
 from karrot.users.factories import UserFactory, VerifiedUserFactory
 from karrot.utils.geoip import ip_to_lat_lon
@@ -1109,12 +1109,8 @@ class PushWelcomeMessageTests(TestCase):
         self.user = UserFactory()
 
     def test_sends_a_welcome_push_message(self, notify_subscribers):
-        token = faker.uuid4()
-        subscription = PushSubscription.objects.create(
-            user=self.user,
-            token=token,
-            platform=PushSubscriptionPlatform.ANDROID.value,
-        )
+        faker.uuid4()
+        subscription = WebPushSubscriptionFactory(user=self.user)
         self.assertEqual(notify_subscribers.call_count, 1)
 
         kwargs = notify_subscribers.call_args_list[0][1]
@@ -1129,7 +1125,6 @@ class ReceiverPushTests(TestCase):
         self.author = UserFactory()
         self.group = GroupFactory(members=[self.user, self.author])
 
-        self.token = faker.uuid4()
         self.content = faker.text()
 
         # join a conversation
@@ -1141,11 +1136,7 @@ class ReceiverPushTests(TestCase):
 
         with mute_signals(post_save):
             # add a push subscriber
-            self.subscription = PushSubscription.objects.create(
-                user=self.user,
-                token=self.token,
-                platform=PushSubscriptionPlatform.ANDROID.value,
-            )
+            self.subscription = WebPushSubscriptionFactory(user=self.user)
 
     def test_sends_to_push_subscribers(self, notify_subscribers):
         # add a message to the conversation
@@ -1229,11 +1220,7 @@ class GroupConversationReceiverPushTests(TestCase):
 
         with mute_signals(post_save):
             # add a push subscriber
-            self.subscription = PushSubscription.objects.create(
-                user=self.user,
-                token=self.token,
-                platform=PushSubscriptionPlatform.ANDROID.value,
-            )
+            self.subscription = WebPushSubscriptionFactory(user=self.user)
 
     def test_sends_to_push_subscribers(self, notify_subscribers):
         with self.captureOnCommitCallbacks(execute=True):

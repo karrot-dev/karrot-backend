@@ -18,12 +18,6 @@ BACKEND_REVISION = get_git_rev()
 
 def get_config_data():
     return {
-        'fcm': {
-            'api_key': getattr(settings, 'FCM_CLIENT_API_KEY', None),
-            'messaging_sender_id': getattr(settings, 'FCM_CLIENT_MESSAGING_SENDER_ID', None),
-            'project_id': getattr(settings, 'FCM_CLIENT_PROJECT_ID', None),
-            'app_id': getattr(settings, 'FCM_CLIENT_APP_ID', None),
-        },
         'sentry': {
             'dsn': settings.SENTRY_CLIENT_DSN,
             'environment': settings.SENTRY_ENVIRONMENT,
