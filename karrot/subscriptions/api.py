@@ -1,6 +1,5 @@
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -28,6 +27,13 @@ class WebPushSubscriptionViewSet(GenericViewSet):
     def subscribe(self, request, pk=None):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        # don't want duplicate push notifications for this endpoint/key combo
+        self.get_queryset().filter(
+            endpoint=request.data['endpoint'],
+            keys__contains=request.data['keys'],
+        ).delete()
+
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -39,10 +45,11 @@ class WebPushSubscriptionViewSet(GenericViewSet):
     def unsubscribe(self, request, pk=None):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        subscription = get_object_or_404(
-            self.get_queryset(),
+
+        # we could have ended up with multiple, so delete them all
+        self.get_queryset().filter(
             endpoint=serializer.data['endpoint'],
             keys__contains=serializer.data['keys'],
-        )
-        subscription.delete()
+        ).delete()
+
         return Response(status=status.HTTP_204_NO_CONTENT)
