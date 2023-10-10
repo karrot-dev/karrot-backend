@@ -5,13 +5,6 @@ from factory.django import DjangoModelFactory
 from karrot.utils.tests.fake import faker
 
 
-def set_password(obj, *args, **kwargs_):
-    if hasattr(obj, 'set_password'):
-        obj.set_password(obj.display_name)
-    else:
-        print('HMMM', obj)
-
-
 class UserFactory(DjangoModelFactory):
     class Meta:
         model = get_user_model()
@@ -25,7 +18,7 @@ class UserFactory(DjangoModelFactory):
     description = LazyAttribute(lambda _: faker.text())
 
     # Use display_name as password, as it is readable
-    password = PostGeneration(set_password)
+    password = PostGeneration(lambda obj, *args, **kwargs: obj.set_password(obj.display_name))
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
