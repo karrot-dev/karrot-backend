@@ -118,6 +118,7 @@ def notify_message_push_subscribers_with_language(message, subscriptions, langua
         title=message_title,
         body=Truncator(message.content).chars(num=1000),
         url=frontend_urls.message_url(message),
+        image_url=frontend_urls.user_photo_url(message.author),
         # this causes each notification for a given conversation to replace previous notifications
         # fancier would be to make the new notifications show a summary not just the latest message
         tag='conversation:{}'.format(conversation.id),
