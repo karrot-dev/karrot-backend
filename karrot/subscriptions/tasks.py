@@ -1,5 +1,4 @@
 from itertools import groupby
-from typing import List
 
 from babel.dates import format_date, format_time
 from django.utils import timezone, translation
@@ -10,7 +9,6 @@ from huey.contrib.djhuey import db_task, db_periodic_task
 from karrot.applications.models import ApplicationStatus
 from karrot.groups.models import GroupMembership, GroupNotificationType
 from karrot.subscriptions.models import ChannelSubscription, WebPushSubscription
-from karrot.subscriptions.utils import PushNotifyOptions
 from karrot.subscriptions.web_push import notify_subscribers
 from karrot.utils import frontend_urls, stats_utils
 from karrot.utils.stats_utils import timer
@@ -115,16 +113,14 @@ def notify_message_push_subscribers_with_language(message, subscriptions, langua
     with translation.override(language):
         message_title = get_message_title(message, language)
 
-    notify_subscribers_by_device(
-        subscriptions,
-        click_action=frontend_urls.message_url(message),
-        fcm_options={
-            'message_title': message_title,
-            'message_body': Truncator(message.content).chars(num=1000),
-            # this causes each notification for a given conversation to replace previous notifications
-            # fancier would be to make the new notifications show a summary not just the latest message
-            'tag': 'conversation:{}'.format(conversation.id),
-        }
+    notify_subscribers(
+        subscriptions=subscriptions,
+        title=message_title,
+        body=Truncator(message.content).chars(num=1000),
+        url=frontend_urls.message_url(message),
+        # this causes each notification for a given conversation to replace previous notifications
+        # fancier would be to make the new notifications show a summary not just the latest message
+        tag='conversation:{}'.format(conversation.id),
     )
 
 
@@ -170,23 +166,15 @@ def notify_new_offer_push_subscribers_with_language(offer, subscriptions, langua
     with translation.override(language):
         message_title = '🎁️ {} / {}'.format(offer.name, offer.user.display_name)
 
-    notify_subscribers_by_device(
-        subscriptions,
-        click_action=frontend_urls.offer_url(offer),
-        fcm_options={
-            'message_title': message_title,
-            'message_body': Truncator(offer.description).chars(num=1000),
-            # this causes each notification for a given conversation to replace previous notifications
-            # fancier would be to make the new notifications show a summary not just the latest message
-            'tag': 'offer:{}'.format(offer.id),
-        },
+    notify_subscribers(
+        subscriptions=subscriptions,
+        title=message_title,
+        body=Truncator(offer.description).chars(num=1000),
+        url=frontend_urls.offer_url(offer),
+        # this causes each notification for a given conversation to replace previous notifications
+        # fancier would be to make the new notifications show a summary not just the latest message
+        tag='offer:{}'.format(offer.id),
     )
-
-
-def notify_subscribers_by_device(
-    subscriptions: List[WebPushSubscription], *, click_action=None, fcm_options: PushNotifyOptions
-):
-    notify_subscribers(subscriptions=subscriptions, fcm_options=fcm_options)
 
 
 @db_periodic_task(crontab(hour='*/24', minute=35))  # every 24 hours

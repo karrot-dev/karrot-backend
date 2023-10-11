@@ -18,7 +18,7 @@ from karrot.activities.models import Activity, ActivitySeries, ActivityParticipa
 from karrot.groups.models import Group, GroupMembership, GroupNotificationType
 from karrot.places.models import PlaceStatus, Place
 from karrot.subscriptions.models import WebPushSubscription
-from karrot.subscriptions.tasks import notify_subscribers_by_device
+from karrot.subscriptions.tasks import notify_subscribers
 from karrot.users.models import User
 from karrot.utils import stats_utils, frontend_urls
 from karrot.utils.stats_utils import timer
@@ -81,14 +81,12 @@ def activity_reminder(participant_id):
 
         click_action = frontend_urls.activity_detail_url(activity)
 
-        notify_subscribers_by_device(
-            subscriptions,
-            click_action=click_action,
-            fcm_options={
-                'message_title': title,
-                'message_body': body,
-                'tag': 'activity:{}'.format(activity.id),
-            }
+        notify_subscribers(
+            subscriptions=subscriptions,
+            title=title,
+            body=body,
+            url=click_action,
+            tag='activity:{}'.format(activity.id),
         )
 
 
@@ -169,13 +167,11 @@ def notify_participant_removals(
                 }
                 body = removed_by.display_name + ':' + Truncator(message).chars(num=1000)
                 if subscriptions.count() > 0:
-                    notify_subscribers_by_device(
-                        subscriptions,
-                        click_action=frontend_urls.history_url(history_id),
-                        fcm_options={
-                            'message_title': title,
-                            'message_body': body,
-                        }
+                    notify_subscribers(
+                        subscriptions=subscriptions,
+                        title=title,
+                        body=body,
+                        url=frontend_urls.history_url(history_id),
                     )
 
 

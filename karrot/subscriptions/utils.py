@@ -16,10 +16,10 @@ channel_layer_send_sync = async_to_sync(channel_layer.send)
 
 
 class PushNotifyOptions(TypedDict):
-    message_title: str
-    message_body: NotRequired[str]
+    title: str
+    body: NotRequired[str]
     tag: NotRequired[str]
-    click_action: NotRequired[str]
+    url: NotRequired[str]
     image_url: NotRequired[str]
 
 

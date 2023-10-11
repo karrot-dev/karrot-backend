@@ -6,10 +6,19 @@ from pywebpush import webpush, WebPushException
 
 from karrot.subscriptions.models import WebPushSubscription
 from karrot.subscriptions.stats import pushed_via_web_push
-from karrot.subscriptions.utils import PushNotifyOptions
 
 
-def notify_subscribers(*, subscriptions: List[WebPushSubscription], fcm_options: PushNotifyOptions):
+def notify_subscribers(
+    *,
+    subscriptions: List[WebPushSubscription],
+    title: str,
+    body: str = '',
+    tag: str = '',
+    url: str = '',
+    image_url: str = '',
+):
+    print('NOTIFYING!', title, body, url)
+
     success_count = 0
     error_count = 0
     for subscription in subscriptions:
@@ -26,20 +35,20 @@ def notify_subscribers(*, subscriptions: List[WebPushSubscription], fcm_options:
         }
 
         payload = {
-            "title": fcm_options['message_title'],
+            "title": title,
         }
 
-        if 'body' in fcm_options:
-            payload['body'] = fcm_options['message_body'],
+        if body:
+            payload['body'] = body
 
-        if 'click_action' in fcm_options:
-            payload['url'] = fcm_options['click_action']
+        if url:
+            payload['url'] = url
 
-        if 'tag' in fcm_options:
-            payload['tag'] = fcm_options['tag']
+        if tag:
+            payload['tag'] = tag
 
-        if 'image_url' in fcm_options:
-            payload['image_url'] = fcm_options['image_url']
+        if image_url:
+            payload['image_url'] = image_url
 
         try:
             webpush(

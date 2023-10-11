@@ -31,7 +31,10 @@ class WebPushTests(TestCase):
         with patch('karrot.subscriptions.web_push.webpush', side_effect=mock_webpush) as webpush:
             subscriptions = [*valid, *invalid]
             shuffle(subscriptions)
-            notify_subscribers(subscriptions=subscriptions, fcm_options={'message_title': 'hey'})
+            notify_subscribers(
+                subscriptions=subscriptions,
+                title='Hey',
+            )
 
         self.assertEqual(WebPushSubscription.objects.filter(id__in=[entry.id for entry in valid]).count(), len(valid))
         self.assertEqual(WebPushSubscription.objects.filter(id__in=[entry.id for entry in invalid]).count(), 0)
@@ -55,9 +58,7 @@ class WebPushNotifySubscribersTests(TestCase):
 
             notify_subscribers(
                 subscriptions=subscriptions,
-                fcm_options={
-                    'message_title': 'heya',
-                },
+                title='heya',
             )
 
             self.assertEqual(len(webpush.call_args_list), len(subscriptions))

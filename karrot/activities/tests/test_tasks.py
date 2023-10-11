@@ -34,7 +34,7 @@ def group_timezone_at(group, **kwargs):
             yield
 
 
-@patch('karrot.activities.tasks.notify_subscribers_by_device')
+@patch('karrot.activities.tasks.notify_subscribers')
 class TestActivityReminderTask(TestCase):
     def setUp(self):
         self.user = VerifiedUserFactory()
@@ -45,11 +45,11 @@ class TestActivityReminderTask(TestCase):
         with mute_signals(post_save):
             self.subscriptions = [WebPushSubscriptionFactory(user=self.user)]
 
-    def test_activity_reminder_notifies_subscribers(self, notify_subscribers_by_device):
+    def test_activity_reminder_notifies_subscribers(self, notify_subscribers):
         participant = self.activity.add_participant(self.user)
-        notify_subscribers_by_device.reset_mock()
+        notify_subscribers.reset_mock()
         tasks.activity_reminder.call_local(participant.id)
-        args, kwargs = notify_subscribers_by_device.call_args
+        args, kwargs = notify_subscribers.call_args
         self.assertEqual(len(args[0]), 1)
         self.assertEqual(args[0].first(), self.subscriptions[0])
         self.assertIn(
@@ -65,13 +65,13 @@ class TestActivityReminderTask(TestCase):
             kwargs['fcm_options']['message_body'],
         )
 
-    def test_does_not_send_for_disabled_activity(self, notify_subscribers_by_device):
+    def test_does_not_send_for_disabled_activity(self, notify_subscribers):
         self.activity.is_disabled = True
         self.activity.save()
         participant = self.activity.add_participant(self.user)
-        notify_subscribers_by_device.reset_mock()
+        notify_subscribers.reset_mock()
         tasks.activity_reminder.call_local(participant.id)
-        self.assertEqual(notify_subscribers_by_device.call_count, 0)
+        self.assertEqual(notify_subscribers.call_count, 0)
 
 
 class TestActivityNotificationTask(APITestCase):

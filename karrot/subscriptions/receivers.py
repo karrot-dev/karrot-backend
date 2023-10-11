@@ -44,7 +44,7 @@ from karrot.status.helpers import unseen_notification_count, unread_conversation
     get_feedback_possible, ongoing_issues
 from karrot.subscriptions import tasks
 from karrot.subscriptions.models import ChannelSubscription, WebPushSubscription
-from karrot.subscriptions.tasks import notify_subscribers_by_device
+from karrot.subscriptions.tasks import notify_subscribers
 from karrot.subscriptions.utils import send_in_channel, MockRequest
 from karrot.userauth.serializers import AuthUserSerializer
 from karrot.users.serializers import UserSerializer
@@ -772,6 +772,7 @@ def push_subscription_created(sender, instance, created, **kwargs):
         return
     subscription = instance
     # send them a welcome push message!
-    notify_subscribers_by_device([subscription], fcm_options={
-        'message_title': _('Push notifications are enabled!'),
-    })
+    notify_subscribers(
+        subscriptions=[subscription],
+        title=_('Push notifications are enabled!'),
+    )
