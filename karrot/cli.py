@@ -77,6 +77,14 @@ def basedir():
     print(settings.BASE_DIR)
 
 
+@cli.command(help='generate a vapid keypair')
+def generate_vapid_keypair():
+    from karrot.subscriptions.web_push import generate_keypair
+    keypair = generate_keypair()
+    for k in keypair:
+        print(f"{k}={keypair[k]}")
+
+
 @cli.command(help='show the effective config')
 def config():
     for key, value in get_options().items():

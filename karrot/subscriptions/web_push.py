@@ -2,7 +2,9 @@ from typing import List
 
 from django.conf import settings
 from orjson import orjson
+from py_vapid import Vapid, b64urlencode
 from pywebpush import webpush, WebPushException
+from cryptography.hazmat.primitives import serialization
 
 from karrot.subscriptions.models import WebPushSubscription
 from karrot.subscriptions.stats import pushed_via_web_push
@@ -66,3 +68,25 @@ def notify_subscribers(
                 raise ex
 
     pushed_via_web_push(success_count, error_count)
+
+
+def generate_keypair():
+    vapid = Vapid()
+    vapid.generate_keys()
+    return {
+        "VAPID_PRIVATE_KEY":
+        b64urlencode(
+            vapid.private_key.private_bytes(
+                encoding=serialization.Encoding.DER,
+                format=serialization.PrivateFormat.PKCS8,
+                encryption_algorithm=serialization.NoEncryption(),
+            )
+        ),
+        "VAPID_PUBLIC_KEY":
+        b64urlencode(
+            vapid.public_key.public_bytes(
+                encoding=serialization.Encoding.X962,
+                format=serialization.PublicFormat.UncompressedPoint,
+            )
+        ),
+    }

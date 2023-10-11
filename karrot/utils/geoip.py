@@ -5,10 +5,7 @@ from geoip2.errors import AddressNotFoundError
 
 try:
     geoip = GeoIP2()
-    print('geoip functionality is available')
-except GeoIP2Exception as err:
-    print('GeoIP2 error', err)
-    print('geoip functionality is not available')
+except GeoIP2Exception:
     geoip = None
 
 
