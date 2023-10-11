@@ -17,8 +17,6 @@ def notify_subscribers(
     url: str = '',
     image_url: str = '',
 ):
-    print('NOTIFYING!', title, body, url)
-
     success_count = 0
     error_count = 0
     for subscription in subscriptions:

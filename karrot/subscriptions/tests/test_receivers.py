@@ -1103,19 +1103,18 @@ class IssueReceiverTest(WSTestCase):
         self.assertEqual(len(messages['issues:issue']), 1)
 
 
-@patch('karrot.subscriptions.tasks.notify_subscribers')
+@patch('karrot.subscriptions.receivers.notify_subscribers')
 class PushWelcomeMessageTests(TestCase):
     def setUp(self):
         self.user = UserFactory()
 
     def test_sends_a_welcome_push_message(self, notify_subscribers):
-        faker.uuid4()
         subscription = WebPushSubscriptionFactory(user=self.user)
         self.assertEqual(notify_subscribers.call_count, 1)
 
         kwargs = notify_subscribers.call_args_list[0][1]
         self.assertEqual(list(kwargs['subscriptions']), [subscription])
-        self.assertEqual(kwargs['fcm_options']['message_title'], 'Push notifications are enabled!')
+        self.assertEqual(kwargs['title'], 'Push notifications are enabled!')
 
 
 @patch('karrot.subscriptions.tasks.notify_subscribers')
@@ -1148,8 +1147,8 @@ class ReceiverPushTests(TestCase):
         self.assertEqual(notify_subscribers.call_count, 1)
         kwargs = notify_subscribers.call_args_list[0][1]
         self.assertEqual(list(kwargs['subscriptions']), [self.subscription])
-        self.assertEqual(kwargs['fcm_options']['message_title'], self.author.display_name)
-        self.assertEqual(kwargs['fcm_options']['message_body'], self.content)
+        self.assertEqual(kwargs['title'], self.author.display_name)
+        self.assertEqual(kwargs['body'], self.content)
 
     def test_send_push_notification_if_active_channel_subscription(self, notify_subscribers):
         with self.captureOnCommitCallbacks(execute=True):
@@ -1176,8 +1175,8 @@ class ReceiverPushTests(TestCase):
         self.assertEqual(notify_subscribers.call_count, 1)
         kwargs = notify_subscribers.call_args_list[0][1]
         self.assertEqual(list(kwargs['subscriptions']), [self.subscription])
-        self.assertEqual(kwargs['fcm_options']['message_title'], self.author.display_name)
-        self.assertEqual(kwargs['fcm_options']['message_body'], self.content)
+        self.assertEqual(kwargs['title'], self.author.display_name)
+        self.assertEqual(kwargs['body'], self.content)
 
     def test_does_not_send_to_push_subscribers_when_not_in_conversation(self, notify_subscribers):
         with self.captureOnCommitCallbacks(execute=True):
@@ -1198,10 +1197,8 @@ class ReceiverPushTests(TestCase):
         self.assertEqual(notify_subscribers.call_count, 1)
         kwargs = notify_subscribers.call_args_list[0][1]
         self.assertEqual(list(kwargs['subscriptions']), [self.subscription])
-        self.assertEqual(
-            kwargs['fcm_options']['message_title'], '{} / {}'.format(self.place.name, self.author.display_name)
-        )
-        self.assertEqual(kwargs['fcm_options']['message_body'], content)
+        self.assertEqual(kwargs['title'], '{} / {}'.format(self.place.name, self.author.display_name))
+        self.assertEqual(kwargs['body'], content)
 
 
 @patch('karrot.subscriptions.tasks.notify_subscribers')
@@ -1232,8 +1229,8 @@ class GroupConversationReceiverPushTests(TestCase):
         self.assertEqual(notify_subscribers.call_count, 1)
         kwargs = notify_subscribers.call_args_list[0][1]
         self.assertEqual(list(kwargs['subscriptions']), [self.subscription])
-        self.assertEqual(kwargs['fcm_options']['message_title'], self.group.name + ' / ' + self.author.display_name)
-        self.assertEqual(kwargs['fcm_options']['message_body'], self.content)
+        self.assertEqual(kwargs['title'], self.group.name + ' / ' + self.author.display_name)
+        self.assertEqual(kwargs['body'], self.content)
 
 
 class TrustReceiverTest(WSTestCase):

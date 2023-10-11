@@ -50,19 +50,20 @@ class TestActivityReminderTask(TestCase):
         notify_subscribers.reset_mock()
         tasks.activity_reminder.call_local(participant.id)
         args, kwargs = notify_subscribers.call_args
-        self.assertEqual(len(args[0]), 1)
-        self.assertEqual(args[0].first(), self.subscriptions[0])
+        subscriptions = kwargs['subscriptions']
+        self.assertEqual(len(subscriptions), 1)
+        self.assertEqual(subscriptions[0], self.subscriptions[0])
         self.assertIn(
             f'/group/{self.group.id}/place/{self.place.id}/activities/{self.activity.id}/detail',
-            kwargs['click_action'],
+            kwargs['url'],
         )
         self.assertIn(
             'Upcoming {}'.format(self.activity.activity_type.name),
-            kwargs['fcm_options']['message_title'],
+            kwargs['title'],
         )
         self.assertIn(
             self.place.name,
-            kwargs['fcm_options']['message_body'],
+            kwargs['body'],
         )
 
     def test_does_not_send_for_disabled_activity(self, notify_subscribers):
