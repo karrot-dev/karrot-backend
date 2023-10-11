@@ -57,7 +57,7 @@ msgstr ""
 msgid "Upcoming %(activity_type)s"
 msgstr ""
 
-#: karrot/activities/tasks.py:166
+#: karrot/activities/tasks.py:164
 #, python-format
 msgid "%(activity_type)s no longer available - %(date_time)s"
 msgstr ""
@@ -767,7 +767,7 @@ msgstr ""
 msgid "You are already subscribed to this place"
 msgstr ""
 
-#: karrot/subscriptions/receivers.py:776
+#: karrot/subscriptions/receivers.py:777
 msgid "Push notifications are enabled!"
 msgstr ""
 

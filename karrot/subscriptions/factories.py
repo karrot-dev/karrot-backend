@@ -1,17 +1,20 @@
-import random
-
 from factory import LazyAttribute, SubFactory
 from factory.django import DjangoModelFactory
 
-from karrot.subscriptions.models import PushSubscription, PushSubscriptionPlatform
+from karrot.subscriptions.models import WebPushSubscription
 from karrot.users.factories import UserFactory
 from karrot.utils.tests.fake import faker
 
 
-class PushSubscriptionFactory(DjangoModelFactory):
+class WebPushSubscriptionFactory(DjangoModelFactory):
     class Meta:
-        model = PushSubscription
+        model = WebPushSubscription
 
     user = SubFactory(UserFactory)
-    token = LazyAttribute(lambda x: faker.uuid4())
-    platform = LazyAttribute(lambda x: random.choice(list(PushSubscriptionPlatform)).value)
+    endpoint = LazyAttribute(lambda x: faker.url())
+    keys = LazyAttribute(lambda x: {'auth': faker.uuid4(), 'p256dh': faker.uuid4()})
+
+    mobile = False
+    browser = "firefox"
+    version = "1.0"
+    os = "linux"

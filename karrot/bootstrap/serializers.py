@@ -19,13 +19,6 @@ class GeoSerializer(serializers.Serializer):
     timezone = serializers.CharField()
 
 
-class FCMClientConfigSerializer(serializers.Serializer):
-    api_key = serializers.CharField()
-    messaging_sender_id = serializers.CharField()
-    project_id = serializers.CharField()
-    app_id = serializers.CharField()
-
-
 class SentryClientConfigSerializer(serializers.Serializer):
     dsn = serializers.CharField()
     environment = serializers.CharField()
@@ -40,12 +33,16 @@ class ForumConfigSerializer(serializers.Serializer):
     discussions_feed = serializers.CharField()
 
 
+class WebPushConfigSerializer(serializers.Serializer):
+    vapid_public_key = serializers.CharField()
+
+
 class ConfigSerializer(serializers.Serializer):
-    fcm = FCMClientConfigSerializer()
     sentry = SentryClientConfigSerializer()
     upload = UploadConfigSerializer()
     forum = ForumConfigSerializer()
     feedback_possible_days = serializers.IntegerField()
+    web_push = WebPushConfigSerializer()
 
 
 class BootstrapSerializer(serializers.Serializer):

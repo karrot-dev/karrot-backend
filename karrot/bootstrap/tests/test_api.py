@@ -14,25 +14,19 @@ from karrot.utils.tests.fake import faker
 DEFAULT_SETTINGS = {
     'SENTRY_CLIENT_DSN': settings.SENTRY_CLIENT_DSN,
     'SENTRY_ENVIRONMENT': settings.SENTRY_ENVIRONMENT,
-    'FCM_CLIENT_API_KEY': settings.FCM_CLIENT_API_KEY,
-    'FCM_CLIENT_MESSAGING_SENDER_ID': settings.FCM_CLIENT_MESSAGING_SENDER_ID,
-    'FCM_CLIENT_PROJECT_ID': settings.FCM_CLIENT_PROJECT_ID,
-    'FCM_CLIENT_APP_ID': settings.FCM_CLIENT_APP_ID,
     'FILE_UPLOAD_MAX_SIZE': settings.FILE_UPLOAD_MAX_SIZE,
     'FORUM_BANNER_TOPIC_ID': settings.FORUM_BANNER_TOPIC_ID,
     'FORUM_DISCUSSIONS_FEED': settings.FORUM_DISCUSSIONS_FEED,
+    'VAPID_PUBLIC_KEY': settings.VAPID_PUBLIC_KEY,
 }
 
 OVERRIDE_SETTINGS = {
     'SENTRY_CLIENT_DSN': faker.name(),
     'SENTRY_ENVIRONMENT': faker.name(),
-    'FCM_CLIENT_API_KEY': faker.name(),
-    'FCM_CLIENT_MESSAGING_SENDER_ID': faker.name(),
-    'FCM_CLIENT_PROJECT_ID': faker.name(),
-    'FCM_CLIENT_APP_ID': faker.name(),
     'FILE_UPLOAD_MAX_SIZE': 12345,
     'FORUM_BANNER_TOPIC_ID': 444,
     'FORUM_DISCUSSIONS_FEED': 'something/else.json',
+    'VAPID_PUBLIC_KEY': faker.uuid4(),
 }
 
 
@@ -42,12 +36,6 @@ class TestConfigAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.data, {
-                'fcm': {
-                    'api_key': DEFAULT_SETTINGS['FCM_CLIENT_API_KEY'],
-                    'messaging_sender_id': DEFAULT_SETTINGS['FCM_CLIENT_MESSAGING_SENDER_ID'],
-                    'project_id': DEFAULT_SETTINGS['FCM_CLIENT_PROJECT_ID'],
-                    'app_id': DEFAULT_SETTINGS['FCM_CLIENT_APP_ID'],
-                },
                 'sentry': {
                     'dsn': DEFAULT_SETTINGS['SENTRY_CLIENT_DSN'],
                     'environment': DEFAULT_SETTINGS['SENTRY_ENVIRONMENT'],
@@ -60,6 +48,9 @@ class TestConfigAPI(APITestCase):
                     'discussions_feed': DEFAULT_SETTINGS['FORUM_DISCUSSIONS_FEED'],
                 },
                 'feedback_possible_days': 30,
+                'web_push': {
+                    'vapid_public_key': DEFAULT_SETTINGS['VAPID_PUBLIC_KEY'],
+                },
             }, response.data
         )
 
@@ -69,12 +60,6 @@ class TestConfigAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.data, {
-                'fcm': {
-                    'api_key': OVERRIDE_SETTINGS['FCM_CLIENT_API_KEY'],
-                    'messaging_sender_id': OVERRIDE_SETTINGS['FCM_CLIENT_MESSAGING_SENDER_ID'],
-                    'project_id': OVERRIDE_SETTINGS['FCM_CLIENT_PROJECT_ID'],
-                    'app_id': OVERRIDE_SETTINGS['FCM_CLIENT_APP_ID'],
-                },
                 'sentry': {
                     'dsn': OVERRIDE_SETTINGS['SENTRY_CLIENT_DSN'],
                     'environment': OVERRIDE_SETTINGS['SENTRY_ENVIRONMENT'],
@@ -87,6 +72,9 @@ class TestConfigAPI(APITestCase):
                     'discussions_feed': OVERRIDE_SETTINGS['FORUM_DISCUSSIONS_FEED'],
                 },
                 'feedback_possible_days': 30,
+                'web_push': {
+                    'vapid_public_key': OVERRIDE_SETTINGS['VAPID_PUBLIC_KEY'],
+                },
             }, response.data
         )
 

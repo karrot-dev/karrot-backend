@@ -103,6 +103,12 @@ def new_offer_unsubscribe_url(user, offer):
     )
 
 
+def user_photo_url(user):
+    if not user or not user.photo:
+        return None
+    return ''.join([settings.HOSTNAME, user.photo.url])
+
+
 def group_photo_url(group):
     if not group or not group.photo:
         return None

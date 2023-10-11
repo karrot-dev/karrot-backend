@@ -43,8 +43,8 @@ from karrot.places.serializers import PlaceSerializer
 from karrot.status.helpers import unseen_notification_count, unread_conversations, pending_applications, \
     get_feedback_possible, ongoing_issues
 from karrot.subscriptions import tasks
-from karrot.subscriptions.models import ChannelSubscription, PushSubscription
-from karrot.subscriptions.tasks import notify_subscribers_by_device
+from karrot.subscriptions.models import ChannelSubscription, WebPushSubscription
+from karrot.subscriptions.tasks import notify_subscribers
 from karrot.subscriptions.utils import send_in_channel, MockRequest
 from karrot.userauth.serializers import AuthUserSerializer
 from karrot.users.serializers import UserSerializer
@@ -766,12 +766,13 @@ def send_feedback_possible_count(user):
         send_in_channel(subscription.reply_channel, topic='status', payload=payload)
 
 
-@receiver(post_save, sender=PushSubscription)
+@receiver(post_save, sender=WebPushSubscription)
 def push_subscription_created(sender, instance, created, **kwargs):
     if not created:
         return
     subscription = instance
     # send them a welcome push message!
-    notify_subscribers_by_device([subscription], fcm_options={
-        'message_title': _('Push notifications are enabled!'),
-    })
+    notify_subscribers(
+        subscriptions=[subscription],
+        title=_('Push notifications are enabled!'),
+    )

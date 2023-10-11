@@ -21,7 +21,7 @@ from karrot.activities.tasks import daily_activity_notifications, fetch_activity
 from karrot.groups.roles import GROUP_MEMBER, GROUP_EDITOR
 from karrot.places.factories import PlaceFactory
 from karrot.places.models import PlaceStatus, PlaceSubscription
-from karrot.subscriptions.models import PushSubscription, PushSubscriptionPlatform
+from karrot.subscriptions.factories import WebPushSubscriptionFactory
 from karrot.users.factories import VerifiedUserFactory, UserFactory
 from karrot.utils.frontend_urls import place_url
 
@@ -34,7 +34,7 @@ def group_timezone_at(group, **kwargs):
             yield
 
 
-@patch('karrot.activities.tasks.notify_subscribers_by_device')
+@patch('karrot.activities.tasks.notify_subscribers')
 class TestActivityReminderTask(TestCase):
     def setUp(self):
         self.user = VerifiedUserFactory()
@@ -43,39 +43,36 @@ class TestActivityReminderTask(TestCase):
         self.place = PlaceFactory(group=self.group, subscribers=[self.user, self.other_user])
         self.activity = ActivityFactory(place=self.place)
         with mute_signals(post_save):
-            self.subscriptions = [
-                PushSubscription.objects.create(
-                    user=self.user, token='', platform=PushSubscriptionPlatform.ANDROID.value
-                )
-            ]
+            self.subscriptions = [WebPushSubscriptionFactory(user=self.user)]
 
-    def test_activity_reminder_notifies_subscribers(self, notify_subscribers_by_device):
+    def test_activity_reminder_notifies_subscribers(self, notify_subscribers):
         participant = self.activity.add_participant(self.user)
-        notify_subscribers_by_device.reset_mock()
+        notify_subscribers.reset_mock()
         tasks.activity_reminder.call_local(participant.id)
-        args, kwargs = notify_subscribers_by_device.call_args
-        self.assertEqual(len(args[0]), 1)
-        self.assertEqual(args[0].first(), self.subscriptions[0])
+        args, kwargs = notify_subscribers.call_args
+        subscriptions = kwargs['subscriptions']
+        self.assertEqual(len(subscriptions), 1)
+        self.assertEqual(subscriptions[0], self.subscriptions[0])
         self.assertIn(
             f'/group/{self.group.id}/place/{self.place.id}/activities/{self.activity.id}/detail',
-            kwargs['click_action'],
+            kwargs['url'],
         )
         self.assertIn(
             'Upcoming {}'.format(self.activity.activity_type.name),
-            kwargs['fcm_options']['message_title'],
+            kwargs['title'],
         )
         self.assertIn(
             self.place.name,
-            kwargs['fcm_options']['message_body'],
+            kwargs['body'],
         )
 
-    def test_does_not_send_for_disabled_activity(self, notify_subscribers_by_device):
+    def test_does_not_send_for_disabled_activity(self, notify_subscribers):
         self.activity.is_disabled = True
         self.activity.save()
         participant = self.activity.add_participant(self.user)
-        notify_subscribers_by_device.reset_mock()
+        notify_subscribers.reset_mock()
         tasks.activity_reminder.call_local(participant.id)
-        self.assertEqual(notify_subscribers_by_device.call_count, 0)
+        self.assertEqual(notify_subscribers.call_count, 0)
 
 
 class TestActivityNotificationTask(APITestCase):

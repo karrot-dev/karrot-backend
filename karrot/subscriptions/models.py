@@ -2,7 +2,6 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
-from enum import Enum
 
 from karrot.base.base_models import BaseModel
 
@@ -26,20 +25,15 @@ class ChannelSubscription(BaseModel):
     client_ip = models.GenericIPAddressField(null=True)
 
 
-class PushSubscriptionPlatform(Enum):
-    ANDROID = 'android'
-    WEB = 'web'
-
-
-class PushSubscription(BaseModel):
-    """A subscription to receive messages over an FCM push channel."""
-    class Meta:
-        unique_together = ('user', 'token')
-
+class WebPushSubscription(BaseModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    token = models.TextField()  # FCM device registration token
-    platform = models.CharField(
-        default=PushSubscriptionPlatform.ANDROID.value,
-        choices=[(platform.value, platform.value) for platform in PushSubscriptionPlatform],
-        max_length=100,
-    )
+
+    # subscription info
+    endpoint = models.URLField(max_length=500)
+    keys = models.JSONField()
+
+    # extra info
+    mobile = models.BooleanField()
+    browser = models.CharField()
+    version = models.CharField()
+    os = models.CharField()

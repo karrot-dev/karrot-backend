@@ -13,7 +13,8 @@ from karrot.groups.factories import GroupFactory
 from karrot.activities.factories import ActivityFactory
 from karrot.activities.models import to_range
 from karrot.places.factories import PlaceFactory
-from karrot.subscriptions.models import PushSubscription, PushSubscriptionPlatform
+from karrot.subscriptions.factories import WebPushSubscriptionFactory
+from karrot.subscriptions.models import WebPushSubscription
 from karrot.subscriptions.tasks import get_message_title, notify_message_push_subscribers
 from karrot.users.factories import UserFactory
 
@@ -28,9 +29,7 @@ class TestMessagePushNotifications(TestCase):
         message = conversation.messages.create(author=author, content='bla')
 
         with mute_signals(post_save):
-            subscriptions = [
-                PushSubscription.objects.create(user=user, token='', platform=PushSubscriptionPlatform.ANDROID.value)
-            ]
+            subscriptions = [WebPushSubscriptionFactory(user=user)]
 
         notify.reset_mock()
         notify_message_push_subscribers(message)
@@ -46,11 +45,7 @@ class TestMessagePushNotifications(TestCase):
             author=reply_author, conversation=conversation, thread=message, content='reply'
         )
         with mute_signals(post_save):
-            subscriptions = [
-                PushSubscription.objects.create(
-                    user=author, token='', platform=PushSubscriptionPlatform.ANDROID.value
-                )
-            ]
+            subscriptions = [WebPushSubscriptionFactory(user=author)]
 
         notify.reset_mock()
         notify_message_push_subscribers(reply)
@@ -64,10 +59,7 @@ class TestMessagePushNotifications(TestCase):
         message = conversation.messages.create(author=author, content='bla')
 
         with mute_signals(post_save):
-            subscriptions = [
-                PushSubscription.objects.create(user=u, token='', platform=PushSubscriptionPlatform.ANDROID.value)
-                for u in users
-            ]
+            subscriptions = [WebPushSubscriptionFactory(user=u) for u in users]
 
         notify.reset_mock()
         notify_message_push_subscribers(message)
@@ -89,7 +81,7 @@ class TestMessagePushNotifications(TestCase):
         participant.muted = True
         participant.save()
         with mute_signals(post_save):
-            PushSubscription.objects.create(user=user, token='', platform=PushSubscriptionPlatform.ANDROID.value)
+            WebPushSubscriptionFactory(user=user)
 
         notify.reset_mock()
         notify_message_push_subscribers(message)
@@ -109,7 +101,7 @@ class TestMessagePushNotifications(TestCase):
         participant.muted = True
         participant.save()
         with mute_signals(post_save):
-            PushSubscription.objects.create(user=author, token='', platform=PushSubscriptionPlatform.ANDROID.value)
+            WebPushSubscription(user=author)
 
         notify.reset_mock()
         notify_message_push_subscribers(reply)

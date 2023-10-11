@@ -17,8 +17,8 @@ from karrot.activities.emails import prepare_activity_notification_email, \
 from karrot.activities.models import Activity, ActivitySeries, ActivityParticipant, ParticipantType, ActivityType
 from karrot.groups.models import Group, GroupMembership, GroupNotificationType
 from karrot.places.models import PlaceStatus, Place
-from karrot.subscriptions.models import PushSubscription
-from karrot.subscriptions.tasks import notify_subscribers_by_device
+from karrot.subscriptions.models import WebPushSubscription
+from karrot.subscriptions.tasks import notify_subscribers
 from karrot.users.models import User
 from karrot.utils import stats_utils, frontend_urls
 from karrot.utils.stats_utils import timer
@@ -51,7 +51,7 @@ def activity_reminder(participant_id):
         if is_past(activity.date.start):
             return
 
-        subscriptions = PushSubscription.objects.filter(user=user)
+        subscriptions = WebPushSubscription.objects.filter(user=user)
         if subscriptions.count() == 0:
             return
 
@@ -81,14 +81,12 @@ def activity_reminder(participant_id):
 
         click_action = frontend_urls.activity_detail_url(activity)
 
-        notify_subscribers_by_device(
-            subscriptions,
-            click_action=click_action,
-            fcm_options={
-                'message_title': title,
-                'message_body': body,
-                'tag': 'activity:{}'.format(activity.id),
-            }
+        notify_subscribers(
+            subscriptions=subscriptions,
+            title=title,
+            body=body,
+            url=click_action,
+            tag='activity:{}'.format(activity.id),
         )
 
 
@@ -155,7 +153,7 @@ def notify_participant_removals(
                     },
                 )
 
-                subscriptions = PushSubscription.objects.filter(user=user)
+                subscriptions = WebPushSubscription.objects.filter(user=user)
                 activity_type_name = activity['activity_type'].get_translated_name()
                 formatted_date_time = format_datetime(
                     activity['date'].start,
@@ -169,13 +167,11 @@ def notify_participant_removals(
                 }
                 body = removed_by.display_name + ':' + Truncator(message).chars(num=1000)
                 if subscriptions.count() > 0:
-                    notify_subscribers_by_device(
-                        subscriptions,
-                        click_action=frontend_urls.history_url(history_id),
-                        fcm_options={
-                            'message_title': title,
-                            'message_body': body,
-                        }
+                    notify_subscribers(
+                        subscriptions=subscriptions,
+                        title=title,
+                        body=body,
+                        url=frontend_urls.history_url(history_id),
                     )
 
 

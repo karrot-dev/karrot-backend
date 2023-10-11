@@ -28,7 +28,7 @@ from karrot.activities.api import ActivityViewSet, ActivitySeriesViewSet, Feedba
 from karrot.places.api import PlaceViewSet, PlaceTypeViewSet
 from karrot.stats.api import FrontendStatsView, ActivityHistoryStatsViewSet
 from karrot.status.api import StatusView
-from karrot.subscriptions.api import PushSubscriptionViewSet
+from karrot.subscriptions.api import WebPushSubscriptionViewSet
 from karrot.template_previews import views as template_preview_views
 from karrot.unsubscribe.api import TokenUnsubscribeView, UnsubscribeViewSet
 from karrot.userauth.api import AuthUserView, AuthView, LogoutView, \
@@ -68,7 +68,7 @@ router.register('attachments', AttachmentViewSet)
 router.register('notifications', NotificationViewSet)
 
 # Subscription endpoints
-router.register('subscriptions/push', PushSubscriptionViewSet)
+router.register('subscriptions/web-push', WebPushSubscriptionViewSet)
 
 # Offer endpoints
 router.register('offers', OfferViewSet)
@@ -115,7 +115,7 @@ urlpatterns = [
     path('docs/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/anymail/', include('anymail.urls')),
-    path('silk/', include('silk.urls', namespace='silk'))
+    path('silk/', include('silk.urls', namespace='silk')),
 ]
 
 if settings.DEBUG:

@@ -3,14 +3,13 @@ from itertools import groupby
 from babel.dates import format_date, format_time
 from django.utils import timezone, translation
 from django.utils.text import Truncator
-from furl import furl
 from huey import crontab
 from huey.contrib.djhuey import db_task, db_periodic_task
 
 from karrot.applications.models import ApplicationStatus
 from karrot.groups.models import GroupMembership, GroupNotificationType
-from karrot.subscriptions.fcm import notify_subscribers
-from karrot.subscriptions.models import PushSubscription, PushSubscriptionPlatform, ChannelSubscription
+from karrot.subscriptions.models import ChannelSubscription, WebPushSubscription
+from karrot.subscriptions.web_push import notify_subscribers
 from karrot.utils import frontend_urls, stats_utils
 from karrot.utils.stats_utils import timer
 
@@ -18,17 +17,18 @@ from karrot.utils.stats_utils import timer
 @db_task()
 def notify_message_push_subscribers(message):
     if message.is_thread_reply():
-        subscriptions = PushSubscription.objects.filter(
+        subscriptions = WebPushSubscription.objects.filter(
             user__conversationthreadparticipant__thread=message.thread,
             user__conversationthreadparticipant__muted=False,
         )
     else:
-        subscriptions = PushSubscription.objects.filter(
+        subscriptions = WebPushSubscription.objects.filter(
             user__conversationparticipant__conversation=message.conversation,
             user__conversationparticipant__muted=False,
         )
 
-    subscriptions = subscriptions.exclude(user=message.author).\
+    subscriptions = subscriptions.\
+        exclude(user=message.author).\
         select_related('user').\
         order_by('user__language').\
         distinct()
@@ -114,16 +114,15 @@ def notify_message_push_subscribers_with_language(message, subscriptions, langua
     with translation.override(language):
         message_title = get_message_title(message, language)
 
-    notify_subscribers_by_device(
-        subscriptions,
-        click_action=frontend_urls.message_url(message),
-        fcm_options={
-            'message_title': message_title,
-            'message_body': Truncator(message.content).chars(num=1000),
-            # this causes each notification for a given conversation to replace previous notifications
-            # fancier would be to make the new notifications show a summary not just the latest message
-            'tag': 'conversation:{}'.format(conversation.id),
-        }
+    notify_subscribers(
+        subscriptions=subscriptions,
+        title=message_title,
+        body=Truncator(message.content).chars(num=1000),
+        url=frontend_urls.message_url(message),
+        image_url=frontend_urls.user_photo_url(message.author),
+        # this causes each notification for a given conversation to replace previous notifications
+        # fancier would be to make the new notifications show a summary not just the latest message
+        tag='conversation:{}'.format(conversation.id),
     )
 
 
@@ -137,7 +136,9 @@ def notify_mention_push_subscribers(mention):
     if conversation.conversationparticipant_set.filter(user=user).exists():
         return
 
-    notify_message_push_subscribers_with_language(message, PushSubscription.objects.filter(user=user), user.language)
+    notify_message_push_subscribers_with_language(
+        message, WebPushSubscription.objects.filter(user=user), user.language
+    )
 
 
 @db_task()
@@ -147,7 +148,7 @@ def notify_new_offer_push_subscribers(offer):
         groupmembership__in=GroupMembership.objects.active().with_notification_type(GroupNotificationType.NEW_OFFER),
     )
 
-    subscriptions = PushSubscription.objects.filter(
+    subscriptions = WebPushSubscription.objects.filter(
         user__in=users,
     ).\
         exclude(user=offer.user). \
@@ -167,59 +168,15 @@ def notify_new_offer_push_subscribers_with_language(offer, subscriptions, langua
     with translation.override(language):
         message_title = '🎁️ {} / {}'.format(offer.name, offer.user.display_name)
 
-    notify_subscribers_by_device(
-        subscriptions,
-        click_action=frontend_urls.offer_url(offer),
-        fcm_options={
-            'message_title': message_title,
-            'message_body': Truncator(offer.description).chars(num=1000),
-            # this causes each notification for a given conversation to replace previous notifications
-            # fancier would be to make the new notifications show a summary not just the latest message
-            'tag': 'offer:{}'.format(offer.id),
-        },
+    notify_subscribers(
+        subscriptions=subscriptions,
+        title=message_title,
+        body=Truncator(offer.description).chars(num=1000),
+        url=frontend_urls.offer_url(offer),
+        # this causes each notification for a given conversation to replace previous notifications
+        # fancier would be to make the new notifications show a summary not just the latest message
+        tag='offer:{}'.format(offer.id),
     )
-
-
-def notify_subscribers_by_device(subscriptions, *, click_action=None, fcm_options):
-    android_subscriptions = [s for s in subscriptions if s.platform == PushSubscriptionPlatform.ANDROID.value]
-    web_subscriptions = [s for s in subscriptions if s.platform == PushSubscriptionPlatform.WEB.value]
-
-    def get_android_click_action_options():
-        if not click_action:
-            return {}
-        return {
-            # according to https://github.com/fechanique/cordova-plugin-fcm#send-notification-payload-example-rest-api
-            'click_action': 'FCM_PLUGIN_ACTIVITY',
-            'data_message': {
-                # we send the route as data - the frontend takes care of the actual routing
-                'karrot_route': str(furl(click_action).fragment),
-            },
-        }
-
-    def get_web_click_action_options():
-        if not click_action:
-            return {}
-        return {
-            'click_action': click_action,
-        }
-
-    if android_subscriptions:
-        notify_subscribers(
-            subscriptions=android_subscriptions, fcm_options={
-                **fcm_options,
-                **get_android_click_action_options(),
-            }
-        )
-
-    if web_subscriptions:
-        # getting this error with firefox at the moment https://github.com/firebase/firebase-js-sdk/issues/6523
-        # TODO: maybe switch to web push directly, not via fcm... (and just use fcm for android)
-        notify_subscribers(
-            subscriptions=web_subscriptions, fcm_options={
-                **fcm_options,
-                **get_web_click_action_options(),
-            }
-        )
 
 
 @db_periodic_task(crontab(hour='*/24', minute=35))  # every 24 hours
