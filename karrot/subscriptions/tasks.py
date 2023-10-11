@@ -27,7 +27,8 @@ def notify_message_push_subscribers(message):
             user__conversationparticipant__muted=False,
         )
 
-    subscriptions = subscriptions.exclude(user=message.author).\
+    subscriptions = subscriptions.\
+        exclude(user=message.author).\
         select_related('user').\
         order_by('user__language').\
         distinct()
