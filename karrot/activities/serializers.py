@@ -30,11 +30,17 @@ from karrot.history.models import History, HistoryTypus
 from karrot.activities import stats
 from karrot.activities.models import (
     Activity as ActivityModel, Feedback as FeedbackModel, ActivitySeries as ActivitySeriesModel, ActivityType,
-    ActivityParticipant, ParticipantType, SeriesParticipantType, default_duration, Activity
+    ActivityParticipant, ParticipantType, SeriesParticipantType, default_duration, Activity, FeedbackNoShow
 )
 from karrot.utils.date_utils import csv_datetime
 from karrot.utils.misc import find_changed, is_prefetched
 from karrot.places.serializers import PublicPlaceSerializer
+
+
+class FeedbackNoShowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FeedbackNoShow
+        fields = ['user']
 
 
 class FeedbackSerializer(serializers.ModelSerializer):
@@ -48,6 +54,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
             'given_by',
             'created_at',
             'is_editable',
+            'no_shows',
         ]
         read_only_fields = ['given_by', 'created_at']
         extra_kwargs = {'given_by': {'default': serializers.CurrentUserDefault()}}

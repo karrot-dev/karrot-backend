@@ -547,6 +547,17 @@ class Feedback(BaseModel):
         unique_together = ('about', 'given_by')
 
 
+class FeedbackNoShow(BaseModel):
+    feedback = models.ForeignKey(
+        Feedback,
+        on_delete=models.CASCADE,
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+
+
 class ICSAuthToken(NicelyFormattedModel):
     token = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField('users.User', on_delete=models.CASCADE)
