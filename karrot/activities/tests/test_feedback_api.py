@@ -10,7 +10,7 @@ from rest_framework.test import APITestCase
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupStatus
 from karrot.places.factories import PlaceFactory
-from karrot.activities.models import Feedback, to_range
+from karrot.activities.models import Feedback, to_range, FeedbackNoShow
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import UserFactory
 from karrot.activities.factories import ActivityFactory, FeedbackFactory, ActivityTypeFactory
@@ -26,15 +26,24 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         cls.participant = UserFactory()
         cls.participant2 = UserFactory()
         cls.participant3 = UserFactory()
+        cls.participant4 = UserFactory()
         cls.evil_participant = UserFactory()
+        cls.non_participant = UserFactory()
         cls.group = GroupFactory(
-            members=[cls.member, cls.participant, cls.evil_participant, cls.participant2, cls.participant3]
+            members=[
+                cls.member, cls.participant, cls.evil_participant, cls.participant2, cls.participant3,
+                cls.non_participant
+            ]
         )
         cls.place = PlaceFactory(group=cls.group)
         cls.activity = ActivityFactory(
             place=cls.place,
             date=to_range(timezone.now() + relativedelta(days=1)),
-            participants=[cls.participant, cls.participant2, cls.participant3],
+            participants=[
+                cls.participant,
+                cls.participant2,
+                cls.participant3,
+            ],
         )
 
         activity_type_without_feedback_weight = ActivityTypeFactory(
@@ -56,7 +65,13 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         cls.past_activity = ActivityFactory(
             place=cls.place,
             date=to_range(timezone.now() - relativedelta(days=1)),
-            participants=[cls.participant, cls.evil_participant, cls.participant2, cls.participant3],
+            participants=[
+                cls.participant,
+                cls.evil_participant,
+                cls.participant2,
+                cls.participant3,
+                cls.participant4,
+            ],
         )
 
         # old activity with feedback
@@ -303,7 +318,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         Member is allowed to see list of feedback
         """
         self.client.force_login(user=self.member)
-        with self.assertNumQueries(7):
+        with self.assertNumQueries(8):
             response = self.get_results(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         feedback = response.data['feedback']
@@ -478,3 +493,64 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         response = self.client.patch(self.feedback_url, {'comment': '', 'weight': None}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(response.data, {'non_field_errors': ['Both comment and weight cannot be blank.']})
+
+    def test_post_no_shows(self):
+        self.client.force_login(user=self.participant3)
+        qs = FeedbackNoShow.objects.filter(user=self.participant2.id, feedback__about=self.feedback_post['about'])
+        self.assertEqual(qs.count(), 0)
+        response = self.client.post(
+            self.url, {
+                **self.feedback_post, 'no_shows': [{
+                    'user': self.participant2.id
+                }]
+            }, format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.assertEqual(qs.count(), 1)
+
+    def test_update_no_shows(self):
+        self.client.force_login(user=self.participant)
+
+        # Give it two initial no-show entries, one of which we'll keep, one we'll remove
+        FeedbackNoShow.objects.create(feedback=self.feedback, user=self.participant2)
+        FeedbackNoShow.objects.create(feedback=self.feedback, user=self.participant3)
+
+        response = self.client.get(self.feedback_url)
+        self.assertEqual(
+            response.data['no_shows'], [
+                {
+                    'user': self.participant2.id
+                },
+                {
+                    'user': self.participant3.id
+                },
+            ]
+        )
+
+        response = self.client.patch(
+            self.feedback_url, {'no_shows': [
+                {
+                    'user': self.participant3.id
+                },
+                {
+                    'user': self.participant4.id
+                },
+            ]},
+            format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data['no_shows'], [{'user': self.participant3.id}, {'user': self.participant4.id}])
+
+    def test_cannot_record_non_participants_as_no_show(self):
+        self.client.force_login(user=self.participant3)
+        response = self.client.post(
+            self.url, {
+                **self.feedback_post, 'no_shows': [
+                    {
+                        'user': self.non_participant.id
+                    },
+                ]
+            }, format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)

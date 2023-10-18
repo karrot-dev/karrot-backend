@@ -551,6 +551,7 @@ class FeedbackNoShow(BaseModel):
     feedback = models.ForeignKey(
         Feedback,
         on_delete=models.CASCADE,
+        related_name='no_shows',
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
