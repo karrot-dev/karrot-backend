@@ -25,3 +25,5 @@ shiv --output-file="$output_filename" \
      --entry-point=karrot.cli:run \
      --preamble=scripts/shiv-cleanup.py \
      --no-deps .
+
+sha256sum "$output_filename" > "$output_filename.sha256"

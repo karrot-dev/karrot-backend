@@ -101,7 +101,7 @@ jobs:
             if [[ "$CIRCLE_BRANCH" = "master" ]] || [[ "$CIRCLE_BRANCH" = "production" ]]; then
               export FILENAME="karrot-backend-$(echo ${CIRCLE_TAG:-$CIRCLE_BRANCH} | sed 's/[^a-zA-Z0-9.-]/-/g').pyz"
               ./scripts/build "$FILENAME"
-              rsync -e "ssh -o StrictHostKeyChecking=no" -av "$FILENAME" "$RSYNC_DESTINATION"
+              rsync -e "ssh -o StrictHostKeyChecking=no" -av "$FILENAME"* "$RSYNC_DESTINATION"
             else
               echo "Skipping build for ${CIRCLE_TAG:-$CIRCLE_BRANCH}"
             fi
