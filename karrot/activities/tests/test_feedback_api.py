@@ -542,6 +542,22 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data['no_shows'], [{'user': self.participant3.id}, {'user': self.participant4.id}])
 
+    def test_can_remove_all_no_shows(self):
+        self.client.force_login(user=self.participant)
+        FeedbackNoShow.objects.create(feedback=self.feedback, user=self.participant2)
+        FeedbackNoShow.objects.create(feedback=self.feedback, user=self.participant3)
+        response = self.client.patch(self.feedback_url, {'no_shows': []}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data['no_shows'], [])
+
+    def test_no_shows_is_optional(self):
+        self.client.force_login(user=self.participant)
+        FeedbackNoShow.objects.create(feedback=self.feedback, user=self.participant2)
+        FeedbackNoShow.objects.create(feedback=self.feedback, user=self.participant3)
+        response = self.client.patch(self.feedback_url, {'comment': 'updated'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data['no_shows']), 2)
+
     def test_cannot_record_non_participants_as_no_show(self):
         self.client.force_login(user=self.participant3)
         response = self.client.post(

@@ -79,7 +79,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
     def update(self, feedback, validated_data):
         no_shows = validated_data.pop('no_shows', None)
         feedback = super().update(feedback, validated_data)
-        if no_shows:
+        if no_shows is not None:
             existing_no_shows = list(feedback.no_shows.all())
             for no_show in no_shows:
                 existing_no_show = None
