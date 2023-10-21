@@ -217,6 +217,7 @@ MIDDLEWARE = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'karrot.utils.extend_session_middleware.ExtendSessionMiddleware',
 )
 
 ROOT_URLCONF = 'config.urls'
