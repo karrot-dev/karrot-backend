@@ -24,10 +24,10 @@ class TestConvertActivityToRangeMigration(TestMigrations):
         ('activities', '0011_activity_migrate_to_date_range'),
     ]
 
-    def setUpBeforeMigration(self, apps):
-        Group = apps.get_model('groups', 'Group')
-        Place = apps.get_model('places', 'Place')
-        Activity = apps.get_model('activities', 'Activity')
+    def setUpBeforeMigration(self):
+        Group = self.apps.get_model('groups', 'Group')
+        Place = self.apps.get_model('places', 'Place')
+        Activity = self.apps.get_model('activities', 'Activity')
         group = Group.objects.create(name=faker.name())
         place = Place.objects.create(name=faker.name(), group=group)
         activity = Activity.objects.create(place=place, date=timezone.now())
@@ -55,14 +55,14 @@ class TestConvertWeightIntoSumMigration(TestMigrations):
         ('activities', '0020_activity_feedback_always_as_sum'),
     ]
 
-    def setUpBeforeMigration(self, apps):
-        User = apps.get_model('users', 'User')
-        Group = apps.get_model('groups', 'Group')
-        GroupMembership = apps.get_model('groups', 'GroupMembership')
-        Place = apps.get_model('places', 'Place')
-        Activity = apps.get_model('activities', 'Activity')
-        ActivityParticipant = apps.get_model('activities', 'ActivityParticipant')
-        Feedback = apps.get_model('activities', 'Feedback')
+    def setUpBeforeMigration(self):
+        User = self.apps.get_model('users', 'User')
+        Group = self.apps.get_model('groups', 'Group')
+        GroupMembership = self.apps.get_model('groups', 'GroupMembership')
+        Place = self.apps.get_model('places', 'Place')
+        Activity = self.apps.get_model('activities', 'Activity')
+        ActivityParticipant = self.apps.get_model('activities', 'ActivityParticipant')
+        Feedback = self.apps.get_model('activities', 'Feedback')
         group = Group.objects.create(name=faker.name())
         place = Place.objects.create(name=faker.name(), group=group)
         activity1 = Activity.objects.create(place=place, date=to_range(timezone.now()), feedback_as_sum=False)
@@ -123,11 +123,11 @@ class TestSetActivityTypes(TestMigrations):
         ('activities', '0023_create_and_set_activity_types'),
     ]
 
-    def setUpBeforeMigration(self, apps):
-        Group = apps.get_model('groups', 'Group')
-        Place = apps.get_model('places', 'Place')
-        Activity = apps.get_model('activities', 'Activity')
-        ActivitySeries = apps.get_model('activities', 'ActivitySeries')
+    def setUpBeforeMigration(self):
+        Group = self.apps.get_model('groups', 'Group')
+        Place = self.apps.get_model('places', 'Place')
+        Activity = self.apps.get_model('activities', 'Activity')
+        ActivitySeries = self.apps.get_model('activities', 'ActivitySeries')
 
         for theme in ['foodsaving', 'bikekitchen', 'general']:
             group = Group.objects.create(name=faker.name(), theme=theme)
@@ -171,16 +171,16 @@ class TestAddParticipantTypes(TestMigrations):
         ('activities', '0034_backfill_participant_role'),
     ]
 
-    def setUpBeforeMigration(self, apps):
-        User = apps.get_model('users', 'User')
-        Group = apps.get_model('groups', 'Group')
-        GroupMembership = apps.get_model('groups', 'GroupMembership')
-        PlaceType = apps.get_model('places', 'PlaceType')
-        Place = apps.get_model('places', 'Place')
-        ActivityType = apps.get_model('activities', 'ActivityType')
-        Activity = apps.get_model('activities', 'Activity')
-        ActivitySeries = apps.get_model('activities', 'ActivitySeries')
-        ActivityParticipant = apps.get_model('activities', 'ActivityParticipant')
+    def setUpBeforeMigration(self):
+        User = self.apps.get_model('users', 'User')
+        Group = self.apps.get_model('groups', 'Group')
+        GroupMembership = self.apps.get_model('groups', 'GroupMembership')
+        PlaceType = self.apps.get_model('places', 'PlaceType')
+        Place = self.apps.get_model('places', 'Place')
+        ActivityType = self.apps.get_model('activities', 'ActivityType')
+        Activity = self.apps.get_model('activities', 'Activity')
+        ActivitySeries = self.apps.get_model('activities', 'ActivitySeries')
+        ActivityParticipant = self.apps.get_model('activities', 'ActivityParticipant')
 
         group = Group.objects.create(name=faker.name())
         place_type = PlaceType.objects.create(name=faker.name(), group=group)
@@ -247,13 +247,13 @@ class TestActivityTypeArchivedAtMigration(TestMigrations):
         ('activities', '0042_set_activity_type_archived_at'),
     ]
 
-    def setUpBeforeMigration(self, apps):
-        apps.get_model('users', 'User')
-        Group = apps.get_model('groups', 'Group')
-        PlaceType = apps.get_model('places', 'PlaceType')
-        Place = apps.get_model('places', 'Place')
-        ActivityType = apps.get_model('activities', 'ActivityType')
-        History = apps.get_model('history', 'History')
+    def setUpBeforeMigration(self):
+        self.apps.get_model('users', 'User')
+        Group = self.apps.get_model('groups', 'Group')
+        PlaceType = self.apps.get_model('places', 'PlaceType')
+        Place = self.apps.get_model('places', 'Place')
+        ActivityType = self.apps.get_model('activities', 'ActivityType')
+        History = self.apps.get_model('history', 'History')
 
         group = Group.objects.create(name=faker.name())
         place_type = PlaceType.objects.create(name=faker.name(), group=group)

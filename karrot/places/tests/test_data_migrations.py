@@ -15,12 +15,12 @@ class TestPlaceArchivedAtMigration(TestMigrations):
         ('places', '0040_set_place_archived_at'),
     ]
 
-    def setUpBeforeMigration(self, apps):
-        apps.get_model('users', 'User')
-        Group = apps.get_model('groups', 'Group')
-        PlaceType = apps.get_model('places', 'PlaceType')
-        Place = apps.get_model('places', 'Place')
-        History = apps.get_model('history', 'History')
+    def setUpBeforeMigration(self):
+        self.apps.get_model('users', 'User')
+        Group = self.apps.get_model('groups', 'Group')
+        PlaceType = self.apps.get_model('places', 'PlaceType')
+        Place = self.apps.get_model('places', 'Place')
+        History = self.apps.get_model('history', 'History')
 
         group = Group.objects.create(name=faker.name())
         place_type = PlaceType.objects.create(name=faker.name(), group=group)
@@ -83,11 +83,11 @@ class TestPlaceTypeArchivedAtMigration(TestMigrations):
         ('places', '0040_set_place_archived_at'),
     ]
 
-    def setUpBeforeMigration(self, apps):
-        apps.get_model('users', 'User')
-        Group = apps.get_model('groups', 'Group')
-        PlaceType = apps.get_model('places', 'PlaceType')
-        History = apps.get_model('history', 'History')
+    def setUpBeforeMigration(self):
+        self.apps.get_model('users', 'User')
+        Group = self.apps.get_model('groups', 'Group')
+        PlaceType = self.apps.get_model('places', 'PlaceType')
+        History = self.apps.get_model('history', 'History')
 
         group = Group.objects.create(name=faker.name())
         place_type1 = PlaceType.objects.create(name=faker.name(), group=group)

@@ -14,11 +14,11 @@ class TestOfferArchivedAtMigration(TestMigrations):
         ('offers', '0006_set_archived_at'),
     ]
 
-    def setUpBeforeMigration(self, apps):
-        Group = apps.get_model('groups', 'Group')
-        GroupMembership = apps.get_model('groups', 'GroupMembership')
-        User = apps.get_model('users', 'User')
-        Offer = apps.get_model('offers', 'Offer')
+    def setUpBeforeMigration(self):
+        Group = self.apps.get_model('groups', 'Group')
+        GroupMembership = self.apps.get_model('groups', 'GroupMembership')
+        User = self.apps.get_model('users', 'User')
+        Offer = self.apps.get_model('offers', 'Offer')
 
         group = Group.objects.create(name=faker.name())
         user = User.objects.create()

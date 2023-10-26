@@ -12,10 +12,10 @@ class TestEnableIssueNotifications(TestMigrations):
         ('issues', '0004_enable_issue_notifications'),
     ]
 
-    def setUpBeforeMigration(self, apps):
-        Group = apps.get_model('groups', 'Group')
-        GroupMembership = apps.get_model('groups', 'GroupMembership')
-        User = apps.get_model('users', 'User')
+    def setUpBeforeMigration(self):
+        Group = self.apps.get_model('groups', 'Group')
+        GroupMembership = self.apps.get_model('groups', 'GroupMembership')
+        User = self.apps.get_model('users', 'User')
         group = Group.objects.create(name=faker.name())
         user1 = User.objects.create()
         user2 = User.objects.create()

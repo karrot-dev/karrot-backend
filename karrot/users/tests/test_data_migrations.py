@@ -35,10 +35,10 @@ class TestGenerateUsername(TestMigrations, UtilsMixin):
         GroupMembership.objects.create(user=user, group=self.group)
         return user
 
-    def setUpBeforeMigration(self, apps):
+    def setUpBeforeMigration(self):
         self.apps = apps
-        User = apps.get_model('users', 'User')
-        Group = apps.get_model('groups', 'Group')
+        User = self.apps.get_model('users', 'User')
+        Group = self.apps.get_model('groups', 'Group')
         self.group = Group.objects.create(name='testgroup')
         self.id1 = self.create_user(display_name='Peter Jones').id
         self.id2 = self.create_user(display_name='Peter Jones').id
@@ -102,10 +102,10 @@ class TestFixUsername(TestMigrations, UtilsMixin):
         ('users', '0027_fix_usernames'),
     ]
 
-    def setUpBeforeMigration(self, apps):
+    def setUpBeforeMigration(self):
         self.apps = apps
-        apps.get_model('users', 'User')
-        Group = apps.get_model('groups', 'Group')
+        self.apps.get_model('users', 'User')
+        Group = self.apps.get_model('groups', 'Group')
         self.group = Group.objects.create(name='testgroup')
         self.id1 = self.create_user(username='something with spaces').id
         self.id2 = self.create_user(username='NothingChanged').id
