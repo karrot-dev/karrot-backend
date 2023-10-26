@@ -36,7 +36,6 @@ class TestGenerateUsername(TestMigrations, UtilsMixin):
         return user
 
     def setUpBeforeMigration(self):
-        self.apps = apps
         User = self.apps.get_model('users', 'User')
         Group = self.apps.get_model('groups', 'Group')
         self.group = Group.objects.create(name='testgroup')
@@ -103,8 +102,6 @@ class TestFixUsername(TestMigrations, UtilsMixin):
     ]
 
     def setUpBeforeMigration(self):
-        self.apps = apps
-        self.apps.get_model('users', 'User')
         Group = self.apps.get_model('groups', 'Group')
         self.group = Group.objects.create(name='testgroup')
         self.id1 = self.create_user(username='something with spaces').id
@@ -113,8 +110,6 @@ class TestFixUsername(TestMigrations, UtilsMixin):
         self.id4 = self.create_user(username='someaddress@gmail.com').id
 
     def test_username_creation(self):
-        self.apps.get_model('users', 'User')
-
         self.check_username(self.id1, 'something_with_spaces')
         self.check_username(self.id2, 'NothingChanged')
         self.check_username(self.id3, '_____')
