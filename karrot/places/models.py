@@ -36,6 +36,7 @@ class PlaceType(BaseModel, UpdatedAtMixin):
         max_length=100,
         default=DEFAULT_STATUS,
     )
+    archived_at = models.DateTimeField(null=True)
 
     class Meta:
         unique_together = ('group', 'name')
@@ -57,6 +58,7 @@ class Place(BaseModel, LocationModel, ConversationMixin):
     description = models.TextField(blank=True)
     weeks_in_advance = models.PositiveIntegerField(default=4)
     status = models.CharField(choices=PlaceStatus.choices, max_length=20, default=DEFAULT_STATUS)
+    archived_at = models.DateTimeField(null=True)
     default_view = models.CharField(choices=PlaceDefaultView.choices, max_length=20, default=DEFAULT_DEFAULT_VIEW)
 
     place_type = models.ForeignKey(

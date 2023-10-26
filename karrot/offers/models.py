@@ -27,6 +27,7 @@ class Offer(BaseModel, ConversationMixin):
         max_length=100,
     )
     status_changed_at = DateTimeField(default=timezone.now)
+    archived_at = models.DateTimeField(null=True)
 
     @property
     def ended_at(self):

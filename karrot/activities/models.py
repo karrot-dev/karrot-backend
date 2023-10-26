@@ -47,6 +47,7 @@ class ActivityType(BaseModel, UpdatedAtMixin):
         choices=ActivityTypeStatus.choices,
         max_length=100,
     )
+    archived_at = models.DateTimeField(null=True)
 
     class Meta:
         unique_together = ('group', 'name')
