@@ -14,7 +14,6 @@ from karrot.activities.factories import ActivitySeriesFactory, ActivityFactory, 
 from karrot.activities.models import to_range
 from karrot.history.utils import without_keys
 from karrot.places.factories import PlaceFactory
-from karrot.places.models import PlaceStatus
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import UserFactory
 from karrot.utils.tests.fake import faker
@@ -303,11 +302,11 @@ class TestPlaceChangesActivitySeriesAPI(APITestCase, ExtractPaginationMixin):
         self.assertIn('Do not set more than', response.data['weeks_in_advance'][0])
 
     def test_set_place_active_status_updates_activities(self):
-        self.place.status = PlaceStatus.ARCHIVED.value
+        self.place.archived_at = timezone.now()
         self.place.save()
         self.place.activities.all().delete()
         self.client.force_login(user=self.member)
-        response = self.client.patch(self.place_url, {'status': PlaceStatus.ACTIVE.value}, format='json')
+        response = self.client.patch(self.place_url, {'archived_at': None}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreater(self.place.activities.count(), 0)
 

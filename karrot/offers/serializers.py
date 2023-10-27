@@ -55,6 +55,7 @@ class OfferSerializer(serializers.ModelSerializer):
             'name',
             'description',
             'status',
+            'archived_at',
             'images',
         )
         read_only_fields = (
@@ -65,6 +66,12 @@ class OfferSerializer(serializers.ModelSerializer):
         )
 
     images = OfferImageSerializer(many=True)
+    status = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_status(offer) -> str:
+        """Legacy API support"""
+        return 'archived' if offer.is_archived else 'active'
 
     def save(self, **kwargs):
         return super().save(user=self.context['request'].user)

@@ -33,7 +33,7 @@ from karrot.issues.serializers import IssueSerializer
 from karrot.issues.signals import issue_changed
 from karrot.notifications.models import Notification, NotificationMeta
 from karrot.notifications.serializers import NotificationSerializer, NotificationMetaSerializer
-from karrot.offers.models import Offer, OfferStatus
+from karrot.offers.models import Offer
 from karrot.offers.serializers import OfferSerializer
 from karrot.activities.models import Activity, ActivitySeries, Feedback, ActivityParticipant, ActivityType
 from karrot.activities.serializers import ActivitySerializer, ActivitySeriesSerializer, FeedbackSerializer, \
@@ -471,7 +471,7 @@ def send_offer_updates(sender, instance, created, **kwargs):
     offer = instance
     payload = OfferSerializer(offer).data
     for subscription in ChannelSubscription.objects.recent().filter(user__in=offer.group.members.all()).distinct():
-        if offer.status == OfferStatus.ACTIVE.value or \
+        if not offer.is_archived or \
            offer.user == subscription.user or \
            subscription.user.conversation_set.filter(id=offer.conversation.id).exists():
             send_in_channel(subscription.reply_channel, topic='offers:offer', payload=payload)

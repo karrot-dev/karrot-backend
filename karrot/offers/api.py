@@ -14,7 +14,8 @@ from rest_framework.viewsets import GenericViewSet
 
 from karrot.conversations.api import RetrieveConversationMixin
 from karrot.offers import stats
-from karrot.offers.models import Offer, OfferImage, OfferStatus
+from karrot.offers.filters import OffersFilter
+from karrot.offers.models import Offer, OfferImage
 from karrot.offers.serializers import OfferSerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
 from karrot.utils.parsers import JSONWithFilesMultiPartParser
@@ -47,17 +48,14 @@ class OfferViewSet(
     serializer_class = OfferSerializer
     queryset = Offer.objects
     filter_backends = (filters.DjangoFilterBackend, )
-    filterset_fields = (
-        'group',
-        'status',
-    )
+    filterset_class = OffersFilter
     pagination_class = OfferPagination
     parser_classes = [JSONWithFilesMultiPartParser, JSONParser]
 
     def get_queryset(self):
         qs = self.queryset.filter(group__members=self.request.user)
         is_owner = Q(user=self.request.user)
-        is_active = Q(status=OfferStatus.ACTIVE.value)
+        is_active = Q(archived_at__isnull=True)
         if self.action in ('retrieve', 'conversation'):
             # we let people who participated in the conversation retrieve the specific offer and conversation
             ct = ContentType.objects.get_for_model(Offer)
@@ -91,7 +89,7 @@ class OfferViewSet(
         self.check_permissions(request)
         offer = self.get_object()
         self.check_object_permissions(request, offer)
-        if offer.status != OfferStatus.ACTIVE.value:
+        if offer.is_archived:
             raise ValidationError(_('You can only archive an active offer'))
         offer.archive()
         stats.offer_archived(offer)

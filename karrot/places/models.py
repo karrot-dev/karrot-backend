@@ -11,6 +11,9 @@ class PlaceStatus(models.TextChoices):
     NEGOTIATING = 'negotiating'
     ACTIVE = 'active'
     DECLINED = 'declined'
+    # We have re-implemented this as archived_at field
+    # BUT for legacy API support we still have it as a valid
+    # status, but convert it to archived_at in the serializer
     ARCHIVED = 'archived'
 
 
@@ -19,23 +22,11 @@ class PlaceDefaultView(models.TextChoices):
     WALL = 'wall'
 
 
-class PlaceTypeStatus(models.TextChoices):
-    ACTIVE = 'active'
-    ARCHIVED = 'archived'
-
-
 class PlaceType(BaseModel, UpdatedAtMixin):
-    DEFAULT_STATUS = PlaceTypeStatus.ACTIVE.value
-
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='place_types')
     name = models.CharField(max_length=80)
     name_is_translatable = models.BooleanField(default=True)
     icon = models.CharField(max_length=100)
-    status = models.CharField(
-        choices=PlaceTypeStatus.choices,
-        max_length=100,
-        default=DEFAULT_STATUS,
-    )
     archived_at = models.DateTimeField(null=True)
 
     class Meta:
@@ -44,6 +35,10 @@ class PlaceType(BaseModel, UpdatedAtMixin):
     def get_translated_name(self):
         # the translations are collected via place_types.py
         return _(self.name) if self.name_is_translatable else self.name
+
+    @property
+    def is_archived(self):
+        return self.archived_at is not None
 
 
 class Place(BaseModel, LocationModel, ConversationMixin):
@@ -81,8 +76,9 @@ class Place(BaseModel, LocationModel, ConversationMixin):
     def __str__(self):
         return 'Place {} ({})'.format(self.name, self.group)
 
-    def is_active(self):
-        return self.status == 'active'
+    @property
+    def is_archived(self):
+        return self.archived_at is not None
 
     @property
     def conversation_supports_threads(self):

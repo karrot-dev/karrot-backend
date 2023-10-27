@@ -297,7 +297,7 @@ class TestHistoryAPIActivityForInactivePlace(APITestCase, ExtractPaginationMixin
     def setUp(self):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
-        self.place = PlaceFactory(group=self.group, status='archived')
+        self.place = PlaceFactory(group=self.group, archived_at=timezone.now())
         self.activity = ActivityFactory(place=self.place, date=to_range(timezone.now() - relativedelta(days=1)))
         self.activity.add_participant(self.member)
 

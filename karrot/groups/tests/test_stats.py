@@ -99,7 +99,7 @@ class TestGroupStats(TestCase):
 
         [PlaceFactory(group=group, status='active') for _ in range(3)]
         [PlaceFactory(group=group, status='negotiating') for _ in range(7)]
-        [PlaceFactory(group=group, status='archived') for _ in range(10)]
+        [PlaceFactory(group=group, archived_at=timezone.now()) for _ in range(10)]
 
         points = stats.get_group_places_stats(group)
 

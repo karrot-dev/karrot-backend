@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import transaction
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
@@ -18,6 +19,7 @@ class PlaceTypeHistorySerializer(serializers.ModelSerializer):
 
 class PlaceTypeSerializer(serializers.ModelSerializer):
     updated_message = serializers.CharField(write_only=True, required=False)
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = PlaceType
@@ -27,6 +29,7 @@ class PlaceTypeSerializer(serializers.ModelSerializer):
             'name_is_translatable',
             'icon',
             'status',
+            'archived_at',
             'group',
             "created_at",
             'updated_at',
@@ -37,6 +40,11 @@ class PlaceTypeSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
         ]
+
+    @staticmethod
+    def get_status(place_type) -> str:
+        """For legacy API support"""
+        return 'archived' if place_type.is_archived else 'active'
 
     def validate_group(self, group):
         if not group.is_member(self.context['request'].user):
@@ -50,6 +58,14 @@ class PlaceTypeSerializer(serializers.ModelSerializer):
             return super().save(**kwargs)
 
         updated_message = self.validated_data.pop('updated_message', None)
+
+        # Legacy API support
+        status = self.context['request'].data.get('status', None)
+        if status:
+            if status == 'active' and self.instance.is_archived:
+                self.validated_data['archived_at'] = None
+            elif status == 'archived' and not self.instance.is_archived:
+                self.validated_data['archived_at'] = timezone.now()
 
         place_type = self.instance
         changed_data = find_changed(place_type, self.validated_data)
@@ -123,6 +139,7 @@ class PlaceSerializer(serializers.ModelSerializer):
             'longitude',
             'weeks_in_advance',
             'status',
+            'archived_at',
             'is_subscribed',
             'subscribers',
             'place_type',
@@ -194,6 +211,14 @@ class PlaceSerializer(serializers.ModelSerializer):
             )
         return w
 
+    def to_representation(self, instance):
+        """Legacy API support"""
+        data = super().to_representation(instance)
+        archived_at = data.get('archived_at', None)
+        if archived_at:
+            data['status'] = 'archived'
+        return data
+
 
 class PlaceUpdateSerializer(PlaceSerializer):
     class Meta:
@@ -204,6 +229,15 @@ class PlaceUpdateSerializer(PlaceSerializer):
 
     @transaction.atomic()
     def save(self, **kwargs):
+        # Legacy API support
+        status = self.validated_data.get('status', None)
+        if status:
+            if status == 'archived':
+                self.validated_data.pop('status')
+                self.validated_data['archived_at'] = timezone.now()
+            elif self.instance.is_archived:
+                self.validated_data['archived_at'] = None
+
         self._validated_data = find_changed(self.instance, self.validated_data)
         skip_update = len(self.validated_data.keys()) == 0
         if skip_update:

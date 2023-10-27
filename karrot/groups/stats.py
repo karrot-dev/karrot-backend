@@ -168,9 +168,11 @@ def get_group_places_stats(group):
         'count_total': group.places.count(),
     }
 
-    for entry in group.places.values('status').annotate(count=Count('status')):
+    for entry in group.places.filter(archived_at__isnull=True).values('status').annotate(count=Count('status')):
         # record one value per place status too
         fields['count_status_{}'.format(entry['status'])] = entry['count']
+
+    fields['count_status_archived'] = group.places.filter(archived_at__isnull=False).count()
 
     return [{
         'measurement': 'karrot.group.places',

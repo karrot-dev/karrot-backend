@@ -207,6 +207,9 @@ class FeedbackExportRenderer(CSVRenderer):
 
 class ActivityTypeSerializer(serializers.ModelSerializer):
     updated_message = serializers.CharField(write_only=True, required=False)
+    status = serializers.SerializerMethodField()
+
+    # status = serializers.CharField()
 
     class Meta:
         model = ActivityType
@@ -220,6 +223,7 @@ class ActivityTypeSerializer(serializers.ModelSerializer):
             'has_feedback_weight',
             'feedback_icon',
             'status',
+            'archived_at',
             'group',
             "created_at",
             'updated_at',
@@ -231,6 +235,11 @@ class ActivityTypeSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
         ]
+
+    @staticmethod
+    def get_status(activity_type) -> str:
+        """Legacy API support"""
+        return 'archived' if activity_type.is_archived else 'active'
 
     def validate_group(self, group):
         if not group.is_member(self.context['request'].user):
@@ -244,6 +253,15 @@ class ActivityTypeSerializer(serializers.ModelSerializer):
             return super().save(**kwargs)
 
         updated_message = self.validated_data.pop('updated_message', None)
+
+        # Support setting status as "archived"/"active" to set/unset archived_at
+        # Have to read the raw request data... not validated...
+        status = self.context['request'].data.get('status', None)
+        if status:
+            if status == 'active' and self.instance.is_archived:
+                self.validated_data['archived_at'] = None
+            elif status == 'archived' and not self.instance.is_archived:
+                self.validated_data['archived_at'] = timezone.now()
 
         activity_type = self.instance
         changed_data = find_changed(activity_type, self.validated_data)
@@ -515,7 +533,7 @@ class ActivitySerializer(serializers.ModelSerializer):
         return activity
 
     def validate_activity_type(self, activity_type):
-        if activity_type.status != 'active':
+        if activity_type.is_archived:
             raise serializers.ValidationError('You can only create activities for active types')
         return activity_type
 
@@ -997,7 +1015,7 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
         return series
 
     def validate_activity_type(self, activity_type):
-        if activity_type.status != 'active':
+        if activity_type.is_archived:
             raise serializers.ValidationError('You can only create series for active types')
         return activity_type
 

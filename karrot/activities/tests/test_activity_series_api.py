@@ -60,7 +60,7 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
         self.activity_type = ActivityTypeFactory(group=self.group)
-        self.archived_activity_type = ActivityTypeFactory(group=self.group, status='archived')
+        self.archived_activity_type = ActivityTypeFactory(group=self.group, archived_at=timezone.now())
 
     def test_create_and_get_recurring_series(self):
         self.maxDiff = None

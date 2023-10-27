@@ -42,7 +42,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         cls.group = GroupFactory(members=[cls.member, cls.second_member])
         cls.place = PlaceFactory(group=cls.group)
         cls.activity_type = ActivityTypeFactory(group=cls.group)
-        cls.archived_activity_type = ActivityTypeFactory(group=cls.group, status='archived')
+        cls.archived_activity_type = ActivityTypeFactory(group=cls.group, archived_at=timezone.now())
         cls.activity = ActivityFactory(activity_type=cls.activity_type, place=cls.place)
         cls.activity_url = cls.url + str(cls.activity.id) + '/'
         cls.join_url = cls.activity_url + 'add/'
