@@ -137,3 +137,50 @@ class TestPlaceTypeArchivedAtMigration(TestMigrations):
 
         self.assertGreater(diff_seconds1, 5)
         self.assertLess(diff_seconds2, 5)
+
+
+class TestPlaceStatusMigration(TestMigrations):
+    migrate_from = [
+        ('groups', '0050_enable_agreements_and_participant_types'),
+        ('places', '0043_placetype_description_placestatus_place_status_next'),
+    ]
+    migrate_to = [
+        ('places', '0044_migrate_place_statuses'),
+    ]
+
+    def setUpBeforeMigration(self):
+        self.apps.get_model('users', 'User')
+        Group = self.apps.get_model('groups', 'Group')
+        Place = self.apps.get_model('places', 'Place')
+        PlaceType = self.apps.get_model('places', 'PlaceType')
+
+        group1 = Group.objects.create(name=faker.name())
+        group2 = Group.objects.create(name=faker.name())
+
+        for group in [group1, group2]:
+            place_type = PlaceType.objects.create(name=faker.name(), group=group)
+            for _ in range(3):
+                for status in ('created', 'negotiating', 'active', 'declined'):
+                    Place.objects.create(
+                        name=faker.name(),
+                        group=group,
+                        place_type=place_type,
+                        status=status,
+                    )
+
+        self.group1_id = group1.id
+        self.group2_id = group2.id
+
+    def test_converts_to_status_next(self):
+        Group = self.apps.get_model('groups', 'Group')
+        Place = self.apps.get_model('places', 'Place')
+        PlaceStatus = self.apps.get_model('places', 'PlaceStatus')
+
+        group1 = Group.objects.get(id=self.group1_id)
+        group2 = Group.objects.get(id=self.group2_id)
+
+        for group in [group1, group2]:
+            self.assertEqual(PlaceStatus.objects.filter(group=group).count(), 4)
+            for status in ('created', 'negotiating', 'active', 'declined'):
+                status = PlaceStatus.objects.get(group=group, name=status.capitalize())
+                self.assertEqual(Place.objects.filter(group=group, status_next=status).count(), 3)

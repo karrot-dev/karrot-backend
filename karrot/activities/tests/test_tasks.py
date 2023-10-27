@@ -20,7 +20,7 @@ from karrot.activities.models import to_range
 from karrot.activities.tasks import daily_activity_notifications, fetch_activity_notification_data_for_group
 from karrot.groups.roles import GROUP_MEMBER, GROUP_EDITOR
 from karrot.places.factories import PlaceFactory
-from karrot.places.models import PlaceStatus, PlaceSubscription
+from karrot.places.models import PlaceSubscription
 from karrot.subscriptions.factories import WebPushSubscriptionFactory
 from karrot.users.factories import VerifiedUserFactory, UserFactory
 from karrot.utils.frontend_urls import place_url
@@ -84,7 +84,7 @@ class TestActivityNotificationTask(APITestCase):
         cls.group = GroupFactory(members=[cls.user, cls.other_user, cls.non_verified_user])
         cls.place = PlaceFactory(group=cls.group, subscribers=[cls.user, cls.other_user, cls.non_verified_user])
 
-        cls.declined_place = PlaceFactory(group=cls.group, status=PlaceStatus.DECLINED.value)
+        cls.archived_place = PlaceFactory(group=cls.group, archived_at=timezone.now())
 
         # unsubscribe other_user from notifications
         GroupMembership.objects.filter(group=cls.group, user=cls.other_user).update(notification_types=[])
@@ -230,7 +230,7 @@ class TestActivityNotificationTask(APITestCase):
 
     def test_ignores_not_active_places(self):
         with group_timezone_at(self.group, hour=20):
-            self.create_empty_activity(delta=relativedelta(minutes=10), place=self.declined_place)
+            self.create_empty_activity(delta=relativedelta(minutes=10), place=self.archived_place)
             daily_activity_notifications()
             self.assertEqual(len(mail.outbox), 0)
 

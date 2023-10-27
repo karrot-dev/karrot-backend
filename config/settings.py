@@ -200,7 +200,6 @@ or in our [Matrix chat room](https://chat.karrot.world)!
         'docExpansion': 'none',
     },
     'ENUM_NAME_OVERRIDES': {
-        'PlaceStatusEnum': 'karrot.places.models.PlaceStatus.choices',
         'GroupStatusEnum': 'karrot.groups.models.GroupStatus.choices',
     },
 }

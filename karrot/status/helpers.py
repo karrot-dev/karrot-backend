@@ -10,7 +10,6 @@ from karrot.conversations.models import ConversationParticipant, ConversationThr
 from karrot.groups.models import Group
 from karrot.notifications.models import Notification
 from karrot.activities.models import Activity
-from karrot.places.models import PlaceStatus
 
 
 def unseen_notification_count(user):
@@ -90,7 +89,7 @@ def get_feedback_possible(user):
             'places__activities',
             filter=Q(
                 places__activities__in=Activity.objects.only_feedback_possible(user),
-                places__status=PlaceStatus.ACTIVE.value
+                places__archived_at__isnull=True,
             )
         )
     ).values_list('id', 'feedback_possible')

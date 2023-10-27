@@ -42,8 +42,8 @@ class TestPlacesAPI(APITestCase, ExtractPaginationMixin):
             'address': faker.address(),
             'latitude': faker.latitude(),
             'longitude': faker.longitude(),
-            'status': 'created',
-            'place_type': cls.group.place_types.first().id,
+            'status': cls.group.place_statuses.order_by('?').first().id,
+            'place_type': cls.group.place_types.order_by('?').first().id,
         }
 
         # another group
@@ -158,13 +158,13 @@ class TestPlacesAPI(APITestCase, ExtractPaginationMixin):
 
     def test_valid_status(self):
         self.client.force_login(user=self.member)
-        response = self.client.patch(self.place_url, {'status': 'active'}, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.patch(self.place_url, {'status': self.group.place_statuses.last().id}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_invalid_status(self):
         self.client.force_login(user=self.member)
-        response = self.client.patch(self.place_url, {'status': 'foobar'}, format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        response = self.client.patch(self.place_url, {'status': 9872398723}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_default_view(self):
         self.client.force_login(user=self.member)

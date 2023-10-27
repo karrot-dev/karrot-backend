@@ -7,7 +7,7 @@ from rest_framework.exceptions import PermissionDenied
 
 from karrot.groups.serializers import GroupPreviewSerializer
 from karrot.history.models import History, HistoryTypus
-from karrot.places.models import Place as PlaceModel, PlaceSubscription, PlaceType, PlaceStatus
+from karrot.places.models import Place as PlaceModel, PlaceSubscription, PlaceType
 from karrot.utils.misc import find_changed
 
 
@@ -162,7 +162,6 @@ class PlaceSerializer(serializers.ModelSerializer):
             'subscribers',
         ]
 
-    status = serializers.ChoiceField(choices=PlaceStatus.choices, default=PlaceModel.DEFAULT_STATUS)
     is_subscribed = serializers.SerializerMethodField()
 
     def get_is_subscribed(self, place) -> bool:

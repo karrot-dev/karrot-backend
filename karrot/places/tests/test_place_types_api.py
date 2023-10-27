@@ -133,6 +133,6 @@ class TestPlaceTypesAPI(APITestCase, ExtractPaginationMixin):
         return {
             'name': faker.sentence(nb_words=4),
             'group': self.group.id,
-            'status': 'active',
+            'status': self.group.place_statuses.order_by('?').first().id,
             **extra,
         }

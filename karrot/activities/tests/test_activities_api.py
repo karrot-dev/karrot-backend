@@ -586,7 +586,7 @@ class TestActivitiesWithParticipantTypeAPI(APITestCase):
         self.member = UserFactory()
         self.other_member = UserFactory()
         self.group = GroupFactory(members=[self.member, self.other_member])
-        self.place = PlaceFactory(group=self.group, status='active')
+        self.place = PlaceFactory(group=self.group)
         self.approved_member = UserFactory()
         self.group.groupmembership_set.create(
             user=self.approved_member,
@@ -744,8 +744,8 @@ class TestActivitiesListAPI(APITestCase, ExtractPaginationMixin):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.activity_type = ActivityTypeFactory(group=self.group)
-        self.active_place = PlaceFactory(group=self.group, status='active')
-        self.inactive_place = PlaceFactory(group=self.group, status='created')
+        self.active_place = PlaceFactory(group=self.group)
+        self.inactive_place = PlaceFactory(group=self.group, archived_at=timezone.now())
 
         participant_types = [
             {

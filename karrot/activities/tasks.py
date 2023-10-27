@@ -16,7 +16,7 @@ from karrot.activities.emails import prepare_activity_notification_email, \
     prepare_participant_removed_email
 from karrot.activities.models import Activity, ActivitySeries, ActivityParticipant, ParticipantType, ActivityType
 from karrot.groups.models import Group, GroupMembership, GroupNotificationType
-from karrot.places.models import PlaceStatus, Place
+from karrot.places.models import Place
 from karrot.subscriptions.models import WebPushSubscription
 from karrot.subscriptions.tasks import notify_subscribers
 from karrot.users.models import User
@@ -229,7 +229,7 @@ def fetch_activity_notification_data_for_group(group):
     )
 
     group_activities = Activity.objects.exclude_disabled().annotate_num_participants().filter(
-        place__status=PlaceStatus.ACTIVE.value,
+        place__archived_at__isnull=True,
         place__group=group,
     ).order_by('date')
 

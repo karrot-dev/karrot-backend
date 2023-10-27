@@ -1,7 +1,10 @@
+import re
 from collections import defaultdict
 
 from django.db.models import Count
 from django.utils import timezone
+
+import unidecode
 from karrot.utils.influxdb_utils import write_points
 
 
@@ -163,14 +166,37 @@ def get_group_members_stats(group):
     }]
 
 
+# not sure what is actually invalid or not, but let's keep it simple...
+STATS_KEY_INVALID_CHARS_RE = re.compile(r'[^a-zA-Z0-9_\-.]')
+
+
 def get_group_places_stats(group):
     fields = {
         'count_total': group.places.count(),
     }
 
-    for entry in group.places.filter(archived_at__isnull=True).values('status').annotate(count=Count('status')):
+    def convert_status_name(name: str) -> str:
+        """Status name might be user entered now, so we should convert anything funny"""
+        # lowercasing means the new place statuses match the old ones
+        # (enum ones vs the new custom foreign key implementation)
+        name = name.lower()
+
+        # unidecode has various caveats, does not do locale-aware conversion
+        # e.g. German "ä" goes to "a" not "ae"
+        # https://pypi.org/project/Unidecode/ explains why it's difficult
+        # it should be fine for our purposes :)
+        name = unidecode.unidecode(name)
+
+        # replace anything else funny with a _
+        name = STATS_KEY_INVALID_CHARS_RE.sub('_', name)
+
+        return name
+
+    for entry in group.places.select_related('status').filter(archived_at__isnull=True
+                                                              ).values('status__name').annotate(count=Count('status')):
         # record one value per place status too
-        fields['count_status_{}'.format(entry['status'])] = entry['count']
+        # lowercase the status name to keep consistent with previous approach
+        fields['count_status_{}'.format(convert_status_name(entry['status__name']))] = entry['count']
 
     fields['count_status_archived'] = group.places.filter(archived_at__isnull=False).count()
 
