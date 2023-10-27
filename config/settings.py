@@ -161,6 +161,7 @@ INSTALLED_APPS = (
     'versatileimagefield',
     'huey.contrib.djhuey',
     'silk',
+    'django_watchfiles',
 )
 
 REST_FRAMEWORK = {

@@ -80,3 +80,4 @@ psutil
 sqlparse # for pretty-printing SQL in shell
 importlib-metadata # for py3.9 compat
 honcho
+django-watchfiles

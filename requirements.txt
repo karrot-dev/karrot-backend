@@ -53,6 +53,7 @@ django-redis==5.4.0
 django-silk==5.0.4
 django-timezone-field==6.0.1
 django-versatileimagefield==3.0
+django-watchfiles==0.1.0
 djangorestframework==3.14.0
 djangorestframework-csv==3.0.1
 drf-orjson-renderer==1.7.2
