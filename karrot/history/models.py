@@ -55,6 +55,9 @@ class HistoryTypus(enum.Enum):
     AGREEMENT_CREATE = 32
     AGREEMENT_MODIFY = 33
     MEMBER_GOT_ROLE = 34
+    PLACE_STATUS_CREATE = 35
+    PLACE_STATUS_MODIFY = 36
+    PLACE_STATUS_DELETE = 37
 
 
 class HistoryQuerySet(models.QuerySet):

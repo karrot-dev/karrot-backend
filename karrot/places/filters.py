@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters, ModelChoiceFilter
 
-from karrot.places.models import PlaceType
+from karrot.places.models import PlaceType, PlaceStatus
 
 
 def groups_queryset(request):
@@ -12,4 +12,12 @@ class PlaceTypeFilter(filters.FilterSet):
 
     class Meta:
         model = PlaceType
+        fields = ['group']
+
+
+class PlaceStatusFilter(filters.FilterSet):
+    group = ModelChoiceFilter(queryset=groups_queryset)
+
+    class Meta:
+        model = PlaceStatus
         fields = ['group']

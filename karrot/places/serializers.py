@@ -7,7 +7,7 @@ from rest_framework.exceptions import PermissionDenied
 
 from karrot.groups.serializers import GroupPreviewSerializer
 from karrot.history.models import History, HistoryTypus
-from karrot.places.models import Place as PlaceModel, PlaceSubscription, PlaceType
+from karrot.places.models import Place as PlaceModel, PlaceSubscription, PlaceType, PlaceStatus
 from karrot.utils.misc import find_changed
 
 
@@ -17,9 +17,14 @@ class PlaceTypeHistorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class PlaceStatusHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlaceStatus
+        fields = '__all__'
+
+
 class PlaceTypeSerializer(serializers.ModelSerializer):
     updated_message = serializers.CharField(write_only=True, required=False)
-    status = serializers.SerializerMethodField()
 
     class Meta:
         model = PlaceType
@@ -28,7 +33,6 @@ class PlaceTypeSerializer(serializers.ModelSerializer):
             'name',
             'name_is_translatable',
             'icon',
-            'status',
             'archived_at',
             'group',
             "created_at",
@@ -40,11 +44,6 @@ class PlaceTypeSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
         ]
-
-    @staticmethod
-    def get_status(place_type) -> str:
-        """For legacy API support"""
-        return 'archived' if place_type.is_archived else 'active'
 
     def validate_group(self, group):
         if not group.is_member(self.context['request'].user):
@@ -58,14 +57,6 @@ class PlaceTypeSerializer(serializers.ModelSerializer):
             return super().save(**kwargs)
 
         updated_message = self.validated_data.pop('updated_message', None)
-
-        # Legacy API support
-        status = self.context['request'].data.get('status', None)
-        if status:
-            if status == 'active' and self.instance.is_archived:
-                self.validated_data['archived_at'] = None
-            elif status == 'archived' and not self.instance.is_archived:
-                self.validated_data['archived_at'] = timezone.now()
 
         place_type = self.instance
         changed_data = find_changed(place_type, self.validated_data)
@@ -101,6 +92,77 @@ class PlaceTypeSerializer(serializers.ModelSerializer):
             after=PlaceTypeHistorySerializer(place_type).data,
         )
         return place_type
+
+
+class PlaceStatusSerializer(serializers.ModelSerializer):
+    updated_message = serializers.CharField(write_only=True, required=False)
+
+    class Meta:
+        model = PlaceStatus
+        fields = [
+            'id',
+            'name',
+            'name_is_translatable',
+            'colour',
+            'archived_at',
+            'group',
+            "created_at",
+            'updated_at',
+            'updated_message',
+        ]
+        read_only_fields = [
+            'id',
+            'created_at',
+            'updated_at',
+        ]
+
+    def validate_group(self, group):
+        if not group.is_member(self.context['request'].user):
+            raise PermissionDenied('You are not a member of this group.')
+        if not group.is_editor(self.context['request'].user):
+            raise PermissionDenied('You need to be a group editor')
+        return group
+
+    def save(self, **kwargs):
+        if not self.instance:
+            return super().save(**kwargs)
+
+        updated_message = self.validated_data.pop('updated_message', None)
+
+        place_type = self.instance
+        changed_data = find_changed(place_type, self.validated_data)
+        self._validated_data = changed_data
+        skip_update = len(self.validated_data.keys()) == 0
+        if skip_update:
+            return self.instance
+
+        before_data = PlaceStatusHistorySerializer(place_type).data
+        status = super().save(**kwargs)
+        after_data = PlaceStatusHistorySerializer(place_type).data
+
+        if before_data != after_data:
+            History.objects.create(
+                typus=HistoryTypus.PLACE_STATUS_MODIFY,
+                group=status.group,
+                users=[self.context['request'].user],
+                payload={k: self.initial_data.get(k)
+                         for k in changed_data.keys()},
+                before=before_data,
+                after=after_data,
+                message=updated_message,
+            )
+        return status
+
+    def create(self, validated_data):
+        status = super().create(validated_data)
+        History.objects.create(
+            typus=HistoryTypus.PLACE_STATUS_CREATE,
+            group=status.group,
+            users=[self.context['request'].user],
+            payload=self.initial_data,
+            after=PlaceStatusHistorySerializer(status).data,
+        )
+        return status
 
 
 class PlaceHistorySerializer(serializers.ModelSerializer):
