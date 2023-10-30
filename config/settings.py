@@ -311,13 +311,16 @@ EMAIL_REPLY_DOMAIN = options['EMAIL_REPLY_DOMAIN']
 
 EMAIL_BACKEND_NAME = options['EMAIL_BACKEND']
 
+ANYMAIL = {}
+
+# it's valid to use postal just for incoming email, so still set this if present
+if options['POSTAL_WEBHOOK_KEY']:
+    ANYMAIL['POSTAL_WEBHOOK_KEY'] = options['POSTAL_WEBHOOK_KEY']
+
 if EMAIL_BACKEND_NAME == 'postal':
     EMAIL_BACKEND = 'anymail.backends.postal.EmailBackend'
-    ANYMAIL = {
-        'POSTAL_API_URL': options['POSTAL_API_URL'],
-        'POSTAL_API_KEY': options['POSTAL_API_KEY'],
-        'POSTAL_WEBHOOK_KEY': options['POSTAL_WEBHOOK_KEY'],
-    }
+    ANYMAIL['POSTAL_API_URL'] = options['POSTAL_API_URL']
+    ANYMAIL['POSTAL_API_KEY'] = options['POSTAL_API_KEY']
 elif EMAIL_BACKEND_NAME == 'smtp':
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = options['SMTP_HOST']
