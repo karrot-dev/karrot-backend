@@ -351,6 +351,6 @@ class TestActivityHistoryStatsAPI(APITestCase):
             'leave_missed_count': 0,
             'leave_missed_late_count': 0,
             'feedback_count': 0,
-            'feedback_weight': 0,
+            'feedback_weight': 0.0,
             **(data if data else {}),
         }

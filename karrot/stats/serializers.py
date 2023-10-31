@@ -1,15 +1,15 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from karrot.history.models import History
+from karrot.places.models import Place
 
 MAX_STATS = 50
 
 
-class ActivityHistoryStatsSerializer(serializers.ModelSerializer):
+class ActivityHistoryStatsSerializer(serializers.Serializer):
     # using the values('place, 'group') in the query doesn't seem to fit nicely with DRF model serializer
     # so having to explicitly declare these fields here
-    place = serializers.IntegerField()
+    place = serializers.IntegerField(source='id')
     group = serializers.IntegerField()
 
     done_count = serializers.IntegerField()
@@ -22,7 +22,7 @@ class ActivityHistoryStatsSerializer(serializers.ModelSerializer):
     feedback_weight = serializers.FloatField()
 
     class Meta:
-        model = History
+        model = Place
         fields = [
             'place',
             'group',

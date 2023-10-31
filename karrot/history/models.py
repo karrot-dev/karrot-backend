@@ -2,7 +2,8 @@ from datetime import timedelta
 
 from django.db.models import JSONField, Index, BooleanField
 from django.db import models
-from django.db.models.expressions import RawSQL
+from django.db.models.expressions import Func, Q, ExpressionWrapper
+from django.db.models.fields.json import KT
 from django.dispatch import Signal
 from django.utils import timezone
 from django_enumfield import enum
@@ -11,6 +12,11 @@ from karrot.base.base_models import NicelyFormattedModel
 from karrot.history.utils import without_keys
 
 history_created = Signal()
+
+
+class Epoch(Func):
+    template = 'EXTRACT(EPOCH FROM %(expressions)s :: timestamp with time zone)'
+    output_field = models.IntegerField()
 
 
 class HistoryTypus(enum.Enum):
@@ -62,32 +68,18 @@ class HistoryQuerySet(models.QuerySet):
         return entry
 
     def activity_left_late(self, **kwargs):
-        return self.annotate_activity_leave_late(**kwargs).filter(activity_leave_late=True)
+        return self.add_activity_left_late(**kwargs).filter(activity_left_late=True)
 
-    def annotate_activity_leave_late(self, **kwargs):
-        sql = f"""
-            "{History._meta.db_table}"."typus" = %s
-            AND
-            ROUND (
-                EXTRACT (
-                    EPOCH FROM (
-                        "{History._meta.db_table}"."payload" #>> ARRAY['date','0']
-                    ) :: timestamp with time zone
+    def add_activity_left_late(self, **kwargs):
+        return self \
+            .filter(typus=HistoryTypus.ACTIVITY_LEAVE) \
+            .alias(left_seconds_before_activity=Epoch(KT('payload__date__0')) - Epoch('date')) \
+            .alias(
+                activity_left_late=ExpressionWrapper(
+                    Q(left_seconds_before_activity__lte=timedelta(**kwargs).total_seconds()),
+                    output_field=BooleanField(),
                 )
-                -
-                EXTRACT (EPOCH FROM "{History._meta.db_table}"."date")
-            ) <= %s
-        """
-        return self.annotate(
-            activity_leave_late=RawSQL(
-                sql,
-                [
-                    HistoryTypus.ACTIVITY_LEAVE.value,
-                    timedelta(**kwargs).total_seconds(),
-                ],
-                output_field=BooleanField(),
             )
-        )
 
 
 class History(NicelyFormattedModel):
