@@ -165,7 +165,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
     def test_list_activities_with_feedback(self):
         self.client.force_login(user=self.member)
         feedback = Feedback.objects.create(given_by=self.member, about=self.past_activity, comment='hello')
-        with self.assertNumQueries(5):
+        with self.assertNumQueries(6):
             response = self.get_results(self.url, {'has_feedback': True})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 1)

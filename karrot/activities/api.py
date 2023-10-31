@@ -297,8 +297,11 @@ class ActivityViewSet(
             # because we have participants field in the serializer
             # only prefetch on read_only actions, otherwise there are caching problems when participants get added
             qs = qs.select_related('activity_type').prefetch_related(
-                'activityparticipant_set', 'feedback_set', 'participant_types',
-                'activityparticipant_set__participant_type'
+                'activityparticipant_set',
+                'feedback_set',
+                'participant_types',
+                'activityparticipant_set__participant_type',
+                'feedback_set__no_shows',
             )
         if self.action == 'add':
             # Lock activity when adding a participant
