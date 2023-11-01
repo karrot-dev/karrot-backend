@@ -14,6 +14,7 @@ class ActivityHistoryStatsSerializer(serializers.Serializer):
 
     done_count = serializers.IntegerField()
     missed_count = serializers.IntegerField()
+    no_show_count = serializers.IntegerField()
     leave_count = serializers.IntegerField()
     leave_late_count = serializers.IntegerField()
     leave_missed_count = serializers.IntegerField()
