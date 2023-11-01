@@ -116,13 +116,21 @@ class FeedbackViewSet(
         return self.queryset.filter(about__place__group__members=self.request.user)
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset()) \
+        queryset = self \
+            .filter_queryset(self.get_queryset()) \
             .select_related('about') \
-            .prefetch_related('about__activity_type', 'about__activityparticipant_set', 'about__feedback_given_by',
-                              'about__participant_types', 'about__activityparticipant_set__participant_type', 'no_shows',) \
+            .prefetch_related(
+                'about__activity_type',
+                'about__activityparticipant_set',
+                'about__feedback_given_by',
+                'about__participant_types',
+                'about__activityparticipant_set__participant_type',
+                'no_shows',
+            ) \
             .annotate(
-            timezone=F('about__place__group__timezone'),
-            activity_date=F('about__date__startswith'))
+                timezone=F('about__place__group__timezone'),
+                activity_date=F('about__date__startswith'))
+
         feedback = self.paginate_queryset(queryset)
 
         activities = set()
