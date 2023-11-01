@@ -82,7 +82,13 @@ class ActivityHistoryStatsViewSet(GenericViewSet):
         # remove the ordering as it's not important and breaks some sub queries
         history_qs = super() \
             .filter_queryset(self.queryset) \
-            .filter(place=OuterRef('id')) \
+            .filter(
+                place=OuterRef('id'),
+                # there are some old null entries in the db
+                # just ignore them, making it consistent with
+                # how stats always worked
+                activity__isnull=False,
+            ) \
             .order_by()
 
         feedback_filter = Q(typus=HistoryTypus.ACTIVITY_DONE)
@@ -117,20 +123,28 @@ class ActivityHistoryStatsViewSet(GenericViewSet):
                 # Each activity could have multiple no_show reports for a given user
                 # But we want to only count per activity
                 # We use the concat to make something unique per activity/user combo to use in our distinct clause
-                Concat('activity', Value('//'), 'activity__feedback__no_shows__user'),
+                Concat('activity', Value('|'), 'activity__feedback__no_shows__user'),
                 distinct=True,
             )) \
             .values('count')
 
+        # you can have many leaves for the same activity, but
+        # we only want to count it per unique activity+user
+        # (activity leaves only ever have one user, so users is always one item)
+        leave_count_annotation = NonAggregatingCount(
+            Concat('activity', Value('|'), 'users'),
+            distinct=True,
+        )
+
         leave_count = history_qs \
             .filter(typus=HistoryTypus.ACTIVITY_LEAVE) \
-            .annotate(count=NonAggregatingCount('id')) \
+            .annotate(count=leave_count_annotation) \
             .values('count')
 
         leave_late_count = history_qs \
             .add_activity_left_late(hours=settings.ACTIVITY_LEAVE_LATE_HOURS) \
             .filter(activity_left_late=True) \
-            .annotate(count=NonAggregatingCount('id')) \
+            .annotate(count=leave_count_annotation) \
             .values('count')
 
         leave_missed_count = history_qs \
@@ -138,7 +152,7 @@ class ActivityHistoryStatsViewSet(GenericViewSet):
                 typus=HistoryTypus.ACTIVITY_LEAVE,
                 activity__in=all_missed_activities,
             ) \
-            .annotate(count=NonAggregatingCount('id')) \
+            .annotate(count=leave_count_annotation) \
             .values('count')
 
         leave_missed_late_count = history_qs \
@@ -147,7 +161,7 @@ class ActivityHistoryStatsViewSet(GenericViewSet):
                 activity_left_late=True,
                 activity__in=all_missed_activities,
             ) \
-            .annotate(count=NonAggregatingCount('id')) \
+            .annotate(count=leave_count_annotation) \
             .values('count')
 
         feedback_count = history_qs \

@@ -11,6 +11,7 @@ from karrot.activities.factories import ActivityFactory, ActivityTypeFactory
 from karrot.activities.models import to_range, Activity, Feedback, FeedbackNoShow
 from karrot.groups.factories import GroupFactory
 from karrot.groups.roles import GROUP_MEMBER
+from karrot.history.models import History
 from karrot.places.factories import PlaceFactory
 from karrot.places.models import PlaceStatus
 from karrot.users.factories import VerifiedUserFactory
@@ -258,6 +259,32 @@ class TestActivityHistoryStatsAPI(APITestCase):
                 response.data
             )
 
+    def test_join_leave_repeatedly_only_counts_once_per_user(self):
+        self.setup_activity(max_participants=2)
+
+        for user in [self.user, self.user2]:
+            self.client.force_login(user=user)
+            # repeatedly join and leave
+            for _ in range(5):
+                self.client.post(f'/api/activities/{self.activity.id}/add/')
+                self.client.post(f'/api/activities/{self.activity.id}/remove/')
+
+        with freeze_time(self.after_the_activity_is_over, tick=True):
+            Activity.objects.process_finished_activities()
+            self.client.force_login(user=self.user)
+            response = self.client.get('/api/stats/activity-history/', {'group': self.group.id})
+            self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+            self.assertEqual(len(response.data), 1)
+            self.assertEqual([dict(entry) for entry in response.data], [
+                self.expected_entry({
+                    'missed_count': 1,
+                    'leave_count': 2,
+                    'leave_late_count': 0,
+                    'leave_missed_count': 2,
+                    'leave_missed_late_count': 0,
+                })
+            ], response.data)
+
     def test_feedback(self):
         self.setup_activity()
         self.client.force_login(user=self.user)
@@ -378,28 +405,25 @@ class TestActivityHistoryStatsAPI(APITestCase):
                 })
             ], response.data)
 
-    def assert_scenario(self, scenario, expects):
-        group = scenario['group']
-        login_as = scenario['login_as']
-        for activity_entry in scenario['activities']:
-            activity = ActivityFactory(
-                place=activity_entry['place'],
-                date=to_range(timezone.now() + timedelta(days=33)),
-            )
-            for user in activity_entry['participants']:
-                activity.add_participant(user)
-            for no_show_report in activity_entry['no_show_reports']:
-                user_from = no_show_report['user_from']
-                user_to = no_show_report['user_to']
-                feedback = Feedback.objects.create(about=activity, given_by=user_from, comment='yay')
-                FeedbackNoShow.objects.create(feedback=feedback, user=user_to)
+    def test_ignores_history_with_null_activity(self):
+        """There are some old db entries that might have null activity
 
-        with freeze_time(timezone.now() + timedelta(days=100), tick=True):
+        They should not be included in any of the counts, there are not
+        many, and they weren't ever included in the stats, so we maintain that...
+        """
+        self.setup_activity()
+        with freeze_time(self.after_the_activity_is_over, tick=True):
             Activity.objects.process_finished_activities()
-            self.client.force_login(user=login_as)
-            response = self.client.get('/api/stats/activity-history/', {'group': group.id})
-            self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-            self.assertEqual([dict(entry) for entry in response.data], expects, response.data)
+            self.client.force_login(user=self.user)
+
+            # normally should have 1 entry
+            response = self.client.get('/api/stats/activity-history/', {'group': self.group.id})
+            self.assertEqual(len(response.data), 1, response.data)
+
+            # remove it and check it doesn't give a result
+            History.objects.filter(activity=self.activity).update(activity=None)
+            response = self.client.get('/api/stats/activity-history/', {'group': self.group.id})
+            self.assertEqual(len(response.data), 0, response.data)
 
     def test_no_show_two_feedbacks_about_same_person(self):
         users = [VerifiedUserFactory() for _ in range(4)]
@@ -531,3 +555,26 @@ class TestActivityHistoryStatsAPI(APITestCase):
             'feedback_weight': 0.0,
             **(data if data else {}),
         }
+
+    def assert_scenario(self, scenario, expects):
+        group = scenario['group']
+        login_as = scenario['login_as']
+        for activity_entry in scenario['activities']:
+            activity = ActivityFactory(
+                place=activity_entry['place'],
+                date=to_range(timezone.now() + timedelta(days=33)),
+            )
+            for user in activity_entry['participants']:
+                activity.add_participant(user)
+            for no_show_report in activity_entry['no_show_reports']:
+                user_from = no_show_report['user_from']
+                user_to = no_show_report['user_to']
+                feedback = Feedback.objects.create(about=activity, given_by=user_from, comment='yay')
+                FeedbackNoShow.objects.create(feedback=feedback, user=user_to)
+
+        with freeze_time(timezone.now() + timedelta(days=100), tick=True):
+            Activity.objects.process_finished_activities()
+            self.client.force_login(user=login_as)
+            response = self.client.get('/api/stats/activity-history/', {'group': group.id})
+            self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+            self.assertEqual([dict(entry) for entry in response.data], expects, response.data)
