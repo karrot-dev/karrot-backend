@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from karrot.activities.factories import ActivityFactory, ActivityTypeFactory
-from karrot.activities.models import to_range, Activity, Feedback
+from karrot.activities.models import to_range, Activity, Feedback, FeedbackNoShow
 from karrot.groups.factories import GroupFactory
 from karrot.groups.roles import GROUP_MEMBER
 from karrot.places.factories import PlaceFactory
@@ -340,17 +340,194 @@ class TestActivityHistoryStatsAPI(APITestCase):
                 'done_count': 1,
             })], response.data)
 
+    def test_reports_no_shows(self):
+        self.setup_activity(max_participants=2)
+        self.client.force_login(user=self.user)
+        # join activity (well before it starts)
+        self.client.post(f'/api/activities/{self.activity.id}/add/')
+
+        # other user joins too
+        self.client.force_login(user=self.user2)
+        response = self.client.post(f'/api/activities/{self.activity.id}/add/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.client.force_login(user=self.user)
+
+        with freeze_time(self.after_the_activity_is_over, tick=True):
+            Activity.objects.process_finished_activities()
+            # user reports that user2 didn't show up
+            response = self.client.post(
+                '/api/feedback/', {
+                    'about': self.activity.id,
+                    'comment': 'THEY BAILED ON ME!!!!!',
+                    'weight': 1,
+                    'no_shows': [{
+                        'user': self.user2.id
+                    }]
+                },
+                format='json'
+            )
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+            response = self.client.get('/api/stats/activity-history/', {'group': self.group.id})
+            self.assertEqual(len(response.data), 1)
+            self.assertEqual([dict(entry) for entry in response.data], [
+                self.expected_entry({
+                    'done_count': 1,
+                    'no_show_count': 1,
+                    'feedback_count': 1,
+                    'feedback_weight': 1.0,
+                })
+            ], response.data)
+
+    def assert_scenario(self, scenario, expects):
+        group = scenario['group']
+        login_as = scenario['login_as']
+        for activity_entry in scenario['activities']:
+            activity = ActivityFactory(
+                place=activity_entry['place'],
+                date=to_range(timezone.now() + timedelta(days=33)),
+            )
+            for user in activity_entry['participants']:
+                activity.add_participant(user)
+            for no_show_report in activity_entry['no_show_reports']:
+                user_from = no_show_report['user_from']
+                user_to = no_show_report['user_to']
+                feedback = Feedback.objects.create(about=activity, given_by=user_from, comment='yay')
+                FeedbackNoShow.objects.create(feedback=feedback, user=user_to)
+
+        with freeze_time(timezone.now() + timedelta(days=100), tick=True):
+            Activity.objects.process_finished_activities()
+            self.client.force_login(user=login_as)
+            response = self.client.get('/api/stats/activity-history/', {'group': group.id})
+            self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+            self.assertEqual([dict(entry) for entry in response.data], expects, response.data)
+
+    def test_no_show_two_feedbacks_about_same_person(self):
+        users = [VerifiedUserFactory() for _ in range(4)]
+        group = GroupFactory(members=users)
+        place = PlaceFactory(group=group)
+        self.assert_scenario({
+            'group':
+            group,
+            'login_as':
+            users[0],
+            'activities': [
+                {
+                    'place':
+                    place,
+                    'participants': [users[0], users[1], users[2]],
+                    'no_show_reports': [
+                        {
+                            'user_from': users[0],
+                            'user_to': users[2]
+                        },
+                        {
+                            'user_from': users[1],
+                            'user_to': users[2]
+                        },
+                    ],
+                },
+            ],
+        }, [
+            self.expected_entry({
+                'place': place.id,
+                'group': group.id,
+                'done_count': 1,
+                'feedback_count': 2,
+                'no_show_count': 1,
+            })
+        ])
+
+    def test_complex_no_shows(self):
+        users = [VerifiedUserFactory() for _ in range(5)]
+        group = GroupFactory(members=users)
+        places = [
+            PlaceFactory(
+                # they come out in name order, so ensure we match that
+                name=f'place_{i}',
+                group=group,
+            ) for i in range(3)
+        ]
+        self.maxDiff = None
+        self.assert_scenario({
+            'group':
+            group,
+            'login_as':
+            users[0],
+            'activities': [
+                {
+                    'place':
+                    places[0],
+                    'participants': [users[0], users[1], users[2], users[3]],
+                    'no_show_reports': [
+                        {
+                            'user_from': users[0],
+                            'user_to': users[1]
+                        },
+                        {
+                            'user_from': users[1],
+                            'user_to': users[3]
+                        },
+                        {
+                            'user_from': users[2],
+                            'user_to': users[3]
+                        },
+                    ],
+                },
+                {
+                    'place': places[0],
+                    'participants': [users[2], users[3]],
+                    'no_show_reports': [
+                        {
+                            'user_from': users[2],
+                            'user_to': users[3]
+                        },
+                    ],
+                },
+                {
+                    'place':
+                    places[1],
+                    'participants': [users[0], users[1], users[2]],
+                    'no_show_reports': [
+                        {
+                            'user_from': users[0],
+                            'user_to': users[2]
+                        },
+                        {
+                            'user_from': users[1],
+                            'user_to': users[2]
+                        },
+                    ],
+                },
+            ],
+        }, [
+            self.expected_entry({
+                'place': places[0].id,
+                'group': group.id,
+                'done_count': 2,
+                'feedback_count': 4,
+                'no_show_count': 3,
+            }),
+            self.expected_entry({
+                'place': places[1].id,
+                'group': group.id,
+                'done_count': 1,
+                'feedback_count': 2,
+                'no_show_count': 1,
+            })
+        ])
+
     def expected_entry(self, data=None):
         return {
             'place': self.place.id,
             'group': self.place.group.id,
             'done_count': 0,
             'missed_count': 0,
+            'no_show_count': 0,
             'leave_count': 0,
             'leave_late_count': 0,
             'leave_missed_count': 0,
             'leave_missed_late_count': 0,
             'feedback_count': 0,
-            'feedback_weight': 0,
+            'feedback_weight': 0.0,
             **(data if data else {}),
         }

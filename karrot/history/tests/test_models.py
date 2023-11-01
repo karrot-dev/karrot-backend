@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.db.models import F
 from django.test import TestCase
 
 from karrot.activities.factories import ActivityFactory
@@ -31,12 +32,18 @@ class HistoryQuerySetTests(TestCase):
     def test_activity_left_late(self):
         leave_seconds_before_activity = 324
         history = self.create_history(date=self.activity.date.start - timedelta(seconds=leave_seconds_before_activity))
-        late = History.objects.annotate_activity_leave_late(seconds=leave_seconds_before_activity)
-        not_late = History.objects.annotate_activity_leave_late(seconds=leave_seconds_before_activity - 1)
-        self.assertEqual(late.get(pk=history.id).activity_leave_late, True)
-        self.assertEqual(not_late.get(pk=history.id).activity_leave_late, False)
-        self.assertEqual(late.filter(activity_leave_late=True).count(), 1)
-        self.assertEqual(not_late.filter(activity_leave_late=True).count(), 0)
+
+        def qs(seconds):
+            return History.objects \
+                .add_activity_left_late(seconds=seconds) \
+                .annotate(activity_left_late=F('activity_left_late'))
+
+        late = qs(leave_seconds_before_activity)
+        not_late = qs(leave_seconds_before_activity - 1)
+        self.assertEqual(late.get(pk=history.id).activity_left_late, True)
+        self.assertEqual(not_late.get(pk=history.id).activity_left_late, False)
+        self.assertEqual(late.filter(activity_left_late=True).count(), 1)
+        self.assertEqual(not_late.filter(activity_left_late=True).count(), 0)
 
 
 class HistoryTypusTests(TestCase):

@@ -1,11 +1,10 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.db.models import Count, Q, Sum
-from django.db.models.functions import Coalesce
+from django.db.models import Count, Q, Sum, Subquery, IntegerField, OuterRef, FloatField, Value
+from django.db.models.functions import Coalesce, Concat
 from django_filters import IsoDateTimeFromToRangeFilter
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, ModelChoiceFilter, ModelMultipleChoiceFilter
 from rest_framework import views, status
-from rest_framework.mixins import ListModelMixin
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -14,6 +13,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from karrot.activities.models import ActivityType
 from karrot.history.models import HistoryTypus, History
+from karrot.places.models import Place
 from karrot.stats import stats
 from karrot.stats.serializers import FrontendStatsSerializer, ActivityHistoryStatsSerializer
 
@@ -34,6 +34,22 @@ def activity_type_queryset(request):
     return ActivityType.objects.filter(group__in=request.user.groups.all())
 
 
+class NonAggregatingCount(Count):
+    """A COUNT that does not trigger a GROUP BY to be added
+
+    This is useful when using Subquery in an annotation
+    """
+    contains_aggregate = False
+
+
+class NonAggregatingSum(Sum):
+    """A SUM that does not trigger a GROUP BY to be added
+
+    This is useful when using Subquery in an annotation
+    """
+    contains_aggregate = False
+
+
 class ActivityHistoryStatsFilter(FilterSet):
     group = ModelChoiceFilter(queryset=groups_queryset)
     user = ModelMultipleChoiceFilter(queryset=users_queryset, field_name='users')
@@ -45,18 +61,29 @@ class ActivityHistoryStatsFilter(FilterSet):
         fields = ['group', 'activity_type', 'user']
 
 
-class ActivityHistoryStatsViewSet(ListModelMixin, GenericViewSet):
+class ActivityHistoryStatsViewSet(GenericViewSet):
     serializer_class = ActivityHistoryStatsSerializer
     queryset = History.objects
     filter_backends = (DjangoFilterBackend, )
     filterset_class = ActivityHistoryStatsFilter
     permission_classes = (IsAuthenticated, )
 
-    def get_queryset(self):
+    def list(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_entries(), many=True)
+        return Response(serializer.data)
+
+    def get_entries(self):
         # ActivityHistoryStatsFilter has already used the "user" param
         # to filter the history, but we want to pull it out again for filtering
         # other things too
         user_id = self.request.query_params.get('user', None)
+
+        # our main history queryset, which contains all the filter params
+        # remove the ordering as it's not important and breaks some sub queries
+        history_qs = super() \
+            .filter_queryset(self.queryset) \
+            .filter(place=OuterRef('id')) \
+            .order_by()
 
         feedback_filter = Q(typus=HistoryTypus.ACTIVITY_DONE)
 
@@ -67,46 +94,105 @@ class ActivityHistoryStatsViewSet(ListModelMixin, GenericViewSet):
         # which is used to match up with activities that people left
         all_missed_activities = History.objects.filter(typus=HistoryTypus.ACTIVITY_MISSED).values_list('activity')
 
-        return self.filter_queryset(super().get_queryset()) \
-            .annotate_activity_leave_late(hours=settings.ACTIVITY_LEAVE_LATE_HOURS) \
-            .values('place', 'group') \
-            .filter(typus__in=[
-                HistoryTypus.ACTIVITY_DONE,
-                HistoryTypus.ACTIVITY_MISSED,
-                HistoryTypus.ACTIVITY_LEAVE,
-            ]) \
+        done_count = history_qs \
+            .filter(typus=HistoryTypus.ACTIVITY_DONE) \
+            .annotate(count=NonAggregatingCount('id')) \
+            .values('count')
+
+        missed_count = history_qs \
+            .filter(typus=HistoryTypus.ACTIVITY_MISSED) \
+            .annotate(count=NonAggregatingCount('id')) \
+            .values('count')
+
+        no_show_count = history_qs \
+            .filter(typus=HistoryTypus.ACTIVITY_DONE) \
+            .filter(
+                Q(activity__feedback__no_shows__user=user_id) if user_id
+                # Important to include this isnull=False condition when we don't have a user,
+                # or django will use a LEFT OUTER JOIN and the query will have a count of 1
+                else Q(activity__feedback__no_shows__user__isnull=False)
+            ) \
+            .annotate(count=NonAggregatingCount(
+                # Needs to be counted per activity+user combo
+                # Each activity could have multiple no_show reports for a given user
+                # But we want to only count per activity
+                # We use the concat to make something unique per activity/user combo to use in our distinct clause
+                Concat('activity', Value('//'), 'activity__feedback__no_shows__user'),
+                distinct=True,
+            )) \
+            .values('count')
+
+        leave_count = history_qs \
+            .filter(typus=HistoryTypus.ACTIVITY_LEAVE) \
+            .annotate(count=NonAggregatingCount('id')) \
+            .values('count')
+
+        leave_late_count = history_qs \
+            .add_activity_left_late(hours=settings.ACTIVITY_LEAVE_LATE_HOURS) \
+            .filter(activity_left_late=True) \
+            .annotate(count=NonAggregatingCount('id')) \
+            .values('count')
+
+        leave_missed_count = history_qs \
+            .filter(
+                typus=HistoryTypus.ACTIVITY_LEAVE,
+                activity__in=all_missed_activities,
+            ) \
+            .annotate(count=NonAggregatingCount('id')) \
+            .values('count')
+
+        leave_missed_late_count = history_qs \
+            .add_activity_left_late(hours=settings.ACTIVITY_LEAVE_LATE_HOURS) \
+            .filter(
+                activity_left_late=True,
+                activity__in=all_missed_activities,
+            ) \
+            .annotate(count=NonAggregatingCount('id')) \
+            .values('count')
+
+        feedback_count = history_qs \
+            .filter(feedback_filter) \
+            .annotate(feedback_count=NonAggregatingCount('activity__feedback')) \
+            .values('feedback_count')
+
+        feedback_weight = history_qs \
+            .filter(feedback_filter) \
+            .annotate(feedback_weight=NonAggregatingSum('activity__feedback__weight')) \
+            .values('feedback_weight')
+
+        def annotation(subquery, is_float=False):
+            if is_float:
+                default_value = 0.0
+                output_field = FloatField()
+            else:
+                default_value = 0
+                output_field = IntegerField()
+            return Coalesce(Subquery(subquery, output_field=output_field), default_value)
+
+        return Place.objects \
+            .values('id', 'group') \
             .annotate(
-                done_count=Count('activity', distinct=True, filter=Q(
-                    typus=HistoryTypus.ACTIVITY_DONE,
-                )),
-                missed_count=Count('activity', distinct=True, filter=Q(
-                    typus=HistoryTypus.ACTIVITY_MISSED,
-                )),
-                leave_count=Count('activity', distinct=True, filter=Q(
-                    typus=HistoryTypus.ACTIVITY_LEAVE,
-                )),
-                leave_late_count=Count('activity', distinct=True, filter=Q(
-                    activity_leave_late=True,
-                )),
-                leave_missed_count=Count('activity', distinct=True, filter=Q(
-                    typus=HistoryTypus.ACTIVITY_LEAVE,
-                    activity__in=all_missed_activities,
-                )),
-                leave_missed_late_count=Count('activity', distinct=True, filter=Q(
-                    activity_leave_late=True,
-                    activity__in=all_missed_activities,
-                )),
-                feedback_count=Count('activity__feedback', filter=feedback_filter),
-                feedback_weight=Coalesce(Sum('activity__feedback__weight', filter=feedback_filter), 0.0)) \
+                done_count=annotation(done_count),
+                missed_count=annotation(missed_count),
+                no_show_count=annotation(no_show_count),
+                leave_count=annotation(leave_count),
+                leave_late_count=annotation(leave_late_count),
+                leave_missed_count=annotation(leave_missed_count),
+                leave_missed_late_count=annotation(leave_missed_late_count),
+                feedback_count=annotation(feedback_count),
+                feedback_weight=annotation(feedback_weight, is_float=True),
+            ) \
             .filter(
                 # don't need to check the leave_missed_* ones here, as the leave_* ones will be >0 in those cases
+                # TODO: in the query it looks like it's duplicating the filtering stuff from the annotations, which might be fine
                 Q(done_count__gt=0) |
                 Q(missed_count__gt=0) |
                 Q(leave_count__gt=0) |
                 Q(leave_late_count__gt=0) |
                 Q(feedback_count__gt=0) |
-                Q(feedback_weight__gt=0)) \
-            .order_by('place__name')
+                Q(feedback_weight__gt=0)
+            ) \
+            .order_by('name')
 
 
 class FrontendStatsView(views.APIView):

@@ -30,11 +30,17 @@ from karrot.history.models import History, HistoryTypus
 from karrot.activities import stats
 from karrot.activities.models import (
     Activity as ActivityModel, Feedback as FeedbackModel, ActivitySeries as ActivitySeriesModel, ActivityType,
-    ActivityParticipant, ParticipantType, SeriesParticipantType, default_duration, Activity
+    ActivityParticipant, ParticipantType, SeriesParticipantType, default_duration, Activity, FeedbackNoShow
 )
 from karrot.utils.date_utils import csv_datetime
 from karrot.utils.misc import find_changed, is_prefetched
 from karrot.places.serializers import PublicPlaceSerializer
+
+
+class FeedbackNoShowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FeedbackNoShow
+        fields = ['user']
 
 
 class FeedbackSerializer(serializers.ModelSerializer):
@@ -48,6 +54,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
             'given_by',
             'created_at',
             'is_editable',
+            'no_shows',
         ]
         read_only_fields = ['given_by', 'created_at']
         extra_kwargs = {'given_by': {'default': serializers.CurrentUserDefault()}}
@@ -58,14 +65,39 @@ class FeedbackSerializer(serializers.ModelSerializer):
         ]
 
     is_editable = serializers.SerializerMethodField()
+    no_shows = FeedbackNoShowSerializer(many=True, required=False)
 
     def create(self, validated_data):
+        no_shows = validated_data.pop('no_shows', None)
         feedback = super().create(validated_data)
+        if no_shows:
+            for no_show in no_shows:
+                feedback.no_shows.create(**no_show)
         feedback.about.place.group.refresh_active_status()
         return feedback
 
     def update(self, feedback, validated_data):
-        super().update(feedback, validated_data)
+        no_shows = validated_data.pop('no_shows', None)
+        feedback = super().update(feedback, validated_data)
+        if no_shows is not None:
+            existing_no_shows = list(feedback.no_shows.all())
+            for no_show in no_shows:
+                existing_no_show = None
+                for entry in existing_no_shows:
+                    if entry.user_id == no_show['user'].id:
+                        existing_no_show = entry
+
+                if existing_no_show:
+                    # we don't have anything to update about it, but if we had more attrs on it
+                    # this would be where we update it
+                    existing_no_shows.remove(existing_no_show)
+                else:
+                    feedback.no_shows.create(**no_show)
+
+            # remove anything leftover
+            for entry in existing_no_shows:
+                entry.delete()
+
         feedback.about.place.group.refresh_active_status()
         return feedback
 
@@ -95,7 +127,8 @@ class FeedbackSerializer(serializers.ModelSerializer):
                 return None
             return getattr(self.instance, field)
 
-        activity_type = data.get('about', get_instance_attr('about')).activity_type
+        activity = data.get('about', get_instance_attr('about'))
+        activity_type = activity.activity_type
 
         comment = data.get('comment', get_instance_attr('comment'))
         weight = data.get('weight', get_instance_attr('weight'))
@@ -112,6 +145,14 @@ class FeedbackSerializer(serializers.ModelSerializer):
 
         if (comment is None or comment == '') and weight is None:
             raise serializers.ValidationError('Both comment and weight cannot be blank.')
+
+        no_shows = data.get('no_shows', None)
+        if no_shows:
+            # confusingly "participants" are the user entries not ActivityParticipant ones
+            user_ids = activity.participants.values_list('id', flat=True)
+            for no_show in no_shows:
+                if no_show['user'].id not in user_ids:
+                    raise serializers.ValidationError('user is not participant')
 
         data['given_by'] = self.context['request'].user
         return data
