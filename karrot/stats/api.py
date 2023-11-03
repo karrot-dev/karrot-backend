@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.db.models import Count, Q, Sum, Subquery, IntegerField, OuterRef, FloatField, Value
+from django.db.models import Count, Q, Sum, Subquery, OuterRef, Value, F
 from django.db.models.functions import Coalesce, Concat
 from django_filters import IsoDateTimeFromToRangeFilter
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, ModelChoiceFilter, ModelMultipleChoiceFilter
@@ -73,10 +73,10 @@ class ActivityHistoryStatsViewSet(GenericViewSet):
         return Response(serializer.data)
 
     def get_entries(self):
-        # ActivityHistoryStatsFilter has already used the "user" param
-        # to filter the history, but we want to pull it out again for filtering
-        # other things too
+        # ActivityHistoryStatsFilter will validate and use these params
+        # for History queryset filtering, but we also want them for other purposes
         user_id = self.request.query_params.get('user', None)
+        group_id = self.request.query_params.get('group', None)
 
         # our main history queryset, which contains all the filter params
         # remove the ordering as it's not important and breaks some sub queries
@@ -174,27 +174,19 @@ class ActivityHistoryStatsViewSet(GenericViewSet):
             .annotate(feedback_weight=NonAggregatingSum('activity__feedback__weight')) \
             .values('feedback_weight')
 
-        def annotation(subquery, is_float=False):
-            if is_float:
-                default_value = 0.0
-                output_field = FloatField()
-            else:
-                default_value = 0
-                output_field = IntegerField()
-            return Coalesce(Subquery(subquery, output_field=output_field), default_value)
-
         return Place.objects \
-            .values('id', 'group') \
+            .filter(group=group_id) \
+            .values('group', place=F('id')) \
             .annotate(
-                done_count=annotation(done_count),
-                missed_count=annotation(missed_count),
-                no_show_count=annotation(no_show_count),
-                leave_count=annotation(leave_count),
-                leave_late_count=annotation(leave_late_count),
-                leave_missed_count=annotation(leave_missed_count),
-                leave_missed_late_count=annotation(leave_missed_late_count),
-                feedback_count=annotation(feedback_count),
-                feedback_weight=annotation(feedback_weight, is_float=True),
+                done_count=Subquery(done_count),
+                missed_count=Subquery(missed_count),
+                no_show_count=Subquery(no_show_count),
+                leave_count=Subquery(leave_count),
+                leave_late_count=Subquery(leave_late_count),
+                leave_missed_count=Subquery(leave_missed_count),
+                leave_missed_late_count=Subquery(leave_missed_late_count),
+                feedback_count=Subquery(feedback_count),
+                feedback_weight=Coalesce(Subquery(feedback_weight), 0.0),
             ) \
             .filter(
                 # don't need to check the leave_missed_* ones here, as the leave_* ones will be >0 in those cases

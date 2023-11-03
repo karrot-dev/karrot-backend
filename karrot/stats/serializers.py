@@ -9,7 +9,7 @@ MAX_STATS = 50
 class ActivityHistoryStatsSerializer(serializers.Serializer):
     # using the values('place, 'group') in the query doesn't seem to fit nicely with DRF model serializer
     # so having to explicitly declare these fields here
-    place = serializers.IntegerField(source='id')
+    place = serializers.IntegerField()
     group = serializers.IntegerField()
 
     done_count = serializers.IntegerField()
