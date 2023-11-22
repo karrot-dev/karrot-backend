@@ -9,8 +9,8 @@
 # Frido Hokkaido <kuerbiskernkotze@posteo.ee>, 2019
 # Tilmann Becker <tilmann.becker+github@gmail.com>, 2019
 # Lea Nolte <lea.marie@gmx.net>, 2019
-# Carlos Pesquera Alonso <fydus@hotmail.com>, 2021
 # Sergio Varela <sergitroll9@gmail.com>, 2022
+# Carlos Pesquera Alonso <fydus@hotmail.com>, 2023
 # 
 #, fuzzy
 msgid ""
@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "PO-Revision-Date: 2017-02-24 04:04+0000\n"
-"Last-Translator: Sergio Varela <sergitroll9@gmail.com>, 2022\n"
+"Last-Translator: Carlos Pesquera Alonso <fydus@hotmail.com>, 2023\n"
 "Language-Team: Spanish (https://app.transifex.com/yunity-1/teams/68631/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -51,15 +51,15 @@ msgstr "Actividad"
 msgid "Task"
 msgstr "Tarea"
 
-#: karrot/activities/serializers.py:143
+#: karrot/activities/serializers.py:311
 msgid "Must be a list"
 msgstr "Tiene que haber una lista"
 
-#: karrot/activities/serializers.py:144
+#: karrot/activities/serializers.py:312
 msgid "Must be a list with one or two values"
 msgstr "Tiene que haber una lista con uno o dos valores"
 
-#: karrot/activities/serializers.py:145
+#: karrot/activities/serializers.py:313
 msgid "Must pass start value"
 msgstr "Tiene que pasar un valor inicial"
 
@@ -68,10 +68,10 @@ msgstr "Tiene que pasar un valor inicial"
 msgid "Upcoming %(activity_type)s"
 msgstr "Próxima%(activity_type)s"
 
-#: karrot/activities/tasks.py:166
+#: karrot/activities/tasks.py:164
 #, python-format
 msgid "%(activity_type)s no longer available - %(date_time)s"
-msgstr ""
+msgstr "%(activity_type)s no disponible(s) - %(date_time)s"
 
 #: karrot/activities/templates/activity_notification.html.jinja2:4
 #: karrot/activities/templates/activity_notification.html.jinja2:184
@@ -129,11 +129,11 @@ msgstr "Click aquí para darte de baja"
 #: karrot/activities/templates/participant_removed.subject.jinja2:1
 #, python-format
 msgid "Your activities for %(place_name)s changed"
-msgstr ""
+msgstr "Tus actividades de %(place_name)s han cambiado"
 
 #: karrot/activities/templates/participant_removed.html.jinja2:122
 msgid "The following activities are no longer available for you"
-msgstr ""
+msgstr "Las siguientes actividades ya no están disponibles para ti"
 
 #: karrot/activities/templates/participant_removed.html.jinja2:138
 #, python-format
@@ -142,6 +142,9 @@ msgid ""
 "transform: uppercase; text-decoration: none; font-weight: 700; color: "
 "#4a982e;\">%(display_name)s</a>"
 msgstr ""
+"Mensaje de <a class=\"message-author\" href=\"%(url)s\" style=\"text-"
+"transform: uppercase; text-decoration: none; font-weight: 700; color: "
+"#4a982e;\">%(display_name)s</a>"
 
 #: karrot/activities/templates/participant_removed.html.jinja2:161
 #: karrot/groups/templates/user_became_editor.html.jinja2:219
@@ -268,16 +271,16 @@ msgstr ""
 " en %(site_name)s</a> o <a href=\"%(mute_url)s\">silenciar la "
 "conversación</a>."
 
-#: karrot/conversations/api.py:83 karrot/conversations/api.py:291
-#: karrot/conversations/api.py:482 karrot/conversations/serializers.py:271
+#: karrot/conversations/api.py:84 karrot/conversations/api.py:292
+#: karrot/conversations/api.py:483 karrot/conversations/serializers.py:271
 msgid "You are not in this conversation"
 msgstr "No eres parte de esta conversación"
 
-#: karrot/conversations/api.py:92
+#: karrot/conversations/api.py:93
 msgid "You are not the author of this message"
 msgstr "No tienes la autoría de este mensaje"
 
-#: karrot/conversations/api.py:101
+#: karrot/conversations/api.py:102
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
@@ -285,11 +288,11 @@ msgstr ""
 "No puedes editar este mensaje mas de %(days_number)sdías después de su "
 "creación."
 
-#: karrot/conversations/api.py:410
+#: karrot/conversations/api.py:411
 msgid "Must be first in thread"
 msgstr "Tiene que estar primero en un hilo"
 
-#: karrot/conversations/api.py:413
+#: karrot/conversations/api.py:414
 msgid "You are not a participant in this thread"
 msgstr "No participar en este hilo"
 
@@ -306,7 +309,7 @@ msgstr "Nuevo mensaje de solicitud de %(user_name)s para %(group_name)s"
 #: karrot/conversations/emails.py:290
 #, python-format
 msgid "New message in membership review of %(user_name)s"
-msgstr ""
+msgstr "Nuevo mensaje de revisión de membresía de %(user_name)s"
 
 #: karrot/conversations/emails.py:305
 #, python-format
@@ -518,7 +521,7 @@ msgstr "¡Usa tu poder con inteligencia!"
 #: karrot/groups/templates/user_got_role.subject.jinja2:1
 #, python-format
 msgid "You received a new role in %(group_name)s!"
-msgstr ""
+msgstr "¡Has recibido un nuevo rol en %(group_name)s!"
 
 #: karrot/groups/templates/user_got_role.html.jinja2:172
 #, python-format
@@ -526,6 +529,8 @@ msgid ""
 "You received enough trust from fellow group members to now have the role: "
 "%(role_name)s"
 msgstr ""
+"Has recibido suficiente confianza de miembros del grupo para pasar a tener "
+"el rol de %(role_name)s"
 
 #: karrot/groups/templates/user_inactive_in_group.html.jinja2:169
 msgid "Hey, we're missing you!"
@@ -631,7 +636,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "Ya se envió una invitación a este correo electrónico. "
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
-#: karrot/offers/serializers.py:98
+#: karrot/offers/serializers.py:100
 msgid "You are not a member of this group."
 msgstr "No eres un miembro de este grupo"
 
@@ -693,6 +698,7 @@ msgstr "La posición dada está fuera del rango permitido"
 #, python-format
 msgid "The membership review of %(affected_user_name)s continues"
 msgstr ""
+"La revisión de la membresía de %(affected_user_name)s sigue en proceso"
 
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:169
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:169
@@ -722,19 +728,21 @@ msgid ""
 "You are receiving this because you are subscribed to <strong>Membership "
 "Review</strong> emails for this group."
 msgstr ""
+"Estas recibiendo esto porque le estás suscrito a los correos electrónicos de"
+" <strong>Revisión de membresía</strong> de este grupo."
 
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:4
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.html.jinja2:168
 #: karrot/issues/templates/conflict_resolution_continued_affected_user.subject.jinja2:1
 msgid "Your membership review continues"
-msgstr ""
+msgstr "La revisión de tu membresía sigue en proceso"
 
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:4
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:168
 #: karrot/issues/templates/new_conflict_resolution.subject.jinja2:1
 #, python-format
 msgid "A membership review was started for %(affected_user_name)s"
-msgstr ""
+msgstr "Una revisión de membresía ha sido iniciada por %(affected_user_name)s"
 
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:176
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:176
@@ -751,7 +759,7 @@ msgstr "La ronda de votación termina el %(expiry_date)s."
 #: karrot/issues/templates/new_conflict_resolution_affected_user.html.jinja2:168
 #: karrot/issues/templates/new_conflict_resolution_affected_user.subject.jinja2:1
 msgid "A review of your membership was started"
-msgstr ""
+msgstr "Se inició una revisión de membresía"
 
 #: karrot/offers/api.py:33
 msgid "You are not the owner of this offer"
@@ -830,9 +838,9 @@ msgstr "No organices con más de %(count)ssemanas de adelanto"
 msgid "You are already subscribed to this place"
 msgstr "Ya estás suscrita a este lugar"
 
-#: karrot/subscriptions/receivers.py:776
+#: karrot/subscriptions/receivers.py:777
 msgid "Push notifications are enabled!"
-msgstr ""
+msgstr "¡Notificaciones habilitadas!"
 
 #: karrot/userauth/api.py:98 karrot/userauth/serializers.py:102
 #: karrot/userauth/serializers.py:151 karrot/userauth/serializers.py:172
