@@ -264,4 +264,6 @@ def user_passwordreset_url(code):
 
 
 def logo_url():
-    return '{hostname}/statics/carrot_logo.png'.format(hostname=settings.HOSTNAME, )
+    return '{hostname}/statics/carrot_logo.png'.format(
+        hostname=settings.HOSTNAME,
+    )
