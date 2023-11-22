@@ -198,8 +198,11 @@ class ConversationMessageAttachmentSerializer(serializers.ModelSerializer):
         return asdict(urls)
 
     @staticmethod
-    def get_size(attachment) -> int:
-        return attachment.file.size
+    def get_size(attachment) -> Optional[int]:
+        try:
+            return attachment.file.size
+        except FileNotFoundError:
+            return
 
     def to_representation(self, attachment):
         data = super().to_representation(attachment)
