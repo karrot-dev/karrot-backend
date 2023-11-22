@@ -3,6 +3,7 @@ from django.db.models import Q
 
 from karrot.base.filters import ISODateTimeRangeFromToRangeFilter
 from karrot.activities.models import Activity, ActivitySeries, Feedback, ActivityType
+from karrot.places.models import PlaceStatus
 
 
 def groups_queryset(request):
@@ -32,6 +33,7 @@ class PublicActivitiesFilter(filters.FilterSet):
 
 class ActivitiesFilter(filters.FilterSet):
     place = filters.NumberFilter(field_name='place')
+    place_status = filters.ChoiceFilter(field_name='place__status', choices=PlaceStatus.choices)
     group = filters.NumberFilter(field_name='place__group')
     date = ISODateTimeRangeFromToRangeFilter(field_name='date', lookup_expr='overlap')
     feedback_possible = filters.BooleanFilter(method='filter_feedback_possible')
@@ -39,7 +41,9 @@ class ActivitiesFilter(filters.FilterSet):
     joined = filters.BooleanFilter(method='filter_joined')
     activity_type = filters.NumberFilter(field_name='activity_type')
     slots = filters.ChoiceFilter(method='filter_slots', choices=[(val, val) for val in ('free', 'empty', 'joined')])
-    places = filters.ChoiceFilter(method='filter_places', choices=[(val, val) for val in ('subscribed', )])
+    places = filters.ChoiceFilter(
+        method='filter_places', choices=[(val, val) for val in ('subscribed', )]
+    )
 
     class Meta:
         model = Activity
@@ -58,7 +62,9 @@ class ActivitiesFilter(filters.FilterSet):
     def filter_feedback_possible(self, qs, name, value):
         if value is True:
             return qs.only_feedback_possible(self.request.user)
-        return qs.exclude_feedback_possible(self.request.user)
+        elif value is False:
+            return qs.exclude_feedback_possible(self.request.user)
+        return qs
 
     def filter_has_feedback(self, qs, name, value):
         if value is True:
