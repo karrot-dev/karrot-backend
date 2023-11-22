@@ -45,15 +45,15 @@ msgstr ""
 msgid "Task"
 msgstr ""
 
-#: karrot/activities/serializers.py:143
+#: karrot/activities/serializers.py:311
 msgid "Must be a list"
 msgstr ""
 
-#: karrot/activities/serializers.py:144
+#: karrot/activities/serializers.py:312
 msgid "Must be a list with one or two values"
 msgstr ""
 
-#: karrot/activities/serializers.py:145
+#: karrot/activities/serializers.py:313
 msgid "Must pass start value"
 msgstr ""
 
@@ -62,7 +62,7 @@ msgstr ""
 msgid "Upcoming %(activity_type)s"
 msgstr ""
 
-#: karrot/activities/tasks.py:166
+#: karrot/activities/tasks.py:164
 #, python-format
 msgid "%(activity_type)s no longer available - %(date_time)s"
 msgstr ""
@@ -253,26 +253,26 @@ msgstr ""
 "直接回覆這封郵件，<a href=\"%(conversation_url)s\">在%(site_name)s上檢視</a>, 或是<a "
 "href=\"%(mute_url)s\">將對話靜音</a>"
 
-#: karrot/conversations/api.py:83 karrot/conversations/api.py:291
-#: karrot/conversations/api.py:482 karrot/conversations/serializers.py:271
+#: karrot/conversations/api.py:84 karrot/conversations/api.py:292
+#: karrot/conversations/api.py:483 karrot/conversations/serializers.py:271
 msgid "You are not in this conversation"
 msgstr "你並未加入對話"
 
-#: karrot/conversations/api.py:92
+#: karrot/conversations/api.py:93
 msgid "You are not the author of this message"
 msgstr "這則訊息不是你寫的"
 
-#: karrot/conversations/api.py:101
+#: karrot/conversations/api.py:102
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
 msgstr "在發出訊息%(days_number)s天後你就不能編輯了"
 
-#: karrot/conversations/api.py:410
+#: karrot/conversations/api.py:411
 msgid "Must be first in thread"
 msgstr "必須是討論串中的第一個"
 
-#: karrot/conversations/api.py:413
+#: karrot/conversations/api.py:414
 msgid "You are not a participant in this thread"
 msgstr "你並未加入此討論串"
 
@@ -583,7 +583,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "邀請信已寄送至下列電子郵件信箱："
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
-#: karrot/offers/serializers.py:98
+#: karrot/offers/serializers.py:100
 msgid "You are not a member of this group."
 msgstr "你並不是此社團的成員。"
 
@@ -774,7 +774,7 @@ msgstr ""
 msgid "You are already subscribed to this place"
 msgstr ""
 
-#: karrot/subscriptions/receivers.py:776
+#: karrot/subscriptions/receivers.py:777
 msgid "Push notifications are enabled!"
 msgstr ""
 

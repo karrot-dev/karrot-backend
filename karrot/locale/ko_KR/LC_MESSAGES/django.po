@@ -45,15 +45,15 @@ msgstr "활동"
 msgid "Task"
 msgstr "업무"
 
-#: karrot/activities/serializers.py:143
+#: karrot/activities/serializers.py:311
 msgid "Must be a list"
 msgstr "목록이어야 합니다"
 
-#: karrot/activities/serializers.py:144
+#: karrot/activities/serializers.py:312
 msgid "Must be a list with one or two values"
 msgstr "하나 혹은 두 값의 목록이어야 합니다"
 
-#: karrot/activities/serializers.py:145
+#: karrot/activities/serializers.py:313
 msgid "Must pass start value"
 msgstr "시작 값을 통과해야 합니다"
 
@@ -62,7 +62,7 @@ msgstr "시작 값을 통과해야 합니다"
 msgid "Upcoming %(activity_type)s"
 msgstr "예정된 %(activity_type)s"
 
-#: karrot/activities/tasks.py:166
+#: karrot/activities/tasks.py:164
 #, python-format
 msgid "%(activity_type)s no longer available - %(date_time)s"
 msgstr ""
@@ -253,26 +253,26 @@ msgstr ""
 "이메일에 직접 답하거나, <a href=\"%(conversation_url)s\">%(site_name)s에서 보거나</a>, <a "
 "href=\"%(mute_url)s\">대화를 음소거 하세요</a>."
 
-#: karrot/conversations/api.py:83 karrot/conversations/api.py:291
-#: karrot/conversations/api.py:482 karrot/conversations/serializers.py:271
+#: karrot/conversations/api.py:84 karrot/conversations/api.py:292
+#: karrot/conversations/api.py:483 karrot/conversations/serializers.py:271
 msgid "You are not in this conversation"
 msgstr "이 대화에 속하지 않았습니다"
 
-#: karrot/conversations/api.py:92
+#: karrot/conversations/api.py:93
 msgid "You are not the author of this message"
 msgstr "당신은 이 메시지의 작성자가 아닙니다."
 
-#: karrot/conversations/api.py:101
+#: karrot/conversations/api.py:102
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
 msgstr "당신은 메시지가 생성된지 %(days_number)s 일부터는 편집하실 수 없습니다."
 
-#: karrot/conversations/api.py:410
+#: karrot/conversations/api.py:411
 msgid "Must be first in thread"
 msgstr "쓰레드에서 첫 번째여야 합니다"
 
-#: karrot/conversations/api.py:413
+#: karrot/conversations/api.py:414
 msgid "You are not a participant in this thread"
 msgstr "이 쓰레드에 참여자가 아닙니다"
 
@@ -591,7 +591,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "이미 이메일 주소로 초대가 전송되었습니다"
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
-#: karrot/offers/serializers.py:98
+#: karrot/offers/serializers.py:100
 msgid "You are not a member of this group."
 msgstr "당신은 이 그룹의 구성원이 아닙니다."
 
@@ -784,7 +784,7 @@ msgstr "%(count)s주 이상 미리 설정해선 안됩니다"
 msgid "You are already subscribed to this place"
 msgstr "이미 이 장소를 구독하셨습니다"
 
-#: karrot/subscriptions/receivers.py:776
+#: karrot/subscriptions/receivers.py:777
 msgid "Push notifications are enabled!"
 msgstr ""
 

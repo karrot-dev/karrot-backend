@@ -45,15 +45,15 @@ msgstr "Tevékenység"
 msgid "Task"
 msgstr "Feladat"
 
-#: karrot/activities/serializers.py:143
+#: karrot/activities/serializers.py:311
 msgid "Must be a list"
 msgstr "Ennek listának kell lennie"
 
-#: karrot/activities/serializers.py:144
+#: karrot/activities/serializers.py:312
 msgid "Must be a list with one or two values"
 msgstr "Egy vagy kétértékes listának kell lennie"
 
-#: karrot/activities/serializers.py:145
+#: karrot/activities/serializers.py:313
 msgid "Must pass start value"
 msgstr "Többnek kell lennie mint a kiindulási értéknek"
 
@@ -62,7 +62,7 @@ msgstr "Többnek kell lennie mint a kiindulási értéknek"
 msgid "Upcoming %(activity_type)s"
 msgstr "Közelgő %(activity_type)s"
 
-#: karrot/activities/tasks.py:166
+#: karrot/activities/tasks.py:164
 #, python-format
 msgid "%(activity_type)s no longer available - %(date_time)s"
 msgstr ""
@@ -264,16 +264,16 @@ msgstr ""
 " meg a(z) %(site_name)s oldalon</a>, vagy <a href=\"%(mute_url)s\">némítsd "
 "le a beszélgetést</a>."
 
-#: karrot/conversations/api.py:83 karrot/conversations/api.py:291
-#: karrot/conversations/api.py:482 karrot/conversations/serializers.py:271
+#: karrot/conversations/api.py:84 karrot/conversations/api.py:292
+#: karrot/conversations/api.py:483 karrot/conversations/serializers.py:271
 msgid "You are not in this conversation"
 msgstr "Nem vagy tagja ennek a beszélgetésnek"
 
-#: karrot/conversations/api.py:92
+#: karrot/conversations/api.py:93
 msgid "You are not the author of this message"
 msgstr "Nem te írtad ezt az üzenetet"
 
-#: karrot/conversations/api.py:101
+#: karrot/conversations/api.py:102
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
@@ -281,11 +281,11 @@ msgstr ""
 "Nem tudsz szerkeszteni üzeneteket több mint %(days_number)s nappal a "
 "küldésük után."
 
-#: karrot/conversations/api.py:410
+#: karrot/conversations/api.py:411
 msgid "Must be first in thread"
 msgstr "Elsőnek kell lennie a beszélgetésben"
 
-#: karrot/conversations/api.py:413
+#: karrot/conversations/api.py:414
 msgid "You are not a participant in this thread"
 msgstr "Nem vagy résztvevője ennek a beszélgetésnek"
 
@@ -623,7 +623,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "Már el lett küldve egy meghívó erre az email címre."
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
-#: karrot/offers/serializers.py:98
+#: karrot/offers/serializers.py:100
 msgid "You are not a member of this group."
 msgstr "Nem vagy tagja ennek a csoportnak."
 
@@ -822,7 +822,7 @@ msgstr "Ne legyen több mint %(count)s héttel előre beállítva"
 msgid "You are already subscribed to this place"
 msgstr "Már fel vagy iratkozva erre a helyre"
 
-#: karrot/subscriptions/receivers.py:776
+#: karrot/subscriptions/receivers.py:777
 msgid "Push notifications are enabled!"
 msgstr ""
 

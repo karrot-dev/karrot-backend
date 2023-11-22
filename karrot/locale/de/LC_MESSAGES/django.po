@@ -53,15 +53,15 @@ msgstr "Aktivität"
 msgid "Task"
 msgstr "Aufgabe"
 
-#: karrot/activities/serializers.py:143
+#: karrot/activities/serializers.py:311
 msgid "Must be a list"
 msgstr "Muss eine Liste sein"
 
-#: karrot/activities/serializers.py:144
+#: karrot/activities/serializers.py:312
 msgid "Must be a list with one or two values"
 msgstr "Muss eine Liste mit einem oder zwei Werten sein"
 
-#: karrot/activities/serializers.py:145
+#: karrot/activities/serializers.py:313
 msgid "Must pass start value"
 msgstr "Muss einen Startwert enthalten"
 
@@ -70,7 +70,7 @@ msgstr "Muss einen Startwert enthalten"
 msgid "Upcoming %(activity_type)s"
 msgstr "Bevorstehend  %(activity_type)s"
 
-#: karrot/activities/tasks.py:166
+#: karrot/activities/tasks.py:164
 #, python-format
 msgid "%(activity_type)s no longer available - %(date_time)s"
 msgstr ""
@@ -272,16 +272,16 @@ msgstr ""
 "besuchen</a> oder <a href=\"%(mute_url)s\">die Unterhaltung "
 "stummschalten</a>."
 
-#: karrot/conversations/api.py:83 karrot/conversations/api.py:291
-#: karrot/conversations/api.py:482 karrot/conversations/serializers.py:271
+#: karrot/conversations/api.py:84 karrot/conversations/api.py:292
+#: karrot/conversations/api.py:483 karrot/conversations/serializers.py:271
 msgid "You are not in this conversation"
 msgstr "Du bist nicht Teil dieser Unterhaltung"
 
-#: karrot/conversations/api.py:92
+#: karrot/conversations/api.py:93
 msgid "You are not the author of this message"
 msgstr "Du bist nicht Autor dieser Nachricht"
 
-#: karrot/conversations/api.py:101
+#: karrot/conversations/api.py:102
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
@@ -289,11 +289,11 @@ msgstr ""
 "Du kannst eine Nachricht nicht mehr als %(days_number)s Tage nach ihrer "
 "Erstellung bearbeiten."
 
-#: karrot/conversations/api.py:410
+#: karrot/conversations/api.py:411
 msgid "Must be first in thread"
 msgstr "Muss erste Nachricht im Thread sein"
 
-#: karrot/conversations/api.py:413
+#: karrot/conversations/api.py:414
 msgid "You are not a participant in this thread"
 msgstr "Du bist nicht Teil dieses Threads"
 
@@ -634,7 +634,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "Eine Einladung wurde bereits an diese E-Mail-Adresse versendet"
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
-#: karrot/offers/serializers.py:98
+#: karrot/offers/serializers.py:100
 msgid "You are not a member of this group."
 msgstr "Du bist kein Mitglied dieser Gruppe."
 
@@ -836,7 +836,7 @@ msgstr "Nicht mehr als %(count)s Wochen im Voraus setzen"
 msgid "You are already subscribed to this place"
 msgstr "Du hast diesen Ort bereits abonniert"
 
-#: karrot/subscriptions/receivers.py:776
+#: karrot/subscriptions/receivers.py:777
 msgid "Push notifications are enabled!"
 msgstr ""
 
