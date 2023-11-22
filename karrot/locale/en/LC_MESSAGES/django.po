@@ -249,7 +249,7 @@ msgid ""
 msgstr ""
 
 #: karrot/conversations/api.py:84 karrot/conversations/api.py:292
-#: karrot/conversations/api.py:483 karrot/conversations/serializers.py:271
+#: karrot/conversations/api.py:483 karrot/conversations/serializers.py:274
 msgid "You are not in this conversation"
 msgstr ""
 
@@ -292,7 +292,7 @@ msgstr ""
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/serializers.py:273
+#: karrot/conversations/serializers.py:276
 msgid "This conversation has been closed"
 msgstr ""
 
