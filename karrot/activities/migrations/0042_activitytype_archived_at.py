@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('activities', '0040_activity_public_activities_must_have_public_id'),
+        ('activities', '0041_feedbacknoshow'),
     ]
 
     operations = [

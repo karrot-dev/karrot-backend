@@ -31,9 +31,15 @@ class PublicActivitiesFilter(filters.FilterSet):
     date = ISODateTimeRangeFromToRangeFilter(field_name='date', lookup_expr='overlap')
 
 
+def place_status_queryset(request):
+    if request:
+        return PlaceStatus.objects.filter(group__members=request.user)
+    return PlaceStatus.objects.none()
+
+
 class ActivitiesFilter(filters.FilterSet):
     place = filters.NumberFilter(field_name='place')
-    place_status = filters.ChoiceFilter(field_name='place__status', choices=PlaceStatus.choices)
+    place_status = filters.ModelChoiceFilter(field_name='place__status', queryset=place_status_queryset)
     group = filters.NumberFilter(field_name='place__group')
     date = ISODateTimeRangeFromToRangeFilter(field_name='date', lookup_expr='overlap')
     feedback_possible = filters.BooleanFilter(method='filter_feedback_possible')

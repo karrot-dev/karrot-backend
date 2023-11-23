@@ -240,11 +240,11 @@ class TestActivityTypeArchivedAtMigration(TestMigrations):
     migrate_from = [
         ('groups', '0050_enable_agreements_and_participant_types'),
         ('places', '0038_place_default_view'),
-        ('activities', '0041_activitytype_archived_at'),
+        ('activities', '0042_activitytype_archived_at'),
         ('history', '0015_history_history_his_typus_c46ce5_idx'),
     ]
     migrate_to = [
-        ('activities', '0042_set_activity_type_archived_at'),
+        ('activities', '0043_set_activity_type_archived_at'),
     ]
 
     def setUpBeforeMigration(self):

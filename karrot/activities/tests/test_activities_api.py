@@ -779,7 +779,7 @@ class TestActivitiesListAPI(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.member)
         response = self.get_results(self.url, {'place': self.inactive_place.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
+        self.assertEqual(len(response.data), 0)
 
     def test_get_activity_for_inactive_place(self):
         self.client.force_login(user=self.member)
