@@ -16,6 +16,7 @@ import re
 import orjson
 import redis
 import sentry_sdk
+from PIL import Image
 
 from dotenv import load_dotenv
 from sentry_sdk.integrations.django import DjangoIntegration
@@ -348,6 +349,11 @@ PASSWORD_HASHERS = [
 
 PREVIEW_SIZE = 1600
 THUMBNAIL_SIZE = 200
+
+# Monkeypatch to fix https://github.com/respondcreate/django-versatileimagefield/issues/203
+Image.ANTIALIAS = (
+    Image.Resampling.LANCZOS
+)
 
 VERSATILEIMAGEFIELD_SETTINGS = {
     # need to always create them on save
