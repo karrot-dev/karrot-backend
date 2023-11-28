@@ -4,21 +4,15 @@ from karrot.offers.models import Offer
 
 
 class OffersFilter(filters.FilterSet):
-    # for legacy API support
-    status = filters.ChoiceFilter(
-        method='filter_status', choices=[(val, val) for val in (
-            'active',
-            'archived',
-        )]
-    )
+    is_archived = filters.BooleanFilter(method='filter_is_archived')
 
     class Meta:
         model = Offer
         fields = ('group', )
 
-    def filter_status(self, qs, name, value):
-        if value == 'active':
-            return qs.filter(archived_at__isnull=True)
-        elif value == 'archived':
+    def filter_is_archived(self, qs, name, value):
+        if value is True:
             return qs.filter(archived_at__isnull=False)
+        elif value is False:
+            return qs.filter(archived_at__isnull=True)
         return qs

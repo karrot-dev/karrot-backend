@@ -24,6 +24,7 @@ class PlaceStatusHistorySerializer(serializers.ModelSerializer):
 
 
 class PlaceTypeSerializer(serializers.ModelSerializer):
+    is_archived = serializers.BooleanField(default=False)
     updated_message = serializers.CharField(write_only=True, required=False)
 
     class Meta:
@@ -34,6 +35,7 @@ class PlaceTypeSerializer(serializers.ModelSerializer):
             'name_is_translatable',
             'icon',
             'archived_at',
+            'is_archived',
             'group',
             "created_at",
             'updated_at',
@@ -43,6 +45,7 @@ class PlaceTypeSerializer(serializers.ModelSerializer):
             'id',
             'created_at',
             'updated_at',
+            'archived_at',
         ]
 
     def validate_group(self, group):
@@ -57,6 +60,11 @@ class PlaceTypeSerializer(serializers.ModelSerializer):
             return super().save(**kwargs)
 
         updated_message = self.validated_data.pop('updated_message', None)
+
+        if 'is_archived' in self.validated_data:
+            is_archived = self.validated_data.pop('is_archived')
+            archived_at = timezone.now() if is_archived else None
+            self.initial_data['archived_at'] = self.validated_data['archived_at'] = archived_at
 
         place_type = self.instance
         changed_data = find_changed(place_type, self.validated_data)
@@ -83,6 +91,9 @@ class PlaceTypeSerializer(serializers.ModelSerializer):
         return place_type
 
     def create(self, validated_data):
+        if 'is_archived' in validated_data:
+            # can't create something in an archived state
+            validated_data.pop('is_archived')
         place_type = super().create(validated_data)
         History.objects.create(
             typus=HistoryTypus.PLACE_TYPE_CREATE,
@@ -95,6 +106,7 @@ class PlaceTypeSerializer(serializers.ModelSerializer):
 
 
 class PlaceStatusSerializer(serializers.ModelSerializer):
+    is_archived = serializers.BooleanField(default=False)
     updated_message = serializers.CharField(write_only=True, required=False)
 
     class Meta:
@@ -105,6 +117,7 @@ class PlaceStatusSerializer(serializers.ModelSerializer):
             'name_is_translatable',
             'colour',
             'archived_at',
+            'is_archived',
             'group',
             "created_at",
             'updated_at',
@@ -114,6 +127,7 @@ class PlaceStatusSerializer(serializers.ModelSerializer):
             'id',
             'created_at',
             'updated_at',
+            'archived_at',
         ]
 
     def validate_group(self, group):
@@ -136,6 +150,11 @@ class PlaceStatusSerializer(serializers.ModelSerializer):
         if skip_update:
             return self.instance
 
+        if 'is_archived' in self.validated_data:
+            is_archived = self.validated_data.pop('is_archived')
+            archived_at = timezone.now() if is_archived else None
+            self.initial_data['archived_at'] = self.validated_data['archived_at'] = archived_at
+
         before_data = PlaceStatusHistorySerializer(place_type).data
         status = super().save(**kwargs)
         after_data = PlaceStatusHistorySerializer(place_type).data
@@ -154,6 +173,9 @@ class PlaceStatusSerializer(serializers.ModelSerializer):
         return status
 
     def create(self, validated_data):
+        if 'is_archived' in validated_data:
+            # can't create something in an archived state
+            validated_data.pop('is_archived')
         status = super().create(validated_data)
         History.objects.create(
             typus=HistoryTypus.PLACE_STATUS_CREATE,
@@ -202,6 +224,7 @@ class PlaceSerializer(serializers.ModelSerializer):
             'weeks_in_advance',
             'status',
             'archived_at',
+            'is_archived',
             'is_subscribed',
             'subscribers',
             'place_type',
@@ -222,6 +245,7 @@ class PlaceSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id',
             'subscribers',
+            'archived_at',
         ]
 
     is_subscribed = serializers.SerializerMethodField()
@@ -272,16 +296,10 @@ class PlaceSerializer(serializers.ModelSerializer):
             )
         return w
 
-    def to_representation(self, instance):
-        """Legacy API support"""
-        data = super().to_representation(instance)
-        archived_at = data.get('archived_at', None)
-        if archived_at:
-            data['status'] = 'archived'
-        return data
-
 
 class PlaceUpdateSerializer(PlaceSerializer):
+    is_archived = serializers.BooleanField(default=False)
+
     class Meta:
         model = PlaceModel
         fields = PlaceSerializer.Meta.fields
@@ -290,19 +308,16 @@ class PlaceUpdateSerializer(PlaceSerializer):
 
     @transaction.atomic()
     def save(self, **kwargs):
-        # Legacy API support
-        status = self.validated_data.get('status', None)
-        if status:
-            if status == 'archived':
-                self.validated_data.pop('status')
-                self.validated_data['archived_at'] = timezone.now()
-            elif self.instance.is_archived:
-                self.validated_data['archived_at'] = None
-
         self._validated_data = find_changed(self.instance, self.validated_data)
         skip_update = len(self.validated_data.keys()) == 0
         if skip_update:
             return self.instance
+
+        if 'is_archived' in self.validated_data:
+            is_archived = self.validated_data.pop('is_archived')
+            archived_at = timezone.now() if is_archived else None
+            self.initial_data['archived_at'] = self.validated_data['archived_at'] = archived_at
+
         return super().save(**kwargs)
 
     def update(self, place, validated_data):

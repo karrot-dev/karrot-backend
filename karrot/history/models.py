@@ -4,6 +4,7 @@ from django.db.models import JSONField, Index, BooleanField
 from django.db import models
 from django.db.models.expressions import Func, Q, ExpressionWrapper
 from django.db.models.fields.json import KT
+from django.core.serializers.json import DjangoJSONEncoder
 from django.dispatch import Signal
 from django.utils import timezone
 from django_enumfield import enum
@@ -100,9 +101,9 @@ class History(NicelyFormattedModel):
     series = models.ForeignKey('activities.ActivitySeries', null=True, on_delete=models.SET_NULL)
     agreement = models.ForeignKey('agreements.Agreement', null=True, on_delete=models.SET_NULL)
     users = models.ManyToManyField('users.User')
-    payload = JSONField(null=True)
-    before = JSONField(null=True)
-    after = JSONField(null=True)
+    payload = JSONField(null=True, encoder=DjangoJSONEncoder)
+    before = JSONField(null=True, encoder=DjangoJSONEncoder)
+    after = JSONField(null=True, encoder=DjangoJSONEncoder)
     message = models.TextField(null=True)
 
     def __str__(self):
