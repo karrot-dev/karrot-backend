@@ -15,11 +15,12 @@ class PlaceStatus(BaseModel, UpdatedAtMixin):
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='place_statuses')
     name = models.CharField(max_length=80)
     name_is_translatable = models.BooleanField(default=True)
+    description = models.TextField(blank=True)
     archived_at = models.DateTimeField(null=True)
 
     colour = models.CharField(max_length=6)
-    # whether to show places of this status on the map by default
-    show_on_map = models.BooleanField(default=True)
+    # whether to show places of this status in the list and on the map by default
+    is_visible = models.BooleanField(default=True)
 
     class Meta:
         unique_together = ('group', 'name')
