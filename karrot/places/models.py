@@ -22,8 +22,11 @@ class PlaceStatus(BaseModel, UpdatedAtMixin):
     # whether to show places of this status in the list and on the map by default
     is_visible = models.BooleanField(default=True)
 
+    order = models.CharField(blank=False)
+
     class Meta:
         unique_together = ('group', 'name')
+        ordering = ['order', 'id']
 
     @property
     def is_archived(self):

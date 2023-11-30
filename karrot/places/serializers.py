@@ -118,6 +118,7 @@ class PlaceStatusSerializer(serializers.ModelSerializer):
             'name_is_translatable',
             'description',
             'colour',
+            'order',
             'is_visible',
             'archived_at',
             'is_archived',

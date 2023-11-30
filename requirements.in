@@ -27,6 +27,7 @@ django-timezone-field
 django-anymail
 sentry-sdk
 furl
+fractional-indexing
 django-versatileimagefield
 html2text
 babel
