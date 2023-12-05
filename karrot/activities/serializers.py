@@ -206,8 +206,8 @@ class FeedbackExportRenderer(CSVRenderer):
 
 
 class ActivityTypeSerializer(serializers.ModelSerializer):
-    updated_message = serializers.CharField(write_only=True, required=False)
     is_archived = serializers.BooleanField(default=False)
+    updated_message = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = ActivityType
@@ -215,6 +215,7 @@ class ActivityTypeSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'name_is_translatable',
+            'description',
             'colour',
             'icon',
             'has_feedback',
@@ -278,6 +279,9 @@ class ActivityTypeSerializer(serializers.ModelSerializer):
         return activity_type
 
     def create(self, validated_data):
+        if 'is_archived' in validated_data:
+            # can't create something in an archived state
+            validated_data.pop('is_archived')
         activity_type = super().create(validated_data)
         History.objects.create(
             typus=HistoryTypus.ACTIVITY_TYPE_CREATE,
