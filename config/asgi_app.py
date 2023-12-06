@@ -7,6 +7,7 @@ from django.dispatch import receiver
 from starlette.responses import Response
 from starlette.staticfiles import StaticFiles
 
+from karrot.plugins.asgi import PluginAssets
 from karrot.subscriptions.consumers import TokenAuthMiddleware, WebsocketConsumer
 from karrot.utils.asgi_utils import AllowedHostsAndFileOriginValidator, CommunityProxy, cached
 
@@ -23,6 +24,9 @@ def setup_postgres(connection, **kwargs):
 
 api_app = get_asgi_application()
 api_prefixes = ["/api/", "/docs/", "/api-auth/", "/silk/"]
+
+plugin_assets_app = PluginAssets(settings.PLUGIN_DIRS)
+plugin_assets_prefix = settings.PLUGIN_ASSETS_PUBLIC_PREFIX
 
 if settings.DEBUG:
     api_prefixes.append("/_templates")
@@ -58,7 +62,11 @@ async def http_router(scope, receive, send):
     app = None
     if "path" in scope:
         path = scope["path"]
-        if any(path.startswith(prefix) for prefix in api_prefixes):
+        if path.startswith(plugin_assets_prefix):
+            # putting this one first, so it can be nested inside /api/
+            scope["path"] = path[len(plugin_assets_prefix.rstrip("/")):]
+            app = plugin_assets_app
+        elif any(path.startswith(prefix) for prefix in api_prefixes):
             app = api_app
         elif path.startswith("/media/"):
             scope["path"] = path[len("/media") :]

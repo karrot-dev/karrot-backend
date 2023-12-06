@@ -33,6 +33,7 @@ from karrot.meet.api import MeetRoomViewSet, MeetTokenViewSet, MeetWebhookViewSe
 from karrot.notifications.api import NotificationViewSet
 from karrot.offers.api import OfferViewSet
 from karrot.places.api import PlaceStatusViewSet, PlaceTypeViewSet, PlaceViewSet
+from karrot.plugins.api import PluginViewSet
 from karrot.stats.api import ActivityHistoryStatsViewSet, FrontendStatsView
 from karrot.status.api import StatusView
 from karrot.subscriptions.api import WebPushSubscriptionViewSet
@@ -112,6 +113,9 @@ router.register("meet/rooms", MeetRoomViewSet)
 
 # Stats endpoints
 router.register("stats/activity-history", ActivityHistoryStatsViewSet, basename="statsactivityhistory")
+
+# Plugins
+router.register("plugins", PluginViewSet, basename="plugins")
 
 urlpatterns = [
     path("api/auth/token/", obtain_auth_token),

@@ -43,12 +43,15 @@ is_dev = MODE == "dev"
 
 DEBUG = is_dev
 
+PLUGIN_DIRS = [val.strip() for val in options["PLUGIN_DIRS"].split(",")]
+PLUGIN_ASSETS_PUBLIC_PREFIX = "/api/plugins/assets/"
+
 USE_DEPRECATED_PYTZ = True
 
 # Generic
 DESCRIPTION_MAX_LENGTH = 100000
 NAME_MAX_LENGTH = 80
-# Names that shouldn't be used used by groups or users because they are either confusing or unspecific
+# Names that shouldn't be used by groups or users because they are either confusing or unspecific
 # Values are case-insensitive
 RESERVED_NAMES = (
     "karrot",
@@ -139,6 +142,7 @@ INSTALLED_APPS = (
     "karrot.history.HistoryConfig",
     "karrot.groups.GroupsConfig",
     "karrot.places.PlacesConfig",
+    "karrot.plugins",
     "karrot.unsubscribe",
     "karrot.offers.OffersConfig",
     "karrot.activities.ActivitiesConfig",
