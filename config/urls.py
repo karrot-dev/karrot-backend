@@ -26,6 +26,7 @@ from karrot.offers.api import OfferViewSet
 from karrot.activities.api import ActivityViewSet, ActivitySeriesViewSet, FeedbackViewSet, ActivityTypeViewSet, \
     PublicActivityViewSet
 from karrot.places.api import PlaceViewSet, PlaceTypeViewSet
+from karrot.plugins.api import PluginViewSet
 from karrot.stats.api import FrontendStatsView, ActivityHistoryStatsViewSet
 from karrot.status.api import StatusView
 from karrot.subscriptions.api import WebPushSubscriptionViewSet
@@ -91,6 +92,9 @@ router.register('unsubscribe', UnsubscribeViewSet, basename='unsubscribe')
 
 # Stats endpoints
 router.register('stats/activity-history', ActivityHistoryStatsViewSet)
+
+# Plugins
+router.register('plugins', PluginViewSet, basename='plugins')
 
 urlpatterns = [
     path('api/auth/token/', obtain_auth_token),

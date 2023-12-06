@@ -10,6 +10,18 @@ from starlette.responses import Response
 
 ONE_YEAR = 60 * 60 * 24 * 365
 
+# Borrowing from:
+#   https://github.com/florimondmanca/asgi-caches/blob/master/src/asgi_caches/utils/cache.py
+#
+# From section 14.12 of RFC2616:
+# "HTTP/1.1 servers SHOULD NOT send Expires dates more than
+# one year in the future."
+max_age = ONE_YEAR
+
+
+def http_date(epoch_time):
+    return email.utils.formatdate(epoch_time, usegmt=True)
+
 
 class ExpiresMax:
     def __init__(self, app):
@@ -19,14 +31,6 @@ class ExpiresMax:
         if scope['type'] != 'http':
             return await self.app(scope, receive, send)
 
-        # Borrowing from:
-        #   https://github.com/florimondmanca/asgi-caches/blob/master/src/asgi_caches/utils/cache.py
-        #
-        # From section 14.12 of RFC2616:
-        # "HTTP/1.1 servers SHOULD NOT send Expires dates more than
-        # one year in the future."
-        max_age = ONE_YEAR
-
         async def send_cached(message):
             # Borrowing from:
             #   https://github.com/encode/starlette/blob/master/starlette/middleware/cors.py
@@ -34,13 +38,16 @@ class ExpiresMax:
                 return await send(message)
             message.setdefault("headers", [])
             headers = MutableHeaders(scope=message)
-            headers.update({
-                'Cache-Control': f'max-age={max_age}',
-                'Expires': http_date(time.time() + max_age),
-            })
+            headers.update(expires_max_headers)
             await send(message)
 
         return await self.app(scope, receive, send_cached)
+
+
+expires_max_headers = {
+    'Cache-Control': f'max-age={max_age}',
+    'Expires': http_date(time.time() + max_age),
+}
 
 
 class CommunityProxy:
@@ -80,10 +87,6 @@ def AllowedHostsAndFileOriginValidator(application):
     if settings.DEBUG and not allowed_hosts:
         allowed_hosts = ["localhost", "127.0.0.1", "[::1]"]
     return OriginValidatorThatAllowsFileUrls(application, allowed_hosts)
-
-
-def http_date(epoch_time):
-    return email.utils.formatdate(epoch_time, usegmt=True)
 
 
 def cached(app):
