@@ -1,7 +1,7 @@
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 
-from config.settings import PLUGIN_DIRS, PLUGIN_ASSETS_PUBLIC_PREFIX
+from config.settings import PLUGIN_ASSETS_PUBLIC_PREFIX
 from karrot.plugins.plugins import list_plugins, Plugin
 
 
@@ -18,5 +18,5 @@ def serialize_plugin(plugin: Plugin):
 
 class PluginViewSet(ViewSet):
     def list(self, request):
-        plugins = list_plugins(PLUGIN_DIRS)
+        plugins = list_plugins()
         return Response([serialize_plugin(plugin) for plugin in plugins])

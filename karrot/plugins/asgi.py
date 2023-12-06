@@ -1,5 +1,4 @@
 from os.path import normpath, join
-from typing import List
 from asgiref.sync import sync_to_async
 
 import aiofiles.os
@@ -16,10 +15,6 @@ get_plugin_async = sync_to_async(get_plugin)
 
 
 class PluginAssets:
-    def __init__(self, plugin_dirs: List[str]):
-        super().__init__()
-        self.plugin_dirs = plugin_dirs
-
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         """
         The ASGI entry point.
@@ -34,7 +29,7 @@ class PluginAssets:
         if not plugin_name or not path:
             return not_found
 
-        plugin = await get_plugin_async(self.plugin_dirs, plugin_name)
+        plugin = await get_plugin_async(plugin_name)
         if not plugin:
             return not_found
 
@@ -62,8 +57,7 @@ class PluginAssets:
         Given the ASGI scope, return the `path` string to serve up,
         with OS specific path separators, and any '..', '.' components removed.
         """
-        path = path.lstrip("/")
-        parts = path.split("/")
+        parts = path.lstrip("/").split("/")
         if len(parts) < 2:
             return
         plugin_name = parts[0]

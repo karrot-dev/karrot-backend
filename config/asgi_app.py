@@ -25,7 +25,7 @@ def setup_postgres(connection, **kwargs):
 api_app = get_asgi_application()
 api_prefixes = ["/api/", "/docs/", "/api-auth/", "/silk/"]
 
-plugin_assets_app = PluginAssets(settings.PLUGIN_DIRS)
+plugin_assets_app = PluginAssets()
 plugin_assets_prefix = settings.PLUGIN_ASSETS_PUBLIC_PREFIX
 
 if settings.DEBUG:

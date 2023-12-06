@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import re
+from os.path import realpath
 
 import orjson
 import redis
@@ -43,7 +44,7 @@ is_dev = MODE == "dev"
 
 DEBUG = is_dev
 
-PLUGIN_DIRS = [val.strip() for val in options["PLUGIN_DIRS"].split(",")]
+PLUGIN_DIRS = [realpath(val.strip()) for val in options["PLUGIN_DIRS"].split(",")]
 PLUGIN_ASSETS_PUBLIC_PREFIX = "/api/plugins/assets/"
 
 USE_DEPRECATED_PYTZ = True

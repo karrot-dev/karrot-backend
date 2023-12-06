@@ -1,12 +1,11 @@
 from django.core.management.base import BaseCommand
 
 from karrot.plugins.plugins import list_plugins
-from config.settings import PLUGIN_DIRS
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        for plugin in list_plugins(PLUGIN_DIRS):
+        for plugin in list_plugins():
             print(plugin.name)
             print('  dir:', plugin.dir)
             print('  asset_dir:', plugin.asset_dir)
