@@ -8,11 +8,9 @@ https://docs.djangoproject.com/en/dev/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/dev/ref/settings/
 """
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import re
-from os.path import realpath
 
 import orjson
 import redis
@@ -25,6 +23,8 @@ from sentry_sdk.integrations.redis import RedisIntegration
 
 from karrot.groups import themes
 from config.options import get_options
+from karrot.plugins.backend import load_backend_plugins
+from karrot.plugins.utils import normalize_plugin_dirs
 
 load_dotenv()
 
@@ -43,8 +43,10 @@ is_dev = MODE == 'dev'
 
 DEBUG = is_dev
 
-PLUGIN_DIRS = [realpath(val.strip()) for val in options['PLUGIN_DIRS'].split(',')]
+PLUGIN_DIRS = normalize_plugin_dirs(options['PLUGIN_DIRS'])
 PLUGIN_ASSETS_PUBLIC_PREFIX = '/api/plugins/assets/'
+
+BACKEND_PLUGINS = load_backend_plugins(PLUGIN_DIRS)
 
 USE_DEPRECATED_PYTZ = True
 
@@ -152,6 +154,8 @@ INSTALLED_APPS = (
     'karrot.stats',
     'karrot.status.StatusConfig',
     'karrot.utils',
+
+    *BACKEND_PLUGINS,
 
     # Django packages
     'django_extensions',

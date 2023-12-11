@@ -27,6 +27,7 @@ from karrot.activities.api import ActivityViewSet, ActivitySeriesViewSet, Feedba
     PublicActivityViewSet
 from karrot.places.api import PlaceViewSet, PlaceTypeViewSet
 from karrot.plugins.api import PluginViewSet
+from karrot.plugins.backend import get_plugin_urlpatterns
 from karrot.stats.api import FrontendStatsView, ActivityHistoryStatsViewSet
 from karrot.status.api import StatusView
 from karrot.subscriptions.api import WebPushSubscriptionViewSet
@@ -97,6 +98,7 @@ router.register('stats/activity-history', ActivityHistoryStatsViewSet)
 router.register('plugins', PluginViewSet, basename='plugins')
 
 urlpatterns = [
+    *get_plugin_urlpatterns(settings.BACKEND_PLUGINS),
     path('api/auth/token/', obtain_auth_token),
     path('api/auth/logout/', LogoutView.as_view()),
     path('api/auth/user/', AuthUserView.as_view()),
