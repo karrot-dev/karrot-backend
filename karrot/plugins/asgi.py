@@ -6,7 +6,7 @@ from starlette.responses import FileResponse
 from starlette.responses import Response
 from starlette.types import Receive, Scope, Send
 
-from karrot.plugins.plugins import get_plugin
+from karrot.plugins.frontend import get_plugin
 from karrot.utils.asgi_utils import expires_max_headers
 
 not_found = Response('not found', status_code=404, media_type='text/plain')

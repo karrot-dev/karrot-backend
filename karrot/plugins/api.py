@@ -2,7 +2,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 
 from config.settings import PLUGIN_ASSETS_PUBLIC_PREFIX
-from karrot.plugins.plugins import list_plugins, Plugin
+from karrot.plugins.frontend import list_plugins, Plugin
 
 
 def serialize_plugin(plugin: Plugin):

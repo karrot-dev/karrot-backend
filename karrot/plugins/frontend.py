@@ -24,7 +24,7 @@ class Plugin:
 
 def find_manifest(base: str) -> Optional[str]:
     try:
-        return str(next(Path(base).glob('**/manifest.json')))
+        return str(next(entry for entry in Path(base).rglob('manifest.json') if 'node_modules' not in str(entry)))
     except StopIteration:
         return None
 
