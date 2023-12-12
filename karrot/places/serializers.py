@@ -109,6 +109,7 @@ class PlaceTypeSerializer(serializers.ModelSerializer):
 class PlaceStatusSerializer(serializers.ModelSerializer):
     is_archived = serializers.BooleanField(default=False)
     updated_message = serializers.CharField(write_only=True, required=False)
+    set_places_to_status = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = PlaceStatus
@@ -126,6 +127,7 @@ class PlaceStatusSerializer(serializers.ModelSerializer):
             "created_at",
             'updated_at',
             'updated_message',
+            'set_places_to_status',
         ]
         read_only_fields = [
             'id',
@@ -141,14 +143,21 @@ class PlaceStatusSerializer(serializers.ModelSerializer):
             raise PermissionDenied('You need to be a group editor')
         return group
 
+    def validate_set_places_to_status(self, status_id):
+        group = self.instance.group
+        if not group.place_statuses.filter(id=status_id).exists():
+            raise PermissionDenied('Invalid status')
+        return status_id
+
     def save(self, **kwargs):
         if not self.instance:
             return super().save(**kwargs)
 
         updated_message = self.validated_data.pop('updated_message', None)
+        set_places_to_status = self.validated_data.pop('set_places_to_status', None)
 
-        place_type = self.instance
-        changed_data = find_changed(place_type, self.validated_data)
+        place_status = self.instance
+        changed_data = find_changed(place_status, self.validated_data)
         self._validated_data = changed_data
         skip_update = len(self.validated_data.keys()) == 0
         if skip_update:
@@ -159,9 +168,16 @@ class PlaceStatusSerializer(serializers.ModelSerializer):
             archived_at = timezone.now() if is_archived else None
             self.initial_data['archived_at'] = self.validated_data['archived_at'] = archived_at
 
-        before_data = PlaceStatusHistorySerializer(place_type).data
+        before_data = PlaceStatusHistorySerializer(place_status).data
         status = super().save(**kwargs)
-        after_data = PlaceStatusHistorySerializer(place_type).data
+        after_data = PlaceStatusHistorySerializer(place_status).data
+
+        if set_places_to_status:
+            # update any places if needed
+            # do it in a loop, so we trigger signals
+            for place in PlaceModel.objects.filter(status=status):
+                place.status_id = set_places_to_status
+                place.save()
 
         if before_data != after_data:
             History.objects.create(
