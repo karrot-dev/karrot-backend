@@ -1,0 +1,85 @@
+from datetime import timedelta
+
+from django.test import TestCase
+from django.utils import timezone
+from django.db.models import Count, Q, Sum, Exists
+from freezegun import freeze_time
+
+from karrot.activities.factories import ActivityFactory
+from karrot.activities.models import to_range, Activity, Feedback, FeedbackNoShow
+from karrot.history.models import History, HistoryTypus
+from karrot.users.factories import UserFactory
+from karrot.utils.shell_utils import pqs
+
+
+class TestActivityHistoryQueries(TestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.user2 = UserFactory()
+        self.date = to_range(timezone.now() + timedelta(days=33))
+        self.after_the_activity_is_over = self.date.end + timedelta(hours=2)
+        self.activity = ActivityFactory(
+            date=self.date,
+
+        )
+
+    def test_foo(self):
+        self.activity.add_participant(self.user)
+        self.activity.add_participant(self.user2)
+        with freeze_time(self.after_the_activity_is_over, tick=True):
+            Activity.objects.process_finished_activities()
+            feedback = Feedback.objects.create(
+                given_by=self.user,
+                about=self.activity,
+                weight=1.5,
+                comment='foo',
+            )
+            FeedbackNoShow.objects.create(feedback=feedback, user=self.user2)
+
+            history = History.objects.filter(typus=HistoryTypus.ACTIVITY_DONE) \
+                .annotate(no_show=Count('activity__feedback__no_shows__user', distinct=True))
+
+            pqs(history)
+
+            for entry in history:
+                print('history', entry.no_show)
+
+
+
+
+
+    def notest_reports_no_shows(self):
+        self.setup_activity(max_participants=2)
+        self.client.force_login(user=self.user)
+        # join activity (well before it starts)
+        self.client.post(f'/api/activities/{self.activity.id}/add/')
+
+        # other user joins too
+        self.client.force_login(user=self.user2)
+        response = self.client.post(f'/api/activities/{self.activity.id}/add/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.client.force_login(user=self.user)
+
+        with freeze_time(self.after_the_activity_is_over, tick=True):
+            Activity.objects.process_finished_activities()
+            # user reports that user2 didn't show up
+            response = self.client.post(
+                '/api/feedback/', {
+                    'about': self.activity.id,
+                    'comment': 'THEY BAILED ON ME!!!!!',
+                    'weight': 1,
+                    'no_shows': [{
+                        'user': self.user2.id
+                    }]
+                }, format='json'
+            )
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+            response = self.client.get('/api/stats/activity-history/', {'group': self.group.id, 'user': self.user.id})
+            print('stats', response.data)
+            self.assertEqual(len(response.data), 1)
+            self.assertEqual([dict(entry) for entry in response.data], [self.expected_entry({
+                'done_count': 1,
+                # 'no_show_count': 1,
+                'feedback_count': 1,
+                'feedback_weight': 1.0,
+            })], response.data)

@@ -93,12 +93,12 @@ class TestActivitySeriesModel(TestCase):
             series = ActivitySeriesFactory(place=self.place, start_date=two_weeks_ago)
 
         activities = series.activities.all()
-        past_date_count = activities.filter(date__startswith__lt=now).count()
+        past_date_count = activities.filter(date__endswith__lt=now).count()
         self.assertGreater(activities.count(), 2)
         series.delete()
         upcoming_activities = Activity.objects.filter(date__startswith__gte=now, is_disabled=False)
         self.assertEqual(upcoming_activities.count(), 0, upcoming_activities)
-        self.assertEqual(Activity.objects.filter(date__startswith__lt=now).count(), past_date_count)
+        self.assertEqual(Activity.objects.filter(date__endswith__lt=now).count(), past_date_count)
 
 
 class TestProcessFinishedActivities(TestCase):

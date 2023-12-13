@@ -194,10 +194,10 @@ class ActivityQuerySet(models.QuerySet):
         return self.exclude_disabled().filter(date__startswith__gt=timezone.now(), date__startswith__lt=in_some_hours)
 
     def missed(self):
-        return self.exclude_disabled().filter(date__startswith__lt=timezone.now(), participants=None)
+        return self.exclude_disabled().filter(date__endswith__lt=timezone.now(), participants=None)
 
     def done(self):
-        return self.exclude_disabled().filter(date__startswith__lt=timezone.now())\
+        return self.exclude_disabled().filter(date__endswith__lt=timezone.now())\
             .annotate_num_participants().filter(num_participants__gt=0)
 
     def with_free_slots(self, user):
@@ -242,7 +242,7 @@ class ActivityQuerySet(models.QuerySet):
         """
         for activity in self.exclude_disabled().filter(
                 is_done=False,
-                date__startswith__lt=timezone.now(),
+                date__endswith__lt=timezone.now(),
         ):
             if not activity.place.is_active():
                 # Make sure we don't process this activity again, even if the place gets active in future
