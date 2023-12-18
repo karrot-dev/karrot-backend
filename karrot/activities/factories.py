@@ -3,15 +3,21 @@ from random import randint
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
-from factory import SubFactory, LazyFunction, LazyAttribute, post_generation, Sequence, SelfAttribute
+from factory import LazyAttribute, LazyFunction, SelfAttribute, Sequence, SubFactory, post_generation
 from factory.django import DjangoModelFactory
 
 from karrot.activities.models import (
     Activity as ActivityModel,
+)
+from karrot.activities.models import (
     ActivitySeries as ActivitySeriesModel,
-    Feedback as FeedbackModel,
-    to_range,
+)
+from karrot.activities.models import (
     ActivityType,
+    to_range,
+)
+from karrot.activities.models import (
+    Feedback as FeedbackModel,
 )
 from karrot.places.factories import PlaceFactory
 from karrot.utils.tests.fake import faker

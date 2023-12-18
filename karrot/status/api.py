@@ -1,8 +1,8 @@
-from rest_framework import views, status
+from rest_framework import status, views
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from karrot.status.helpers import status_data, StatusSerializer
+from karrot.status.helpers import StatusSerializer, status_data
 
 
 class StatusView(views.APIView):

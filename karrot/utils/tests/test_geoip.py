@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from geoip2.errors import AddressNotFoundError
 
-from karrot.utils.geoip import ip_to_city, ip_to_lat_lon, geoip_is_available
+from karrot.utils.geoip import geoip_is_available, ip_to_city, ip_to_lat_lon
 
 
 @patch("karrot.utils.geoip.geoip")

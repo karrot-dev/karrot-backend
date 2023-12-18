@@ -1,21 +1,20 @@
 import uuid
+from datetime import timedelta
 from typing import List, Optional
 
 import dateutil.rrule
-from datetime import timedelta
-
+from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import UploadedFile
+from django.db import transaction
 from django.db.models import F
 from django.db.models.functions import Lower
 from django.forms import model_to_dict
+from django.utils import timezone
+from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from icalendar import vCalAddress, vText
-from django.contrib.auth import get_user_model
-from django.conf import settings
-from django.db import transaction
-from django.utils import timezone
-from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.fields import CharField, DateTimeField, Field
@@ -24,25 +23,31 @@ from rest_framework.validators import UniqueTogetherValidator
 from rest_framework_csv.renderers import CSVRenderer
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
-from karrot.activities.tasks import notify_participant_removals
-from karrot.base.base_models import CustomDateTimeTZRange, Tstzrange
-from karrot.history.models import History, HistoryTypus
 from karrot.activities import stats
 from karrot.activities.models import (
-    Activity as ActivityModel,
-    Feedback as FeedbackModel,
-    ActivitySeries as ActivitySeriesModel,
-    ActivityType,
+    Activity,
     ActivityParticipant,
+    ActivityType,
+    FeedbackNoShow,
     ParticipantType,
     SeriesParticipantType,
     default_duration,
-    Activity,
-    FeedbackNoShow,
 )
+from karrot.activities.models import (
+    Activity as ActivityModel,
+)
+from karrot.activities.models import (
+    ActivitySeries as ActivitySeriesModel,
+)
+from karrot.activities.models import (
+    Feedback as FeedbackModel,
+)
+from karrot.activities.tasks import notify_participant_removals
+from karrot.base.base_models import CustomDateTimeTZRange, Tstzrange
+from karrot.history.models import History, HistoryTypus
+from karrot.places.serializers import PublicPlaceSerializer
 from karrot.utils.date_utils import csv_datetime
 from karrot.utils.misc import find_changed, is_prefetched
-from karrot.places.serializers import PublicPlaceSerializer
 
 
 class FeedbackNoShowSerializer(serializers.ModelSerializer):

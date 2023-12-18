@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 from karrot.history.filters import HistoryFilter
 from karrot.history.models import History
-from karrot.history.serializers import HistorySerializer, HistoryExportRenderer, HistoryExportSerializer
+from karrot.history.serializers import HistoryExportRenderer, HistoryExportSerializer, HistorySerializer
 
 
 class HistoryPagination(CursorPagination):

@@ -1,16 +1,16 @@
 import binascii
 
 import sentry_sdk
-from anymail.signals import tracking, inbound
+from anymail.signals import inbound, tracking
 from django.contrib.auth import get_user_model
 from django.core.signing import BadSignature
 from django.dispatch import receiver
 
-from karrot.conversations.models import ConversationMessage, Conversation
+from karrot.conversations.models import Conversation, ConversationMessage
 from karrot.utils.email_utils import generate_plaintext_from_html
 from karrot.webhooks import stats
 from karrot.webhooks.models import EmailEvent, IncomingEmail
-from karrot.webhooks.utils import parse_local_part, notify_about_rejected_email, trim_with_talon, trim_with_discourse
+from karrot.webhooks.utils import notify_about_rejected_email, parse_local_part, trim_with_discourse, trim_with_talon
 
 
 @receiver(tracking)

@@ -1,10 +1,10 @@
 from anymail.exceptions import AnymailAPIError
 from django.contrib.auth import logout, update_session_auth_hash
-from django.utils.translation import gettext as _
 from django.middleware.csrf import get_token as generate_csrf_token_for_frontend
-from rest_framework import status, generics, views
+from django.utils.translation import gettext as _
+from rest_framework import generics, status, views
 from rest_framework.pagination import CursorPagination
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from karrot.userauth import stats
@@ -13,12 +13,12 @@ from karrot.userauth.permissions import MailIsNotVerified
 from karrot.userauth.serializers import (
     AuthLoginSerializer,
     AuthUserSerializer,
-    ChangePasswordSerializer,
-    RequestResetPasswordSerializer,
     ChangeMailSerializer,
-    VerificationCodeSerializer,
-    ResetPasswordSerializer,
+    ChangePasswordSerializer,
     FailedEmailDeliverySerializer,
+    RequestResetPasswordSerializer,
+    ResetPasswordSerializer,
+    VerificationCodeSerializer,
 )
 from karrot.utils.serializers import EmptySerializer
 

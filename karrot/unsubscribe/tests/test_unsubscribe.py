@@ -1,14 +1,14 @@
 from django.test import TestCase
 
+from karrot.activities.factories import ActivityFactory
 from karrot.applications.factories import ApplicationFactory
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupNotificationType
-from karrot.activities.factories import ActivityFactory
 from karrot.places.factories import PlaceFactory
 from karrot.unsubscribe.utils import (
-    unsubscribe_from_all_conversations_in_group,
     generate_token,
     parse_token,
+    unsubscribe_from_all_conversations_in_group,
     unsubscribe_from_notification_type,
 )
 from karrot.users.factories import UserFactory

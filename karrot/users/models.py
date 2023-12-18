@@ -2,8 +2,8 @@ from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.postgres.fields import CICharField
-from django.db import transaction, models
-from django.db.models import EmailField, BooleanField, TextField, CharField, DateTimeField, ForeignKey
+from django.db import models, transaction
+from django.db.models import BooleanField, CharField, DateTimeField, EmailField, ForeignKey, TextField
 from django.dispatch import Signal
 from django.utils import timezone
 from versatileimagefield.fields import VersatileImageField
@@ -14,11 +14,11 @@ from karrot.userauth.models import VerificationCode
 from karrot.users.emails import (
     prepare_accountdelete_request_email,
     prepare_accountdelete_success_email,
-    prepare_changemail_success_email,
     prepare_changemail_request_email,
-    prepare_signup_email,
-    prepare_passwordreset_success_email,
+    prepare_changemail_success_email,
     prepare_passwordreset_request_email,
+    prepare_passwordreset_success_email,
+    prepare_signup_email,
 )
 from karrot.webhooks.models import EmailEvent
 

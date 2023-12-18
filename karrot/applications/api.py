@@ -1,7 +1,7 @@
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
-from rest_framework import permissions, mixins
+from rest_framework import mixins, permissions
 from rest_framework.decorators import action
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated

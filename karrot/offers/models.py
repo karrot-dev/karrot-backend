@@ -2,7 +2,7 @@ from enum import Enum
 
 from django.conf import settings
 from django.db import models
-from django.db.models import IntegerField, DateTimeField
+from django.db.models import DateTimeField, IntegerField
 from django.utils import timezone
 from versatileimagefield.fields import VersatileImageField
 from versatileimagefield.image_warmer import VersatileImageFieldWarmer

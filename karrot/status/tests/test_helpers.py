@@ -1,10 +1,10 @@
 from django.test import TestCase
 
+from karrot.activities.factories import ActivityFactory
 from karrot.applications.factories import ApplicationFactory
 from karrot.groups.factories import GroupFactory
 from karrot.issues.factories import IssueFactory
 from karrot.offers.factories import OfferFactory
-from karrot.activities.factories import ActivityFactory
 from karrot.places.factories import PlaceFactory
 from karrot.status.helpers import unread_conversations
 from karrot.users.factories import UserFactory

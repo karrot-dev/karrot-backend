@@ -4,8 +4,8 @@ from django.db.models import Q
 
 from karrot.activities.models import Activity, create_activity_banner_image_warmer
 from karrot.conversations.models import ConversationMessageImage, create_conversation_message_image_warmer
-from karrot.groups.models import create_group_photo_warmer, Group
-from karrot.offers.models import create_offer_image_warmer, OfferImage
+from karrot.groups.models import Group, create_group_photo_warmer
+from karrot.offers.models import OfferImage, create_offer_image_warmer
 from karrot.userauth.models import create_user_photo_warmer
 
 

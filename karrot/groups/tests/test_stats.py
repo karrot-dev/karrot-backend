@@ -2,11 +2,11 @@ from dateutil.relativedelta import relativedelta
 from django.test import TestCase
 from django.utils import timezone
 
-from karrot.groups import stats, roles
-from karrot.groups.factories import GroupFactory
-from karrot.groups.models import GroupMembership
 from karrot.activities.factories import ActivityFactory
 from karrot.activities.models import to_range
+from karrot.groups import roles, stats
+from karrot.groups.factories import GroupFactory
+from karrot.groups.models import GroupMembership
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory
 

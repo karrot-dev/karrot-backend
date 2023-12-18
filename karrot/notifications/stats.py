@@ -1,8 +1,8 @@
 from django.utils import timezone
-from karrot.utils.influxdb_utils import write_points
 
 from karrot.groups.models import Group
 from karrot.groups.stats import group_tags
+from karrot.utils.influxdb_utils import write_points
 
 
 def notification_tags(notification):

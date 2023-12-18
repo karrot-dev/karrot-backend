@@ -4,9 +4,8 @@ from django.db.models import F
 from django_filters import rest_framework as filters
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
-from rest_framework import mixins
-from rest_framework import viewsets
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication, BaseAuthentication
+from rest_framework import mixins, viewsets
+from rest_framework.authentication import BaseAuthentication, BasicAuthentication, SessionAuthentication
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.generics import get_object_or_404
@@ -16,55 +15,61 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from karrot.conversations.api import RetrieveConversationMixin
-from karrot.history.models import History, HistoryTypus
 from karrot.activities.filters import (
     ActivitiesFilter,
     ActivitySeriesFilter,
-    FeedbackFilter,
     ActivityTypeFilter,
+    FeedbackFilter,
     PublicActivitiesFilter,
 )
 from karrot.activities.models import (
     Activity as ActivityModel,
+)
+from karrot.activities.models import (
     ActivitySeries as ActivitySeriesModel,
-    Feedback as FeedbackModel,
+)
+from karrot.activities.models import (
     ActivityType,
     ICSAuthToken,
 )
-from karrot.activities.permissions import (
-    IsUpcoming,
-    HasNotJoinedActivity,
-    HasJoinedActivity,
-    IsEmptyActivity,
-    IsSameParticipant,
-    IsRecentActivity,
-    IsGroupEditor,
-    TypeHasNoActivities,
-    CannotChangeGroup,
-    IsNotUpcoming,
-    IsNotPast,
+from karrot.activities.models import (
+    Feedback as FeedbackModel,
 )
-from karrot.activities.serializers import (
-    ActivityDismissFeedbackSerializer,
-    ActivitySerializer,
-    ActivitySeriesSerializer,
-    ActivityJoinSerializer,
-    ActivityLeaveSerializer,
-    FeedbackSerializer,
-    ActivityUpdateSerializer,
-    ActivitySeriesUpdateSerializer,
-    ActivitySeriesHistorySerializer,
-    FeedbackExportSerializer,
-    FeedbackExportRenderer,
-    ActivityTypeSerializer,
-    ActivityICSSerializer,
-    ActivitySeriesUpdateCheckSerializer,
-    ActivityUpdateCheckSerializer,
-    PublicActivitySerializer,
-    PublicActivityICSSerializer,
+from karrot.activities.permissions import (
+    CannotChangeGroup,
+    HasJoinedActivity,
+    HasNotJoinedActivity,
+    IsEmptyActivity,
+    IsGroupEditor,
+    IsNotPast,
+    IsNotUpcoming,
+    IsRecentActivity,
+    IsSameParticipant,
+    IsUpcoming,
+    TypeHasNoActivities,
 )
 from karrot.activities.renderers import ICSCalendarRenderer
+from karrot.activities.serializers import (
+    ActivityDismissFeedbackSerializer,
+    ActivityICSSerializer,
+    ActivityJoinSerializer,
+    ActivityLeaveSerializer,
+    ActivitySerializer,
+    ActivitySeriesHistorySerializer,
+    ActivitySeriesSerializer,
+    ActivitySeriesUpdateCheckSerializer,
+    ActivitySeriesUpdateSerializer,
+    ActivityTypeSerializer,
+    ActivityUpdateCheckSerializer,
+    ActivityUpdateSerializer,
+    FeedbackExportRenderer,
+    FeedbackExportSerializer,
+    FeedbackSerializer,
+    PublicActivityICSSerializer,
+    PublicActivitySerializer,
+)
+from karrot.conversations.api import RetrieveConversationMixin
+from karrot.history.models import History, HistoryTypus
 from karrot.utils.mixins import PartialUpdateModelMixin
 from karrot.utils.parsers import JSONWithFilesMultiPartParser
 

@@ -1,8 +1,9 @@
+from icalendar import Calendar, Event
 from rest_framework import renderers
 from rest_framework.utils.serializer_helpers import ReturnDict
-from icalendar import Calendar, Event
-from karrot.places.models import Place
+
 from karrot.groups.models import Group
+from karrot.places.models import Place
 
 
 class ICSCalendarRenderer(renderers.BaseRenderer):

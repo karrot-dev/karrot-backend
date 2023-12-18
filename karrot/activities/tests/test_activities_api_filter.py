@@ -3,17 +3,17 @@ from datetime import timedelta
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from django.utils import timezone
-
+from karrot.activities.factories import ActivityFactory, ActivitySeriesFactory, ActivityTypeFactory, FeedbackFactory
+from karrot.activities.models import Activity as ActivityModel
+from karrot.activities.models import to_range
 from karrot.groups.factories import GroupFactory
-from karrot.activities.factories import ActivityFactory, ActivitySeriesFactory, FeedbackFactory, ActivityTypeFactory
-from karrot.activities.models import Activity as ActivityModel, to_range
+from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import UserFactory
-from karrot.places.factories import PlaceFactory
 
 
 class TestActivitydatesAPIFilter(APITestCase, ExtractPaginationMixin):

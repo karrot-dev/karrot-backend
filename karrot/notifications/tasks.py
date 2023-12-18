@@ -4,9 +4,9 @@ from django.db.models.functions import Cast
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task
 
-from karrot.issues.models import Voting, IssueStatus
-from karrot.notifications.models import Notification, NotificationType
 from karrot.activities.models import Activity, ActivityParticipant
+from karrot.issues.models import IssueStatus, Voting
+from karrot.notifications.models import Notification, NotificationType
 from karrot.utils import stats_utils
 from karrot.utils.stats_utils import timer
 

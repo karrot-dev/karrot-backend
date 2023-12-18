@@ -1,4 +1,5 @@
-from django_filters import rest_framework as filters, ModelChoiceFilter
+from django_filters import ModelChoiceFilter
+from django_filters import rest_framework as filters
 
 from karrot.places.models import PlaceType
 

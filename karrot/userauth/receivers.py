@@ -1,4 +1,4 @@
-from django.contrib.auth import user_login_failed, user_logged_in, get_user_model
+from django.contrib.auth import get_user_model, user_logged_in, user_login_failed
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 

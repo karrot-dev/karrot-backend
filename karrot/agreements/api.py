@@ -4,10 +4,10 @@ from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
-from karrot.agreements.permissions import IsGroupEditor
 from karrot.agreements.filters import AgreementFilter
-from karrot.agreements.serializers import AgreementSerializer
 from karrot.agreements.models import Agreement
+from karrot.agreements.permissions import IsGroupEditor
+from karrot.agreements.serializers import AgreementSerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
 
 

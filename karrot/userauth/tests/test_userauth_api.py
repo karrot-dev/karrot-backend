@@ -12,9 +12,9 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from karrot.groups.factories import GroupFactory
 from karrot.activities.factories import ActivityFactory
 from karrot.activities.models import to_range
+from karrot.groups.factories import GroupFactory
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.userauth.models import VerificationCode

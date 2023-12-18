@@ -2,15 +2,15 @@ import json
 
 import requests
 from django.conf import settings
-from django.db.models.signals import post_save, pre_delete, post_delete
+from django.db.models.signals import post_delete, post_save, pre_delete
 from django.dispatch import receiver
 
 from karrot.conversations.models import Conversation
 from karrot.groups import roles, stats
 from karrot.groups.emails import (
     prepare_user_became_editor_email,
-    prepare_user_lost_editor_role_email,
     prepare_user_got_role_email,
+    prepare_user_lost_editor_role_email,
 )
 from karrot.groups.models import Group, GroupMembership, Trust, create_group_photo_warmer
 from karrot.groups.roles import GROUP_EDITOR

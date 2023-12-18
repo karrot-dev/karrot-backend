@@ -13,16 +13,16 @@ from rest_framework.test import APITestCase
 
 from karrot.activities import tasks
 from karrot.activities.factories import ActivityFactory
+from karrot.activities.models import to_range
+from karrot.activities.tasks import daily_activity_notifications, fetch_activity_notification_data_for_group
 from karrot.activities.tests.test_activities_api import APPROVED
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
-from karrot.activities.models import to_range
-from karrot.activities.tasks import daily_activity_notifications, fetch_activity_notification_data_for_group
-from karrot.groups.roles import GROUP_MEMBER, GROUP_EDITOR
+from karrot.groups.roles import GROUP_EDITOR, GROUP_MEMBER
 from karrot.places.factories import PlaceFactory
 from karrot.places.models import PlaceStatus, PlaceSubscription
 from karrot.subscriptions.factories import WebPushSubscriptionFactory
-from karrot.users.factories import VerifiedUserFactory, UserFactory
+from karrot.users.factories import UserFactory, VerifiedUserFactory
 from karrot.utils.frontend_urls import place_url
 
 

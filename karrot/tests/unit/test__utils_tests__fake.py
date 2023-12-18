@@ -1,4 +1,5 @@
 from django.test import TestCase
+
 from karrot.utils.tests.fake import Faker
 
 

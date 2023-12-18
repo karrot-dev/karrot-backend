@@ -5,18 +5,18 @@ from django.conf import settings
 from django.db.models import IntegerField, Q
 from django.db.models.fields.json import KeyTextTransform
 from django.db.models.functions import Cast
-from django.db.models.signals import post_save, pre_save, pre_delete, post_delete
+from django.db.models.signals import post_delete, post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 from pytz import utc
 
+from karrot.activities.models import Activity, ActivityParticipant
 from karrot.applications.models import Application, ApplicationStatus
-from karrot.issues.models import Issue, Voting, OptionTypes
-from karrot.notifications.models import Notification, NotificationType, NotificationMeta
 from karrot.groups.models import GroupMembership, get_default_roles
 from karrot.groups.roles import GROUP_EDITOR
 from karrot.invitations.models import Invitation
-from karrot.activities.models import Activity, ActivityParticipant
+from karrot.issues.models import Issue, OptionTypes, Voting
+from karrot.notifications.models import Notification, NotificationMeta, NotificationType
 from karrot.places.models import Place
 from karrot.users.models import User
 

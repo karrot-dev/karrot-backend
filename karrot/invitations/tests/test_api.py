@@ -1,14 +1,14 @@
 import re
-from anymail.exceptions import AnymailAPIError
+from unittest.mock import patch
 
+from anymail.exceptions import AnymailAPIError
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.core import mail
 from django.utils import timezone
-from django.conf import settings
 from furl import furl
 from rest_framework import status
 from rest_framework.test import APITestCase
-from unittest.mock import patch
 
 from karrot.groups.factories import GroupFactory
 from karrot.history.models import History

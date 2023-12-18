@@ -5,11 +5,11 @@ from django.utils import timezone
 from django.utils.timezone import get_current_timezone
 
 from config import settings
-from karrot.conversations.models import ConversationMessage
-from karrot.groups.models import Group, GroupNotificationType, GroupMembership
 from karrot.activities.models import Activity, Feedback
+from karrot.conversations.models import ConversationMessage
+from karrot.groups.models import Group, GroupMembership, GroupNotificationType
 from karrot.utils.email_utils import prepare_email
-from karrot.utils.frontend_urls import group_wall_url, group_settings_url, group_summary_unsubscribe_url
+from karrot.utils.frontend_urls import group_settings_url, group_summary_unsubscribe_url, group_wall_url
 
 
 def prepare_group_summary_data(group, from_date, to_date):

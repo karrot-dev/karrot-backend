@@ -1,6 +1,5 @@
-from karrot.utils.influxdb_utils import write_points
-
 from karrot.groups.stats import group_tags
+from karrot.utils.influxdb_utils import write_points
 
 
 def issue_tags(issue):

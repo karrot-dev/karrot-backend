@@ -5,10 +5,10 @@ from karrot.groups.models import Group
 from karrot.unsubscribe import stats
 from karrot.unsubscribe.utils import (
     parse_token,
-    unsubscribe_from_conversation,
-    unsubscribe_from_thread,
     unsubscribe_from_all_conversations_in_group,
+    unsubscribe_from_conversation,
     unsubscribe_from_notification_type,
+    unsubscribe_from_thread,
 )
 
 

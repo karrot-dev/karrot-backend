@@ -1,10 +1,9 @@
-from django.core.management import BaseCommand
-from shlex import quote
-
 import os
 import subprocess
+from shlex import quote
 
 from django.conf import settings
+from django.core.management import BaseCommand
 
 #
 # A script to manage database dump and restore.

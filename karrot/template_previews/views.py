@@ -5,39 +5,39 @@ import re
 from collections import namedtuple
 
 from dateutil.relativedelta import relativedelta
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound
 from django.template.loader import render_to_string
 from django.template.utils import get_app_template_dirs
 from django.utils import timezone
 
 import karrot.applications.emails
-import karrot.issues.emails
 import karrot.conversations.emails
 import karrot.invitations.emails
+import karrot.issues.emails
 import karrot.users.emails
 from config import settings
+from karrot.activities.emails import prepare_activity_notification_email, prepare_participant_removed_email
+from karrot.activities.models import Activity, ActivitySeries
 from karrot.applications.factories import ApplicationFactory
 from karrot.applications.models import Application
-from karrot.issues.factories import IssueFactory
-from karrot.conversations.models import ConversationMessage, Conversation
+from karrot.conversations.emails import prepare_mention_notification
+from karrot.conversations.models import Conversation, ConversationMessage
 from karrot.groups.emails import (
-    prepare_user_inactive_in_group_email,
-    prepare_group_summary_emails,
     prepare_group_summary_data,
+    prepare_group_summary_emails,
     prepare_user_became_editor_email,
+    prepare_user_inactive_in_group_email,
     prepare_user_removal_from_group_email,
 )
 from karrot.groups.models import Group
 from karrot.invitations.models import Invitation
+from karrot.issues.factories import IssueFactory
 from karrot.offers.emails import prepare_new_offer_notification_email
 from karrot.offers.factories import OfferFactory
 from karrot.offers.models import Offer
-from karrot.activities.emails import prepare_activity_notification_email, prepare_participant_removed_email
-from karrot.activities.models import Activity, ActivitySeries
 from karrot.users.factories import VerifiedUserFactory
 from karrot.users.models import User
 from karrot.utils.tests.fake import faker
-from karrot.conversations.emails import prepare_mention_notification
 
 basedir = os.path.abspath(os.path.join(settings.BASE_DIR, "karrot"))
 

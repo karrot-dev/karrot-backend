@@ -1,5 +1,4 @@
-from django.db import DataError
-from django.db import IntegrityError
+from django.db import DataError, IntegrityError
 from django.test import TestCase
 
 from karrot.groups.factories import GroupFactory

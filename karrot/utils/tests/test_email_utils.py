@@ -17,11 +17,11 @@ from karrot.invitations.models import Invitation
 from karrot.userauth.models import VerificationCode
 from karrot.users.factories import UserFactory
 from karrot.utils.email_utils import (
-    time_filter,
+    CustomAnymailMessage,
     date_filter,
     generate_plaintext_from_html,
     prepare_email,
-    CustomAnymailMessage,
+    time_filter,
 )
 from karrot.utils.frontend_urls import group_photo_url, karrot_logo_url
 from karrot.utils.tests.uploads import image_path

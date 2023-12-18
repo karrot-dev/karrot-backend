@@ -1,10 +1,10 @@
 from typing import List
 
+from cryptography.hazmat.primitives import serialization
 from django.conf import settings
 from orjson import orjson
 from py_vapid import Vapid, b64urlencode
-from pywebpush import webpush, WebPushException
-from cryptography.hazmat.primitives import serialization
+from pywebpush import WebPushException, webpush
 
 from karrot.subscriptions.models import WebPushSubscription
 from karrot.subscriptions.stats import pushed_via_web_push

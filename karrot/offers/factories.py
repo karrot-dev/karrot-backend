@@ -1,4 +1,4 @@
-from factory import SubFactory, LazyAttribute, post_generation
+from factory import LazyAttribute, SubFactory, post_generation
 from factory.django import DjangoModelFactory
 
 from karrot.groups.factories import GroupFactory

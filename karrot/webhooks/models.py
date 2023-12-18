@@ -1,6 +1,6 @@
 from anymail.signals import EventType
-from django.db.models import JSONField
 from django.db import models
+from django.db.models import JSONField
 
 from config import settings
 from karrot.base.base_models import BaseModel

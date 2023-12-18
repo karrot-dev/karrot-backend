@@ -1,8 +1,9 @@
-from factory import LazyAttribute, SubFactory, post_generation, SelfAttribute, Sequence
+from factory import LazyAttribute, SelfAttribute, Sequence, SubFactory, post_generation
 from factory.django import DjangoModelFactory
 
 from karrot.groups.factories import GroupFactory
-from karrot.places.models import Place as PlaceModel, PlaceType
+from karrot.places.models import Place as PlaceModel
+from karrot.places.models import PlaceType
 from karrot.utils.tests.fake import faker
 
 

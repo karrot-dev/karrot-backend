@@ -5,8 +5,8 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from karrot.users.factories import VerifiedUserFactory
 from karrot.userauth.models import VerificationCode
+from karrot.users.factories import VerifiedUserFactory
 
 
 class TestPasswordReset(APITestCase):

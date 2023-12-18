@@ -1,15 +1,15 @@
 import os
 
 import click
-from uvicorn.workers import UvicornWorker
-from gunicorn.app.base import BaseApplication
+import django
 from click import pass_context
 from daphne.cli import CommandLineInterface
-from django.core import management
 from django.conf import settings
-import django
+from django.core import management
 from django.core.management import execute_from_command_line
 from dotenv import load_dotenv
+from gunicorn.app.base import BaseApplication
+from uvicorn.workers import UvicornWorker
 
 from config.options import get_options
 

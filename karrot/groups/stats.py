@@ -2,6 +2,7 @@ from collections import defaultdict
 
 from django.db.models import Count
 from django.utils import timezone
+
 from karrot.utils.influxdb_utils import write_points
 
 

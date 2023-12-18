@@ -11,13 +11,14 @@ from karrot.activities.models import Activity
 from karrot.activities.permissions import CannotChangeGroup
 from karrot.conversations.api import RetrieveConversationMixin
 from karrot.places.filters import PlaceTypeFilter
-from karrot.places.models import Place as PlaceModel, PlaceSubscription, PlaceType
-from karrot.places.permissions import TypeHasNoPlaces, IsGroupEditor
+from karrot.places.models import Place as PlaceModel
+from karrot.places.models import PlaceSubscription, PlaceType
+from karrot.places.permissions import IsGroupEditor, TypeHasNoPlaces
 from karrot.places.serializers import (
     PlaceSerializer,
-    PlaceUpdateSerializer,
     PlaceSubscriptionSerializer,
     PlaceTypeSerializer,
+    PlaceUpdateSerializer,
 )
 from karrot.utils.mixins import PartialUpdateModelMixin
 

@@ -2,8 +2,8 @@ from django.db import transaction
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.serializers import ModelSerializer
 
-from karrot.history.models import History, HistoryTypus
 from karrot.agreements.models import Agreement
+from karrot.history.models import History, HistoryTypus
 
 
 class AgreementHistorySerializer(ModelSerializer):

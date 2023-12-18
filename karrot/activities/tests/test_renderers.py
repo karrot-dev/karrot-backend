@@ -1,11 +1,13 @@
-from django.test import TestCase
-from pytz import UTC
-from datetime import datetime
-from rest_framework.utils.serializer_helpers import ReturnDict, ReturnList
-from rest_framework.response import Response
-from karrot.activities.renderers import ICSCalendarRenderer
-from icalendar import vCalAddress, vText
 from collections import namedtuple
+from datetime import datetime
+
+from django.test import TestCase
+from icalendar import vCalAddress, vText
+from pytz import UTC
+from rest_framework.response import Response
+from rest_framework.utils.serializer_helpers import ReturnDict, ReturnList
+
+from karrot.activities.renderers import ICSCalendarRenderer
 
 
 class ICSCalendarRendererTest(TestCase):

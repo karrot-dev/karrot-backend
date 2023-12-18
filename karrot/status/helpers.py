@@ -1,15 +1,16 @@
 from collections import defaultdict
-from django.db.models import F, Count, Q, Case, When, BooleanField
+
+from django.db.models import BooleanField, Case, Count, F, Q, When
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from karrot.issues.models import IssueStatus
+from karrot.activities.models import Activity
 from karrot.applications.models import ApplicationStatus
 from karrot.conversations.models import ConversationParticipant, ConversationThreadParticipant
 from karrot.groups.models import Group
+from karrot.issues.models import IssueStatus
 from karrot.notifications.models import Notification
-from karrot.activities.models import Activity
 from karrot.places.models import PlaceStatus
 
 

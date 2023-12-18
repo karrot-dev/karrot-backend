@@ -1,28 +1,29 @@
 from datetime import timedelta
-from dirtyfields import DirtyFieldsMixin
 
-from versatileimagefield.image_warmer import VersatileImageFieldWarmer
 from dateutil.relativedelta import relativedelta
+from dirtyfields import DirtyFieldsMixin
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import TextField, DateTimeField, QuerySet, Count, Q, F, Exists, OuterRef, Value, CheckConstraint
+from django.db.models import CheckConstraint, Count, DateTimeField, Exists, F, OuterRef, Q, QuerySet, TextField, Value
 from django.db.models.manager import BaseManager
 from django.template.loader import render_to_string
-from django.utils import timezone as tz, timezone
+from django.utils import timezone
+from django.utils import timezone as tz
 from timezone_field import TimeZoneField
 from versatileimagefield.fields import VersatileImageField
+from versatileimagefield.image_warmer import VersatileImageFieldWarmer
 
 from karrot.activities.activity_types import default_activity_types
+from karrot.activities.models import Activity, ActivityType
 from karrot.base.base_models import BaseModel, LocationModel
 from karrot.conversations.models import ConversationMixin
+from karrot.groups import roles, themes
 from karrot.groups.roles import GROUP_EDITOR, GROUP_MEMBER, GROUP_NEWCOMER
 from karrot.history.models import History, HistoryTypus
-from karrot.activities.models import Activity, ActivityType
 from karrot.places.models import PlaceType
 from karrot.places.place_types import default_place_types
 from karrot.utils import markdown
-from karrot.groups import roles, themes
 
 
 def default_group_features():

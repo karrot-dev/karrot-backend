@@ -1,19 +1,18 @@
 from datetime import timedelta
 
-from django.db import DataError
-from django.db import IntegrityError
+from django.db import DataError, IntegrityError
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
-from karrot.conversations.models import Conversation, ConversationParticipant
-from karrot.groups.factories import GroupFactory
-from karrot.groups.models import Group, get_default_notification_types
 from karrot.activities.factories import ActivityFactory
 from karrot.activities.models import to_range
-from karrot.groups.roles import GROUP_NEWCOMER, GROUP_MEMBER, GROUP_EDITOR
+from karrot.conversations.models import Conversation, ConversationParticipant
+from karrot.groups import themes
+from karrot.groups.factories import GroupFactory
+from karrot.groups.models import Group, get_default_notification_types
+from karrot.groups.roles import GROUP_EDITOR, GROUP_MEMBER, GROUP_NEWCOMER
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory
-from karrot.groups import themes
 
 
 class TestGroupModel(TestCase):

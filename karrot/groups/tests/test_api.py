@@ -1,23 +1,25 @@
 from random import randint
-from unittest.mock import patch, call
+from unittest.mock import call, patch
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from karrot.activities.factories import ActivityFactory
+from karrot.activities.models import to_range
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import (
-    Group as GroupModel,
+    Group,
     GroupMembership,
     GroupNotificationType,
     get_default_notification_types,
-    Group,
+)
+from karrot.groups.models import (
+    Group as GroupModel,
 )
 from karrot.groups.stats import group_tags
 from karrot.history.models import History, HistoryTypus
-from karrot.activities.factories import ActivityFactory
-from karrot.activities.models import to_range
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory
 from karrot.utils.geoip import ip_to_lat_lon

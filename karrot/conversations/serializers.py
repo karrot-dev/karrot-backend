@@ -1,5 +1,5 @@
 import logging
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from os.path import basename
 from typing import List, Optional
 
@@ -16,13 +16,13 @@ from versatileimagefield.serializers import VersatileImageFieldSerializer
 from karrot.conversations.helpers import normalize_emoji_name
 from karrot.conversations.models import (
     ConversationMessage,
-    ConversationParticipant,
+    ConversationMessageAttachment,
+    ConversationMessageImage,
     ConversationMessageReaction,
-    ConversationThreadParticipant,
     ConversationMeta,
     ConversationNotificationStatus,
-    ConversationMessageImage,
-    ConversationMessageAttachment,
+    ConversationParticipant,
+    ConversationThreadParticipant,
 )
 
 logger = logging.getLogger(__name__)

@@ -1,9 +1,9 @@
 from enum import Enum
-from silk.profiling.profiler import silk_profile
 
 from django.conf import settings
 from django.db import models, transaction
 from django.utils import timezone
+from silk.profiling.profiler import silk_profile
 
 from karrot.applications.stats import application_status_update
 from karrot.applications.tasks import notify_about_accepted_application, notify_about_declined_application

@@ -10,7 +10,7 @@ from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
-from karrot.subscriptions.consumers import WebsocketConsumer, TokenAuthMiddleware, get_auth_token_from_subprotocols
+from karrot.subscriptions.consumers import TokenAuthMiddleware, WebsocketConsumer, get_auth_token_from_subprotocols
 from karrot.subscriptions.models import ChannelSubscription
 from karrot.subscriptions.routing import AllowedHostsAndFileOriginValidator
 from karrot.users.factories import UserFactory

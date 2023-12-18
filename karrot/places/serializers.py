@@ -6,7 +6,8 @@ from rest_framework.exceptions import PermissionDenied
 
 from karrot.groups.serializers import GroupPreviewSerializer
 from karrot.history.models import History, HistoryTypus
-from karrot.places.models import Place as PlaceModel, PlaceSubscription, PlaceType, PlaceStatus
+from karrot.places.models import Place as PlaceModel
+from karrot.places.models import PlaceStatus, PlaceSubscription, PlaceType
 from karrot.utils.misc import find_changed
 
 

@@ -6,26 +6,25 @@ from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrulestr
 from django.conf import settings
 from django.contrib.postgres.indexes import GistIndex
-from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db import models
-from django.db import transaction
-from django.db.models import Count, DurationField, F, FilteredRelation, Q, Sum, CheckConstraint
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models, transaction
+from django.db.models import CheckConstraint, Count, DurationField, F, FilteredRelation, Q, Sum
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from versatileimagefield.fields import VersatileImageField
 from versatileimagefield.image_warmer import VersatileImageFieldWarmer
 
-from karrot.groups.roles import GROUP_MEMBER
 from karrot.activities import stats
 from karrot.activities.utils import match_activities_with_dates, rrule_between_dates_in_local_time
 from karrot.base.base_models import (
     BaseModel,
-    CustomDateTimeTZRange,
     CustomDateTimeRangeField,
-    UpdatedAtMixin,
+    CustomDateTimeTZRange,
     NicelyFormattedModel,
+    UpdatedAtMixin,
 )
 from karrot.conversations.models import ConversationMixin
+from karrot.groups.roles import GROUP_MEMBER
 from karrot.history.models import History, HistoryTypus
 from karrot.places.models import PlaceStatus
 

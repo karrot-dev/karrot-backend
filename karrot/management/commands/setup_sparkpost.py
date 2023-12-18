@@ -1,5 +1,6 @@
-import requests
 import sys
+
+import requests
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from rest_framework import status

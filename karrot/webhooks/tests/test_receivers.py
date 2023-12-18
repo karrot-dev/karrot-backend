@@ -2,7 +2,7 @@ import os
 import uuid
 
 from anymail.inbound import AnymailInboundMessage
-from anymail.signals import AnymailInboundEvent, EventType, AnymailTrackingEvent
+from anymail.signals import AnymailInboundEvent, AnymailTrackingEvent, EventType
 from django.core import mail
 from rest_framework.test import APITestCase
 

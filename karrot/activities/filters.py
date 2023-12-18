@@ -1,8 +1,9 @@
-from django_filters import rest_framework as filters, ModelChoiceFilter
 from django.db.models import Q
+from django_filters import ModelChoiceFilter
+from django_filters import rest_framework as filters
 
+from karrot.activities.models import Activity, ActivitySeries, ActivityType, Feedback
 from karrot.base.filters import ISODateTimeRangeFromToRangeFilter
-from karrot.activities.models import Activity, ActivitySeries, Feedback, ActivityType
 from karrot.places.models import PlaceStatus
 
 

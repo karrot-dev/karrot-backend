@@ -1,9 +1,9 @@
 from io import BytesIO
 from typing import Tuple
 
+from django.core.files import File
 from PIL import Image
 from PIL.ImageOps import exif_transpose
-from django.core.files import File
 
 # A list of mime types that pillow supports
 Image.init()

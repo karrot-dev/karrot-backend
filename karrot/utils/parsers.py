@@ -1,8 +1,8 @@
 import json
 
 import glom
-from rest_framework.parsers import MultiPartParser
 from rest_framework.exceptions import ParseError
+from rest_framework.parsers import MultiPartParser
 
 
 class JSONWithFilesMultiPartParser(MultiPartParser):

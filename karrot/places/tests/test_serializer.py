@@ -1,4 +1,5 @@
 from collections import namedtuple
+
 from django.test import TestCase
 
 from karrot.groups.factories import GroupFactory

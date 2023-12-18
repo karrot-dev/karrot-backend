@@ -1,27 +1,28 @@
 from collections import defaultdict
 
-from babel.dates import format_time, format_datetime
+from babel.dates import format_datetime, format_time
 from dateutil.relativedelta import relativedelta
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import F, Q, QuerySet
 from django.utils import timezone, translation
 from django.utils.text import Truncator
 from django.utils.timezone import get_current_timezone
-from django.utils.translation import gettext as _, to_locale, get_language
+from django.utils.translation import get_language, to_locale
+from django.utils.translation import gettext as _
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task, db_task
 
 from karrot.activities import stats
 from karrot.activities.emails import prepare_activity_notification_email, prepare_participant_removed_email
-from karrot.activities.models import Activity, ActivitySeries, ActivityParticipant, ParticipantType, ActivityType
+from karrot.activities.models import Activity, ActivityParticipant, ActivitySeries, ActivityType, ParticipantType
 from karrot.groups.models import Group, GroupMembership, GroupNotificationType
-from karrot.places.models import PlaceStatus, Place
+from karrot.notifications.models import Notification, NotificationType
+from karrot.places.models import Place, PlaceStatus
 from karrot.subscriptions.models import WebPushSubscription
 from karrot.subscriptions.tasks import notify_subscribers
 from karrot.users.models import User
-from karrot.utils import stats_utils, frontend_urls
+from karrot.utils import frontend_urls, stats_utils
 from karrot.utils.stats_utils import timer
-from karrot.notifications.models import Notification, NotificationType
 
 
 def is_today(dt):

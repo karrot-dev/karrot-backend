@@ -1,5 +1,6 @@
-from karrot.utils.misc import json_stringify
 from django.test import TestCase
+
+from karrot.utils.misc import json_stringify
 
 
 class JsonStringifyTestCase(TestCase):

@@ -1,21 +1,22 @@
 import datetime
-import pytz
 from datetime import timedelta
+from unittest.mock import patch
+
+import pytz
 from dateutil.relativedelta import relativedelta
 from django.core import mail
 from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
-from unittest.mock import patch
 
 from config import settings
+from karrot.activities.factories import ActivityFactory, FeedbackFactory
 from karrot.groups.emails import calculate_group_summary_dates, prepare_group_summary_data, prepare_group_summary_emails
-from karrot.groups.factories import GroupFactory, PlaygroundGroupFactory, InactiveGroupFactory
+from karrot.groups.factories import GroupFactory, InactiveGroupFactory, PlaygroundGroupFactory
 from karrot.groups.models import GroupMembership, GroupStatus
 from karrot.groups.roles import GROUP_MEMBER
-from karrot.groups.tasks import process_inactive_users, send_summary_emails, mark_inactive_groups
+from karrot.groups.tasks import mark_inactive_groups, process_inactive_users, send_summary_emails
 from karrot.history.models import History, HistoryTypus
-from karrot.activities.factories import ActivityFactory, FeedbackFactory
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory, VerifiedUserFactory
 

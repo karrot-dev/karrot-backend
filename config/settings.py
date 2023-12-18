@@ -15,14 +15,13 @@ import re
 import orjson
 import redis
 import sentry_sdk
-from PIL import Image
-
 from dotenv import load_dotenv
+from PIL import Image
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
 
-from karrot.groups import themes
 from config.options import get_options
+from karrot.groups import themes
 
 load_dotenv()
 

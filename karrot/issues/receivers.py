@@ -5,7 +5,7 @@ from django.utils import timezone
 from karrot.conversations.models import Conversation
 from karrot.groups.models import GroupMembership
 from karrot.issues.models import Issue, Vote, Voting
-from karrot.issues.tasks import notify_about_new_conflict_resolution, notify_about_continued_conflict_resolution
+from karrot.issues.tasks import notify_about_continued_conflict_resolution, notify_about_new_conflict_resolution
 
 
 @receiver(post_save, sender=Issue)

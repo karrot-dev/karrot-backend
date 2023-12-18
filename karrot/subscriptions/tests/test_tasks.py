@@ -1,21 +1,21 @@
-from unittest.mock import patch, call
+from unittest.mock import call, patch
 
 from dateutil.parser import parse
 from django.db.models.signals import post_save
 from django.test import TestCase
 from factory.django import mute_signals
 
+from karrot.activities.factories import ActivityFactory
+from karrot.activities.models import to_range
 from karrot.applications.factories import ApplicationFactory
-from karrot.issues.factories import IssueFactory
 from karrot.conversations.models import (
     Conversation,
     ConversationMessage,
-    ConversationThreadParticipant,
     ConversationParticipant,
+    ConversationThreadParticipant,
 )
 from karrot.groups.factories import GroupFactory
-from karrot.activities.factories import ActivityFactory
-from karrot.activities.models import to_range
+from karrot.issues.factories import IssueFactory
 from karrot.places.factories import PlaceFactory
 from karrot.subscriptions.factories import WebPushSubscriptionFactory
 from karrot.subscriptions.models import WebPushSubscription

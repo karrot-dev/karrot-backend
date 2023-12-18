@@ -2,17 +2,17 @@ from dateutil.relativedelta import relativedelta
 from django.test import TestCase
 from django.utils import timezone
 
+from karrot.activities.factories import ActivityFactory
+from karrot.activities.models import ActivityParticipant, to_range
+from karrot.groups.factories import GroupFactory
 from karrot.issues.factories import (
     IssueFactory,
     fast_forward_just_before_voting_expiration,
     vote_for_further_discussion,
 )
-from karrot.groups.factories import GroupFactory
 from karrot.notifications import tasks
 from karrot.notifications.models import Notification, NotificationType
 from karrot.notifications.tasks import create_activity_upcoming_notifications, create_voting_ends_soon_notifications
-from karrot.activities.factories import ActivityFactory
-from karrot.activities.models import ActivityParticipant, to_range
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory
 

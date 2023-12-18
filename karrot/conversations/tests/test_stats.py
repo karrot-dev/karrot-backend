@@ -1,9 +1,9 @@
 from django.test import TestCase
 
+from karrot.activities.factories import ActivityFactory
 from karrot.conversations.factories import ConversationFactory
 from karrot.conversations.stats import conversation_tags
 from karrot.groups.factories import GroupFactory
-from karrot.activities.factories import ActivityFactory
 from karrot.places.factories import PlaceFactory
 
 

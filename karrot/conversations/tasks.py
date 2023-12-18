@@ -7,22 +7,22 @@ from anymail.exceptions import AnymailAPIError
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.files.storage import default_storage
-from django.db.models import Q, F
+from django.db.models import F, Q
 from django.utils import timezone
 from huey import crontab
-from huey.contrib.djhuey import db_task, db_periodic_task
+from huey.contrib.djhuey import db_periodic_task, db_task
 
 from karrot.conversations.emails import (
     prepare_conversation_message_notification,
     prepare_group_conversation_message_notification,
-    prepare_place_conversation_message_notification,
     prepare_mention_notification,
+    prepare_place_conversation_message_notification,
 )
 from karrot.conversations.models import (
-    ConversationParticipant,
-    ConversationThreadParticipant,
     Conversation,
     ConversationMessageAttachment,
+    ConversationParticipant,
+    ConversationThreadParticipant,
 )
 from karrot.users.models import User
 from karrot.utils import stats_utils

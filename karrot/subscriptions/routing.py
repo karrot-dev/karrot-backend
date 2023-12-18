@@ -4,7 +4,7 @@ from channels.security import websocket
 from django.conf import settings
 from django.core.asgi import get_asgi_application
 
-from .consumers import WebsocketConsumer, TokenAuthMiddleware
+from .consumers import TokenAuthMiddleware, WebsocketConsumer
 
 
 class OriginValidatorThatAllowsFileUrls(websocket.OriginValidator):

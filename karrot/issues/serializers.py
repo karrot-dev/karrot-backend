@@ -2,7 +2,7 @@ from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
-from karrot.issues.models import Issue, Voting, Vote, Option
+from karrot.issues.models import Issue, Option, Vote, Voting
 
 
 class VoteListSerializer(serializers.ListSerializer):

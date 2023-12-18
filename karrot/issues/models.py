@@ -1,15 +1,16 @@
+from enum import Enum
+
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.db.models import Sum, Count, Prefetch
+from django.db.models import Count, Prefetch, Sum
 from django.utils import timezone
-from enum import Enum
 
 from karrot.base.base_models import BaseModel
-from karrot.issues import stats, signals
 from karrot.conversations.models import ConversationMixin
 from karrot.history.models import History, HistoryTypus
+from karrot.issues import signals, stats
 from karrot.utils import markdown
 
 

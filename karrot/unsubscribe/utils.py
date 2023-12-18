@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core import signing
 
-from karrot.conversations.models import ConversationThreadParticipant, ConversationParticipant, ConversationMessage
+from karrot.conversations.models import ConversationMessage, ConversationParticipant, ConversationThreadParticipant
 from karrot.groups.models import GroupMembership
 
 

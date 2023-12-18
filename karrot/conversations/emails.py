@@ -1,22 +1,22 @@
 import pytz
 from babel.dates import format_date, format_time
-from django.utils import translation, timezone
+from django.utils import timezone, translation
 from django.utils.text import Truncator
 from django.utils.translation import gettext as _
 
 from config import settings
-from karrot.utils.email_utils import prepare_email, formataddr
+from karrot.utils.email_utils import formataddr, prepare_email
 from karrot.utils.frontend_urls import (
-    group_wall_url,
-    conversation_unsubscribe_url,
     activity_detail_url,
-    user_detail_url,
     application_url,
-    thread_url,
-    thread_unsubscribe_url,
+    conversation_unsubscribe_url,
+    group_wall_url,
     issue_url,
-    place_wall_url,
     offer_url,
+    place_wall_url,
+    thread_unsubscribe_url,
+    thread_url,
+    user_detail_url,
 )
 from karrot.webhooks.utils import make_local_part
 

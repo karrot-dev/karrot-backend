@@ -4,9 +4,9 @@
 # Usage: ./manage.py test --settings=config.test_settings
 
 # noinspection PyUnresolvedReferences
-from .settings import *  # noqa: F401,F403
-
 import logging
+
+from .settings import *  # noqa: F401,F403
 
 logging.disable(logging.CRITICAL)
 

@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from karrot.activities.factories import ActivityFactory, ActivityTypeFactory
-from karrot.activities.models import to_range, Activity, Feedback, FeedbackNoShow
+from karrot.activities.models import Activity, Feedback, FeedbackNoShow, to_range
 from karrot.groups.factories import GroupFactory
 from karrot.groups.roles import GROUP_MEMBER
 from karrot.history.models import History

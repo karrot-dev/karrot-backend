@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-import subprocess
-import os
 import glob
-import sys
-from os.path import dirname, realpath, join
+import os
 import pkgutil
+import subprocess
+import sys
+from os.path import dirname, join, realpath
 
 process_mjml = "--no-mjml" not in sys.argv[1:]
 install_hooks = "--no-hooks" not in sys.argv[1:]

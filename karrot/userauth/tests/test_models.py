@@ -1,8 +1,8 @@
 from django.db.utils import IntegrityError
 from django.test import TestCase
 
-from karrot.users.factories import UserFactory
 from karrot.userauth.models import VerificationCode
+from karrot.users.factories import UserFactory
 
 
 class TestVerificationCodeModel(TestCase):

@@ -1,10 +1,10 @@
-from django.db.models.manager import BaseManager
-from django.utils import timezone
 from enum import Enum
 
 from django.conf import settings
-from django.db.models import JSONField
 from django.db import models
+from django.db.models import JSONField
+from django.db.models.manager import BaseManager
+from django.utils import timezone
 
 from karrot.base.base_models import BaseModel
 from karrot.notifications import stats

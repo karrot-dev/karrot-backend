@@ -1,17 +1,18 @@
+from unittest.mock import patch
+
 from dateutil.relativedelta import relativedelta
 from django.core import mail
 from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
-from unittest.mock import patch
 
 from karrot.conversations import tasks
-from karrot.conversations.models import ConversationParticipant, ConversationThreadParticipant, Conversation
+from karrot.conversations.models import Conversation, ConversationParticipant, ConversationThreadParticipant
 from karrot.conversations.tasks import mark_conversations_as_closed
 from karrot.groups.factories import GroupFactory
 from karrot.issues.factories import IssueFactory
 from karrot.tests.utils import execute_scheduled_tasks_immediately
-from karrot.users.factories import VerifiedUserFactory, UserFactory
+from karrot.users.factories import UserFactory, VerifiedUserFactory
 
 
 def suppressed_notifications():

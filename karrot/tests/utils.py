@@ -4,8 +4,8 @@ from django.apps import apps
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 from django.test import TestCase
+from huey.contrib.djhuey import disconnect_signal, signal
 from huey.signals import SIGNAL_SCHEDULED
-from huey.contrib.djhuey import signal, disconnect_signal
 
 
 # Mostly based on this nice persons article:

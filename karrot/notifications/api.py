@@ -12,7 +12,7 @@ from karrot.applications.serializers import ApplicationSerializer
 from karrot.issues.models import Issue
 from karrot.issues.serializers import IssueSerializer
 from karrot.notifications.models import Notification, NotificationMeta
-from karrot.notifications.serializers import NotificationSerializer, NotificationMetaSerializer
+from karrot.notifications.serializers import NotificationMetaSerializer, NotificationSerializer
 
 
 class NotificationPagination(CursorPagination):

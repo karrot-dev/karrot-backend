@@ -3,6 +3,8 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 
+from karrot.activities.factories import ActivityFactory
+from karrot.activities.models import to_range
 from karrot.applications.factories import ApplicationFactory
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
@@ -10,15 +12,13 @@ from karrot.groups.roles import GROUP_EDITOR
 from karrot.invitations.models import Invitation
 from karrot.issues.factories import (
     IssueFactory,
-    vote_for_further_discussion,
     fast_forward_to_voting_expiration,
+    vote_for_further_discussion,
     vote_for_remove_user,
 )
 from karrot.issues.tasks import process_expired_votings
 from karrot.notifications.models import Notification, NotificationType
 from karrot.notifications.tasks import create_activity_upcoming_notifications
-from karrot.activities.factories import ActivityFactory
-from karrot.activities.models import to_range
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory
 

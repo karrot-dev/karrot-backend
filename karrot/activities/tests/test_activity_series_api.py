@@ -1,4 +1,3 @@
-from django.core import mail
 from itertools import zip_longest
 from unittest.mock import ANY
 
@@ -7,17 +6,18 @@ from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrulestr
 from dateutil.tz import tzlocal
+from django.core import mail
 from django.utils import timezone
 from django.utils.datetime_safe import datetime
 from more_itertools import interleave
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from karrot.activities.factories import ActivitySeriesFactory, ActivityTypeFactory
+from karrot.activities.models import ActivitySeries
 from karrot.activities.tests.test_activities_api import APPROVED
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupStatus
-from karrot.activities.models import ActivitySeries
-from karrot.activities.factories import ActivitySeriesFactory, ActivityTypeFactory
 from karrot.groups.roles import GROUP_MEMBER
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import ExtractPaginationMixin

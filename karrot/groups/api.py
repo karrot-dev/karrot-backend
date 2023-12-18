@@ -1,36 +1,36 @@
 import pytz
-from django.http import HttpResponseRedirect, Http404
+from django.http import Http404, HttpResponseRedirect
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework import mixins
-from rest_framework import status
+from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticated, BasePermission
+from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from karrot.conversations.api import RetrieveConversationMixin
 from karrot.groups import stats
 from karrot.groups.filters import GroupsFilter, GroupsInfoFilter
-from karrot.groups.models import Group as GroupModel, GroupMembership, Trust
+from karrot.groups.models import Group as GroupModel
+from karrot.groups.models import GroupMembership, Trust
 from karrot.groups.serializers import (
     GroupDetailSerializer,
-    GroupPreviewSerializer,
     GroupJoinSerializer,
     GroupLeaveSerializer,
-    TimezonesSerializer,
-    GroupMembershipInfoSerializer,
     GroupMembershipAddNotificationTypeSerializer,
+    GroupMembershipInfoSerializer,
     GroupMembershipRemoveNotificationTypeSerializer,
+    GroupPreviewSerializer,
+    TimezonesSerializer,
     TrustActionSerializer,
 )
-from karrot.utils.serializers import EmptySerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
+from karrot.utils.serializers import EmptySerializer
 
 
 class IsNotMember(BasePermission):

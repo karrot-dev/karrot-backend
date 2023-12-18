@@ -1,73 +1,72 @@
 from collections import defaultdict
-
 from itertools import groupby
 
 from django.conf import settings
 from django.contrib.auth import user_logged_out
 from django.db import transaction
 from django.db.models import Q
-from django.db.models.signals import post_save, pre_delete, post_delete
+from django.db.models.signals import post_delete, post_save, pre_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext as _
 
-from karrot.agreements.serializers import AgreementSerializer
+from karrot.activities.models import Activity, ActivityParticipant, ActivitySeries, ActivityType, Feedback
+from karrot.activities.serializers import (
+    ActivitySerializer,
+    ActivitySeriesSerializer,
+    ActivityTypeSerializer,
+    FeedbackSerializer,
+)
 from karrot.agreements.models import Agreement
-from karrot.issues.models import Issue
+from karrot.agreements.serializers import AgreementSerializer
 from karrot.applications.models import Application
 from karrot.applications.serializers import ApplicationSerializer
 from karrot.community_feed.models import CommunityFeedMeta
 from karrot.community_feed.serializers import CommunityFeedMetaSerializer
 from karrot.conversations.models import (
-    ConversationParticipant,
     ConversationMessage,
-    ConversationMessageReaction,
-    ConversationThreadParticipant,
-    ConversationMeta,
     ConversationMessageMention,
+    ConversationMessageReaction,
+    ConversationMeta,
+    ConversationParticipant,
+    ConversationThreadParticipant,
 )
 from karrot.conversations.serializers import (
     ConversationMessageSerializer,
-    ConversationSerializer,
     ConversationMetaSerializer,
+    ConversationSerializer,
 )
 from karrot.conversations.signals import (
-    thread_marked_seen,
+    conversation_marked_seen,
     new_conversation_message,
     new_thread_message,
-    conversation_marked_seen,
+    thread_marked_seen,
 )
-from karrot.groups.models import Group, Trust, GroupMembership
+from karrot.groups.models import Group, GroupMembership, Trust
 from karrot.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer
 from karrot.history.models import history_created
 from karrot.history.serializers import HistorySerializer
 from karrot.invitations.models import Invitation
 from karrot.invitations.serializers import InvitationSerializer
+from karrot.issues.models import Issue
 from karrot.issues.serializers import IssueSerializer
 from karrot.issues.signals import issue_changed
 from karrot.notifications.models import Notification, NotificationMeta
-from karrot.notifications.serializers import NotificationSerializer, NotificationMetaSerializer
+from karrot.notifications.serializers import NotificationMetaSerializer, NotificationSerializer
 from karrot.offers.models import Offer, OfferStatus
 from karrot.offers.serializers import OfferSerializer
-from karrot.activities.models import Activity, ActivitySeries, Feedback, ActivityParticipant, ActivityType
-from karrot.activities.serializers import (
-    ActivitySerializer,
-    ActivitySeriesSerializer,
-    FeedbackSerializer,
-    ActivityTypeSerializer,
-)
 from karrot.places.models import Place, PlaceSubscription
 from karrot.places.serializers import PlaceSerializer
 from karrot.status.helpers import (
-    unseen_notification_count,
-    unread_conversations,
-    pending_applications,
     get_feedback_possible,
     ongoing_issues,
+    pending_applications,
+    unread_conversations,
+    unseen_notification_count,
 )
 from karrot.subscriptions import tasks
 from karrot.subscriptions.models import ChannelSubscription, WebPushSubscription
 from karrot.subscriptions.tasks import notify_subscribers
-from karrot.subscriptions.utils import send_in_channel, MockRequest
+from karrot.subscriptions.utils import MockRequest, send_in_channel
 from karrot.userauth.serializers import AuthUserSerializer
 from karrot.users.serializers import UserSerializer
 from karrot.utils.misc import on_transaction_commit

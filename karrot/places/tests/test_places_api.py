@@ -8,10 +8,10 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from karrot.activities.factories import ActivityFactory, ActivitySeriesFactory, FeedbackFactory
+from karrot.activities.models import to_range
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupStatus
-from karrot.activities.factories import ActivitySeriesFactory, ActivityFactory, FeedbackFactory
-from karrot.activities.models import to_range
 from karrot.history.utils import without_keys
 from karrot.places.factories import PlaceFactory
 from karrot.places.models import PlaceStatus

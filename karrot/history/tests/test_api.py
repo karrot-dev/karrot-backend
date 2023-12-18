@@ -4,12 +4,12 @@ from django.utils import timezone
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
 
+from karrot.activities.factories import ActivityFactory, ActivitySeriesFactory, ActivityTypeFactory
+from karrot.activities.models import Activity, to_range
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupMembership
 from karrot.groups.roles import GROUP_MEMBER
 from karrot.history.models import History
-from karrot.activities.factories import ActivityFactory, ActivitySeriesFactory, ActivityTypeFactory
-from karrot.activities.models import Activity, to_range
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import UserFactory

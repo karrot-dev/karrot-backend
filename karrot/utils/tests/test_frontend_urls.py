@@ -6,11 +6,11 @@ from karrot.offers.factories import OfferFactory
 from karrot.users.factories import VerifiedUserFactory
 from karrot.utils.frontend_urls import (
     absolute_url,
-    offer_image_url,
-    group_photo_url,
     group_photo_or_karrot_logo_url,
+    group_photo_url,
     karrot_logo_url,
     message_url,
+    offer_image_url,
 )
 from karrot.utils.tests.uploads import image_path
 

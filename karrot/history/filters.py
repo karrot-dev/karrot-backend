@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters
 
-from karrot.history.models import HistoryTypus, History
+from karrot.history.models import History, HistoryTypus
 
 
 class HistoryTypusFilter(filters.MultipleChoiceFilter):

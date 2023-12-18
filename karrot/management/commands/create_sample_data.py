@@ -1,7 +1,7 @@
+import random
 import time
 
 import pytz
-import random
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user
 from django.core import mail
@@ -10,9 +10,9 @@ from django.http import request
 from django.utils import timezone
 from rest_framework.test import APIClient
 
+from karrot.activities.models import Activity, ActivitySeries, ActivityType, to_range
 from karrot.groups.models import Group, GroupMembership, GroupStatus
 from karrot.groups.roles import GROUP_EDITOR, GROUP_MEMBER
-from karrot.activities.models import Activity, ActivitySeries, to_range, ActivityType
 from karrot.places.models import Place, PlaceType
 from karrot.users.models import User
 from karrot.utils.tests.fake import faker

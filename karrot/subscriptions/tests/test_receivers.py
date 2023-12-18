@@ -14,18 +14,18 @@ from django.utils import timezone
 from django.utils.crypto import get_random_string
 from factory.django import mute_signals
 
+from karrot.activities.factories import ActivityFactory, ActivitySeriesFactory, FeedbackFactory
+from karrot.activities.models import Activity, to_range
 from karrot.applications.factories import ApplicationFactory
 from karrot.conversations.factories import ConversationFactory
 from karrot.conversations.models import ConversationMessage, ConversationMessageReaction, ConversationNotificationStatus
 from karrot.groups import roles
 from karrot.groups.factories import GroupFactory
-from karrot.groups.models import Trust, GroupMembership
+from karrot.groups.models import GroupMembership, Trust
 from karrot.invitations.models import Invitation
 from karrot.issues.factories import IssueFactory, vote_for_further_discussion
 from karrot.notifications.models import Notification
 from karrot.offers.factories import OfferFactory
-from karrot.activities.factories import FeedbackFactory, ActivityFactory, ActivitySeriesFactory
-from karrot.activities.models import Activity, to_range
 from karrot.places.factories import PlaceFactory
 from karrot.subscriptions.factories import WebPushSubscriptionFactory
 from karrot.subscriptions.models import ChannelSubscription

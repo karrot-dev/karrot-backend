@@ -9,10 +9,11 @@ Downloads all Grafana dashboards from an organization for backup purposes, until
 5. Commit changes
 """
 
-import requests
+import json
 import os
 import shutil
-import json
+
+import requests
 
 import config
 

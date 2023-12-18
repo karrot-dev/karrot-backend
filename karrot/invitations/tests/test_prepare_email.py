@@ -2,9 +2,10 @@ from unittest.mock import patch
 
 from django.test import TestCase
 
-from ..factories import InvitationFactory
-from karrot.invitations.models import Invitation
 from karrot.invitations.emails import prepare_emailinvitation_email
+from karrot.invitations.models import Invitation
+
+from ..factories import InvitationFactory
 
 
 class PrepareEmailTestCase(TestCase):

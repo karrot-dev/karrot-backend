@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from django.db import DataError, IntegrityError
@@ -6,9 +7,9 @@ from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
 
-from karrot.history.models import History
 from karrot.activities.factories import ActivityFactory, ActivitySeriesFactory
-from karrot.activities.models import Feedback, Activity, ActivitySeries, to_range
+from karrot.activities.models import Activity, ActivitySeries, Feedback, to_range
+from karrot.history.models import History
 from karrot.places.factories import PlaceFactory
 from karrot.places.models import PlaceStatus
 from karrot.users.factories import UserFactory

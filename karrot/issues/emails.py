@@ -1,6 +1,6 @@
 from config import settings
 from karrot.conversations.models import Conversation
-from karrot.utils.email_utils import prepare_email, formataddr
+from karrot.utils.email_utils import formataddr, prepare_email
 from karrot.utils.frontend_urls import conflict_resolution_unsubscribe_url, issue_url
 from karrot.webhooks.utils import make_local_part
 

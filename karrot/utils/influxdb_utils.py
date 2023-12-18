@@ -1,12 +1,11 @@
 """Utilities for working with influxdb."""
 # partially from https://github.com/bitlabstudio/django-influxdb-metrics
-from django.conf import settings
-from django.core.signals import request_finished
-from django.dispatch import receiver
-
 import logging
 from threading import Thread
 
+from django.conf import settings
+from django.core.signals import request_finished
+from django.dispatch import receiver
 from influxdb import InfluxDBClient
 
 logger = logging.getLogger(__name__)

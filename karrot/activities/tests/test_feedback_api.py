@@ -7,13 +7,13 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from karrot.activities.factories import ActivityFactory, ActivityTypeFactory, FeedbackFactory
+from karrot.activities.models import Feedback, FeedbackNoShow, to_range
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupStatus
 from karrot.places.factories import PlaceFactory
-from karrot.activities.models import Feedback, to_range, FeedbackNoShow
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import UserFactory
-from karrot.activities.factories import ActivityFactory, FeedbackFactory, ActivityTypeFactory
 
 
 class FeedbackTest(APITestCase, ExtractPaginationMixin):

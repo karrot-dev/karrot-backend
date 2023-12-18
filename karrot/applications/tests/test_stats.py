@@ -5,8 +5,8 @@ from django.test import TestCase
 from django.utils import timezone
 
 from karrot.applications import stats
-from karrot.groups.factories import GroupFactory
 from karrot.applications.factories import ApplicationFactory
+from karrot.groups.factories import GroupFactory
 from karrot.users.factories import UserFactory
 
 

@@ -1,7 +1,8 @@
+from rest_framework.test import APITestCase
+
 from karrot.conversations.models import ConversationParticipant
 from karrot.groups.factories import GroupFactory
 from karrot.users.factories import UserFactory
-from rest_framework.test import APITestCase
 
 
 class TestApplicationReceivers(APITestCase):

@@ -3,8 +3,8 @@ from django.contrib.auth import get_user_model
 from django.db.models import Count
 from django.utils import timezone
 
-from karrot.groups.models import GroupMembership, GroupStatus
 from karrot.activities.models import Activity
+from karrot.groups.models import GroupMembership, GroupStatus
 
 
 def get_users_stats():

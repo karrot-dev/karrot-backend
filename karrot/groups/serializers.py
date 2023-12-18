@@ -8,16 +8,18 @@ from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.fields import Field
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
-from karrot.groups.models import Group as GroupModel, GroupMembership, GroupNotificationType, Trust
+from karrot.groups.models import Group as GroupModel
+from karrot.groups.models import GroupMembership, GroupNotificationType, Trust
 from karrot.history.models import History, HistoryTypus
+from karrot.utils.geoip import geoip_is_available, get_client_ip, ip_to_lat_lon
 from karrot.utils.misc import find_changed
 from karrot.utils.validators import prevent_reserved_names
+
 from . import roles
-from karrot.utils.geoip import geoip_is_available, get_client_ip, ip_to_lat_lon
 from .roles import GROUP_EDITOR
 
 

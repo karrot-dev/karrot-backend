@@ -2,11 +2,11 @@
 import os
 import re
 import shutil
-import psutil
 
 # see https://shiv.readthedocs.io/en/latest/#preamble
-
 from pathlib import Path
+
+import psutil
 
 # variable injected from shiv.bootstrap
 site_packages: Path

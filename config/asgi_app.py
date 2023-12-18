@@ -5,11 +5,10 @@ from django.core.asgi import get_asgi_application
 from django.db.backends.signals import connection_created
 from django.dispatch import receiver
 from starlette.responses import Response
-
 from starlette.staticfiles import StaticFiles
 
-from karrot.utils.asgi_utils import CommunityProxy, AllowedHostsAndFileOriginValidator, cached
-from karrot.subscriptions.consumers import WebsocketConsumer, TokenAuthMiddleware
+from karrot.subscriptions.consumers import TokenAuthMiddleware, WebsocketConsumer
+from karrot.utils.asgi_utils import AllowedHostsAndFileOriginValidator, CommunityProxy, cached
 
 
 @receiver(connection_created)

@@ -1,15 +1,16 @@
 from collections import namedtuple
 from datetime import timedelta
+
 from django.db import DataError
 from django.test import TestCase
 from django.utils import timezone
 
-from karrot.groups.models import GroupMembership
 from karrot.activities.factories import ActivityFactory
-from karrot.groups.roles import GROUP_MEMBER
-from karrot.groups.factories import GroupFactory
 from karrot.activities.filters import ActivitiesFilter
 from karrot.activities.models import Activity
+from karrot.groups.factories import GroupFactory
+from karrot.groups.models import GroupMembership
+from karrot.groups.roles import GROUP_MEMBER
 from karrot.places.factories import PlaceFactory
 from karrot.places.models import PlaceSubscription
 from karrot.users.factories import VerifiedUserFactory

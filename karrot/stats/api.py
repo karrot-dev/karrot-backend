@@ -1,10 +1,10 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.db.models import Count, Q, Sum, Subquery, OuterRef, Value, F
+from django.db.models import Count, F, OuterRef, Q, Subquery, Sum, Value
 from django.db.models.functions import Coalesce, Concat
 from django_filters import IsoDateTimeFromToRangeFilter
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, ModelChoiceFilter, ModelMultipleChoiceFilter
-from rest_framework import views, status
+from rest_framework import status, views
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -12,10 +12,10 @@ from rest_framework.throttling import UserRateThrottle
 from rest_framework.viewsets import GenericViewSet
 
 from karrot.activities.models import ActivityType
-from karrot.history.models import HistoryTypus, History
+from karrot.history.models import History, HistoryTypus
 from karrot.places.models import Place
 from karrot.stats import stats
-from karrot.stats.serializers import FrontendStatsSerializer, ActivityHistoryStatsSerializer
+from karrot.stats.serializers import ActivityHistoryStatsSerializer, FrontendStatsSerializer
 
 
 class StatsThrottle(UserRateThrottle):

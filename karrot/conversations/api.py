@@ -7,7 +7,7 @@ from urllib.parse import quote
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import prefetch_related_objects, F
+from django.db.models import F, prefetch_related_objects
 from django.http import FileResponse, Http404, HttpResponse
 from django.utils import timezone
 from django.utils.cache import get_conditional_response
@@ -15,46 +15,45 @@ from django.utils.http import content_disposition_header, quote_etag
 from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework import mixins
-from rest_framework import status
+from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import CursorPagination
 from rest_framework.parsers import JSONParser
-from rest_framework.permissions import IsAuthenticated, BasePermission
+from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from karrot.activities.models import Activity
+from karrot.activities.serializers import ActivitySerializer
 from karrot.applications.models import Application
 from karrot.applications.serializers import ApplicationSerializer
 from karrot.conversations.models import (
     Conversation,
     ConversationMessage,
-    ConversationMessageReaction,
-    ConversationParticipant,
-    ConversationMeta,
     ConversationMessageAttachment,
+    ConversationMessageReaction,
+    ConversationMeta,
+    ConversationParticipant,
 )
 from karrot.conversations.serializers import (
-    ConversationSerializer,
-    ConversationMessageSerializer,
-    ConversationMessageReactionSerializer,
-    EmojiField,
-    ConversationThreadSerializer,
-    ConversationMetaSerializer,
     ConversationMessageAttachmentSerializer,
+    ConversationMessageReactionSerializer,
+    ConversationMessageSerializer,
+    ConversationMetaSerializer,
+    ConversationSerializer,
+    ConversationThreadSerializer,
+    EmojiField,
 )
 from karrot.issues.models import Issue
 from karrot.issues.serializers import IssueSerializer
-from karrot.utils.parsers import JSONWithFilesMultiPartParser
 from karrot.offers.models import Offer
 from karrot.offers.serializers import OfferSerializer
-from karrot.activities.models import Activity
-from karrot.activities.serializers import ActivitySerializer
 from karrot.users.serializers import UserInfoSerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
+from karrot.utils.parsers import JSONWithFilesMultiPartParser
 
 logger = logging.getLogger(__name__)
 

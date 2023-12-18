@@ -1,5 +1,5 @@
 from karrot.utils.email_utils import prepare_email
-from karrot.utils.frontend_urls import user_delete_url, user_passwordreset_url, user_emailverification_url
+from karrot.utils.frontend_urls import user_delete_url, user_emailverification_url, user_passwordreset_url
 
 
 def prepare_accountdelete_request_email(user, verification_code):

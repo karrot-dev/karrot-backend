@@ -1,9 +1,11 @@
 from importlib import import_module
 from os import walk
-from os.path import join as join_path, dirname
+from os.path import dirname
+from os.path import join as join_path
+
+from django.test import TestCase
 
 import karrot
-from django.test import TestCase
 
 
 def iter_sources(root_module_path, pysuffix=".py"):

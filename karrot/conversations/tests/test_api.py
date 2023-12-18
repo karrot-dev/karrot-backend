@@ -1,42 +1,42 @@
 import os
 from datetime import timedelta
 from email.utils import parseaddr
-from os.path import isfile, basename
+from os.path import basename, isfile
 from urllib.parse import quote
-from freezegun import freeze_time
 
 from dateutil.parser import parse
 from django.core import mail
-from django.utils import timezone
 from django.test import override_settings
+from django.utils import timezone
+from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from karrot.activities.factories import ActivityFactory
 from karrot.applications.factories import ApplicationFactory
 from karrot.conversations.factories import ConversationFactory
 from karrot.conversations.models import (
-    ConversationParticipant,
     Conversation,
     ConversationMessage,
     ConversationMessageReaction,
     ConversationNotificationStatus,
+    ConversationParticipant,
     ConversationThreadParticipant,
 )
 from karrot.groups.factories import GroupFactory
-from karrot.groups.models import GroupStatus, GroupMembership
+from karrot.groups.models import GroupMembership, GroupStatus
 from karrot.issues.factories import IssueFactory
 from karrot.offers.factories import OfferFactory
-from karrot.activities.factories import ActivityFactory
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import execute_scheduled_tasks_immediately
 from karrot.users.factories import UserFactory, VerifiedUserFactory
 from karrot.utils.tests.uploads import (
+    encode_data_with_attachments,
     encode_data_with_images,
     image_path,
-    uploaded_file_for,
     pdf_attachment_path,
-    encode_data_with_attachments,
     read_response,
+    uploaded_file_for,
 )
 from karrot.webhooks.utils import parse_local_part
 

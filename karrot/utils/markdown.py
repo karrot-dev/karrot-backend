@@ -4,11 +4,11 @@ from bleach_allowlist import markdown_attrs, markdown_tags
 from django.utils.text import Truncator
 from markdown import Extension
 from markdown.extensions.nl2br import Nl2BrExtension
+from markdown.postprocessors import Postprocessor
 from pymdownx.emoji import EmojiExtension, twemoji
 from pymdownx.magiclink import MagiclinkExtension
 from pymdownx.superfences import SuperFencesCodeExtension
 from pymdownx.tilde import DeleteSubExtension
-from markdown.postprocessors import Postprocessor
 
 
 class MentionsPostProcessor(Postprocessor):

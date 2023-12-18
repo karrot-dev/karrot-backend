@@ -3,12 +3,12 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from karrot.activities.factories import ActivityFactory
+from karrot.activities.models import Feedback, to_range
 from karrot.groups.factories import GroupFactory
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import UserFactory
-from karrot.activities.models import Feedback, to_range
-from karrot.activities.factories import ActivityFactory
 
 
 class TestFeedbackAPIFilter(APITestCase, ExtractPaginationMixin):

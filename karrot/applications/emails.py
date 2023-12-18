@@ -1,11 +1,11 @@
 from config import settings
 from karrot.conversations.models import Conversation
-from karrot.utils.email_utils import prepare_email, formataddr
+from karrot.utils.email_utils import formataddr, prepare_email
 from karrot.utils.frontend_urls import (
-    group_wall_url,
     application_url,
     applications_url,
     group_edit_url,
+    group_wall_url,
     new_application_unsubscribe_url,
 )
 from karrot.webhooks.utils import make_local_part

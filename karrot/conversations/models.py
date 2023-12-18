@@ -1,7 +1,6 @@
 from enum import Enum
 from uuid import uuid4
 
-from PIL import Image, UnidentifiedImageError
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -10,19 +9,20 @@ from django.db import models
 from django.db.models import Count, F, IntegerField, Q
 from django.db.models.manager import BaseManager
 from django.utils import timezone
+from PIL import Image, UnidentifiedImageError
 from versatileimagefield.fields import VersatileImageField
 from versatileimagefield.image_warmer import VersatileImageFieldWarmer
 
 from config.settings import USERNAME_MENTION_RE
 from karrot.base.base_models import BaseModel, UpdatedAtMixin
 from karrot.conversations.signals import (
+    conversation_marked_seen,
     new_conversation_message,
     new_thread_message,
-    conversation_marked_seen,
     thread_marked_seen,
 )
 from karrot.utils import markdown
-from karrot.utils.image_utils import resize_image, is_supported_content_type
+from karrot.utils.image_utils import is_supported_content_type, resize_image
 
 
 class ConversationQuerySet(models.QuerySet):

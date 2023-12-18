@@ -8,12 +8,12 @@ from rest_framework.test import APITestCase
 
 import karrot.groups
 import karrot.groups.emails as group_emails
-from karrot.groups.factories import GroupFactory
-from karrot.groups.models import GroupNotificationType, GroupMembership
 from karrot.activities.factories import ActivityFactory
+from karrot.groups.factories import GroupFactory
+from karrot.groups.models import GroupMembership, GroupNotificationType
 from karrot.groups.roles import GROUP_MEMBER
 from karrot.places.factories import PlaceFactory
-from karrot.users.factories import VerifiedUserFactory, UserFactory
+from karrot.users.factories import UserFactory, VerifiedUserFactory
 
 
 class TestGroupSummaryEmails(APITestCase):

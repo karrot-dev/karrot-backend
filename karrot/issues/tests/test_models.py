@@ -3,14 +3,14 @@ from django.core import mail
 from django.test import TestCase
 from freezegun import freeze_time
 
-from karrot.issues.factories import IssueFactory
-from karrot.issues.models import OptionTypes
-from karrot.issues.tasks import process_expired_votings
 from karrot.groups import roles
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupNotificationType
 from karrot.groups.roles import GROUP_EDITOR, GROUP_MEMBER
 from karrot.history.models import History, HistoryTypus
+from karrot.issues.factories import IssueFactory
+from karrot.issues.models import OptionTypes
+from karrot.issues.tasks import process_expired_votings
 from karrot.users.factories import VerifiedUserFactory
 
 

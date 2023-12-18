@@ -8,12 +8,12 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from karrot.activities.factories import ActivityFactory, ActivityTypeFactory
+from karrot.activities.models import ActivityParticipant, Feedback, to_range
 from karrot.base.base_models import CustomDateTimeTZRange
 from karrot.conversations.models import ConversationNotificationStatus
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupStatus
-from karrot.activities.factories import ActivityFactory, ActivityTypeFactory
-from karrot.activities.models import to_range, ActivityParticipant, Feedback
 from karrot.groups.roles import GROUP_MEMBER
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import ExtractPaginationMixin, pluck

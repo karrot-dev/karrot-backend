@@ -6,32 +6,32 @@ The `urlpatterns` list routes URLs to views. For more information please see:
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.urls import path, re_path, include
+from django.urls import include, path, re_path
 from django.views.static import serve
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 
+from karrot.activities.api import (
+    ActivitySeriesViewSet,
+    ActivityTypeViewSet,
+    ActivityViewSet,
+    FeedbackViewSet,
+    PublicActivityViewSet,
+)
 from karrot.agreements.api import AgreementViewSet
 from karrot.applications.api import ApplicationViewSet
 from karrot.bootstrap.api import BootstrapViewSet, ConfigViewSet
 from karrot.community_feed.api import CommunityFeedViewSet
-from karrot.conversations.api import ConversationMessageViewSet, ConversationViewSet, AttachmentViewSet
-from karrot.groups.api import GroupViewSet, GroupInfoViewSet
+from karrot.conversations.api import AttachmentViewSet, ConversationMessageViewSet, ConversationViewSet
+from karrot.groups.api import GroupInfoViewSet, GroupViewSet
 from karrot.history.api import HistoryViewSet
-from karrot.invitations.api import InvitationsViewSet, InvitationAcceptViewSet
+from karrot.invitations.api import InvitationAcceptViewSet, InvitationsViewSet
 from karrot.issues.api import IssuesViewSet
 from karrot.notifications.api import NotificationViewSet
 from karrot.offers.api import OfferViewSet
-from karrot.activities.api import (
-    ActivityViewSet,
-    ActivitySeriesViewSet,
-    FeedbackViewSet,
-    ActivityTypeViewSet,
-    PublicActivityViewSet,
-)
-from karrot.places.api import PlaceViewSet, PlaceTypeViewSet
-from karrot.stats.api import FrontendStatsView, ActivityHistoryStatsViewSet
+from karrot.places.api import PlaceTypeViewSet, PlaceViewSet
+from karrot.stats.api import ActivityHistoryStatsViewSet, FrontendStatsView
 from karrot.status.api import StatusView
 from karrot.subscriptions.api import WebPushSubscriptionViewSet
 from karrot.template_previews import views as template_preview_views
@@ -39,17 +39,17 @@ from karrot.unsubscribe.api import TokenUnsubscribeView, UnsubscribeViewSet
 from karrot.userauth.api import (
     AuthUserView,
     AuthView,
-    LogoutView,
-    RequestResetPasswordView,
+    ChangeMailView,
     ChangePasswordView,
-    VerifyMailView,
+    FailedEmailDeliveryView,
+    LogoutView,
+    RequestDeleteUserView,
+    RequestResetPasswordView,
     ResendMailVerificationCodeView,
     ResetPasswordView,
-    ChangeMailView,
-    RequestDeleteUserView,
-    FailedEmailDeliveryView,
+    VerifyMailView,
 )
-from karrot.users.api import UserViewSet, UserInfoViewSet
+from karrot.users.api import UserInfoViewSet, UserViewSet
 
 router = DefaultRouter()
 

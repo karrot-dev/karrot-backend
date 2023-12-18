@@ -2,7 +2,7 @@ from django.conf import settings
 
 from karrot.conversations.models import Conversation
 from karrot.utils.email_utils import formataddr, prepare_email
-from karrot.utils.frontend_urls import new_offer_unsubscribe_url, offer_url, offer_image_url
+from karrot.utils.frontend_urls import new_offer_unsubscribe_url, offer_image_url, offer_url
 from karrot.webhooks.utils import make_local_part
 
 

@@ -12,7 +12,7 @@ from karrot.groups import roles
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupNotificationType
 from karrot.issues.factories import IssueFactory, vote_for_no_change, vote_for_remove_user
-from karrot.issues.models import Vote, IssueStatus
+from karrot.issues.models import IssueStatus, Vote
 from karrot.issues.tasks import process_expired_votings
 from karrot.tests.utils import ExtractPaginationMixin
 from karrot.users.factories import VerifiedUserFactory

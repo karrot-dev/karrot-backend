@@ -4,7 +4,7 @@ from babel.dates import format_date, format_time
 from django.utils import timezone, translation
 from django.utils.text import Truncator
 from huey import crontab
-from huey.contrib.djhuey import db_task, db_periodic_task
+from huey.contrib.djhuey import db_periodic_task, db_task
 
 from karrot.applications.models import ApplicationStatus
 from karrot.groups.models import GroupMembership, GroupNotificationType

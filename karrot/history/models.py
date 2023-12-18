@@ -1,8 +1,8 @@
 from datetime import timedelta
 
-from django.db.models import JSONField, Index, BooleanField
 from django.db import models
-from django.db.models.expressions import Func, Q, ExpressionWrapper
+from django.db.models import BooleanField, Index, JSONField
+from django.db.models.expressions import ExpressionWrapper, Func, Q
 from django.db.models.fields.json import KT
 from django.dispatch import Signal
 from django.utils import timezone

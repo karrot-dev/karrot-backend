@@ -1,20 +1,20 @@
 import logging
 from datetime import datetime
 
-from django.db.models.signals import post_save, pre_delete, pre_save, post_delete
+from django.db.models.signals import post_delete, post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from pytz import utc
 
-from karrot.conversations import tasks, stats
+from karrot.conversations import stats, tasks
 from karrot.conversations.models import (
-    ConversationParticipant,
     ConversationMessage,
-    ConversationMessageReaction,
-    ConversationThreadParticipant,
-    ConversationMeta,
-    ConversationMessageMention,
     ConversationMessageAttachment,
     ConversationMessageImage,
+    ConversationMessageMention,
+    ConversationMessageReaction,
+    ConversationMeta,
+    ConversationParticipant,
+    ConversationThreadParticipant,
 )
 from karrot.notifications.models import Notification, NotificationType
 from karrot.users.models import User

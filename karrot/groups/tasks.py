@@ -11,14 +11,13 @@ from huey.contrib.djhuey import db_periodic_task
 from config import settings
 from karrot.applications.stats import get_application_stats
 from karrot.groups.emails import (
-    prepare_user_inactive_in_group_email,
-    prepare_group_summary_data,
     calculate_group_summary_dates,
+    prepare_group_summary_data,
     prepare_group_summary_emails,
+    prepare_user_inactive_in_group_email,
     prepare_user_removal_from_group_email,
 )
-from karrot.groups.models import Group, GroupStatus
-from karrot.groups.models import GroupMembership
+from karrot.groups.models import Group, GroupMembership, GroupStatus
 from karrot.groups.stats import get_group_members_stats, get_group_places_stats, group_summary_email
 from karrot.history.models import History, HistoryTypus
 from karrot.issues.stats import get_issue_stats

@@ -4,18 +4,18 @@ from django.core import mail
 from django.db import IntegrityError
 from django.test import TestCase
 
+from karrot.activities.factories import ActivityFactory
 from karrot.conversations.factories import ConversationFactory
 from karrot.conversations.models import (
     Conversation,
     ConversationMessage,
     ConversationMessageReaction,
-    ConversationThreadParticipant,
     ConversationParticipant,
+    ConversationThreadParticipant,
 )
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupNotificationType
 from karrot.issues.factories import IssueFactory
-from karrot.activities.factories import ActivityFactory
 from karrot.places.factories import PlaceFactory
 from karrot.tests.utils import execute_scheduled_tasks_immediately
 from karrot.users.factories import UserFactory, VerifiedUserFactory

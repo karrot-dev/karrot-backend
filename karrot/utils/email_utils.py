@@ -3,18 +3,18 @@ from email.utils import formataddr as real_formataddr
 import html2text
 from anymail.exceptions import AnymailAPIError
 from anymail.message import AnymailMessage
-from babel.dates import format_date, format_time, format_datetime
+from babel.dates import format_date, format_datetime, format_time
 from django.template import TemplateDoesNotExist
-from django.template.loader import render_to_string, get_template
-from django.utils import translation, timezone
+from django.template.loader import get_template, render_to_string
+from django.utils import timezone, translation
 from django.utils.text import Truncator
 from django.utils.timezone import get_current_timezone
-from django.utils.translation import to_locale, get_language
+from django.utils.translation import get_language, to_locale
 from jinja2 import Environment
 
 from config import settings
 from karrot.utils import stats
-from karrot.utils.frontend_urls import place_url, user_url, absolute_url, group_photo_or_karrot_logo_url, group_wall_url
+from karrot.utils.frontend_urls import absolute_url, group_photo_or_karrot_logo_url, group_wall_url, place_url, user_url
 
 
 def date_filter(value):
