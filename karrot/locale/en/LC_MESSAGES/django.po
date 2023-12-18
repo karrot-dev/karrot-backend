@@ -40,24 +40,24 @@ msgstr ""
 msgid "Task"
 msgstr ""
 
-#: karrot/activities/serializers.py:312
+#: karrot/activities/serializers.py:315
 msgid "Must be a list"
 msgstr ""
 
-#: karrot/activities/serializers.py:313
+#: karrot/activities/serializers.py:316
 msgid "Must be a list with one or two values"
 msgstr ""
 
-#: karrot/activities/serializers.py:314
+#: karrot/activities/serializers.py:317
 msgid "Must pass start value"
 msgstr ""
 
-#: karrot/activities/tasks.py:76
+#: karrot/activities/tasks.py:77
 #, python-format
 msgid "Upcoming %(activity_type)s"
 msgstr ""
 
-#: karrot/activities/tasks.py:162
+#: karrot/activities/tasks.py:163
 #, python-format
 msgid "%(activity_type)s no longer available - %(date_time)s"
 msgstr ""
@@ -248,27 +248,27 @@ msgid ""
 "conversation</a>."
 msgstr ""
 
-#: karrot/conversations/api.py:93 karrot/conversations/api.py:311
-#: karrot/conversations/api.py:507 karrot/conversations/serializers.py:281
+#: karrot/conversations/api.py:92 karrot/conversations/api.py:310
+#: karrot/conversations/api.py:506 karrot/conversations/serializers.py:281
 msgid "You are not in this conversation"
 msgstr ""
 
-#: karrot/conversations/api.py:102
+#: karrot/conversations/api.py:101
 msgid "You are not the author of this message"
 msgstr ""
 
-#: karrot/conversations/api.py:111
+#: karrot/conversations/api.py:110
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its "
 "creation."
 msgstr ""
 
-#: karrot/conversations/api.py:433
+#: karrot/conversations/api.py:432
 msgid "Must be first in thread"
 msgstr ""
 
-#: karrot/conversations/api.py:436
+#: karrot/conversations/api.py:435
 msgid "You are not a participant in this thread"
 msgstr ""
 
@@ -347,15 +347,15 @@ msgstr ""
 msgid "You cannot give trust to yourself"
 msgstr ""
 
-#: karrot/groups/serializers.py:33
+#: karrot/groups/serializers.py:35
 msgid "Unknown timezone"
 msgstr ""
 
-#: karrot/groups/serializers.py:41
+#: karrot/groups/serializers.py:43
 msgid "Playground"
 msgstr ""
 
-#: karrot/groups/serializers.py:252
+#: karrot/groups/serializers.py:254
 msgid "You are not in this group"
 msgstr ""
 
@@ -567,7 +567,7 @@ msgstr ""
 msgid "%(group_name)s is really missing you!"
 msgstr ""
 
-#: karrot/invitations/api.py:27
+#: karrot/invitations/api.py:26
 msgid "Invitation to this email address was sent recently, wait before resending"
 msgstr ""
 
@@ -754,20 +754,20 @@ msgstr ""
 msgid "Market"
 msgstr ""
 
-#: karrot/places/serializers.py:189
+#: karrot/places/serializers.py:190
 msgid "Set at least one week in advance"
 msgstr ""
 
-#: karrot/places/serializers.py:192
+#: karrot/places/serializers.py:193
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr ""
 
-#: karrot/places/serializers.py:243
+#: karrot/places/serializers.py:244
 msgid "You are already subscribed to this place"
 msgstr ""
 
-#: karrot/subscriptions/receivers.py:829
+#: karrot/subscriptions/receivers.py:828
 msgid "Push notifications are enabled!"
 msgstr ""
 
