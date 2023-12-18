@@ -180,7 +180,7 @@ class TestSummaryEmailTask(TestCase):
 
     def test_summary_email_dates_printed_correctly(self):
         mail.outbox = []
-        with timezone.override(timezone.utc), freeze_time(datetime.datetime(2018, 8, 19)):  # Sunday
+        with timezone.override(timezone.utc), freeze_time(timezone.datetime(2018, 8, 19)):  # Sunday
             group = GroupFactory()
             self.make_activity_in_group(group)
             from_date, to_date = calculate_group_summary_dates(group)
