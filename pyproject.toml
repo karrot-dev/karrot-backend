@@ -1,0 +1,18 @@
+[tool.ruff]
+
+line-length = 120
+
+# just for initial commit of ruff
+select = []
+
+#select = [
+#    "B",
+#    "E",
+#    "F",
+#    "Q",
+#    "W",
+#]
+
+exclude = [
+    "migrations",
+]

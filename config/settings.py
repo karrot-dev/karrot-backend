@@ -1,4 +1,3 @@
-# yapf: disable
 """
 Django settings for Karrot.
 
