@@ -10,16 +10,15 @@ from rest_framework.viewsets import GenericViewSet
 from karrot.activities.models import Activity
 from karrot.activities.permissions import CannotChangeGroup
 from karrot.conversations.api import RetrieveConversationMixin
-from karrot.places.filters import PlaceStatusFilter, PlaceTypeFilter
-from karrot.places.models import Place as PlaceModel
-from karrot.places.models import PlaceStatus, PlaceSubscription, PlaceType
+from karrot.places.filters import PlaceTypeFilter, PlaceStatusFilter
+from karrot.places.models import Place as PlaceModel, PlaceStatus
+from karrot.places.models import PlaceSubscription, PlaceType
 from karrot.places.permissions import IsGroupEditor, TypeHasNoPlaces
 from karrot.places.serializers import (
     PlaceSerializer,
-    PlaceStatusSerializer,
     PlaceSubscriptionSerializer,
     PlaceTypeSerializer,
-    PlaceUpdateSerializer,
+    PlaceUpdateSerializer, PlaceStatusSerializer,
 )
 from karrot.utils.mixins import PartialUpdateModelMixin
 
