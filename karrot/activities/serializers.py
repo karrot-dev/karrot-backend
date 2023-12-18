@@ -150,9 +150,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
             )
 
         if weight is not None and not activity_type.has_feedback_weight:
-            raise serializers.ValidationError(
-                f"You cannot give weight feedback to an activity of type {activity_type.name}."
-            )
+            raise serializers.ValidationError(f"You cannot give weight feedback to an activity of type {activity_type.name}.")
 
         if (comment is None or comment == "") and weight is None:
             raise serializers.ValidationError("Both comment and weight cannot be blank.")
@@ -960,9 +958,6 @@ class ActivityDismissFeedbackSerializer(serializers.ModelSerializer):
 @extend_schema_field(OpenApiTypes.INT)
 class DurationInSecondsField(Field):
     default_error_messages = {}
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
     def to_internal_value(self, value):
         return timedelta(seconds=value)

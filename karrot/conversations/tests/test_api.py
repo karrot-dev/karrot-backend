@@ -964,24 +964,18 @@ class TestConversationsMessageReactionsPostAPI(APITestCase):
         self.assertEqual(response.data["name"], "thumbsup")
 
         # and the base form can't be saved now
-        response = self.client.post(
-            f"/api/messages/{self.message.id}/reactions/", {"name": "thumbsup"}, format="json"
-        )
+        response = self.client.post(f"/api/messages/{self.message.id}/reactions/", {"name": "thumbsup"}, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_react_with_different_emoji(self):
         """Can react multiple times with different emoji."""
         self.client.force_login(user=self.user)
 
-        response = self.client.post(
-            f"/api/messages/{self.message.id}/reactions/", {"name": "thumbsup"}, format="json"
-        )
+        response = self.client.post(f"/api/messages/{self.message.id}/reactions/", {"name": "thumbsup"}, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # second request with different emoji is ok
-        response = self.client.post(
-            f"/api/messages/{self.message.id}/reactions/", {"name": "tada"}, format="json"
-        )
+        response = self.client.post(f"/api/messages/{self.message.id}/reactions/", {"name": "tada"}, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_include_reactions_in_message(self):
@@ -1137,9 +1131,7 @@ class TestConversationsMessageEditAPI(APITestCase):
             data = {
                 "images": [{"position": 0, "image": image_file}],
             }
-            response = self.client.patch(
-                f"/api/messages/{self.message.id}/", data=encode_data_with_images(data)
-            )
+            response = self.client.patch(f"/api/messages/{self.message.id}/", data=encode_data_with_images(data))
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
             self.assertTrue("full_size" in response.data["images"][0]["image_urls"])
 

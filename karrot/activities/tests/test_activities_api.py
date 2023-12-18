@@ -641,9 +641,7 @@ class TestActivitiesWithParticipantTypeAPI(APITestCase):
         pt_approved = self.activity.participant_types.get(role=APPROVED)
         self.activity.add_participant(self.approved_member, participant_type=pt_approved)
         self.client.force_login(user=self.member)
-        response = self.client.post(
-            f"/api/activities/{self.activity.id}/add/", {"participant_type": pt_member.id}
-        )
+        response = self.client.post(f"/api/activities/{self.activity.id}/add/", {"participant_type": pt_member.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         participant = ActivityParticipant.objects.get(activity=self.activity, user=self.member)
         self.assertEqual(participant.participant_type.role, GROUP_MEMBER)
@@ -658,9 +656,7 @@ class TestActivitiesWithParticipantTypeAPI(APITestCase):
     def test_can_join_with_participant_type(self):
         self.client.force_login(user=self.approved_member)
         pt_approved = self.activity.participant_types.get(role=APPROVED)
-        response = self.client.post(
-            f"/api/activities/{self.activity.id}/add/", {"participant_type": pt_approved.id}
-        )
+        response = self.client.post(f"/api/activities/{self.activity.id}/add/", {"participant_type": pt_approved.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         participant = ActivityParticipant.objects.get(activity=self.activity, user=self.approved_member)
         self.assertEqual(participant.participant_type.role, APPROVED)

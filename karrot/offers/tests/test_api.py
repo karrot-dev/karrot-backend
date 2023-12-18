@@ -105,9 +105,7 @@ class TestOffersAPI(APITestCase):
             data = {
                 "images": [{"position": 1, "image": image_file}],
             }
-            response = self.client.patch(
-                f"/api/offers/{offer.id}/", encode_data_with_images(data), format="multipart"
-            )
+            response = self.client.patch(f"/api/offers/{offer.id}/", encode_data_with_images(data), format="multipart")
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
             self.assertEqual(len(response.data["images"]), 2)
 
@@ -117,9 +115,7 @@ class TestOffersAPI(APITestCase):
         data = {
             "images": [{"id": offer.images.first().id, "_removed": True}],
         }
-        response = self.client.patch(
-            f"/api/offers/{offer.id}/", encode_data_with_images(data), format="multipart"
-        )
+        response = self.client.patch(f"/api/offers/{offer.id}/", encode_data_with_images(data), format="multipart")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data["images"]), 1)
 
@@ -135,9 +131,7 @@ class TestOffersAPI(APITestCase):
                 for image in offer.images.all()
             ],
         }
-        response = self.client.patch(
-            f"/api/offers/{offer.id}/", encode_data_with_images(data), format="multipart"
-        )
+        response = self.client.patch(f"/api/offers/{offer.id}/", encode_data_with_images(data), format="multipart")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_reposition_image(self):
