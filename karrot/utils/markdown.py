@@ -18,10 +18,10 @@ class MentionsPostProcessor(Postprocessor):
 
     def run(self, text):
         for mention in self.mentions:
-            mention_text = "@{}".format(mention.user.username)
+            mention_text = f"@{mention.user.username}"
             text = text.replace(
                 mention_text,
-                "<strong>{}</strong>".format(mention_text),
+                f"<strong>{mention_text}</strong>",
             )
         return text
 

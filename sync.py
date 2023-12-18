@@ -53,7 +53,7 @@ if process_mjml:
     entries = glob.glob(join(base, "karrot/*/templates/*.html.jinja2"))
     for entry in entries:
         os.remove(entry)
-    print("Removed {} entries".format(len(entries)))
+    print(f"Removed {len(entries)} entries")
 
     header("Generating new templates")
     subprocess.run(["./mjml/convert"], env=environ, check=True)

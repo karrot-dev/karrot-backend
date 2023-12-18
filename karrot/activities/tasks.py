@@ -85,7 +85,7 @@ def activity_reminder(participant_id):
             title=title,
             body=body,
             url=click_action,
-            tag="activity:{}".format(activity.id),
+            tag=f"activity:{activity.id}",
         )
 
 

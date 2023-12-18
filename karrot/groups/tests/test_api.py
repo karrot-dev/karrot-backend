@@ -70,14 +70,14 @@ class TestGroupsInfoAPI(APITestCase):
     def test_group_image_redirect(self):
         # NOT logged in (as it needs to work in emails)
         group = GroupFactory(photo=image_path, members=[self.member])
-        response = self.client.get("/api/groups-info/{}/photo/".format(group.id))
+        response = self.client.get(f"/api/groups-info/{group.id}/photo/")
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertEqual(response.url, group.photo.url)
 
     def test_group_image_redirect_no_photo(self):
         # NOT logged in (as it needs to work in emails)
         group = GroupFactory(members=[self.member])
-        response = self.client.get("/api/groups-info/{}/photo/".format(group.id))
+        response = self.client.get(f"/api/groups-info/{group.id}/photo/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_not_too_many_queries(self):
@@ -239,24 +239,24 @@ class TestGroupsAPI(APITestCase):
 
     def test_get_conversation(self):
         self.client.force_login(user=self.member)
-        response = self.client.get("/api/groups/{}/conversation/".format(self.group.id))
+        response = self.client.get(f"/api/groups/{self.group.id}/conversation/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertIn(self.member.id, response.data["participants"])
         self.assertEqual(response.data["type"], "group")
 
     def test_join_group(self):
         self.client.force_login(user=self.user)
-        response = self.client.post("/api/groups/{}/join/".format(self.group.id))
+        response = self.client.post(f"/api/groups/{self.group.id}/join/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_join_group_fails_if_not_logged_in(self):
-        response = self.client.post("/api/groups/{}/join/".format(self.group.id))
+        response = self.client.post(f"/api/groups/{self.group.id}/join/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_cannot_join_non_open_group(self):
         non_open_group = GroupFactory(is_open=False)
         self.client.force_login(user=self.user)
-        response = self.client.post("/api/groups/{}/join/".format(non_open_group.id))
+        response = self.client.post(f"/api/groups/{non_open_group.id}/join/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_leave_group(self):
@@ -280,14 +280,14 @@ class TestGroupsAPI(APITestCase):
         GroupMembership.objects.create(group=unrelated_activity.place.group, user=self.member)
 
         self.client.force_login(user=self.member)
-        response = self.client.post("/api/groups/{}/leave/".format(self.group.id))
+        response = self.client.post(f"/api/groups/{self.group.id}/leave/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(activity.participants.get_queryset().filter(id=self.member.id).exists())
         self.assertTrue(past_activity.participants.get_queryset().filter(id=self.member.id).exists())
         self.assertTrue(unrelated_activity.participants.get_queryset().filter(id=self.member.id).exists())
 
     def test_leave_group_fails_if_not_logged_in(self):
-        response = self.client.post("/api/groups/{}/leave/".format(self.group.id))
+        response = self.client.post(f"/api/groups/{self.group.id}/leave/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_group_as_nonmember(self):
@@ -354,12 +354,12 @@ class TestGroupMembershipsAPI(APITestCase):
 
     def test_shows_user_active(self):
         self.client.force_login(user=self.active_user)
-        response = self.client.get("/api/groups/{}/".format(self.group.id))
+        response = self.client.get(f"/api/groups/{self.group.id}/")
         self.assertEqual(response.data["memberships"][self.active_user.id]["active"], True)
 
     def test_shows_user_inactive(self):
         self.client.force_login(user=self.active_user)
-        response = self.client.get("/api/groups/{}/".format(self.group.id))
+        response = self.client.get(f"/api/groups/{self.group.id}/")
         self.assertEqual(response.data["memberships"][self.inactive_user.id]["active"], False)
 
 
@@ -378,7 +378,7 @@ class TestGroupMemberLastSeenAPI(APITestCase):
         self.assertLess(self.membership.lastseen_at, before)
 
         self.client.force_login(user=self.user)
-        response = self.client.post("/api/groups/{}/mark_user_active/".format(self.group.id), format="json")
+        response = self.client.post(f"/api/groups/{self.group.id}/mark_user_active/", format="json")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.membership.refresh_from_db()
         self.assertGreater(self.membership.lastseen_at, before)
@@ -427,7 +427,7 @@ class TestGroupNotificationTypes(APITestCase):
         self.membership.save()
 
         response = self.client.put(
-            "/api/groups/{}/notification_types/{}/".format(self.group.id, GroupNotificationType.WEEKLY_SUMMARY)
+            f"/api/groups/{self.group.id}/notification_types/{GroupNotificationType.WEEKLY_SUMMARY}/"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.membership.refresh_from_db()
@@ -438,7 +438,7 @@ class TestGroupNotificationTypes(APITestCase):
         self.membership.notification_types = [GroupNotificationType.WEEKLY_SUMMARY]
         self.membership.save()
         response = self.client.delete(
-            "/api/groups/{}/notification_types/{}/".format(self.group.id, GroupNotificationType.WEEKLY_SUMMARY)
+            f"/api/groups/{self.group.id}/notification_types/{GroupNotificationType.WEEKLY_SUMMARY}/"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.membership.refresh_from_db()
@@ -446,5 +446,5 @@ class TestGroupNotificationTypes(APITestCase):
 
     def test_appears_in_group_detail(self):
         self.client.force_login(user=self.user)
-        response = self.client.get("/api/groups/{}/".format(self.group.id))
+        response = self.client.get(f"/api/groups/{self.group.id}/")
         self.assertEqual(response.data["notification_types"], get_default_notification_types())

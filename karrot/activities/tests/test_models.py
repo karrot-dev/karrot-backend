@@ -1,3 +1,4 @@
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from django.db import DataError, IntegrityError
@@ -50,7 +51,7 @@ class TestActivitySeriesModel(TestCase):
         self.place.status = PlaceStatus.ARCHIVED.value
         self.place.save()
 
-        start_date = self.place.group.timezone.localize(timezone.now().replace(2017, 3, 18, 15, 0, 0, 0))
+        start_date = self.place.group.timezone.localize(datetime.now().replace(2017, 3, 18, 15, 0, 0, 0))  # noqa: DTZ005
 
         ActivitySeriesFactory(place=self.place, start_date=start_date)
 
@@ -59,7 +60,7 @@ class TestActivitySeriesModel(TestCase):
         self.assertEqual(Activity.objects.count(), 0)
 
     def test_daylight_saving_time_to_summer(self):
-        start_date = self.place.group.timezone.localize(timezone.now().replace(2017, 3, 18, 15, 0, 0, 0))
+        start_date = datetime.now(tz=self.place.group.timezone).replace(2017, 3, 18, 15, 0, 0, 0)
 
         before_dst_switch = timezone.now().replace(2017, 3, 18, 4, 40, 13)
         with freeze_time(before_dst_switch, tick=True):
@@ -67,12 +68,12 @@ class TestActivitySeriesModel(TestCase):
 
         expected_dates = []
         for month, day in [(3, 18), (3, 25), (4, 1), (4, 8)]:
-            expected_dates.append(self.place.group.timezone.localize(timezone.datetime(2017, month, day, 15, 0)))
+            expected_dates.append(self.place.group.timezone.localize(datetime(2017, month, day, 15, 0)))  # noqa: DTZ001
         for actual_date, expected_date in zip(Activity.objects.filter(series=series), expected_dates):
             self.assertEqual(actual_date.date.start, expected_date)
 
     def test_daylight_saving_time_to_winter(self):
-        start_date = self.place.group.timezone.localize(timezone.now().replace(2016, 10, 22, 15, 0, 0, 0))
+        start_date = self.place.group.timezone.localize(datetime.now().replace(2016, 10, 22, 15, 0, 0, 0))  # noqa: DTZ005
 
         before_dst_switch = timezone.now().replace(2016, 10, 22, 4, 40, 13)
         with freeze_time(before_dst_switch, tick=True):
@@ -80,7 +81,7 @@ class TestActivitySeriesModel(TestCase):
 
         expected_dates = []
         for month, day in [(10, 22), (10, 29), (11, 5), (11, 12)]:
-            expected_dates.append(self.place.group.timezone.localize(timezone.datetime(2016, month, day, 15, 0)))
+            expected_dates.append(self.place.group.timezone.localize(datetime(2016, month, day, 15, 0)))  # noqa: DTZ001, DTZ001
         for actual_date, expected_date in zip(Activity.objects.filter(series=series), expected_dates):
             self.assertEqual(actual_date.date.start, expected_date)
 

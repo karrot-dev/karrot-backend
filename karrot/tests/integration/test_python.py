@@ -49,4 +49,4 @@ class PythonIsValidTestCase(TestCase):
 
     def then_all_modules_import_cleanly(self):
         for module, exception in self.exception:
-            self.fail("{} did not import cleanly: {}".format(module, exception.args[0]))
+            self.fail(f"{module} did not import cleanly: {exception.args[0]}")

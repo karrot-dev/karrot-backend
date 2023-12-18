@@ -89,8 +89,8 @@ class Command(BaseCommand):
         }
         if existing_relay is None:
             print(
-                "WARNING: creating a new relay webhook for {}. "
-                "Please check on sparkpost.com if there are unused ones.".format(settings.EMAIL_REPLY_DOMAIN)
+                f"WARNING: creating a new relay webhook for {settings.EMAIL_REPLY_DOMAIN}. "
+                "Please check on sparkpost.com if there are unused ones."
             )
             response = s.post("https://api.sparkpost.com/api/v1/relay-webhooks", json=relay_webhook_data)
             self.log_response(response)

@@ -23,7 +23,7 @@ class TestEmailReplyReceiver(APITestCase):
     def make_message(self, reply_token=None, text="message body", html=None, to=None):
         reply_token = reply_token or make_local_part(self.conversation, self.user)
         return AnymailInboundMessage.construct(
-            to=to or "{}@example.com".format(reply_token),
+            to=to or f"{reply_token}@example.com",
             text=text,
             html=html,
         )
@@ -53,7 +53,7 @@ class TestEmailReplyReceiver(APITestCase):
         self.assertEqual(incoming_email.message, message)
 
     def test_receive_incoming_email_ignores_invalid_to(self):
-        real_to = "{}@example.com".format(make_local_part(self.conversation, self.user))
+        real_to = f"{make_local_part(self.conversation, self.user)}@example.com"
         to = f"noreply@example.com, {real_to}, invalid@asdf.com"
         inbound_message = self.make_message(to=to)
         self.send_message(inbound_message)

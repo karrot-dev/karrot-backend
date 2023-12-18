@@ -43,13 +43,13 @@ def get_message_title(message, language):
 
     if message.is_thread_reply():
         thread_start = Truncator(message.thread.content).chars(num=15)
-        return "{} / {}".format(thread_start, author_name)
+        return f"{thread_start} / {author_name}"
 
     if type == "group":
-        return "{} / {}".format(conversation.target.name, author_name)
+        return f"{conversation.target.name} / {author_name}"
 
     if type == "place":
-        return "{} / {}".format(conversation.target.name, author_name)
+        return f"{conversation.target.name} / {author_name}"
 
     if type == "activity":
         activity = conversation.target
@@ -66,9 +66,9 @@ def get_message_title(message, language):
                 locale=translation.to_locale(language),
                 tzinfo=timezone.get_current_timezone(),
             )
-        short_date = "{} {}".format(weekday, time)
-        short_name = "{} {}".format(activity.activity_type.get_translated_name(), short_date)
-        return "{} / {}".format(short_name, author_name)
+        short_date = f"{weekday} {time}"
+        short_name = f"{activity.activity_type.get_translated_name()} {short_date}"
+        return f"{short_name} / {author_name}"
 
     if type == "application":
         application = conversation.target
@@ -83,22 +83,22 @@ def get_message_title(message, language):
             emoji = "❌"
         elif application.status == ApplicationStatus.WITHDRAWN.value:
             emoji = "🗑️"
-        application_title = "{} {}".format(emoji, applicant_name)
+        application_title = f"{emoji} {applicant_name}"
 
         if message.author == application.user:
             return application_title
         else:
-            return "{} / {}".format(application_title, author_name)
+            return f"{application_title} / {author_name}"
 
     if type == "issue":
         issue = conversation.target
         if message.author == issue.affected_user:
-            return "☹️ {}".format(author_name)
-        return "☹️ {} / {}".format(issue.affected_user, author_name)
+            return f"☹️ {author_name}"
+        return f"☹️ {issue.affected_user} / {author_name}"
 
     if type == "offer":
         offer = conversation.target
-        return "🎁️ {} / {}".format(offer.name, author_name)
+        return f"🎁️ {offer.name} / {author_name}"
 
     return author_name
 
@@ -120,7 +120,7 @@ def notify_message_push_subscribers_with_language(message, subscriptions, langua
         image_url=frontend_urls.user_photo_url(message.author),
         # this causes each notification for a given conversation to replace previous notifications
         # fancier would be to make the new notifications show a summary not just the latest message
-        tag="conversation:{}".format(conversation.id),
+        tag=f"conversation:{conversation.id}",
     )
 
 
@@ -163,7 +163,7 @@ def notify_new_offer_push_subscribers_with_language(offer, subscriptions, langua
         language = "en"
 
     with translation.override(language):
-        message_title = "🎁️ {} / {}".format(offer.name, offer.user.display_name)
+        message_title = f"🎁️ {offer.name} / {offer.user.display_name}"
 
     notify_subscribers(
         subscriptions=subscriptions,
@@ -172,7 +172,7 @@ def notify_new_offer_push_subscribers_with_language(offer, subscriptions, langua
         url=frontend_urls.offer_url(offer),
         # this causes each notification for a given conversation to replace previous notifications
         # fancier would be to make the new notifications show a summary not just the latest message
-        tag="offer:{}".format(offer.id),
+        tag=f"offer:{offer.id}",
     )
 
 

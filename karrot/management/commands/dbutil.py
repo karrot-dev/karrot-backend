@@ -86,11 +86,11 @@ class Command(BaseCommand):
             from_name = db["NAME"]
             to_name = argv.pop(0)
             environ["PGDATABASE"] = "postgres"
-            sql = 'ALTER DATABASE "{}" RENAME TO "{}"'.format(from_name, to_name)
+            sql = f'ALTER DATABASE "{from_name}" RENAME TO "{to_name}"'
             execute(["psql", "-c", sql])
         elif command == "rename-from":
             from_name = argv.pop(0)
             to_name = db["NAME"]
             environ["PGDATABASE"] = "postgres"
-            sql = 'ALTER DATABASE "{}" RENAME TO "{}"'.format(from_name, to_name)
+            sql = f'ALTER DATABASE "{from_name}" RENAME TO "{to_name}"'
             execute(["psql", "-c", sql])

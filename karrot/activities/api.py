@@ -283,8 +283,8 @@ class PublicActivityViewSet(
     )
     def ics_detail(self, request, pk=None):
         response = self.retrieve(request)
-        filename = "activity-{pk}.ics".format(pk=pk)
-        response["content-disposition"] = "attachment; filename={filename}".format(filename=filename)
+        filename = f"activity-{pk}.ics"
+        response["content-disposition"] = f"attachment; filename={filename}"
         return response
 
     @extend_schema(operation_id="public_activities_ics_list", responses=OpenApiTypes.STR)
@@ -299,7 +299,7 @@ class PublicActivityViewSet(
     def ics_list(self, request):
         response = self.list(request)
         filename = "activities.ics"
-        response["content-disposition"] = "attachment; filename={filename}".format(filename=filename)
+        response["content-disposition"] = f"attachment; filename={filename}"
         return response
 
 
@@ -412,8 +412,8 @@ class ActivityViewSet(
     )
     def ics_detail(self, request, pk=None):
         response = self.retrieve(request)
-        filename = "activity-{pk}.ics".format(pk=pk)
-        response["content-disposition"] = "attachment; filename={filename}".format(filename=filename)
+        filename = f"activity-{pk}.ics"
+        response["content-disposition"] = f"attachment; filename={filename}"
         return response
 
     @extend_schema(operation_id="activities_ics_list", responses=OpenApiTypes.STR)
@@ -429,7 +429,7 @@ class ActivityViewSet(
     def ics_list(self, request):
         response = self.list(request)
         filename = "activities.ics"
-        response["content-disposition"] = "attachment; filename={filename}".format(filename=filename)
+        response["content-disposition"] = f"attachment; filename={filename}"
         return response
 
     @extend_schema(responses=OpenApiTypes.STR)

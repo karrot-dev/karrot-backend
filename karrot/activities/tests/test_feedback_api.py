@@ -183,7 +183,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         activity = ActivityFactory(place=self.place)
         with freeze_time(activity.date.start + timedelta(minutes=1), tick=True):
             self.client.force_login(user=self.member)
-            response = self.client.post("/api/activities/{}/add/".format(activity.id))
+            response = self.client.post(f"/api/activities/{activity.id}/add/")
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
             response = self.client.post(
                 self.url,
@@ -224,9 +224,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
             response.data,
             {
                 "about": [
-                    "You can't give feedback for activities more than {} days ago.".format(
-                        settings.FEEDBACK_POSSIBLE_DAYS
-                    )
+                    f"You can't give feedback for activities more than {settings.FEEDBACK_POSSIBLE_DAYS} days ago."
                 ]
             },
         )
@@ -465,7 +463,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
         self.assertEqual(
             response.data["detail"],
-            "You can't give feedback for activities more than {} days ago.".format(settings.FEEDBACK_POSSIBLE_DAYS),
+            f"You can't give feedback for activities more than {settings.FEEDBACK_POSSIBLE_DAYS} days ago.",
         )
 
     def test_patch_feedback_to_remove_weight(self):

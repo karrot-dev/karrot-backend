@@ -70,7 +70,7 @@ class TestUsersAPI(APITestCase):
 
     def test_get_conversation(self):
         self.client.force_login(user=self.user)
-        response = self.client.get("/api/users/{}/conversation/".format(self.user2.id))
+        response = self.client.get(f"/api/users/{self.user2.id}/conversation/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(self.user.id, response.data["participants"])
         self.assertIn(self.user2.id, response.data["participants"])
@@ -78,7 +78,7 @@ class TestUsersAPI(APITestCase):
 
     def test_get_conversation_for_yourself_fails(self):
         self.client.force_login(user=self.user)
-        response = self.client.get("/api/users/{}/conversation/".format(self.user.id))
+        response = self.client.get(f"/api/users/{self.user.id}/conversation/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 

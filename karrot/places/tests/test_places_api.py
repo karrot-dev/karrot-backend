@@ -205,14 +205,14 @@ class TestPlacesAPI(APITestCase, ExtractPaginationMixin):
 
     def test_subscribe_and_get_conversation(self):
         self.client.force_login(user=self.member)
-        response = self.client.get("/api/places/{}/".format(self.place.id))
+        response = self.client.get(f"/api/places/{self.place.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertFalse(response.data["is_subscribed"])
 
-        response = self.client.post("/api/places/{}/subscription/".format(self.place.id))
+        response = self.client.post(f"/api/places/{self.place.id}/subscription/")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
-        response = self.client.get("/api/places/{}/".format(self.place.id))
+        response = self.client.get(f"/api/places/{self.place.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertTrue(response.data["is_subscribed"])
 
@@ -220,7 +220,7 @@ class TestPlacesAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertTrue(response.data[0]["is_subscribed"])
 
-        response = self.client.get("/api/places/{}/conversation/".format(self.place.id))
+        response = self.client.get(f"/api/places/{self.place.id}/conversation/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertIn(self.member.id, response.data["participants"])
         self.assertEqual(response.data["type"], "place")
@@ -235,11 +235,11 @@ class TestPlacesAPI(APITestCase, ExtractPaginationMixin):
         self.place.placesubscription_set.create(user=self.member)
 
         self.client.force_login(user=self.member)
-        response = self.client.delete("/api/places/{}/subscription/".format(self.place.id))
+        response = self.client.delete(f"/api/places/{self.place.id}/subscription/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.data)
 
         # conversation participant also gets deleted
-        response = self.client.get("/api/places/{}/conversation/".format(self.place.id))
+        response = self.client.get(f"/api/places/{self.place.id}/conversation/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertNotIn(self.member.id, response.data["participants"])
 
@@ -318,7 +318,7 @@ class TestPlaceStatisticsAPI(APITestCase):
         group = GroupFactory(members=[user])
         place = PlaceFactory(group=group)
 
-        response = self.client.get("/api/places/{}/statistics/".format(place.id))
+        response = self.client.get(f"/api/places/{place.id}/statistics/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.data,
@@ -347,7 +347,7 @@ class TestPlaceStatisticsAPI(APITestCase):
         feedback.sort(key=attrgetter("about.id"))
         weight = float(sum(f.weight for f in feedback))
 
-        response = self.client.get("/api/places/{}/statistics/".format(place.id))
+        response = self.client.get(f"/api/places/{place.id}/statistics/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.data,

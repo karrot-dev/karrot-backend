@@ -116,7 +116,7 @@ class Command(BaseCommand):
 
         def modify_group(group):
             response = c.patch(
-                "/api/groups/{}/".format(group),
+                f"/api/groups/{group}/",
                 {
                     "name": "Group (edited) " + faker.city(),
                     "description": faker.text(),
@@ -137,7 +137,7 @@ class Command(BaseCommand):
             membership.add_roles([GROUP_EDITOR])
             membership.save()
 
-            print("joined group {}".format(group))
+            print(f"joined group {group}")
             return
 
         def apply_to_group(group):
@@ -151,22 +151,22 @@ class Command(BaseCommand):
             if response.status_code != 201:
                 raise Exception("could not apply to group", group, response.data)
 
-            print("applied to group {}".format(group))
+            print(f"applied to group {group}")
             return response.data
 
         def trust_user_in_group(user, group):
-            response = c.post("/api/groups/{}/users/{}/trust/".format(group, user))
+            response = c.post(f"/api/groups/{group}/users/{user}/trust/")
             if response.status_code != 200:
                 raise Exception("could not trust user", user, response.data)
 
-            print("trusted user {} in group {}".format(user, group))
+            print(f"trusted user {user} in group {group}")
             return response.data
 
         def leave_group(group):
-            response = c.post("/api/groups/{}/leave/".format(group))
+            response = c.post(f"/api/groups/{group}/leave/")
             if response.status_code != 200:
                 raise Exception("could not leave group", group, response.data)
-            print("left group {}".format(group))
+            print(f"left group {group}")
             return response.data
 
         def make_message(conversation_id):
@@ -203,7 +203,7 @@ class Command(BaseCommand):
 
         def modify_place(place):
             response = c.patch(
-                "/api/places/{}/".format(place),
+                f"/api/places/{place}/",
                 {
                     "name": "Place (edited) " + faker.name(),
                     "description": faker.text(),
@@ -239,7 +239,7 @@ class Command(BaseCommand):
 
         def modify_series(series):
             response = c.patch(
-                "/api/activity-series/{}/".format(series),
+                f"/api/activity-series/{series}/",
                 {"start_date": timezone.now().replace(hour=20), "rule": "FREQ=WEEKLY"},
             )
             if response.status_code != 200:
@@ -248,7 +248,7 @@ class Command(BaseCommand):
             return response.data
 
         def delete_series(series):
-            response = c.delete("/api/activity-series/{}/".format(series))
+            response = c.delete(f"/api/activity-series/{series}/")
             if response.status_code != 204:
                 raise Exception("could not delete series", series, response.status_code, response.data)
             print("deleted series: ", series)
@@ -281,7 +281,7 @@ class Command(BaseCommand):
         def modify_activity(activity):
             pt = activity.participant_types.first()
             response = c.patch(
-                "/api/activities/{}/".format(activity.id),
+                f"/api/activities/{activity.id}/",
                 {
                     "participant_types": [
                         {
@@ -298,14 +298,14 @@ class Command(BaseCommand):
             return response.data
 
         def join_activity(activity):
-            response = c.post("/api/activities/{}/add/".format(activity))
+            response = c.post(f"/api/activities/{activity}/add/")
             if response.status_code != 200:
                 raise Exception("could not join activity", activity, response.data)
             print("joined activity: ", activity)
             return response.data
 
         def leave_activity(activity):
-            response = c.post("/api/activities/{}/remove/".format(activity))
+            response = c.post(f"/api/activities/{activity}/remove/")
             if response.status_code != 200:
                 raise Exception("could not leave activity", activity, response.data)
             print("left activity: ", activity)
@@ -473,7 +473,7 @@ class Command(BaseCommand):
             group.status = GroupStatus.PLAYGROUND.value
             group.save()
 
-        print_success("Done! You can login with any of those mail addresses and password {}".format(default_password))
+        print_success(f"Done! You can login with any of those mail addresses and password {default_password}")
         if not options["more_data"]:
             print_success("Consider using the --more argument next time for more users.")
 

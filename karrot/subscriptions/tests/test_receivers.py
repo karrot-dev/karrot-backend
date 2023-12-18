@@ -270,7 +270,7 @@ class ConversationReceiverTests(WSTestCase):
         self.assertEqual(response["payload"]["participants"], [user.id])
 
     def test_conversation_marked_as_seen(self):
-        user, author = [UserFactory() for _ in range(2)]
+        user, author = (UserFactory() for _ in range(2))
         conversation = ConversationFactory(participants=[user, author])
         message = ConversationMessage.objects.create(conversation=conversation, content="yay", author=author)
         participant = conversation.conversationparticipant_set.get(user=user)
@@ -389,7 +389,7 @@ class ConversationThreadReceiverTests(WSTestCase):
         )
 
     def test_thread_marked_as_seen(self):
-        author, op_author = [UserFactory() for _ in range(2)]
+        author, op_author = (UserFactory() for _ in range(2))
         conversation = ConversationFactory(participants=[author, op_author])
         thread = ConversationMessage.objects.create(conversation=conversation, content="yay", author=op_author)
         reply = ConversationMessage.objects.create(
@@ -421,7 +421,7 @@ class ConversationThreadReceiverTests(WSTestCase):
 class ConversationMessageReactionReceiverTests(WSTestCase):
     def test_receive_reaction_update(self):
         self.maxDiff = None
-        author, user, reaction_user = [UserFactory() for _ in range(3)]
+        author, user, reaction_user = (UserFactory() for _ in range(3))
         conversation = ConversationFactory(participants=[author, user, reaction_user])
         message = ConversationMessage.objects.create(conversation=conversation, content="yay", author=author)
 
@@ -446,7 +446,7 @@ class ConversationMessageReactionReceiverTests(WSTestCase):
 
     def test_receive_reaction_deletion(self):
         self.maxDiff = None
-        author, user, reaction_user = [UserFactory() for _ in range(3)]
+        author, user, reaction_user = (UserFactory() for _ in range(3))
         conversation = ConversationFactory(participants=[author, user, reaction_user])
         message = ConversationMessage.objects.create(
             conversation=conversation,
@@ -1197,7 +1197,7 @@ class ReceiverPushTests(TestCase):
         self.assertEqual(notify_subscribers.call_count, 0)
 
     def test_sends_mentions_when_not_in_conversation(self, notify_subscribers):
-        content = "hello @{} how are you?".format(self.user.username)
+        content = f"hello @{self.user.username} how are you?"
 
         with self.captureOnCommitCallbacks(execute=True):
             ConversationMessage.objects.create(
@@ -1207,7 +1207,7 @@ class ReceiverPushTests(TestCase):
         self.assertEqual(notify_subscribers.call_count, 1)
         kwargs = notify_subscribers.call_args_list[0][1]
         self.assertEqual(list(kwargs["subscriptions"]), [self.subscription])
-        self.assertEqual(kwargs["title"], "{} / {}".format(self.place.name, self.author.display_name))
+        self.assertEqual(kwargs["title"], f"{self.place.name} / {self.author.display_name}")
         self.assertEqual(kwargs["body"], content)
 
 

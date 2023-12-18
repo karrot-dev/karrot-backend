@@ -29,10 +29,7 @@ class TestAbsoluteURL(TestCase):
         url = group_photo_url(group)
         self.assertEqual(
             url,
-            "{hostname}/api/groups-info/{id}/photo/".format(
-                hostname=settings.HOSTNAME,
-                id=group.id,
-            ),
+            f"{settings.HOSTNAME}/api/groups-info/{group.id}/photo/",
         )
 
     def test_group_photo_url_without_photo(self):
@@ -45,10 +42,7 @@ class TestAbsoluteURL(TestCase):
         url = group_photo_or_karrot_logo_url(group)
         self.assertEqual(
             url,
-            "{hostname}/api/groups-info/{id}/photo/".format(
-                hostname=settings.HOSTNAME,
-                id=group.id,
-            ),
+            f"{settings.HOSTNAME}/api/groups-info/{group.id}/photo/",
         )
 
     def test_group_photo_or_karrot_logo_url_without_photo(self):
@@ -61,10 +55,7 @@ class TestAbsoluteURL(TestCase):
         url = offer_image_url(offer)
         self.assertEqual(
             url,
-            "{hostname}/api/offers/{id}/image/".format(
-                hostname=settings.HOSTNAME,
-                id=offer.id,
-            ),
+            f"{settings.HOSTNAME}/api/offers/{offer.id}/image/",
         )
 
     def test_offer_image_url_without_images(self):

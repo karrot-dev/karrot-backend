@@ -78,7 +78,7 @@ class IssueModelTests(TestCase):
         email_to_affected_user = next(email for email in mail.outbox if email.to[0] == self.affected_member.email)
         email_to_editor = next(email for email in mail.outbox if email.to[0] == self.member.email)
         self.assertIn("Your membership", email_to_affected_user.subject)
-        self.assertIn("The membership review of {}".format(self.affected_member.display_name), email_to_editor.subject)
+        self.assertIn(f"The membership review of {self.affected_member.display_name}", email_to_editor.subject)
 
     def test_no_change(self):
         self.vote_on(OptionTypes.NO_CHANGE.value)

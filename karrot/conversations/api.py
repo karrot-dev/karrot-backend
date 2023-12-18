@@ -488,7 +488,7 @@ class ConversationMessageViewSet(
             group.refresh_active_status()
 
 
-class RetrieveConversationMixin(object):
+class RetrieveConversationMixin:
     """Retrieve a conversation instance."""
 
     def retrieve_conversation(self, request, *args, **kwargs):
@@ -510,7 +510,7 @@ class RetrieveConversationMixin(object):
         return Response(serializer.data)
 
 
-class RetrievePrivateConversationMixin(object):
+class RetrievePrivateConversationMixin:
     """Retrieve a private user conversation instance."""
 
     def retrieve_private_conversation(self, request, *args, **kwargs):

@@ -25,7 +25,7 @@ def get_git_rev():
                 .strip()
                 .decode("utf-8")
             )
-        except (OSError, IOError):
+        except OSError:
             pass
 
     if release:
@@ -33,7 +33,7 @@ def get_git_rev():
 
     revision_file = os.path.join(BASE_DIR, "karrot", "COMMIT")
     if os.path.exists(revision_file):
-        with open(revision_file, "r") as f:
+        with open(revision_file) as f:
             return f.read().strip()
 
 

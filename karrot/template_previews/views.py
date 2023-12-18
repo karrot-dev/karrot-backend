@@ -124,7 +124,7 @@ def get_or_create_mention():
 
     # insert a mention into some faker text
     parts = faker.text().split(" ")
-    parts.insert(random.randint(0, len(parts)), "@{}".format(mentioned_user.username))
+    parts.insert(random.randint(0, len(parts)), f"@{mentioned_user.username}")
     content = " ".join(parts)
 
     message = conversation.messages.create(author=author, content=content)
@@ -304,7 +304,7 @@ def list_templates(request):
                         formats = []
 
                         for s in ["subject", "text", "html"]:
-                            if os.path.isfile("{}.{}.jinja2".format(os.path.join(directory, name), s)):
+                            if os.path.isfile(f"{os.path.join(directory, name)}.{s}.jinja2"):
                                 formats.append(s)
                             elif s == "text":
                                 formats.append("autotext")
@@ -350,7 +350,7 @@ def show_template(request):
 
     if not has_handler:
         return HttpResponseNotFound(
-            "Please setup a handler for the <strong>{}</strong> in <strong>{}</strong>".format(name, __file__)
+            f"Please setup a handler for the <strong>{name}</strong> in <strong>{__file__}</strong>"
         )
 
     email = getattr(handlers, name)()
@@ -362,15 +362,15 @@ def show_template(request):
                 html_content = content
 
         if html_content is None:
-            return HttpResponseNotFound("{} does not have html content".format(name))
+            return HttpResponseNotFound(f"{name} does not have html content")
 
         return HttpResponse(html_content)
 
     elif format == "text" or format == "autotext":
-        return HttpResponse("<pre>{}</pre>".format(email.body))
+        return HttpResponse(f"<pre>{email.body}</pre>")
 
     elif format == "subject":
-        return HttpResponse("<pre>{}</pre>".format(email.subject))
+        return HttpResponse(f"<pre>{email.subject}</pre>")
 
     elif format == "raw":
-        return HttpResponse("<pre>{}</pre>".format(html.escape(email.message().as_string())))
+        return HttpResponse(f"<pre>{html.escape(email.message().as_string())}</pre>")

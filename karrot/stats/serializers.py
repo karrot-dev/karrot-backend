@@ -63,5 +63,5 @@ class FrontendStatsSerializer(serializers.Serializer):
 
     def validate_stats(self, stats):
         if len(stats) > MAX_STATS:
-            raise ValidationError("You can only send up to {}".format(MAX_STATS))
+            raise ValidationError(f"You can only send up to {MAX_STATS}")
         return stats

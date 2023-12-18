@@ -21,7 +21,7 @@ def get_client_ip(request):
         return request.META.get("REMOTE_ADDR")
 
 
-@lru_cache()
+@lru_cache
 def ip_to_city(ip):
     if not geoip_is_available():
         return None
@@ -31,7 +31,7 @@ def ip_to_city(ip):
         return None
 
 
-@lru_cache()
+@lru_cache
 def ip_to_lat_lon(ip):
     if not geoip_is_available():
         return None

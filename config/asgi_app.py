@@ -19,7 +19,7 @@ def setup_postgres(connection, **kwargs):
         return
 
     with connection.cursor() as cursor:
-        cursor.execute("SET statement_timeout TO {};".format(settings.REQUEST_DATABASE_TIMEOUT_MILLISECONDS))
+        cursor.execute(f"SET statement_timeout TO {settings.REQUEST_DATABASE_TIMEOUT_MILLISECONDS};")
 
 
 api_app = get_asgi_application()

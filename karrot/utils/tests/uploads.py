@@ -13,7 +13,7 @@ def encode_data_with_images(data):
     for index, image in enumerate(data.get("images", [])):
         image_file = image.pop("image", None)
         if image_file:
-            post_data["images.{}.image".format(index)] = image_file
+            post_data[f"images.{index}.image"] = image_file
     data_file = StringIO(json.dumps(data))
     data_file.content_type = "application/json"
     post_data["document"] = data_file
@@ -25,7 +25,7 @@ def encode_data_with_attachments(data):
     for index, attachment in enumerate(data.get("attachments", [])):
         attachment_file = attachment.pop("file", None)
         if attachment_file:
-            post_data["attachments.{}.file".format(index)] = attachment_file
+            post_data[f"attachments.{index}.file"] = attachment_file
     data_file = StringIO(json.dumps(data))
     data_file.content_type = "application/json"
     post_data["document"] = data_file

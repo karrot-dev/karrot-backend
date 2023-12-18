@@ -44,7 +44,7 @@ class TestHistoryAPIWithExistingGroup(APITestCase, ExtractPaginationMixin):
     def setUp(self):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member], is_open=True)
-        self.group_url = "/api/groups/{}/".format(self.group.id)
+        self.group_url = f"/api/groups/{self.group.id}/"
 
     def test_modify_group(self):
         self.client.force_login(self.member)
@@ -106,7 +106,7 @@ class TestHistoryAPIWithExistingPlace(APITestCase, ExtractPaginationMixin):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
-        self.place_url = "/api/places/{}/".format(self.place.id)
+        self.place_url = f"/api/places/{self.place.id}/"
         self.activity_type = ActivityTypeFactory(group=self.group)
 
     def test_modify_place(self):
@@ -178,9 +178,9 @@ class TestHistoryAPIWithExistingActivities(APITestCase, ExtractPaginationMixin):
         self.group = GroupFactory(members=[self.member])
         self.place = PlaceFactory(group=self.group)
         self.activity = ActivityFactory(place=self.place)
-        self.activity_url = "/api/activities/{}/".format(self.activity.id)
+        self.activity_url = f"/api/activities/{self.activity.id}/"
         self.series = ActivitySeriesFactory(place=self.place)
-        self.series_url = "/api/activity-series/{}/".format(self.series.id)
+        self.series_url = f"/api/activity-series/{self.series.id}/"
 
     def test_modify_activity(self):
         self.client.force_login(self.member)

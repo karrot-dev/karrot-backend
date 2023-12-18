@@ -160,12 +160,12 @@ def get_group_members_stats(group):
         activity_active_memberships = memberships.activity_active_within(days=n)
         fields.update(
             {
-                "count_active_{}d".format(n): active_memberships.count(),
-                "count_active_newcomers_{}d".format(n): active_memberships.newcomers().count(),
-                "count_active_editors_{}d".format(n): active_memberships.editors().count(),
-                "count_activity_active_{}d".format(n): activity_active_memberships.count(),
-                "count_activity_active_newcomers_{}d".format(n): activity_active_memberships.newcomers().count(),
-                "count_activity_active_editors_{}d".format(n): activity_active_memberships.editors().count(),
+                f"count_active_{n}d": active_memberships.count(),
+                f"count_active_newcomers_{n}d": active_memberships.newcomers().count(),
+                f"count_active_editors_{n}d": active_memberships.editors().count(),
+                f"count_activity_active_{n}d": activity_active_memberships.count(),
+                f"count_activity_active_newcomers_{n}d": activity_active_memberships.newcomers().count(),
+                f"count_activity_active_editors_{n}d": activity_active_memberships.editors().count(),
             }
         )
 
@@ -175,7 +175,7 @@ def get_group_members_stats(group):
             notification_type_count[t] += 1
 
     for t, count in notification_type_count.items():
-        fields.update({"count_active_30d_with_notification_type_{}".format(t): count})
+        fields.update({f"count_active_30d_with_notification_type_{t}": count})
 
     return [
         {

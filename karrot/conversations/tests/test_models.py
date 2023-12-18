@@ -109,12 +109,12 @@ class ConversationMessageMentionTests(TestCase):
         )
 
     def test_mentions(self):
-        message = self.create_message(content="some message with a mention for @{} yay!".format(self.user2.username))
+        message = self.create_message(content=f"some message with a mention for @{self.user2.username} yay!")
         self.assertEqual(message.mentions.count(), 1)
         self.assertEqual(message.mentions.first().user, self.user2)
 
     def test_mentions_for_user_in_other_group(self):
-        message = self.create_message(content="hey @{} in other group!".format(self.user_in_other_group.username))
+        message = self.create_message(content=f"hey @{self.user_in_other_group.username} in other group!")
         self.assertEqual(message.mentions.count(), 0)
 
     def test_mentions_for_non_user(self):
@@ -124,7 +124,7 @@ class ConversationMessageMentionTests(TestCase):
         self.assertEqual(message.mentions.count(), 0)
 
     def test_update_removes_mentions(self):
-        message = self.create_message(content="some message with a mention for @{} yay!".format(self.user2.username))
+        message = self.create_message(content=f"some message with a mention for @{self.user2.username} yay!")
         self.assertEqual(message.mentions.count(), 1)
         message.content = "nobody to mention any more"
         message.save()
@@ -135,18 +135,18 @@ class ConversationMessageMentionTests(TestCase):
             content="no mentions to see here",
         )
         self.assertEqual(message.mentions.count(), 0)
-        message.content = "oh actually I can mention @{} now".format(self.user2.username)
+        message.content = f"oh actually I can mention @{self.user2.username} now"
         message.save()
         self.assertEqual(message.mentions.count(), 1)
 
     def test_creates_bell_notification(self):
         self.assertEqual(self.user2.notification_set.filter(type="mention").count(), 0)
-        self.create_message(content="some message with a mention for @{} yay!".format(self.user2.username))
+        self.create_message(content=f"some message with a mention for @{self.user2.username} yay!")
         self.assertEqual(self.user2.notification_set.filter(type="mention").count(), 1)
 
     def test_removes_bell_notification(self):
         self.assertEqual(self.user2.notification_set.filter(type="mention").count(), 0)
-        message = self.create_message(content="some message with a mention for @{} yay!".format(self.user2.username))
+        message = self.create_message(content=f"some message with a mention for @{self.user2.username} yay!")
         self.assertEqual(self.user2.notification_set.filter(type="mention").count(), 1)
         message.content = "no mentions"
         message.save()

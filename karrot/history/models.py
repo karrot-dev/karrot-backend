@@ -104,7 +104,7 @@ class History(NicelyFormattedModel):
     message = models.TextField(null=True)
 
     def __str__(self):
-        return "History {} - {} ({})".format(self.date, HistoryTypus.name(self.typus), self.group)
+        return f"History {self.date} - {HistoryTypus.name(self.typus)} ({self.group})"
 
     def changed(self):
         before = self.before or {}

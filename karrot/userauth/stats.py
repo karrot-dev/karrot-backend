@@ -108,7 +108,7 @@ def verification_code_failed(reason):
             {
                 "measurement": "karrot.events",
                 "fields": {
-                    "verification_code_{}".format(reason): 1,
+                    f"verification_code_{reason}": 1,
                     "verification_code_failed": 1,
                 },
             }

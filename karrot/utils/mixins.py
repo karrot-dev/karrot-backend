@@ -1,7 +1,7 @@
 from rest_framework.mixins import UpdateModelMixin
 
 
-class PartialUpdateModelMixin(object):
+class PartialUpdateModelMixin:
     """
     Update a model instance.
     Only allow PATCH, no PUT

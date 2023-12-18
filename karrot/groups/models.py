@@ -67,7 +67,7 @@ class GroupQuerySet(models.QuerySet):
 class GroupManager(BaseManager.from_queryset(GroupQuerySet)):
     def create(self, *args, **kwargs):
         kwargs["theme"] = kwargs.get("theme", settings.GROUP_THEME_DEFAULT.value)
-        return super(GroupManager, self).create(*args, **kwargs)
+        return super().create(*args, **kwargs)
 
 
 class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
@@ -117,7 +117,7 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
         return True
 
     def __str__(self):
-        return "Group {}".format(self.name)
+        return f"Group {self.name}"
 
     def add_member(self, user, added_by=None, history_payload=None):
         membership = GroupMembership.objects.create(
@@ -208,7 +208,7 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
             PlaceType.objects.get_or_create(name=name, group=self, defaults=options)
 
 
-class GroupNotificationType(object):
+class GroupNotificationType:
     WEEKLY_SUMMARY = "weekly_summary"
     DAILY_ACTIVITY_NOTIFICATION = "daily_activity_notification"
     NEW_APPLICATION = "new_application"

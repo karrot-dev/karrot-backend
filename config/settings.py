@@ -38,7 +38,7 @@ if MODE not in (
     "dev",
     "prod",
 ):
-    raise Exception("MODE must be one of dev|prod, not {}".format(MODE))
+    raise Exception(f"MODE must be one of dev|prod, not {MODE}")
 
 is_dev = MODE == "dev"
 
@@ -291,9 +291,9 @@ REDIS_SOCKET = options["REDIS_SOCKET"]
 REDIS_DB = options["REDIS_DB"]
 
 if REDIS_SOCKET:
-    REDIS_URL = "unix://{}?db={}".format(REDIS_SOCKET, REDIS_DB)
+    REDIS_URL = f"unix://{REDIS_SOCKET}?db={REDIS_DB}"
 else:
-    REDIS_URL = "redis://{}:{}/{}".format(REDIS_HOST, REDIS_PORT, REDIS_DB)
+    REDIS_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
 
 CACHES = {
     "default": {

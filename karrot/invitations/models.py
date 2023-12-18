@@ -68,4 +68,4 @@ class Invitation(BaseModel):
         self.save()
 
     def __str__(self):
-        return "Invite to {0} by {1}".format(self.group.name, self.invited_by.display_name)
+        return f"Invite to {self.group.name} by {self.invited_by.display_name}"

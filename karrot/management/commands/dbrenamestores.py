@@ -34,11 +34,11 @@ class Command(BaseCommand):
         ]
 
         def rename_jsonb_field(table, column, field_from, field_to):
-            query = """
-            update {}
-            set {} = {} - '{}' || jsonb_build_object('{}', {}->'{}')
-            where {} ? '{}'
-            """.format(table, column, column, field_from, field_to, column, field_from, column, field_from)
+            query = f"""
+            update {table}
+            set {column} = {column} - '{field_from}' || jsonb_build_object('{field_to}', {column}->'{field_from}')
+            where {column} ? '{field_from}'
+            """
             return re.sub("\\s+", " ", query).strip()
 
         # rename 'store' -> 'place' inside jsonb fields
@@ -52,7 +52,7 @@ class Command(BaseCommand):
 
         fkey_query = "select table_name, column_name from information_schema.columns where column_name = 'store_id'"
         for table_name, _ in fetchall(fkey_query):
-            queries.append("alter table {} rename column store_id to place_id".format(table_name))
+            queries.append(f"alter table {table_name} rename column store_id to place_id")
 
         # constraints
 

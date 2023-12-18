@@ -133,8 +133,8 @@ class TestHTMLToPlainText(TestCase):
     def test_does_not_split_links(self):
         # token that causes html2text to make a line break if wrap_links option is not set
         token = "4522e1fa-9827-44ec-bf76-f7fa8fb132ff"
-        url = "http://localhost:8080/#/signup?invite={}&email=please%40join.com".format(token)
-        html = '<a href="{}">some link</a>'.format(url)
+        url = f"http://localhost:8080/#/signup?invite={token}&email=please%40join.com"
+        html = f'<a href="{url}">some link</a>'
         text = generate_plaintext_from_html(html)
         self.assertIn(url, text)
 
@@ -153,7 +153,7 @@ class TestJinjaFilters(TestCase):
         offset_hours = int(tz.utcoffset(datetime.utcnow()).total_seconds() / 3600)
         with timezone.override(tz), translation.override("en"):
             val = time_filter(datetime)
-            self.assertEqual(val, "{}:00 AM".format(hour + offset_hours))
+            self.assertEqual(val, f"{hour + offset_hours}:00 AM")
 
     def test_date_filter_uses_timezone(self):
         # 11pm on Sunday UTC

@@ -300,7 +300,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
     def test_join_activity_without_max_participants_as_member(self):
         self.client.force_login(user=self.member)
         activity = ActivityFactory(place=self.place, participant_types=[{"role": GROUP_MEMBER, "max_participants": 5}])
-        response = self.client.post("/api/activities/{}/add/".format(activity.id))
+        response = self.client.post(f"/api/activities/{activity.id}/add/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_join_full_activity_fails(self):
@@ -322,7 +322,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         # jump to 5 minutes after it starts
         with freeze_time(activity.date.start + relativedelta(minutes=5), tick=True):
             self.client.force_login(user=self.member)
-            response = self.client.post("/api/activities/{}/add/".format(activity.id))
+            response = self.client.post(f"/api/activities/{activity.id}/add/")
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_join_past_activity_fails(self):
@@ -411,7 +411,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
 
         # can get via conversations
         conversation_id = self.activity.conversation.id
-        response = self.client.get("/api/conversations/{}/".format(conversation_id))
+        response = self.client.get(f"/api/conversations/{conversation_id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # can write a message
@@ -433,7 +433,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
 
         # can get via conversation
         conversation_id = self.activity.conversation.id
-        response = self.client.get("/api/conversations/{}/".format(conversation_id))
+        response = self.client.get(f"/api/conversations/{conversation_id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # can write a message
@@ -455,7 +455,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
 
         # cannot get via conversation info
         conversation_id = self.activity.conversation.id
-        response = self.client.get("/api/conversations/{}/".format(conversation_id))
+        response = self.client.get(f"/api/conversations/{conversation_id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         # cannot write a message
@@ -551,12 +551,12 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         self.assertFalse(self.activity.is_done, False)
 
     def test_export_ics_logged_out(self):
-        response = self.client.get("/api/activities/{id}/ics/".format(id=self.activity.id))
+        response = self.client.get(f"/api/activities/{self.activity.id}/ics/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_export_ics_not_group_member(self):
         self.client.force_login(user=self.user)
-        response = self.client.get("/api/activities/{id}/ics/".format(id=self.activity.id))
+        response = self.client.get(f"/api/activities/{self.activity.id}/ics/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
     def test_export_ics_logged_in(self):
@@ -564,18 +564,18 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         # first, join the activity to make sure it has an attendee
         response = self.client.post(self.join_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        response = self.client.get("/api/activities/{id}/ics/".format(id=self.activity.id))
+        response = self.client.get(f"/api/activities/{self.activity.id}/ics/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEquals(response.data["status"], "CONFIRMED")
+        self.assertEqual(response.data["status"], "CONFIRMED")
 
     def test_export_ics_disabled_activity(self):
         self.client.force_login(user=self.member)
         self.activity.is_disabled = True
         self.activity.save()
-        response = self.client.get("/api/activities/{id}/ics/".format(id=self.activity.id))
+        response = self.client.get(f"/api/activities/{self.activity.id}/ics/")
         # disabled activities are still visible
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEquals(response.data["status"], "CANCELLED")
+        self.assertEqual(response.data["status"], "CANCELLED")
 
     def test_export_ics_activities_logged_out(self):
         response = self.get_results("/api/activities/ics/")
@@ -633,7 +633,7 @@ class TestActivitiesWithParticipantTypeAPI(APITestCase):
             ],
         )
         self.client.force_login(user=self.member)
-        response = self.client.post("/api/activities/{}/add/".format(activity.id))
+        response = self.client.post(f"/api/activities/{activity.id}/add/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_can_join_as_member_participant(self):
@@ -641,9 +641,7 @@ class TestActivitiesWithParticipantTypeAPI(APITestCase):
         pt_approved = self.activity.participant_types.get(role=APPROVED)
         self.activity.add_participant(self.approved_member, participant_type=pt_approved)
         self.client.force_login(user=self.member)
-        response = self.client.post(
-            "/api/activities/{}/add/".format(self.activity.id), {"participant_type": pt_member.id}
-        )
+        response = self.client.post(f"/api/activities/{self.activity.id}/add/", {"participant_type": pt_member.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         participant = ActivityParticipant.objects.get(activity=self.activity, user=self.member)
         self.assertEqual(participant.participant_type.role, GROUP_MEMBER)
@@ -652,22 +650,20 @@ class TestActivitiesWithParticipantTypeAPI(APITestCase):
         pt_member = self.activity.participant_types.get(role=GROUP_MEMBER)
         self.activity.add_participant(self.member, participant_type=pt_member)
         self.client.force_login(user=self.other_member)
-        response = self.client.post("/api/activities/{}/add/".format(self.activity.id))
+        response = self.client.post(f"/api/activities/{self.activity.id}/add/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_can_join_with_participant_type(self):
         self.client.force_login(user=self.approved_member)
         pt_approved = self.activity.participant_types.get(role=APPROVED)
-        response = self.client.post(
-            "/api/activities/{}/add/".format(self.activity.id), {"participant_type": pt_approved.id}
-        )
+        response = self.client.post(f"/api/activities/{self.activity.id}/add/", {"participant_type": pt_approved.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         participant = ActivityParticipant.objects.get(activity=self.activity, user=self.approved_member)
         self.assertEqual(participant.participant_type.role, APPROVED)
 
     def test_cannot_join_if_missing_role(self):
         self.client.force_login(user=self.member)
-        response = self.client.post("/api/activities/{}/add/".format(self.activity.id), {"role": APPROVED})
+        response = self.client.post(f"/api/activities/{self.activity.id}/add/", {"role": APPROVED})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_participants_api(self):
@@ -676,7 +672,7 @@ class TestActivitiesWithParticipantTypeAPI(APITestCase):
         self.activity.add_participant(self.member, participant_type=pt_member)
         self.activity.add_participant(self.approved_member, participant_type=pt_approved)
         self.client.force_login(user=self.member)
-        response = self.client.get("/api/activities/{}/".format(self.activity.id))
+        response = self.client.get(f"/api/activities/{self.activity.id}/")
 
         self.assertEqual(
             response.data["participants"],
@@ -697,7 +693,7 @@ class TestActivitiesWithParticipantTypeAPI(APITestCase):
     def test_add_participant_type(self):
         self.client.force_login(user=self.member)
         response = self.client.patch(
-            "/api/activities/{}/".format(self.activity.id),
+            f"/api/activities/{self.activity.id}/",
             {
                 "participant_types": [
                     {
@@ -717,7 +713,7 @@ class TestActivitiesWithParticipantTypeAPI(APITestCase):
     def test_modify_participant_type_description(self):
         self.client.force_login(user=self.member)
         response = self.client.patch(
-            "/api/activities/{}/".format(self.activity.id),
+            f"/api/activities/{self.activity.id}/",
             {
                 "participant_types": [
                     {
@@ -737,7 +733,7 @@ class TestActivitiesWithParticipantTypeAPI(APITestCase):
         self.assertEqual(self.activity.participants.count(), 1)
         self.client.force_login(user=self.member)
         response = self.client.patch(
-            "/api/activities/{}/".format(self.activity.id),
+            f"/api/activities/{self.activity.id}/",
             {
                 "participant_types": [
                     {
@@ -754,7 +750,7 @@ class TestActivitiesWithParticipantTypeAPI(APITestCase):
     def test_remove_participant_type(self):
         self.client.force_login(user=self.member)
         response = self.client.patch(
-            "/api/activities/{}/".format(self.activity.id),
+            f"/api/activities/{self.activity.id}/",
             {
                 "participant_types": [
                     {

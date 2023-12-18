@@ -151,7 +151,7 @@ class ActivitySeries(BaseModel):
                     activity.delete()
 
     def __str__(self):
-        return "ActivitySeries {} - {}".format(self.rule, self.place)
+        return f"ActivitySeries {self.rule} - {self.place}"
 
     def delete(self, **kwargs):
         self.rule = str(rrulestr(self.rule).replace(dtstart=self.start_date, until=timezone.now()))
@@ -382,7 +382,7 @@ class Activity(BaseModel, ConversationMixin):
         return self.date.end
 
     def __str__(self):
-        return "Activity {} - {}".format(self.date.start, self.place)
+        return f"Activity {self.date.start} - {self.place}"
 
     def get_timezone(self):
         value = self.timezone if hasattr(self, "timezone") else self.group.timezone

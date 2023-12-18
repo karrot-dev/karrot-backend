@@ -77,7 +77,7 @@ class Place(BaseModel, LocationModel, ConversationMixin):
     )
 
     def __str__(self):
-        return "Place {} ({})".format(self.name, self.group)
+        return f"Place {self.name} ({self.group})"
 
     def is_active(self):
         return self.status == "active"

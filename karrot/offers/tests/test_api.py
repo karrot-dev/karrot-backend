@@ -19,13 +19,13 @@ class TestOffersAPI(APITestCase):
 
     def test_offer_image_redirect(self):
         # NOT logged in (as it needs to work in emails)
-        response = self.client.get("/api/offers/{}/image/".format(self.offer.id))
+        response = self.client.get(f"/api/offers/{self.offer.id}/image/")
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertEqual(response.url, self.offer.images.first().image.url)
 
     def test_fetch_offer(self):
         self.client.force_login(user=self.user)
-        response = self.client.get("/api/offers/{}/".format(self.offer.id))
+        response = self.client.get(f"/api/offers/{self.offer.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data["name"], self.offer.name)
 
@@ -58,14 +58,14 @@ class TestOffersAPI(APITestCase):
     def test_cannot_fetch_another_users_archived_offer(self):
         offer = OfferFactory(user=self.user, group=self.group, images=[image_path], status="archived")
         self.client.force_login(user=self.another_user)
-        response = self.client.get("/api/offers/{}/".format(offer.id))
+        response = self.client.get(f"/api/offers/{offer.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
     def test_can_fetch_other_users_archived_offer_if_in_the_conversation(self):
         offer = OfferFactory(user=self.user, group=self.group, images=[image_path], status="archived")
         offer.conversation.join(self.another_user)
         self.client.force_login(user=self.another_user)
-        response = self.client.get("/api/offers/{}/".format(offer.id))
+        response = self.client.get(f"/api/offers/{offer.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_update_offer(self):
@@ -73,19 +73,19 @@ class TestOffersAPI(APITestCase):
         data = {
             "name": faker.name(),
         }
-        response = self.client.patch("/api/offers/{}/".format(self.offer.id), data, format="json")
+        response = self.client.patch(f"/api/offers/{self.offer.id}/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data["name"], data["name"])
 
     def test_mark_offer_archived(self):
         self.client.force_login(user=self.user)
-        response = self.client.post("/api/offers/{}/archive/".format(self.offer.id))
+        response = self.client.post(f"/api/offers/{self.offer.id}/archive/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data["status"], "archived")
 
     def test_mark_offer_archived_as_another_user(self):
         self.client.force_login(user=self.another_user)
-        response = self.client.post("/api/offers/{}/archive/".format(self.offer.id))
+        response = self.client.post(f"/api/offers/{self.offer.id}/archive/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_update_offer_as_another_user(self):
@@ -94,7 +94,7 @@ class TestOffersAPI(APITestCase):
         data = {
             "name": faker.name(),
         }
-        response = self.client.patch("/api/offers/{}/".format(offer.id), data, format="json")
+        response = self.client.patch(f"/api/offers/{offer.id}/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_add_image(self):
@@ -104,9 +104,7 @@ class TestOffersAPI(APITestCase):
             data = {
                 "images": [{"position": 1, "image": image_file}],
             }
-            response = self.client.patch(
-                "/api/offers/{}/".format(offer.id), encode_data_with_images(data), format="multipart"
-            )
+            response = self.client.patch(f"/api/offers/{offer.id}/", encode_data_with_images(data), format="multipart")
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
             self.assertEqual(len(response.data["images"]), 2)
 
@@ -116,9 +114,7 @@ class TestOffersAPI(APITestCase):
         data = {
             "images": [{"id": offer.images.first().id, "_removed": True}],
         }
-        response = self.client.patch(
-            "/api/offers/{}/".format(offer.id), encode_data_with_images(data), format="multipart"
-        )
+        response = self.client.patch(f"/api/offers/{offer.id}/", encode_data_with_images(data), format="multipart")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data["images"]), 1)
 
@@ -134,9 +130,7 @@ class TestOffersAPI(APITestCase):
                 for image in offer.images.all()
             ],
         }
-        response = self.client.patch(
-            "/api/offers/{}/".format(offer.id), encode_data_with_images(data), format="multipart"
-        )
+        response = self.client.patch(f"/api/offers/{offer.id}/", encode_data_with_images(data), format="multipart")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_reposition_image(self):
@@ -147,7 +141,7 @@ class TestOffersAPI(APITestCase):
         data = {
             "images": [{"id": image_id, "position": new_position}],
         }
-        response = self.client.patch("/api/offers/{}/".format(offer.id), data, format="json")
+        response = self.client.patch(f"/api/offers/{offer.id}/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         by_id = {image["id"]: image for image in response.data["images"]}
         self.assertEqual(by_id[image_id]["position"], new_position)

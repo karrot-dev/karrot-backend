@@ -54,7 +54,7 @@ class TestInvitationAPIIntegration(APITestCase):
         self.assertEqual(
             response.status_code,
             status.HTTP_200_OK,
-            "token {} not valid".format(token),
+            f"token {token} not valid",
         )
         self.assertIn(self.non_member, self.group.members.all())
 

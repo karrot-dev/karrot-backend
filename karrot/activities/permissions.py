@@ -64,7 +64,7 @@ class IsSameParticipant(permissions.BasePermission):
 
 
 class IsRecentActivity(permissions.BasePermission):
-    message = "You can't give feedback for activities more than {} days ago.".format(settings.FEEDBACK_POSSIBLE_DAYS)
+    message = f"You can't give feedback for activities more than {settings.FEEDBACK_POSSIBLE_DAYS} days ago."
 
     def has_object_permission(self, request, view, obj):
         if view.action == "partial_update":
@@ -83,7 +83,7 @@ class IsGroupEditor(permissions.BasePermission):
             elif hasattr(obj, "place"):
                 return obj.place.group.is_editor(request.user)
             else:
-                raise Exception("Cannot check permission for {}".format(type(obj)))
+                raise Exception(f"Cannot check permission for {type(obj)}")
         return True
 
 

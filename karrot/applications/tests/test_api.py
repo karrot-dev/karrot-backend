@@ -61,12 +61,12 @@ class TestCreateApplication(APITestCase, ExtractPaginationMixin):
         )
 
         # get conversation
-        conversation_response = self.client.get("/api/applications/{}/conversation/".format(application_id))
+        conversation_response = self.client.get(f"/api/applications/{application_id}/conversation/")
         self.assertEqual(conversation_response.status_code, status.HTTP_200_OK)
         for user_id in (self.applicant.id, self.member.id):
             self.assertIn(user_id, conversation_response.data["participants"])
         conversation_id = conversation_response.data["id"]
-        message_response = self.get_results("/api/messages/?conversation={}".format(conversation_id))
+        message_response = self.get_results(f"/api/messages/?conversation={conversation_id}")
         self.assertEqual(len(message_response.data), 0)
 
         # list application
@@ -175,10 +175,7 @@ class TestApplicationNotifications(APITestCase):
     def test_disable_notifications(self):
         self.client.force_login(user=self.member)
         response = self.client.delete(
-            "/api/groups/{}/notification_types/{}/".format(
-                self.group.id,
-                GroupNotificationType.NEW_APPLICATION,
-            )
+            f"/api/groups/{self.group.id}/notification_types/{GroupNotificationType.NEW_APPLICATION}/"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -284,20 +281,20 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
 
     def test_list_applications_for_group(self):
         self.client.force_login(user=self.member)
-        response = self.get_results("/api/applications/?group={}".format(self.group.id))
+        response = self.get_results(f"/api/applications/?group={self.group.id}")
         self.assertEqual(len(response.data), 1)
 
     def test_list_applications_for_group_as_newcomer(self):
         newcomer = UserFactory()
         self.group.groupmembership_set.create(user=newcomer)
         self.client.force_login(user=newcomer)
-        response = self.get_results("/api/applications/?group={}".format(self.group.id))
+        response = self.get_results(f"/api/applications/?group={self.group.id}")
         self.assertEqual(len(response.data), 1)
 
     def test_list_own_applications(self):
         [ApplicationFactory(group=self.group, user=UserFactory()) for _ in range(4)]
         self.client.force_login(user=self.applicant)
-        response = self.get_results("/api/applications/?user={}".format(self.applicant.id))
+        response = self.get_results(f"/api/applications/?user={self.applicant.id}")
         self.assertEqual(len(response.data), 1)
 
     def test_list_pending_applications(self):
@@ -307,7 +304,7 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
 
     def test_accept_application(self):
         self.client.force_login(user=self.member)
-        response = self.client.post("/api/applications/{}/accept/".format(self.application.id))
+        response = self.client.post(f"/api/applications/{self.application.id}/accept/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["status"], "accepted")
         self.assertEqual(response.data["decided_by"], self.member.id)
@@ -335,19 +332,19 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
 
     def test_cannot_accept_application_twice(self):
         self.client.force_login(user=self.member)
-        response = self.client.post("/api/applications/{}/accept/".format(self.application.id))
+        response = self.client.post(f"/api/applications/{self.application.id}/accept/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response = self.client.post("/api/applications/{}/accept/".format(self.application.id))
+        response = self.client.post(f"/api/applications/{self.application.id}/accept/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_newcomer_cannot_accept_application(self):
         self.client.force_login(user=self.newcomer)
-        response = self.client.post("/api/applications/{}/accept/".format(self.application.id))
+        response = self.client.post(f"/api/applications/{self.application.id}/accept/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_decline_application(self):
         self.client.force_login(user=self.member)
-        response = self.client.post("/api/applications/{}/decline/".format(self.application.id))
+        response = self.client.post(f"/api/applications/{self.application.id}/decline/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["status"], "declined")
         self.assertEqual(response.data["decided_by"], self.member.id)
@@ -366,24 +363,24 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
 
     def test_cannot_decline_application_twice(self):
         self.client.force_login(user=self.member)
-        response = self.client.post("/api/applications/{}/decline/".format(self.application.id))
+        response = self.client.post(f"/api/applications/{self.application.id}/decline/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response = self.client.post("/api/applications/{}/decline/".format(self.application.id))
+        response = self.client.post(f"/api/applications/{self.application.id}/decline/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_newcomer_cannot_decline_application(self):
         self.client.force_login(user=self.newcomer)
-        response = self.client.post("/api/applications/{}/decline/".format(self.application.id))
+        response = self.client.post(f"/api/applications/{self.application.id}/decline/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_applicant_cannot_decline_application(self):
         self.client.force_login(user=self.applicant)
-        response = self.client.post("/api/applications/{}/decline/".format(self.application.id))
+        response = self.client.post(f"/api/applications/{self.application.id}/decline/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_withdraw_application(self):
         self.client.force_login(user=self.applicant)
-        response = self.client.post("/api/applications/{}/withdraw/".format(self.application.id))
+        response = self.client.post(f"/api/applications/{self.application.id}/withdraw/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["status"], "withdrawn")
         self.assertFalse(
@@ -395,14 +392,14 @@ class TestApplicationHandling(APITestCase, ExtractPaginationMixin):
 
     def test_cannot_withdraw_application_twice(self):
         self.client.force_login(user=self.applicant)
-        response = self.client.post("/api/applications/{}/withdraw/".format(self.application.id))
+        response = self.client.post(f"/api/applications/{self.application.id}/withdraw/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response = self.client.post("/api/applications/{}/withdraw/".format(self.application.id))
+        response = self.client.post(f"/api/applications/{self.application.id}/withdraw/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_group_member_cannot_withdraw_application(self):
         self.client.force_login(user=self.member)
-        response = self.client.post("/api/applications/{}/withdraw/".format(self.application.id))
+        response = self.client.post(f"/api/applications/{self.application.id}/withdraw/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
@@ -416,20 +413,20 @@ class TestApplicationUserProfileAccess(APITestCase, ExtractPaginationMixin):
     def test_applicant_cannot_view_group_members_profile_information(self):
         self.client.force_login(user=self.applicant)
 
-        member_profile_url = "/api/users/{}/profile/".format(self.member.id)
+        member_profile_url = f"/api/users/{self.member.id}/profile/"
         response = self.client.get(member_profile_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_group_member_can_view_applicant_profile_information(self):
         self.client.force_login(user=self.member)
 
-        applicant_profile_url = "/api/users/{}/profile/".format(self.applicant.id)
+        applicant_profile_url = f"/api/users/{self.applicant.id}/profile/"
         response = self.client.get(applicant_profile_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["description"], self.applicant.description)
         self.assertEqual(response.data["email"], self.applicant.email)
 
-        applicant_info_url = "/api/users-info/{}/".format(self.applicant.id)
+        applicant_info_url = f"/api/users-info/{self.applicant.id}/"
         response = self.client.get(applicant_info_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["display_name"], self.applicant.display_name)

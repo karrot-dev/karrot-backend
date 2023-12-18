@@ -85,7 +85,7 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
         email_to_affected_user = next(email for email in mail.outbox if email.to[0] == self.affected_member.email)
         self.assertEqual(len(mail.outbox), 2)
         self.assertIn("your membership", email_to_affected_user.subject)
-        self.assertIn("for {}".format(self.affected_member.display_name), email_to_editor.subject)
+        self.assertIn(f"for {self.affected_member.display_name}", email_to_editor.subject)
 
         # vote on option
         response = self.client.post(
@@ -122,18 +122,18 @@ class TestConflictResolutionAPI(APITestCase, ExtractPaginationMixin):
         option_count = options.count()
 
         response = self.client.post(
-            "/api/issues/{}/vote/".format(issue.id), make_vote_data(options, [1] * option_count), format="json"
+            f"/api/issues/{issue.id}/vote/", make_vote_data(options, [1] * option_count), format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
         response = self.client.post(
-            "/api/issues/{}/vote/".format(issue.id), make_vote_data(options, [2] * option_count), format="json"
+            f"/api/issues/{issue.id}/vote/", make_vote_data(options, [2] * option_count), format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
         self.assertEqual([v.score for v in Vote.objects.all()], [2] * option_count)
 
-        response = self.client.delete("/api/issues/{}/vote/".format(issue.id))
+        response = self.client.delete(f"/api/issues/{issue.id}/vote/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.data)
 
         self.assertEqual(Vote.objects.count(), 0)
@@ -208,7 +208,7 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
     def vote_via_API(self, issue, data=None):
         voting = issue.latest_voting()
         return self.client.post(
-            "/api/issues/{}/vote/".format(issue.id), data or make_vote_data(voting.options.all()), format="json"
+            f"/api/issues/{issue.id}/vote/", data or make_vote_data(voting.options.all()), format="json"
         )
 
     def fast_forward_to_voting_expiration(self, voting):
@@ -216,7 +216,7 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         return freeze_time(time_when_voting_expires, tick=True)
 
     def delete_vote_via_API(self, issue):
-        return self.client.delete("/api/issues/{}/vote/".format(issue.id))
+        return self.client.delete(f"/api/issues/{issue.id}/vote/")
 
     def test_cannot_create_issue_as_nonmember(self):
         self.client.force_login(user=VerifiedUserFactory())
@@ -262,45 +262,45 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
     def test_cannot_list_issues_as_nonmember(self):
         self.create_issue()
         self.client.force_login(user=VerifiedUserFactory())
-        response = self.get_results("/api/issues/?group={}".format(self.group.id))
+        response = self.get_results(f"/api/issues/?group={self.group.id}")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_can_list_issues_as_newcomer(self):
         self.create_issue()
         self.client.force_login(user=self.newcomer)
-        response = self.get_results("/api/issues/?group={}".format(self.group.id))
+        response = self.get_results(f"/api/issues/?group={self.group.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 1)
 
     def test_cannot_retrieve_issue_as_nonmember(self):
         issue = self.create_issue()
         self.client.force_login(user=VerifiedUserFactory())
-        response = self.get_results("/api/issues/{}/".format(issue.id))
+        response = self.get_results(f"/api/issues/{issue.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
     def test_can_retrieve_issue_as_newcomer(self):
         issue = self.create_issue()
         self.client.force_login(user=self.newcomer)
-        response = self.get_results("/api/issues/{}/".format(issue.id))
+        response = self.get_results(f"/api/issues/{issue.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_cannot_retrieve_issue_conversation_as_nonmember(self):
         issue = self.create_issue()
         self.client.force_login(user=VerifiedUserFactory())
-        response = self.get_results("/api/issues/{}/conversation/".format(issue.id))
+        response = self.get_results(f"/api/issues/{issue.id}/conversation/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
     def test_can_retrieve_issue_conversation_as_newcomer(self):
         issue = self.create_issue()
         self.client.force_login(user=self.newcomer)
-        response = self.get_results("/api/issues/{}/conversation/".format(issue.id))
+        response = self.get_results(f"/api/issues/{issue.id}/conversation/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_can_leave_issue_conversation(self):
         # Make sure that users don't leave the issue conversation, because the API doesn't let them in again
         issue = self.create_issue()
         self.client.force_login(user=self.member)
-        response = self.get_results("/api/issues/{}/conversation/".format(issue.id))
+        response = self.get_results(f"/api/issues/{issue.id}/conversation/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         conversation = response.data
         response = self.client.patch(
@@ -370,7 +370,7 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
         vote_for_remove_user(voting=voting, user=issue.created_by)
 
         self.client.force_login(user=issue.affected_user)
-        response = self.client.post("/api/groups/{}/leave/".format(issue.group.id))
+        response = self.client.post(f"/api/groups/{issue.group.id}/leave/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.client.force_login(user=issue.created_by)
@@ -412,10 +412,10 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
 
         self.client.force_login(user=self.affected_member)
         # cannot access issue
-        response = self.get_results("/api/issues/{}/".format(issue.id))
+        response = self.get_results(f"/api/issues/{issue.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
         # cannot access conversation
-        response = self.get_results("/api/conversations/{}/".format(issue.conversation.id))
+        response = self.get_results(f"/api/conversations/{issue.conversation.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
     def test_removing_votes_when_user_leaves_group(self):
@@ -430,7 +430,7 @@ class TestCaseAPIPermissions(APITestCase, ExtractPaginationMixin):
 
         # other_member leaves the group voluntarily
         self.client.force_login(user=self.other_member)
-        response = self.client.post("/api/groups/{}/leave/".format(self.group.id))
+        response = self.client.post(f"/api/groups/{self.group.id}/leave/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         with self.fast_forward_to_voting_expiration(voting):

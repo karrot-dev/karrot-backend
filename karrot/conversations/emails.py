@@ -80,7 +80,7 @@ def prepare_thread_message_notification(user, messages):
     conversation_name = thread_text_beginning
 
     local_part = make_local_part(conversation, user, thread)
-    reply_to = formataddr((reply_to_name, "{}@{}".format(local_part, settings.EMAIL_REPLY_DOMAIN)))
+    reply_to = formataddr((reply_to_name, f"{local_part}@{settings.EMAIL_REPLY_DOMAIN}"))
     from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
     unsubscribe_url = thread_unsubscribe_url(user, group, thread)
@@ -155,7 +155,7 @@ def prepare_message_notification(
         thread = first_message if conversation.target and conversation.target.conversation_supports_threads else None
 
         local_part = make_local_part(conversation, user, thread)
-        reply_to = formataddr((reply_to_name, "{}@{}".format(local_part, settings.EMAIL_REPLY_DOMAIN)))
+        reply_to = formataddr((reply_to_name, f"{local_part}@{settings.EMAIL_REPLY_DOMAIN}"))
         from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
         unsubscribe_url = conversation_unsubscribe_url(user, group=group, conversation=conversation)
@@ -233,11 +233,11 @@ def prepare_activity_conversation_message_notification(user, messages):
                 locale=translation.to_locale(language),
             )
 
-            long_date = "{} {}, {}".format(weekday, time, date)
-            short_date = "{} {}".format(weekday, time)
+            long_date = f"{weekday} {time}, {date}"
+            short_date = f"{weekday} {time}"
 
-            reply_to_name = "{} {}".format(activity.activity_type.get_translated_name(), short_date)
-            conversation_name = "{} {}".format(activity.activity_type.get_translated_name(), long_date)
+            reply_to_name = f"{activity.activity_type.get_translated_name()} {short_date}"
+            conversation_name = f"{activity.activity_type.get_translated_name()} {long_date}"
 
         return prepare_message_notification(
             user,
@@ -335,7 +335,7 @@ def prepare_mention_notification(mention):
 
     reply_to_name = message.author.display_name
     local_part = make_local_part(conversation, user, thread)
-    reply_to = formataddr((reply_to_name, "{}@{}".format(local_part, settings.EMAIL_REPLY_DOMAIN)))
+    reply_to = formataddr((reply_to_name, f"{local_part}@{settings.EMAIL_REPLY_DOMAIN}"))
 
     from_text = message.author.display_name
     from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
@@ -351,5 +351,5 @@ def prepare_mention_notification(mention):
                 "message": message,
                 "conversation_url": conversation_url_for(message),
             },
-            stats_category="{}_mention".format(conversation.type()),
+            stats_category=f"{conversation.type()}_mention",
         )

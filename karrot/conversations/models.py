@@ -425,7 +425,7 @@ class ConversationThreadParticipant(BaseModel, UpdatedAtMixin):
             thread_marked_seen.send(sender=self.__class__, participant=self)
 
 
-class ConversationMixin(object):
+class ConversationMixin:
     # TODO: including this should automatically wireup a signal to create/destroy with target
 
     @property

@@ -292,7 +292,7 @@ class TestTrustList(APITestCase):
 
     def test_list_trust_for_group(self):
         self.client.force_login(user=self.member1)
-        response = self.client.get("/api/groups/{}/".format(self.group.id))
+        response = self.client.get(f"/api/groups/{self.group.id}/")
         self.assertEqual(
             response.data["memberships"][self.member1.id]["trust"],
             [
@@ -309,7 +309,7 @@ class TestTrustList(APITestCase):
 
     def test_backwards_compatible_trusted_by_field(self):
         self.client.force_login(user=self.member1)
-        response = self.client.get("/api/groups/{}/".format(self.group.id))
+        response = self.client.get(f"/api/groups/{self.group.id}/")
         # trust for other roles won't be included in the 'trusted_by' field
         self.assertEqual(response.data["memberships"][self.member1.id]["trusted_by"], [self.member2.id])
         self.assertEqual(response.data["memberships"][self.member2.id]["trusted_by"], [self.member1.id])

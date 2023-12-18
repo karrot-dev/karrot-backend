@@ -131,7 +131,7 @@ class TestMessagePushNotificationTitles(TestCase):
         message = conversation.messages.create(author=author, content="bla")
 
         title = get_message_title(message, "en")
-        self.assertEqual(title, "{} / {}".format(group.name, author.display_name))
+        self.assertEqual(title, f"{group.name} / {author.display_name}")
 
     def test_place_message_title(self):
         author = UserFactory()
@@ -140,7 +140,7 @@ class TestMessagePushNotificationTitles(TestCase):
         message = conversation.messages.create(author=author, content="bla")
 
         title = get_message_title(message, "en")
-        self.assertEqual(title, "{} / {}".format(place.name, author.display_name))
+        self.assertEqual(title, f"{place.name} / {author.display_name}")
 
     def test_reply_message_title(self):
         author = UserFactory()
@@ -152,7 +152,7 @@ class TestMessagePushNotificationTitles(TestCase):
         )
 
         title = get_message_title(reply, "en")
-        self.assertEqual(title, "blablablablabl… / {}".format(author.display_name))
+        self.assertEqual(title, f"blablablablabl… / {author.display_name}")
 
     def test_activity_message_title(self):
         author = UserFactory()
@@ -164,7 +164,7 @@ class TestMessagePushNotificationTitles(TestCase):
 
         title = get_message_title(message, "en")
         self.assertEqual(
-            title, "{} Sunday 9:00 PM / {}".format(activity.activity_type.get_translated_name(), author.display_name)
+            title, f"{activity.activity_type.get_translated_name()} Sunday 9:00 PM / {author.display_name}"
         )
 
     def test_application_message_title(self):
@@ -176,27 +176,27 @@ class TestMessagePushNotificationTitles(TestCase):
         message = conversation.messages.create(author=author, content="bla")
 
         title = get_message_title(message, "en")
-        self.assertEqual(title, "❓ {} / {}".format(applicant.display_name, author.display_name))
+        self.assertEqual(title, f"❓ {applicant.display_name} / {author.display_name}")
 
         application.accept(author)
         message.refresh_from_db()
         title = get_message_title(message, "en")
-        self.assertEqual(title, "✅ {} / {}".format(applicant.display_name, author.display_name))
+        self.assertEqual(title, f"✅ {applicant.display_name} / {author.display_name}")
 
         application.decline(author)
         message.refresh_from_db()
         title = get_message_title(message, "en")
-        self.assertEqual(title, "❌ {} / {}".format(applicant.display_name, author.display_name))
+        self.assertEqual(title, f"❌ {applicant.display_name} / {author.display_name}")
 
         application.withdraw()
         message.refresh_from_db()
         title = get_message_title(message, "en")
-        self.assertEqual(title, "🗑️ {} / {}".format(applicant.display_name, author.display_name))
+        self.assertEqual(title, f"🗑️ {applicant.display_name} / {author.display_name}")
 
         message = conversation.messages.create(author=applicant, content="bla")
         message.refresh_from_db()
         title = get_message_title(message, "en")
-        self.assertEqual(title, "🗑️ {}".format(applicant.display_name))
+        self.assertEqual(title, f"🗑️ {applicant.display_name}")
 
     def test_issue_message_title(self):
         issue = IssueFactory()

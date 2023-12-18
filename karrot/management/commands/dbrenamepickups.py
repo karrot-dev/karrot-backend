@@ -47,11 +47,11 @@ class Command(BaseCommand):
         rename_notification_types("collector", "participant")
 
         def rename_jsonb_field(table, column, field_from, field_to):
-            query = """
-            update {}
-            set {} = {} - '{}' || jsonb_build_object('{}', {}->'{}')
-            where {} ? '{}'
-            """.format(table, column, column, field_from, field_to, column, field_from, column, field_from)
+            query = f"""
+            update {table}
+            set {column} = {column} - '{field_from}' || jsonb_build_object('{field_to}', {column}->'{field_from}')
+            where {column} ? '{field_from}'
+            """
             return re.sub("\\s+", " ", query).strip()
 
         # rename inside jsonb fields
@@ -102,9 +102,7 @@ class Command(BaseCommand):
                 select indexname from pg_indexes where schemaname = 'public' and indexname like '%{index_from}%'
             """
             for (indexname,) in fetchall(index_query):
-                return "alter index if exists {} rename to {}".format(
-                    indexname, indexname.replace(index_from, index_to)
-                )
+                return f"alter index if exists {indexname} rename to {indexname.replace(index_from, index_to)}"
 
         queries.append(rename_indexes("pickup", "activity"))
         queries.append(rename_indexes("collector", "participant"))
@@ -114,9 +112,7 @@ class Command(BaseCommand):
         def rename_sequences(sequence_from, sequence_to):
             sequence_query = f"select relname from pg_class where relkind = 'S' and relname like '%{sequence_from}%'"
             for (relname,) in fetchall(sequence_query):
-                return "alter sequence if exists {} rename to {}".format(
-                    relname, relname.replace(sequence_from, sequence_to)
-                )
+                return f"alter sequence if exists {relname} rename to {relname.replace(sequence_from, sequence_to)}"
 
         queries.append(rename_sequences("pickup", "activity"))
         queries.append(rename_sequences("collector", "participant"))

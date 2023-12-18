@@ -114,7 +114,7 @@ class TestConversationsAPI(APITestCase):
 
         self.client.force_login(user=user)
         with self.assertNumQueries(3):
-            response = self.client.get("/api/conversations/{}/".format(conversation.id), format="json")
+            response = self.client.get(f"/api/conversations/{conversation.id}/", format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -130,7 +130,7 @@ class TestConversationsAPI(APITestCase):
     def test_list_messages(self):
         self.client.force_login(user=self.participant1)
         with self.assertNumQueries(8):
-            response = self.client.get("/api/messages/?conversation={}".format(self.conversation1.id), format="json")
+            response = self.client.get(f"/api/messages/?conversation={self.conversation1.id}", format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["content"], "hello")
@@ -162,7 +162,7 @@ class TestConversationsAPI(APITestCase):
     def test_get_message(self):
         self.client.force_login(user=self.participant1)
         message_id = self.conversation1.messages.first().id
-        response = self.client.get("/api/messages/{}/".format(message_id), format="json")
+        response = self.client.get(f"/api/messages/{message_id}/", format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["id"], message_id)
 
@@ -176,12 +176,12 @@ class TestConversationsAPI(APITestCase):
 
     def test_cannot_get_messages_if_not_in_conversation(self):
         self.client.force_login(user=self.participant1)
-        response = self.client.get("/api/messages/?conversation={}".format(self.conversation3.id), format="json")
+        response = self.client.get(f"/api/messages/?conversation={self.conversation3.id}", format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_same_error_if_conversation_does_not_exist_as_if_you_are_just_not_in_it(self):
         self.client.force_login(user=self.participant1)
-        response = self.client.get("/api/messages/?conversation={}".format(982398723), format="json")
+        response = self.client.get(f"/api/messages/?conversation={982398723}", format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_create_message(self):
@@ -388,7 +388,7 @@ class TestGroupPublicConversation(APITestCase):
         conversation.messages.create(author=author, content="asdf")
 
         self.client.force_login(user=user)
-        response = self.client.get("/api/messages/?conversation={}".format(conversation.id))
+        response = self.client.get(f"/api/messages/?conversation={conversation.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data["results"]), 1, response.data["results"])
 
@@ -451,7 +451,7 @@ class TestConversationThreadsAPI(APITestCase):
         n = 5
         replies = [self.create_reply(thread=another_thread) for _ in range(n)]
 
-        response = self.client.get("/api/messages/?thread={}".format(another_thread.id), format="json")
+        response = self.client.get(f"/api/messages/?thread={another_thread.id}", format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual([m["id"] for m in response.data["results"]], [another_thread.id] + [m.id for m in replies])
         self.assertEqual(len(response.data["results"]), n + 1)
@@ -499,7 +499,7 @@ class TestConversationThreadsAPI(APITestCase):
         self.client.force_login(user=self.user)
         data = {"muted": True}
         self.create_reply()
-        response = self.client.patch("/api/messages/{}/thread/".format(self.thread.id), data, format="json")
+        response = self.client.patch(f"/api/messages/{self.thread.id}/thread/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         participant = self.thread.participants.get(user=self.user)
         self.assertEqual(participant.muted, True)
@@ -508,7 +508,7 @@ class TestConversationThreadsAPI(APITestCase):
         self.client.force_login(user=self.user)
         reply = self.create_reply(author=self.user2)
         data = {"seen_up_to": reply.id}
-        response = self.client.patch("/api/messages/{}/thread/".format(self.thread.id), data, format="json")
+        response = self.client.patch(f"/api/messages/{self.thread.id}/thread/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["seen_up_to"], reply.id)
         self.assertEqual(response.data["unread_reply_count"], 0)
@@ -519,20 +519,20 @@ class TestConversationThreadsAPI(APITestCase):
         self.client.force_login(user=self.user)
         another_message = self.conversation.messages.create(author=self.user, content="boo")
         data = {"muted": True}
-        response = self.client.patch("/api/messages/{}/thread/".format(another_message.id), data, format="json")
+        response = self.client.patch(f"/api/messages/{another_message.id}/thread/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_can_edit_reply(self):
         self.client.force_login(user=self.user)
         reply = self.create_reply()
-        response = self.client.patch("/api/messages/{}/".format(reply.id), {"content": "edited!"}, format="json")
+        response = self.client.patch(f"/api/messages/{reply.id}/", {"content": "edited!"}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["content"], "edited!")
 
     def test_can_react_to_reply(self):
         self.client.force_login(user=self.user)
         reply = self.create_reply()
-        response = self.client.post("/api/messages/{}/reactions/".format(reply.id), {"name": "smile"}, format="json")
+        response = self.client.post(f"/api/messages/{reply.id}/reactions/", {"name": "smile"}, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_get_thread_meta_for_particiant(self):
@@ -603,7 +603,7 @@ class TestConversationThreadsAPI(APITestCase):
         another_message = self.conversation.messages.create(author=self.user, content="yay")
         reply = self.create_reply()
         data = {"thread": another_message.id}
-        response = self.client.patch("/api/messages/{}/".format(reply.id), data, format="json")
+        response = self.client.patch(f"/api/messages/{reply.id}/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_send_reply_notifications(self):
@@ -627,7 +627,7 @@ class TestConversationsSeenUpToAPI(APITestCase):
         message = self.conversation.messages.create(author=self.user, content="yay")
         self.client.force_login(user=self.user)
 
-        response = self.client.get("/api/conversations/{}/".format(self.conversation.id), format="json")
+        response = self.client.get(f"/api/conversations/{self.conversation.id}/", format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["seen_up_to"], message.id)
         self.assertEqual(response.data["unread_message_count"], 0)
@@ -636,7 +636,7 @@ class TestConversationsSeenUpToAPI(APITestCase):
         message = self.conversation.messages.create(author=self.user2, content="yay")
         self.client.force_login(user=self.user)
 
-        response = self.client.get("/api/conversations/{}/".format(self.conversation.id), format="json")
+        response = self.client.get(f"/api/conversations/{self.conversation.id}/", format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["seen_up_to"], None)
         self.assertEqual(response.data["unread_message_count"], 1)
@@ -645,7 +645,7 @@ class TestConversationsSeenUpToAPI(APITestCase):
         self.participant.seen_up_to = message
         self.participant.save()
 
-        response = self.client.get("/api/conversations/{}/".format(self.conversation.id), format="json")
+        response = self.client.get(f"/api/conversations/{self.conversation.id}/", format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["seen_up_to"], message.id)
         self.assertEqual(response.data["unread_message_count"], 0)
@@ -665,12 +665,12 @@ class TestConversationsSeenUpToAPI(APITestCase):
         message = self.conversation.messages.create(author=self.user2, content="yay")
         self.client.force_login(user=self.user)
 
-        response = self.client.get("/api/conversations/{}/".format(self.conversation.id), format="json")
+        response = self.client.get(f"/api/conversations/{self.conversation.id}/", format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["seen_up_to"], None)
 
         data = {"seen_up_to": message.id}
-        response = self.client.patch("/api/conversations/{}/".format(self.conversation.id), data, format="json")
+        response = self.client.patch(f"/api/conversations/{self.conversation.id}/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["seen_up_to"], message.id)
 
@@ -685,13 +685,13 @@ class TestConversationsSeenUpToAPI(APITestCase):
         message = conversation.messages.create(author=self.user2, content="yay")
         self.client.force_login(user=user)
 
-        response = self.client.get("/api/conversations/{}/".format(conversation.id), format="json")
+        response = self.client.get(f"/api/conversations/{conversation.id}/", format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["seen_up_to"], None)
         self.assertFalse(ConversationParticipant.objects.filter(conversation=conversation.id, user=user.id).exists())
 
         data = {"seen_up_to": message.id}
-        response = self.client.patch("/api/conversations/{}/".format(conversation.id), data, format="json")
+        response = self.client.patch(f"/api/conversations/{conversation.id}/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data[0], "Cannot mark seen_up_to without subscribing to notifications")
 
@@ -700,7 +700,7 @@ class TestConversationsSeenUpToAPI(APITestCase):
     def test_mark_seen_up_to_fails_for_invalid_id(self):
         self.client.force_login(user=self.user)
         data = {"seen_up_to": 9817298172}
-        response = self.client.patch("/api/conversations/{}/".format(self.conversation.id), data, format="json")
+        response = self.client.patch(f"/api/conversations/{self.conversation.id}/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.data["seen_up_to"][0], 'Invalid pk "{}" - object does not exist.'.format(data["seen_up_to"])
@@ -713,7 +713,7 @@ class TestConversationsSeenUpToAPI(APITestCase):
         self.client.force_login(user=self.user)
 
         data = {"seen_up_to": message.id}
-        response = self.client.patch("/api/conversations/{}/".format(self.conversation.id), data, format="json")
+        response = self.client.patch(f"/api/conversations/{self.conversation.id}/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["seen_up_to"][0], "Must refer to a message in the conversation")
 
@@ -732,7 +732,7 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
         self.client.force_login(user=self.user)
 
         data = {"notifications": ConversationNotificationStatus.MUTED.value}
-        response = self.client.patch("/api/conversations/{}/".format(self.conversation.id), data, format="json")
+        response = self.client.patch(f"/api/conversations/{self.conversation.id}/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["notifications"], ConversationNotificationStatus.MUTED.value)
 
@@ -748,7 +748,7 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
         self.client.force_login(user=self.user)
 
         data = {"notifications": ConversationNotificationStatus.ALL.value}
-        response = self.client.patch("/api/conversations/{}/".format(self.conversation.id), data, format="json")
+        response = self.client.patch(f"/api/conversations/{self.conversation.id}/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["notifications"], ConversationNotificationStatus.ALL.value)
 
@@ -791,7 +791,7 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
             ConversationMessage.objects.create(
                 author=self.user,
                 conversation=conversation,
-                content="hey @{} how are you?".format(mentioned_user.username),
+                content=f"hey @{mentioned_user.username} how are you?",
             )
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("you were mentioned", mail.outbox[0].body)
@@ -809,7 +809,7 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
             ConversationMessage.objects.create(
                 author=self.user,
                 conversation=conversation,
-                content="hey @{} how are you?".format(mentioned_user.username),
+                content=f"hey @{mentioned_user.username} how are you?",
             )
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("you were mentioned", mail.outbox[0].body)
@@ -827,7 +827,7 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
             message = ConversationMessage.objects.create(
                 author=self.user,
                 conversation=conversation,
-                content="hey @{} how are you?".format(mentioned_user.username),
+                content=f"hey @{mentioned_user.username} how are you?",
             )
             # mark as read (tasks are only run at end of block)
             participant = ConversationParticipant.objects.get(user=mentioned_user, conversation=conversation)
@@ -849,7 +849,7 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
             ConversationMessage.objects.create(
                 author=self.user,
                 conversation=conversation,
-                content="hey @{} how are you?".format(mentioned_user.username),
+                content=f"hey @{mentioned_user.username} how are you?",
             )
 
         self.assertEqual(len(mail.outbox), 1)
@@ -882,7 +882,7 @@ class TestConversationsMessageReactionsPostAPI(APITestCase):
         # log in is missing
 
         data = {"name": "thumbsup"}
-        response = self.client.post("/api/messages/{}/reactions/".format(self.message.id), data, format="json")
+        response = self.client.post(f"/api/messages/{self.message.id}/reactions/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_add_emoji_to_message_of_other_group(self):
@@ -891,7 +891,7 @@ class TestConversationsMessageReactionsPostAPI(APITestCase):
         # log in as user who didn't join the conversation
         self.client.force_login(user=self.user2)
         data = {"name": "thumbsup"}
-        response = self.client.post("/api/messages/{}/reactions/".format(self.message2.id), data, format="json")
+        response = self.client.post(f"/api/messages/{self.message2.id}/reactions/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_add_to_message_with_invalid_id(self):
@@ -905,20 +905,20 @@ class TestConversationsMessageReactionsPostAPI(APITestCase):
         """It should be impossible to add an unsupported emoji. (respond 400)"""
         self.client.force_login(user=self.user)
         data = {"name": "nonexistent_emoji"}
-        response = self.client.post("/api/messages/{}/reactions/".format(self.message.id), data, format="json")
+        response = self.client.post(f"/api/messages/{self.message.id}/reactions/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_react_updated_emoji(self):
         "Test if source-url has been updated to newest list of emojis"
         self.client.force_login(user=self.user)
         data = {"name": "star_struck"}
-        response = self.client.post("/api/messages/{}/reactions/".format(self.message.id), data, format="json")
+        response = self.client.post(f"/api/messages/{self.message.id}/reactions/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_empty_request_fails(self):
         """If no emoji is given, the request should fail (respond 400)"""
         self.client.force_login(user=self.user)
-        response = self.client.post("/api/messages/{}/reactions/".format(self.message.id), format="json")
+        response = self.client.post(f"/api/messages/{self.message.id}/reactions/", format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_reaction_to_nonexistent_message(self):
@@ -928,7 +928,7 @@ class TestConversationsMessageReactionsPostAPI(APITestCase):
         self.client.force_login(user=self.user)
 
         data = {"name": "thumbsup"}
-        response = self.client.post("/api/messages/{}/reactions/".format(1735), data, format="json")
+        response = self.client.post(f"/api/messages/{1735}/reactions/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_dont_react_twice_with_the_same_emoji(self):
@@ -936,17 +936,17 @@ class TestConversationsMessageReactionsPostAPI(APITestCase):
         self.client.force_login(user=self.user)
         data = {"name": "thumbsup"}
 
-        response = self.client.post("/api/messages/{}/reactions/".format(self.message.id), data, format="json")
+        response = self.client.post(f"/api/messages/{self.message.id}/reactions/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        response = self.client.post("/api/messages/{}/reactions/".format(self.message.id), data, format="json")
+        response = self.client.post(f"/api/messages/{self.message.id}/reactions/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_react_to_message_with_emoji(self):
         """User who can participate in conversation can react to a message with emoji."""
         self.client.force_login(user=self.user)
         data = {"name": "tada"}
-        response = self.client.post("/api/messages/{}/reactions/".format(self.message.id), data, format="json")
+        response = self.client.post(f"/api/messages/{self.message.id}/reactions/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data["name"], "tada")
         self.assertTrue(
@@ -959,29 +959,23 @@ class TestConversationsMessageReactionsPostAPI(APITestCase):
         # log in
         self.client.force_login(user=self.user)
         data = {"name": "+1"}
-        response = self.client.post("/api/messages/{}/reactions/".format(self.message.id), data, format="json")
+        response = self.client.post(f"/api/messages/{self.message.id}/reactions/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data["name"], "thumbsup")
 
         # and the base form can't be saved now
-        response = self.client.post(
-            "/api/messages/{}/reactions/".format(self.message.id), {"name": "thumbsup"}, format="json"
-        )
+        response = self.client.post(f"/api/messages/{self.message.id}/reactions/", {"name": "thumbsup"}, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_react_with_different_emoji(self):
         """Can react multiple times with different emoji."""
         self.client.force_login(user=self.user)
 
-        response = self.client.post(
-            "/api/messages/{}/reactions/".format(self.message.id), {"name": "thumbsup"}, format="json"
-        )
+        response = self.client.post(f"/api/messages/{self.message.id}/reactions/", {"name": "thumbsup"}, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # second request with different emoji is ok
-        response = self.client.post(
-            "/api/messages/{}/reactions/".format(self.message.id), {"name": "tada"}, format="json"
-        )
+        response = self.client.post(f"/api/messages/{self.message.id}/reactions/", {"name": "tada"}, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_include_reactions_in_message(self):
@@ -992,7 +986,7 @@ class TestConversationsMessageReactionsPostAPI(APITestCase):
         self.reaction = self.message.reactions.create(user=self.user2, name="thumbsup")
 
         self.client.force_login(user=self.user)
-        response = self.client.get("/api/messages/?conversation={}".format(self.conversation.id), format="json")
+        response = self.client.get(f"/api/messages/?conversation={self.conversation.id}", format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(len(response.data["results"][0]["reactions"]), 3)
@@ -1103,32 +1097,32 @@ class TestConversationsMessageEditAPI(APITestCase):
         self.client.force_login(user=self.user)
         data = {"content": "hi"}
         now = timezone.now()
-        response = self.client.patch("/api/messages/{}/".format(self.message.id), data, format="json")
+        response = self.client.patch(f"/api/messages/{self.message.id}/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertGreater(parse(response.data["edited_at"]), now)
 
     def test_cannot_update_message_without_specifying_content(self):
         self.client.force_login(user=self.user)
         data = {"content": ""}
-        response = self.client.patch("/api/messages/{}/".format(self.message.id), data, format="json")
+        response = self.client.patch(f"/api/messages/{self.message.id}/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_cannot_update_message_if_not_in_conversation(self):
         self.client.force_login(user=self.user2)
         data = {"content": "a nice message"}
-        response = self.client.patch("/api/messages/{}/".format(self.message.id), data, format="json")
+        response = self.client.patch(f"/api/messages/{self.message.id}/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_cannot_update_message_if_not_message_author(self):
         self.client.force_login(user=self.user2)
         data = {"content": "a nicer message"}
-        response = self.client.patch("/api/messages/{}/".format(self.message2.id), data, format="json")
+        response = self.client.patch(f"/api/messages/{self.message2.id}/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_cannot_update_message_if_past_10_days(self):
         self.client.force_login(user=self.user)
         data = {"content": "a nicer message"}
-        response = self.client.patch("/api/messages/{}/".format(self.message3.id), data, format="json")
+        response = self.client.patch(f"/api/messages/{self.message3.id}/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_message_with_new_image(self):
@@ -1137,9 +1131,7 @@ class TestConversationsMessageEditAPI(APITestCase):
             data = {
                 "images": [{"position": 0, "image": image_file}],
             }
-            response = self.client.patch(
-                "/api/messages/{}/".format(self.message.id), data=encode_data_with_images(data)
-            )
+            response = self.client.patch(f"/api/messages/{self.message.id}/", data=encode_data_with_images(data))
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
             self.assertTrue("full_size" in response.data["images"][0]["image_urls"])
 
@@ -1154,7 +1146,7 @@ class TestConversationsMessageEditAPI(APITestCase):
             "images": [{"id": image.id, "_removed": True}],
         }
         response = self.client.patch(
-            "/api/messages/{}/".format(self.message.id), encode_data_with_images(data), format="multipart"
+            f"/api/messages/{self.message.id}/", encode_data_with_images(data), format="multipart"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data["images"]), 0)
@@ -1172,7 +1164,7 @@ class TestConversationsMessageEditAPI(APITestCase):
             "attachments": [{"id": attachment.id, "_removed": True}],
         }
         response = self.client.patch(
-            "/api/messages/{}/".format(self.message.id), encode_data_with_images(data), format="multipart"
+            f"/api/messages/{self.message.id}/", encode_data_with_images(data), format="multipart"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data["attachments"]), 0)
@@ -1293,7 +1285,7 @@ class TestPrivateConversationAPI(APITestCase):
         self.client.force_login(user=self.user)
         private_conversation = Conversation.objects.get_or_create_for_two_users(self.user, self.user2)
         response = self.client.patch(
-            "/api/conversations/{}/".format(private_conversation.id),
+            f"/api/conversations/{private_conversation.id}/",
             {
                 "notifications": ConversationNotificationStatus.NONE.value,
             },

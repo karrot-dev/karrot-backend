@@ -146,7 +146,7 @@ def prepare_email(
     if unsubscribe_url:
         headers.update(
             {
-                "List-Unsubscribe": "<{}>".format(unsubscribe_url),
+                "List-Unsubscribe": f"<{unsubscribe_url}>",
             }
         )
 
@@ -175,13 +175,13 @@ def prepare_email_content(template, context, tz, language="en"):
         html_content = None
 
         try:
-            html_template = get_template("{}.html.jinja2".format(template))
+            html_template = get_template(f"{template}.html.jinja2")
             html_content = html_template.render(context)
         except TemplateDoesNotExist:
             pass
 
         try:
-            text_template = get_template("{}.text.jinja2".format(template))
+            text_template = get_template(f"{template}.text.jinja2")
             text_content = text_template.render(context)
         except TemplateDoesNotExist as exc:
             if html_content:
@@ -189,7 +189,7 @@ def prepare_email_content(template, context, tz, language="en"):
             else:
                 raise Exception("Nothing to use for text content, no text or html templates available.") from exc
 
-        subject = render_to_string("{}.subject.jinja2".format(template), context).replace("\n", "")
+        subject = render_to_string(f"{template}.subject.jinja2", context).replace("\n", "")
 
         return subject, text_content, html_content
 

@@ -49,8 +49,8 @@ def get_users_stats():
         ).distinct()
         fields.update(
             {
-                "count_active_{}d".format(n): active_users.count(),
-                "count_activity_active_{}d".format(n): activity_active_users.count(),
+                f"count_active_{n}d": active_users.count(),
+                f"count_activity_active_{n}d": activity_active_users.count(),
             }
         )
 

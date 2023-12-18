@@ -58,7 +58,7 @@ class TestActivityReminderTask(TestCase):
             kwargs["url"],
         )
         self.assertIn(
-            "Upcoming {}".format(self.activity.activity_type.name),
+            f"Upcoming {self.activity.activity_type.name}",
             kwargs["title"],
         )
         self.assertIn(

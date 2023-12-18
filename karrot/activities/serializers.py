@@ -121,7 +121,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
             raise ValidationError("You aren't assigned to the activity.")
         if not about.is_recent():
             raise ValidationError(
-                "You can't give feedback for activities more than {} days ago.".format(settings.FEEDBACK_POSSIBLE_DAYS)
+                f"You can't give feedback for activities more than {settings.FEEDBACK_POSSIBLE_DAYS} days ago."
             )
         return about
 
@@ -138,12 +138,10 @@ class FeedbackSerializer(serializers.ModelSerializer):
         weight = data.get("weight", get_instance_attr("weight"))
 
         if not activity_type.has_feedback:
-            raise ValidationError("You cannot give feedback to an activity of type {}.".format(activity_type.name))
+            raise ValidationError(f"You cannot give feedback to an activity of type {activity_type.name}.")
 
         if weight is not None and not activity_type.has_feedback_weight:
-            raise ValidationError(
-                "You cannot give weight feedback to an activity of type {}.".format(activity_type.name)
-            )
+            raise ValidationError(f"You cannot give weight feedback to an activity of type {activity_type.name}.")
 
         if (comment is None or comment == "") and weight is None:
             raise ValidationError("Both comment and weight cannot be blank.")
@@ -805,13 +803,13 @@ class ActivityICSSerializer(serializers.ModelSerializer):
         domain = "karrot"
         if request and request.META.get("HTTP_HOST"):
             domain = request.META.get("HTTP_HOST")
-        return "activity_{}@{}".format(activity.id, domain)
+        return f"activity_{activity.id}@{domain}"
 
     def get_status(self, activity):
         return "CANCELLED" if activity.is_disabled else "CONFIRMED"
 
     def get_summary(self, activity):
-        return "{}: {}".format(activity.activity_type.name, activity.place.name)
+        return f"{activity.activity_type.name}: {activity.place.name}"
 
     def get_transp(self, activity):
         return "OPAQUE"
@@ -843,7 +841,7 @@ class PublicActivityICSSerializer(ActivityICSSerializer):
         domain = "karrot"
         if request and request.META.get("HTTP_HOST"):
             domain = request.META.get("HTTP_HOST")
-        return "activity_{}@{}".format(activity.public_id, domain)
+        return f"activity_{activity.public_id}@{domain}"
 
     def get_attendee(self, activity):
         return []
@@ -939,9 +937,6 @@ class ActivityDismissFeedbackSerializer(serializers.ModelSerializer):
 @extend_schema_field(OpenApiTypes.INT)
 class DurationInSecondsField(Field):
     default_error_messages = {}
-
-    def __init__(self, **kwargs):
-        super(DurationInSecondsField, self).__init__(**kwargs)
 
     def to_internal_value(self, value):
         return timedelta(seconds=value)

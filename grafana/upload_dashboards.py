@@ -21,7 +21,7 @@ path = os.path.dirname(os.path.realpath(__file__))
 dashboard_dir = os.path.join(path, "dashboards")
 
 s = requests.Session()
-s.headers.update({"Authorization": "Bearer {}".format(config.API_KEY)})
+s.headers.update({"Authorization": f"Bearer {config.API_KEY}"})
 
 
 def ask(question):
@@ -40,7 +40,7 @@ for entry in os.listdir(dashboard_dir):
             "overwrite": False,
         }
         dashboard_url = "{host}/d/{uid}".format(host=config.GRAFANA_HOST, uid=data["dashboard"]["uid"])
-        if ask("Update dashboard {} ({})? [y/N] ".format(entry, dashboard_url)):
-            res = s.post("{host}/api/dashboards/db".format(host=config.GRAFANA_HOST), json=data)
+        if ask(f"Update dashboard {entry} ({dashboard_url})? [y/N] "):
+            res = s.post(f"{config.GRAFANA_HOST}/api/dashboards/db", json=data)
             print(res)
             print(res.json())

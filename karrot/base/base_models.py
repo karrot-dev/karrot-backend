@@ -31,8 +31,8 @@ class NicelyFormattedModel(Model):
 
     def __repr__(self):
         model = str(self.__class__.__name__)
-        columns = ", ".join('{}="{}"'.format(field, value) for field, value in self.to_dict().items())
-        return "{}({})".format(model, columns)
+        columns = ", ".join(f'{field}="{value}"' for field, value in self.to_dict().items())
+        return f"{model}({columns})"
 
 
 class BaseModel(NicelyFormattedModel):

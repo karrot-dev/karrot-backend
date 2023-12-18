@@ -91,7 +91,7 @@ class Command(BaseCommand):
                     *influx_args,
                     "-import",
                     "-compressed",
-                    "-path={}".format(dump),
+                    f"-path={dump}",
                 ]
             )
         elif command == "rewrite":
@@ -100,8 +100,8 @@ class Command(BaseCommand):
             sed = "; ".join(
                 [
                     "s/store/place/g",
-                    's/CREATE DATABASE.*WITH/CREATE DATABASE "{}" WITH/'.format(to_db_name),
-                    "s/CONTEXT-DATABASE:.*/CONTEXT-DATABASE:{}/".format(to_db_name),
+                    f's/CREATE DATABASE.*WITH/CREATE DATABASE "{to_db_name}" WITH/',
+                    f"s/CONTEXT-DATABASE:.*/CONTEXT-DATABASE:{to_db_name}/",
                 ]
             )
             execute(

@@ -68,7 +68,7 @@ class TestProcessInactiveUsers(TestCase):
         process_inactive_users()
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, [self.inactive_user.email])
-        self.assertEqual(mail.outbox[0].subject, "{} is missing you!".format(self.group.name))
+        self.assertEqual(mail.outbox[0].subject, f"{self.group.name} is missing you!")
 
 
 class TestProcessInactiveUsersForRemoval(TestCase):
@@ -94,7 +94,7 @@ class TestProcessInactiveUsersForRemoval(TestCase):
         self.assertIsNotNone(self.inactive_membership.removal_notification_at)
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, [self.inactive_user.email])
-        self.assertEqual(mail.outbox[0].subject, "{} is really missing you!".format(self.group.name))
+        self.assertEqual(mail.outbox[0].subject, f"{self.group.name} is really missing you!")
 
 
 class TestProcessInactiveUsersRemovesOldUsers(TestCase):

@@ -242,7 +242,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
 
     def test_change_max_participants_for_series(self):
         """should change all future instances (except for individually changed ones), but not past ones"""
-        url = "/api/activity-series/{}/".format(self.series.id)
+        url = f"/api/activity-series/{self.series.id}/"
         self.client.force_login(user=self.member)
 
         participant_type = self.series.participant_types.get(role="member")
@@ -262,7 +262,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
     def test_add_participant_type(self):
         self.client.force_login(user=self.member)
         self.client.patch(
-            "/api/activity-series/{}/".format(self.series.id),
+            f"/api/activity-series/{self.series.id}/",
             {
                 "participant_types": [
                     {
@@ -281,7 +281,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
     def test_modify_participant_type_description(self):
         self.client.force_login(user=self.member)
         response = self.client.patch(
-            "/api/activity-series/{}/".format(self.series.id),
+            f"/api/activity-series/{self.series.id}/",
             {
                 "participant_types": [
                     {
@@ -305,7 +305,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         mail.outbox = []
         message = faker.text()
         response = self.client.patch(
-            "/api/activity-series/{}/".format(self.series.id),
+            f"/api/activity-series/{self.series.id}/",
             {
                 "participant_types": [
                     {
@@ -331,7 +331,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
     def test_remove_participant_type(self):
         self.client.force_login(user=self.member)
         response = self.client.patch(
-            "/api/activity-series/{}/".format(self.series.id),
+            f"/api/activity-series/{self.series.id}/",
             {
                 "participant_types": [
                     {
@@ -352,7 +352,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
     def test_change_series_activates_group(self):
         self.group.status = GroupStatus.INACTIVE.value
         self.group.save()
-        url = "/api/activity-series/{}/".format(self.series.id)
+        url = f"/api/activity-series/{self.series.id}/"
         self.client.force_login(user=self.member)
         self.client.patch(url, {"description": "I changed it"})
         self.group.refresh_from_db()
@@ -367,7 +367,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         original_dates = [parse(_["date"][0]) for _ in response.data]
 
         # change times
-        url = "/api/activity-series/{}/".format(self.series.id)
+        url = f"/api/activity-series/{self.series.id}/"
         new_startdate = shift_date_in_local_time(
             self.series.start_date, relativedelta(hours=2, minutes=20), self.group.timezone
         )
@@ -394,7 +394,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         original_dates = [parse(_["date"][0]) for _ in response.data]
 
         # change dates
-        url = "/api/activity-series/{}/".format(self.series.id)
+        url = f"/api/activity-series/{self.series.id}/"
         new_startdate = shift_date_in_local_time(self.series.start_date, relativedelta(days=5), self.group.timezone)
         response = self.client.patch(url, {"start_date": new_startdate.isoformat()})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
@@ -419,7 +419,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         original_dates = [parse(_["date"][0]) for _ in response.data]
 
         # change dates
-        url = "/api/activity-series/{}/".format(self.series.id)
+        url = f"/api/activity-series/{self.series.id}/"
         new_startdate = shift_date_in_local_time(self.series.start_date, relativedelta(days=-5), self.group.timezone)
         response = self.client.patch(url, {"start_date": new_startdate.isoformat()})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
@@ -442,7 +442,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
     def test_set_end_date(self):
         self.client.force_login(user=self.member)
         # change rule
-        url = "/api/activity-series/{}/".format(self.series.id)
+        url = f"/api/activity-series/{self.series.id}/"
         rule = "FREQ=WEEKLY;UNTIL={}".format((self.now + relativedelta(days=8)).strftime("%Y%m%dT%H%M%S"))
         response = self.client.patch(url, {"rule": rule})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
@@ -456,7 +456,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
 
     def test_set_end_date_with_timezone(self):
         self.client.force_login(user=self.member)
-        url = "/api/activity-series/{}/".format(self.series.id)
+        url = f"/api/activity-series/{self.series.id}/"
         rule = "FREQ=WEEKLY;UNTIL={}+0100".format((self.now + relativedelta(days=8)).strftime("%Y%m%dT%H%M%S"))
         response = self.client.patch(url, {"rule": rule})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
@@ -470,7 +470,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         mail.outbox = []
 
         # change rule
-        url = "/api/activity-series/{}/".format(self.series.id)
+        url = f"/api/activity-series/{self.series.id}/"
         rule = rrulestr(self.series.rule, dtstart=self.now).replace(until=self.now)
         message = faker.text()
         response = self.client.patch(
@@ -501,7 +501,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         pt = joined_activity.participant_types.first()
         joined_activity.add_participant(self.member, participant_type=pt)
 
-        url = "/api/activity-series/{}/".format(self.series.id)
+        url = f"/api/activity-series/{self.series.id}/"
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.data)
 
@@ -511,7 +511,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         empty_activities = [p for p in response.data if len(p["participants"]) == 0]
         self.assertEqual(empty_activities, [])
 
-        url = "/api/activities/{}/".format(joined_activity.id)
+        url = f"/api/activities/{joined_activity.id}/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual([entry["user"] for entry in response.data["participants"]], [self.member.id])
@@ -519,7 +519,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
 
     def test_change_max_participants_to_invalid_number_fails(self):
         self.client.force_login(user=self.member)
-        url = "/api/activity-series/{}/".format(self.series.id)
+        url = f"/api/activity-series/{self.series.id}/"
         participant_type = self.series.participant_types.first()
         response = self.client.patch(
             url, {"participant_types": {"id": participant_type.id, "max_participants": -1}}, format="json"
@@ -531,7 +531,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         unrelated_place = PlaceFactory()
 
         self.client.force_login(user=self.member)
-        url = "/api/activity-series/{}/".format(self.series.id)
+        url = f"/api/activity-series/{self.series.id}/"
         response = self.client.patch(url, {"place": unrelated_place.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data["place"], original_place.id)
@@ -540,7 +540,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
 
     def test_set_multiple_rules_fails(self):
         self.client.force_login(user=self.member)
-        url = "/api/activity-series/{}/".format(self.series.id)
+        url = f"/api/activity-series/{self.series.id}/"
         response = self.client.patch(url, {"rule": "RRULE:FREQ=WEEKLY;BYDAY=MO\nRRULE:FREQ=MONTHLY"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(response.data, {"rule": ["Only single recurrence rules are allowed."]})
@@ -548,7 +548,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
     def test_keep_changes_to_max_participants(self):
         self.client.force_login(user=self.member)
         activity_under_test = self.series.activities.first()
-        url = "/api/activities/{}/".format(activity_under_test.id)
+        url = f"/api/activities/{activity_under_test.id}/"
 
         # change setting of activity
         pt = activity_under_test.participant_types.get(role=GROUP_MEMBER)
@@ -572,19 +572,19 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.series.update_activities()
 
         # check if changes persist
-        url = "/api/activities/{}/".format(activity_under_test.id)
+        url = f"/api/activities/{activity_under_test.id}/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         pt_data = find_by_id(response.data["participant_types"], pt.id)
         self.assertEqual(pt_data["max_participants"], 666)
 
         # modify series max_participants
-        series_url = "/api/activity-series/{}/".format(self.series.id)
+        series_url = f"/api/activity-series/{self.series.id}/"
         response = self.client.patch(series_url, {"max_participants": 20})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
         # check if changes persist
-        url = "/api/activities/{}/".format(activity_under_test.id)
+        url = f"/api/activities/{activity_under_test.id}/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         pt_data = find_by_id(response.data["participant_types"], pt.id)
@@ -593,7 +593,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
     def test_keep_changes_to_description(self):
         self.client.force_login(user=self.member)
         activity_under_test = self.series.activities.first()
-        url = "/api/activities/{}/".format(activity_under_test.id)
+        url = f"/api/activities/{activity_under_test.id}/"
 
         # change setting of activity
         response = self.client.patch(url, {"description": "asdf"})
@@ -604,24 +604,24 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.series.update_activities()
 
         # check if changes persist
-        url = "/api/activities/{}/".format(activity_under_test.id)
+        url = f"/api/activities/{activity_under_test.id}/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data["description"], "asdf")
 
         # modify series description
-        series_url = "/api/activity-series/{}/".format(self.series.id)
+        series_url = f"/api/activity-series/{self.series.id}/"
         response = self.client.patch(series_url, {"description": "new series description"})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
         # check if changes persist
-        url = "/api/activities/{}/".format(activity_under_test.id)
+        url = f"/api/activities/{activity_under_test.id}/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data["description"], "asdf")
 
     def test_invalid_rule_fails(self):
-        url = "/api/activity-series/{}/".format(self.series.id)
+        url = f"/api/activity-series/{self.series.id}/"
         self.client.force_login(user=self.member)
         response = self.client.patch(url, {"rule": "FREQ=WEEKLY;BYDAY="})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
@@ -646,7 +646,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
                 tomorrow,
             ],
         )
-        series_url = "/api/activity-series/{}/".format(self.series.id)
+        series_url = f"/api/activity-series/{self.series.id}/"
         self.client.force_login(user=self.member)
         response = self.client.patch(
             series_url,
@@ -657,7 +657,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.series.refresh_from_db()
 
-        response = self.client.get("/api/activities/?series={}".format(self.series.id))
+        response = self.client.get(f"/api/activities/?series={self.series.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # self.assertEqual([parse(p['date'][0]) for p in response.data['results']], [
         #     shift_date_in_local_time(self.series.start_date, delta, self.group.timezone) for delta in (
@@ -688,7 +688,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         joined_activity.add_participant(self.member, participant_type=pt)
 
         # change weeks_in_advance
-        place_url = "/api/places/{}/".format(self.place.id)
+        place_url = f"/api/places/{self.place.id}/"
         self.client.force_login(user=self.member)
         response = self.client.patch(
             place_url,
@@ -698,7 +698,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        response = self.get_results("/api/activities/?series={}".format(self.series.id))
+        response = self.get_results(f"/api/activities/?series={self.series.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["id"], joined_activity.id)
@@ -709,7 +709,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         activity = self.series.activities.last()
 
         response = self.client.patch(
-            "/api/activities/{}/".format(activity.id),
+            f"/api/activities/{activity.id}/",
             {
                 "date": (activity.date + relativedelta(weeks=7)).as_list(),
             },
@@ -724,7 +724,7 @@ class TestActivitySeriesChangeAPI(APITestCase, ExtractPaginationMixin):
         activity = self.series.activities.last()
 
         response = self.client.patch(
-            "/api/activities/{}/".format(activity.id),
+            f"/api/activities/{activity.id}/",
             {"has_duration": True},
             format="json",
         )
@@ -741,7 +741,7 @@ class TestActivitySeriesAPIAuth(APITestCase):
     def setUp(self):
         self.url = "/api/activity-series/"
         self.series = ActivitySeriesFactory()
-        self.series_url = "/api/activity-series/{}/".format(self.series.id)
+        self.series_url = f"/api/activity-series/{self.series.id}/"
         self.non_member = UserFactory()
         self.series_data = {"place": self.series.place.id, "rule": "FREQ=WEEKLY", "start_date": timezone.now()}
 
