@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 
 import dateutil.rrule
+from datetime import timedelta
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import UploadedFile
@@ -817,7 +819,7 @@ class ActivityICSSerializer(serializers.ModelSerializer):
     attendee = serializers.SerializerMethodField()
 
     def get_dtstamp(self, activity):
-        return datetime.now()
+        return timezone.now()
 
     def get_uid(self, activity):
         request = self.context.get("request")
