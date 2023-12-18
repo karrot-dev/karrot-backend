@@ -22,24 +22,24 @@ class EmailEvent(BaseModel):
     version = models.IntegerField()
 
     class Meta:
-        indexes = [models.Index(fields=['event_id'])]
+        indexes = [models.Index(fields=["event_id"])]
 
     @property
     def reason(self) -> str:
         if self.version == 2:
-            return self.payload['payload']['output']
-        return self.payload.get('reason')
+            return self.payload["payload"]["output"]
+        return self.payload.get("reason")
 
     @property
     def subject(self) -> str:
         if self.version == 2:
-            return self.payload['payload']['message']['subject']
-        return self.payload.get('subject')
+            return self.payload["payload"]["message"]["subject"]
+        return self.payload.get("subject")
 
 
 class IncomingEmail(BaseModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    message = models.ForeignKey('conversations.ConversationMessage', on_delete=models.CASCADE)
+    message = models.ForeignKey("conversations.ConversationMessage", on_delete=models.CASCADE)
 
     payload = JSONField()
     version = models.IntegerField()

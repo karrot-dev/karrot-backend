@@ -11,8 +11,11 @@ from huey.contrib.djhuey import db_periodic_task
 from config import settings
 from karrot.applications.stats import get_application_stats
 from karrot.groups.emails import (
-    prepare_user_inactive_in_group_email, prepare_group_summary_data, calculate_group_summary_dates,
-    prepare_group_summary_emails, prepare_user_removal_from_group_email
+    prepare_user_inactive_in_group_email,
+    prepare_group_summary_data,
+    calculate_group_summary_dates,
+    prepare_group_summary_emails,
+    prepare_user_removal_from_group_email,
 )
 from karrot.groups.models import Group, GroupStatus
 from karrot.groups.models import GroupMembership
@@ -37,7 +40,7 @@ def record_group_stats():
 
         write_points(points)
 
-    stats_utils.periodic_task('group__record_group_stats', seconds=t.elapsed_seconds)
+    stats_utils.periodic_task("group__record_group_stats", seconds=t.elapsed_seconds)
 
 
 @db_periodic_task(crontab(hour=2, minute=0))  # 2am every day
@@ -53,8 +56,8 @@ def process_inactive_users():
 
         inactive_threshold_date = now - timedelta(days=settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP)
         for membership in GroupMembership.objects.filter(
-                lastseen_at__lte=inactive_threshold_date,
-                inactive_at=None,
+            lastseen_at__lte=inactive_threshold_date,
+            inactive_at=None,
         ):
             # only send emails if group itself is marked as active
             if membership.group.status == GroupStatus.ACTIVE.value:
@@ -68,8 +71,9 @@ def process_inactive_users():
         removal_notification_date = now - relativedelta(
             months=settings.NUMBER_OF_INACTIVE_MONTHS_UNTIL_REMOVAL_FROM_GROUP_NOTIFICATION
         )
-        for membership in GroupMembership.objects.filter(removal_notification_at=None,
-                                                         inactive_at__lte=removal_notification_date):
+        for membership in GroupMembership.objects.filter(
+            removal_notification_at=None, inactive_at__lte=removal_notification_date
+        ):
             if membership.group.status == GroupStatus.ACTIVE.value:
                 prepare_user_removal_from_group_email(membership.user, membership.group).send()
             membership.removal_notification_at = now
@@ -85,22 +89,22 @@ def process_inactive_users():
                 typus=HistoryTypus.GROUP_LEAVE_INACTIVE,
                 group=membership.group,
                 users=[membership.user],
-                payload={'display_name': membership.user.display_name}
+                payload={"display_name": membership.user.display_name},
             )
             count_users_removed += 1
 
     stats_utils.periodic_task(
-        'group__process_inactive_users',
+        "group__process_inactive_users",
         seconds=t.elapsed_seconds,
         extra_fields={
-            'count_users_flagged_inactive': count_users_flagged_inactive,
-            'count_users_flagged_for_removal': count_users_flagged_for_removal,
-            'count_users_removed': count_users_removed,
-        }
+            "count_users_flagged_inactive": count_users_flagged_inactive,
+            "count_users_flagged_for_removal": count_users_flagged_for_removal,
+            "count_users_removed": count_users_removed,
+        },
     )
 
 
-@db_periodic_task(crontab(day_of_week='0,6', minute=0))  # check every hour on saturday/sunday
+@db_periodic_task(crontab(day_of_week="0,6", minute=0))  # check every hour on saturday/sunday
 def send_summary_emails():
     """
     We want to send them on Sunday at 8am in the local time of the group
@@ -118,7 +122,7 @@ def send_summary_emails():
                 # Sunday is day 6 here, confusing!
                 return localtime.hour == 8 and localtime.weekday() == 6
 
-        groups = Group.objects.annotate(member_count=Count('members')).filter(member_count__gt=0)
+        groups = Group.objects.annotate(member_count=Count("members")).filter(member_count__gt=0)
 
         for group in groups:
             if not is_8am_localtime(group):
@@ -127,11 +131,10 @@ def send_summary_emails():
             from_date, to_date = calculate_group_summary_dates(group)
 
             if not group.sent_summary_up_to or group.sent_summary_up_to < to_date:
-
                 email_recipient_count = 0
 
                 context = prepare_group_summary_data(group, from_date, to_date)
-                if context['has_activity']:
+                if context["has_activity"]:
                     for email in prepare_group_summary_emails(group, context):
                         try:
                             email.send()
@@ -148,23 +151,23 @@ def send_summary_emails():
                 group_summary_email(
                     group,
                     email_recipient_count=email_recipient_count,
-                    feedback_count=context['feedbacks'].count(),
-                    message_count=context['messages'].count(),
-                    new_user_count=context['new_users'].count(),
-                    activities_done_count=context['activities_done_count'],
-                    activities_missed_count=context['activities_missed_count'],
-                    has_activity=context['has_activity'],
+                    feedback_count=context["feedbacks"].count(),
+                    message_count=context["messages"].count(),
+                    new_user_count=context["new_users"].count(),
+                    activities_done_count=context["activities_done_count"],
+                    activities_missed_count=context["activities_missed_count"],
+                    has_activity=context["has_activity"],
                 )
 
                 recipient_count += email_recipient_count
 
     stats_utils.periodic_task(
-        'group__send_summary_emails',
+        "group__send_summary_emails",
         seconds=t.elapsed_seconds,
         extra_fields={
-            'recipient_count': recipient_count,
-            'email_count': email_count,
-        }
+            "recipient_count": recipient_count,
+            "email_count": email_count,
+        },
     )
 
 
@@ -176,4 +179,4 @@ def mark_inactive_groups():
                 group.status = GroupStatus.INACTIVE.value
                 group.save()
 
-    stats_utils.periodic_task('group__mark_inactive_groups', seconds=t.elapsed_seconds)
+    stats_utils.periodic_task("group__mark_inactive_groups", seconds=t.elapsed_seconds)

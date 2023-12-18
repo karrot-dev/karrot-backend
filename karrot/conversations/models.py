@@ -15,17 +15,21 @@ from versatileimagefield.image_warmer import VersatileImageFieldWarmer
 
 from config.settings import USERNAME_MENTION_RE
 from karrot.base.base_models import BaseModel, UpdatedAtMixin
-from karrot.conversations.signals import new_conversation_message, new_thread_message, conversation_marked_seen, \
-    thread_marked_seen
+from karrot.conversations.signals import (
+    new_conversation_message,
+    new_thread_message,
+    conversation_marked_seen,
+    thread_marked_seen,
+)
 from karrot.utils import markdown
 from karrot.utils.image_utils import resize_image, is_supported_content_type
 
 
 class ConversationQuerySet(models.QuerySet):
     def create(self, **kwargs):
-        target = kwargs.get('target', None)
+        target = kwargs.get("target", None)
         if target is not None:
-            kwargs['group'] = target.group
+            kwargs["group"] = target.group
 
         return super().create(**kwargs)
 
@@ -37,10 +41,8 @@ class ConversationQuerySet(models.QuerySet):
 
     def get_or_create_for_two_users(self, user1, user2):
         if user1.id == user2.id:
-            raise Exception('Users need to be different')
-        conv = self.filter(is_private=True, participants=user1) \
-            .filter(participants=user2) \
-            .first()
+            raise ValueError("Users need to be different")
+        conv = self.filter(is_private=True, participants=user1).filter(participants=user2).first()
         if not conv:
             conv = self.create(is_private=True)
             conv.sync_users([user1, user2])
@@ -58,32 +60,33 @@ class ConversationQuerySet(models.QuerySet):
 
 class Conversation(BaseModel, UpdatedAtMixin):
     """A conversation between one or more users."""
+
     class Meta:
-        unique_together = ('target_type', 'target_id')
+        unique_together = ("target_type", "target_id")
 
     objects = ConversationQuerySet.as_manager()
 
-    participants = models.ManyToManyField(settings.AUTH_USER_MODEL, through='ConversationParticipant')
+    participants = models.ManyToManyField(settings.AUTH_USER_MODEL, through="ConversationParticipant")
     is_private = models.BooleanField(default=False)
     is_closed = models.BooleanField(default=False)
 
     # conversation belongs to this group
-    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, null=True)
+    group = models.ForeignKey("groups.Group", on_delete=models.CASCADE, null=True)
 
     target_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
     target_id = models.PositiveIntegerField(null=True)
-    target = GenericForeignKey('target_type', 'target_id')
+    target = GenericForeignKey("target_type", "target_id")
 
     latest_message = models.ForeignKey(
-        'conversations.ConversationMessage',
+        "conversations.ConversationMessage",
         on_delete=models.SET_NULL,
         null=True,
-        related_name='conversation_latest_message'
+        related_name="conversation_latest_message",
     )
 
     def make_participant(self, **kwargs):
         defaults = {
-            'updated_at': self.updated_at,
+            "updated_at": self.updated_at,
         }
         defaults.update(kwargs)
         return ConversationParticipant(conversation=self, **defaults)
@@ -119,13 +122,13 @@ class Conversation(BaseModel, UpdatedAtMixin):
 
     def type(self):
         if self.is_private:
-            return 'private'
+            return "private"
         if self.target_type_id is None:
             return None
 
         type = str(self.target_type.model)
-        if type == 'activity':
-            return 'activity'
+        if type == "activity":
+            return "activity"
 
         return type
 
@@ -136,7 +139,7 @@ class Conversation(BaseModel, UpdatedAtMixin):
 
     def supports_mentions(self):
         # no mentions for private conversations (and those without a type/group...)
-        return self.type() is not None and self.type() != 'private' and self.group is not None
+        return self.type() is not None and self.type() != "private" and self.group is not None
 
 
 class ConversationMeta(BaseModel):
@@ -147,41 +150,41 @@ class ConversationMeta(BaseModel):
 
 class ConversationParticipantQuerySet(models.QuerySet):
     def annotate_unread_message_count(self):
-        exclude_replies = (
-            Q(conversation__messages__thread_id=None) |
-            Q(conversation__messages__id=F('conversation__messages__thread_id'))
+        exclude_replies = Q(conversation__messages__thread_id=None) | Q(
+            conversation__messages__id=F("conversation__messages__thread_id")
         )
-        unread_messages = Q(seen_up_to=None) | Q(conversation__messages__id__gt=F('seen_up_to'))
+        unread_messages = Q(seen_up_to=None) | Q(conversation__messages__id__gt=F("seen_up_to"))
         filter = unread_messages & exclude_replies
-        return self.annotate(unread_message_count=Count('conversation__messages', filter=filter, distinct=True))
+        return self.annotate(unread_message_count=Count("conversation__messages", filter=filter, distinct=True))
 
 
 class ConversationNotificationStatus(Enum):
-    ALL = 'all'
-    MUTED = 'muted'
-    NONE = 'none'
+    ALL = "all"
+    MUTED = "muted"
+    NONE = "none"
 
 
 class ConversationParticipant(BaseModel, UpdatedAtMixin):
     """The join table between Conversation and User."""
+
     class Meta:
-        unique_together = (('user', 'conversation'), )
+        unique_together = (("user", "conversation"),)
 
     objects = ConversationParticipantQuerySet.as_manager()
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE)
     seen_up_to = models.ForeignKey(
-        'ConversationMessage',
+        "ConversationMessage",
         null=True,
         on_delete=models.SET_NULL,
-        related_name='conversationparticipants_seen_up_to',
+        related_name="conversationparticipants_seen_up_to",
     )
     notified_up_to = models.ForeignKey(
-        'ConversationMessage',
+        "ConversationMessage",
         null=True,
         on_delete=models.SET_NULL,
-        related_name='conversationparticipants_notified_up_to',
+        related_name="conversationparticipants_notified_up_to",
     )
     muted = models.BooleanField(default=False)
 
@@ -220,7 +223,7 @@ class ConversationParticipant(BaseModel, UpdatedAtMixin):
 
 class ConversationMessageQuerySet(models.QuerySet):
     def exclude_replies(self):
-        return self.filter(Q(thread_id=None) | Q(id=F('thread_id')))
+        return self.filter(Q(thread_id=None) | Q(id=F("thread_id")))
 
     def only_threads_with_user(self, user):
         return self.filter(participants__user=user)
@@ -229,43 +232,46 @@ class ConversationMessageQuerySet(models.QuerySet):
         return self.exclude(thread_id=None)
 
     def only_replies(self):
-        return self.filter(~Q(thread_id=None) & ~Q(id=F('thread_id')))
+        return self.filter(~Q(thread_id=None) & ~Q(id=F("thread_id")))
 
     def annotate_replies_count(self):
         return self.annotate(
-            replies_count=Count('thread_messages', filter=~Q(thread_messages__id=F('thread_id')), distinct=True)
+            replies_count=Count("thread_messages", filter=~Q(thread_messages__id=F("thread_id")), distinct=True)
         )
 
     def annotate_unread_replies_count_for(self, user):
         # see also ConversationThreadParticipantQuerySet.annotate_unread_replies_count
-        unread_replies_filter = Q(
-            participants__user=user,
-        ) & ~Q(thread_messages__id=F('thread_id')  # replies have id != thread_id
-               ) & (Q(participants__seen_up_to=None) | Q(thread_messages__id__gt=F('participants__seen_up_to')))
-        return self.annotate(
-            unread_replies_count=Count('thread_messages', filter=unread_replies_filter, distinct=True)
+        unread_replies_filter = (
+            Q(
+                participants__user=user,
+            )
+            & ~Q(
+                thread_messages__id=F("thread_id")  # replies have id != thread_id
+            )
+            & (Q(participants__seen_up_to=None) | Q(thread_messages__id__gt=F("participants__seen_up_to")))
         )
+        return self.annotate(unread_replies_count=Count("thread_messages", filter=unread_replies_filter, distinct=True))
 
     def with_conversation_access(self, user):
         # Note: this is needed if ConversationQuerySet.with_access is too slow
         # should contain the same logic
         return self.filter(
-            Q(conversation__participants=user) |
-            Q(conversation__group__groupmembership__user=user, conversation__group__isnull=False)
+            Q(conversation__participants=user)
+            | Q(conversation__group__groupmembership__user=user, conversation__group__isnull=False)
         )
 
 
 class ConversationMessageManager(BaseManager.from_queryset(ConversationMessageQuerySet)):
     def create(self, **kwargs):
-        if 'thread' not in kwargs:
+        if "thread" not in kwargs:
             # make sure author is participant (to receive notifications)
-            conversation = kwargs.get('conversation')
-            author = kwargs.get('author')
+            conversation = kwargs.get("conversation")
+            author = kwargs.get("author")
             conversation.conversationparticipant_set.get_or_create(user=author)
 
         obj = super().create(**kwargs)
         # clear cached value
-        if obj.thread and hasattr(obj.thread, '_replies_count'):
+        if obj.thread and hasattr(obj.thread, "_replies_count"):
             del obj.thread._replies_count
         return obj
 
@@ -276,18 +282,18 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
     objects = ConversationMessageManager()
 
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    conversation = models.ForeignKey(Conversation, related_name='messages', on_delete=models.CASCADE)
-    thread = models.ForeignKey('self', related_name='thread_messages', null=True, on_delete=models.CASCADE)
+    conversation = models.ForeignKey(Conversation, related_name="messages", on_delete=models.CASCADE)
+    thread = models.ForeignKey("self", related_name="thread_messages", null=True, on_delete=models.CASCADE)
 
     content = models.TextField()
     received_via = models.CharField(max_length=40, blank=True)
     edited_at = models.DateTimeField(null=True)
 
     latest_message = models.ForeignKey(
-        'self',
+        "self",
         on_delete=models.SET_NULL,
         null=True,
-        related_name='thread_latest_message',
+        related_name="thread_latest_message",
     )
 
     def save(self, **kwargs):
@@ -329,7 +335,7 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 
     @property
     def replies_count(self):
-        if hasattr(self, '_replies_count'):
+        if hasattr(self, "_replies_count"):
             return self._replies_count
         else:
             return self.thread_messages.only_replies().count()
@@ -345,9 +351,9 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
         usernames = USERNAME_MENTION_RE.findall(self.content)
 
         # add in the new ones
-        newly_mentioned_users = self.conversation.group.members \
-            .filter(username__in=usernames) \
-            .exclude(id__in=self.mentions.values('user__id'))
+        newly_mentioned_users = self.conversation.group.members.filter(username__in=usernames).exclude(
+            id__in=self.mentions.values("user__id")
+        )
         created = [self.mentions.create(user=user) for user in newly_mentioned_users]
 
         # clear out the old ones
@@ -357,20 +363,19 @@ class ConversationMessage(BaseModel, UpdatedAtMixin):
 
 
 class ConversationMessageMention(BaseModel, UpdatedAtMixin):
-    message = models.ForeignKey(ConversationMessage, related_name='mentions', on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='mentions', on_delete=models.CASCADE)
+    message = models.ForeignKey(ConversationMessage, related_name="mentions", on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="mentions", on_delete=models.CASCADE)
 
 
 class ConversationThreadParticipantQuerySet(models.QuerySet):
     def annotate_unread_replies_count(self):
         # see also ConversationMessageQuerySet.annotate_unread_replies_count_for
-        unread_replies_filter = (
-            ~Q(thread__thread_messages__id=F('thread_id')) &
-            (Q(seen_up_to=None) | Q(thread__thread_messages__id__gt=F('seen_up_to')))
+        unread_replies_filter = ~Q(thread__thread_messages__id=F("thread_id")) & (
+            Q(seen_up_to=None) | Q(thread__thread_messages__id__gt=F("seen_up_to"))
         )
 
         return self.annotate(
-            unread_replies_count=Count('thread__thread_messages', filter=unread_replies_filter, distinct=True)
+            unread_replies_count=Count("thread__thread_messages", filter=unread_replies_filter, distinct=True)
         )
 
 
@@ -378,23 +383,23 @@ class ConversationThreadParticipant(BaseModel, UpdatedAtMixin):
     objects = ConversationThreadParticipantQuerySet.as_manager()
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    thread = models.ForeignKey(ConversationMessage, related_name='participants', on_delete=models.CASCADE)
+    thread = models.ForeignKey(ConversationMessage, related_name="participants", on_delete=models.CASCADE)
     seen_up_to = models.ForeignKey(
         ConversationMessage,
         null=True,
         on_delete=models.SET_NULL,
-        related_name='threadparticipants_seen_up_to',
+        related_name="threadparticipants_seen_up_to",
     )
     notified_up_to = models.ForeignKey(
         ConversationMessage,
         null=True,
         on_delete=models.SET_NULL,
-        related_name='threadparticipants_notified_up_to',
+        related_name="threadparticipants_notified_up_to",
     )
     muted = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ['user', 'thread']
+        unique_together = ["user", "thread"]
 
     def unseen_and_unnotified_messages(self):
         messages = self.thread.thread_messages.only_replies()
@@ -447,28 +452,29 @@ class ConversationMixin(object):
 
 class ConversationMessageReaction(BaseModel):
     """Emoji reactions to messages."""
+
     # User who gave the reaction
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    message = models.ForeignKey(ConversationMessage, related_name='reactions', on_delete=models.CASCADE)
+    message = models.ForeignKey(ConversationMessage, related_name="reactions", on_delete=models.CASCADE)
     # Name of the emoji
     name = models.CharField(max_length=100)
 
     class Meta:
-        unique_together = ['user', 'name', 'message']
+        unique_together = ["user", "name", "message"]
 
 
 class ConversationMessageImage(BaseModel):
     class Meta:
-        ordering = ['position']
+        ordering = ["position"]
 
     message = models.ForeignKey(
         ConversationMessage,
-        related_name='images',
+        related_name="images",
         on_delete=models.CASCADE,
     )
     image = VersatileImageField(
-        'ConversationMessage Image',
-        upload_to='conversation_message_images',
+        "ConversationMessage Image",
+        upload_to="conversation_message_images",
         null=False,
     )
     position = IntegerField(default=0)
@@ -479,34 +485,34 @@ class ConversationMessageAttachmentQuerySet(models.QuerySet):
         # Note: this is needed if ConversationQuerySet.with_access is too slow
         # should contain the same logic
         return self.filter(
-            Q(message__conversation__participants=user) |
-            Q(message__conversation__group__groupmembership__user=user, message__conversation__group__isnull=False)
+            Q(message__conversation__participants=user)
+            | Q(message__conversation__group__groupmembership__user=user, message__conversation__group__isnull=False)
         )
 
 
 class ConversationMessageAttachment(BaseModel):
     class Meta:
-        ordering = ['position']
+        ordering = ["position"]
 
     objects = ConversationMessageAttachmentQuerySet.as_manager()
 
     message = models.ForeignKey(
         ConversationMessage,
-        related_name='attachments',
+        related_name="attachments",
         on_delete=models.CASCADE,
     )
     file = models.FileField(
-        'ConversationMessage Attachment',
-        upload_to='conversation_message_attachment_files',
+        "ConversationMessage Attachment",
+        upload_to="conversation_message_attachment_files",
         null=False,
     )
 
     preview = models.ImageField(
-        upload_to='conversation_message_attachment_previews',
+        upload_to="conversation_message_attachment_previews",
         null=True,
     )
     thumbnail = models.ImageField(
-        upload_to='conversation_message_attachment_thumbnails',
+        upload_to="conversation_message_attachment_thumbnails",
         null=True,
     )
 
@@ -530,17 +536,17 @@ class ConversationMessageAttachment(BaseModel):
         You can pass the "save" parameter to decide whether to also save
         the underlying model. If it is part of an existing call to save, you want false.
         """
-        if (self.file and (not self.preview or not self.thumbnail) and is_supported_content_type(self.content_type)):
+        if self.file and (not self.preview or not self.thumbnail) and is_supported_content_type(self.content_type):
             try:
                 preview_size = settings.PREVIEW_SIZE
                 thumbnail_size = settings.THUMBNAIL_SIZE
                 with Image.open(self.file.file) as image:
                     width, height = image.size
                     if not self.preview and (width > preview_size or height > preview_size):
-                        self.preview.save(f'{uuid4()}.jpg', resize_image(image, (preview_size, preview_size)), save)
+                        self.preview.save(f"{uuid4()}.jpg", resize_image(image, (preview_size, preview_size)), save)
                     if not self.thumbnail and (width > thumbnail_size or height > thumbnail_size):
                         self.thumbnail.save(
-                            f'{uuid4()}.jpg', resize_image(image, (thumbnail_size, thumbnail_size)), save
+                            f"{uuid4()}.jpg", resize_image(image, (thumbnail_size, thumbnail_size)), save
                         )
             except UnidentifiedImageError:
                 pass
@@ -549,7 +555,7 @@ class ConversationMessageAttachment(BaseModel):
 def create_conversation_message_image_warmer(instance_or_queryset, *, verbose=False):
     return VersatileImageFieldWarmer(
         instance_or_queryset=instance_or_queryset,
-        rendition_key_set='conversation_message_image',
-        image_attr='image',
+        rendition_key_set="conversation_message_image",
+        image_attr="image",
         verbose=verbose,
     )

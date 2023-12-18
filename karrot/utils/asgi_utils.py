@@ -16,7 +16,7 @@ class ExpiresMax:
         self.app = app
 
     async def __call__(self, scope, receive, send):
-        if scope['type'] != 'http':
+        if scope["type"] != "http":
             return await self.app(scope, receive, send)
 
         # Borrowing from:
@@ -34,10 +34,12 @@ class ExpiresMax:
                 return await send(message)
             message.setdefault("headers", [])
             headers = MutableHeaders(scope=message)
-            headers.update({
-                'Cache-Control': f'max-age={max_age}',
-                'Expires': http_date(time.time() + max_age),
-            })
+            headers.update(
+                {
+                    "Cache-Control": f"max-age={max_age}",
+                    "Expires": http_date(time.time() + max_age),
+                }
+            )
             await send(message)
 
         return await self.app(scope, receive, send_cached)
@@ -45,14 +47,14 @@ class ExpiresMax:
 
 class CommunityProxy:
     def __init__(self, proxy_url):
-        self.proxy_url = re.sub(r'/$', '', proxy_url)  # no trailing slash
+        self.proxy_url = re.sub(r"/$", "", proxy_url)  # no trailing slash
 
     async def __call__(self, scope, receive, send):
         async with httpx.AsyncClient() as client:
-            path = scope['path']
-            proxy_url = self.proxy_url + path[len('/community_proxy'):]
+            path = scope["path"]
+            proxy_url = self.proxy_url + path[len("/community_proxy") :]
             r = await client.get(proxy_url)
-            keep_headers = ['cache-control', 'last-modified']
+            keep_headers = ["cache-control", "last-modified"]
             headers = {}
             for key in keep_headers:
                 if key in r.headers:
@@ -61,7 +63,7 @@ class CommunityProxy:
                 r.content,
                 status_code=r.status_code,
                 headers=headers,
-                media_type=r.headers['content-type'],
+                media_type=r.headers["content-type"],
             )
             return await response(scope, receive, send)
 
@@ -69,7 +71,7 @@ class CommunityProxy:
 class OriginValidatorThatAllowsFileUrls(websocket.OriginValidator):
     # We need to allow file urls in the origin header for our cordova app
     def valid_origin(self, parsed_origin):
-        if parsed_origin is not None and parsed_origin.scheme == 'file':
+        if parsed_origin is not None and parsed_origin.scheme == "file":
             return True
         return super().valid_origin(parsed_origin)
 

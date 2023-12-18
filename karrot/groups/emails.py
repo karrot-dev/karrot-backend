@@ -18,9 +18,12 @@ def prepare_group_summary_data(group, from_date, to_date):
         groupmembership__created_at__lt=to_date,
     ).all()
 
-    activities = Activity.objects.in_group(group).exclude_disabled().filter(
-        date__startswith__gte=from_date, date__startswith__lt=to_date
-    ).annotate_num_participants()
+    activities = (
+        Activity.objects.in_group(group)
+        .exclude_disabled()
+        .filter(date__startswith__gte=from_date, date__startswith__lt=to_date)
+        .annotate_num_participants()
+    )
 
     activities_done_count = activities.done().count()
 
@@ -41,19 +44,20 @@ def prepare_group_summary_data(group, from_date, to_date):
 
     data = {
         # minus one second so it's displayed as the full day
-        'to_date': to_date - relativedelta(seconds=1),
-        'from_date': from_date,
-        'group': group,
-        'new_users': new_users,
-        'activities_done_count': activities_done_count,
-        'activities_missed_count': activities_missed_count,
-        'feedbacks': feedbacks,
-        'messages': messages,
-        'settings_url': group_settings_url(group),
+        "to_date": to_date - relativedelta(seconds=1),
+        "from_date": from_date,
+        "group": group,
+        "new_users": new_users,
+        "activities_done_count": activities_done_count,
+        "activities_missed_count": activities_missed_count,
+        "feedbacks": feedbacks,
+        "messages": messages,
+        "settings_url": group_settings_url(group),
     }
 
-    data['has_activity'] = any(data[field] > 0 for field in ['activities_done_count', 'activities_missed_count']) or \
-        any(len(data[field]) > 0 for field in ['feedbacks', 'messages', 'new_users'])
+    data["has_activity"] = any(
+        data[field] > 0 for field in ["activities_done_count", "activities_missed_count"]
+    ) or any(len(data[field]) > 0 for field in ["feedbacks", "messages", "new_users"])
 
     return data
 
@@ -62,22 +66,24 @@ def prepare_group_summary_emails(group, context):
     """Prepares one email per language"""
 
     members = group.members.filter(
-        groupmembership__in=GroupMembership.objects.active().
-        with_notification_type(GroupNotificationType.WEEKLY_SUMMARY)
+        groupmembership__in=GroupMembership.objects.active().with_notification_type(
+            GroupNotificationType.WEEKLY_SUMMARY
+        )
     ).exclude(groupmembership__user__in=get_user_model().objects.unverified())
 
     return [
         prepare_email(
-            template='group_summary',
+            template="group_summary",
             tz=group.timezone,
             context={
-                'unsubscribe_url': group_summary_unsubscribe_url(member, group),
+                "unsubscribe_url": group_summary_unsubscribe_url(member, group),
                 **context,
             },
             to=[member.email],
             language=member.language,
-            stats_category='group_summary',
-        ) for member in members
+            stats_category="group_summary",
+        )
+        for member in members
     ]
 
 
@@ -99,74 +105,74 @@ def calculate_group_summary_dates(group):
 
 def prepare_user_inactive_in_group_email(user, group):
     return prepare_email(
-        template='user_inactive_in_group',
+        template="user_inactive_in_group",
         user=user,
         tz=group.timezone,
         context={
-            'group_name': group.name,
-            'group_url': group_wall_url(group),
-            'group': group,
-            'num_days_inactive': settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP,
+            "group_name": group.name,
+            "group_url": group_wall_url(group),
+            "group": group,
+            "num_days_inactive": settings.NUMBER_OF_DAYS_UNTIL_INACTIVE_IN_GROUP,
         },
-        stats_category='user_inactive_in_group',
+        stats_category="user_inactive_in_group",
     )
 
 
 def prepare_user_removal_from_group_email(user, group):
     return prepare_email(
-        template='user_removal_from_group',
+        template="user_removal_from_group",
         user=user,
         tz=group.timezone,
         context={
-            'group_name': group.name,
-            'group_url': group_wall_url(group),
-            'group': group,
-            'num_months_inactive': settings.NUMBER_OF_INACTIVE_MONTHS_UNTIL_REMOVAL_FROM_GROUP_NOTIFICATION,
-            'num_removal_days': settings.NUMBER_OF_DAYS_AFTER_REMOVAL_NOTIFICATION_WE_ACTUALLY_REMOVE_THEM,
+            "group_name": group.name,
+            "group_url": group_wall_url(group),
+            "group": group,
+            "num_months_inactive": settings.NUMBER_OF_INACTIVE_MONTHS_UNTIL_REMOVAL_FROM_GROUP_NOTIFICATION,
+            "num_removal_days": settings.NUMBER_OF_DAYS_AFTER_REMOVAL_NOTIFICATION_WE_ACTUALLY_REMOVE_THEM,
         },
-        stats_category='user_removal_from_group',
+        stats_category="user_removal_from_group",
     )
 
 
 def prepare_user_became_editor_email(user, group):
     return prepare_email(
-        template='user_became_editor',
+        template="user_became_editor",
         user=user,
         tz=group.timezone,
         context={
-            'group_name': group.name,
-            'group_url': group_wall_url(group),
-            'group': group,
+            "group_name": group.name,
+            "group_url": group_wall_url(group),
+            "group": group,
         },
-        stats_category='user_became_editor',
+        stats_category="user_became_editor",
     )
 
 
 def prepare_user_lost_editor_role_email(user, group):
     return prepare_email(
-        template='user_lost_editor_role',
+        template="user_lost_editor_role",
         user=user,
         tz=group.timezone,
         context={
-            'group_name': group.name,
-            'group_url': group_wall_url(group),
-            'group': group,
+            "group_name": group.name,
+            "group_url": group_wall_url(group),
+            "group": group,
         },
-        stats_category='user_lost_editor_role',
+        stats_category="user_lost_editor_role",
     )
 
 
 def prepare_user_got_role_email(user, group, role):
     return prepare_email(
-        template='user_got_role',
+        template="user_got_role",
         user=user,
         tz=group.timezone,
         context={
-            'group_name': group.name,
-            'role_name': role.name,
-            'role_description': role.description,
-            'group_url': group_wall_url(group),
-            'group': group,
+            "group_name": group.name,
+            "role_name": role.name,
+            "role_description": role.description,
+            "group_url": group_wall_url(group),
+            "group": group,
         },
-        stats_category='user_got_role',
+        stats_category="user_got_role",
     )

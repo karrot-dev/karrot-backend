@@ -21,8 +21,8 @@ def get_client():
         settings.INFLUXDB_PASSWORD,
         settings.INFLUXDB_DATABASE,
         timeout=settings.INFLUXDB_TIMEOUT,
-        ssl=getattr(settings, 'INFLUXDB_SSL', False),
-        verify_ssl=getattr(settings, 'INFLUXDB_VERIFY_SSL', False),
+        ssl=getattr(settings, "INFLUXDB_SSL", False),
+        verify_ssl=getattr(settings, "INFLUXDB_VERIFY_SSL", False),
     )
 
 
@@ -38,17 +38,18 @@ def actually_write_points(data):
     :param data: Array of dicts, as required by
       https://github.com/influxdb/influxdb-python
     """
-    if getattr(settings, 'INFLUXDB_DISABLED', False):
+    if getattr(settings, "INFLUXDB_DISABLED", False):
         return
 
     client = get_client()
-    use_threading = getattr(settings, 'INFLUXDB_USE_THREADING', False)
+    use_threading = getattr(settings, "INFLUXDB_USE_THREADING", False)
     if use_threading is True:
         thread = Thread(
-            target=process_points, args=(
+            target=process_points,
+            args=(
                 client,
                 data,
-            )
+            ),
         )
         thread.start()
     else:
@@ -60,8 +61,8 @@ def process_points(client, data):
     try:
         client.write_points(data)
     except Exception:
-        if getattr(settings, 'INFLUXDB_FAIL_SILENTLY', True):
-            logger.exception('Error while writing data points')
+        if getattr(settings, "INFLUXDB_FAIL_SILENTLY", True):
+            logger.exception("Error while writing data points")
         else:
             raise
 

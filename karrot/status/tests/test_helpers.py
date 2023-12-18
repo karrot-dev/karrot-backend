@@ -23,7 +23,7 @@ class TestStatusHelpers(TestCase):
         conversations = [t.conversation for t in (group, activity, application, issue, offer)]
         another_user = UserFactory()
         [c.sync_users([user, another_user]) for c in conversations]
-        [c.messages.create(content='hey', author=another_user) for c in conversations]
+        [c.messages.create(content="hey", author=another_user) for c in conversations]
 
         with self.assertNumQueries(2):
             unread_conversations(user)

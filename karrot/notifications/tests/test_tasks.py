@@ -2,8 +2,11 @@ from dateutil.relativedelta import relativedelta
 from django.test import TestCase
 from django.utils import timezone
 
-from karrot.issues.factories import IssueFactory, fast_forward_just_before_voting_expiration, \
-    vote_for_further_discussion
+from karrot.issues.factories import (
+    IssueFactory,
+    fast_forward_just_before_voting_expiration,
+    vote_for_further_discussion,
+)
 from karrot.groups.factories import GroupFactory
 from karrot.notifications import tasks
 from karrot.notifications.models import Notification, NotificationType
@@ -23,8 +26,8 @@ class TestDeleteExpiredTask(TestCase):
             user=UserFactory(),
             expires_at=one_hour_ago,
             context={
-                'group': group.id,
-            }
+                "group": group.id,
+            },
         )
 
         tasks.delete_expired_notifications.call_local()
@@ -39,8 +42,8 @@ class TestDeleteExpiredTask(TestCase):
             user=UserFactory(),
             expires_at=in_one_hour,
             context={
-                'group': group.id,
-            }
+                "group": group.id,
+            },
         )
 
         tasks.delete_expired_notifications.call_local()
@@ -65,15 +68,16 @@ class TestActivityUpcomingTask(TestCase):
         self.assertEqual(set(n.user.id for n in notifications), set(user.id for user in users))
         activity1_user1_participant = ActivityParticipant.objects.get(user=users[0], activity=activity1)
         activity1_user1_notification = next(
-            n for n in notifications if n.context['activity_participant'] == activity1_user1_participant.id
+            n for n in notifications if n.context["activity_participant"] == activity1_user1_participant.id
         )
         self.assertEqual(
-            activity1_user1_notification.context, {
-                'group': group.id,
-                'place': place.id,
-                'activity': activity1.id,
-                'activity_participant': activity1_user1_participant.id,
-            }
+            activity1_user1_notification.context,
+            {
+                "group": group.id,
+                "place": place.id,
+                "activity": activity1.id,
+                "activity_participant": activity1_user1_participant.id,
+            },
         )
         self.assertEqual(activity1_user1_notification.expires_at, activity1.date.start)
 

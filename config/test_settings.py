@@ -15,14 +15,14 @@ DEBUG = False
 TEMPLATE_DEBUG = False
 
 PASSWORD_HASHERS = [
-    'django.contrib.auth.hashers.MD5PasswordHasher',
+    "django.contrib.auth.hashers.MD5PasswordHasher",
 ]
 
 MIDDLEWARE_CLASSES = [
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
 ]
 
 # Some tests fail when this is active... needs investigation
@@ -35,5 +35,5 @@ MIDDLEWARE_CLASSES = [
 EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
 
 HUEY = {
-    'immediate': True,  # immediate for testing, seperate runner otherwise
+    "immediate": True,  # immediate for testing, seperate runner otherwise
 }

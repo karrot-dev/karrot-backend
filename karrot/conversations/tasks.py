@@ -18,8 +18,12 @@ from karrot.conversations.emails import (
     prepare_place_conversation_message_notification,
     prepare_mention_notification,
 )
-from karrot.conversations.models import ConversationParticipant, ConversationThreadParticipant, Conversation, \
-    ConversationMessageAttachment
+from karrot.conversations.models import (
+    ConversationParticipant,
+    ConversationThreadParticipant,
+    Conversation,
+    ConversationMessageAttachment,
+)
 from karrot.users.models import User
 from karrot.utils import stats_utils
 from karrot.utils.stats_utils import timer
@@ -35,8 +39,9 @@ def get_participants_to_notify(message):
         ).filter(
             # Do not notify if thread participant doesn't have access to the conversation anymore
             # (We don't remove thread participants after they left the group)
-            Q(thread__conversation__participants=F('user')) | Q(
-                thread__conversation__group__groupmembership__user=F('user'),
+            Q(thread__conversation__participants=F("user"))
+            | Q(
+                thread__conversation__group__groupmembership__user=F("user"),
                 thread__conversation__group__isnull=False,
             )
         )
@@ -53,15 +58,21 @@ def get_participants_to_notify(message):
         not_in_group = ~Q(user__groupmembership__group=group)
         participants_to_notify = participants_to_notify.filter(active_members | not_in_group)
 
-    return participants_to_notify.exclude(
-        user=message.author,
-    ).exclude(
-        user__in=User.objects.unverified(),
-    ).exclude(
-        seen_up_to__id__gte=message.id,
-    ).exclude(
-        notified_up_to__id__gte=message.id,
-    ).distinct()
+    return (
+        participants_to_notify.exclude(
+            user=message.author,
+        )
+        .exclude(
+            user__in=User.objects.unverified(),
+        )
+        .exclude(
+            seen_up_to__id__gte=message.id,
+        )
+        .exclude(
+            notified_up_to__id__gte=message.id,
+        )
+        .distinct()
+    )
 
 
 def send_and_mark(participant, message, email):
@@ -108,25 +119,25 @@ def notify_participants(message):
     # as replies via email will go into a thread
     if conversation.target and conversation.target.conversation_supports_threads and not message.is_thread_reply():
         target_type = conversation.type()
-        if target_type == 'group':
+        if target_type == "group":
             notify_group_conversation_participants(message)
             return
 
-        if target_type == 'place':
+        if target_type == "place":
             notify_place_conversation_participants(message)
             return
 
         raise Exception(
             f'Conversation with target "{target_type}" supports threads,'
-            f' but no notification template has been configured.'
+            f" but no notification template has been configured."
         )
 
     # skip this notification if this is not the most recent message, allows us to batch messages
     all_messages = conversation.messages
     if message.is_thread_reply():
-        latest_message = all_messages.only_replies().latest('created_at')
+        latest_message = all_messages.only_replies().latest("created_at")
     else:
-        latest_message = all_messages.exclude_replies().latest('created_at')
+        latest_message = all_messages.exclude_replies().latest("created_at")
     if latest_message.id != message.id:
         return
 
@@ -171,15 +182,15 @@ def mark_conversations_as_closed():
     with timer() as t:
         close_threshold = timezone.now() - relativedelta(days=settings.CONVERSATION_CLOSED_DAYS)
         for conversation in Conversation.objects.filter(
-                is_closed=False,
-                target_id__isnull=False,
+            is_closed=False,
+            target_id__isnull=False,
         ).exclude(latest_message__created_at__gte=close_threshold):
             ended_at = conversation.target.ended_at
             if ended_at is not None and ended_at < close_threshold:
                 conversation.is_closed = True
                 conversation.save()
 
-    stats_utils.periodic_task('conversations__mark_conversations_as_closed', seconds=t.elapsed_seconds)
+    stats_utils.periodic_task("conversations__mark_conversations_as_closed", seconds=t.elapsed_seconds)
 
 
 @db_periodic_task(crontab(hour=4, minute=23))  # around 4am every day
@@ -211,11 +222,9 @@ def delete_orphaned_attachment_files():
             for next_dir in dirs:
                 walk(os.path.join(current_dir, next_dir), field)
 
-            entries = set(f'{current_dir}/{name}' for name in file_names)
+            entries = set(f"{current_dir}/{name}" for name in file_names)
             entries_in_use = set(
-                ConversationMessageAttachment.objects.filter(**{
-                    f'{field}__in': entries
-                }).values_list(field, flat=True)
+                ConversationMessageAttachment.objects.filter(**{f"{field}__in": entries}).values_list(field, flat=True)
             )
             entries_to_remove = entries.difference(entries_in_use)
 
@@ -223,7 +232,7 @@ def delete_orphaned_attachment_files():
                 created_time = storage.get_created_time(name)
                 # just be cautious and only remove them if they are a bit older
                 if created_time < timezone.now() - timedelta(minutes=5):
-                    logger.info(f'Removing orphaned attachment {field}: {name}')
+                    logger.info(f"Removing orphaned attachment {field}: {name}")
                     storage.delete(name)
 
             # check again
@@ -238,8 +247,8 @@ def delete_orphaned_attachment_files():
 
     with timer() as t:
         # these have to match what is configured in the model
-        walk('conversation_message_attachment_files', 'file')
-        walk('conversation_message_attachment_previews', 'preview')
-        walk('conversation_message_attachment_thumbnails', 'thumbnail')
+        walk("conversation_message_attachment_files", "file")
+        walk("conversation_message_attachment_previews", "preview")
+        walk("conversation_message_attachment_thumbnails", "thumbnail")
 
-    stats_utils.periodic_task('conversations__delete_orphaned_attachment_files', seconds=t.elapsed_seconds)
+    stats_utils.periodic_task("conversations__delete_orphaned_attachment_files", seconds=t.elapsed_seconds)

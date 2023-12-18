@@ -13,4 +13,4 @@ class IssuesFilter(filters.FilterSet):
 
     class Meta:
         model = Issue
-        fields = ['group', 'status']
+        fields = ["group", "status"]

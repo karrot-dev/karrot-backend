@@ -14,20 +14,20 @@ from karrot.utils.mixins import PartialUpdateModelMixin
 class AgreementPagination(CursorPagination):
     page_size = 20
     max_page_size = 1200
-    page_size_query_param = 'page_size'
-    ordering = '-id'
+    page_size_query_param = "page_size"
+    ordering = "-id"
 
 
 class AgreementViewSet(
-        mixins.CreateModelMixin,
-        mixins.RetrieveModelMixin,
-        mixins.ListModelMixin,
-        PartialUpdateModelMixin,
-        GenericViewSet,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    PartialUpdateModelMixin,
+    GenericViewSet,
 ):
     serializer_class = AgreementSerializer
     queryset = Agreement.objects
-    filter_backends = (filters.DjangoFilterBackend, )
+    filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = AgreementFilter
     permission_classes = (
         IsAuthenticated,

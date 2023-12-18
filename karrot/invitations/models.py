@@ -34,12 +34,12 @@ class Invitation(BaseModel):
     objects = InvitationQuerySet.as_manager()
 
     class Meta:
-        unique_together = ('email', 'group')
+        unique_together = ("email", "group")
 
     token = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     email = models.EmailField()
     invited_by = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
-    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE)
+    group = models.ForeignKey("groups.Group", on_delete=models.CASCADE)
     expires_at = models.DateTimeField(default=get_default_expiry_date)
 
     def send_mail(self):

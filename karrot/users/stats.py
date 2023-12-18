@@ -19,15 +19,15 @@ def get_users_stats():
     )
 
     fields = {
-        'active_count': active_users_count,
-        'active_unverified_count': active_users.filter(mail_verified=False).count(),
-        'active_with_location_count': active_users.exclude(latitude=None).exclude(longitude=None).count(),
-        'active_with_mobile_number_count': active_users.exclude(mobile_number='').count(),
-        'active_with_description_count': active_users.exclude(description='').count(),
-        'active_with_photo_count': active_users.exclude(photo='').count(),
-        'active_memberships_per_active_user_avg': active_memberships_per_active_user_avg,
-        'no_membership_count': User.objects.filter(groupmembership=None, deleted=False).count(),
-        'deleted_count': User.objects.filter(deleted=True).count(),
+        "active_count": active_users_count,
+        "active_unverified_count": active_users.filter(mail_verified=False).count(),
+        "active_with_location_count": active_users.exclude(latitude=None).exclude(longitude=None).count(),
+        "active_with_mobile_number_count": active_users.exclude(mobile_number="").count(),
+        "active_with_description_count": active_users.exclude(description="").count(),
+        "active_with_photo_count": active_users.exclude(photo="").count(),
+        "active_memberships_per_active_user_avg": active_memberships_per_active_user_avg,
+        "no_membership_count": User.objects.filter(groupmembership=None, deleted=False).count(),
+        "deleted_count": User.objects.filter(deleted=True).count(),
     }
 
     for n in (1, 7, 30, 60, 90):
@@ -37,16 +37,22 @@ def get_users_stats():
         ).distinct()
         now = timezone.now()
         activity_active_users = User.objects.filter(
-            activities__in=Activity.objects.exclude_disabled().filter(
+            activities__in=Activity.objects.exclude_disabled()
+            .filter(
                 date__startswith__lt=now,
                 date__startswith__gte=now - relativedelta(days=n),
-            ).exclude(place__group__status=GroupStatus.PLAYGROUND, ),
-            deleted=False
+            )
+            .exclude(
+                place__group__status=GroupStatus.PLAYGROUND,
+            ),
+            deleted=False,
         ).distinct()
-        fields.update({
-            'count_active_{}d'.format(n): active_users.count(),
-            'count_activity_active_{}d'.format(n): activity_active_users.count(),
-        })
+        fields.update(
+            {
+                "count_active_{}d".format(n): active_users.count(),
+                "count_activity_active_{}d".format(n): activity_active_users.count(),
+            }
+        )
 
     return fields
 
@@ -56,6 +62,6 @@ def get_user_language_stats():
 
     # These "active" users use the database inactive_at field (which means 30 days)
     active_users = User.objects.filter(groupmembership__in=GroupMembership.objects.active(), deleted=False).distinct()
-    language_count = active_users.values('language').annotate(count=Count('language'))
+    language_count = active_users.values("language").annotate(count=Count("language"))
 
-    return {item['language']: item['count'] for item in language_count}
+    return {item["language"]: item["count"] for item in language_count}

@@ -19,22 +19,50 @@ from rest_framework.viewsets import GenericViewSet
 from karrot.conversations.api import RetrieveConversationMixin
 from karrot.history.models import History, HistoryTypus
 from karrot.activities.filters import (
-    ActivitiesFilter, ActivitySeriesFilter, FeedbackFilter, ActivityTypeFilter, PublicActivitiesFilter
+    ActivitiesFilter,
+    ActivitySeriesFilter,
+    FeedbackFilter,
+    ActivityTypeFilter,
+    PublicActivitiesFilter,
 )
 from karrot.activities.models import (
-    Activity as ActivityModel, ActivitySeries as ActivitySeriesModel, Feedback as FeedbackModel, ActivityType,
-    ICSAuthToken
+    Activity as ActivityModel,
+    ActivitySeries as ActivitySeriesModel,
+    Feedback as FeedbackModel,
+    ActivityType,
+    ICSAuthToken,
 )
 from karrot.activities.permissions import (
-    IsUpcoming, HasNotJoinedActivity, HasJoinedActivity, IsEmptyActivity, IsSameParticipant, IsRecentActivity,
-    IsGroupEditor, TypeHasNoActivities, CannotChangeGroup, IsNotUpcoming, IsNotPast
+    IsUpcoming,
+    HasNotJoinedActivity,
+    HasJoinedActivity,
+    IsEmptyActivity,
+    IsSameParticipant,
+    IsRecentActivity,
+    IsGroupEditor,
+    TypeHasNoActivities,
+    CannotChangeGroup,
+    IsNotUpcoming,
+    IsNotPast,
 )
 from karrot.activities.serializers import (
-    ActivityDismissFeedbackSerializer, ActivitySerializer, ActivitySeriesSerializer, ActivityJoinSerializer,
-    ActivityLeaveSerializer, FeedbackSerializer, ActivityUpdateSerializer, ActivitySeriesUpdateSerializer,
-    ActivitySeriesHistorySerializer, FeedbackExportSerializer, FeedbackExportRenderer, ActivityTypeSerializer,
-    ActivityICSSerializer, ActivitySeriesUpdateCheckSerializer, ActivityUpdateCheckSerializer,
-    PublicActivitySerializer, PublicActivityICSSerializer
+    ActivityDismissFeedbackSerializer,
+    ActivitySerializer,
+    ActivitySeriesSerializer,
+    ActivityJoinSerializer,
+    ActivityLeaveSerializer,
+    FeedbackSerializer,
+    ActivityUpdateSerializer,
+    ActivitySeriesUpdateSerializer,
+    ActivitySeriesHistorySerializer,
+    FeedbackExportSerializer,
+    FeedbackExportRenderer,
+    ActivityTypeSerializer,
+    ActivityICSSerializer,
+    ActivitySeriesUpdateCheckSerializer,
+    ActivityUpdateCheckSerializer,
+    PublicActivitySerializer,
+    PublicActivityICSSerializer,
 )
 from karrot.activities.renderers import ICSCalendarRenderer
 from karrot.utils.mixins import PartialUpdateModelMixin
@@ -43,11 +71,11 @@ from karrot.utils.parsers import JSONWithFilesMultiPartParser
 
 class ICSQueryTokenAuthentication(BaseAuthentication):
     def authenticate(self, request):
-        token = request.query_params.get('token', None)
+        token = request.query_params.get("token", None)
         if not token:
             return None
         try:
-            token = ICSAuthToken.objects.select_related('user').get(token=token)
+            token = ICSAuthToken.objects.select_related("user").get(token=token)
         except ICSAuthToken.DoesNotExist:
             return None
         except ValidationError:
@@ -57,15 +85,15 @@ class ICSQueryTokenAuthentication(BaseAuthentication):
 
 
 class ActivityTypeViewSet(
-        mixins.CreateModelMixin,
-        mixins.RetrieveModelMixin,
-        PartialUpdateModelMixin,
-        mixins.ListModelMixin,
-        viewsets.GenericViewSet,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    PartialUpdateModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
 ):
     serializer_class = ActivityTypeSerializer
     queryset = ActivityType.objects
-    filter_backends = (filters.DjangoFilterBackend, )
+    filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = ActivityTypeFilter
     permission_classes = (
         IsAuthenticated,
@@ -81,15 +109,15 @@ class ActivityTypeViewSet(
 class FeedbackPagination(CursorPagination):
     page_size = 10
     max_page_size = 1200
-    page_size_query_param = 'page_size'
-    ordering = '-activity_date'
+    page_size_query_param = "page_size"
+    ordering = "-activity_date"
 
 
 class FeedbackViewSet(
-        mixins.CreateModelMixin,
-        mixins.RetrieveModelMixin,
-        PartialUpdateModelMixin,
-        GenericViewSet,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    PartialUpdateModelMixin,
+    GenericViewSet,
 ):
     """
     Feedback
@@ -104,9 +132,10 @@ class FeedbackViewSet(
     export:
     Export Feedback as CSV
     """
+
     serializer_class = FeedbackSerializer
     queryset = FeedbackModel.objects.all()
-    filter_backends = (filters.DjangoFilterBackend, )
+    filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = FeedbackFilter
     permission_classes = (IsAuthenticated, IsSameParticipant, IsRecentActivity)
     pagination_class = FeedbackPagination
@@ -115,63 +144,66 @@ class FeedbackViewSet(
         return self.queryset.filter(about__place__group__members=self.request.user)
 
     def list(self, request, *args, **kwargs):
-        queryset = self \
-            .filter_queryset(self.get_queryset()) \
-            .select_related('about') \
+        queryset = (
+            self.filter_queryset(self.get_queryset())
+            .select_related("about")
             .prefetch_related(
-                'about__activity_type',
-                'about__activityparticipant_set',
-                'about__feedback_given_by',
-                'about__participant_types',
-                'about__activityparticipant_set__participant_type',
-                'no_shows',
-            ) \
-            .annotate(
-                timezone=F('about__place__group__timezone'),
-                activity_date=F('about__date__startswith'))
+                "about__activity_type",
+                "about__activityparticipant_set",
+                "about__feedback_given_by",
+                "about__participant_types",
+                "about__activityparticipant_set__participant_type",
+                "no_shows",
+            )
+            .annotate(timezone=F("about__place__group__timezone"), activity_date=F("about__date__startswith"))
+        )
 
         feedback = self.paginate_queryset(queryset)
 
         activities = set()
         for f in feedback:
             activity = f.about
-            setattr(activity, 'timezone', f.timezone)
+            activity.timezone = f.timezone
             activities.add(activity)
 
         serializer = self.get_serializer(feedback, many=True)
         context = self.get_serializer_context()
         activities_serializer = ActivitySerializer(activities, many=True, context=context)
-        return self.get_paginated_response({
-            'feedback': serializer.data,
-            'activities': activities_serializer.data,
-        })
+        return self.get_paginated_response(
+            {
+                "feedback": serializer.data,
+                "activities": activities_serializer.data,
+            }
+        )
 
     @action(
         detail=False,
-        methods=['GET'],
-        renderer_classes=(FeedbackExportRenderer, ),
+        methods=["GET"],
+        renderer_classes=(FeedbackExportRenderer,),
         pagination_class=None,
         serializer_class=FeedbackExportSerializer,
     )
     def export(self, request, format=None):
-        queryset = self.filter_queryset(self.get_queryset()) \
-            .select_related('about', 'about__place', 'about__place__group') \
-            .order_by('-about__date')
+        queryset = (
+            self.filter_queryset(self.get_queryset())
+            .select_related("about", "about__place", "about__place__group")
+            .order_by("-about__date")
+        )
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
 
 class ActivitySeriesViewSet(
-        mixins.CreateModelMixin,
-        mixins.RetrieveModelMixin,
-        PartialUpdateModelMixin,
-        mixins.ListModelMixin,
-        mixins.DestroyModelMixin,
-        viewsets.GenericViewSet,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    PartialUpdateModelMixin,
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
 ):
     serializer_class = ActivitySeriesSerializer
     queryset = ActivitySeriesModel.objects
-    filter_backends = (filters.DjangoFilterBackend, )
+    filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = ActivitySeriesFilter
     permission_classes = (IsAuthenticated, IsGroupEditor)
 
@@ -179,7 +211,7 @@ class ActivitySeriesViewSet(
         return self.queryset.filter(place__group__members=self.request.user)
 
     def get_serializer_class(self):
-        if self.action == 'partial_update':
+        if self.action == "partial_update":
             return ActivitySeriesUpdateSerializer
         return self.serializer_class
 
@@ -200,8 +232,8 @@ class ActivitySeriesViewSet(
 
     @action(
         detail=True,
-        methods=['PATCH'],
-        permission_classes=(IsAuthenticated, ),
+        methods=["PATCH"],
+        permission_classes=(IsAuthenticated,),
         serializer_class=ActivitySeriesUpdateCheckSerializer,
     )
     def check(self, request, pk):
@@ -217,13 +249,13 @@ class ActivitySeriesViewSet(
 class ActivityPagination(CursorPagination):
     page_size = 30
     max_page_size = 1200
-    page_size_query_param = 'page_size'
+    page_size_query_param = "page_size"
 
 
 class PublicActivityViewSet(
-        GenericViewSet,
-        mixins.RetrieveModelMixin,
-        mixins.ListModelMixin,
+    GenericViewSet,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
 ):
     serializer_class = PublicActivitySerializer
     queryset = ActivityModel.objects.is_public().exclude_disabled()
@@ -233,55 +265,56 @@ class PublicActivityViewSet(
     )
     filterset_class = PublicActivitiesFilter
     pagination_class = ActivityPagination  # use the activities one seems ok
-    ordering_fields = ['date']
-    ordering = ['date']
+    ordering_fields = ["date"]
+    ordering = ["date"]
 
     def get_object(self):
         queryset = self.filter_queryset(self.get_queryset())
-        obj = get_object_or_404(queryset, public_id=self.kwargs['pk'])
+        obj = get_object_or_404(queryset, public_id=self.kwargs["pk"])
         return obj
 
     @extend_schema(responses=OpenApiTypes.STR)
     @action(
         detail=True,
-        methods=['GET'],
-        renderer_classes=(ICSCalendarRenderer, ),
+        methods=["GET"],
+        renderer_classes=(ICSCalendarRenderer,),
         serializer_class=PublicActivityICSSerializer,
-        url_path='ics'
+        url_path="ics",
     )
     def ics_detail(self, request, pk=None):
         response = self.retrieve(request)
-        filename = 'activity-{pk}.ics'.format(pk=pk)
-        response['content-disposition'] = 'attachment; filename={filename}'.format(filename=filename)
+        filename = "activity-{pk}.ics".format(pk=pk)
+        response["content-disposition"] = "attachment; filename={filename}".format(filename=filename)
         return response
 
-    @extend_schema(operation_id='public_activities_ics_list', responses=OpenApiTypes.STR)
+    @extend_schema(operation_id="public_activities_ics_list", responses=OpenApiTypes.STR)
     @action(
         detail=False,
-        methods=['GET'],
-        renderer_classes=(ICSCalendarRenderer, ),
+        methods=["GET"],
+        renderer_classes=(ICSCalendarRenderer,),
         serializer_class=PublicActivityICSSerializer,
-        url_path='ics',
-        pagination_class=None
+        url_path="ics",
+        pagination_class=None,
     )
     def ics_list(self, request):
         response = self.list(request)
-        filename = 'activities.ics'
-        response['content-disposition'] = 'attachment; filename={filename}'.format(filename=filename)
+        filename = "activities.ics"
+        response["content-disposition"] = "attachment; filename={filename}".format(filename=filename)
         return response
 
 
 class ActivityViewSet(
-        mixins.CreateModelMixin,
-        mixins.RetrieveModelMixin,
-        PartialUpdateModelMixin,
-        mixins.ListModelMixin,
-        GenericViewSet,
-        RetrieveConversationMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    PartialUpdateModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
+    RetrieveConversationMixin,
 ):
     """
     Activities
     """
+
     serializer_class = ActivitySerializer
     queryset = ActivityModel.objects
     filter_backends = (
@@ -292,37 +325,37 @@ class ActivityViewSet(
     permission_classes = (IsAuthenticated, IsUpcoming, IsGroupEditor, IsEmptyActivity)
     pagination_class = ActivityPagination
     parser_classes = [JSONWithFilesMultiPartParser, JSONParser]
-    ordering_fields = ['date']
-    ordering = ['date']
+    ordering_fields = ["date"]
+    ordering = ["date"]
 
     def get_queryset(self):
         qs = self.queryset.filter(place__group__members=self.request.user)
-        if self.action in ('retrieve', 'list'):
+        if self.action in ("retrieve", "list"):
             # because we have participants field in the serializer
             # only prefetch on read_only actions, otherwise there are caching problems when participants get added
-            qs = qs.select_related('activity_type').prefetch_related(
-                'activityparticipant_set',
-                'feedback_set',
-                'participant_types',
-                'activityparticipant_set__participant_type',
-                'feedback_set__no_shows',
+            qs = qs.select_related("activity_type").prefetch_related(
+                "activityparticipant_set",
+                "feedback_set",
+                "participant_types",
+                "activityparticipant_set__participant_type",
+                "feedback_set__no_shows",
             )
-        if self.action == 'add':
+        if self.action == "add":
             # Lock activity when adding a participant
             # This should prevent a race condition that would result in more participants than slots
             qs = qs.select_for_update()
         return qs
 
     def get_serializer_class(self):
-        if self.action == 'partial_update':
+        if self.action == "partial_update":
             return ActivityUpdateSerializer
         return self.serializer_class
 
     @action(
         detail=True,
-        methods=['POST'],
+        methods=["POST"],
         permission_classes=(IsAuthenticated, IsNotPast, HasNotJoinedActivity),
-        serializer_class=ActivityJoinSerializer
+        serializer_class=ActivityJoinSerializer,
     )
     def add(self, request, pk=None):
         # Transaction needed by select_for_update
@@ -331,17 +364,17 @@ class ActivityViewSet(
 
     @action(
         detail=True,
-        methods=['POST'],
+        methods=["POST"],
         permission_classes=(IsAuthenticated, IsNotPast, HasJoinedActivity),
-        serializer_class=ActivityLeaveSerializer
+        serializer_class=ActivityLeaveSerializer,
     )
     def remove(self, request, pk=None):
         return self.partial_update(request)
 
     @action(
         detail=True,
-        methods=['PATCH'],
-        permission_classes=(IsAuthenticated, ),
+        methods=["PATCH"],
+        permission_classes=(IsAuthenticated,),
         serializer_class=ActivityUpdateCheckSerializer,
     )
     def check(self, request, pk):
@@ -362,9 +395,9 @@ class ActivityViewSet(
 
     @action(
         detail=True,
-        methods=['POST'],
+        methods=["POST"],
         permission_classes=(IsAuthenticated, HasJoinedActivity, IsNotUpcoming),
-        serializer_class=ActivityDismissFeedbackSerializer
+        serializer_class=ActivityDismissFeedbackSerializer,
     )
     def dismiss_feedback(self, request, pk=None):
         return self.partial_update(request)
@@ -372,35 +405,35 @@ class ActivityViewSet(
     @extend_schema(responses=OpenApiTypes.STR)
     @action(
         detail=True,
-        methods=['GET'],
-        renderer_classes=(ICSCalendarRenderer, ),
+        methods=["GET"],
+        renderer_classes=(ICSCalendarRenderer,),
         serializer_class=ActivityICSSerializer,
-        url_path='ics'
+        url_path="ics",
     )
     def ics_detail(self, request, pk=None):
         response = self.retrieve(request)
-        filename = 'activity-{pk}.ics'.format(pk=pk)
-        response['content-disposition'] = 'attachment; filename={filename}'.format(filename=filename)
+        filename = "activity-{pk}.ics".format(pk=pk)
+        response["content-disposition"] = "attachment; filename={filename}".format(filename=filename)
         return response
 
-    @extend_schema(operation_id='activities_ics_list', responses=OpenApiTypes.STR)
+    @extend_schema(operation_id="activities_ics_list", responses=OpenApiTypes.STR)
     @action(
         detail=False,
-        methods=['GET'],
-        renderer_classes=(ICSCalendarRenderer, ),
+        methods=["GET"],
+        renderer_classes=(ICSCalendarRenderer,),
         serializer_class=ActivityICSSerializer,
-        url_path='ics',
+        url_path="ics",
         authentication_classes=[BasicAuthentication, SessionAuthentication, ICSQueryTokenAuthentication],
-        pagination_class=None
+        pagination_class=None,
     )
     def ics_list(self, request):
         response = self.list(request)
-        filename = 'activities.ics'
-        response['content-disposition'] = 'attachment; filename={filename}'.format(filename=filename)
+        filename = "activities.ics"
+        response["content-disposition"] = "attachment; filename={filename}".format(filename=filename)
         return response
 
     @extend_schema(responses=OpenApiTypes.STR)
-    @action(detail=False, methods=['GET'], pagination_class=None)
+    @action(detail=False, methods=["GET"], pagination_class=None)
     def ics_token(self, request):
         user = request.user
         try:
@@ -410,7 +443,7 @@ class ActivityViewSet(
         return Response(token)
 
     @extend_schema(request=None, responses=OpenApiTypes.STR)
-    @action(detail=False, methods=['POST'], pagination_class=None)
+    @action(detail=False, methods=["POST"], pagination_class=None)
     def ics_token_refresh(self, request):
         user = request.user
         ICSAuthToken.objects.filter(user=user).delete()

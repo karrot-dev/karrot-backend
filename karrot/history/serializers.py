@@ -15,17 +15,17 @@ class HistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = History
         fields = [
-            'id',
-            'date',
-            'typus',
-            'group',
-            'place',
-            'agreement',
-            'users',
-            'payload',
-            'message',
-            'after',
-            'changes',
+            "id",
+            "date",
+            "typus",
+            "group",
+            "place",
+            "agreement",
+            "users",
+            "payload",
+            "message",
+            "after",
+            "changes",
         ]
 
     typus = SerializerMethodField()
@@ -37,14 +37,14 @@ class HistorySerializer(serializers.ModelSerializer):
         if obj.typus == HistoryTypus.AGREEMENT_MODIFY:
             changes = {}
             for k in (
-                    'title',
-                    'summary',
-                    'content',
+                "title",
+                "summary",
+                "content",
             ):
                 if obj.before[k] != obj.after[k]:
                     changes[k] = {
-                        'before': obj.before[k],
-                        'after': obj.after[k],
+                        "before": obj.before[k],
+                        "after": obj.after[k],
                     }
             if changes:
                 return changes
@@ -57,25 +57,30 @@ class HistorySerializer(serializers.ModelSerializer):
         # It's limited to these types as if we just generally return it we might send
         # internal/private data back to the client. This is a bit of technical debt as
         # we should rethink the history data a bit to ensure we always have what we need.
-        return obj.after if obj.typus in (
-            HistoryTypus.ACTIVITY_TYPE_CREATE,
-            HistoryTypus.ACTIVITY_TYPE_MODIFY,
-        ) else None
+        return (
+            obj.after
+            if obj.typus
+            in (
+                HistoryTypus.ACTIVITY_TYPE_CREATE,
+                HistoryTypus.ACTIVITY_TYPE_MODIFY,
+            )
+            else None
+        )
 
 
 class HistoryExportSerializer(HistorySerializer):
     class Meta:
         model = History
         fields = [
-            'id',
-            'date',
-            'typus',
-            'group',
-            'place',
-            'activity',
-            'users',
-            'activity_date',
-            'message',
+            "id",
+            "date",
+            "typus",
+            "group",
+            "place",
+            "activity",
+            "users",
+            "activity_date",
+            "message",
         ]
 
     activity_date = serializers.SerializerMethodField()
@@ -88,7 +93,7 @@ class HistoryExportSerializer(HistorySerializer):
         if history.payload is None:
             return
 
-        dates = history.payload.get('date')
+        dates = history.payload.get("date")
         if dates is None:
             # It might be very old or about something else than an activity
             return
@@ -108,15 +113,15 @@ class HistoryExportSerializer(HistorySerializer):
     @extend_schema_field(OpenApiTypes.STR)
     def get_users(self, history):
         user_ids = [str(u.id) for u in history.users.all()]
-        return ','.join(user_ids)
+        return ",".join(user_ids)
 
 
 class HistoryExportRenderer(CSVRenderer):
     header = HistoryExportSerializer.Meta.fields
     labels = {
-        'group': 'group_id',
-        'users': 'user_ids',
-        'place': 'place_id',
-        'activity': 'activity_id',
-        'typus': 'type',
+        "group": "group_id",
+        "users": "user_ids",
+        "place": "place_id",
+        "activity": "activity_id",
+        "typus": "type",
     }

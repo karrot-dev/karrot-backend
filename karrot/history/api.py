@@ -13,8 +13,8 @@ from karrot.history.serializers import HistorySerializer, HistoryExportRenderer,
 class HistoryPagination(CursorPagination):
     page_size = 10
     max_page_size = 1200
-    page_size_query_param = 'page_size'
-    ordering = '-date'
+    page_size_query_param = "page_size"
+    ordering = "-date"
 
 
 class HistoryViewSet(viewsets.ReadOnlyModelViewSet):
@@ -24,27 +24,30 @@ class HistoryViewSet(viewsets.ReadOnlyModelViewSet):
     export:
     Export history as CSV
     """
+
     serializer_class = HistorySerializer
     queryset = History.objects
-    filter_backends = (filters.DjangoFilterBackend, )
+    filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = HistoryFilter
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
     pagination_class = HistoryPagination
 
     def get_queryset(self):
-        return self.queryset.filter(group__members=self.request.user).prefetch_related('users')
+        return self.queryset.filter(group__members=self.request.user).prefetch_related("users")
 
     @action(
         detail=False,
-        methods=['GET'],
-        renderer_classes=(HistoryExportRenderer, ),
+        methods=["GET"],
+        renderer_classes=(HistoryExportRenderer,),
         pagination_class=None,
         serializer_class=HistoryExportSerializer,
     )
     def export(self, request):
-        queryset = self.filter_queryset(self.get_queryset()) \
-            .select_related('group') \
-            .prefetch_related('users') \
-            .order_by('-date')
+        queryset = (
+            self.filter_queryset(self.get_queryset())
+            .select_related("group")
+            .prefetch_related("users")
+            .order_by("-date")
+        )
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)

@@ -16,11 +16,12 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, RetrievePriv
     """
     User Profiles
     """
+
     queryset = get_user_model().objects.active()
     serializer_class = UserSerializer
-    filter_backends = (filters.SearchFilter, )
-    permission_classes = (IsAuthenticated, )
-    search_fields = ('display_name', )
+    filter_backends = (filters.SearchFilter,)
+    permission_classes = (IsAuthenticated,)
+    search_fields = ("display_name",)
 
     def retrieve(self, request, *args, **kwargs):
         """Get one user profile"""
@@ -59,17 +60,18 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, RetrievePriv
 class UserPagination(CursorPagination):
     page_size = 20
     max_page_size = 1200
-    page_size_query_param = 'page_size'
-    ordering = 'id'
+    page_size_query_param = "page_size"
+    ordering = "id"
 
 
 class UserInfoViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
     """
     Public User Profiles (for now only users that share a conversation)
     """
+
     queryset = get_user_model().objects.active()
     serializer_class = UserInfoSerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
     pagination_class = UserPagination
 
     def get_queryset(self):

@@ -12,4 +12,4 @@ class PlaceTypeFilter(filters.FilterSet):
 
     class Meta:
         model = PlaceType
-        fields = ['group']
+        fields = ["group"]

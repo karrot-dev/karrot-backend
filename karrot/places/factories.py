@@ -10,7 +10,7 @@ class PlaceTypeFactory(DjangoModelFactory):
     class Meta:
         model = PlaceType
 
-    name = Sequence(lambda n: ' '.join(['PlaceType', str(n), faker.first_name()]))
+    name = Sequence(lambda n: " ".join(["PlaceType", str(n), faker.first_name()]))
 
 
 class PlaceFactory(DjangoModelFactory):
@@ -20,8 +20,8 @@ class PlaceFactory(DjangoModelFactory):
     group = SubFactory(GroupFactory)
     name = LazyAttribute(lambda x: faker.sentence(nb_words=4))
     description = LazyAttribute(lambda x: faker.name())
-    status = 'active'
-    place_type = SubFactory(PlaceTypeFactory, group=SelfAttribute('..group'))
+    status = "active"
+    place_type = SubFactory(PlaceTypeFactory, group=SelfAttribute("..group"))
 
     @post_generation
     def subscribers(self, created, extracted, **kwargs):

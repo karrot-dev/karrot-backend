@@ -14,13 +14,13 @@ from karrot.utils import markdown
 
 
 class IssueTypes(Enum):
-    CONFLICT_RESOLUTION = 'conflict_resolution'
+    CONFLICT_RESOLUTION = "conflict_resolution"
 
 
 class IssueStatus(Enum):
-    ONGOING = 'ongoing'
-    DECIDED = 'decided'
-    CANCELLED = 'cancelled'
+    ONGOING = "ongoing"
+    DECIDED = "decided"
+    CANCELLED = "cancelled"
 
 
 class IssueQuerySet(models.QuerySet):
@@ -35,17 +35,17 @@ class IssueQuerySet(models.QuerySet):
 
     def prefetch_for_serializer(self, user):
         return self.prefetch_related(
-            Prefetch('votings', Voting.objects.annotate_participant_count()),
-            'votings__options',
-            Prefetch('votings__options__votes', Vote.objects.filter(user=user), to_attr='your_votes'),
+            Prefetch("votings", Voting.objects.annotate_participant_count()),
+            "votings__options",
+            Prefetch("votings__options__votes", Vote.objects.filter(user=user), to_attr="your_votes"),
         )
 
 
 class Issue(BaseModel, ConversationMixin):
     objects = IssueQuerySet.as_manager()
 
-    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='issues')
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='issues_created')
+    group = models.ForeignKey("groups.Group", on_delete=models.CASCADE, related_name="issues")
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="issues_created")
     status = models.TextField(
         default=IssueStatus.ONGOING.value,
         choices=[(status.value, status.value) for status in IssueStatus],
@@ -57,7 +57,7 @@ class Issue(BaseModel, ConversationMixin):
     )
     topic = models.TextField()
     affected_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE, related_name='affected_by_issue'
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE, related_name="affected_by_issue"
     )
 
     @property
@@ -90,7 +90,7 @@ class Issue(BaseModel, ConversationMixin):
             signals.issue_changed.send(sender=self.__class__, issue=self)
 
     def latest_voting(self):
-        return self.votings.latest('created_at')
+        return self.votings.latest("created_at")
 
     def topic_rendered(self, **kwargs):
         return markdown.render(self.topic, **kwargs)
@@ -111,7 +111,7 @@ class VotingQuerySet(models.QuerySet):
         return self.filter(expires_at__gt=timezone.now(), expires_at__lt=in_some_hours)
 
     def annotate_participant_count(self):
-        return self.annotate(_participant_count=Count('options__votes__user', distinct=True))
+        return self.annotate(_participant_count=Count("options__votes__user", distinct=True))
 
 
 def voting_expiration_time():
@@ -121,20 +121,20 @@ def voting_expiration_time():
 class Voting(BaseModel):
     objects = VotingQuerySet.as_manager()
 
-    issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='votings')
+    issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name="votings")
     expires_at = models.DateTimeField(default=voting_expiration_time)
     accepted_option = models.ForeignKey(
-        'Option',
+        "Option",
         on_delete=models.SET_NULL,
         null=True,
-        related_name='accepted_for_voting',
+        related_name="accepted_for_voting",
     )
 
     def is_expired(self):
         return self.expires_at < timezone.now()
 
     def participant_count(self) -> int:
-        if hasattr(self, '_participant_count'):
+        if hasattr(self, "_participant_count"):
             return self._participant_count
 
         return get_user_model().objects.filter(votes_given__option__voting=self).distinct().count()
@@ -142,13 +142,13 @@ class Voting(BaseModel):
     def create_options(self):
         options = [
             {
-                'type': OptionTypes.FURTHER_DISCUSSION.value,
+                "type": OptionTypes.FURTHER_DISCUSSION.value,
             },
             {
-                'type': OptionTypes.NO_CHANGE.value,
+                "type": OptionTypes.NO_CHANGE.value,
             },
             {
-                'type': OptionTypes.REMOVE_USER.value,
+                "type": OptionTypes.REMOVE_USER.value,
             },
         ]
         for option in options:
@@ -162,11 +162,11 @@ class Voting(BaseModel):
         for option_id, data in vote_data.items():
             vote = votes.get(option_id, None)
             if vote is not None:
-                if vote.score == data['score']:
+                if vote.score == data["score"]:
                     existing.append(vote)
                     continue
                 vote.delete()
-            data['user'] = user
+            data["user"] = user
             created.append(Vote.objects.create(**data))
 
         if len(votes) == 0:
@@ -190,7 +190,7 @@ class Voting(BaseModel):
         return deleted
 
     def calculate_results(self):
-        options = list(self.options.annotate(_sum_score=Sum('votes__score')).order_by('_sum_score'))
+        options = list(self.options.annotate(_sum_score=Sum("votes__score")).order_by("_sum_score"))
         for option in options:
             option.sum_score = option._sum_score
             option.save()
@@ -207,13 +207,13 @@ class Voting(BaseModel):
 
 
 class OptionTypes(Enum):
-    FURTHER_DISCUSSION = 'further_discussion'
-    NO_CHANGE = 'no_change'
-    REMOVE_USER = 'remove_user'
+    FURTHER_DISCUSSION = "further_discussion"
+    NO_CHANGE = "no_change"
+    REMOVE_USER = "remove_user"
 
 
 class Option(BaseModel):
-    voting = models.ForeignKey(Voting, on_delete=models.CASCADE, related_name='options')
+    voting = models.ForeignKey(Voting, on_delete=models.CASCADE, related_name="options")
     type = models.TextField(choices=[(status.value, status.value) for status in OptionTypes])
     sum_score = models.FloatField(null=True)
 
@@ -244,8 +244,8 @@ class Option(BaseModel):
 
 class Vote(BaseModel):
     class Meta:
-        unique_together = ('user', 'option')
+        unique_together = ("user", "option")
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='votes_given')
-    option = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='votes')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="votes_given")
+    option = models.ForeignKey(Option, on_delete=models.CASCADE, related_name="votes")
     score = models.IntegerField()

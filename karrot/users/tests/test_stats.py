@@ -53,19 +53,19 @@ class TestUserStats(TestCase):
 
         # one user with mobile number
         mobile_number_user = users[2]
-        mobile_number_user.mobile_number = '123'
+        mobile_number_user.mobile_number = "123"
         mobile_number_user.save()
 
         # five users without description
         def remove_description(user):
-            user.description = ''
+            user.description = ""
             user.save()
 
         [remove_description(u) for u in users[:5]]
 
         # one user with photo
         photo_user = users[4]
-        photo_user.photo = 'photo.jpg'
+        photo_user.photo = "photo.jpg"
         photo_user.save()
 
         # 2 groups where everybody is active, 1 where everybody is inactive
@@ -85,27 +85,28 @@ class TestUserStats(TestCase):
         points = stats.get_users_stats()
 
         self.assertEqual(
-            points, {
-                'active_count': 9,
-                'active_unverified_count': 1,
-                'active_with_location_count': 1,
-                'active_with_mobile_number_count': 1,
-                'active_with_description_count': 4,
-                'active_with_photo_count': 1,
-                'active_memberships_per_active_user_avg': 2.0,
-                'no_membership_count': 1,
-                'deleted_count': 1,
-                'count_active_1d': 9,
-                'count_active_7d': 10,
-                'count_active_30d': 11,
-                'count_active_60d': 12,
-                'count_active_90d': 13,
-                'count_activity_active_1d': 0,
-                'count_activity_active_7d': 1,
-                'count_activity_active_30d': 2,
-                'count_activity_active_60d': 3,
-                'count_activity_active_90d': 4,
-            }
+            points,
+            {
+                "active_count": 9,
+                "active_unverified_count": 1,
+                "active_with_location_count": 1,
+                "active_with_mobile_number_count": 1,
+                "active_with_description_count": 4,
+                "active_with_photo_count": 1,
+                "active_memberships_per_active_user_avg": 2.0,
+                "no_membership_count": 1,
+                "deleted_count": 1,
+                "count_active_1d": 9,
+                "count_active_7d": 10,
+                "count_active_30d": 11,
+                "count_active_60d": 12,
+                "count_active_90d": 13,
+                "count_activity_active_1d": 0,
+                "count_activity_active_7d": 1,
+                "count_activity_active_30d": 2,
+                "count_activity_active_60d": 3,
+                "count_activity_active_90d": 4,
+            },
         )
 
     def test_user_stats_with_no_active_users(self):
@@ -115,25 +116,26 @@ class TestUserStats(TestCase):
         points = stats.get_users_stats()
 
         self.assertEqual(
-            points, {
-                'active_count': 0,
-                'active_unverified_count': 0,
-                'active_with_location_count': 0,
-                'active_with_mobile_number_count': 0,
-                'active_with_description_count': 0,
-                'active_with_photo_count': 0,
-                'active_memberships_per_active_user_avg': 0,
-                'no_membership_count': 0,
-                'deleted_count': 0,
-                'count_active_1d': 0,
-                'count_active_7d': 0,
-                'count_active_30d': 0,
-                'count_active_60d': 0,
-                'count_active_90d': 0,
-                'count_activity_active_1d': 0,
-                'count_activity_active_7d': 0,
-                'count_activity_active_30d': 0,
-                'count_activity_active_60d': 0,
-                'count_activity_active_90d': 0,
-            }
+            points,
+            {
+                "active_count": 0,
+                "active_unverified_count": 0,
+                "active_with_location_count": 0,
+                "active_with_mobile_number_count": 0,
+                "active_with_description_count": 0,
+                "active_with_photo_count": 0,
+                "active_memberships_per_active_user_avg": 0,
+                "no_membership_count": 0,
+                "deleted_count": 0,
+                "count_active_1d": 0,
+                "count_active_7d": 0,
+                "count_active_30d": 0,
+                "count_active_60d": 0,
+                "count_active_90d": 0,
+                "count_activity_active_1d": 0,
+                "count_activity_active_7d": 0,
+                "count_activity_active_30d": 0,
+                "count_activity_active_60d": 0,
+                "count_activity_active_90d": 0,
+            },
         )

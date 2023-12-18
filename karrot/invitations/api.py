@@ -15,7 +15,7 @@ from karrot.invitations.serializers import InvitationSerializer, InvitationAccep
 
 
 class InvitesPerDayThrottle(UserRateThrottle):
-    rate = '50/day'
+    rate = "50/day"
 
 
 class NotInGroup(BasePermission):
@@ -24,7 +24,7 @@ class NotInGroup(BasePermission):
 
 
 class CanResend(BasePermission):
-    message = _('Invitation to this email address was sent recently, wait before resending')
+    message = _("Invitation to this email address was sent recently, wait before resending")
 
     def has_object_permission(self, request, view, obj):
         return timezone.now() >= obj.created_at + relativedelta(hours=1)
@@ -34,11 +34,12 @@ class InvitationsViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mix
     """
     Invitations
     """
+
     queryset = Invitation.objects
     serializer_class = InvitationSerializer
-    filter_backends = (filters.DjangoFilterBackend, )
-    filterset_fields = ('group', )
-    permission_classes = (IsAuthenticated, )
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_fields = ("group",)
+    permission_classes = (IsAuthenticated,)
     throttle_classes = ()
 
     def get_queryset(self):
@@ -46,11 +47,11 @@ class InvitationsViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mix
         return self.queryset.filter(group__in=users_groups, expires_at__gte=timezone.now())
 
     def get_throttles(self):
-        if self.action == 'create':
-            self.throttle_classes = (InvitesPerDayThrottle, )
+        if self.action == "create":
+            self.throttle_classes = (InvitesPerDayThrottle,)
         return super().get_throttles()
 
-    @action(detail=True, methods=['POST'], permission_classes=(IsAuthenticated, CanResend))
+    @action(detail=True, methods=["POST"], permission_classes=(IsAuthenticated, CanResend))
     def resend(self, request, **kwargs):
         """
         Resend invitation email
@@ -71,12 +72,12 @@ class InvitationAcceptViewSet(GenericViewSet):
         IsAuthenticated,
         NotInGroup,
     )
-    lookup_field = 'token'
+    lookup_field = "token"
 
     def get_queryset(self):
         return self.queryset.filter(expires_at__gte=timezone.now())
 
-    @action(detail=True, methods=['POST'])
+    @action(detail=True, methods=["POST"])
     def accept(self, request, **kwargs):
         """
         Accept the invitation

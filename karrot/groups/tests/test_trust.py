@@ -67,7 +67,7 @@ class TestTrustReceiver(TestCase):
 
         self.assertTrue(group.is_editor(newcomer))
         self.assertEqual(len(mail.outbox), 1)
-        self.assertIn('You gained editing permissions', mail.outbox[0].subject)
+        self.assertIn("You gained editing permissions", mail.outbox[0].subject)
 
         self.assertEqual(History.objects.filter(typus=HistoryTypus.MEMBER_BECAME_EDITOR).count(), 1)
 
@@ -100,7 +100,7 @@ class TestTrustReceiver(TestCase):
 
         self.assertFalse(group.is_editor(editor1))
         self.assertEqual(len(mail.outbox), 1)
-        self.assertIn('You lost editing permissions', mail.outbox[0].subject)
+        self.assertIn("You lost editing permissions", mail.outbox[0].subject)
 
         self.assertEqual(History.objects.filter(typus=HistoryTypus.USER_LOST_EDITOR_ROLE).count(), 1)
 
@@ -137,7 +137,7 @@ class TestTrustAPI(APITestCase):
     def test_give_trust(self):
         self.client.force_login(user=self.member1)
 
-        url = reverse('group-trust-user', args=(self.group.id, self.member2.id))
+        url = reverse("group-trust-user", args=(self.group.id, self.member2.id))
         response = self.client.post(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
@@ -151,13 +151,13 @@ class TestTrustAPI(APITestCase):
         )
 
     def test_give_trust_for_role(self):
-        self.group.roles.create(name='someotherrole', description='nothing')
+        self.group.roles.create(name="someotherrole", description="nothing")
         self.group.save()
         self.client.force_login(user=self.member1)
         mail.outbox = []
 
-        url = reverse('group-trust-user', args=(self.group.id, self.member2.id))
-        response = self.client.post(url, {'role': 'someotherrole'})
+        url = reverse("group-trust-user", args=(self.group.id, self.member2.id))
+        response = self.client.post(url, {"role": "someotherrole"})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertTrue(
@@ -165,25 +165,25 @@ class TestTrustAPI(APITestCase):
                 membership__group=self.group,
                 membership__user=self.member2,
                 given_by=self.member1,
-                role='someotherrole',
+                role="someotherrole",
             ).exists()
         )
 
-        self.assertIn('You received a new role in', mail.outbox[0].subject)
+        self.assertIn("You received a new role in", mail.outbox[0].subject)
 
     def test_give_trust_for_role_with_role_requirement(self):
-        self.group.roles.create(name='special_role', description='nothing', role_required_for_trust='editor')
+        self.group.roles.create(name="special_role", description="nothing", role_required_for_trust="editor")
         self.group.save()
         newcomer = UserFactory()
         self.group.add_member(newcomer)
         self.client.force_login(user=newcomer)
 
-        url = reverse('group-trust-user', args=(self.group.id, self.member2.id))
-        response = self.client.post(url, {'role': 'special_role'})
+        url = reverse("group-trust-user", args=(self.group.id, self.member2.id))
+        response = self.client.post(url, {"role": "special_role"})
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(
-            response.data['role'][0],
+            response.data["role"][0],
             'Trust for role "special_role" can only be given by users with "editor" role',
         )
         self.assertFalse(
@@ -191,7 +191,7 @@ class TestTrustAPI(APITestCase):
                 membership__group=self.group,
                 membership__user=self.member2,
                 given_by=self.member1,
-                role='special_role',
+                role="special_role",
             ).exists()
         )
 
@@ -200,7 +200,7 @@ class TestTrustAPI(APITestCase):
         Trust.objects.create(membership=membership, given_by=self.member1)
         self.client.force_login(user=self.member1)
 
-        url = reverse('group-trust-user', args=(self.group.id, self.member2.id))
+        url = reverse("group-trust-user", args=(self.group.id, self.member2.id))
         response = self.client.post(url)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -208,7 +208,7 @@ class TestTrustAPI(APITestCase):
     def test_cannot_give_trust_to_self(self):
         self.client.force_login(user=self.member1)
 
-        url = reverse('group-trust-user', args=(self.group.id, self.member1.id))
+        url = reverse("group-trust-user", args=(self.group.id, self.member1.id))
         response = self.client.post(url)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -225,7 +225,7 @@ class TestTrustAPI(APITestCase):
         Trust.objects.create(membership=membership, given_by=self.member1)
         self.client.force_login(user=self.member1)
 
-        url = reverse('group-trust-user', args=(self.group.id, self.member2.id))
+        url = reverse("group-trust-user", args=(self.group.id, self.member2.id))
         response = self.client.delete(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
@@ -238,15 +238,15 @@ class TestTrustAPI(APITestCase):
         )
 
     def test_trust_can_be_revoked_for_role(self):
-        self.group.roles.create(name='someotherrole', description='nothing')
+        self.group.roles.create(name="someotherrole", description="nothing")
         self.group.save()
         membership = GroupMembership.objects.get(user=self.member2, group=self.group)
         Trust.objects.create(membership=membership, given_by=self.member1, role=GROUP_EDITOR)
-        Trust.objects.create(membership=membership, given_by=self.member1, role='someotherrole')
+        Trust.objects.create(membership=membership, given_by=self.member1, role="someotherrole")
         self.client.force_login(user=self.member1)
 
-        url = reverse('group-trust-user', args=(self.group.id, self.member2.id))
-        response = self.client.delete(url, {'role': 'someotherrole'})
+        url = reverse("group-trust-user", args=(self.group.id, self.member2.id))
+        response = self.client.delete(url, {"role": "someotherrole"})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertFalse(
@@ -254,7 +254,7 @@ class TestTrustAPI(APITestCase):
                 membership__group=self.group,
                 membership__user=self.member2,
                 given_by=self.member1,
-                role='someotherrole',
+                role="someotherrole",
             ).exists()
         )
         self.assertTrue(
@@ -270,7 +270,7 @@ class TestTrustAPI(APITestCase):
         GroupMembership.objects.get(user=self.member2, group=self.group)
         self.client.force_login(user=self.member1)
 
-        url = reverse('group-trust-user', args=(self.group.id, self.member2.id))
+        url = reverse("group-trust-user", args=(self.group.id, self.member2.id))
         response = self.client.delete(url)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -287,39 +287,29 @@ class TestTrustList(APITestCase):
         Trust.objects.create(membership=membership, given_by=self.member1)
         membership = GroupMembership.objects.get(user=self.member1, group=self.group)
         Trust.objects.create(membership=membership, given_by=self.member2)
-        self.group.roles.create(name='anotherrole', description='nothing')
-        Trust.objects.create(membership=membership, given_by=self.member3, role='anotherrole')
+        self.group.roles.create(name="anotherrole", description="nothing")
+        Trust.objects.create(membership=membership, given_by=self.member3, role="anotherrole")
 
     def test_list_trust_for_group(self):
         self.client.force_login(user=self.member1)
-        response = self.client.get('/api/groups/{}/'.format(self.group.id))
+        response = self.client.get("/api/groups/{}/".format(self.group.id))
         self.assertEqual(
-            response.data['memberships'][self.member1.id]['trust'], [
-                {
-                    'created_at': ANY,
-                    'given_by': self.member2.id,
-                    'role': GROUP_EDITOR
-                },
-                {
-                    'created_at': ANY,
-                    'given_by': self.member3.id,
-                    'role': 'anotherrole'
-                },
-            ]
+            response.data["memberships"][self.member1.id]["trust"],
+            [
+                {"created_at": ANY, "given_by": self.member2.id, "role": GROUP_EDITOR},
+                {"created_at": ANY, "given_by": self.member3.id, "role": "anotherrole"},
+            ],
         )
         self.assertEqual(
-            response.data['memberships'][self.member2.id]['trust'], [
-                {
-                    'created_at': ANY,
-                    'given_by': self.member1.id,
-                    'role': GROUP_EDITOR
-                },
-            ]
+            response.data["memberships"][self.member2.id]["trust"],
+            [
+                {"created_at": ANY, "given_by": self.member1.id, "role": GROUP_EDITOR},
+            ],
         )
 
     def test_backwards_compatible_trusted_by_field(self):
         self.client.force_login(user=self.member1)
-        response = self.client.get('/api/groups/{}/'.format(self.group.id))
+        response = self.client.get("/api/groups/{}/".format(self.group.id))
         # trust for other roles won't be included in the 'trusted_by' field
-        self.assertEqual(response.data['memberships'][self.member1.id]['trusted_by'], [self.member2.id])
-        self.assertEqual(response.data['memberships'][self.member2.id]['trusted_by'], [self.member1.id])
+        self.assertEqual(response.data["memberships"][self.member1.id]["trusted_by"], [self.member2.id])
+        self.assertEqual(response.data["memberships"][self.member2.id]["trusted_by"], [self.member1.id])

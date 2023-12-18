@@ -7,8 +7,7 @@ from django.utils import timezone
 from freezegun import freeze_time
 
 from karrot.history.models import History
-from karrot.activities.factories import ActivityFactory, \
-    ActivitySeriesFactory
+from karrot.activities.factories import ActivityFactory, ActivitySeriesFactory
 from karrot.activities.models import Feedback, Activity, ActivitySeries, to_range
 from karrot.places.factories import PlaceFactory
 from karrot.places.models import PlaceStatus
@@ -32,7 +31,7 @@ class TestFeedbackModel(TestCase):
 
     def test_create_fails_if_comment_too_long(self):
         with self.assertRaises(DataError):
-            Feedback.objects.create(comment='a' * 100001, about=self.activity, given_by=self.user, weight=1)
+            Feedback.objects.create(comment="a" * 100001, about=self.activity, given_by=self.user, weight=1)
 
     def test_create_two_feedback_for_same_activity_as_same_user_fails(self):
         Feedback.objects.create(given_by=self.user, about=self.activity)

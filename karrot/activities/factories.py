@@ -3,12 +3,15 @@ from random import randint
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
-from factory import SubFactory, LazyFunction, LazyAttribute, post_generation, Sequence, \
-    SelfAttribute
+from factory import SubFactory, LazyFunction, LazyAttribute, post_generation, Sequence, SelfAttribute
 from factory.django import DjangoModelFactory
 
 from karrot.activities.models import (
-    Activity as ActivityModel, ActivitySeries as ActivitySeriesModel, Feedback as FeedbackModel, to_range, ActivityType
+    Activity as ActivityModel,
+    ActivitySeries as ActivitySeriesModel,
+    Feedback as FeedbackModel,
+    to_range,
+    ActivityType,
 )
 from karrot.places.factories import PlaceFactory
 from karrot.utils.tests.fake import faker
@@ -22,7 +25,7 @@ class ActivityTypeFactory(DjangoModelFactory):
     class Meta:
         model = ActivityType
 
-    name = Sequence(lambda n: ' '.join(['ActivityType', str(n), faker.first_name()]))
+    name = Sequence(lambda n: " ".join(["ActivityType", str(n), faker.first_name()]))
 
 
 class ActivityFactory(DjangoModelFactory):
@@ -37,8 +40,8 @@ class ActivityFactory(DjangoModelFactory):
             # default set...
             participant_types = [
                 {
-                    'role': 'member',
-                    'max_participants': 5,
+                    "role": "member",
+                    "max_participants": 5,
                 },
             ]
         for participant_type in participant_types:
@@ -52,7 +55,7 @@ class ActivityFactory(DjangoModelFactory):
             for user in participants:
                 self.add_participant(user)
 
-    activity_type = SubFactory(ActivityTypeFactory, group=SelfAttribute('..place.group'))
+    activity_type = SubFactory(ActivityTypeFactory, group=SelfAttribute("..place.group"))
     place = SubFactory(PlaceFactory)
     date = LazyFunction(in_one_day)
 
@@ -69,8 +72,8 @@ class ActivitySeriesFactory(DjangoModelFactory):
             # default set...
             participant_types = [
                 {
-                    'role': 'member',
-                    'max_participants': 5,
+                    "role": "member",
+                    "max_participants": 5,
                 },
             ]
         for participant_type in participant_types:
@@ -80,10 +83,10 @@ class ActivitySeriesFactory(DjangoModelFactory):
     def update_activities(self, created, ignored, **kwargs):
         self.update_activities()
 
-    activity_type = SubFactory(ActivityTypeFactory, group=SelfAttribute('..place.group'))
+    activity_type = SubFactory(ActivityTypeFactory, group=SelfAttribute("..place.group"))
     place = SubFactory(PlaceFactory)
     start_date = LazyAttribute(lambda _: timezone.now().replace(second=0, microsecond=0) + relativedelta(minutes=15))
-    rule = 'FREQ=WEEKLY'
+    rule = "FREQ=WEEKLY"
 
 
 class FeedbackFactory(DjangoModelFactory):

@@ -7,8 +7,13 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from karrot.groups.factories import GroupFactory
-from karrot.groups.models import Group as GroupModel, GroupMembership, \
-    GroupNotificationType, get_default_notification_types, Group
+from karrot.groups.models import (
+    Group as GroupModel,
+    GroupMembership,
+    GroupNotificationType,
+    get_default_notification_types,
+    Group,
+)
 from karrot.groups.stats import group_tags
 from karrot.history.models import History, HistoryTypus
 from karrot.activities.factories import ActivityFactory
@@ -24,9 +29,9 @@ class TestGroupsInfoAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.member = UserFactory()
-        self.group = GroupFactory(members=[self.member], application_questions='')
-        GroupFactory(application_questions='')
-        self.url = '/api/groups-info/'
+        self.group = GroupFactory(members=[self.member], application_questions="")
+        GroupFactory(application_questions="")
+        self.url = "/api/groups-info/"
 
     def test_list_groups_as_anon(self):
         with self.assertNumQueries(1):
@@ -42,37 +47,37 @@ class TestGroupsInfoAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_retrieve_group_as_anon(self):
-        url = self.url + str(self.group.id) + '/'
+        url = self.url + str(self.group.id) + "/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('Hey there', response.data['application_questions'])
-        self.assertEqual(response.data['member_count'], 1)
+        self.assertIn("Hey there", response.data["application_questions"])
+        self.assertEqual(response.data["member_count"], 1)
 
     def test_retrieve_group_as_user(self):
         self.client.force_login(user=self.user)
-        url = self.url + str(self.group.id) + '/'
+        url = self.url + str(self.group.id) + "/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['is_member'], False)
+        self.assertEqual(response.data["is_member"], False)
 
     def test_retrieve_group_as_member(self):
         self.client.force_login(user=self.member)
-        url = self.url + str(self.group.id) + '/'
+        url = self.url + str(self.group.id) + "/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['is_member'], True)
+        self.assertEqual(response.data["is_member"], True)
 
     def test_group_image_redirect(self):
         # NOT logged in (as it needs to work in emails)
         group = GroupFactory(photo=image_path, members=[self.member])
-        response = self.client.get('/api/groups-info/{}/photo/'.format(group.id))
+        response = self.client.get("/api/groups-info/{}/photo/".format(group.id))
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertEqual(response.url, group.photo.url)
 
     def test_group_image_redirect_no_photo(self):
         # NOT logged in (as it needs to work in emails)
         group = GroupFactory(members=[self.member])
-        response = self.client.get('/api/groups-info/{}/photo/'.format(group.id))
+        response = self.client.get("/api/groups-info/{}/photo/".format(group.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_not_too_many_queries(self):
@@ -90,34 +95,34 @@ class TestGroupsInfoGeoIPAPI(APITestCase):
         self.member = UserFactory()
         lat, lng = faker.latlng()
         self.group = GroupFactory(members=[self.member], latitude=lat, longitude=lng)
-        self.url = '/api/groups-info/'
-        self.client_ip = '2003:d9:ef08:4a00:4b7a:7964:8a3c:a33e'
+        self.url = "/api/groups-info/"
+        self.client_ip = "2003:d9:ef08:4a00:4b7a:7964:8a3c:a33e"
 
     def tearDown(self):
         ip_to_lat_lon.cache_clear()
 
-    @patch('karrot.utils.geoip.geoip')
+    @patch("karrot.utils.geoip.geoip")
     def test_returns_distance_via_geoip(self, geoip):
         geoip.lat_lon.return_value = [float(val) for val in faker.latlng()]
         response = self.client.get(self.url, HTTP_X_FORWARDED_FOR=self.client_ip)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         geoip.lat_lon.assert_called_with(self.client_ip)
-        self.assertIsNotNone(response.data[0]['distance'])
+        self.assertIsNotNone(response.data[0]["distance"])
 
-    @patch('karrot.utils.geoip.geoip')
+    @patch("karrot.utils.geoip.geoip")
     def test_returns_none_if_no_ip_address_provided(self, geoip):
         geoip.lat_lon.return_value = [float(val) for val in faker.latlng()]
         response = self.client.get(self.url, HTTP_X_FORWARDED_FOR=None, REMOTE_ADDR=None)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIsNone(response.data[0]['distance'])
+        self.assertIsNone(response.data[0]["distance"])
 
-    @patch('karrot.utils.geoip.geoip', None)
+    @patch("karrot.utils.geoip.geoip", None)
     def test_returns_none_if_geoip_not_available(self):
         response = self.client.get(self.url, HTTP_X_FORWARDED_FOR=self.client_ip)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIsNone(response.data[0]['distance'])
+        self.assertIsNone(response.data[0]["distance"])
 
-    @patch('karrot.utils.geoip.geoip')
+    @patch("karrot.utils.geoip.geoip")
     def test_caches_geoip_lookup(self, geoip):
         lat_lng = [float(val) for val in faker.latlng()]
         geoip.lat_lon.return_value = lat_lng
@@ -136,41 +141,41 @@ class TestGroupsAPI(APITestCase):
         self.user = UserFactory()
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member, UserFactory()], is_open=True)
-        self.url = '/api/groups/'
+        self.url = "/api/groups/"
         self.group_data = {
-            'name': faker.name(),
-            'description': faker.text(),
-            'address': faker.address(),
-            'latitude': faker.latitude(),
-            'longitude': faker.longitude(),
-            'timezone': 'Europe/Berlin'
+            "name": faker.name(),
+            "description": faker.text(),
+            "address": faker.address(),
+            "latitude": faker.latitude(),
+            "longitude": faker.longitude(),
+            "timezone": "Europe/Berlin",
         }
 
     def test_create_group(self):
         self.client.force_login(user=self.user)
-        data = {'name': 'random_name', 'description': 'still alive', 'timezone': 'Europe/Berlin'}
-        response = self.client.post(self.url, data, format='json')
+        data = {"name": "random_name", "description": "still alive", "timezone": "Europe/Berlin"}
+        response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
-        self.assertEqual(response.data['name'], data['name'])
+        self.assertEqual(response.data["name"], data["name"])
 
-        new_group = GroupModel.objects.get(name=data['name'])
-        self.assertEqual(new_group.description, data['description'])
+        new_group = GroupModel.objects.get(name=data["name"])
+        self.assertEqual(new_group.description, data["description"])
         membership = new_group.groupmembership_set.get(user=self.user)
         self.assertIn(GroupNotificationType.NEW_APPLICATION, membership.notification_types)
 
     def test_create_group_with_location(self):
         self.client.force_login(user=self.user)
-        response = self.client.post(self.url, self.group_data, format='json')
+        response = self.client.post(self.url, self.group_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['name'], self.group_data['name'])
+        self.assertEqual(response.data["name"], self.group_data["name"])
         self.assertEqual(
-            GroupModel.objects.get(name=self.group_data['name']).description, self.group_data['description']
+            GroupModel.objects.get(name=self.group_data["name"]).description, self.group_data["description"]
         )
-        self.assertEqual(response.data['address'], self.group_data['address'])
+        self.assertEqual(response.data["address"], self.group_data["address"])
 
     def test_create_group_fails_if_not_logged_in(self):
-        data = {'name': 'random_name', 'description': 'still alive'}
-        response = self.client.post(self.url, data, format='json')
+        data = {"name": "random_name", "description": "still alive"}
+        response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_list_groups(self):
@@ -178,80 +183,80 @@ class TestGroupsAPI(APITestCase):
         with self.assertNumQueries(6):
             response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data[0]['id'], self.group.id)
+        self.assertEqual(response.data[0]["id"], self.group.id)
 
     def test_retrieve_group_as_nonmember(self):
         self.client.force_login(user=self.user)
-        url = self.url + str(self.group.id) + '/'
+        url = self.url + str(self.group.id) + "/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_retrieve_group_as_member(self):
         self.client.force_login(user=self.member)
-        url = self.url + str(self.group.id) + '/'
+        url = self.url + str(self.group.id) + "/"
         with self.assertNumQueries(6):
             response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('photo_urls', response.data)
+        self.assertIn("photo_urls", response.data)
 
     def test_patch_group(self):
-        url = self.url + str(self.group.id) + '/'
-        response = self.client.patch(url, self.group_data, format='json')
+        url = self.url + str(self.group.id) + "/"
+        response = self.client.patch(url, self.group_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_patch_group_as_user(self):
         self.client.force_login(user=self.user)
-        url = self.url + str(self.group.id) + '/'
-        response = self.client.patch(url, self.group_data, format='json')
+        url = self.url + str(self.group.id) + "/"
+        response = self.client.patch(url, self.group_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_patch_group_as_member(self):
         self.client.force_login(user=self.member)
-        url = self.url + str(self.group.id) + '/'
-        response = self.client.patch(url, self.group_data, format='json')
+        url = self.url + str(self.group.id) + "/"
+        response = self.client.patch(url, self.group_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_patch_group_as_newcomer(self):
         newcomer = UserFactory()
         self.group.groupmembership_set.create(user=newcomer)
         self.client.force_login(user=newcomer)
-        url = self.url + str(self.group.id) + '/'
-        response = self.client.patch(url, self.group_data, format='json')
+        url = self.url + str(self.group.id) + "/"
+        response = self.client.patch(url, self.group_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_change_timezone_to_invalid_value_fails(self):
         self.client.force_login(user=self.member)
-        url = self.url + str(self.group.id) + '/'
-        response = self.client.patch(url, {'timezone': 'alksjdflkajw'})
+        url = self.url + str(self.group.id) + "/"
+        response = self.client.patch(url, {"timezone": "alksjdflkajw"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        self.assertEqual(response.data, {'timezone': ['Unknown timezone']})
+        self.assertEqual(response.data, {"timezone": ["Unknown timezone"]})
 
     def test_change_is_open_fails(self):
         self.client.force_login(user=self.member)
-        url = self.url + str(self.group.id) + '/'
-        self.client.patch(url, {'is_open': False})
+        url = self.url + str(self.group.id) + "/"
+        self.client.patch(url, {"is_open": False})
         self.assertTrue(Group.objects.get(id=self.group.id).is_open)
 
     def test_get_conversation(self):
         self.client.force_login(user=self.member)
-        response = self.client.get('/api/groups/{}/conversation/'.format(self.group.id))
+        response = self.client.get("/api/groups/{}/conversation/".format(self.group.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertIn(self.member.id, response.data['participants'])
-        self.assertEqual(response.data['type'], 'group')
+        self.assertIn(self.member.id, response.data["participants"])
+        self.assertEqual(response.data["type"], "group")
 
     def test_join_group(self):
         self.client.force_login(user=self.user)
-        response = self.client.post('/api/groups/{}/join/'.format(self.group.id))
+        response = self.client.post("/api/groups/{}/join/".format(self.group.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_join_group_fails_if_not_logged_in(self):
-        response = self.client.post('/api/groups/{}/join/'.format(self.group.id))
+        response = self.client.post("/api/groups/{}/join/".format(self.group.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_cannot_join_non_open_group(self):
         non_open_group = GroupFactory(is_open=False)
         self.client.force_login(user=self.user)
-        response = self.client.post('/api/groups/{}/join/'.format(non_open_group.id))
+        response = self.client.post("/api/groups/{}/join/".format(non_open_group.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_leave_group(self):
@@ -260,9 +265,11 @@ class TestGroupsAPI(APITestCase):
             place=place, participants=[self.member, self.user], date=to_range(timezone.now() + relativedelta(weeks=1))
         )
         past_activity = ActivityFactory(
-            place=place, participants=[
+            place=place,
+            participants=[
                 self.member,
-            ], date=to_range(timezone.now() - relativedelta(weeks=1))
+            ],
+            date=to_range(timezone.now() - relativedelta(weeks=1)),
         )
         unrelated_activity = ActivityFactory(
             date=to_range(timezone.now() + relativedelta(weeks=1)),
@@ -273,25 +280,25 @@ class TestGroupsAPI(APITestCase):
         GroupMembership.objects.create(group=unrelated_activity.place.group, user=self.member)
 
         self.client.force_login(user=self.member)
-        response = self.client.post('/api/groups/{}/leave/'.format(self.group.id))
+        response = self.client.post("/api/groups/{}/leave/".format(self.group.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(activity.participants.get_queryset().filter(id=self.member.id).exists())
         self.assertTrue(past_activity.participants.get_queryset().filter(id=self.member.id).exists())
         self.assertTrue(unrelated_activity.participants.get_queryset().filter(id=self.member.id).exists())
 
     def test_leave_group_fails_if_not_logged_in(self):
-        response = self.client.post('/api/groups/{}/leave/'.format(self.group.id))
+        response = self.client.post("/api/groups/{}/leave/".format(self.group.id))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_group_as_nonmember(self):
         self.client.force_login(user=self.user)
-        url = self.url + str(self.group.id) + '/'
+        url = self.url + str(self.group.id) + "/"
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_delete_group_as_member(self):
         self.client.force_login(user=self.member)
-        url = self.url + str(self.group.id) + '/'
+        url = self.url + str(self.group.id) + "/"
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -300,23 +307,23 @@ class TestUploadGroupPhoto(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.group = GroupFactory(members=[self.user])
-        self.url = '/api/groups/' + str(self.group.id) + '/'
+        self.url = "/api/groups/" + str(self.group.id) + "/"
 
     def test_upload_and_delete_photo(self):
         self.client.force_login(user=self.user)
         response = self.client.get(self.url)
-        self.assertTrue('full_size' not in response.data['photo_urls'])
+        self.assertTrue("full_size" not in response.data["photo_urls"])
 
         History.objects.all().delete()
 
-        with open(image_path, 'rb') as photo:
-            response = self.client.patch(self.url, {'photo': photo})
+        with open(image_path, "rb") as photo:
+            response = self.client.patch(self.url, {"photo": photo})
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
         response = self.client.get(self.url)
-        self.assertTrue('full_size' in response.data['photo_urls'])
-        self.assertTrue('thumbnail' in response.data['photo_urls'])
-        self.assertTrue(response.data['photo_urls']['full_size'].startswith('http://testserver'))
+        self.assertTrue("full_size" in response.data["photo_urls"])
+        self.assertTrue("thumbnail" in response.data["photo_urls"])
+        self.assertTrue(response.data["photo_urls"]["full_size"].startswith("http://testserver"))
 
         self.assertEqual(History.objects.count(), 1)
         self.assertEqual(History.objects.first().typus, HistoryTypus.GROUP_CHANGE_PHOTO)
@@ -324,12 +331,12 @@ class TestUploadGroupPhoto(APITestCase):
         History.objects.all().delete()
 
         # delete photo
-        response = self.client.patch(self.url, {'photo': None}, format='json')
+        response = self.client.patch(self.url, {"photo": None}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
         response = self.client.get(self.url)
-        self.assertTrue('full_size' not in response.data['photo_urls'])
-        self.assertTrue('thumbnail' not in response.data['photo_urls'])
+        self.assertTrue("full_size" not in response.data["photo_urls"])
+        self.assertTrue("thumbnail" not in response.data["photo_urls"])
 
         self.assertEqual(History.objects.count(), 1)
         self.assertEqual(History.objects.first().typus, HistoryTypus.GROUP_DELETE_PHOTO)
@@ -347,13 +354,13 @@ class TestGroupMembershipsAPI(APITestCase):
 
     def test_shows_user_active(self):
         self.client.force_login(user=self.active_user)
-        response = self.client.get('/api/groups/{}/'.format(self.group.id))
-        self.assertEqual(response.data['memberships'][self.active_user.id]['active'], True)
+        response = self.client.get("/api/groups/{}/".format(self.group.id))
+        self.assertEqual(response.data["memberships"][self.active_user.id]["active"], True)
 
     def test_shows_user_inactive(self):
         self.client.force_login(user=self.active_user)
-        response = self.client.get('/api/groups/{}/'.format(self.group.id))
-        self.assertEqual(response.data['memberships'][self.inactive_user.id]['active'], False)
+        response = self.client.get("/api/groups/{}/".format(self.group.id))
+        self.assertEqual(response.data["memberships"][self.inactive_user.id]["active"], False)
 
 
 class TestGroupMemberLastSeenAPI(APITestCase):
@@ -365,13 +372,13 @@ class TestGroupMemberLastSeenAPI(APITestCase):
         self.membership.removal_notification_at = timezone.now() - relativedelta(hours=2)
         self.membership.save()
 
-    @patch('karrot.groups.stats.write_points')
+    @patch("karrot.groups.stats.write_points")
     def test_mark_user_as_seen_in_group(self, write_points):
         before = timezone.now()
         self.assertLess(self.membership.lastseen_at, before)
 
         self.client.force_login(user=self.user)
-        response = self.client.post('/api/groups/{}/mark_user_active/'.format(self.group.id), format='json')
+        response = self.client.post("/api/groups/{}/mark_user_active/".format(self.group.id), format="json")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.membership.refresh_from_db()
         self.assertGreater(self.membership.lastseen_at, before)
@@ -379,21 +386,29 @@ class TestGroupMemberLastSeenAPI(APITestCase):
         self.assertEqual(self.membership.removal_notification_at, None)
 
         expected_stats = [
-            call([{
-                'measurement': 'karrot.events',
-                'tags': group_tags(self.group),
-                'fields': {
-                    'group_member_returned': 1,
-                    'group_member_returned_seconds_since_marked_for_removal': 60 * 60 * 2,
-                },
-            }]),
-            call([{
-                'measurement': 'karrot.events',
-                'tags': group_tags(self.group),
-                'fields': {
-                    'group_activity': 1,
-                },
-            }]),
+            call(
+                [
+                    {
+                        "measurement": "karrot.events",
+                        "tags": group_tags(self.group),
+                        "fields": {
+                            "group_member_returned": 1,
+                            "group_member_returned_seconds_since_marked_for_removal": 60 * 60 * 2,
+                        },
+                    }
+                ]
+            ),
+            call(
+                [
+                    {
+                        "measurement": "karrot.events",
+                        "tags": group_tags(self.group),
+                        "fields": {
+                            "group_activity": 1,
+                        },
+                    }
+                ]
+            ),
         ]
 
         self.assertEqual(write_points.call_args_list, expected_stats)
@@ -412,7 +427,7 @@ class TestGroupNotificationTypes(APITestCase):
         self.membership.save()
 
         response = self.client.put(
-            '/api/groups/{}/notification_types/{}/'.format(self.group.id, GroupNotificationType.WEEKLY_SUMMARY)
+            "/api/groups/{}/notification_types/{}/".format(self.group.id, GroupNotificationType.WEEKLY_SUMMARY)
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.membership.refresh_from_db()
@@ -423,7 +438,7 @@ class TestGroupNotificationTypes(APITestCase):
         self.membership.notification_types = [GroupNotificationType.WEEKLY_SUMMARY]
         self.membership.save()
         response = self.client.delete(
-            '/api/groups/{}/notification_types/{}/'.format(self.group.id, GroupNotificationType.WEEKLY_SUMMARY)
+            "/api/groups/{}/notification_types/{}/".format(self.group.id, GroupNotificationType.WEEKLY_SUMMARY)
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.membership.refresh_from_db()
@@ -431,5 +446,5 @@ class TestGroupNotificationTypes(APITestCase):
 
     def test_appears_in_group_detail(self):
         self.client.force_login(user=self.user)
-        response = self.client.get('/api/groups/{}/'.format(self.group.id))
-        self.assertEqual(response.data['notification_types'], get_default_notification_types())
+        response = self.client.get("/api/groups/{}/".format(self.group.id))
+        self.assertEqual(response.data["notification_types"], get_default_notification_types())

@@ -14,21 +14,21 @@ from karrot.utils import markdown
 
 
 class ApplicationStatus(Enum):
-    PENDING = 'pending'
-    ACCEPTED = 'accepted'
-    DECLINED = 'declined'
-    WITHDRAWN = 'withdrawn'
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    DECLINED = "declined"
+    WITHDRAWN = "withdrawn"
 
 
 class Application(BaseModel, ConversationMixin):
-    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE)
+    group = models.ForeignKey("groups.Group", on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     decided_at = models.DateTimeField(null=True)
     decided_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='application_decided',
+        related_name="application_decided",
     )
     questions = models.TextField()
     answers = models.TextField()
@@ -62,20 +62,20 @@ class Application(BaseModel, ConversationMixin):
         self.decided_by = accepted_by
         self.decided_at = timezone.now()
 
-        with silk_profile('save application'):
+        with silk_profile("save application"):
             self.save()
 
-        with silk_profile('add group member'):
+        with silk_profile("add group member"):
             self.group.add_member(
                 self.user,
                 added_by=accepted_by,
                 history_payload={
-                    'accepted_by': accepted_by.id,
-                    'application_date': self.created_at.isoformat(),
-                }
+                    "accepted_by": accepted_by.id,
+                    "application_date": self.created_at.isoformat(),
+                },
             )
 
-        with silk_profile('notify accepted application'):
+        with silk_profile("notify accepted application"):
             notify_about_accepted_application(self)
 
     @transaction.atomic
@@ -89,10 +89,10 @@ class Application(BaseModel, ConversationMixin):
             group=self.group,
             users=[declined_by],
             payload={
-                'applicant': self.user.id,
-                'applicant_name': self.user.display_name,
-                'application_date': self.created_at.isoformat()
-            }
+                "applicant": self.user.id,
+                "applicant_name": self.user.display_name,
+                "application_date": self.created_at.isoformat(),
+            },
         )
 
         notify_about_declined_application(self)

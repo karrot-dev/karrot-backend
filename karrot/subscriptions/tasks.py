@@ -27,15 +27,13 @@ def notify_message_push_subscribers(message):
             user__conversationparticipant__muted=False,
         )
 
-    subscriptions = subscriptions.\
-        exclude(user=message.author).\
-        select_related('user').\
-        order_by('user__language').\
-        distinct()
+    subscriptions = (
+        subscriptions.exclude(user=message.author).select_related("user").order_by("user__language").distinct()
+    )
 
-    for (language, subscriptions) in groupby(subscriptions, key=lambda subscription: subscription.user.language):
-        subscriptions = list(subscriptions)
-        notify_message_push_subscribers_with_language(message, subscriptions, language)
+    for language, language_subscriptions in groupby(subscriptions, key=lambda subscription: subscription.user.language):
+        language_subscriptions = list(language_subscriptions)
+        notify_message_push_subscribers_with_language(message, language_subscriptions, language)
 
 
 def get_message_title(message, language):
@@ -45,62 +43,62 @@ def get_message_title(message, language):
 
     if message.is_thread_reply():
         thread_start = Truncator(message.thread.content).chars(num=15)
-        return '{} / {}'.format(thread_start, author_name)
+        return "{} / {}".format(thread_start, author_name)
 
-    if type == 'group':
-        return '{} / {}'.format(conversation.target.name, author_name)
+    if type == "group":
+        return "{} / {}".format(conversation.target.name, author_name)
 
-    if type == 'place':
-        return '{} / {}'.format(conversation.target.name, author_name)
+    if type == "place":
+        return "{} / {}".format(conversation.target.name, author_name)
 
-    if type == 'activity':
+    if type == "activity":
         activity = conversation.target
         group_tz = activity.place.group.timezone
         with timezone.override(group_tz):
             weekday = format_date(
                 activity.date.start.astimezone(timezone.get_current_timezone()),
-                'EEEE',
+                "EEEE",
                 locale=translation.to_locale(language),
             )
             time = format_time(
                 activity.date.start,
-                format='short',
+                format="short",
                 locale=translation.to_locale(language),
                 tzinfo=timezone.get_current_timezone(),
             )
-        short_date = '{} {}'.format(weekday, time)
-        short_name = '{} {}'.format(activity.activity_type.get_translated_name(), short_date)
-        return '{} / {}'.format(short_name, author_name)
+        short_date = "{} {}".format(weekday, time)
+        short_name = "{} {}".format(activity.activity_type.get_translated_name(), short_date)
+        return "{} / {}".format(short_name, author_name)
 
-    if type == 'application':
+    if type == "application":
         application = conversation.target
         applicant_name = application.user.display_name
-        if applicant_name == '':
-            applicant_name = '(?)'
+        if applicant_name == "":
+            applicant_name = "(?)"
 
-        emoji = '❓'
+        emoji = "❓"
         if application.status == ApplicationStatus.ACCEPTED.value:
-            emoji = '✅'
+            emoji = "✅"
         elif application.status == ApplicationStatus.DECLINED.value:
-            emoji = '❌'
+            emoji = "❌"
         elif application.status == ApplicationStatus.WITHDRAWN.value:
-            emoji = '🗑️'
-        application_title = '{} {}'.format(emoji, applicant_name)
+            emoji = "🗑️"
+        application_title = "{} {}".format(emoji, applicant_name)
 
         if message.author == application.user:
             return application_title
         else:
-            return '{} / {}'.format(application_title, author_name)
+            return "{} / {}".format(application_title, author_name)
 
-    if type == 'issue':
+    if type == "issue":
         issue = conversation.target
         if message.author == issue.affected_user:
-            return '☹️ {}'.format(author_name)
-        return '☹️ {} / {}'.format(issue.affected_user, author_name)
+            return "☹️ {}".format(author_name)
+        return "☹️ {} / {}".format(issue.affected_user, author_name)
 
-    if type == 'offer':
+    if type == "offer":
         offer = conversation.target
-        return '🎁️ {} / {}'.format(offer.name, author_name)
+        return "🎁️ {} / {}".format(offer.name, author_name)
 
     return author_name
 
@@ -109,7 +107,7 @@ def notify_message_push_subscribers_with_language(message, subscriptions, langua
     conversation = message.conversation
 
     if not translation.check_for_language(language):
-        language = 'en'
+        language = "en"
 
     with translation.override(language):
         message_title = get_message_title(message, language)
@@ -122,7 +120,7 @@ def notify_message_push_subscribers_with_language(message, subscriptions, langua
         image_url=frontend_urls.user_photo_url(message.author),
         # this causes each notification for a given conversation to replace previous notifications
         # fancier would be to make the new notifications show a summary not just the latest message
-        tag='conversation:{}'.format(conversation.id),
+        tag="conversation:{}".format(conversation.id),
     )
 
 
@@ -136,37 +134,36 @@ def notify_mention_push_subscribers(mention):
     if conversation.conversationparticipant_set.filter(user=user).exists():
         return
 
-    notify_message_push_subscribers_with_language(
-        message, WebPushSubscription.objects.filter(user=user), user.language
-    )
+    notify_message_push_subscribers_with_language(message, WebPushSubscription.objects.filter(user=user), user.language)
 
 
 @db_task()
 def notify_new_offer_push_subscribers(offer):
-
     users = offer.group.members.filter(
         groupmembership__in=GroupMembership.objects.active().with_notification_type(GroupNotificationType.NEW_OFFER),
     )
 
-    subscriptions = WebPushSubscription.objects.filter(
-        user__in=users,
-    ).\
-        exclude(user=offer.user). \
-        select_related('user'). \
-        order_by('user__language'). \
-        distinct()
+    subscriptions = (
+        WebPushSubscription.objects.filter(
+            user__in=users,
+        )
+        .exclude(user=offer.user)
+        .select_related("user")
+        .order_by("user__language")
+        .distinct()
+    )
 
-    for (language, subscriptions) in groupby(subscriptions, key=lambda subscription: subscription.user.language):
-        subscriptions = list(subscriptions)
-        notify_new_offer_push_subscribers_with_language(offer, subscriptions, language)
+    for language, language_subscriptions in groupby(subscriptions, key=lambda subscription: subscription.user.language):
+        language_subscriptions = list(language_subscriptions)
+        notify_new_offer_push_subscribers_with_language(offer, language_subscriptions, language)
 
 
 def notify_new_offer_push_subscribers_with_language(offer, subscriptions, language):
     if not translation.check_for_language(language):
-        language = 'en'
+        language = "en"
 
     with translation.override(language):
-        message_title = '🎁️ {} / {}'.format(offer.name, offer.user.display_name)
+        message_title = "🎁️ {} / {}".format(offer.name, offer.user.display_name)
 
     notify_subscribers(
         subscriptions=subscriptions,
@@ -175,14 +172,14 @@ def notify_new_offer_push_subscribers_with_language(offer, subscriptions, langua
         url=frontend_urls.offer_url(offer),
         # this causes each notification for a given conversation to replace previous notifications
         # fancier would be to make the new notifications show a summary not just the latest message
-        tag='offer:{}'.format(offer.id),
+        tag="offer:{}".format(offer.id),
     )
 
 
-@db_periodic_task(crontab(hour='*/24', minute=35))  # every 24 hours
+@db_periodic_task(crontab(hour="*/24", minute=35))  # every 24 hours
 def delete_old_channel_subscriptions():
     with timer() as t:
         # delete old channel subscriptions after some minutes of inactivity
         ChannelSubscription.objects.old().delete()
 
-    stats_utils.periodic_task('subscriptions__delete_old_channel_subscriptions', seconds=t.elapsed_seconds)
+    stats_utils.periodic_task("subscriptions__delete_old_channel_subscriptions", seconds=t.elapsed_seconds)

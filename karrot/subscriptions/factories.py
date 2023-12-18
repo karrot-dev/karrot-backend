@@ -12,7 +12,7 @@ class WebPushSubscriptionFactory(DjangoModelFactory):
 
     user = SubFactory(UserFactory)
     endpoint = LazyAttribute(lambda x: faker.url())
-    keys = LazyAttribute(lambda x: {'auth': faker.uuid4(), 'p256dh': faker.uuid4()})
+    keys = LazyAttribute(lambda x: {"auth": faker.uuid4(), "p256dh": faker.uuid4()})
 
     mobile = False
     browser = "firefox"

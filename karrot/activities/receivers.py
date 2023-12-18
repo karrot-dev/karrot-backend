@@ -17,10 +17,15 @@ from karrot.places.models import Place, PlaceStatus
 def leave_group_handler(sender, instance, **kwargs):
     group = instance.group
     user = instance.user
-    for activity in Activity.objects. \
-            filter(date__startswith__gte=timezone.now()). \
-            filter(participants__in=[user, ]). \
-            filter(place__group=group):
+    for activity in (
+        Activity.objects.filter(date__startswith__gte=timezone.now())
+        .filter(
+            participants__in=[
+                user,
+            ]
+        )
+        .filter(place__group=group)
+    ):
         activity.remove_participant(user)
 
 
@@ -78,7 +83,7 @@ def schedule_activity_reminder(sender, instance, **kwargs):
     remind_at = activity.date.start - timedelta(hours=settings.ACTIVITY_REMINDER_HOURS)
     if remind_at > timezone.now():
         task = tasks.activity_reminder.schedule(
-            (participant.id, ),
+            (participant.id,),
             eta=remind_at,
         )
         participant.reminder_task_id = task.id

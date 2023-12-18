@@ -6,7 +6,7 @@ from rest_framework.exceptions import ParseError
 
 
 class JSONWithFilesMultiPartParser(MultiPartParser):
-    """"
+    """ "
     A multipart parser that allows you send JSON with files to be nested inside it
 
     So, if you you had an model with a name and image field you kind of want to be able to
@@ -50,24 +50,25 @@ class JSONWithFilesMultiPartParser(MultiPartParser):
         data.append('image', imageBlob, 'image.jpg')
 
     """
+
     def parse(self, stream, media_type=None, parser_context=None):
         parsed = MultiPartParser.parse(self, stream, media_type, parser_context)
 
         if len(parsed.data) > 0:
             if len(parsed.files) > 0:
-                raise ParseError('Either pass data or files')
+                raise ParseError("Either pass data or files")
             return parsed.data
 
         data = {}
 
         # Find any JSON document content first
         for name, content in parsed.files.items():
-            if name == 'document' and content.content_type == 'application/json':
+            if name == "document" and content.content_type == "application/json":
                 data.update(**json.load(content.file))
 
         # Now get any other content
         for name, content in parsed.files.items():
-            if name != 'document':
+            if name != "document":
                 # name is the path into the object to assign
                 glom.assign(data, name, content)
 

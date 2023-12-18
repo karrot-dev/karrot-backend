@@ -15,48 +15,46 @@ class ActivityTypeFilter(filters.FilterSet):
 
     class Meta:
         model = ActivityType
-        fields = ['group']
+        fields = ["group"]
 
 
 class ActivitySeriesFilter(filters.FilterSet):
     class Meta:
         model = ActivitySeries
         fields = [
-            'place',
+            "place",
         ]
 
 
 class PublicActivitiesFilter(filters.FilterSet):
-    group = filters.NumberFilter(field_name='place__group')
-    date = ISODateTimeRangeFromToRangeFilter(field_name='date', lookup_expr='overlap')
+    group = filters.NumberFilter(field_name="place__group")
+    date = ISODateTimeRangeFromToRangeFilter(field_name="date", lookup_expr="overlap")
 
 
 class ActivitiesFilter(filters.FilterSet):
-    place = filters.NumberFilter(field_name='place')
-    place_status = filters.ChoiceFilter(field_name='place__status', choices=PlaceStatus.choices)
-    group = filters.NumberFilter(field_name='place__group')
-    date = ISODateTimeRangeFromToRangeFilter(field_name='date', lookup_expr='overlap')
-    feedback_possible = filters.BooleanFilter(method='filter_feedback_possible')
-    has_feedback = filters.BooleanFilter(method='filter_has_feedback')
-    joined = filters.BooleanFilter(method='filter_joined')
-    activity_type = filters.NumberFilter(field_name='activity_type')
-    slots = filters.ChoiceFilter(method='filter_slots', choices=[(val, val) for val in ('free', 'empty', 'joined')])
-    places = filters.ChoiceFilter(
-        method='filter_places', choices=[(val, val) for val in ('subscribed', )]
-    )
+    place = filters.NumberFilter(field_name="place")
+    place_status = filters.ChoiceFilter(field_name="place__status", choices=PlaceStatus.choices)
+    group = filters.NumberFilter(field_name="place__group")
+    date = ISODateTimeRangeFromToRangeFilter(field_name="date", lookup_expr="overlap")
+    feedback_possible = filters.BooleanFilter(method="filter_feedback_possible")
+    has_feedback = filters.BooleanFilter(method="filter_has_feedback")
+    joined = filters.BooleanFilter(method="filter_joined")
+    activity_type = filters.NumberFilter(field_name="activity_type")
+    slots = filters.ChoiceFilter(method="filter_slots", choices=[(val, val) for val in ("free", "empty", "joined")])
+    places = filters.ChoiceFilter(method="filter_places", choices=[(val, val) for val in ("subscribed",)])
 
     class Meta:
         model = Activity
         fields = [
-            'place',
-            'group',
-            'date',
-            'series',
-            'feedback_possible',
-            'joined',
-            'activity_type',
-            'slots',
-            'places',
+            "place",
+            "group",
+            "date",
+            "series",
+            "feedback_possible",
+            "joined",
+            "activity_type",
+            "slots",
+            "places",
         ]
 
     def filter_feedback_possible(self, qs, name, value):
@@ -81,27 +79,27 @@ class ActivitiesFilter(filters.FilterSet):
         return qs
 
     def filter_slots(self, qs, name, value):
-        if value == 'free':
+        if value == "free":
             return qs.with_free_slots(self.request.user)
-        elif value == 'empty':
+        elif value == "empty":
             return qs.empty()
-        elif value == 'joined':
+        elif value == "joined":
             return qs.with_participant(self.request.user)
         return qs
 
     def filter_places(self, qs, name, value):
-        if value == 'subscribed':
+        if value == "subscribed":
             return qs.filter(place__subscribers=self.request.user)
         return qs
 
 
 class FeedbackFilter(filters.FilterSet):
-    group = filters.NumberFilter(field_name='about__place__group')
-    place = filters.NumberFilter(field_name='about__place')
-    about = filters.NumberFilter(field_name='about')
-    given_by = filters.NumberFilter(field_name='given_by')
-    created_at = filters.IsoDateTimeFromToRangeFilter(field_name='created_at')
+    group = filters.NumberFilter(field_name="about__place__group")
+    place = filters.NumberFilter(field_name="about__place")
+    about = filters.NumberFilter(field_name="about")
+    given_by = filters.NumberFilter(field_name="given_by")
+    created_at = filters.IsoDateTimeFromToRangeFilter(field_name="created_at")
 
     class Meta:
         model = Feedback
-        fields = ['group', 'place', 'about', 'given_by', 'created_at']
+        fields = ["group", "place", "about", "given_by", "created_at"]

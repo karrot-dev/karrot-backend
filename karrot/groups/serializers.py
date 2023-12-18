@@ -12,8 +12,7 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.fields import Field
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
-from karrot.groups.models import Group as GroupModel, GroupMembership, \
-    GroupNotificationType, Trust
+from karrot.groups.models import Group as GroupModel, GroupMembership, GroupNotificationType, Trust
 from karrot.history.models import History, HistoryTypus
 from karrot.utils.misc import find_changed
 from karrot.utils.validators import prevent_reserved_names
@@ -30,18 +29,18 @@ class TimezoneField(serializers.Field):
     def to_internal_value(self, data):
         try:
             return pytz.timezone(str(data))
-        except pytz.exceptions.UnknownTimeZoneError:
-            raise ValidationError(_('Unknown timezone'))
+        except pytz.exceptions.UnknownTimeZoneError as exc:
+            raise ValidationError(_("Unknown timezone")) from exc
 
 
 class GroupBaseSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         if instance.is_playground():
-            if 'name' in ret:
-                ret['name'] = _('Playground')
-            if 'public_description' in ret:
-                ret['public_description'] = render_to_string('playground_public_description.nopreview.jinja2')
+            if "name" in ret:
+                ret["name"] = _("Playground")
+            if "public_description" in ret:
+                ret["public_description"] = render_to_string("playground_public_description.nopreview.jinja2")
         return ret
 
 
@@ -49,14 +48,14 @@ class GroupMembershipInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupMembership
         fields = (
-            'created_at',
-            'added_by',
-            'roles',
-            'active',
-            'trusted_by',
-            'trust',
+            "created_at",
+            "added_by",
+            "roles",
+            "active",
+            "trusted_by",
+            "trust",
         )
-        read_only_fields = ['created_at', 'roles', 'added_by', 'trust']
+        read_only_fields = ["created_at", "roles", "added_by", "trust"]
 
     active = serializers.SerializerMethodField()
     trusted_by = serializers.SerializerMethodField()
@@ -78,9 +77,9 @@ class GroupMembershipTrustSerializer(serializers.ModelSerializer):
     class Meta:
         model = Trust
         fields = (
-            'given_by',
-            'role',
-            'created_at',
+            "given_by",
+            "role",
+            "created_at",
         )
 
 
@@ -89,15 +88,16 @@ class GroupHistorySerializer(GroupBaseSerializer):
 
     class Meta:
         model = GroupModel
-        exclude = ['photo']
+        exclude = ["photo"]
 
 
 class GroupDetailSerializer(GroupBaseSerializer):
     "use this also for creating and updating a group"
+
     memberships = serializers.SerializerMethodField()
     notification_types = serializers.SerializerMethodField()
-    photo = VersatileImageFieldSerializer(sizes='group_logo', required=False, allow_null=True, write_only=True)
-    photo_urls = VersatileImageFieldSerializer(sizes='group_logo', read_only=True, source='photo')
+    photo = VersatileImageFieldSerializer(sizes="group_logo", required=False, allow_null=True, write_only=True)
+    photo_urls = VersatileImageFieldSerializer(sizes="group_logo", read_only=True, source="photo")
     timezone = TimezoneField()
 
     # setting constants
@@ -116,53 +116,50 @@ class GroupDetailSerializer(GroupBaseSerializer):
     class Meta:
         model = GroupModel
         fields = [
-            'id',
-            'name',
-            'description',
-            'welcome_message',
-            'public_description',
-            'application_questions',
-            'application_questions_default',
-            'members',
-            'memberships',
-            'roles',
-            'address',
-            'latitude',
-            'longitude',
-            'timezone',
-            'status',
-            'theme',
-            'features',
-            'notification_types',
-            'is_open',
-            'trust_threshold_for_newcomer',
-            'member_inactive_after_days',
-            'issue_voting_duration_days',
-            'photo',
-            'photo_urls',
+            "id",
+            "name",
+            "description",
+            "welcome_message",
+            "public_description",
+            "application_questions",
+            "application_questions_default",
+            "members",
+            "memberships",
+            "roles",
+            "address",
+            "latitude",
+            "longitude",
+            "timezone",
+            "status",
+            "theme",
+            "features",
+            "notification_types",
+            "is_open",
+            "trust_threshold_for_newcomer",
+            "member_inactive_after_days",
+            "issue_voting_duration_days",
+            "photo",
+            "photo_urls",
         ]
         extra_kwargs = {
-            'name': {
-                'min_length': 5,
-                'validators': [prevent_reserved_names],
+            "name": {
+                "min_length": 5,
+                "validators": [prevent_reserved_names],
             },
-            'description': {
-                'trim_whitespace': False,
-                'max_length': settings.DESCRIPTION_MAX_LENGTH
-            },
-            'welcome_message': {
-                'trim_whitespace': False,
+            "description": {"trim_whitespace": False, "max_length": settings.DESCRIPTION_MAX_LENGTH},
+            "welcome_message": {
+                "trim_whitespace": False,
             },
         }
         read_only_fields = [
-            'active',
-            'members',
-            'memberships',
-            'roles',
-            'notification_types',
-            'is_open',
-            'theme',
-            'features',
+            "active",
+            "members",
+            "memberships",
+            "roles",
+            "notification_types",
+            "is_open",
+            "theme",
+            "features",
         ]
 
     roles = serializers.SerializerMethodField()
@@ -176,17 +173,17 @@ class GroupDetailSerializer(GroupBaseSerializer):
         # does not include 'editor', as it is a built-in role right now
         return {
             role.name: {
-                'name': role.name,
-                'display_name': role.display_name,
-                'description': role.description,
-                'threshold': role.threshold,
-                'role_required_for_trust': role.role_required_for_trust,
+                "name": role.name,
+                "display_name": role.display_name,
+                "description": role.description,
+                "threshold": role.threshold,
+                "role_required_for_trust": role.role_required_for_trust,
             }
             for role in group.roles.all()
         }
 
     def get_notification_types(self, group) -> List[str]:
-        user = self.context['request'].user
+        user = self.context["request"].user
         membership = next(m for m in group.groupmembership_set.all() if m.user_id == user.id)
         return membership.notification_types
 
@@ -194,11 +191,11 @@ class GroupDetailSerializer(GroupBaseSerializer):
         if group.is_playground():
             # Prevent editing of public fields
             # Those fields get overridden with a translation message
-            for field in ['name', 'public_description']:
+            for field in ["name", "public_description"]:
                 if field in validated_data:
                     del validated_data[field]
 
-        if 'photo' in validated_data:
+        if "photo" in validated_data:
             group.delete_photo()
 
         changed_data = find_changed(group, validated_data)
@@ -207,28 +204,27 @@ class GroupDetailSerializer(GroupBaseSerializer):
         after_data = GroupHistorySerializer(group).data
 
         if before_data != after_data:
-            user = self.context['request'].user
+            user = self.context["request"].user
             History.objects.create(
                 typus=HistoryTypus.GROUP_MODIFY,
                 group=group,
                 users=[user],
-                payload={k: self.initial_data.get(k)
-                         for k in changed_data.keys()},
+                payload={k: self.initial_data.get(k) for k in changed_data.keys()},
                 before=before_data,
                 after=after_data,
             )
 
-        if 'photo' in validated_data:
-            deleted = validated_data['photo'] is None
+        if "photo" in validated_data:
+            deleted = validated_data["photo"] is None
             History.objects.create(
                 typus=HistoryTypus.GROUP_DELETE_PHOTO if deleted else HistoryTypus.GROUP_CHANGE_PHOTO,
                 group=group,
-                users=[self.context['request'].user],
+                users=[self.context["request"].user],
             )
         return group
 
     def create(self, validated_data):
-        user = self.context['request'].user
+        user = self.context["request"].user
         group = GroupModel.objects.create(**validated_data)
 
         # create first member and make it receive application notifications
@@ -246,22 +242,23 @@ class GroupDetailSerializer(GroupBaseSerializer):
             group=group,
             users=[user],
             payload=self.initial_data,
-            after=GroupHistorySerializer(group).data
+            after=GroupHistorySerializer(group).data,
         )
         return group
 
     def validate_group(self, group):
-        membership = GroupMembership.objects.filter(user=self.context['request'].user, group=group).first()
+        membership = GroupMembership.objects.filter(user=self.context["request"].user, group=group).first()
         if not membership:
-            raise PermissionDenied(_('You are not in this group'))
+            raise PermissionDenied(_("You are not in this group"))
         return group
 
 
 class TrustActionSerializer(serializers.ModelSerializer):
     """Responsible for both creating and destroying trust"""
+
     class Meta:
         model = GroupMembership
-        fields = ('role', )
+        fields = ("role",)
 
     # default so it works with non-trust-for-role aware frontend
     role = serializers.CharField(default=GROUP_EDITOR)
@@ -270,31 +267,33 @@ class TrustActionSerializer(serializers.ModelSerializer):
         group = self.instance.group
         if role_name not in group.all_role_names:
             raise ValidationError(f'Invalid role "{role_name}" for group, available roles are {group.all_role_names}')
-        if role_name != 'editor':
+        if role_name != "editor":
             role = group.roles.get(name=role_name)
-            if role.role_required_for_trust and not group.is_member_with_role(self.context['request'].user,
-                                                                              role.role_required_for_trust):
+            if role.role_required_for_trust and not group.is_member_with_role(
+                self.context["request"].user, role.role_required_for_trust
+            ):
                 raise ValidationError(
-                    f'Trust for role "{role_name}" can only be given by users with "{role.role_required_for_trust}" role'
+                    f'Trust for role "{role_name}" can only be given by users '
+                    f'with "{role.role_required_for_trust}" role'
                 )
 
         return role_name
 
     def update(self, membership, validated_data):
-        request = self.context['request']
+        request = self.context["request"]
         user = request.user
         params = dict(
             membership=membership,
             given_by=user,
-            role=validated_data['role'],
+            role=validated_data["role"],
         )
 
-        if request.method == 'POST':
+        if request.method == "POST":
             trust, created = Trust.objects.get_or_create(**params)
             if not created:
-                raise ValidationError('You already gave trust to this user')
+                raise ValidationError("You already gave trust to this user")
 
-        elif request.method == 'DELETE':
+        elif request.method == "DELETE":
             Trust.objects.get(**params).delete()
 
         return membership
@@ -315,22 +314,23 @@ class DistanceField(Field):
     - we cannot determine the IP address of the client
     - the IP address cannot be found in the database
     """
+
     def __init__(self, **kwargs):
-        kwargs['source'] = '*'
-        kwargs['read_only'] = True
+        kwargs["source"] = "*"
+        kwargs["read_only"] = True
         super().__init__(**kwargs)
 
     def to_representation(self, value):
         if not geoip_is_available():
             return None
 
-        if not (hasattr(value, 'latitude') and hasattr(value, 'longitude')):
-            raise Exception('Must have latitude and longitude fields to use DistanceField')
+        if not (hasattr(value, "latitude") and hasattr(value, "longitude")):
+            raise Exception("Must have latitude and longitude fields to use DistanceField")
 
         if not value.latitude or not value.longitude:
             return None
 
-        request = self.context.get('request', None)
+        request = self.context.get("request", None)
         if not request:
             return None
 
@@ -360,8 +360,9 @@ class GroupPreviewSerializer(GroupBaseSerializer):
     Public information for all visitors
     should be readonly
     """
+
     application_questions = serializers.SerializerMethodField()
-    photo_urls = VersatileImageFieldSerializer(sizes='group_logo', read_only=True, source='photo')
+    photo_urls = VersatileImageFieldSerializer(sizes="group_logo", read_only=True, source="photo")
     distance = DistanceField()
     member_count = serializers.SerializerMethodField()
     is_member = serializers.SerializerMethodField()
@@ -369,37 +370,37 @@ class GroupPreviewSerializer(GroupBaseSerializer):
     class Meta:
         model = GroupModel
         fields = [
-            'id',
-            'name',
-            'public_description',
-            'application_questions',
-            'address',
-            'latitude',
-            'longitude',
-            'member_count',
-            'is_member',
-            'status',
-            'theme',
-            'is_open',
-            'photo_urls',
-            'distance',
+            "id",
+            "name",
+            "public_description",
+            "application_questions",
+            "address",
+            "latitude",
+            "longitude",
+            "member_count",
+            "is_member",
+            "status",
+            "theme",
+            "is_open",
+            "photo_urls",
+            "distance",
         ]
 
     def get_application_questions(self, group) -> str:
         return group.get_application_questions_or_default()
 
     def get_member_count(self, group) -> int:
-        if hasattr(group, 'member_count'):
+        if hasattr(group, "member_count"):
             return group.member_count
 
         return group.members.count()
 
     def get_is_member(self, group) -> bool:
-        user = self.context['request'].user if 'request' in self.context else None
+        user = self.context["request"].user if "request" in self.context else None
         if not user or user.is_anonymous:
             return False
 
-        if hasattr(group, 'is_user_member'):
+        if hasattr(group, "is_user_member"):
             return group.is_user_member
 
         return user in group.members.all()
@@ -411,7 +412,7 @@ class GroupJoinSerializer(GroupBaseSerializer):
         fields = []
 
     def update(self, instance, validated_data):
-        user = self.context['request'].user
+        user = self.context["request"].user
         instance.add_member(user)
         return instance
 
@@ -422,7 +423,7 @@ class GroupLeaveSerializer(GroupBaseSerializer):
         fields = []
 
     def update(self, instance, validated_data):
-        user = self.context['request'].user
+        user = self.context["request"].user
         instance.remove_member(user)
         return instance
 
@@ -433,19 +434,22 @@ class TimezonesSerializer(serializers.Serializer):
 
 class GroupMembershipAddNotificationTypeSerializer(serializers.Serializer):
     notification_type = serializers.ChoiceField(
-        choices=[(choice, choice) for choice in (
-            GroupNotificationType.WEEKLY_SUMMARY,
-            GroupNotificationType.DAILY_ACTIVITY_NOTIFICATION,
-            GroupNotificationType.NEW_APPLICATION,
-            GroupNotificationType.NEW_OFFER,
-            GroupNotificationType.CONFLICT_RESOLUTION,
-        )],
+        choices=[
+            (choice, choice)
+            for choice in (
+                GroupNotificationType.WEEKLY_SUMMARY,
+                GroupNotificationType.DAILY_ACTIVITY_NOTIFICATION,
+                GroupNotificationType.NEW_APPLICATION,
+                GroupNotificationType.NEW_OFFER,
+                GroupNotificationType.CONFLICT_RESOLUTION,
+            )
+        ],
         required=True,
-        write_only=True
+        write_only=True,
     )
 
     def update(self, instance, validated_data):
-        notification_type = validated_data['notification_type']
+        notification_type = validated_data["notification_type"]
         instance.add_notification_types([notification_type])
         instance.save()
         return instance
@@ -455,7 +459,7 @@ class GroupMembershipRemoveNotificationTypeSerializer(serializers.Serializer):
     notification_type = serializers.CharField(required=True, write_only=True)
 
     def update(self, instance, validated_data):
-        notification_type = validated_data['notification_type']
+        notification_type = validated_data["notification_type"]
         instance.remove_notification_types([notification_type])
         instance.save()
         return instance

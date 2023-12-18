@@ -25,11 +25,13 @@ class PushNotifyOptions(TypedDict):
 
 def send_in_channel(channel, topic, payload):
     message = {
-        'type': 'message.send',
-        'text': json.dumps({
-            'topic': topic,
-            'payload': payload,
-        }),
+        "type": "message.send",
+        "text": json.dumps(
+            {
+                "topic": topic,
+                "payload": payload,
+            }
+        ),
     }
     try:
         channel_layer_send_sync(channel, message)

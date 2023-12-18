@@ -45,76 +45,82 @@ class TestGroupStats(TestCase):
         points = stats.get_group_members_stats(group)
 
         self.assertEqual(
-            points, [{
-                'measurement': 'karrot.group.members',
-                'tags': {
-                    'group': str(group.id),
-                    'group_status': 'active',
-                },
-                'fields': {
-                    'count_active_1d': 5,
-                    'count_active_7d': 6,
-                    'count_active_30d': 7,
-                    'count_active_60d': 8,
-                    'count_active_90d': 9,
-                    'count_active_editors_1d': 5,
-                    'count_active_editors_7d': 5,
-                    'count_active_editors_30d': 6,
-                    'count_active_editors_60d': 7,
-                    'count_active_editors_90d': 8,
-                    'count_active_newcomers_1d': 0,
-                    'count_active_newcomers_7d': 1,
-                    'count_active_newcomers_30d': 1,
-                    'count_active_newcomers_60d': 1,
-                    'count_active_newcomers_90d': 1,
-                    'count_activity_active_1d': 0,
-                    'count_activity_active_7d': 1,
-                    'count_activity_active_30d': 2,
-                    'count_activity_active_60d': 3,
-                    'count_activity_active_90d': 4,
-                    'count_activity_active_editors_1d': 0,
-                    'count_activity_active_editors_7d': 0,
-                    'count_activity_active_editors_30d': 1,
-                    'count_activity_active_editors_60d': 2,
-                    'count_activity_active_editors_90d': 3,
-                    'count_activity_active_newcomers_1d': 0,
-                    'count_activity_active_newcomers_7d': 1,
-                    'count_activity_active_newcomers_30d': 1,
-                    'count_activity_active_newcomers_60d': 1,
-                    'count_activity_active_newcomers_90d': 1,
-                    'count_total': 10,
-                    'count_editors_total': 9,
-                    'count_newcomers_total': 1,
-                    'count_active_30d_with_notification_type_weekly_summary': 7,
-                    'count_active_30d_with_notification_type_new_application': 7,
-                    'count_active_30d_with_notification_type_new_offer': 7,
-                    'count_active_30d_with_notification_type_daily_activity_notification': 7,
-                    'count_active_30d_with_notification_type_conflict_resolution': 7,
-                },
-            }]
+            points,
+            [
+                {
+                    "measurement": "karrot.group.members",
+                    "tags": {
+                        "group": str(group.id),
+                        "group_status": "active",
+                    },
+                    "fields": {
+                        "count_active_1d": 5,
+                        "count_active_7d": 6,
+                        "count_active_30d": 7,
+                        "count_active_60d": 8,
+                        "count_active_90d": 9,
+                        "count_active_editors_1d": 5,
+                        "count_active_editors_7d": 5,
+                        "count_active_editors_30d": 6,
+                        "count_active_editors_60d": 7,
+                        "count_active_editors_90d": 8,
+                        "count_active_newcomers_1d": 0,
+                        "count_active_newcomers_7d": 1,
+                        "count_active_newcomers_30d": 1,
+                        "count_active_newcomers_60d": 1,
+                        "count_active_newcomers_90d": 1,
+                        "count_activity_active_1d": 0,
+                        "count_activity_active_7d": 1,
+                        "count_activity_active_30d": 2,
+                        "count_activity_active_60d": 3,
+                        "count_activity_active_90d": 4,
+                        "count_activity_active_editors_1d": 0,
+                        "count_activity_active_editors_7d": 0,
+                        "count_activity_active_editors_30d": 1,
+                        "count_activity_active_editors_60d": 2,
+                        "count_activity_active_editors_90d": 3,
+                        "count_activity_active_newcomers_1d": 0,
+                        "count_activity_active_newcomers_7d": 1,
+                        "count_activity_active_newcomers_30d": 1,
+                        "count_activity_active_newcomers_60d": 1,
+                        "count_activity_active_newcomers_90d": 1,
+                        "count_total": 10,
+                        "count_editors_total": 9,
+                        "count_newcomers_total": 1,
+                        "count_active_30d_with_notification_type_weekly_summary": 7,
+                        "count_active_30d_with_notification_type_new_application": 7,
+                        "count_active_30d_with_notification_type_new_offer": 7,
+                        "count_active_30d_with_notification_type_daily_activity_notification": 7,
+                        "count_active_30d_with_notification_type_conflict_resolution": 7,
+                    },
+                }
+            ],
         )
 
     def test_group_places_stats(self):
         group = GroupFactory()
 
-        [PlaceFactory(group=group, status='active') for _ in range(3)]
-        [PlaceFactory(group=group, status='negotiating') for _ in range(7)]
-        [PlaceFactory(group=group, status='archived') for _ in range(10)]
+        [PlaceFactory(group=group, status="active") for _ in range(3)]
+        [PlaceFactory(group=group, status="negotiating") for _ in range(7)]
+        [PlaceFactory(group=group, status="archived") for _ in range(10)]
 
         points = stats.get_group_places_stats(group)
 
         self.assertEqual(
-            points, [{
-                'measurement': 'karrot.group.places',
-                'tags': {
-                    'group': str(group.id),
-                    'group_status': 'active',
-                },
-                'fields': {
-                    'count_total': 20,
-                    'count_status_active': 3,
-                    'count_status_negotiating': 7,
-                    'count_status_archived': 10,
-                },
-            }]
+            points,
+            [
+                {
+                    "measurement": "karrot.group.places",
+                    "tags": {
+                        "group": str(group.id),
+                        "group_status": "active",
+                    },
+                    "fields": {
+                        "count_total": 20,
+                        "count_status_active": 3,
+                        "count_status_negotiating": 7,
+                        "count_status_archived": 10,
+                    },
+                }
+            ],
         )

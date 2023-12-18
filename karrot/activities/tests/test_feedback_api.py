@@ -19,8 +19,8 @@ from karrot.activities.factories import ActivityFactory, FeedbackFactory, Activi
 class FeedbackTest(APITestCase, ExtractPaginationMixin):
     @classmethod
     def setUpTestData(cls):
-        """ This method runs once before tests in this class """
-        cls.url = '/api/feedback/'
+        """This method runs once before tests in this class"""
+        cls.url = "/api/feedback/"
 
         cls.member = UserFactory()
         cls.participant = UserFactory()
@@ -31,8 +31,12 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         cls.non_participant = UserFactory()
         cls.group = GroupFactory(
             members=[
-                cls.member, cls.participant, cls.evil_participant, cls.participant2, cls.participant3,
-                cls.non_participant
+                cls.member,
+                cls.participant,
+                cls.evil_participant,
+                cls.participant2,
+                cls.participant3,
+                cls.non_participant,
             ]
         )
         cls.place = PlaceFactory(group=cls.group)
@@ -80,7 +84,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
             date=to_range(timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS + 2)),
             participants=[
                 cls.participant3,
-            ]
+            ],
         )
         cls.old_feedback = FeedbackFactory(about=cls.old_activity, given_by=cls.participant3)
 
@@ -101,38 +105,33 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         )
 
         # create feedback for POST method
-        cls.feedback_post = {'about': cls.past_activity.id, 'weight': 2, 'comment': 'asfjk'}
+        cls.feedback_post = {"about": cls.past_activity.id, "weight": 2, "comment": "asfjk"}
 
         # create feedback for POST method without weight and comment
         cls.feedback_without_weight_comment = {
-            'about': cls.past_activity.id,
+            "about": cls.past_activity.id,
         }
 
         # create feedback to future activity
-        cls.future_feedback_post = {'about': cls.activity.id, 'weight': 2, 'comment': 'asfjk'}
+        cls.future_feedback_post = {"about": cls.activity.id, "weight": 2, "comment": "asfjk"}
 
         # create feedback for an old activity
-        cls.feedback_for_old_activity = {'about': cls.old_activity.id, 'weight': 5, 'comment': 'this is long ago'}
+        cls.feedback_for_old_activity = {"about": cls.old_activity.id, "weight": 5, "comment": "this is long ago"}
 
         # create feedback for GET method
-        cls.feedback_get = {'given_by': cls.participant, 'about': cls.past_activity, 'weight': 2, 'comment': 'asfjk2'}
+        cls.feedback_get = {"given_by": cls.participant, "about": cls.past_activity, "weight": 2, "comment": "asfjk2"}
 
-        cls.feedback_get_2 = {
-            'given_by': cls.participant2,
-            'about': cls.past_activity,
-            'weight': 2,
-            'comment': 'asfjk'
-        }
+        cls.feedback_get_2 = {"given_by": cls.participant2, "about": cls.past_activity, "weight": 2, "comment": "asfjk"}
 
         # create 2 instances of feedback for GET method
         cls.feedback = Feedback.objects.create(**cls.feedback_get)
         Feedback.objects.create(**cls.feedback_get_2)
 
-        cls.feedback_url = cls.url + str(cls.feedback.id) + '/'
-        cls.old_feedback_url = cls.url + str(cls.old_feedback.id) + '/'
+        cls.feedback_url = cls.url + str(cls.feedback.id) + "/"
+        cls.old_feedback_url = cls.url + str(cls.old_feedback.id) + "/"
 
     def setUp(self):
-        """ This method runs before each test. Refresh some data that gets modified in test cases. """
+        """This method runs before each test. Refresh some data that gets modified in test cases."""
         self.group.refresh_from_db()
         self.feedback.refresh_from_db()
 
@@ -140,7 +139,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         """
         Non-User is not allowed to give feedback.
         """
-        response = self.client.post(self.url, self.feedback_post, format='json')
+        response = self.client.post(self.url, self.feedback_post, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_create_feedback_fails_as_non_group_member(self):
@@ -148,25 +147,25 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         User is not allowed to give feedback when not a member of the place's group.
         """
         self.client.force_login(user=self.user)
-        response = self.client.post(self.url, self.feedback_post, format='json')
+        response = self.client.post(self.url, self.feedback_post, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        self.assertEqual(response.data, {'about': ['You are not member of the place\'s group.']})
+        self.assertEqual(response.data, {"about": ["You are not member of the place's group."]})
 
     def test_create_feedback_fails_as_non_participant(self):
         """
         Group Member is not allowed to give feedback when he is not assigned to the activity.
         """
         self.client.force_login(user=self.member)
-        response = self.client.post(self.url, self.feedback_post, format='json')
+        response = self.client.post(self.url, self.feedback_post, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        self.assertEqual(response.data, {'about': ['You aren\'t assigned to the activity.']})
+        self.assertEqual(response.data, {"about": ["You aren't assigned to the activity."]})
 
     def test_create_feedback_works_as_participant(self):
         """
         Editor is allowed to give feedback when he is assigned to the Activity.
         """
         self.client.force_login(user=self.participant3)
-        response = self.client.post(self.url, self.feedback_post, format='json')
+        response = self.client.post(self.url, self.feedback_post, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
     def test_create_feedback_as_newcomer_participant(self):
@@ -177,26 +176,29 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.group.groupmembership_set.create(user=newcomer)
         self.past_activity.add_participant(newcomer)
         self.client.force_login(user=newcomer)
-        response = self.client.post(self.url, self.feedback_post, format='json')
+        response = self.client.post(self.url, self.feedback_post, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
     def test_create_feedback_when_joined_activity_late(self):
         activity = ActivityFactory(place=self.place)
         with freeze_time(activity.date.start + timedelta(minutes=1), tick=True):
             self.client.force_login(user=self.member)
-            response = self.client.post('/api/activities/{}/add/'.format(activity.id))
+            response = self.client.post("/api/activities/{}/add/".format(activity.id))
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-            response = self.client.post(self.url, {
-                'about': activity.id,
-                'comment': 'hello',
-            })
+            response = self.client.post(
+                self.url,
+                {
+                    "about": activity.id,
+                    "comment": "hello",
+                },
+            )
             self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
     def test_create_feedback_activates_group(self):
         self.group.status = GroupStatus.INACTIVE.value
         self.group.save()
         self.client.force_login(user=self.participant3)
-        self.client.post(self.url, self.feedback_post, format='json')
+        self.client.post(self.url, self.feedback_post, format="json")
         self.group.refresh_from_db()
         self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)
 
@@ -205,27 +207,28 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         Participant is not allowed to give feedback more than one time to the Activity.
         """
         self.client.force_login(user=self.participant3)
-        response = self.client.post(self.url, self.feedback_post, format='json')
+        response = self.client.post(self.url, self.feedback_post, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
-        response = self.client.post(self.url, self.feedback_post, format='json')
+        response = self.client.post(self.url, self.feedback_post, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        self.assertEqual(response.data, {'non_field_errors': ['The fields about, given_by must make a unique set.']})
+        self.assertEqual(response.data, {"non_field_errors": ["The fields about, given_by must make a unique set."]})
 
     def test_create_feedback_fails_for_old_activity(self):
         """
         Participant is not allowed to give feedback for old Activities.
         """
         self.client.force_login(user=self.participant3)
-        response = self.client.post(self.url, self.feedback_for_old_activity, format='json')
+        response = self.client.post(self.url, self.feedback_for_old_activity, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(
-            response.data, {
-                'about': [
-                    'You can\'t give feedback for activities more than {} days ago.'.format(
+            response.data,
+            {
+                "about": [
+                    "You can't give feedback for activities more than {} days ago.".format(
                         settings.FEEDBACK_POSSIBLE_DAYS
                     )
                 ]
-            }
+            },
         )
 
     def test_create_feedback_without_weight(self):
@@ -233,68 +236,73 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         Weight field can be empty
         """
         self.client.force_login(user=self.participant3)
-        response = self.client.post(self.url, {k: v for (k, v) in self.feedback_post.items() if k != 'weight'})
+        response = self.client.post(self.url, {k: v for (k, v) in self.feedback_post.items() if k != "weight"})
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
-        self.assertIsNone(response.data['weight'])
+        self.assertIsNone(response.data["weight"])
 
     def test_create_feedback_without_comment(self):
         """
         Comment field can be empty
         """
         self.client.force_login(user=self.participant3)
-        response = self.client.post(self.url, {k: v for (k, v) in self.feedback_post.items() if k != 'comment'})
+        response = self.client.post(self.url, {k: v for (k, v) in self.feedback_post.items() if k != "comment"})
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
-        self.assertEqual(response.data['comment'], '')
+        self.assertEqual(response.data["comment"], "")
 
     def test_weight_and_comment_is_null_fails(self):
         """
         Both comment and weight cannot be empty
         """
         self.client.force_login(user=self.participant3)
-        response = self.client.post(self.url, self.feedback_without_weight_comment, format='json')
+        response = self.client.post(self.url, self.feedback_without_weight_comment, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        self.assertEqual(response.data, {'non_field_errors': ['Both comment and weight cannot be blank.']})
+        self.assertEqual(response.data, {"non_field_errors": ["Both comment and weight cannot be blank."]})
 
     def test_weight_for_activity_that_does_not_accept_weight(self):
         self.maxDiff = None
         self.client.force_login(user=self.participant3)
         response = self.client.post(
-            self.url, {
-                'about': self.activity_without_feedback_weight.id,
-                'comment': 'hello',
-                'weight': 200,
+            self.url,
+            {
+                "about": self.activity_without_feedback_weight.id,
+                "comment": "hello",
+                "weight": 200,
             },
-            format='json'
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(
-            response.data, {
-                'non_field_errors': [
-                    'You cannot give weight feedback to an activity of type {}.'.format(
+            response.data,
+            {
+                "non_field_errors": [
+                    "You cannot give weight feedback to an activity of type {}.".format(
                         self.activity_without_feedback_weight.activity_type.name
                     )
                 ]
-            }
+            },
         )
 
     def test_weight_for_activity_that_does_not_accept_feedback(self):
         self.maxDiff = None
         self.client.force_login(user=self.participant3)
         response = self.client.post(
-            self.url, {
-                'about': self.activity_without_feedback.id,
-                'comment': 'hello',
-            }, format='json'
+            self.url,
+            {
+                "about": self.activity_without_feedback.id,
+                "comment": "hello",
+            },
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
         self.assertEqual(
-            response.data, {
-                'non_field_errors': [
-                    'You cannot give feedback to an activity of type {}.'.format(
+            response.data,
+            {
+                "non_field_errors": [
+                    "You cannot give feedback to an activity of type {}.".format(
                         self.activity_without_feedback.activity_type.name
                     )
                 ]
-            }
+            },
         )
 
     def test_list_feedback_fails_as_non_user(self):
@@ -311,7 +319,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.user)
         response = self.get_results(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['feedback']), 0)
+        self.assertEqual(len(response.data["feedback"]), 0)
 
     def test_list_feedback_works_as_group_member(self):
         """
@@ -321,30 +329,30 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         with self.assertNumQueries(8):
             response = self.get_results(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        feedback = response.data['feedback']
+        feedback = response.data["feedback"]
         self.assertEqual(len(feedback), 3)
 
         # check related data
-        activity_ids = set(f['about'] for f in feedback)
-        self.assertEqual(len(response.data['activities']), len(activity_ids))
-        self.assertEqual(set(p['id'] for p in response.data['activities']), activity_ids)
+        activity_ids = set(f["about"] for f in feedback)
+        self.assertEqual(len(response.data["activities"]), len(activity_ids))
+        self.assertEqual(set(p["id"] for p in response.data["activities"]), activity_ids)
 
     def test_export_feedback(self):
         self.client.force_login(user=self.member)
         with self.assertNumQueries(2):
-            response = self.get_results(self.url + 'export/')
+            response = self.get_results(self.url + "export/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
         feedback = response.data[0]
 
         # converts dates into group timezone
-        self.assertFalse(feedback['created_at'].endswith('Z'))
+        self.assertFalse(feedback["created_at"].endswith("Z"))
 
         # includes activity
-        self.assertFalse(feedback['about_date'].endswith('Z'))
+        self.assertFalse(feedback["about_date"].endswith("Z"))
 
         # includes place id
-        self.assertIn('about_place', feedback)
+        self.assertIn("about_place", feedback)
 
     def test_list_feedback_works_as_participant(self):
         """
@@ -353,7 +361,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.participant)
         response = self.get_results(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['feedback']), 3)
+        self.assertEqual(len(response.data["feedback"]), 3)
 
     def test_retrieve_feedback_fails_as_non_user(self):
         """
@@ -393,13 +401,13 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.participant3)
         response = self.client.post(self.url, self.future_feedback_post)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        self.assertEqual(response.data, {'about': ['The activity is not done yet']})
+        self.assertEqual(response.data, {"about": ["The activity is not done yet"]})
 
     def test_patch_feedback_fails_as_non_user(self):
         """
         Non-user is not allowed to change feedback
         """
-        response = self.client.patch(self.feedback_url, self.feedback_post, format='json')
+        response = self.client.patch(self.feedback_url, self.feedback_post, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_patch_feedback_fails_as_user(self):
@@ -407,7 +415,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         User is not allowed to change feedback
         """
         self.client.force_login(user=self.user)
-        response = self.client.patch(self.feedback_url, self.feedback_post, format='json')
+        response = self.client.patch(self.feedback_url, self.feedback_post, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
     def test_patch_feedback_fails_as_group_member(self):
@@ -415,7 +423,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         Group member is not allowed to change feedback
         """
         self.client.force_login(user=self.member)
-        response = self.client.patch(self.feedback_url, self.feedback_post, format='json')
+        response = self.client.patch(self.feedback_url, self.feedback_post, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_patch_feedback_fails_as_evil_participant(self):
@@ -423,7 +431,7 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         A participant is not allowed to change feedback if he didn't created it
         """
         self.client.force_login(user=self.evil_participant)
-        response = self.client.patch(self.feedback_url, {'weight': 3}, format='json')
+        response = self.client.patch(self.feedback_url, {"weight": 3}, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_patch_feedback_works_as_participant(self):
@@ -431,15 +439,15 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         Participant is allowed to change feedback
         """
         self.client.force_login(user=self.participant)
-        response = self.client.patch(self.feedback_url, {'weight': 3}, format='json')
+        response = self.client.patch(self.feedback_url, {"weight": 3}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data['weight'], 3)
+        self.assertEqual(response.data["weight"], 3)
 
     def test_patch_feedback_activates_group(self):
         self.group.status = GroupStatus.INACTIVE.value
         self.group.save()
         self.client.force_login(user=self.participant)
-        self.client.patch(self.feedback_url, {'weight': 3}, format='json')
+        self.client.patch(self.feedback_url, {"weight": 3}, format="json")
         self.group.refresh_from_db()
         self.assertEqual(self.group.status, GroupStatus.ACTIVE.value)
 
@@ -448,62 +456,58 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         Participant cannot change weight to negative value
         """
         self.client.force_login(user=self.participant)
-        response = self.client.patch(self.feedback_url, {'weight': -1}, format='json')
+        response = self.client.patch(self.feedback_url, {"weight": -1}, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
     def test_patch_feedback_fails_if_activity_too_old(self):
         self.client.force_login(user=self.participant3)
-        response = self.client.patch(self.old_feedback_url, {'weight': 499}, format='json')
+        response = self.client.patch(self.old_feedback_url, {"weight": 499}, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
         self.assertEqual(
-            response.data['detail'],
-            'You can\'t give feedback for activities more than {} days ago.'.format(settings.FEEDBACK_POSSIBLE_DAYS)
+            response.data["detail"],
+            "You can't give feedback for activities more than {} days ago.".format(settings.FEEDBACK_POSSIBLE_DAYS),
         )
 
     def test_patch_feedback_to_remove_weight(self):
         self.client.force_login(user=self.participant)
-        response = self.client.patch(self.feedback_url, {'weight': None}, format='json')
+        response = self.client.patch(self.feedback_url, {"weight": None}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data['weight'], None)
+        self.assertEqual(response.data["weight"], None)
 
     def test_patch_feedback_to_remove_weight_fails_if_comment_is_empty(self):
         self.client.force_login(user=self.participant)
-        self.feedback.comment = ''
+        self.feedback.comment = ""
         self.feedback.save()
-        response = self.client.patch(self.feedback_url, {'weight': None}, format='json')
+        response = self.client.patch(self.feedback_url, {"weight": None}, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        self.assertEqual(response.data, {'non_field_errors': ['Both comment and weight cannot be blank.']})
+        self.assertEqual(response.data, {"non_field_errors": ["Both comment and weight cannot be blank."]})
 
     def test_patch_feedback_to_remove_comment(self):
         self.client.force_login(user=self.participant)
-        response = self.client.patch(self.feedback_url, {'comment': ''}, format='json')
+        response = self.client.patch(self.feedback_url, {"comment": ""}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data['comment'], '')
+        self.assertEqual(response.data["comment"], "")
 
     def test_patch_feedback_to_remove_comment_fails_if_weight_is_empty(self):
         self.client.force_login(user=self.participant)
         self.feedback.weight = None
         self.feedback.save()
-        response = self.client.patch(self.feedback_url, {'comment': ''}, format='json')
+        response = self.client.patch(self.feedback_url, {"comment": ""}, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        self.assertEqual(response.data, {'non_field_errors': ['Both comment and weight cannot be blank.']})
+        self.assertEqual(response.data, {"non_field_errors": ["Both comment and weight cannot be blank."]})
 
     def test_patch_feedback_to_remove_comment_and_weight_fails(self):
         self.client.force_login(user=self.participant)
-        response = self.client.patch(self.feedback_url, {'comment': '', 'weight': None}, format='json')
+        response = self.client.patch(self.feedback_url, {"comment": "", "weight": None}, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
-        self.assertEqual(response.data, {'non_field_errors': ['Both comment and weight cannot be blank.']})
+        self.assertEqual(response.data, {"non_field_errors": ["Both comment and weight cannot be blank."]})
 
     def test_post_no_shows(self):
         self.client.force_login(user=self.participant3)
-        qs = FeedbackNoShow.objects.filter(user=self.participant2.id, feedback__about=self.feedback_post['about'])
+        qs = FeedbackNoShow.objects.filter(user=self.participant2.id, feedback__about=self.feedback_post["about"])
         self.assertEqual(qs.count(), 0)
         response = self.client.post(
-            self.url, {
-                **self.feedback_post, 'no_shows': [{
-                    'user': self.participant2.id
-                }]
-            }, format='json'
+            self.url, {**self.feedback_post, "no_shows": [{"user": self.participant2.id}]}, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertEqual(qs.count(), 1)
@@ -517,56 +521,53 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
 
         response = self.client.get(self.feedback_url)
         self.assertEqual(
-            response.data['no_shows'], [
-                {
-                    'user': self.participant2.id
-                },
-                {
-                    'user': self.participant3.id
-                },
-            ]
+            response.data["no_shows"],
+            [
+                {"user": self.participant2.id},
+                {"user": self.participant3.id},
+            ],
         )
 
         response = self.client.patch(
-            self.feedback_url, {'no_shows': [
-                {
-                    'user': self.participant3.id
-                },
-                {
-                    'user': self.participant4.id
-                },
-            ]},
-            format='json'
+            self.feedback_url,
+            {
+                "no_shows": [
+                    {"user": self.participant3.id},
+                    {"user": self.participant4.id},
+                ]
+            },
+            format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data['no_shows'], [{'user': self.participant3.id}, {'user': self.participant4.id}])
+        self.assertEqual(response.data["no_shows"], [{"user": self.participant3.id}, {"user": self.participant4.id}])
 
     def test_can_remove_all_no_shows(self):
         self.client.force_login(user=self.participant)
         FeedbackNoShow.objects.create(feedback=self.feedback, user=self.participant2)
         FeedbackNoShow.objects.create(feedback=self.feedback, user=self.participant3)
-        response = self.client.patch(self.feedback_url, {'no_shows': []}, format='json')
+        response = self.client.patch(self.feedback_url, {"no_shows": []}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data['no_shows'], [])
+        self.assertEqual(response.data["no_shows"], [])
 
     def test_no_shows_is_optional(self):
         self.client.force_login(user=self.participant)
         FeedbackNoShow.objects.create(feedback=self.feedback, user=self.participant2)
         FeedbackNoShow.objects.create(feedback=self.feedback, user=self.participant3)
-        response = self.client.patch(self.feedback_url, {'comment': 'updated'}, format='json')
+        response = self.client.patch(self.feedback_url, {"comment": "updated"}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['no_shows']), 2)
+        self.assertEqual(len(response.data["no_shows"]), 2)
 
     def test_cannot_record_non_participants_as_no_show(self):
         self.client.force_login(user=self.participant3)
         response = self.client.post(
-            self.url, {
-                **self.feedback_post, 'no_shows': [
-                    {
-                        'user': self.non_participant.id
-                    },
-                ]
-            }, format='json'
+            self.url,
+            {
+                **self.feedback_post,
+                "no_shows": [
+                    {"user": self.non_participant.id},
+                ],
+            },
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)

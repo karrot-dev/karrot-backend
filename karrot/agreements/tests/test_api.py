@@ -10,10 +10,10 @@ from karrot.utils.tests.fake import faker
 
 def create_agreement_content(**kwargs):
     return {
-        'active_from': timezone.now(),
-        'title': faker.text()[:200],
-        'summary': faker.text(),
-        'content': faker.text(),
+        "active_from": timezone.now(),
+        "title": faker.text()[:200],
+        "summary": faker.text(),
+        "content": faker.text(),
         **kwargs,
     }
 
@@ -26,7 +26,7 @@ class TestCreateAgreement(APITestCase):
 
     def create_agreement_data(self, **kwargs):
         return {
-            'group': self.group.id,
+            "group": self.group.id,
             **create_agreement_content(),
             **kwargs,
         }
@@ -34,7 +34,7 @@ class TestCreateAgreement(APITestCase):
     def test_can_create_agreement(self):
         self.client.force_login(user=self.editor)
         response = self.client.post(
-            '/api/agreements/',
+            "/api/agreements/",
             self.create_agreement_data(),
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
@@ -42,7 +42,7 @@ class TestCreateAgreement(APITestCase):
     def test_cannot_create_agreement_as_newcomer(self):
         self.client.force_login(user=self.newcomer)
         response = self.client.post(
-            '/api/agreements/',
+            "/api/agreements/",
             self.create_agreement_data(),
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
@@ -51,7 +51,7 @@ class TestCreateAgreement(APITestCase):
         other_group = GroupFactory()
         self.client.force_login(user=self.editor)
         response = self.client.post(
-            '/api/agreements/',
+            "/api/agreements/",
             self.create_agreement_data(group=other_group.id),
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
@@ -68,9 +68,11 @@ class TestUpdateAgreement(APITestCase):
         self.client.force_login(user=self.editor)
         new_content = faker.text()
         response = self.client.patch(
-            f'/api/agreements/{self.agreement.id}/', {
-                'content': new_content,
-            }, format='json'
+            f"/api/agreements/{self.agreement.id}/",
+            {
+                "content": new_content,
+            },
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.agreement.refresh_from_db()
@@ -80,9 +82,11 @@ class TestUpdateAgreement(APITestCase):
         self.client.force_login(user=self.editor)
         self.assertEqual(self.agreement.last_changed_by, None)
         self.client.patch(
-            f'/api/agreements/{self.agreement.id}/', {
-                'content': faker.text(),
-            }, format='json'
+            f"/api/agreements/{self.agreement.id}/",
+            {
+                "content": faker.text(),
+            },
+            format="json",
         )
         self.agreement.refresh_from_db()
         self.assertEqual(self.agreement.last_changed_by, self.editor)
@@ -91,9 +95,11 @@ class TestUpdateAgreement(APITestCase):
         self.client.force_login(user=self.newcomer)
         new_content = faker.text()
         response = self.client.patch(
-            f'/api/agreements/{self.agreement.id}/', {
-                'content': new_content,
-            }, format='json'
+            f"/api/agreements/{self.agreement.id}/",
+            {
+                "content": new_content,
+            },
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
@@ -101,9 +107,11 @@ class TestUpdateAgreement(APITestCase):
         other_group = GroupFactory(members=[self.editor])
         self.client.force_login(user=self.editor)
         response = self.client.patch(
-            f'/api/agreements/{self.agreement.id}/', {
-                'group': other_group.id,
-            }, format='json'
+            f"/api/agreements/{self.agreement.id}/",
+            {
+                "group": other_group.id,
+            },
+            format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.data)
 
@@ -135,58 +143,68 @@ class TestReadAgreements(APITestCase):
     def test_can_get_agreement(self):
         self.client.force_login(user=self.newcomer)
         agreement = self.group.agreements.first()
-        response = self.client.get(f'/api/agreements/{agreement.id}/')
+        response = self.client.get(f"/api/agreements/{agreement.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(
-            set(response.data.keys()), {
-                'id',
-                'title',
-                'summary',
-                'content',
-                'active_from',
-                'active_to',
-                'review_at',
-                'group',
-                'last_changed_by',
-                'created_by',
-            }
+            set(response.data.keys()),
+            {
+                "id",
+                "title",
+                "summary",
+                "content",
+                "active_from",
+                "active_to",
+                "review_at",
+                "group",
+                "last_changed_by",
+                "created_by",
+            },
         )
-        check_fields = {'id', 'title', 'summary', 'content'}
+        check_fields = {"id", "title", "summary", "content"}
         for field in check_fields:
             self.assertEqual(response.data[field], getattr(agreement, field))
 
     def test_can_list_agreements(self):
         self.client.force_login(user=self.newcomer)
-        response = self.client.get('/api/agreements/')
+        response = self.client.get("/api/agreements/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['results']), 20)
+        self.assertEqual(len(response.data["results"]), 20)
 
     def test_can_list_agreements_by_group(self):
         self.client.force_login(user=self.newcomer)
-        response = self.client.get('/api/agreements/', {'group': self.other_group.id})
+        response = self.client.get("/api/agreements/", {"group": self.other_group.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['results']), 0)
+        self.assertEqual(len(response.data["results"]), 0)
 
     def test_can_filter_by_active(self):
         self.client.force_login(user=self.newcomer)
-        response = self.client.get('/api/agreements/', {
-            'active': 'true',
-        })
+        response = self.client.get(
+            "/api/agreements/",
+            {
+                "active": "true",
+            },
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['results']), 8)
+        self.assertEqual(len(response.data["results"]), 8)
 
     def test_can_filter_by_inactive(self):
         self.client.force_login(user=self.newcomer)
-        response = self.client.get('/api/agreements/', {
-            'active': 'false',
-        })
+        response = self.client.get(
+            "/api/agreements/",
+            {
+                "active": "false",
+            },
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['results']), 12)
+        self.assertEqual(len(response.data["results"]), 12)
 
     def test_can_filter_by_review_due(self):
         self.client.force_login(user=self.newcomer)
-        response = self.client.get('/api/agreements/', {
-            'review_due': True,
-        })
+        response = self.client.get(
+            "/api/agreements/",
+            {
+                "review_due": True,
+            },
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['results']), 5)
+        self.assertEqual(len(response.data["results"]), 5)

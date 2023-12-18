@@ -17,7 +17,8 @@ class NicelyFormattedModel(Model):
         :rtype: list
         """
         return [
-            field.name for field in self._meta.get_fields()
+            field.name
+            for field in self._meta.get_fields()
             if isinstance(field, Field) and not isinstance(field, RelatedField)
         ]
 
@@ -30,8 +31,8 @@ class NicelyFormattedModel(Model):
 
     def __repr__(self):
         model = str(self.__class__.__name__)
-        columns = ', '.join('{}="{}"'.format(field, value) for field, value in self.to_dict().items())
-        return '{}({})'.format(model, columns)
+        columns = ", ".join('{}="{}"'.format(field, value) for field, value in self.to_dict().items())
+        return "{}({})".format(model, columns)
 
 
 class BaseModel(NicelyFormattedModel):
@@ -59,13 +60,14 @@ class LocationModel(Model):
 
 
 class Tstzrange(Func):
-    function = 'tstzrange'
+    function = "tstzrange"
 
 
 class CustomDateTimeTZRange(DateTimeTZRange):
     """
     Similar to psycopg.types.range.Range but with extra helpers
     """
+
     @property
     def start(self):
         return self.lower

@@ -34,9 +34,9 @@ class HistoryQuerySetTests(TestCase):
         history = self.create_history(date=self.activity.date.start - timedelta(seconds=leave_seconds_before_activity))
 
         def qs(seconds):
-            return History.objects \
-                .add_activity_left_late(seconds=seconds) \
-                .annotate(activity_left_late=F('activity_left_late'))
+            return History.objects.add_activity_left_late(seconds=seconds).annotate(
+                activity_left_late=F("activity_left_late")
+            )
 
         late = qs(leave_seconds_before_activity)
         not_late = qs(leave_seconds_before_activity - 1)

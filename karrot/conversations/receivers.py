@@ -7,8 +7,14 @@ from pytz import utc
 
 from karrot.conversations import tasks, stats
 from karrot.conversations.models import (
-    ConversationParticipant, ConversationMessage, ConversationMessageReaction, ConversationThreadParticipant,
-    ConversationMeta, ConversationMessageMention, ConversationMessageAttachment, ConversationMessageImage
+    ConversationParticipant,
+    ConversationMessage,
+    ConversationMessageReaction,
+    ConversationThreadParticipant,
+    ConversationMeta,
+    ConversationMessageMention,
+    ConversationMessageAttachment,
+    ConversationMessageImage,
 )
 from karrot.notifications.models import Notification, NotificationType
 from karrot.users.models import User
@@ -75,7 +81,7 @@ def notify_participants(sender, instance, created, **kwargs):
     if not created:
         return
 
-    tasks.notify_participants.schedule(args=(message, ), delay=5 * 60)
+    tasks.notify_participants.schedule(args=(message,), delay=5 * 60)
 
 
 @receiver(post_save, sender=ConversationMessage)
@@ -119,10 +125,10 @@ def user_mentioned(sender, instance, created, **kwargs):
         type=NotificationType.MENTION.value,
         user=mention.user,
         context={
-            'mention': mention.id,
-            'group': conversation.group.id,
-            'user': message.author.id,
-            'url': message_url(message),
+            "mention": mention.id,
+            "group": conversation.group.id,
+            "user": message.author.id,
+            "url": message_url(message),
         },
     )
 
@@ -130,7 +136,7 @@ def user_mentioned(sender, instance, created, **kwargs):
         # verified mail is enough
         # we will notify inactive members here as maybe being mentioned draws them in again :)
         # 5 seconds delay so we don't notify them if they read it immediately
-        tasks.notify_mention.schedule((mention, ), delay=5)
+        tasks.notify_mention.schedule((mention,), delay=5)
 
     stats.user_mentioned(instance)
 
@@ -165,8 +171,8 @@ def make_conversation_meta(sender, instance, created, **kwargs):
     min_date = datetime.min.replace(tzinfo=utc)
     ConversationMeta.objects.get_or_create(
         {
-            'conversations_marked_at': min_date,
-            'threads_marked_at': min_date,
+            "conversations_marked_at": min_date,
+            "threads_marked_at": min_date,
         },
         user=user,
     )

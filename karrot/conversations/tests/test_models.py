@@ -5,8 +5,13 @@ from django.db import IntegrityError
 from django.test import TestCase
 
 from karrot.conversations.factories import ConversationFactory
-from karrot.conversations.models import Conversation, ConversationMessage, ConversationMessageReaction, \
-    ConversationThreadParticipant, ConversationParticipant
+from karrot.conversations.models import (
+    Conversation,
+    ConversationMessage,
+    ConversationMessageReaction,
+    ConversationThreadParticipant,
+    ConversationParticipant,
+)
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupNotificationType
 from karrot.issues.factories import IssueFactory
@@ -50,22 +55,22 @@ class ConversationModelTests(TestCase):
     def test_message_create(self):
         user = UserFactory()
         conversation = ConversationFactory(participants=[user])
-        conversation.messages.create(author=user, content='yay')
+        conversation.messages.create(author=user, content="yay")
         self.assertEqual(ConversationMessage.objects.filter(author=user).count(), 1)
 
     def test_keeps_latest_message_updated(self):
         user = UserFactory()
         conversation = ConversationFactory(participants=[user])
-        message = conversation.messages.create(author=user, content='yay')
+        message = conversation.messages.create(author=user, content="yay")
         self.assertEqual(conversation.latest_message, message)
 
-        message = conversation.messages.create(author=user, content='yay2')
+        message = conversation.messages.create(author=user, content="yay2")
         self.assertEqual(conversation.latest_message, message)
 
     def test_message_create_requires_author(self):
         conversation = ConversationFactory()
         with self.assertRaises(IntegrityError):
-            conversation.messages.create(content='ohno')
+            conversation.messages.create(content="ohno")
 
     def test_creating_from_target(self):
         target = GroupFactory()  # could be any model
@@ -104,44 +109,48 @@ class ConversationMessageMentionTests(TestCase):
         )
 
     def test_mentions(self):
-        message = self.create_message(content='some message with a mention for @{} yay!'.format(self.user2.username))
+        message = self.create_message(content="some message with a mention for @{} yay!".format(self.user2.username))
         self.assertEqual(message.mentions.count(), 1)
         self.assertEqual(message.mentions.first().user, self.user2)
 
     def test_mentions_for_user_in_other_group(self):
-        message = self.create_message(content='hey @{} in other group!'.format(self.user_in_other_group.username))
+        message = self.create_message(content="hey @{} in other group!".format(self.user_in_other_group.username))
         self.assertEqual(message.mentions.count(), 0)
 
     def test_mentions_for_non_user(self):
-        message = self.create_message(content='hello @probablynotauser how are you?', )
+        message = self.create_message(
+            content="hello @probablynotauser how are you?",
+        )
         self.assertEqual(message.mentions.count(), 0)
 
     def test_update_removes_mentions(self):
-        message = self.create_message(content='some message with a mention for @{} yay!'.format(self.user2.username))
+        message = self.create_message(content="some message with a mention for @{} yay!".format(self.user2.username))
         self.assertEqual(message.mentions.count(), 1)
-        message.content = 'nobody to mention any more'
+        message.content = "nobody to mention any more"
         message.save()
         self.assertEqual(message.mentions.count(), 0)
 
     def test_update_adds_mentions(self):
-        message = self.create_message(content='no mentions to see here', )
+        message = self.create_message(
+            content="no mentions to see here",
+        )
         self.assertEqual(message.mentions.count(), 0)
-        message.content = 'oh actually I can mention @{} now'.format(self.user2.username)
+        message.content = "oh actually I can mention @{} now".format(self.user2.username)
         message.save()
         self.assertEqual(message.mentions.count(), 1)
 
     def test_creates_bell_notification(self):
-        self.assertEqual(self.user2.notification_set.filter(type='mention').count(), 0)
-        message = self.create_message(content='some message with a mention for @{} yay!'.format(self.user2.username))
-        self.assertEqual(self.user2.notification_set.filter(type='mention').count(), 1)
+        self.assertEqual(self.user2.notification_set.filter(type="mention").count(), 0)
+        self.create_message(content="some message with a mention for @{} yay!".format(self.user2.username))
+        self.assertEqual(self.user2.notification_set.filter(type="mention").count(), 1)
 
     def test_removes_bell_notification(self):
-        self.assertEqual(self.user2.notification_set.filter(type='mention').count(), 0)
-        message = self.create_message(content='some message with a mention for @{} yay!'.format(self.user2.username))
-        self.assertEqual(self.user2.notification_set.filter(type='mention').count(), 1)
-        message.content = 'no mentions'
+        self.assertEqual(self.user2.notification_set.filter(type="mention").count(), 0)
+        message = self.create_message(content="some message with a mention for @{} yay!".format(self.user2.username))
+        self.assertEqual(self.user2.notification_set.filter(type="mention").count(), 1)
+        message.content = "no mentions"
         message.save()
-        self.assertEqual(self.user2.notification_set.filter(type='mention').count(), 0)
+        self.assertEqual(self.user2.notification_set.filter(type="mention").count(), 0)
 
 
 class ConversationThreadModelTests(TestCase):
@@ -150,14 +159,14 @@ class ConversationThreadModelTests(TestCase):
         self.user2 = UserFactory()
         self.group = GroupFactory(members=[self.user, self.user2])
         self.conversation = self.group.conversation
-        self.thread = self.conversation.messages.create(author=self.user, content='yay')
+        self.thread = self.conversation.messages.create(author=self.user, content="yay")
 
     def create_reply(self, **kwargs):
         args = {
-            'conversation': self.conversation,
-            'author': self.user,
-            'thread': self.thread,
-            'content': 'my reply',
+            "conversation": self.conversation,
+            "author": self.user,
+            "thread": self.thread,
+            "content": "my reply",
         }
         args.update(kwargs)
         return ConversationMessage.objects.create(**args)
@@ -174,9 +183,7 @@ class ConversationThreadModelTests(TestCase):
         n = 4
         [self.create_reply() for _ in range(n)]
 
-        message = ConversationMessage.objects \
-            .annotate_replies_count() \
-            .get(pk=self.thread.id)
+        message = ConversationMessage.objects.annotate_replies_count().get(pk=self.thread.id)
 
         self.assertEqual(message.replies_count, n)
         self.assertEqual(message._replies_count, n)
@@ -188,13 +195,11 @@ class ConversationThreadModelTests(TestCase):
         messages = [self.create_reply() for _ in range(n)]
 
         # "read" some of the messages
-        ConversationThreadParticipant.objects \
-            .filter(user=self.user2, thread=self.thread.id) \
-            .update(seen_up_to=messages[read_messages - 1])
+        ConversationThreadParticipant.objects.filter(user=self.user2, thread=self.thread.id).update(
+            seen_up_to=messages[read_messages - 1]
+        )
 
-        message = ConversationMessage.objects \
-            .annotate_unread_replies_count_for(self.user2) \
-            .get(pk=self.thread.id)
+        message = ConversationMessage.objects.annotate_unread_replies_count_for(self.user2).get(pk=self.thread.id)
 
         self.assertEqual(message.unread_replies_count, n - read_messages)
 
@@ -202,9 +207,9 @@ class ConversationThreadModelTests(TestCase):
         self.thread.participants.create(user=self.user2)
         self.create_reply()
 
-        participant = ConversationParticipant.objects \
-            .annotate_unread_message_count() \
-            .get(conversation=self.conversation, user=self.user2)
+        participant = ConversationParticipant.objects.annotate_unread_message_count().get(
+            conversation=self.conversation, user=self.user2
+        )
 
         self.assertEqual(participant.unread_message_count, 1)
 
@@ -215,9 +220,7 @@ class ConversationThreadModelTests(TestCase):
         self.assertEqual(self.thread.replies_count, n)
 
     def test_annotation_replies_count_property(self):
-        self.thread = ConversationMessage.objects \
-            .annotate_replies_count() \
-            .get(pk=self.thread.id)
+        self.thread = ConversationMessage.objects.annotate_replies_count().get(pk=self.thread.id)
         self.assertEqual(self.thread.replies_count, 0)
         n = 5
         [self.create_reply() for _ in range(n)]
@@ -235,7 +238,7 @@ class TestPlaceConversations(TestCase):
 
     def test_message_email_notifications(self):
         with execute_scheduled_tasks_immediately():
-            message = self.conversation.messages.create(author=self.user, content='asdf')
+            message = self.conversation.messages.create(author=self.user, content="asdf")
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn(self.place.name, mail.outbox[0].subject)
@@ -243,8 +246,8 @@ class TestPlaceConversations(TestCase):
 
     def test_reply_email_notifications(self):
         with execute_scheduled_tasks_immediately():
-            message = self.conversation.messages.create(author=self.user, content='asdf')
-            reply = self.conversation.messages.create(author=self.user2, thread=message, content='my reply')
+            message = self.conversation.messages.create(author=self.user, content="asdf")
+            reply = self.conversation.messages.create(author=self.user2, thread=message, content="my reply")
 
         self.assertEqual(len(mail.outbox), 2)
         self.assertIn(message.content, mail.outbox[1].subject)
@@ -265,7 +268,7 @@ class TestActivityConversations(TestCase):
 
         mail.outbox = []
         with execute_scheduled_tasks_immediately():
-            ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
+            ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content="asdf")
 
         actual_recipients = sorted(m.to[0] for m in mail.outbox)
         expected_recipients = sorted(u.email for u in users)
@@ -294,7 +297,7 @@ class TestIssueConversations(TestCase):
 
     def test_send_email_notifications(self):
         with execute_scheduled_tasks_immediately():
-            ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content='asdf')
+            ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content="asdf")
 
         # only the affected user should get it
         # (the author won't get their own message, nor will the other users)
@@ -315,7 +318,7 @@ class TestPrivateUserConversations(TestCase):
         conversation = Conversation.objects.get_or_create_for_two_users(self.user, self.user2)
         mail.outbox = []
         with execute_scheduled_tasks_immediately():
-            ConversationMessage.objects.create(author=self.user, conversation=conversation, content='asdf')
+            ConversationMessage.objects.create(author=self.user, conversation=conversation, content="asdf")
 
         self.assertEqual(len(mail.outbox), 1)
 
@@ -338,10 +341,10 @@ class TestPrivateUserConversations(TestCase):
         self.assertEqual(Conversation.objects.count(), 1)
         self.assertEqual(c.participants.count(), 2)
         self.assertEqual(conversation_id, c.id)
-        self.assertEqual(c.type(), 'private')
+        self.assertEqual(c.type(), "private")
 
     def test_get_or_create_conversation_for_yourself_fails(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             Conversation.objects.get_or_create_for_two_users(self.user, self.user)
 
     def test_does_not_set_group(self):
@@ -364,10 +367,10 @@ class TestGroupConversation(TestCase):
         mail.outbox = []
 
         with execute_scheduled_tasks_immediately():
-            message = ConversationMessage.objects.create(author=user, conversation=conversation, content='asdf')
+            message = ConversationMessage.objects.create(author=user, conversation=conversation, content="asdf")
 
         reply_to = parseaddr(mail.outbox[0].reply_to[0])[1]
-        local_part = reply_to.split('@')[0]
+        local_part = reply_to.split("@")[0]
         conversation_id, user_id, thread_id = parse_local_part(local_part)
         self.assertEqual(conversation_id, conversation.id)
         self.assertEqual(user_id, user2.id)
@@ -379,8 +382,8 @@ class ReactionModelTests(TestCase):
         user = UserFactory()
         conversation = ConversationFactory()
         conversation.sync_users([user])
-        message = conversation.messages.create(author=user, content='hello')
-        message.reactions.create(message=message, user=user, name='tada')
+        message = conversation.messages.create(author=user, content="hello")
+        message.reactions.create(message=message, user=user, name="tada")
         self.assertEqual(ConversationMessageReaction.objects.filter(message=message, user=user).count(), 1)
 
     def test_reaction_remove(self):
@@ -388,10 +391,10 @@ class ReactionModelTests(TestCase):
         user = UserFactory()
         conversation = ConversationFactory()
         conversation.sync_users([user])
-        message = conversation.messages.create(author=user, content='hello')
+        message = conversation.messages.create(author=user, content="hello")
         # creating reaction
-        message.reactions.create(message=message, user=user, name='tada')
-        instance = ConversationMessageReaction.objects.get(message=message, user=user, name='tada')
+        message.reactions.create(message=message, user=user, name="tada")
+        instance = ConversationMessageReaction.objects.get(message=message, user=user, name="tada")
         # remove reaction
         instance.delete()
         self.assertEqual(ConversationMessageReaction.objects.filter(message=message, user=user).count(), 0)

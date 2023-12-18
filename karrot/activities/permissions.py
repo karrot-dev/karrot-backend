@@ -3,7 +3,7 @@ from rest_framework import permissions
 
 
 class IsNotPast(permissions.BasePermission):
-    message = 'The activity is in the past.'
+    message = "The activity is in the past."
 
     def has_object_permission(self, request, view, obj):
         # do allow GETs for activities in the past
@@ -14,7 +14,7 @@ class IsNotPast(permissions.BasePermission):
 
 
 class IsUpcoming(permissions.BasePermission):
-    message = 'The activity is not upcoming.'
+    message = "The activity is not upcoming."
 
     def has_object_permission(self, request, view, obj):
         # do allow GETs for activities in the past
@@ -25,81 +25,81 @@ class IsUpcoming(permissions.BasePermission):
 
 
 class IsNotUpcoming(permissions.BasePermission):
-    message = 'The activity is not in the past.'
+    message = "The activity is not in the past."
 
     def has_object_permission(self, request, view, obj):
         return not obj.is_upcoming()
 
 
 class IsEmptyActivity(permissions.BasePermission):
-    message = 'You can only delete empty activities.'
+    message = "You can only delete empty activities."
 
     def has_object_permission(self, request, view, obj):
-        if view.action == 'destroy':
+        if view.action == "destroy":
             return obj.participants.count() == 0
         return True
 
 
 class HasJoinedActivity(permissions.BasePermission):
-    message = 'You have not joined this activity.'
+    message = "You have not joined this activity."
 
     def has_object_permission(self, request, view, obj):
         return obj.is_participant(request.user)
 
 
 class HasNotJoinedActivity(permissions.BasePermission):
-    message = 'You have already joined this activity.'
+    message = "You have already joined this activity."
 
     def has_object_permission(self, request, view, obj):
         return not obj.is_participant(request.user)
 
 
 class IsSameParticipant(permissions.BasePermission):
-    message = 'This feedback is given by another user.'
+    message = "This feedback is given by another user."
 
     def has_object_permission(self, request, view, obj):
-        if view.action == 'partial_update':
+        if view.action == "partial_update":
             return obj.given_by == request.user
         return True
 
 
 class IsRecentActivity(permissions.BasePermission):
-    message = 'You can\'t give feedback for activities more than {} days ago.'.format(settings.FEEDBACK_POSSIBLE_DAYS)
+    message = "You can't give feedback for activities more than {} days ago.".format(settings.FEEDBACK_POSSIBLE_DAYS)
 
     def has_object_permission(self, request, view, obj):
-        if view.action == 'partial_update':
+        if view.action == "partial_update":
             return obj.about.is_recent()
         return True
 
 
 class IsGroupEditor(permissions.BasePermission):
-    message = 'You need to be a group editor'
+    message = "You need to be a group editor"
 
     def has_object_permission(self, request, view, obj):
-        if view.action in ('partial_update', 'destroy'):
+        if view.action in ("partial_update", "destroy"):
             # can be used for activity or activity type
-            if hasattr(obj, 'group'):
+            if hasattr(obj, "group"):
                 return obj.group.is_editor(request.user)
-            elif hasattr(obj, 'place'):
+            elif hasattr(obj, "place"):
                 return obj.place.group.is_editor(request.user)
             else:
-                raise Exception('Cannot check permission for {}'.format(type(obj)))
+                raise Exception("Cannot check permission for {}".format(type(obj)))
         return True
 
 
 class TypeHasNoActivities(permissions.BasePermission):
-    message = 'You cannot delete a type which has activities'
+    message = "You cannot delete a type which has activities"
 
     def has_object_permission(self, request, view, obj):
-        if view.action == 'destroy':
+        if view.action == "destroy":
             return not obj.activities.exists()
         return True
 
 
 class CannotChangeGroup(permissions.BasePermission):
-    message = 'You cannot change the group for a type'
+    message = "You cannot change the group for a type"
 
     def has_object_permission(self, request, view, obj):
-        if view.action == 'partial_update':
-            return 'group' not in request.data
+        if view.action == "partial_update":
+            return "group" not in request.data
         return True

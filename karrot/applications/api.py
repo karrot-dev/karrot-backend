@@ -15,27 +15,27 @@ from karrot.conversations.api import RetrieveConversationMixin
 
 
 class ApplicationsPerDayThrottle(UserRateThrottle):
-    rate = '20/day'
+    rate = "20/day"
 
 
 class ApplicationPagination(CursorPagination):
     page_size = 20
     max_page_size = 1200
-    page_size_query_param = 'page_size'
-    ordering = '-id'
+    page_size_query_param = "page_size"
+    ordering = "-id"
 
 
 class HasVerifiedEmailAddress(permissions.BasePermission):
-    message = _('You need to have a verified email address')
+    message = _("You need to have a verified email address")
 
     def has_permission(self, request, view):
-        if view.action != 'create':
+        if view.action != "create":
             return True
         return request.user.mail_verified
 
 
 class IsGroupEditor(permissions.BasePermission):
-    message = _('You need to be a group editor')
+    message = _("You need to be a group editor")
 
     def has_object_permission(self, request, view, obj):
         application = obj
@@ -43,7 +43,7 @@ class IsGroupEditor(permissions.BasePermission):
 
 
 class IsApplicant(permissions.BasePermission):
-    message = _('You need to be the applicant')
+    message = _("You need to be the applicant")
 
     def has_object_permission(self, request, view, obj):
         application = obj
@@ -51,7 +51,7 @@ class IsApplicant(permissions.BasePermission):
 
 
 class IsPending(permissions.BasePermission):
-    message = _('Application is not pending anymore')
+    message = _("Application is not pending anymore")
 
     def has_object_permission(self, request, view, obj):
         application = obj
@@ -59,11 +59,11 @@ class IsPending(permissions.BasePermission):
 
 
 class ApplicationViewSet(
-        mixins.CreateModelMixin,
-        mixins.RetrieveModelMixin,
-        mixins.ListModelMixin,
-        GenericViewSet,
-        RetrieveConversationMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
+    RetrieveConversationMixin,
 ):
     queryset = Application.objects
     serializer_class = ApplicationSerializer
@@ -71,13 +71,13 @@ class ApplicationViewSet(
         IsAuthenticated,
         HasVerifiedEmailAddress,
     )
-    filter_backends = (filters.DjangoFilterBackend, )
-    filterset_fields = ('group', 'user', 'status')
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_fields = ("group", "user", "status")
     pagination_class = ApplicationPagination
 
     def get_throttles(self):
-        if self.action == 'create':
-            self.throttle_classes = (ApplicationsPerDayThrottle, )
+        if self.action == "create":
+            self.throttle_classes = (ApplicationsPerDayThrottle,)
         return super().get_throttles()
 
     def get_queryset(self):
@@ -85,7 +85,7 @@ class ApplicationViewSet(
 
     @action(
         detail=True,
-        methods=['POST'],
+        methods=["POST"],
         permission_classes=(IsAuthenticated, IsGroupEditor, IsPending),
     )
     def accept(self, request, pk=None):
@@ -99,7 +99,7 @@ class ApplicationViewSet(
 
     @action(
         detail=True,
-        methods=['POST'],
+        methods=["POST"],
         permission_classes=(IsAuthenticated, IsGroupEditor, IsPending),
     )
     def decline(self, request, pk=None):
@@ -113,7 +113,7 @@ class ApplicationViewSet(
 
     @action(
         detail=True,
-        methods=['POST'],
+        methods=["POST"],
         permission_classes=(IsAuthenticated, IsApplicant, IsPending),
     )
     def withdraw(self, request, pk=None):
