@@ -59,7 +59,7 @@ def process_points(client, data):
     """Method to be called via threading module."""
     try:
         client.write_points(data)
-    except Exception:
+    except Exception:  # noqa: BLE001
         if getattr(settings, "INFLUXDB_FAIL_SILENTLY", True):
             logger.exception("Error while writing data points")
         else:

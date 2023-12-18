@@ -4,6 +4,7 @@ line-length = 120
 
 select = [
     "B",
+    "BLE",
     "C4",
     "DTZ",
     "E",

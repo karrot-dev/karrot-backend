@@ -46,7 +46,7 @@ class PythonIsValidTestCase(TestCase):
         for module in iter_modules(**self.data):
             try:
                 import_module(module)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 self.exception.append((module, e))
 
     def then_all_modules_import_cleanly(self):

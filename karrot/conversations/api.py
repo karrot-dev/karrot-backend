@@ -516,7 +516,7 @@ class RetrievePrivateConversationMixin:
         user2 = self.get_object()
         try:
             conversation = Conversation.objects.get_or_create_for_two_users(request.user, user2)
-        except Exception:
+        except ValueError:
             return Response(status=status.HTTP_404_NOT_FOUND, data={})
         participant = conversation.conversationparticipant_set.get(user=request.user)
         serializer = ConversationSerializer(participant, context=self.get_serializer_context())
