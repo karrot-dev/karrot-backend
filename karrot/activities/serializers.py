@@ -1,10 +1,8 @@
 import uuid
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import List, Optional
 
 import dateutil.rrule
-from datetime import timedelta
-
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import UploadedFile
@@ -145,12 +143,12 @@ class FeedbackSerializer(serializers.ModelSerializer):
         weight = data.get("weight", get_instance_attr("weight"))
 
         if not activity_type.has_feedback:
-            raise serializers.ValidationError(
-                f"You cannot give feedback to an activity of type {activity_type.name}."
-            )
+            raise serializers.ValidationError(f"You cannot give feedback to an activity of type {activity_type.name}.")
 
         if weight is not None and not activity_type.has_feedback_weight:
-            raise serializers.ValidationError(f"You cannot give weight feedback to an activity of type {activity_type.name}.")
+            raise serializers.ValidationError(
+                f"You cannot give weight feedback to an activity of type {activity_type.name}."
+            )
 
         if (comment is None or comment == "") and weight is None:
             raise serializers.ValidationError("Both comment and weight cannot be blank.")

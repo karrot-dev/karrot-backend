@@ -6,7 +6,8 @@ class TestCustomExceptionHandlerAPI(APITestCase):
     def test_reports_error_code(self):
         response = self.client.get(
             "/api/auth/user/",
-            HTTP_AUTHORIZATION="Token {}".format("invalidtoken"), HTTP_ACCEPT_LANGUAGE="de",
+            HTTP_AUTHORIZATION="Token {}".format("invalidtoken"),
+            HTTP_ACCEPT_LANGUAGE="de",
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response.data["detail"], "Ungültiges Token")

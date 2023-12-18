@@ -27,7 +27,6 @@ def notify_subscribers(
             "keys": subscription.keys,
         }
 
-
         payload = {
             "title": title,
         }
