@@ -190,5 +190,5 @@ def delete_message_attachment_files(sender, instance, **kwargs):
         if file:
             try:
                 file.delete(save=False)
-            except Exception as ex:
+            except Exception as ex:  # noqa: BLE001
                 logger.error(ex)
