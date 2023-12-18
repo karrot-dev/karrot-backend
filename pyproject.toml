@@ -3,6 +3,7 @@
 line-length = 120
 
 select = [
+    # https://docs.astral.sh/ruff/rules/
     "B",
     "BLE",
     "C4",
