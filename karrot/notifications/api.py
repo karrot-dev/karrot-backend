@@ -37,7 +37,7 @@ class NotificationViewSet(GenericViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        notifications = [n for n in self.paginate_queryset(queryset)]
+        notifications = list(self.paginate_queryset(queryset))
 
         meta = NotificationMeta.objects.get(user=request.user)
 

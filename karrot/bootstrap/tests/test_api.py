@@ -147,7 +147,7 @@ class TestBootstrapAPI(APITestCase):
         fields = "server,config,geoip,user,groups,places,users,status,activity_types"
         response = self.client.get(self.url, {"fields": fields})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(sorted(list(response.data.keys())), sorted(fields.split(",")))
+        self.assertEqual(sorted(response.data.keys()), sorted(fields.split(",")))
 
     def test_complains_for_invalid_fields(self):
         self.client.force_login(user=self.user)

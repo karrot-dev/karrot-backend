@@ -622,7 +622,7 @@ def issue_saved(sender, instance, **kwargs):
     issue = instance
     for user, subscriptions in groupby(
         sorted(
-            list(ChannelSubscription.objects.recent().filter(user__in=issue.group.members.all())),
+            ChannelSubscription.objects.recent().filter(user__in=issue.group.members.all()),
             key=lambda x: x.user.id,
         ),
         key=lambda x: x.user,
@@ -646,7 +646,7 @@ def community_feed_meta_saved(sender, instance, **kwargs):
 
 # Status
 def send_conversation_status_update(subscriptions, changed_conversation=None):
-    for user, user_subscriptions in groupby(sorted(list(subscriptions), key=lambda x: x.user.id), key=lambda x: x.user):
+    for user, user_subscriptions in groupby(sorted(subscriptions, key=lambda x: x.user.id), key=lambda x: x.user):
         payload = unread_conversations(user)
 
         if changed_conversation:
@@ -748,7 +748,7 @@ def application_saved(sender, instance, **kwargs):
     application = instance
     for user, subscriptions in groupby(
         sorted(
-            list(ChannelSubscription.objects.recent().filter(user__in=application.group.members.all())),
+            ChannelSubscription.objects.recent().filter(user__in=application.group.members.all()),
             key=lambda x: x.user.id,
         ),
         key=lambda x: x.user,
@@ -772,7 +772,7 @@ def activity_date_saved(sender, instance, **kwargs):
 
     for user, subscriptions in groupby(
         sorted(
-            list(ChannelSubscription.objects.recent().filter(user__in=activity.participants.all())),
+            ChannelSubscription.objects.recent().filter(user__in=activity.participants.all()),
             key=lambda x: x.user.id,
         ),
         key=lambda x: x.user,

@@ -57,10 +57,10 @@ def dbshell():
 
 @cli.command(
     help="run a django manage.py command",
-    context_settings=dict(
-        ignore_unknown_options=True,
-        allow_extra_args=True,
-    ),
+    context_settings={
+        "ignore_unknown_options": True,
+        "allow_extra_args": True,
+    },
 )
 @pass_context
 def manage(ctx):

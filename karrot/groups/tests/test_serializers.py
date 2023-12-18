@@ -22,7 +22,7 @@ class TestGroupSerializer(TestCase):
         self.assertEqual(serializer.data["description"], self.group.description)
         self.assertEqual(sorted(serializer.data["members"]), sorted([_.id for _ in self.group.members.all()]))
         self.assertEqual(
-            sorted(list(serializer.data["memberships"].keys())), sorted([_.id for _ in self.group.members.all()])
+            sorted(serializer.data["memberships"].keys()), sorted([_.id for _ in self.group.members.all()])
         )
         self.assertEqual(serializer.data["roles"], {})
 

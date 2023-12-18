@@ -43,7 +43,7 @@ class AgreementSerializer(ModelSerializer):
     @transaction.atomic
     def save(self, **kwargs):
         current_user = self.context["request"].user
-        extra_kwargs = dict(last_changed_by=current_user)
+        extra_kwargs = {"last_changed_by": current_user}
         if self.instance is None:
             extra_kwargs.update(created_by=current_user)
         return super().save(**kwargs, **extra_kwargs)

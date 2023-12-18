@@ -211,15 +211,15 @@ def fetch_activity_notification_data_for_group(group):
     midnight = localnow.replace(hour=0, minute=0, second=0, microsecond=0) + relativedelta(days=1)
     midnight_tomorrow = midnight + relativedelta(days=1)
 
-    tonight = dict(date__startswith__gte=localnow, date__startswith__lt=midnight)
-    tomorrow = dict(date__startswith__gte=midnight, date__startswith__lt=midnight_tomorrow)
+    tonight = {"date__startswith__gte": localnow, "date__startswith__lt": midnight}
+    tomorrow = {"date__startswith__gte": midnight, "date__startswith__lt": midnight_tomorrow}
 
-    empty = dict(num_participants=0)
-    not_full = dict(
-        participant_types__in=ParticipantType.objects.annotate_num_participants().filter(
+    empty = {"num_participants": 0}
+    not_full = {
+        "participant_types__in": ParticipantType.objects.annotate_num_participants().filter(
             Q(num_participants__gt=0) & (Q(max_participants=None) | Q(num_participants__lt=F("max_participants"))),
         )
-    )
+    }
 
     group_activities = (
         Activity.objects.exclude_disabled()
@@ -268,14 +268,12 @@ def fetch_activity_notification_data_for_group(group):
         tomorrow_not_full = base_tomorrow_not_full.exclude(participants__in=[user])
 
         has_user_activities = any(
-            [
-                v.count() > 0
-                for v in [
-                    tonight_user,
-                    tomorrow_user,
-                    tonight_not_full,
-                    tomorrow_not_full,
-                ]
+            v.count() > 0
+            for v in [
+                tonight_user,
+                tomorrow_user,
+                tonight_not_full,
+                tomorrow_not_full,
             ]
         )
 

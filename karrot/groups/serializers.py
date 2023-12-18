@@ -282,11 +282,11 @@ class TrustActionSerializer(serializers.ModelSerializer):
     def update(self, membership, validated_data):
         request = self.context["request"]
         user = request.user
-        params = dict(
-            membership=membership,
-            given_by=user,
-            role=validated_data["role"],
-        )
+        params = {
+            "membership": membership,
+            "given_by": user,
+            "role": validated_data["role"],
+        }
 
         if request.method == "POST":
             trust, created = Trust.objects.get_or_create(**params)

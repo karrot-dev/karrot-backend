@@ -222,7 +222,7 @@ def delete_orphaned_attachment_files():
             for next_dir in dirs:
                 walk(os.path.join(current_dir, next_dir), field)
 
-            entries = set(f"{current_dir}/{name}" for name in file_names)
+            entries = {f"{current_dir}/{name}" for name in file_names}
             entries_in_use = set(
                 ConversationMessageAttachment.objects.filter(**{f"{field}__in": entries}).values_list(field, flat=True)
             )

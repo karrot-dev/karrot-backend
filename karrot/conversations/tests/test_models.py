@@ -303,7 +303,7 @@ class TestIssueConversations(TestCase):
         # (the author won't get their own message, nor will the other users)
         self.assertEqual(len(mail.outbox), 1)
 
-        actual_recipients = set(m.to[0] for m in mail.outbox)
+        actual_recipients = {m.to[0] for m in mail.outbox}
         expected_recipients = {self.issue.affected_user.email}
 
         self.assertEqual(actual_recipients, expected_recipients)

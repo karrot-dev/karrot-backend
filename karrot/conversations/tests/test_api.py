@@ -763,8 +763,8 @@ class TestConversationsEmailNotificationsAPI(APITestCase):
         with execute_scheduled_tasks_immediately():
             ConversationMessage.objects.create(author=self.user, conversation=self.conversation, content="asdf")
 
-        actual_recipients = set(m.to[0] for m in mail.outbox)
-        expected_recipients = set(u.email for u in users)
+        actual_recipients = {m.to[0] for m in mail.outbox}
+        expected_recipients = {u.email for u in users}
 
         self.assertEqual(actual_recipients, expected_recipients)
 

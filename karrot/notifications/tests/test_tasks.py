@@ -65,7 +65,7 @@ class TestActivityUpcomingTask(TestCase):
         create_activity_upcoming_notifications.call_local()
         notifications = Notification.objects.filter(type=NotificationType.ACTIVITY_UPCOMING.value)
         self.assertEqual(notifications.count(), 6)
-        self.assertEqual(set(n.user.id for n in notifications), set(user.id for user in users))
+        self.assertEqual({n.user.id for n in notifications}, {user.id for user in users})
         activity1_user1_participant = ActivityParticipant.objects.get(user=users[0], activity=activity1)
         activity1_user1_notification = next(
             n for n in notifications if n.context["activity_participant"] == activity1_user1_participant.id

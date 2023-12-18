@@ -22,7 +22,7 @@ from karrot.webhooks.utils import make_local_part
 
 
 def author_names(messages):
-    return ", ".join(set(message.author.display_name for message in messages))
+    return ", ".join({message.author.display_name for message in messages})
 
 
 def prepare_conversation_message_notification(user, messages):

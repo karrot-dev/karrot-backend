@@ -217,7 +217,7 @@ class TestActivityNotificationTask(APITestCase):
             daily_activity_notifications()
             expected_users = [self.user]
             self.assertEqual(len(mail.outbox), len(expected_users))
-            self.assertEqual(set(email for m in mail.outbox for email in m.to), set(u.email for u in expected_users))
+            self.assertEqual({email for m in mail.outbox for email in m.to}, {u.email for u in expected_users})
             self.assertIn(place_url(self.place), mail.outbox[0].body)
 
     def test_does_not_send_if_no_activities(self):

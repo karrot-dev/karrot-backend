@@ -333,9 +333,9 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
         self.assertEqual(len(feedback), 3)
 
         # check related data
-        activity_ids = set(f["about"] for f in feedback)
+        activity_ids = {f["about"] for f in feedback}
         self.assertEqual(len(response.data["activities"]), len(activity_ids))
-        self.assertEqual(set(p["id"] for p in response.data["activities"]), activity_ids)
+        self.assertEqual({p["id"] for p in response.data["activities"]}, activity_ids)
 
     def test_export_feedback(self):
         self.client.force_login(user=self.member)
