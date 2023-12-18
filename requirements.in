@@ -64,9 +64,7 @@ factory-boy
 ipython
 requests-mock
 tblib
-# flake8 # See https://github.com/karrot-dev/karrot-frontend/issues/2476
-autopep8
-autoflake
+ruff
 pytest-asyncio
 pytest-django
 pytest-xdist
@@ -74,7 +72,6 @@ pytest-cov
 freezegun
 logging_tree
 django-silk
-yapf
 pre-commit
 psutil
 sqlparse # for pretty-printing SQL in shell

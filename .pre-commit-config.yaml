@@ -1,32 +1,13 @@
 repos:
 - repo: local
   hooks:
-  - id: autoflake
-    name: autoflake
-    entry: ./scripts/local-or-docker-compose autoflake
+  - id: ruff
+    name: ruff
+    entry: ./scripts/local-or-docker-compose ruff
     args:
-    - "--in-place"
-    - "--remove-all-unused-imports"
-    - "--remove-unused-variables"
-    - "--remove-duplicate-keys"
-    - "--expand-star-imports"
+    - "--fix"
     language: system
     types: [python]
-    exclude: "karrot\/.*\/migrations"
-  - id: yapf
-    name: yapf
-    entry: ./scripts/local-or-docker-compose yapf
-    args:
-    - "--in-place"
-    language: system
-    types: [python]
-    exclude: "karrot\/.*\/migrations"
-  # See https://github.com/karrot-dev/karrot-frontend/issues/2476
-  #- id: flake8
-  #  name: flake8
-  #  entry: flake8
-  #  language: system
-  #  types: [python]
   - id: makemessages
     name: makemessages
     entry: ./scripts/local-or-docker-compose python manage.py makemessages
