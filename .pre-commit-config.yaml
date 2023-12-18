@@ -14,7 +14,6 @@ repos:
     entry: ./scripts/local-or-docker-compose ruff
     args:
       - "format"
-      - "--fix"
     language: system
     types: [ python ]
   - id: makemessages

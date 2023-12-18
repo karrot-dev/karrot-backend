@@ -138,9 +138,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
         weight = data.get("weight", get_instance_attr("weight"))
 
         if not activity_type.has_feedback:
-            raise ValidationError(
-                "You cannot give feedback to an activity of type {}.".format(activity_type.name)
-            )
+            raise ValidationError("You cannot give feedback to an activity of type {}.".format(activity_type.name))
 
         if weight is not None and not activity_type.has_feedback_weight:
             raise ValidationError(
