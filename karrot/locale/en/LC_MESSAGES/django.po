@@ -40,24 +40,24 @@ msgstr ""
 msgid "Task"
 msgstr ""
 
-#: karrot/activities/serializers.py:311
+#: karrot/activities/serializers.py:312
 msgid "Must be a list"
 msgstr ""
 
-#: karrot/activities/serializers.py:312
+#: karrot/activities/serializers.py:313
 msgid "Must be a list with one or two values"
 msgstr ""
 
-#: karrot/activities/serializers.py:313
+#: karrot/activities/serializers.py:314
 msgid "Must pass start value"
 msgstr ""
 
-#: karrot/activities/tasks.py:77
+#: karrot/activities/tasks.py:76
 #, python-format
 msgid "Upcoming %(activity_type)s"
 msgstr ""
 
-#: karrot/activities/tasks.py:164
+#: karrot/activities/tasks.py:162
 #, python-format
 msgid "%(activity_type)s no longer available - %(date_time)s"
 msgstr ""
@@ -155,7 +155,7 @@ msgstr ""
 msgid "You need to have a verified email address"
 msgstr ""
 
-#: karrot/applications/api.py:38 karrot/groups/api.py:51
+#: karrot/applications/api.py:38 karrot/groups/api.py:58
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
 msgid "You need to be a group editor"
 msgstr ""
@@ -248,51 +248,51 @@ msgid ""
 "conversation</a>."
 msgstr ""
 
-#: karrot/conversations/api.py:84 karrot/conversations/api.py:292
-#: karrot/conversations/api.py:483 karrot/conversations/serializers.py:274
+#: karrot/conversations/api.py:93 karrot/conversations/api.py:311
+#: karrot/conversations/api.py:507 karrot/conversations/serializers.py:281
 msgid "You are not in this conversation"
 msgstr ""
 
-#: karrot/conversations/api.py:93
+#: karrot/conversations/api.py:102
 msgid "You are not the author of this message"
 msgstr ""
 
-#: karrot/conversations/api.py:102
+#: karrot/conversations/api.py:111
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its "
 "creation."
 msgstr ""
 
-#: karrot/conversations/api.py:411
+#: karrot/conversations/api.py:433
 msgid "Must be first in thread"
 msgstr ""
 
-#: karrot/conversations/api.py:414
+#: karrot/conversations/api.py:436
 msgid "You are not a participant in this thread"
 msgstr ""
 
-#: karrot/conversations/emails.py:263
+#: karrot/conversations/emails.py:271
 #, python-format
 msgid "New message in your application to %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:267
+#: karrot/conversations/emails.py:275
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:290
+#: karrot/conversations/emails.py:298
 #, python-format
 msgid "New message in membership review of %(user_name)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:305
+#: karrot/conversations/emails.py:314
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/serializers.py:276
+#: karrot/conversations/serializers.py:283
 msgid "This conversation has been closed"
 msgstr ""
 
@@ -335,27 +335,27 @@ msgid ""
 "%(site_name)s</a>, or <a href=\"%(mute_url)s\">mute further replies</a>."
 msgstr ""
 
-#: karrot/groups/api.py:30
+#: karrot/groups/api.py:37
 msgid "You are already a member."
 msgstr ""
 
-#: karrot/groups/api.py:37
+#: karrot/groups/api.py:44
 msgid "You can only join open groups."
 msgstr ""
 
-#: karrot/groups/api.py:44
+#: karrot/groups/api.py:51
 msgid "You cannot give trust to yourself"
 msgstr ""
 
-#: karrot/groups/serializers.py:34
+#: karrot/groups/serializers.py:33
 msgid "Unknown timezone"
 msgstr ""
 
-#: karrot/groups/serializers.py:42
+#: karrot/groups/serializers.py:41
 msgid "Playground"
 msgstr ""
 
-#: karrot/groups/serializers.py:256
+#: karrot/groups/serializers.py:252
 msgid "You are not in this group"
 msgstr ""
 
@@ -754,24 +754,24 @@ msgstr ""
 msgid "Market"
 msgstr ""
 
-#: karrot/places/serializers.py:190
+#: karrot/places/serializers.py:189
 msgid "Set at least one week in advance"
 msgstr ""
 
-#: karrot/places/serializers.py:193
+#: karrot/places/serializers.py:192
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr ""
 
-#: karrot/places/serializers.py:245
+#: karrot/places/serializers.py:243
 msgid "You are already subscribed to this place"
 msgstr ""
 
-#: karrot/subscriptions/receivers.py:777
+#: karrot/subscriptions/receivers.py:829
 msgid "Push notifications are enabled!"
 msgstr ""
 
-#: karrot/userauth/api.py:98 karrot/userauth/serializers.py:102
+#: karrot/userauth/api.py:105 karrot/userauth/serializers.py:102
 #: karrot/userauth/serializers.py:151 karrot/userauth/serializers.py:172
 #: karrot/userauth/serializers.py:202 karrot/userauth/serializers.py:224
 msgid "We could not send you an e-mail."
