@@ -271,12 +271,12 @@ def fetch_activity_notification_data_for_group(group):
 
         has_user_activities = any(
             v.count() > 0
-                for v in [
-                    tonight_user,
-                    tomorrow_user,
-                    tonight_not_full,
-                    tomorrow_not_full,
-                ]
+            for v in [
+                tonight_user,
+                tomorrow_user,
+                tonight_not_full,
+                tomorrow_not_full,
+            ]
         )
 
         if has_empty_activities or has_user_activities:

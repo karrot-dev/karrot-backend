@@ -16,19 +16,19 @@ def prepare_activity_notification_email(
 ):
     has_activities_tonight = any(
         items is not None and len(items) > 0
-            for items in [
-                tonight_user,
-                tonight_empty,
-                tonight_not_full,
-            ]
+        for items in [
+            tonight_user,
+            tonight_empty,
+            tonight_not_full,
+        ]
     )
     has_activities_tomorrow = any(
         items is not None and len(items) > 0
-            for items in [
-                tomorrow_user,
-                tomorrow_empty,
-                tomorrow_not_full,
-            ]
+        for items in [
+            tomorrow_user,
+            tomorrow_empty,
+            tomorrow_not_full,
+        ]
     )
 
     unsubscribe_url = activity_notification_unsubscribe_url(user, group)
