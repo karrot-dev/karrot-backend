@@ -16,7 +16,7 @@ from karrot.notifications.models import Notification, NotificationType, Notifica
 from karrot.groups.models import GroupMembership, get_default_roles
 from karrot.groups.roles import GROUP_EDITOR
 from karrot.invitations.models import Invitation
-from karrot.activities.models import Activity, ActivityParticipant
+from karrot.activities.models import Activity, ActivityParticipant, Feedback
 from karrot.places.models import Place
 from karrot.users.models import User
 
@@ -145,27 +145,36 @@ def application_decided(sender, instance, **kwargs):
 @receiver(pre_save, sender=Activity)
 def feedback_possible(sender, instance, **kwargs):
     activity = instance
-    if not activity.is_done:
+    if not activity.has_started:
         return
 
-    if activity.id:
-        # skip if activity was already processed
-        old = Activity.objects.get(id=activity.id)
-        if old.is_done == activity.is_done:
-            return
-
-        # skip if the activity does not take feedback
-        if not activity.activity_type.has_feedback:
-            return
-    else:
+    if not activity.id:
         # Activity is not saved yet and can't have any participants
+        return
+
+    # skip if activity was already processed
+    old = Activity.objects.get(id=activity.id)
+    if old.has_started == activity.has_started:
+        return
+
+    # skip if the activity does not take feedback
+    if not activity.activity_type.has_feedback:
         return
 
     # TODO take into account that settings can change
     # better save feedback possible expiry in activity too
     expiry_date = activity.date.end + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
-    for user in activity.participants.all():
+    if expiry_date < timezone.now():
+        # already outdated!
+        return
+
+    for participant in activity.activityparticipant_set.filter(feedback_dismissed=False):
+        user = participant.user
+        if Feedback.objects.filter(given_by=user, about=activity).exists():
+            # Ignore if they already gave feedback obvs.
+            continue
+
         Notification.objects.create(
             user=user,
             type=NotificationType.FEEDBACK_POSSIBLE.value,

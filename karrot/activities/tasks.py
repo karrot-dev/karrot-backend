@@ -176,9 +176,10 @@ def notify_participant_removals(
 
 
 @db_periodic_task(crontab(minute='*'))  # every minute
-def process_finished_activities():
+def process_activities():
     with timer() as t:
-        Activity.objects.process_finished_activities()
+        Activity.objects.process_activities()
+    # keep as "activities__process_finished_activities" for historic compat
     stats_utils.periodic_task('activities__process_finished_activities', seconds=t.elapsed_seconds)
 
 

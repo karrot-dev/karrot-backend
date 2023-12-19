@@ -158,12 +158,12 @@ class ActivitySeries(BaseModel):
 
 class ActivityQuerySet(models.QuerySet):
     def _feedback_possible_q(self, user):
-        return Q(is_done=True) \
-               & Q(activity_type__has_feedback=True) \
-               & Q(date__endswith__gte=timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)) \
-               & Q(participants=user) \
-               & ~Q(feedback__given_by=user) \
-               & Q(activityparticipant__feedback_dismissed=False)
+        timezone.now()
+        return (
+            Q(has_started=True) & Q(activity_type__has_feedback=True) &
+            Q(date__endswith__gte=timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)) &
+            Q(participants=user) & ~Q(feedback__given_by=user) & Q(activityparticipant__feedback_dismissed=False)
+        )
 
     def only_feedback_possible(self, user):
         return self.filter(self._feedback_possible_q(user))
@@ -197,7 +197,7 @@ class ActivityQuerySet(models.QuerySet):
         return self.exclude_disabled().filter(date__endswith__lt=timezone.now(), participants=None)
 
     def done(self):
-        return self.exclude_disabled().filter(date__endswith__lt=timezone.now())\
+        return self.exclude_disabled().filter(date__endswith__lt=timezone.now()) \
             .annotate_num_participants().filter(num_participants__gt=0)
 
     def with_free_slots(self, user):
@@ -209,9 +209,9 @@ class ActivityQuerySet(models.QuerySet):
             # check if the roles that are free actually match up with the users roles for that group
             participant_types_with_free_slots = participant_types_with_free_slots \
                 .annotate(membership=FilteredRelation(
-                    'activity__place__group__groupmembership',
-                    condition=Q(activity__place__group__groupmembership__user=user)),
-                ) \
+                'activity__place__group__groupmembership',
+                condition=Q(activity__place__group__groupmembership__user=user)),
+            ) \
                 .filter(membership__roles__contains=[F('role')])
 
         activities = self.exclude_disabled() \
@@ -235,14 +235,37 @@ class ActivityQuerySet(models.QuerySet):
         return self.filter(is_public=True)
 
     @transaction.atomic
-    def process_finished_activities(self):
+    def process_activities(self):
+        """ Process activities that have started OR ended
+
+        We process them at two moments:
+
+        after started
+        We don't do anything here, but receivers will
+
+        after ended
+        This is when we add the history
+        Important to do that at the end, so that anybody that joined
+        after it started is still counted in the history.
         """
-        find all activities that are in the past and didn't get processed yet
-        add them to history and mark as processed
-        """
+        now = timezone.now()
+
+        for activity in self.exclude_disabled().filter(
+                has_started=False,
+                date__startswith__lt=now,
+        ):
+            if not activity.place.is_active():
+                # Make sure we don't process this activity again, even if the place gets active in future
+                activity.is_disabled = True
+                activity.save()
+                continue
+
+            activity.has_started = True
+            activity.save()
+
         for activity in self.exclude_disabled().filter(
                 is_done=False,
-                date__endswith__lt=timezone.now(),
+                date__endswith__lt=now,
         ):
             if not activity.place.is_active():
                 # Make sure we don't process this activity again, even if the place gets active in future
@@ -358,6 +381,7 @@ class Activity(BaseModel, ConversationMixin):
         on_delete=models.SET_NULL,
     )
 
+    has_started = models.BooleanField(default=False)
     is_done = models.BooleanField(default=False)
 
     banner_image = VersatileImageField(

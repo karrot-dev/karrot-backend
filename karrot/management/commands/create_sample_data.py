@@ -429,7 +429,7 @@ class Command(BaseCommand):
             p.date -= difference
             p.save()
             print('did an activity at', p.date)
-        Activity.objects.process_finished_activities()
+        Activity.objects.process_activities()
 
         # delete
         u = login_user()

@@ -254,7 +254,7 @@ class TestHistoryAPIWithDoneActivity(APITestCase, ExtractPaginationMixin):
         self.place = PlaceFactory(group=self.group)
         self.activity = ActivityFactory(place=self.place, date=to_range(timezone.now() - relativedelta(days=1)))
         self.activity.add_participant(self.member)
-        Activity.objects.process_finished_activities()
+        Activity.objects.process_activities()
 
     def test_activity_done(self):
         self.client.force_login(self.member)
@@ -277,7 +277,7 @@ class TestHistoryAPIWithMissedActivity(APITestCase, ExtractPaginationMixin):
         self.place = PlaceFactory(group=self.group)
         self.activity = ActivityFactory(place=self.place, date=to_range(timezone.now() - relativedelta(days=1)))
         # No one joined the activity
-        Activity.objects.process_finished_activities()
+        Activity.objects.process_activities()
 
     def test_activity_missed(self):
         self.client.force_login(self.member)
@@ -302,7 +302,7 @@ class TestHistoryAPIActivityForInactivePlace(APITestCase, ExtractPaginationMixin
         self.activity.add_participant(self.member)
 
         ActivityFactory(place=self.place, date=to_range(timezone.now() - relativedelta(days=1), minutes=30))
-        Activity.objects.process_finished_activities()
+        Activity.objects.process_activities()
 
     def test_no_activity_done_for_inactive_place(self):
         self.client.force_login(self.member)
@@ -325,7 +325,7 @@ class TestHistoryAPIWithDisabledActivity(APITestCase, ExtractPaginationMixin):
             date=to_range(timezone.now() - relativedelta(days=1)),
             is_disabled=True,
         )
-        Activity.objects.process_finished_activities()
+        Activity.objects.process_activities()
 
     def test_no_history_for_disabled_activity(self):
         self.client.force_login(self.member)
