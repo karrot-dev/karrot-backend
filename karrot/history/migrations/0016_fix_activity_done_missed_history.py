@@ -10,8 +10,7 @@ def fix_activity_done_missed_history(apps, schema_editor):
     We previously processed finished activities right after they *started*
     BUT allowed people to join after they had started...
 
-    So if somebody joined after more than ~5 minutes after it started,
-    we might either have:
+    So if somebody joined after it started we might either have:
         a) the wrong count of users on the history object
         b) the wrong history typus (if 0 users before, it'd be marked as MISSED, not DONE)
 
