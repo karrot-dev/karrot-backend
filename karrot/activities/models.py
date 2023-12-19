@@ -158,7 +158,6 @@ class ActivitySeries(BaseModel):
 
 class ActivityQuerySet(models.QuerySet):
     def _feedback_possible_q(self, user):
-        timezone.now()
         return (
             Q(has_started=True) & Q(activity_type__has_feedback=True) &
             Q(date__endswith__gte=timezone.now() - relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)) &
