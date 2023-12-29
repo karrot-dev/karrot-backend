@@ -147,6 +147,7 @@ INSTALLED_APPS = (
     'karrot.stats',
     'karrot.status.StatusConfig',
     'karrot.utils',
+    'karrot.meet',
 
     # Django packages
     'django_extensions',
@@ -210,8 +211,8 @@ MIDDLEWARE = (
     'silk.middleware.SilkyMiddleware',
     'karrot.utils.influxdb_middleware.InfluxDBRequestMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'corsheaders.middleware.CorsMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -423,12 +424,22 @@ CORS_ORIGIN_WHITELIST = []
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
-if DEBUG:
+if is_dev:
     # this is primarily to enable the /_templates pages to work properly
     X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SECURE   = True
+
+if is_dev:
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+else:
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 AUTH_USER_MODEL = 'users.User'
 
