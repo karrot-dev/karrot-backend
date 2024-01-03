@@ -109,7 +109,7 @@ urlpatterns = [
     path('api/auth/', AuthView.as_view()),
     path('api/stats/', FrontendStatsView.as_view()),
     path('api/status/', StatusView.as_view()),
-    path('api/meet/', MeetViewSet.as_view()),
+    path('api/meet/<str:room_id>/token/', MeetViewSet.as_view()),
     path('api/', include((router.urls))),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('admin/docs/', include('django.contrib.admindocs.urls')),
