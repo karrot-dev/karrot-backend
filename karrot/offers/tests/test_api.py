@@ -85,7 +85,7 @@ class TestOffersAPI(APITestCase):
         self.client.force_login(user=self.user)
         response = self.client.post('/api/offers/{}/archive/'.format(self.offer.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data['status'], 'archived')
+        self.assertEqual(response.data['is_archived'], True)
 
     def test_mark_offer_archived_as_another_user(self):
         self.client.force_login(user=self.another_user)
@@ -218,11 +218,11 @@ class TestListOffersAPI(APITestCase):
         for _ in range(2):
             OfferFactory(user=self.user, group=self.group, images=[image_path], archived_at=timezone.now())
 
-        response = self.client.get('/api/offers/', {'status': 'active'})
+        response = self.client.get('/api/offers/', {'is_archived': False})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data['results']), 4)
 
-        response = self.client.get('/api/offers/', {'status': 'archived'})
+        response = self.client.get('/api/offers/', {'is_archived': True})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data['results']), 2)
 

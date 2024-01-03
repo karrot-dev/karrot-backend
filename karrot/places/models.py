@@ -29,7 +29,7 @@ class PlaceStatus(BaseModel, UpdatedAtMixin):
         ordering = ['order', 'id']
 
     @property
-    def is_archived(self):
+    def is_archived(self) -> bool:
         return self.archived_at is not None
 
 
@@ -49,7 +49,7 @@ class PlaceType(BaseModel, UpdatedAtMixin):
         return _(self.name) if self.name_is_translatable else self.name
 
     @property
-    def is_archived(self):
+    def is_archived(self) -> bool:
         return self.archived_at is not None
 
 
@@ -93,7 +93,7 @@ class Place(BaseModel, LocationModel, ConversationMixin):
         return 'Place {} ({})'.format(self.name, self.group)
 
     @property
-    def is_archived(self):
+    def is_archived(self) -> bool:
         return self.archived_at is not None
 
     @property

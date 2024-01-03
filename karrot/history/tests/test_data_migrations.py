@@ -32,17 +32,17 @@ class TestFixActivityDoneMissedHistory(TestMigrations):
         ('history', '0016_fix_activity_done_missed_history'),
     ]
 
-    def setUpBeforeMigration(self, apps):
-        History = apps.get_model('history', 'History')
-        Activity = apps.get_model('activities', 'Activity')
-        ActivityType = apps.get_model('activities', 'ActivityType')
-        ActivityParticipant = apps.get_model('activities', 'ActivityParticipant')
-        ParticipantType = apps.get_model('activities', 'ParticipantType')
-        Group = apps.get_model('groups', 'Group')
-        User = apps.get_model('users', 'User')
-        GroupMembership = apps.get_model('groups', 'GroupMembership')
-        Place = apps.get_model('places', 'Place')
-        PlaceType = apps.get_model('places', 'PlaceType')
+    def setUpBeforeMigration(self):
+        History = self.apps.get_model('history', 'History')
+        Activity = self.apps.get_model('activities', 'Activity')
+        ActivityType = self.apps.get_model('activities', 'ActivityType')
+        ActivityParticipant = self.apps.get_model('activities', 'ActivityParticipant')
+        ParticipantType = self.apps.get_model('activities', 'ParticipantType')
+        Group = self.apps.get_model('groups', 'Group')
+        User = self.apps.get_model('users', 'User')
+        GroupMembership = self.apps.get_model('groups', 'GroupMembership')
+        Place = self.apps.get_model('places', 'Place')
+        PlaceType = self.apps.get_model('places', 'PlaceType')
 
         group = Group.objects.create(name=faker.name())
         user1 = User.objects.create(username=faker.name())

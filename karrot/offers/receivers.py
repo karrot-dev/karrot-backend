@@ -25,5 +25,4 @@ def delete_offer_image_files(sender, instance, **kwargs):
 
 @receiver(post_save, sender=OfferImage)
 def warm_offer_image(sender, instance, **kwargs):
-    print('warming offer image!')
     create_offer_image_warmer(instance).warm()

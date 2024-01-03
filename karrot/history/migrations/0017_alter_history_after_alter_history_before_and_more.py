@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('history', '0015_history_history_his_typus_c46ce5_idx'),
+        ('history', '0016_fix_activity_done_missed_history'),
     ]
 
     operations = [

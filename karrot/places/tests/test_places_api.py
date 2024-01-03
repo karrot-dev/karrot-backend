@@ -306,7 +306,7 @@ class TestPlaceChangesActivitySeriesAPI(APITestCase, ExtractPaginationMixin):
         self.place.save()
         self.place.activities.all().delete()
         self.client.force_login(user=self.member)
-        response = self.client.patch(self.place_url, {'archived_at': None}, format='json')
+        response = self.client.patch(self.place_url, {'is_archived': False}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreater(self.place.activities.count(), 0)
 

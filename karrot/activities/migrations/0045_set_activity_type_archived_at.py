@@ -22,7 +22,7 @@ def set_archived_at(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('activities', '0042_activitytype_archived_at'),
+        ('activities', '0044_activitytype_archived_at'),
         ('history', '0015_history_history_his_typus_c46ce5_idx'),
     ]
 

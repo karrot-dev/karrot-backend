@@ -47,7 +47,7 @@ class ActivityType(BaseModel, UpdatedAtMixin):
         return _(self.name) if self.name_is_translatable else self.name
 
     @property
-    def is_archived(self):
+    def is_archived(self) -> bool:
         return self.archived_at is not None
 
 
@@ -247,7 +247,7 @@ class ActivityQuerySet(models.QuerySet):
                 has_started=False,
                 date__startswith__lt=now,
         ):
-            if not activity.place.is_active():
+            if activity.place.is_archived:
                 # Make sure we don't process this activity again, even if the place gets active in future
                 activity.is_disabled = True
                 activity.save()
