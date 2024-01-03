@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db import models
-from django.db.models import IntegerField, DateTimeField
+from django.db.models import IntegerField
 from django.utils import timezone
 from versatileimagefield.fields import VersatileImageField
 from versatileimagefield.image_warmer import VersatileImageFieldWarmer
@@ -14,7 +14,6 @@ class Offer(BaseModel, ConversationMixin):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(blank=False, max_length=settings.NAME_MAX_LENGTH)
     description = models.TextField(blank=False)
-    status_changed_at = DateTimeField(default=timezone.now)
     archived_at = models.DateTimeField(null=True)
 
     @property
