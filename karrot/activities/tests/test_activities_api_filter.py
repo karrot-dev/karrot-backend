@@ -153,7 +153,7 @@ class TestCustomActivityFilters(APITestCase, ExtractPaginationMixin):
             ], date=self.one_week_ago
         )
 
-        ActivityModel.objects.process_finished_activities()
+        ActivityModel.objects.process_activities()
 
     def test_filter_feedback_possible(self):
         self.client.force_login(user=self.member)

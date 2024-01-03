@@ -798,11 +798,11 @@ class ActivityReceiverTests(WSTransactionTestCase):
 
         self.assertIn('conversations:leave', client.messages_by_topic.keys())
 
-    def test_mark_as_done(self):
+    def test_mark_as_started(self):
         self.activity.add_participant(self.member)
         Notification.objects.all().delete()
         client = self.connect_as(self.member)
-        self.activity.is_done = True
+        self.activity.has_started = True
         self.activity.save()
 
         messages = client.messages_by_topic
@@ -955,7 +955,7 @@ class FinishedActivityReceiverTest(WSTestCase):
         Notification.objects.all().delete()
 
         client = self.connect_as(self.member)
-        Activity.objects.process_finished_activities()
+        Activity.objects.process_activities()
 
         messages_by_topic = client.messages_by_topic
 
@@ -966,23 +966,26 @@ class FinishedActivityReceiverTest(WSTestCase):
         self.assertEqual(response['payload']['type'], 'feedback_possible')
 
         status_messages = messages_by_topic['status']
-        self.assertEqual(len(status_messages), 2)
+
+        self.assertEqual(len(status_messages), 3)
         self.assertEqual(status_messages[0]['payload'], {'unseen_notification_count': 1})
         self.assertEqual(status_messages[1]['payload'], {'groups': {self.group.id: {'feedback_possible_count': 1}}})
+        # a duplicate status message... as during processing activities it did two sets of processing...
+        self.assertEqual(status_messages[2]['payload'], {'groups': {self.group.id: {'feedback_possible_count': 1}}})
 
-        self.assertEqual(len(client.messages), 4, client.messages)
+        self.assertEqual(len(client.messages), 5, client.messages)
 
     def test_receive_dismissed_feedback(self):
         self.activity.date = to_range(timezone.now() - relativedelta(days=1))
         self.activity.save()
 
         client = self.connect_as(self.member)
-        Activity.objects.process_finished_activities()
+        Activity.objects.process_activities()
 
         messages_by_topic = client.messages_by_topic
 
         status_messages = messages_by_topic['status']
-        self.assertEqual(len(status_messages), 2)
+        self.assertEqual(len(status_messages), 3)
         self.assertEqual(status_messages[1]['payload'], {'groups': {self.group.id: {'feedback_possible_count': 1}}})
 
         self.activity.dismiss_feedback(self.member)
@@ -990,8 +993,8 @@ class FinishedActivityReceiverTest(WSTestCase):
         messages_by_topic = client.messages_by_topic
 
         status_messages = messages_by_topic['status']
-        self.assertEqual(len(status_messages), 3)
-        self.assertEqual(status_messages[2]['payload'], {'groups': {self.group.id: {'feedback_possible_count': 0}}})
+        self.assertEqual(len(status_messages), 4)
+        self.assertEqual(status_messages[3]['payload'], {'groups': {self.group.id: {'feedback_possible_count': 0}}})
 
 
 class UserReceiverTest(WSTestCase):

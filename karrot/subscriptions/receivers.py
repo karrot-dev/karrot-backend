@@ -716,10 +716,10 @@ def application_saved(sender, instance, **kwargs):
 def activity_date_saved(sender, instance, **kwargs):
     activity = instance
 
-    if activity.is_done is False:
-        # Activity is not done
+    if activity.has_started is False:
+        # Activity not yet started
         return
-    # TODO don't send if 'is_done' did not change
+    # TODO don't send if 'has_started' did not change
 
     for user, subscriptions in groupby(sorted(list(
             ChannelSubscription.objects.recent().filter(user__in=activity.participants.all())),

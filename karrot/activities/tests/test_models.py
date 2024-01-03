@@ -93,20 +93,20 @@ class TestActivitySeriesModel(TestCase):
             series = ActivitySeriesFactory(place=self.place, start_date=two_weeks_ago)
 
         activities = series.activities.all()
-        past_date_count = activities.filter(date__startswith__lt=now).count()
+        past_date_count = activities.filter(date__endswith__lt=now).count()
         self.assertGreater(activities.count(), 2)
         series.delete()
         upcoming_activities = Activity.objects.filter(date__startswith__gte=now, is_disabled=False)
         self.assertEqual(upcoming_activities.count(), 0, upcoming_activities)
-        self.assertEqual(Activity.objects.filter(date__startswith__lt=now).count(), past_date_count)
+        self.assertEqual(Activity.objects.filter(date__endswith__lt=now).count(), past_date_count)
 
 
 class TestProcessFinishedActivities(TestCase):
     def setUp(self):
         self.activity = ActivityFactory(date=to_range(timezone.now() - relativedelta(weeks=1), minutes=30))
 
-    def test_process_finished_activities(self):
-        Activity.objects.process_finished_activities()
+    def test_process_activities(self):
+        Activity.objects.process_activities()
         self.assertEqual(Activity.objects.count(), 1)
         self.assertEqual(History.objects.count(), 1)
 
@@ -118,7 +118,7 @@ class TestProcessFinishedActivities(TestCase):
 
         self.activity.max_participants = 0
         self.activity.save()
-        Activity.objects.process_finished_activities()
+        Activity.objects.process_activities()
 
         self.assertEqual(Activity.objects.count(), 1)
         self.assertEqual(History.objects.count(), 1)
@@ -126,7 +126,7 @@ class TestProcessFinishedActivities(TestCase):
     def test_do_not_process_disabled_activities(self):
         self.activity.is_disabled = True
         self.activity.save()
-        Activity.objects.process_finished_activities()
+        Activity.objects.process_activities()
 
         self.assertFalse(self.activity.is_done)
         self.assertEqual(History.objects.count(), 0)
@@ -135,7 +135,7 @@ class TestProcessFinishedActivities(TestCase):
         place = self.activity.place
         place.status = PlaceStatus.ARCHIVED.value
         place.save()
-        Activity.objects.process_finished_activities()
+        Activity.objects.process_activities()
 
         self.assertEqual(History.objects.count(), 0)
         self.assertEqual(Activity.objects.count(), 1)
@@ -144,7 +144,7 @@ class TestProcessFinishedActivities(TestCase):
         # do not process activity again if places gets active
         place.status = PlaceStatus.ACTIVE.value
         place.save()
-        Activity.objects.process_finished_activities()
+        Activity.objects.process_activities()
 
         self.assertEqual(History.objects.count(), 0)
 

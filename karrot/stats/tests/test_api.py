@@ -130,7 +130,7 @@ class TestActivityHistoryStatsAPI(APITestCase):
         self.client.force_login(user=self.user)
         self.client.post(f'/api/activities/{self.activity.id}/add/')
         with freeze_time(self.after_the_activity_is_over, tick=True):
-            Activity.objects.process_finished_activities()
+            Activity.objects.process_activities()
             response = self.client.get('/api/stats/activity-history/', {'group': self.group.id, 'user': self.user.id})
             self.assertEqual(len(response.data), 1)
             self.assertEqual([dict(entry) for entry in response.data], [self.expected_entry({
@@ -146,7 +146,7 @@ class TestActivityHistoryStatsAPI(APITestCase):
         self.client.post(f'/api/activities/{self.activity.id}/add/')
 
         with freeze_time(self.after_the_activity_is_over, tick=True):
-            Activity.objects.process_finished_activities()
+            Activity.objects.process_activities()
             for user in [self.user, self.user2]:
                 response = self.client.get('/api/stats/activity-history/', {'group': self.group.id, 'user': user.id})
                 self.assertEqual(len(response.data), 1)
@@ -158,7 +158,7 @@ class TestActivityHistoryStatsAPI(APITestCase):
         self.setup_activity()
         self.client.force_login(user=self.user)
         with freeze_time(self.after_the_activity_is_over, tick=True):
-            Activity.objects.process_finished_activities()
+            Activity.objects.process_activities()
             # only relevant when no user specified
             response = self.client.get('/api/stats/activity-history/', {'group': self.group.id})
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
@@ -180,7 +180,7 @@ class TestActivityHistoryStatsAPI(APITestCase):
             self.client.post(f'/api/activities/{self.activity.id}/remove/')
 
         with freeze_time(self.after_the_activity_is_over, tick=True):
-            Activity.objects.process_finished_activities()
+            Activity.objects.process_activities()
             response = self.client.get('/api/stats/activity-history/', {'group': self.group.id, 'user': self.user.id})
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
             self.assertEqual(len(response.data), 1)
@@ -211,7 +211,7 @@ class TestActivityHistoryStatsAPI(APITestCase):
             self.client.post(f'/api/activities/{self.activity.id}/remove/')
 
         with freeze_time(self.after_the_activity_is_over, tick=True):
-            Activity.objects.process_finished_activities()
+            Activity.objects.process_activities()
             response = self.client.get('/api/stats/activity-history/', {'group': self.group.id, 'user': self.user.id})
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
             # only 1 user participated for a 2 person activity, so this is naughty!
@@ -241,7 +241,7 @@ class TestActivityHistoryStatsAPI(APITestCase):
         self.client.force_login(user=self.user)
 
         with freeze_time(self.after_the_activity_is_over, tick=True):
-            Activity.objects.process_finished_activities()
+            Activity.objects.process_activities()
             response = self.client.get('/api/stats/activity-history/', {'group': self.group.id, 'user': self.user.id})
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
             self.assertEqual(len(response.data), 1, response.data)
@@ -270,7 +270,7 @@ class TestActivityHistoryStatsAPI(APITestCase):
                 self.client.post(f'/api/activities/{self.activity.id}/remove/')
 
         with freeze_time(self.after_the_activity_is_over, tick=True):
-            Activity.objects.process_finished_activities()
+            Activity.objects.process_activities()
             self.client.force_login(user=self.user)
             response = self.client.get('/api/stats/activity-history/', {'group': self.group.id})
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
@@ -297,7 +297,7 @@ class TestActivityHistoryStatsAPI(APITestCase):
         self.client.force_login(user=self.user)
 
         with freeze_time(self.after_the_activity_is_over, tick=True):
-            Activity.objects.process_finished_activities()
+            Activity.objects.process_activities()
             # both users give some feedback!
             Feedback.objects.create(given_by=self.user, about=self.activity, weight=1.5, comment='foo')
             Feedback.objects.create(given_by=self.user2, about=self.activity, weight=2.1, comment='foo')
@@ -328,7 +328,7 @@ class TestActivityHistoryStatsAPI(APITestCase):
         self.client.force_login(user=self.user)
         self.client.post(f'/api/activities/{self.activity.id}/add/')
         with freeze_time(self.after_the_activity_is_over, tick=True):
-            Activity.objects.process_finished_activities()
+            Activity.objects.process_activities()
 
             # filter by matching activity type id
             response = self.client.get(
@@ -356,7 +356,7 @@ class TestActivityHistoryStatsAPI(APITestCase):
         self.client.force_login(user=self.user)
         self.client.post(f'/api/activities/{self.activity.id}/add/')
         with freeze_time(self.after_the_activity_is_over, tick=True):
-            Activity.objects.process_finished_activities()
+            Activity.objects.process_activities()
 
             self.place.status = PlaceStatus.ARCHIVED.value
             self.place.save()
@@ -380,7 +380,7 @@ class TestActivityHistoryStatsAPI(APITestCase):
         self.client.force_login(user=self.user)
 
         with freeze_time(self.after_the_activity_is_over, tick=True):
-            Activity.objects.process_finished_activities()
+            Activity.objects.process_activities()
             # user reports that user2 didn't show up
             response = self.client.post(
                 '/api/feedback/', {
@@ -413,7 +413,7 @@ class TestActivityHistoryStatsAPI(APITestCase):
         """
         self.setup_activity()
         with freeze_time(self.after_the_activity_is_over, tick=True):
-            Activity.objects.process_finished_activities()
+            Activity.objects.process_activities()
             self.client.force_login(user=self.user)
 
             # normally should have 1 entry
@@ -573,7 +573,7 @@ class TestActivityHistoryStatsAPI(APITestCase):
                 FeedbackNoShow.objects.create(feedback=feedback, user=user_to)
 
         with freeze_time(timezone.now() + timedelta(days=100), tick=True):
-            Activity.objects.process_finished_activities()
+            Activity.objects.process_activities()
             self.client.force_login(user=login_as)
             response = self.client.get('/api/stats/activity-history/', {'group': group.id})
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)

@@ -105,7 +105,7 @@ class TestNotificationReceivers(TestCase):
         activity = ActivityFactory(place=place)
 
         activity.add_participant(member)
-        activity.is_done = True
+        activity.has_started = True
         activity.save()
 
         notification = Notification.objects.filter(user=member, type=NotificationType.FEEDBACK_POSSIBLE.value)
