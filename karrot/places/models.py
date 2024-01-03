@@ -70,7 +70,6 @@ class Place(BaseModel, LocationModel, ConversationMixin):
         PlaceStatus,
         related_name='places',
         on_delete=models.CASCADE,
-        null=True,
     )
     place_type = models.ForeignKey(
         PlaceType,

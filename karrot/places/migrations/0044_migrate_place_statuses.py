@@ -64,6 +64,10 @@ def migrate_place_statuses(apps, schema_editor):
             place_status = PlaceStatus.objects.get(group=group, name=to_status_name)
             Place.objects.filter(group=group, status=from_status).update(status_next=place_status)
 
+        # update anything without a status_next to be created (which should just be previously archived ones)
+        created_place_status = PlaceStatus.objects.get(group=group, name='Created')
+        Place.objects.filter(group=group, status_next__isnull=True).update(status_next=created_place_status)
+
 
 class Migration(migrations.Migration):
 
