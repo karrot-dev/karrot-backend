@@ -3,9 +3,6 @@ from fractional_indexing import generate_key_between
 
 # A list of translatable names that groups might use
 translatable_names = {
-    # TODO: do we have these translations already?
-    # ... can we just use frontend translations?
-    # how does it all work!
     'Created': _('Created'),
     'Negotiating': _('Negotiating'),
     'Active': _('Active'),
