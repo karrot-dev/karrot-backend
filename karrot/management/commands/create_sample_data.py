@@ -181,8 +181,8 @@ class Command(BaseCommand):
                     'address': faker.street_address(),
                     'latitude': faker.latitude(),
                     'longitude': faker.longitude(),
-                    'status': PlaceStatus.objects.filter(group=group).first().id,
-                    'place_type': PlaceType.objects.filter(group=group).first().id,
+                    'status': PlaceStatus.objects.filter(group=group).order_by('?').first().id,
+                    'place_type': PlaceType.objects.filter(group=group).order_by('?').first().id,
                 }
             )
             if response.status_code != 201:

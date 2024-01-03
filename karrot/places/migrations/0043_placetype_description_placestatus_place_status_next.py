@@ -26,13 +26,16 @@ class Migration(migrations.Migration):
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('name', models.CharField(max_length=80)),
                 ('name_is_translatable', models.BooleanField(default=True)),
+                ('description', models.TextField(blank=True)),
                 ('archived_at', models.DateTimeField(null=True)),
                 ('colour', models.CharField(max_length=6)),
-                ('show_on_map', models.BooleanField(default=True)),
+                ('is_visible', models.BooleanField(default=True)),
+                ('order', models.CharField(blank=False)),
                 ('group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='place_statuses', to='groups.group')),
             ],
             options={
                 'unique_together': {('group', 'name')},
+                'ordering': ['order', 'id'],
             },
         ),
         migrations.AddField(

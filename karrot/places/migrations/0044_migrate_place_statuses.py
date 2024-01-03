@@ -1,23 +1,46 @@
 """Moves place statuses from enum type into foreign key type"""
 
 
-from django.utils import timezone
 from django.db import migrations
+from fractional_indexing import generate_key_between
 
-from karrot.history.models import HistoryTypus
 
+_last_order = None
+
+
+def next_order():
+    global _last_order
+    order = generate_key_between(_last_order, None)
+    _last_order = order
+    return order
+
+
+# Default types that will be created for new groups
+# (in the future this would be more customizable)
 default_place_statuses = {
     'Created': {
+        'name_is_translatable': True,
         'colour': '9e9e9e',
+        'is_visible': True,
+        'order': next_order(),
     },
     'Negotiating': {
+        'name_is_translatable': True,
         'colour': '2196f3',
+        'is_visible': True,
+        'order': next_order(),
     },
     'Active': {
+        'name_is_translatable': True,
         'colour': '21BA45',
+        'is_visible': True,
+        'order': next_order(),
     },
     'Declined': {
-        'colour': 'DB2828'
+        'name_is_translatable': True,
+        'colour': 'DB2828',
+        'is_visible': False,
+        'order': next_order(),
     },
 }
 
