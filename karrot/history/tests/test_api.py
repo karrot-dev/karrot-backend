@@ -95,6 +95,7 @@ class TestHistoryAPIWithExistingGroup(APITestCase, ExtractPaginationMixin):
                 'name': 'xyzabc',
                 'group': self.group.id,
                 'place_type': self.group.place_types.first().id,
+                'status': self.group.place_statuses.first().id,
             }
         )
         response = self.get_results(history_url)

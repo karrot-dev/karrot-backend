@@ -13,6 +13,7 @@ class TestPlaceModel(TestCase):
         self.defaults = {
             'group': self.group,
             'place_type': self.group.place_types.first(),
+            'status': self.group.place_statuses.first(),
         }
 
     def test_create_fails_if_name_too_long(self):
