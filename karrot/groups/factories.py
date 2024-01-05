@@ -1,11 +1,12 @@
 import os
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from factory import post_generation, LazyAttribute, Sequence
+from factory import LazyAttribute, Sequence, post_generation
 from factory.django import DjangoModelFactory
 
 from karrot.groups import roles
-from karrot.groups.models import Group as GroupModel, GroupStatus, GroupNotificationType
+from karrot.groups.models import Group as GroupModel
+from karrot.groups.models import GroupNotificationType, GroupStatus
 from karrot.utils.tests.fake import faker
 
 
@@ -20,10 +21,12 @@ class GroupFactory(DjangoModelFactory):
                 membership = self.groupmembership_set.create(
                     user=member, roles=[roles.GROUP_MEMBER, roles.GROUP_EDITOR]
                 )
-                membership.add_notification_types([
-                    GroupNotificationType.NEW_APPLICATION,
-                    GroupNotificationType.NEW_OFFER,
-                ])
+                membership.add_notification_types(
+                    [
+                        GroupNotificationType.NEW_APPLICATION,
+                        GroupNotificationType.NEW_OFFER,
+                    ]
+                )
                 membership.save()
 
     @post_generation
@@ -36,11 +39,11 @@ class GroupFactory(DjangoModelFactory):
     def photo(self, created, extracted, **kwargs):
         if created and extracted:
             image_path = extracted
-            with open(image_path, 'rb') as file:
+            with open(image_path, "rb") as file:
                 upload = SimpleUploadedFile(
                     name=os.path.basename(image_path),
                     content=file.read(),
-                    content_type='image/jpeg',
+                    content_type="image/jpeg",
                 )
                 self.photo = upload
                 self.save()
@@ -50,7 +53,7 @@ class GroupFactory(DjangoModelFactory):
         # this feels like abusing the factory system as this is not actually a field, but hey ho!
         self.create_default_types()
 
-    name = Sequence(lambda n: ' '.join(['Group', str(n), faker.name()]))
+    name = Sequence(lambda n: " ".join(["Group", str(n), faker.name()]))
     description = LazyAttribute(lambda x: faker.sentence(nb_words=40))
     public_description = LazyAttribute(lambda x: faker.sentence(nb_words=20))
     application_questions = LazyAttribute(lambda x: faker.sentence(nb_words=20))

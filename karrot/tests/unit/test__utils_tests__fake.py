@@ -1,4 +1,5 @@
 from django.test import TestCase
+
 from karrot.utils.tests.fake import Faker
 
 
@@ -19,7 +20,7 @@ class FakerTestCase(TestCase):
         del self.faker
         self.faker = Faker()
 
-    def when_creating_fake_data(self, with_method='name', num_data=10):
+    def when_creating_fake_data(self, with_method="name", num_data=10):
         fake_data = [getattr(self.faker, with_method)() for _ in range(num_data)]
         self.fake_data.append(fake_data)
 

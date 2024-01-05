@@ -7,12 +7,12 @@ from karrot.conversations.models import ConversationMixin
 
 
 class PlaceDefaultView(models.TextChoices):
-    ACTIVITIES = 'activities'
-    WALL = 'wall'
+    ACTIVITIES = "activities"
+    WALL = "wall"
 
 
 class PlaceStatus(BaseModel, UpdatedAtMixin):
-    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='place_statuses')
+    group = models.ForeignKey("groups.Group", on_delete=models.CASCADE, related_name="place_statuses")
     name = models.CharField(max_length=80)
     name_is_translatable = models.BooleanField(default=True)
     description = models.TextField(blank=True)
@@ -25,8 +25,8 @@ class PlaceStatus(BaseModel, UpdatedAtMixin):
     order = models.CharField(blank=False)
 
     class Meta:
-        unique_together = ('group', 'name')
-        ordering = ['order', 'id']
+        unique_together = ("group", "name")
+        ordering = ["order", "id"]
 
     @property
     def is_archived(self) -> bool:
@@ -34,7 +34,7 @@ class PlaceStatus(BaseModel, UpdatedAtMixin):
 
 
 class PlaceType(BaseModel, UpdatedAtMixin):
-    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='place_types')
+    group = models.ForeignKey("groups.Group", on_delete=models.CASCADE, related_name="place_types")
     name = models.CharField(max_length=80)
     name_is_translatable = models.BooleanField(default=True)
     description = models.TextField(blank=True)
@@ -42,7 +42,7 @@ class PlaceType(BaseModel, UpdatedAtMixin):
     archived_at = models.DateTimeField(null=True)
 
     class Meta:
-        unique_together = ('group', 'name')
+        unique_together = ("group", "name")
 
     def get_translated_name(self):
         # the translations are collected via place_types.py
@@ -55,11 +55,11 @@ class PlaceType(BaseModel, UpdatedAtMixin):
 
 class Place(BaseModel, LocationModel, ConversationMixin):
     class Meta:
-        unique_together = ('group', 'name')
+        unique_together = ("group", "name")
 
     DEFAULT_DEFAULT_VIEW = PlaceDefaultView.ACTIVITIES.value
 
-    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='places')
+    group = models.ForeignKey("groups.Group", on_delete=models.CASCADE, related_name="places")
     name = models.CharField(max_length=settings.NAME_MAX_LENGTH)
     description = models.TextField(blank=True)
     weeks_in_advance = models.PositiveIntegerField(default=4)
@@ -68,19 +68,19 @@ class Place(BaseModel, LocationModel, ConversationMixin):
 
     status = models.ForeignKey(
         PlaceStatus,
-        related_name='places',
+        related_name="places",
         on_delete=models.CASCADE,
     )
     place_type = models.ForeignKey(
         PlaceType,
-        related_name='places',
+        related_name="places",
         on_delete=models.CASCADE,
     )
 
     subscribers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
-        through='PlaceSubscription',
-        related_name='places_subscribed',
+        through="PlaceSubscription",
+        related_name="places_subscribed",
     )
     last_changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -89,7 +89,7 @@ class Place(BaseModel, LocationModel, ConversationMixin):
     )
 
     def __str__(self):
-        return 'Place {} ({})'.format(self.name, self.group)
+        return f"Place {self.name} ({self.group})"
 
     @property
     def is_archived(self) -> bool:
@@ -102,7 +102,7 @@ class Place(BaseModel, LocationModel, ConversationMixin):
 
 class PlaceSubscription(BaseModel):
     class Meta:
-        unique_together = ('place', 'user')
+        unique_together = ("place", "user")
 
     place = models.ForeignKey(Place, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

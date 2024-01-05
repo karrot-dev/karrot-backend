@@ -14,6 +14,7 @@ class InfluxDBRequestMiddleware(MiddlewareMixin):
     Measures request time and sends metric to InfluxDB.
     Credits go to: https://github.com/andymckay/django-statsd/blob/master/django_statsd/middleware.py#L24  # NOQA
     """
+
     def process_view(self, request, view_func, view_args, view_kwargs):
         view = view_func
         if not inspect.isfunction(view_func):
@@ -33,7 +34,7 @@ class InfluxDBRequestMiddleware(MiddlewareMixin):
         self._record_time(request)
 
     def _record_time(self, request):
-        if hasattr(request, '_start_time'):
+        if hasattr(request, "_start_time"):
             ms = int((time.time() - request._start_time) * 1000)
 
             is_authenticated = False
@@ -49,20 +50,22 @@ class InfluxDBRequestMiddleware(MiddlewareMixin):
             resolver_match = request.resolver_match
             view_name = resolver_match.view_name
 
-            data = [{
-                'measurement': 'django_request',
-                'tags': {
-                    'is_authenticated': is_authenticated,
-                    'is_staff': is_staff,
-                    'is_superuser': is_superuser,
-                    'method': request.method,
-                    'module': request._view_module,
-                    'view': request._view_name,
-                    'view_name': view_name,
-                },
-                'fields': {
-                    'value': ms,
-                    'url': request.get_full_path(),
-                },
-            }]
+            data = [
+                {
+                    "measurement": "django_request",
+                    "tags": {
+                        "is_authenticated": is_authenticated,
+                        "is_staff": is_staff,
+                        "is_superuser": is_superuser,
+                        "method": request.method,
+                        "module": request._view_module,
+                        "view": request._view_name,
+                        "view_name": view_name,
+                    },
+                    "fields": {
+                        "value": ms,
+                        "url": request.get_full_path(),
+                    },
+                }
+            ]
             write_points(data)

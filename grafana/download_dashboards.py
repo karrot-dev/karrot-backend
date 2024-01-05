@@ -9,36 +9,37 @@ Downloads all Grafana dashboards from an organization for backup purposes, until
 5. Commit changes
 """
 
-import requests
+import json
 import os
 import shutil
-import json
+
+import requests
 
 import config
 
 path = os.path.dirname(os.path.realpath(__file__))
 
 try:
-    shutil.rmtree(os.path.join(path, 'dashboards'))
+    shutil.rmtree(os.path.join(path, "dashboards"))
 except FileNotFoundError:
     pass
 
-os.mkdir(os.path.join(path, 'dashboards'))
+os.mkdir(os.path.join(path, "dashboards"))
 
 s = requests.Session()
-s.headers.update({'Authorization': 'Bearer {}'.format(config.API_KEY)})
+s.headers.update({"Authorization": f"Bearer {config.API_KEY}"})
 
-dashboard_list = s.get('{host}/api/search'.format(host=config.GRAFANA_HOST)).json()
+dashboard_list = s.get(f"{config.GRAFANA_HOST}/api/search").json()
 for dashboard in dashboard_list:
-    type = dashboard['type']
-    if type != 'dash-db':
+    type = dashboard["type"]
+    if type != "dash-db":
         continue
 
-    uid = dashboard['uid']
-    data = s.get('{host}/api/dashboards/uid/{uid}'.format(host=config.GRAFANA_HOST, uid=uid)).json()
+    uid = dashboard["uid"]
+    data = s.get(f"{config.GRAFANA_HOST}/api/dashboards/uid/{uid}").json()
 
-    uri = dashboard['uri'].split('/')[-1]
-    target_filepath = os.path.join(path, 'dashboards', '{}.json'.format(uri))
+    uri = dashboard["uri"].split("/")[-1]
+    target_filepath = os.path.join(path, "dashboards", f"{uri}.json")
 
-    with open(target_filepath, 'w') as f:
+    with open(target_filepath, "w") as f:
         f.write(json.dumps(data, sort_keys=True, indent=2))

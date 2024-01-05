@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters
 
-from karrot.history.models import HistoryTypus, History
+from karrot.history.models import History, HistoryTypus
 
 
 class HistoryTypusFilter(filters.MultipleChoiceFilter):
@@ -12,19 +12,19 @@ class HistoryTypusFilter(filters.MultipleChoiceFilter):
 
 class HistoryFilter(filters.FilterSet):
     typus = HistoryTypusFilter(choices=HistoryTypus.items())
-    type = HistoryTypusFilter(choices=HistoryTypus.items(), field_name='typus')
-    date = filters.IsoDateTimeFromToRangeFilter(field_name='date')
+    type = HistoryTypusFilter(choices=HistoryTypus.items(), field_name="typus")
+    date = filters.IsoDateTimeFromToRangeFilter(field_name="date")
 
     class Meta:
         model = History
         fields = (
-            'group',
-            'place',
-            'users',
-            'typus',
-            'type',
-            'date',
-            'series',
-            'activity',
-            'agreement',
+            "group",
+            "place",
+            "users",
+            "typus",
+            "type",
+            "date",
+            "series",
+            "activity",
+            "agreement",
         )

@@ -1,20 +1,21 @@
 from collections import namedtuple
 from datetime import timedelta
+
 from django.db import DataError
 from django.test import TestCase
 from django.utils import timezone
 
-from karrot.groups.models import GroupMembership
 from karrot.activities.factories import ActivityFactory
-from karrot.groups.roles import GROUP_MEMBER
-from karrot.groups.factories import GroupFactory
 from karrot.activities.filters import ActivitiesFilter
 from karrot.activities.models import Activity
+from karrot.groups.factories import GroupFactory
+from karrot.groups.models import GroupMembership
+from karrot.groups.roles import GROUP_MEMBER
 from karrot.places.factories import PlaceFactory
 from karrot.places.models import PlaceSubscription
 from karrot.users.factories import VerifiedUserFactory
 
-MockRequest = namedtuple('Request', ['user'])
+MockRequest = namedtuple("Request", ["user"])
 
 
 def halfway_datetime(range):
@@ -29,10 +30,7 @@ class TestActivityFilters(TestCase):
         self.place = PlaceFactory(group=self.group)
         self.activity = ActivityFactory(
             place=self.place,
-            participant_types=[{
-                'role': GROUP_MEMBER,
-                'max_participants': 2
-            }],
+            participant_types=[{"role": GROUP_MEMBER, "max_participants": 2}],
         )
 
     def test_with_no_parameters(self):
@@ -53,14 +51,14 @@ class TestActivityFilters(TestCase):
         qs = Activity.objects.filter(place=self.place)
         f = ActivitiesFilter(
             data={
-                'date_min': date_min,
-                'date_max': date_max,
-                'activity_type': activity_type,
-                'slots': slots,
-                'places': places,
+                "date_min": date_min,
+                "date_max": date_max,
+                "activity_type": activity_type,
+                "slots": slots,
+                "places": places,
             },
             queryset=qs,
-            request=MockRequest(user=user)
+            request=MockRequest(user=user),
         )
         self.assertEqual(list(f.qs), results)
 
@@ -139,10 +137,15 @@ class TestActivityFilters(TestCase):
         now = timezone.now()
         qs = Activity.objects.filter(place=self.place)
         with self.assertRaises(DataError):
-            list(ActivitiesFilter(data={
-                'date_min': now,
-                'date_max': now - timedelta(hours=1),
-            }, queryset=qs).qs)
+            list(
+                ActivitiesFilter(
+                    data={
+                        "date_min": now,
+                        "date_max": now - timedelta(hours=1),
+                    },
+                    queryset=qs,
+                ).qs
+            )
 
     def test_with_activity_type(self):
         self.expect_results(
@@ -160,101 +163,98 @@ class TestActivityFilters(TestCase):
     def test_with_slots_free(self):
         self.expect_results(
             user=self.member,
-            slots='free',
+            slots="free",
             results=[self.activity],
         )
         self.activity.add_participant(self.member)
         self.expect_results(
             user=self.member,
-            slots='free',
+            slots="free",
             results=[self.activity],
         )
         self.expect_results(
             user=self.other_member,
-            slots='free',
+            slots="free",
             results=[self.activity],
         )
         self.activity.add_participant(self.other_member)
         self.expect_results(
             user=self.other_member,
-            slots='free',
+            slots="free",
             results=[],
         )
 
     def test_slots_free_using_roles(self):
         self.special_activity = ActivityFactory(
             place=self.place,
-            participant_types=[{
-                'role': 'special_role',
-                'max_participants': 2
-            }],
+            participant_types=[{"role": "special_role", "max_participants": 2}],
         )
         self.expect_results(
             user=self.member,
-            slots='free',
+            slots="free",
             results=[self.activity],
         )
         membership = GroupMembership.objects.get(
             user=self.member,
             group=self.group,
         )
-        membership.roles.append('special_role')
+        membership.roles.append("special_role")
         membership.save()
         self.expect_results(
             user=self.member,
-            slots='free',
+            slots="free",
             results=[self.activity, self.special_activity],
         )
         self.special_activity.add_participant(self.member)
         self.expect_results(
             user=self.member,
-            slots='free',
+            slots="free",
             results=[self.activity, self.special_activity],
         )
 
     def test_with_slots_empty(self):
         self.expect_results(
-            slots='empty',
+            slots="empty",
             results=[self.activity],
         )
         self.activity.add_participant(self.member)
         self.expect_results(
-            slots='empty',
+            slots="empty",
             results=[],
         )
         self.activity.add_participant(self.other_member)
         self.expect_results(
-            slots='empty',
+            slots="empty",
             results=[],
         )
 
     def test_with_slots_joined(self):
         self.expect_results(
             user=self.member,
-            slots='joined',
+            slots="joined",
             results=[],
         )
         self.activity.add_participant(self.member)
         self.expect_results(
             user=self.member,
-            slots='joined',
+            slots="joined",
             results=[self.activity],
         )
         self.expect_results(
             user=self.other_member,
-            slots='joined',
+            slots="joined",
             results=[],
         )
 
     def test_with_subscribed_places(self):
         self.expect_results(
             user=self.member,
-            places='subscribed',
+            places="subscribed",
             results=[],
         )
         PlaceSubscription.objects.create(place=self.place, user=self.member)
         self.expect_results(
             user=self.member,
-            places='subscribed',
+            places="subscribed",
             results=[self.activity],
         )

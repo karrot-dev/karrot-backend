@@ -11,4 +11,4 @@ def normalize_emoji_name(name: str) -> str:
         return emoji_db.aliases[name]
 
     # when not found, raise error
-    raise Exception('not found')
+    raise Exception("not found")

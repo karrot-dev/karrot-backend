@@ -3,25 +3,24 @@ from email.utils import formataddr as real_formataddr
 import html2text
 from anymail.exceptions import AnymailAPIError
 from anymail.message import AnymailMessage
-from babel.dates import format_date, format_time, format_datetime
+from babel.dates import format_date, format_datetime, format_time
 from django.template import TemplateDoesNotExist
-from django.template.loader import render_to_string, get_template
-from django.utils import translation, timezone
+from django.template.loader import get_template, render_to_string
+from django.utils import timezone, translation
 from django.utils.text import Truncator
 from django.utils.timezone import get_current_timezone
-from django.utils.translation import to_locale, get_language
+from django.utils.translation import get_language, to_locale
 from jinja2 import Environment
 
 from config import settings
 from karrot.utils import stats
-from karrot.utils.frontend_urls import place_url, user_url, absolute_url, group_photo_or_karrot_logo_url, \
-    group_wall_url
+from karrot.utils.frontend_urls import absolute_url, group_photo_or_karrot_logo_url, group_wall_url, place_url, user_url
 
 
 def date_filter(value):
     return format_date(
         value.astimezone(get_current_timezone()),
-        format='full',
+        format="full",
         locale=to_locale(get_language()),
     )
 
@@ -29,7 +28,7 @@ def date_filter(value):
 def time_filter(value):
     return format_time(
         value,
-        format='short',
+        format="short",
         locale=to_locale(get_language()),
         tzinfo=get_current_timezone(),
     )
@@ -38,7 +37,7 @@ def time_filter(value):
 def datetime_filter(value):
     return format_datetime(
         value,
-        format='medium',
+        format="medium",
         locale=to_locale(get_language()),
         tzinfo=get_current_timezone(),
     )
@@ -46,13 +45,13 @@ def datetime_filter(value):
 
 def jinja2_environment(**options):
     env = Environment(**options)
-    env.filters['date'] = date_filter
-    env.filters['time'] = time_filter
-    env.filters['datetime'] = datetime_filter
-    env.globals['place_url'] = place_url
-    env.globals['user_url'] = user_url
-    env.globals['group_wall_url'] = group_wall_url
-    env.globals['absolute_url'] = absolute_url
+    env.filters["date"] = date_filter
+    env.filters["time"] = time_filter
+    env.filters["datetime"] = datetime_filter
+    env.globals["place_url"] = place_url
+    env.globals["user_url"] = user_url
+    env.globals["group_wall_url"] = group_wall_url
+    env.globals["absolute_url"] = absolute_url
     return env
 
 
@@ -103,27 +102,29 @@ def prepare_email(
     **kwargs,
 ):
     context = dict(context) if context else {}
-    tz = kwargs.pop('tz', timezone.utc)
+    tz = kwargs.pop("tz", timezone.utc)
 
     default_context = {
-        'site_name': settings.SITE_NAME,
-        'hostname': settings.HOSTNAME,
+        "site_name": settings.SITE_NAME,
+        "hostname": settings.HOSTNAME,
     }
 
     if user:
-        default_context.update({
-            'user': user,
-            'user_display_name': user.get_full_name(),
-        })
+        default_context.update(
+            {
+                "user": user,
+                "user_display_name": user.get_full_name(),
+            }
+        )
 
     # Merge context, but fail if a default key was redefined
     redefined_keys = set(default_context.keys()).intersection(context.keys())
     if len(redefined_keys) > 0:
-        raise Exception('email context should not redefine defaults: ' + ', '.join(redefined_keys))
+        raise Exception("email context should not redefine defaults: " + ", ".join(redefined_keys))
     context.update(default_context)
 
-    if 'header_image' not in context:
-        context['header_image'] = group_photo_or_karrot_logo_url(context.get('group', None))
+    if "header_image" not in context:
+        context["header_image"] = group_photo_or_karrot_logo_url(context.get("group", None))
 
     if not to:
         if not user:
@@ -143,51 +144,52 @@ def prepare_email(
     headers = {}
 
     if unsubscribe_url:
-        headers.update({
-            'List-Unsubscribe': '<{}>'.format(unsubscribe_url),
-        })
+        headers.update(
+            {
+                "List-Unsubscribe": f"<{unsubscribe_url}>",
+            }
+        )
 
     message_kwargs = {
-        'subject': subject,
-        'body': text_content,
-        'to': to,
-        'from_email': from_email,
-        'headers': headers,
+        "subject": subject,
+        "body": text_content,
+        "to": to,
+        "from_email": from_email,
+        "headers": headers,
         **kwargs,
     }
 
     email = CustomAnymailMessage(**message_kwargs)
 
     if html_content:
-        email.attach_alternative(html_content, 'text/html')
+        email.attach_alternative(html_content, "text/html")
 
     return email
 
 
-def prepare_email_content(template, context, tz, language='en'):
+def prepare_email_content(template, context, tz, language="en"):
     if not translation.check_for_language(language):
-        language = 'en'
+        language = "en"
 
     with timezone.override(tz), translation.override(language):
-
         html_content = None
 
         try:
-            html_template = get_template('{}.html.jinja2'.format(template))
+            html_template = get_template(f"{template}.html.jinja2")
             html_content = html_template.render(context)
         except TemplateDoesNotExist:
             pass
 
         try:
-            text_template = get_template('{}.text.jinja2'.format(template))
+            text_template = get_template(f"{template}.text.jinja2")
             text_content = text_template.render(context)
         except TemplateDoesNotExist:
             if html_content:
                 text_content = generate_plaintext_from_html(html_content)
             else:
-                raise Exception('Nothing to use for text content, no text or html templates available.')
+                raise Exception("Nothing to use for text content, no text or html templates available.")
 
-        subject = render_to_string('{}.subject.jinja2'.format(template), context).replace('\n', '')
+        subject = render_to_string(f"{template}.subject.jinja2", context).replace("\n", "")
 
         return subject, text_content, html_content
 

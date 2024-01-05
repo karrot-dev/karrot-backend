@@ -1,22 +1,22 @@
 import datetime
-import pytz
 from datetime import timedelta
+from unittest.mock import patch
+
+import pytz
 from dateutil.relativedelta import relativedelta
 from django.core import mail
 from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
-from unittest.mock import patch
 
 from config import settings
-from karrot.groups.emails import calculate_group_summary_dates, prepare_group_summary_data, \
-    prepare_group_summary_emails
-from karrot.groups.factories import GroupFactory, PlaygroundGroupFactory, InactiveGroupFactory
+from karrot.activities.factories import ActivityFactory, FeedbackFactory
+from karrot.groups.emails import calculate_group_summary_dates, prepare_group_summary_data, prepare_group_summary_emails
+from karrot.groups.factories import GroupFactory, InactiveGroupFactory, PlaygroundGroupFactory
 from karrot.groups.models import GroupMembership, GroupStatus
 from karrot.groups.roles import GROUP_MEMBER
-from karrot.groups.tasks import process_inactive_users, send_summary_emails, mark_inactive_groups
+from karrot.groups.tasks import mark_inactive_groups, process_inactive_users, send_summary_emails
 from karrot.history.models import History, HistoryTypus
-from karrot.activities.factories import ActivityFactory, FeedbackFactory
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory, VerifiedUserFactory
 
@@ -69,7 +69,7 @@ class TestProcessInactiveUsers(TestCase):
         process_inactive_users()
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, [self.inactive_user.email])
-        self.assertEqual(mail.outbox[0].subject, '{} is missing you!'.format(self.group.name))
+        self.assertEqual(mail.outbox[0].subject, f"{self.group.name} is missing you!")
 
 
 class TestProcessInactiveUsersForRemoval(TestCase):
@@ -95,7 +95,7 @@ class TestProcessInactiveUsersForRemoval(TestCase):
         self.assertIsNotNone(self.inactive_membership.removal_notification_at)
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, [self.inactive_user.email])
-        self.assertEqual(mail.outbox[0].subject, '{} is really missing you!'.format(self.group.name))
+        self.assertEqual(mail.outbox[0].subject, f"{self.group.name} is really missing you!")
 
 
 class TestProcessInactiveUsersRemovesOldUsers(TestCase):
@@ -110,7 +110,7 @@ class TestProcessInactiveUsersRemovesOldUsers(TestCase):
         self.inactive_membership = set_removal_notification_at(
             self.group,
             self.inactive_user,
-            days=settings.NUMBER_OF_DAYS_AFTER_REMOVAL_NOTIFICATION_WE_ACTUALLY_REMOVE_THEM
+            days=settings.NUMBER_OF_DAYS_AFTER_REMOVAL_NOTIFICATION_WE_ACTUALLY_REMOVE_THEM,
         )
         mail.outbox = []
 
@@ -161,7 +161,7 @@ class TestSummaryEmailTask(TestCase):
             [group.add_member(u) for u in new_users]
 
             # a couple of messages
-            [group.conversation.messages.create(author=user, content='hello') for _ in range(self.message_count)]
+            [group.conversation.messages.create(author=user, content="hello") for _ in range(self.message_count)]
 
             # missed activities
             [ActivityFactory(place=place) for _ in range(self.activities_missed_count)]
@@ -170,16 +170,14 @@ class TestSummaryEmailTask(TestCase):
             activities = [
                 ActivityFactory(
                     place=place,
-                    participant_types=[{
-                        'role': GROUP_MEMBER,
-                        'max_participants': 1
-                    }],
+                    participant_types=[{"role": GROUP_MEMBER, "max_participants": 1}],
                     participants=[user],
-                ) for _ in range(self.activities_done_count)
+                )
+                for _ in range(self.activities_done_count)
             ]
 
             # activity feedback
-            [FeedbackFactory(about=activity, given_by=user) for activity in activities[:self.feedback_count]]
+            [FeedbackFactory(about=activity, given_by=user) for activity in activities[: self.feedback_count]]
 
     def test_summary_email_dates_printed_correctly(self):
         mail.outbox = []
@@ -191,11 +189,11 @@ class TestSummaryEmailTask(TestCase):
             emails = prepare_group_summary_emails(group, context)
             self.assertGreater(len(emails), 0)
             email = emails[0]
-            expected_format = 'Sunday, August 12, 2018 to Saturday, August 18, 2018'
+            expected_format = "Sunday, August 12, 2018 to Saturday, August 18, 2018"
             self.assertIn(expected_format, email.body)
 
     def test_summary_emails_send_at_8am_localtime(self):
-        group = GroupFactory(timezone=pytz.timezone('Europe/Berlin'))
+        group = GroupFactory(timezone=pytz.timezone("Europe/Berlin"))
         # 6am UTC is 8am in this timezone
         with timezone.override(timezone.utc), freeze_time(datetime.datetime(2018, 8, 19, 6, 0, 0, tzinfo=pytz.utc)):
             self.make_activity_in_group(group)
@@ -204,7 +202,7 @@ class TestSummaryEmailTask(TestCase):
             self.assertEqual(len(mail.outbox), self.new_user_count)
 
     def test_summary_emails_do_not_send_at_other_times(self):
-        group = GroupFactory(timezone=pytz.timezone('Europe/Berlin'))
+        group = GroupFactory(timezone=pytz.timezone("Europe/Berlin"))
         # 6am UTC is 8am in this timezone
         with timezone.override(timezone.utc), freeze_time(datetime.datetime(2018, 8, 19, 7, 0, 0, tzinfo=pytz.utc)):
             self.make_activity_in_group(group)
@@ -212,7 +210,7 @@ class TestSummaryEmailTask(TestCase):
             send_summary_emails()
             self.assertEqual(len(mail.outbox), 0)
 
-    @patch('karrot.groups.stats.write_points')
+    @patch("karrot.groups.stats.write_points")
     def test_collects_stats(self, write_points):
         group = GroupFactory()
 
@@ -223,25 +221,29 @@ class TestSummaryEmailTask(TestCase):
             send_summary_emails()
 
         self.assertEqual(len(mail.outbox), self.new_user_count)
-        write_points.assert_called_with([{
-            'measurement': 'karrot.email.group_summary',
-            'tags': {
-                'group': str(group.id),
-                'group_status': 'active',
-            },
-            'fields': {
-                'value': 1,
-                'new_user_count': self.new_user_count,
-                'email_recipient_count': self.new_user_count,
-                'feedback_count': self.feedback_count,
-                'activities_missed_count': self.activities_missed_count,
-                'message_count': self.message_count,
-                'activities_done_count': self.activities_done_count,
-                'has_activity': True,
-            },
-        }])
+        write_points.assert_called_with(
+            [
+                {
+                    "measurement": "karrot.email.group_summary",
+                    "tags": {
+                        "group": str(group.id),
+                        "group_status": "active",
+                    },
+                    "fields": {
+                        "value": 1,
+                        "new_user_count": self.new_user_count,
+                        "email_recipient_count": self.new_user_count,
+                        "feedback_count": self.feedback_count,
+                        "activities_missed_count": self.activities_missed_count,
+                        "message_count": self.message_count,
+                        "activities_done_count": self.activities_done_count,
+                        "has_activity": True,
+                    },
+                }
+            ]
+        )
 
-    @patch('karrot.groups.stats.write_points')
+    @patch("karrot.groups.stats.write_points")
     def test_no_summary_email_if_no_activity_in_group(self, write_points):
         group = GroupFactory(members=[VerifiedUserFactory()])
 
@@ -251,23 +253,27 @@ class TestSummaryEmailTask(TestCase):
             send_summary_emails()
 
         self.assertEqual(len(mail.outbox), 0)
-        write_points.assert_called_with([{
-            'measurement': 'karrot.email.group_summary',
-            'tags': {
-                'group': str(group.id),
-                'group_status': 'active',
-            },
-            'fields': {
-                'value': 1,
-                'new_user_count': 0,
-                'email_recipient_count': 0,
-                'feedback_count': 0,
-                'activities_missed_count': 0,
-                'message_count': 0,
-                'activities_done_count': 0,
-                'has_activity': False,
-            },
-        }])
+        write_points.assert_called_with(
+            [
+                {
+                    "measurement": "karrot.email.group_summary",
+                    "tags": {
+                        "group": str(group.id),
+                        "group_status": "active",
+                    },
+                    "fields": {
+                        "value": 1,
+                        "new_user_count": 0,
+                        "email_recipient_count": 0,
+                        "feedback_count": 0,
+                        "activities_missed_count": 0,
+                        "message_count": 0,
+                        "activities_done_count": 0,
+                        "has_activity": False,
+                    },
+                }
+            ]
+        )
 
 
 class TestMarkInactiveGroupsTask(TestCase):

@@ -1,7 +1,7 @@
 from django.contrib.postgres.fields import DateTimeRangeField
 from django.db.backends.postgresql.psycopg_any import DateTimeTZRange
 from django.db.backends.signals import connection_created
-from django.db.models import Model, AutoField, Field, DateTimeField, TextField, FloatField, Func
+from django.db.models import AutoField, DateTimeField, Field, FloatField, Func, Model, TextField
 from django.db.models.fields.related import RelatedField
 from django.dispatch import receiver
 from django.utils import timezone
@@ -17,7 +17,8 @@ class NicelyFormattedModel(Model):
         :rtype: list
         """
         return [
-            field.name for field in self._meta.get_fields()
+            field.name
+            for field in self._meta.get_fields()
             if isinstance(field, Field) and not isinstance(field, RelatedField)
         ]
 
@@ -30,8 +31,8 @@ class NicelyFormattedModel(Model):
 
     def __repr__(self):
         model = str(self.__class__.__name__)
-        columns = ', '.join('{}="{}"'.format(field, value) for field, value in self.to_dict().items())
-        return '{}({})'.format(model, columns)
+        columns = ", ".join(f'{field}="{value}"' for field, value in self.to_dict().items())
+        return f"{model}({columns})"
 
 
 class BaseModel(NicelyFormattedModel):
@@ -59,13 +60,14 @@ class LocationModel(Model):
 
 
 class Tstzrange(Func):
-    function = 'tstzrange'
+    function = "tstzrange"
 
 
 class CustomDateTimeTZRange(DateTimeTZRange):
     """
     Similar to psycopg.types.range.Range but with extra helpers
     """
+
     @property
     def start(self):
         return self.lower
