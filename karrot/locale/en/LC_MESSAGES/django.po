@@ -1,3 +1,4 @@
+
 # Translations template for PROJECT.
 # Copyright (C) 2024 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
@@ -970,4 +971,3 @@ msgstr ""
 #, python-format
 msgid "%(value)s is a reserved name"
 msgstr ""
-
