@@ -32,8 +32,7 @@ def notify_message_push_subscribers(message):
     )
 
     for language, language_subscriptions in groupby(subscriptions, key=lambda subscription: subscription.user.language):
-        language_subscriptions = list(language_subscriptions)
-        notify_message_push_subscribers_with_language(message, subscriptions, language)
+        notify_message_push_subscribers_with_language(message, list(language_subscriptions), language)
 
 
 def get_message_title(message, language):
@@ -154,8 +153,7 @@ def notify_new_offer_push_subscribers(offer):
     )
 
     for language, language_subscriptions in groupby(subscriptions, key=lambda subscription: subscription.user.language):
-        language_subscriptions = list(language_subscriptions)
-        notify_new_offer_push_subscribers_with_language(offer, language_subscriptions, language)
+        notify_new_offer_push_subscribers_with_language(offer, list(language_subscriptions), language)
 
 
 def notify_new_offer_push_subscribers_with_language(offer, subscriptions, language):
