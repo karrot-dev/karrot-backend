@@ -645,7 +645,7 @@ def community_feed_meta_saved(sender, instance, **kwargs):
 
 # Status
 def send_conversation_status_update(subscriptions, changed_conversation=None):
-    for user, subscriptions in groupby(sorted(subscriptions, key=lambda x: x.user.id), key=lambda x: x.user):
+    for user, user_subscriptions in groupby(sorted(subscriptions, key=lambda x: x.user.id), key=lambda x: x.user):
         payload = unread_conversations(user)
 
         if changed_conversation:
@@ -659,7 +659,7 @@ def send_conversation_status_update(subscriptions, changed_conversation=None):
             elif t == "place" and target_id not in payload["places"]:
                 payload["places"][target_id] = {"unread_wall_message_count": 0}
 
-        for subscription in subscriptions:
+        for subscription in user_subscriptions:
             send_in_channel(subscription.reply_channel, topic="status", payload=payload)
 
 

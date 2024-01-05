@@ -31,8 +31,8 @@ def notify_message_push_subscribers(message):
         subscriptions.exclude(user=message.author).select_related("user").order_by("user__language").distinct()
     )
 
-    for language, subscriptions in groupby(subscriptions, key=lambda subscription: subscription.user.language):
-        subscriptions = list(subscriptions)
+    for language, language_subscriptions in groupby(subscriptions, key=lambda subscription: subscription.user.language):
+        language_subscriptions = list(language_subscriptions)
         notify_message_push_subscribers_with_language(message, subscriptions, language)
 
 
@@ -153,9 +153,9 @@ def notify_new_offer_push_subscribers(offer):
         .distinct()
     )
 
-    for language, subscriptions in groupby(subscriptions, key=lambda subscription: subscription.user.language):
-        subscriptions = list(subscriptions)
-        notify_new_offer_push_subscribers_with_language(offer, subscriptions, language)
+    for language, language_subscriptions in groupby(subscriptions, key=lambda subscription: subscription.user.language):
+        language_subscriptions = list(language_subscriptions)
+        notify_new_offer_push_subscribers_with_language(offer, language_subscriptions, language)
 
 
 def notify_new_offer_push_subscribers_with_language(offer, subscriptions, language):

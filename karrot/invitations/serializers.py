@@ -37,8 +37,8 @@ class InvitationSerializer(serializers.ModelSerializer):
         validated_data["invited_by"] = self.context["request"].user
         try:
             return self.Meta.model.objects.create_and_send(**validated_data)
-        except AnymailAPIError:
-            raise serializers.ValidationError(_("Email could not be sent"))
+        except AnymailAPIError as exc:
+            raise serializers.ValidationError(_("Email could not be sent")) from exc
 
 
 class InvitationAcceptSerializer(serializers.Serializer):

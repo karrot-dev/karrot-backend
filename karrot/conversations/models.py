@@ -41,7 +41,7 @@ class ConversationQuerySet(models.QuerySet):
 
     def get_or_create_for_two_users(self, user1, user2):
         if user1.id == user2.id:
-            raise Exception("Users need to be different")
+            raise ValueError("Users need to be different")
         conv = self.filter(is_private=True, participants=user1).filter(participants=user2).first()
         if not conv:
             conv = self.create(is_private=True)

@@ -38,8 +38,8 @@ class EmojiField(serializers.Field):
     def to_internal_value(self, data):
         try:
             return normalize_emoji_name(data)
-        except Exception:
-            raise serializers.ValidationError("not a valid emoji name")
+        except ValueError as exc:
+            raise serializers.ValidationError("not a valid emoji name") from exc
 
 
 class ConversationMessageReactionSerializer(serializers.ModelSerializer):

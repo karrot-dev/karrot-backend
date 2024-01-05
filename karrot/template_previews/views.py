@@ -290,8 +290,8 @@ def list_templates(request):
 
     # collect template files
     template_files = {}
-    for directory in template_dirs:
-        for directory, _dirnames, filenames in os.walk(directory):
+    for template_dir in template_dirs:
+        for directory, _dirnames, filenames in os.walk(template_dir):
             relative_dir = directory[len(basedir) + 1 :]
             for filename in filenames:
                 if re.match(r".*\.jinja2$", filename) and not re.match(r".*\.nopreview\.jinja2$", filename):

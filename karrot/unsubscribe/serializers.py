@@ -22,8 +22,8 @@ class TokenUnsubscribeSerializer(serializers.Serializer):
     def validate_token(token):
         try:
             return parse_token(token)  # will throw an exception if invalid
-        except BadSignature:
-            raise serializers.ValidationError()
+        except BadSignature as exc:
+            raise serializers.ValidationError() from exc
 
     def create(self, validated_data):
         token_data = validated_data.get("token")

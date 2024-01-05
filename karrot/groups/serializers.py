@@ -31,8 +31,8 @@ class TimezoneField(serializers.Field):
     def to_internal_value(self, data):
         try:
             return pytz.timezone(str(data))
-        except pytz.exceptions.UnknownTimeZoneError:
-            raise ValidationError(_("Unknown timezone"))
+        except pytz.exceptions.UnknownTimeZoneError as exc:
+            raise ValidationError(_("Unknown timezone")) from exc
 
 
 class GroupBaseSerializer(serializers.ModelSerializer):
@@ -275,7 +275,8 @@ class TrustActionSerializer(serializers.ModelSerializer):
                 self.context["request"].user, role.role_required_for_trust
             ):
                 raise ValidationError(
-                    f'Trust for role "{role_name}" can only be given by users with "{role.role_required_for_trust}" role'
+                    f'Trust for role "{role_name}" can only be given by users with '
+                    f'"{role.role_required_for_trust}" role'
                 )
 
         return role_name

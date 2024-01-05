@@ -204,7 +204,8 @@ class ActivityHistoryStatsViewSet(GenericViewSet):
             )
             .filter(
                 # don't need to check the leave_missed_* ones here, as the leave_* ones will be >0 in those cases
-                # TODO: in the query it looks like it's duplicating the filtering stuff from the annotations, which might be fine
+                # TODO: in the query it looks like it's duplicating the filtering stuff from the annotations
+                # (which might be fine)
                 Q(done_count__gt=0)
                 | Q(missed_count__gt=0)
                 | Q(leave_count__gt=0)

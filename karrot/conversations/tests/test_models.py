@@ -344,7 +344,7 @@ class TestPrivateUserConversations(TestCase):
         self.assertEqual(c.type(), "private")
 
     def test_get_or_create_conversation_for_yourself_fails(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             Conversation.objects.get_or_create_for_two_users(self.user, self.user)
 
     def test_does_not_set_group(self):

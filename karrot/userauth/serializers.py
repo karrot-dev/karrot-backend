@@ -98,8 +98,8 @@ class AuthUserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         try:
             user = self.Meta.model.objects.create_user(**validated_data)
-        except AnymailAPIError:
-            raise serializers.ValidationError(_("We could not send you an e-mail."))
+        except AnymailAPIError as exc:
+            raise serializers.ValidationError(_("We could not send you an e-mail.")) from exc
         return user
 
     def update(self, user, validated_data):
@@ -121,9 +121,9 @@ class VerificationCodeSerializer(serializers.Serializer):
     def validate_code(self, code):
         try:
             matched_code = VerificationCode.objects.get(code=code, type=self.context["type"])
-        except VerificationCode.DoesNotExist:
+        except VerificationCode.DoesNotExist as exc:
             stats.verification_code_failed(reason="invalid")
-            raise serializers.ValidationError(_("Verification code is invalid"))
+            raise serializers.ValidationError(_("Verification code is invalid")) from exc
 
         if matched_code.has_expired():
             stats.verification_code_failed(reason="expired")
@@ -147,8 +147,8 @@ class VerificationCodeSerializer(serializers.Serializer):
     def update(self, user, validated_data):
         try:
             self._update(user, validated_data)
-        except AnymailAPIError:
-            raise serializers.ValidationError(_("We could not send you an e-mail."))
+        except AnymailAPIError as exc:
+            raise serializers.ValidationError(_("We could not send you an e-mail.")) from exc
         return user
 
 
@@ -168,8 +168,8 @@ class ChangePasswordSerializer(serializers.Serializer):
     def update(self, user, validated_data):
         try:
             user.change_password(validated_data["new_password"])
-        except AnymailAPIError:
-            raise serializers.ValidationError(_("We could not send you an e-mail."))
+        except AnymailAPIError as exc:
+            raise serializers.ValidationError(_("We could not send you an e-mail.")) from exc
         stats.password_changed()
         return user
 
@@ -198,8 +198,8 @@ class ChangeMailSerializer(serializers.Serializer):
         else:
             try:
                 user.update_email(new_email)
-            except AnymailAPIError:
-                raise serializers.ValidationError(_("We could not send you an e-mail."))
+            except AnymailAPIError as exc:
+                raise serializers.ValidationError(_("We could not send you an e-mail.")) from exc
         stats.email_changed()
         return user
 
@@ -212,16 +212,16 @@ class RequestResetPasswordSerializer(serializers.Serializer):
 
         try:
             self.instance = UserModel.objects.active().get(email__iexact=email)
-        except UserModel.DoesNotExist:
-            raise serializers.ValidationError(_("Unknown e-mail address"))
+        except UserModel.DoesNotExist as exc:
+            raise serializers.ValidationError(_("Unknown e-mail address")) from exc
 
         return email
 
     def update(self, user, validated_data):
         try:
             user.send_password_reset_verification_code()
-        except AnymailAPIError:
-            raise serializers.ValidationError(_("We could not send you an e-mail."))
+        except AnymailAPIError as exc:
+            raise serializers.ValidationError(_("We could not send you an e-mail.")) from exc
         stats.password_reset_requested()
         return user
 

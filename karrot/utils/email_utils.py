@@ -183,11 +183,11 @@ def prepare_email_content(template, context, tz, language="en"):
         try:
             text_template = get_template(f"{template}.text.jinja2")
             text_content = text_template.render(context)
-        except TemplateDoesNotExist:
+        except TemplateDoesNotExist as exc:
             if html_content:
                 text_content = generate_plaintext_from_html(html_content)
             else:
-                raise Exception("Nothing to use for text content, no text or html templates available.")
+                raise ValueError("Nothing to use for text content, no text or html templates available.") from exc
 
         subject = render_to_string(f"{template}.subject.jinja2", context).replace("\n", "")
 
