@@ -18,7 +18,7 @@ class DateTimeRangeField(RangeField):
             ISODateTimeField(),
             ISODateTimeField(),
         )
-        super(DateTimeRangeField, self).__init__(fields, *args, **kwargs)
+        super().__init__(fields, *args, **kwargs)
 
 
 class ISODateTimeRangeFromToRangeFilter(filters.IsoDateTimeFromToRangeFilter):
@@ -31,6 +31,7 @@ class ISODateTimeRangeFromToRangeFilter(filters.IsoDateTimeFromToRangeFilter):
 
     See https://docs.djangoproject.com/en/2.1/ref/contrib/postgres/fields/#containment-functions
     """
+
     field_class = DateTimeRangeField
 
     def filter(self, qs, value):

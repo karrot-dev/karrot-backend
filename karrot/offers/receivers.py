@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
 from karrot.conversations.models import Conversation
@@ -24,5 +24,5 @@ def delete_offer_image_files(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=OfferImage)
-def warm_activity_banner_image(sender, instance, **kwargs):
+def warm_offer_image(sender, instance, **kwargs):
     create_offer_image_warmer(instance).warm()

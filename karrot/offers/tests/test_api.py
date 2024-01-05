@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -7,7 +8,7 @@ from karrot.groups.factories import GroupFactory
 from karrot.offers.factories import OfferFactory
 from karrot.users.factories import UserFactory, VerifiedUserFactory
 from karrot.utils.tests.fake import faker
-from karrot.utils.tests.uploads import image_path, encode_data_with_images
+from karrot.utils.tests.uploads import encode_data_with_images, image_path
 
 
 class TestOffersAPI(APITestCase):
@@ -19,130 +20,118 @@ class TestOffersAPI(APITestCase):
 
     def test_offer_image_redirect(self):
         # NOT logged in (as it needs to work in emails)
-        response = self.client.get('/api/offers/{}/image/'.format(self.offer.id))
+        response = self.client.get(f"/api/offers/{self.offer.id}/image/")
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertEqual(response.url, self.offer.images.first().image.url)
 
     def test_fetch_offer(self):
         self.client.force_login(user=self.user)
-        response = self.client.get('/api/offers/{}/'.format(self.offer.id))
+        response = self.client.get(f"/api/offers/{self.offer.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data['name'], self.offer.name)
+        self.assertEqual(response.data["name"], self.offer.name)
 
     def test_create_offer(self):
         self.client.force_login(user=self.user)
-        with open(image_path, 'rb') as image_file:
+        with open(image_path, "rb") as image_file:
             data = {
-                'name': faker.name(),
-                'description': faker.text(),
-                'group': self.group.id,
-                'images': [{
-                    'position': 0,
-                    'image': image_file
-                }],
+                "name": faker.name(),
+                "description": faker.text(),
+                "group": self.group.id,
+                "images": [{"position": 0, "image": image_file}],
             }
-            response = self.client.post('/api/offers/', data=encode_data_with_images(data))
+            response = self.client.post("/api/offers/", data=encode_data_with_images(data))
             self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
-            self.assertEqual(response.data['name'], data['name'])
-            self.assertTrue('full_size' in response.data['images'][0]['image_urls'])
+            self.assertEqual(response.data["name"], data["name"])
+            self.assertTrue("full_size" in response.data["images"][0]["image_urls"])
 
     def test_create_offer_without_image(self):
         self.client.force_login(user=self.user)
         data = {
-            'name': faker.name(),
-            'description': faker.text(),
-            'group': self.group.id,
-            'images': [],
+            "name": faker.name(),
+            "description": faker.text(),
+            "group": self.group.id,
+            "images": [],
         }
-        response = self.client.post('/api/offers/', data=encode_data_with_images(data))
+        response = self.client.post("/api/offers/", data=encode_data_with_images(data))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
-        self.assertEqual(response.data['name'], data['name'])
+        self.assertEqual(response.data["name"], data["name"])
 
     def test_cannot_fetch_another_users_archived_offer(self):
-        offer = OfferFactory(user=self.user, group=self.group, images=[image_path], status='archived')
+        offer = OfferFactory(user=self.user, group=self.group, images=[image_path], archived_at=timezone.now())
         self.client.force_login(user=self.another_user)
-        response = self.client.get('/api/offers/{}/'.format(offer.id))
+        response = self.client.get(f"/api/offers/{offer.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
     def test_can_fetch_other_users_archived_offer_if_in_the_conversation(self):
-        offer = OfferFactory(user=self.user, group=self.group, images=[image_path], status='archived')
+        offer = OfferFactory(user=self.user, group=self.group, images=[image_path], archived_at=timezone.now())
         offer.conversation.join(self.another_user)
         self.client.force_login(user=self.another_user)
-        response = self.client.get('/api/offers/{}/'.format(offer.id))
+        response = self.client.get(f"/api/offers/{offer.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_update_offer(self):
         self.client.force_login(user=self.user)
         data = {
-            'name': faker.name(),
+            "name": faker.name(),
         }
-        response = self.client.patch('/api/offers/{}/'.format(self.offer.id), data, format='json')
+        response = self.client.patch(f"/api/offers/{self.offer.id}/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data['name'], data['name'])
+        self.assertEqual(response.data["name"], data["name"])
 
     def test_mark_offer_archived(self):
         self.client.force_login(user=self.user)
-        response = self.client.post('/api/offers/{}/archive/'.format(self.offer.id))
+        response = self.client.post(f"/api/offers/{self.offer.id}/archive/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data['status'], 'archived')
+        self.assertEqual(response.data["is_archived"], True)
 
     def test_mark_offer_archived_as_another_user(self):
         self.client.force_login(user=self.another_user)
-        response = self.client.post('/api/offers/{}/archive/'.format(self.offer.id))
+        response = self.client.post(f"/api/offers/{self.offer.id}/archive/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_update_offer_as_another_user(self):
         offer = OfferFactory(user=self.user, group=self.group, images=[image_path])
         self.client.force_login(user=self.another_user)
         data = {
-            'name': faker.name(),
+            "name": faker.name(),
         }
-        response = self.client.patch('/api/offers/{}/'.format(offer.id), data, format='json')
+        response = self.client.patch(f"/api/offers/{offer.id}/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
     def test_add_image(self):
         offer = OfferFactory(user=self.user, group=self.group, images=[image_path])
         self.client.force_login(user=self.user)
-        with open(image_path, 'rb') as image_file:
+        with open(image_path, "rb") as image_file:
             data = {
-                'images': [{
-                    'position': 1,
-                    'image': image_file
-                }],
+                "images": [{"position": 1, "image": image_file}],
             }
-            response = self.client.patch(
-                '/api/offers/{}/'.format(offer.id), encode_data_with_images(data), format='multipart'
-            )
+            response = self.client.patch(f"/api/offers/{offer.id}/", encode_data_with_images(data), format="multipart")
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-            self.assertEqual(len(response.data['images']), 2)
+            self.assertEqual(len(response.data["images"]), 2)
 
     def test_remove_image(self):
         offer = OfferFactory(user=self.user, group=self.group, images=[image_path, image_path])
         self.client.force_login(user=self.user)
         data = {
-            'images': [{
-                'id': offer.images.first().id,
-                '_removed': True
-            }],
+            "images": [{"id": offer.images.first().id, "_removed": True}],
         }
-        response = self.client.patch(
-            '/api/offers/{}/'.format(offer.id), encode_data_with_images(data), format='multipart'
-        )
+        response = self.client.patch(f"/api/offers/{offer.id}/", encode_data_with_images(data), format="multipart")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['images']), 1)
+        self.assertEqual(len(response.data["images"]), 1)
 
     def test_remove_all_images(self):
         offer = OfferFactory(user=self.user, group=self.group, images=[image_path, image_path])
         self.client.force_login(user=self.user)
         data = {
-            'images': [{
-                'id': image.id,
-                '_removed': True,
-            } for image in offer.images.all()],
+            "images": [
+                {
+                    "id": image.id,
+                    "_removed": True,
+                }
+                for image in offer.images.all()
+            ],
         }
-        response = self.client.patch(
-            '/api/offers/{}/'.format(offer.id), encode_data_with_images(data), format='multipart'
-        )
+        response = self.client.patch(f"/api/offers/{offer.id}/", encode_data_with_images(data), format="multipart")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_reposition_image(self):
@@ -151,18 +140,15 @@ class TestOffersAPI(APITestCase):
         image_id = offer.images.first().id
         new_position = 5
         data = {
-            'images': [{
-                'id': image_id,
-                'position': new_position
-            }],
+            "images": [{"id": image_id, "position": new_position}],
         }
-        response = self.client.patch('/api/offers/{}/'.format(offer.id), data, format='json')
+        response = self.client.patch(f"/api/offers/{offer.id}/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        by_id = {image['id']: image for image in response.data['images']}
-        self.assertEqual(by_id[image_id]['position'], new_position)
+        by_id = {image["id"]: image for image in response.data["images"]}
+        self.assertEqual(by_id[image_id]["position"], new_position)
 
 
-@patch('karrot.offers.emails.prepare_email')
+@patch("karrot.offers.emails.prepare_email")
 class TestOffersTransactionAPI(APITestCase):
     def setUp(self):
         self.user = VerifiedUserFactory()
@@ -171,21 +157,18 @@ class TestOffersTransactionAPI(APITestCase):
 
     def test_create_offer(self, prepare_email):
         self.client.force_login(user=self.user)
-        with open(image_path, 'rb') as image_file:
+        with open(image_path, "rb") as image_file:
             data = {
-                'name': faker.name(),
-                'description': faker.text(),
-                'group': self.group.id,
-                'images': [{
-                    'position': 0,
-                    'image': image_file
-                }],
+                "name": faker.name(),
+                "description": faker.text(),
+                "group": self.group.id,
+                "images": [{"position": 0, "image": image_file}],
             }
             with self.captureOnCommitCallbacks(execute=True):
-                response = self.client.post('/api/offers/', data=encode_data_with_images(data))
+                response = self.client.post("/api/offers/", data=encode_data_with_images(data))
             self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
             args, kwargs = prepare_email.call_args
-            self.assertIsNotNone(kwargs['context']['offer_photo'])
+            self.assertIsNotNone(kwargs["context"]["offer_photo"])
 
 
 class TestListOffersAPI(APITestCase):
@@ -202,28 +185,28 @@ class TestListOffersAPI(APITestCase):
         for _ in range(2):
             OfferFactory(user=self.user, group=another_group, images=[image_path])
 
-        response = self.client.get('/api/offers/', {'group': self.group.id})
+        response = self.client.get("/api/offers/", {"group": self.group.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['results']), 4)
+        self.assertEqual(len(response.data["results"]), 4)
 
-        response = self.client.get('/api/offers/', {'group': another_group.id})
+        response = self.client.get("/api/offers/", {"group": another_group.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['results']), 2)
+        self.assertEqual(len(response.data["results"]), 2)
 
     def test_list_offers_by_status(self):
         self.client.force_login(user=self.user)
         for _ in range(4):
-            OfferFactory(user=self.user, group=self.group, images=[image_path], status='active')
+            OfferFactory(user=self.user, group=self.group, images=[image_path])
         for _ in range(2):
-            OfferFactory(user=self.user, group=self.group, images=[image_path], status='archived')
+            OfferFactory(user=self.user, group=self.group, images=[image_path], archived_at=timezone.now())
 
-        response = self.client.get('/api/offers/', {'status': 'active'})
+        response = self.client.get("/api/offers/", {"is_archived": False})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['results']), 4)
+        self.assertEqual(len(response.data["results"]), 4)
 
-        response = self.client.get('/api/offers/', {'status': 'archived'})
+        response = self.client.get("/api/offers/", {"is_archived": True})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['results']), 2)
+        self.assertEqual(len(response.data["results"]), 2)
 
     def test_cannot_list_offers_for_another_group(self):
         self.client.force_login(user=self.user)
@@ -233,19 +216,19 @@ class TestListOffersAPI(APITestCase):
         for _ in range(3):
             OfferFactory(user=self.user, group=another_group, images=[image_path])
 
-        response = self.client.get('/api/offers/')
+        response = self.client.get("/api/offers/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['results']), 2)
+        self.assertEqual(len(response.data["results"]), 2)
 
-        response = self.client.get('/api/offers/', {'group': another_group.id})
+        response = self.client.get("/api/offers/", {"group": another_group.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data['results']), 0)
+        self.assertEqual(len(response.data["results"]), 0)
 
     def test_cannot_list_another_users_archived_offers(self):
         for _ in range(2):
-            OfferFactory(user=self.user, group=self.group, images=[image_path], status='active')
+            OfferFactory(user=self.user, group=self.group, images=[image_path])
         for _ in range(3):
-            OfferFactory(user=self.user, group=self.group, images=[image_path], status='archived')
+            OfferFactory(user=self.user, group=self.group, images=[image_path], archived_at=timezone.now())
         self.client.force_login(user=self.another_user)
-        response = self.client.get('/api/offers/')
-        self.assertEqual(len(response.data['results']), 2)
+        response = self.client.get("/api/offers/")
+        self.assertEqual(len(response.data["results"]), 2)

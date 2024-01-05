@@ -1,14 +1,16 @@
 from importlib import import_module
 from os import walk
-from os.path import join as join_path, dirname
+from os.path import dirname
+from os.path import join as join_path
 
-import karrot
 from django.test import TestCase
 
+import karrot
 
-def iter_sources(root_module_path, pysuffix='.py'):
+
+def iter_sources(root_module_path, pysuffix=".py"):
     def is_source(_):
-        return _.endswith(pysuffix) and not _.startswith('__init__')
+        return _.endswith(pysuffix) and not _.startswith("__init__")
 
     for root, _, leaves in walk(root_module_path):
         for leaf in filter(is_source, leaves):
@@ -19,9 +21,9 @@ def iter_modules(root_module_path, excludes=None):
     def is_blacklisted(_):
         return excludes and any(_.startswith(exclude) for exclude in excludes)
 
-    def source_to_module(_, pysuffix='.py'):
-        _ = _[len(dirname(root_module_path)) + 1:-len(pysuffix)]
-        _ = _.replace('/', '.')
+    def source_to_module(_, pysuffix=".py"):
+        _ = _[len(dirname(root_module_path)) + 1 : -len(pysuffix)]
+        _ = _.replace("/", ".")
         return _
 
     for source in iter_sources(root_module_path):
@@ -33,9 +35,9 @@ def iter_modules(root_module_path, excludes=None):
 class PythonIsValidTestCase(TestCase):
     def test_all_modules_import_cleanly(self):
         excludes = {
-            'karrot.tests.integration.test_integration',  # integration test runner has side-effects
+            "karrot.tests.integration.test_integration",  # integration test runner has side-effects
         }
-        self.data = {'root_module_path': karrot.__path__[0], 'excludes': excludes}
+        self.data = {"root_module_path": karrot.__path__[0], "excludes": excludes}
         self.when_importing_modules()
         self.then_all_modules_import_cleanly()
 
@@ -44,9 +46,9 @@ class PythonIsValidTestCase(TestCase):
         for module in iter_modules(**self.data):
             try:
                 import_module(module)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 self.exception.append((module, e))
 
     def then_all_modules_import_cleanly(self):
         for module, exception in self.exception:
-            self.fail('{} did not import cleanly: {}'.format(module, exception.args[0]))
+            self.fail(f"{module} did not import cleanly: {exception.args[0]}")

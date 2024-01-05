@@ -1,0 +1,22 @@
+[tool.ruff]
+
+line-length = 120
+
+select = [
+    # https://docs.astral.sh/ruff/rules/
+    "B",
+    "BLE",
+    "C4",
+    "DTZ",
+    "E",
+    "F",
+    "I",
+    "PIE",
+    "Q",
+    "UP",
+    "W",
+]
+
+exclude = [
+    "migrations",
+]

@@ -1,26 +1,31 @@
 from datetime import timedelta
 
 from django.conf import settings
-from django.db.models.signals import pre_delete, post_save, post_delete, pre_save
+from django.db.models.signals import post_delete, post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 from huey.contrib.djhuey import revoke_by_id
 
 from karrot.activities import stats, tasks
-from karrot.activities.models import Activity, Feedback, ActivityParticipant, create_activity_banner_image_warmer
+from karrot.activities.models import Activity, ActivityParticipant, Feedback, create_activity_banner_image_warmer
 from karrot.conversations.models import Conversation
 from karrot.groups.models import GroupMembership
-from karrot.places.models import Place, PlaceStatus
+from karrot.places.models import Place
 
 
 @receiver(pre_delete, sender=GroupMembership)
 def leave_group_handler(sender, instance, **kwargs):
     group = instance.group
     user = instance.user
-    for activity in Activity.objects. \
-            filter(date__startswith__gte=timezone.now()). \
-            filter(participants__in=[user, ]). \
-            filter(place__group=group):
+    for activity in (
+        Activity.objects.filter(date__startswith__gte=timezone.now())
+        .filter(
+            participants__in=[
+                user,
+            ]
+        )
+        .filter(place__group=group)
+    ):
         activity.remove_participant(user)
 
 
@@ -78,7 +83,7 @@ def schedule_activity_reminder(sender, instance, **kwargs):
     remind_at = activity.date.start - timedelta(hours=settings.ACTIVITY_REMINDER_HOURS)
     if remind_at > timezone.now():
         task = tasks.activity_reminder.schedule(
-            (participant.id, ),
+            (participant.id,),
             eta=remind_at,
         )
         participant.reminder_task_id = task.id
@@ -100,9 +105,9 @@ def update_activity_series_when_place_changes(sender, instance, **kwargs):
         return
 
     old = Place.objects.get(id=place.id)
-    place_became_active = old.status != place.status and place.status == PlaceStatus.ACTIVE.value
+    place_became_unarchived = old.archived_at is not None and place.archived_at is None
     weeks_in_advance_changed = old.weeks_in_advance != place.weeks_in_advance
-    if place_became_active or weeks_in_advance_changed:
+    if place_became_unarchived or weeks_in_advance_changed:
         for series in place.series.all():
             series.update_activities()
 

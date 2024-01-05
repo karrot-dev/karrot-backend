@@ -1,4 +1,4 @@
-from factory import SubFactory, LazyAttribute, post_generation
+from factory import LazyAttribute, SubFactory, post_generation
 from factory.django import DjangoModelFactory
 
 from karrot.groups.factories import GroupFactory
@@ -16,7 +16,6 @@ class OfferFactory(DjangoModelFactory):
     user = SubFactory(UserFactory)
     name = LazyAttribute(lambda x: faker.sentence(nb_words=4))
     description = LazyAttribute(lambda x: faker.name())
-    status = 'active'
 
     @post_generation
     def images(self, created, extracted, **kwargs):

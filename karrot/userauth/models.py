@@ -11,9 +11,9 @@ from karrot.base.base_models import BaseModel
 
 class VerificationCodeQuerySet(models.QuerySet):
     def create(self, *args, **kwargs):
-        if 'code' not in kwargs or not kwargs['code']:
-            url_safe_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-            kwargs['code'] = crypto.get_random_string(length=VerificationCode.LENGTH, allowed_chars=url_safe_chars)
+        if "code" not in kwargs or not kwargs["code"]:
+            url_safe_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+            kwargs["code"] = crypto.get_random_string(length=VerificationCode.LENGTH, allowed_chars=url_safe_chars)
         return super().create(*args, **kwargs)
 
 
@@ -22,10 +22,11 @@ class VerificationCode(BaseModel):
     A single-use token that expires after a predefined period
     and can only be used by a designated user to authenticate a certain type of action.
     """
+
     # Action types
-    EMAIL_VERIFICATION = 'EMAIL_VERIFICATION'
-    PASSWORD_RESET = 'PASSWORD_RESET'
-    ACCOUNT_DELETE = 'ACCOUNT_DELETE'
+    EMAIL_VERIFICATION = "EMAIL_VERIFICATION"
+    PASSWORD_RESET = "PASSWORD_RESET"
+    ACCOUNT_DELETE = "ACCOUNT_DELETE"
     TYPES = [EMAIL_VERIFICATION, PASSWORD_RESET, ACCOUNT_DELETE]
 
     LENGTH = 40
@@ -33,11 +34,11 @@ class VerificationCode(BaseModel):
     objects = VerificationCodeQuerySet.as_manager()
 
     user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    code = CharField('actual verification code', unique=True, max_length=50)
+    code = CharField("actual verification code", unique=True, max_length=50)
     type = CharField(max_length=50)
 
     class Meta:
-        unique_together = ('user', 'type')
+        unique_together = ("user", "type")
 
     def _get_validity_time_limit(self):
         """
@@ -63,7 +64,7 @@ class VerificationCode(BaseModel):
 def create_user_photo_warmer(instance_or_queryset, *, verbose=False):
     return VersatileImageFieldWarmer(
         instance_or_queryset=instance_or_queryset,
-        rendition_key_set='user_profile',
-        image_attr='photo',
+        rendition_key_set="user_profile",
+        image_attr="photo",
         verbose=verbose,
     )

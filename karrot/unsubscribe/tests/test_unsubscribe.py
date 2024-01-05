@@ -1,12 +1,16 @@
 from django.test import TestCase
 
+from karrot.activities.factories import ActivityFactory
 from karrot.applications.factories import ApplicationFactory
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupNotificationType
-from karrot.activities.factories import ActivityFactory
 from karrot.places.factories import PlaceFactory
-from karrot.unsubscribe.utils import unsubscribe_from_all_conversations_in_group, generate_token, parse_token, \
-    unsubscribe_from_notification_type
+from karrot.unsubscribe.utils import (
+    generate_token,
+    parse_token,
+    unsubscribe_from_all_conversations_in_group,
+    unsubscribe_from_notification_type,
+)
 from karrot.users.factories import UserFactory
 
 
@@ -18,25 +22,25 @@ class TestTokenParser(TestCase):
     def test_with_a_conversation(self):
         token = generate_token(self.user, self.group, conversation=self.group.conversation)
         data = parse_token(token)
-        self.assertEqual(self.user, data['user'])
-        self.assertEqual(self.group, data['group'])
-        self.assertEqual(self.group.conversation, data['conversation'])
+        self.assertEqual(self.user, data["user"])
+        self.assertEqual(self.group, data["group"])
+        self.assertEqual(self.group.conversation, data["conversation"])
 
     def test_with_a_thread(self):
-        thread = self.group.conversation.messages.create(author=self.user, content='foo')
-        self.group.conversation.messages.create(author=self.user, content='foo reply', thread=thread)
+        thread = self.group.conversation.messages.create(author=self.user, content="foo")
+        self.group.conversation.messages.create(author=self.user, content="foo reply", thread=thread)
         token = generate_token(self.user, self.group, thread=thread)
         data = parse_token(token)
-        self.assertEqual(self.user, data['user'])
-        self.assertEqual(self.group, data['group'])
-        self.assertEqual(thread, data['thread'])
+        self.assertEqual(self.user, data["user"])
+        self.assertEqual(self.group, data["group"])
+        self.assertEqual(thread, data["thread"])
 
     def test_with_notification_types(self):
         token = generate_token(
             self.user, self.group, notification_type=GroupNotificationType.DAILY_ACTIVITY_NOTIFICATION
         )
         data = parse_token(token)
-        self.assertEqual(data['notification_type'], 'daily_activity_notification')
+        self.assertEqual(data["notification_type"], "daily_activity_notification")
 
 
 class TestUnsubscribeFromNotificationTypes(TestCase):
@@ -46,7 +50,7 @@ class TestUnsubscribeFromNotificationTypes(TestCase):
 
     def test_unsubscribe_from_weekly_summaries(self):
         notification_types = self.group.groupmembership_set.filter(user=self.user).values_list(
-            'notification_types',
+            "notification_types",
             flat=True,
         )
         self.assertIn(GroupNotificationType.WEEKLY_SUMMARY, notification_types.get())
@@ -75,8 +79,8 @@ class TestUnsubscribeFromAllConversationsInGroup(TestCase):
         self.assertFalse(participant.get().muted)
 
     def test_unsubscribe_from_group_wall_thread(self):
-        thread = self.group.conversation.messages.create(author=self.user, content='foo')
-        self.group.conversation.messages.create(author=self.user, content='foo reply', thread=thread)
+        thread = self.group.conversation.messages.create(author=self.user, content="foo")
+        self.group.conversation.messages.create(author=self.user, content="foo reply", thread=thread)
         participant = thread.participants.filter(user=self.user)
         self.assertFalse(participant.get().muted)
         unsubscribe_from_all_conversations_in_group(self.user, self.group)
@@ -85,13 +89,14 @@ class TestUnsubscribeFromAllConversationsInGroup(TestCase):
     def test_unsubscribe_from_all_group_notifications(self):
         membership = self.group.groupmembership_set.filter(user=self.user)
         self.assertEqual(
-            membership.get().notification_types, [
-                'weekly_summary',
-                'daily_activity_notification',
-                'conflict_resolution',
-                'new_application',
-                'new_offer',
-            ]
+            membership.get().notification_types,
+            [
+                "weekly_summary",
+                "daily_activity_notification",
+                "conflict_resolution",
+                "new_application",
+                "new_offer",
+            ],
         )
         unsubscribe_from_all_conversations_in_group(self.user, self.group)
         self.assertEqual(membership.get().notification_types, [])

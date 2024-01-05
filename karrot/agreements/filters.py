@@ -1,6 +1,7 @@
 from django.db.models import Q
 from django.utils import timezone
-from django_filters import rest_framework as filters, ModelChoiceFilter
+from django_filters import ModelChoiceFilter
+from django_filters import rest_framework as filters
 
 
 def groups_queryset(request):

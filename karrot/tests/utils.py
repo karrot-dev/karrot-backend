@@ -4,8 +4,8 @@ from django.apps import apps
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 from django.test import TestCase
+from huey.contrib.djhuey import disconnect_signal, signal
 from huey.signals import SIGNAL_SCHEDULED
-from huey.contrib.djhuey import signal, disconnect_signal
 
 
 # Mostly based on this nice persons article:
@@ -19,8 +19,9 @@ class TestMigrations(TestCase):
     migrate_to = None
 
     def setUp(self):
-        assert self.migrate_from and self.migrate_to, \
-            "TestCase '{}' must define migrate_from and migrate_to properties".format(type(self).__name__)
+        assert (
+            self.migrate_from and self.migrate_to
+        ), f"TestCase '{type(self).__name__}' must define migrate_from and migrate_to properties"
 
         executor = MigrationExecutor(connection)
         old_apps = executor.loader.project_state(self.migrate_from).apps
@@ -28,7 +29,8 @@ class TestMigrations(TestCase):
         # Reverse to the original migration
         executor.migrate(self.migrate_from)
 
-        self.setUpBeforeMigration(old_apps)
+        self.apps = old_apps
+        self.setUpBeforeMigration()
 
         # Run the migration to test
         executor = MigrationExecutor(connection)
@@ -37,16 +39,16 @@ class TestMigrations(TestCase):
 
         self.apps = executor.loader.project_state(self.migrate_to).apps
 
-    def setUpBeforeMigration(self, apps):
+    def setUpBeforeMigration(self):
         pass
 
 
-class ExtractPaginationMixin(object):
+class ExtractPaginationMixin:
     def get_results(self, *args, **kwargs):
         """Overrides response.data to remove the pagination control in tests"""
         response = self.client.get(*args, **kwargs)
-        if 'results' in response.data:
-            response.data = response.data['results']
+        if "results" in response.data:
+            response.data = response.data["results"]
         return response
 
 

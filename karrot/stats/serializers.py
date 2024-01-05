@@ -25,16 +25,16 @@ class ActivityHistoryStatsSerializer(serializers.Serializer):
     class Meta:
         model = Place
         fields = [
-            'place',
-            'group',
-            'done_count',
-            'missed_count',
-            'leave_count',
-            'leave_late_count',
-            'leave_missed_count',
-            'leave_missed_late_count',
-            'feedback_count',
-            'feedback_weight',
+            "place",
+            "group",
+            "done_count",
+            "missed_count",
+            "leave_count",
+            "leave_late_count",
+            "leave_missed_count",
+            "leave_missed_late_count",
+            "feedback_count",
+            "feedback_weight",
         ]
 
 
@@ -63,5 +63,5 @@ class FrontendStatsSerializer(serializers.Serializer):
 
     def validate_stats(self, stats):
         if len(stats) > MAX_STATS:
-            raise ValidationError('You can only send up to {}'.format(MAX_STATS))
+            raise ValidationError(f"You can only send up to {MAX_STATS}")
         return stats

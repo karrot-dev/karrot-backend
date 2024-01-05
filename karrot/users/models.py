@@ -2,8 +2,8 @@ from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.postgres.fields import CICharField
-from django.db import transaction, models
-from django.db.models import EmailField, BooleanField, TextField, CharField, DateTimeField, ForeignKey
+from django.db import models, transaction
+from django.db.models import BooleanField, CharField, DateTimeField, EmailField, ForeignKey, TextField
 from django.dispatch import Signal
 from django.utils import timezone
 from versatileimagefield.fields import VersatileImageField
@@ -11,10 +11,15 @@ from versatileimagefield.fields import VersatileImageField
 from karrot.base.base_models import BaseModel, LocationModel
 from karrot.groups.models import Group, GroupMembership
 from karrot.userauth.models import VerificationCode
-from karrot.users.emails import prepare_accountdelete_request_email, prepare_accountdelete_success_email, \
-    prepare_changemail_success_email, prepare_changemail_request_email, prepare_signup_email, \
-    prepare_passwordreset_success_email, \
-    prepare_passwordreset_request_email
+from karrot.users.emails import (
+    prepare_accountdelete_request_email,
+    prepare_accountdelete_success_email,
+    prepare_changemail_request_email,
+    prepare_changemail_success_email,
+    prepare_passwordreset_request_email,
+    prepare_passwordreset_success_email,
+    prepare_signup_email,
+)
 from karrot.webhooks.models import EmailEvent
 
 MAX_DISPLAY_NAME_LENGTH = 80
@@ -40,11 +45,9 @@ class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
 
     @transaction.atomic
     def _create_user(self, email, password, display_name=None, is_active=True, **extra_fields):
-        """ Creates and saves a user with the given username, email and password.
-
-        """
+        """Creates and saves a user with the given username, email and password."""
         email = self._validate_email(email)
-        extra_fields['unverified_email'] = email
+        extra_fields["unverified_email"] = email
 
         user = self.model(email=email, is_active=is_active, display_name=display_name, **extra_fields)
         user.set_password(password)
@@ -54,7 +57,7 @@ class UserManager(BaseUserManager.from_queryset(UserQuerySet)):
 
     def _validate_email(self, email):
         if email is None:
-            raise ValueError('The email field must be set')
+            raise ValueError("The email field must be set")
         return self.normalize_email(email)
 
     def create_user(self, email=None, password=None, display_name=None, **extra_fields):
@@ -85,23 +88,23 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
     is_superuser = BooleanField(default=False)
     display_name = CharField(max_length=settings.NAME_MAX_LENGTH)
     description = TextField(blank=True)
-    language = CharField(max_length=7, default='en')
+    language = CharField(max_length=7, default="en")
     mail_verified = BooleanField(default=False)
     unverified_email = EmailField(null=True)
     mobile_number = CharField(max_length=255, blank=True)
 
     deleted = BooleanField(default=False)
     deleted_at = DateTimeField(default=None, null=True)
-    current_group = ForeignKey('groups.Group', blank=True, null=True, on_delete=models.SET_NULL)
+    current_group = ForeignKey("groups.Group", blank=True, null=True, on_delete=models.SET_NULL)
 
     photo = VersatileImageField(
-        'Photo',
-        upload_to='user__photos',
+        "Photo",
+        upload_to="user__photos",
         null=True,
     )
 
-    USERNAME_FIELD = 'email'
-    EMAIL_FIELD = 'email'
+    USERNAME_FIELD = "email"
+    EMAIL_FIELD = "email"
 
     def get_full_name(self):
         return self.display_name
@@ -195,18 +198,18 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
 
         success_email = prepare_accountdelete_success_email(self)
 
-        self.description = ''
+        self.description = ""
         self.email = None
         self.is_active = False
         self.is_staff = False
         self.mail_verified = False
         self.unverified_email = None
         self.username = make_password(None)  # randomized
-        self.display_name = ''
+        self.display_name = ""
         self.address = None
         self.latitude = None
         self.longitude = None
-        self.mobile_number = ''
+        self.mobile_number = ""
 
         self.deleted_at = timezone.now()
         self.deleted = True

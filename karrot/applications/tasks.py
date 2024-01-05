@@ -3,10 +3,12 @@ from anymail.exceptions import AnymailAPIError
 from django.contrib.auth import get_user_model
 from huey.contrib.djhuey import db_task
 
-from karrot.applications.emails import prepare_new_application_notification_email, \
-    prepare_application_accepted_email, prepare_application_declined_email
-from karrot.groups.models import GroupMembership
-from karrot.groups.models import GroupNotificationType
+from karrot.applications.emails import (
+    prepare_application_accepted_email,
+    prepare_application_declined_email,
+    prepare_new_application_notification_email,
+)
+from karrot.groups.models import GroupMembership, GroupNotificationType
 
 
 @db_task()

@@ -1,10 +1,10 @@
 from rest_framework.test import APITestCase
 
+from karrot.applications.factories import ApplicationFactory
+from karrot.applications.models import Application, ApplicationStatus
 from karrot.conversations.models import Conversation
 from karrot.groups.factories import GroupFactory
-from karrot.applications.factories import ApplicationFactory
 from karrot.groups.models import GroupMembership
-from karrot.applications.models import Application, ApplicationStatus
 from karrot.users.factories import VerifiedUserFactory
 
 
