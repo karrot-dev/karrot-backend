@@ -4,11 +4,11 @@ from bleach_allowlist import markdown_attrs, markdown_tags
 from django.utils.text import Truncator
 from markdown import Extension
 from markdown.extensions.nl2br import Nl2BrExtension
+from markdown.postprocessors import Postprocessor
 from pymdownx.emoji import EmojiExtension, twemoji
 from pymdownx.magiclink import MagiclinkExtension
 from pymdownx.superfences import SuperFencesCodeExtension
 from pymdownx.tilde import DeleteSubExtension
-from markdown.postprocessors import Postprocessor
 
 
 class MentionsPostProcessor(Postprocessor):
@@ -18,10 +18,10 @@ class MentionsPostProcessor(Postprocessor):
 
     def run(self, text):
         for mention in self.mentions:
-            mention_text = '@{}'.format(mention.user.username)
+            mention_text = f"@{mention.user.username}"
             text = text.replace(
                 mention_text,
-                '<strong>{}</strong>'.format(mention_text),
+                f"<strong>{mention_text}</strong>",
             )
         return text
 
@@ -33,7 +33,7 @@ class MentionsExtension(Extension):
 
     def extendMarkdown(self, md):
         processor = MentionsPostProcessor(self.mentions)
-        md.postprocessors.register(processor, 'mentions', 150)
+        md.postprocessors.register(processor, "mentions", 150)
 
 
 def render(text, truncate_words=None, mentions=None):
@@ -49,8 +49,8 @@ def render(text, truncate_words=None, mentions=None):
         extensions.append(MentionsExtension(mentions))
 
     html = markdown.markdown(text, extensions=extensions)
-    markdown_attrs['img'].append('class')
-    markdown_tags.append('pre')
+    markdown_attrs["img"].append("class")
+    markdown_tags.append("pre")
     clean_html = bleach.clean(html, markdown_tags, markdown_attrs)
 
     if truncate_words:

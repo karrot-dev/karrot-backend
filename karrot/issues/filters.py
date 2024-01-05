@@ -1,4 +1,5 @@
-from django_filters import ModelChoiceFilter, MultipleChoiceFilter, rest_framework as filters
+from django_filters import ModelChoiceFilter, MultipleChoiceFilter
+from django_filters import rest_framework as filters
 
 from karrot.issues.models import Issue, IssueStatus
 
@@ -13,4 +14,4 @@ class IssuesFilter(filters.FilterSet):
 
     class Meta:
         model = Issue
-        fields = ['group', 'status']
+        fields = ["group", "status"]

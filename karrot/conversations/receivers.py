@@ -1,14 +1,20 @@
 import logging
 from datetime import datetime
 
-from django.db.models.signals import post_save, pre_delete, pre_save, post_delete
+from django.db.models.signals import post_delete, post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from pytz import utc
 
-from karrot.conversations import tasks, stats
+from karrot.conversations import stats, tasks
 from karrot.conversations.models import (
-    ConversationParticipant, ConversationMessage, ConversationMessageReaction, ConversationThreadParticipant,
-    ConversationMeta, ConversationMessageMention, ConversationMessageAttachment, ConversationMessageImage
+    ConversationMessage,
+    ConversationMessageAttachment,
+    ConversationMessageImage,
+    ConversationMessageMention,
+    ConversationMessageReaction,
+    ConversationMeta,
+    ConversationParticipant,
+    ConversationThreadParticipant,
 )
 from karrot.notifications.models import Notification, NotificationType
 from karrot.users.models import User
@@ -75,7 +81,7 @@ def notify_participants(sender, instance, created, **kwargs):
     if not created:
         return
 
-    tasks.notify_participants.schedule(args=(message, ), delay=5 * 60)
+    tasks.notify_participants.schedule(args=(message,), delay=5 * 60)
 
 
 @receiver(post_save, sender=ConversationMessage)
@@ -119,10 +125,10 @@ def user_mentioned(sender, instance, created, **kwargs):
         type=NotificationType.MENTION.value,
         user=mention.user,
         context={
-            'mention': mention.id,
-            'group': conversation.group.id,
-            'user': message.author.id,
-            'url': message_url(message),
+            "mention": mention.id,
+            "group": conversation.group.id,
+            "user": message.author.id,
+            "url": message_url(message),
         },
     )
 
@@ -130,7 +136,7 @@ def user_mentioned(sender, instance, created, **kwargs):
         # verified mail is enough
         # we will notify inactive members here as maybe being mentioned draws them in again :)
         # 5 seconds delay so we don't notify them if they read it immediately
-        tasks.notify_mention.schedule((mention, ), delay=5)
+        tasks.notify_mention.schedule((mention,), delay=5)
 
     stats.user_mentioned(instance)
 
@@ -165,8 +171,8 @@ def make_conversation_meta(sender, instance, created, **kwargs):
     min_date = datetime.min.replace(tzinfo=utc)
     ConversationMeta.objects.get_or_create(
         {
-            'conversations_marked_at': min_date,
-            'threads_marked_at': min_date,
+            "conversations_marked_at": min_date,
+            "threads_marked_at": min_date,
         },
         user=user,
     )
@@ -184,5 +190,5 @@ def delete_message_attachment_files(sender, instance, **kwargs):
         if file:
             try:
                 file.delete(save=False)
-            except Exception as ex:
+            except Exception as ex:  # noqa: BLE001
                 logger.error(ex)

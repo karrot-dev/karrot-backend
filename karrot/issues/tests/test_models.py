@@ -3,14 +3,14 @@ from django.core import mail
 from django.test import TestCase
 from freezegun import freeze_time
 
-from karrot.issues.factories import IssueFactory
-from karrot.issues.models import OptionTypes
-from karrot.issues.tasks import process_expired_votings
 from karrot.groups import roles
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import GroupNotificationType
 from karrot.groups.roles import GROUP_EDITOR, GROUP_MEMBER
 from karrot.history.models import History, HistoryTypus
+from karrot.issues.factories import IssueFactory
+from karrot.issues.models import OptionTypes
+from karrot.issues.tasks import process_expired_votings
 from karrot.users.factories import VerifiedUserFactory
 
 
@@ -71,14 +71,14 @@ class IssueModelTests(TestCase):
             self.assertFalse(self.issue.is_decided())
             self.assertTrue(self.group.is_member(self.affected_member))
             self.assertEqual(self.issue.votings.count(), 2)
-            self.assertEqual([v.is_expired() for v in self.issue.votings.order_by('created_at')], [True, False])
+            self.assertEqual([v.is_expired() for v in self.issue.votings.order_by("created_at")], [True, False])
 
         # check if emails have been sent
         self.assertEqual(len(mail.outbox), 2)
         email_to_affected_user = next(email for email in mail.outbox if email.to[0] == self.affected_member.email)
         email_to_editor = next(email for email in mail.outbox if email.to[0] == self.member.email)
-        self.assertIn('Your membership', email_to_affected_user.subject)
-        self.assertIn('The membership review of {}'.format(self.affected_member.display_name), email_to_editor.subject)
+        self.assertIn("Your membership", email_to_affected_user.subject)
+        self.assertIn(f"The membership review of {self.affected_member.display_name}", email_to_editor.subject)
 
     def test_no_change(self):
         self.vote_on(OptionTypes.NO_CHANGE.value)
@@ -121,7 +121,7 @@ class IssueModelTests(TestCase):
 
         # ...they shouldn't become part of existing issue conversations
         expected_ids = sorted([self.member.id, self.affected_member.id])
-        conversation_participant_ids = sorted(self.issue.conversation.participants.values_list('id', flat=True))
+        conversation_participant_ids = sorted(self.issue.conversation.participants.values_list("id", flat=True))
         self.assertEqual(conversation_participant_ids, expected_ids)
 
     def test_remove_participant_if_they_leave_group(self):

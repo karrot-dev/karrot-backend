@@ -1,7 +1,7 @@
 from faker import Faker as BaseFaker
 
 
-class Faker(object):
+class Faker:
     def __init__(self, seed=123):
         self._faker = BaseFaker()
         self._faker.seed_instance(seed)

@@ -7,6 +7,7 @@ from channels.exceptions import ChannelFull
 from channels.layers import get_channel_layer
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
+from django.core.serializers.json import DjangoJSONEncoder
 from typing_extensions import NotRequired
 
 from karrot.subscriptions import stats
@@ -25,11 +26,14 @@ class PushNotifyOptions(TypedDict):
 
 def send_in_channel(channel, topic, payload):
     message = {
-        'type': 'message.send',
-        'text': json.dumps({
-            'topic': topic,
-            'payload': payload,
-        }),
+        "type": "message.send",
+        "text": json.dumps(
+            {
+                "topic": topic,
+                "payload": payload,
+            },
+            cls=DjangoJSONEncoder,
+        ),
     }
     try:
         channel_layer_send_sync(channel, message)

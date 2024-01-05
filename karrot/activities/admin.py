@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from karrot.activities.models import ActivitySeries, Activity
+from karrot.activities.models import Activity, ActivitySeries
 
 
 @admin.register(Activity)

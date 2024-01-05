@@ -10,14 +10,14 @@ def include_empty(qs, name, value):
 
 
 class GroupsInfoFilter(filters.FilterSet):
-    include_empty = filters.BooleanFilter(field_name='members', method=include_empty)
+    include_empty = filters.BooleanFilter(field_name="members", method=include_empty)
 
     class Meta:
         model = Group
-        fields = ['members', 'include_empty', 'name']
+        fields = ["members", "include_empty", "name"]
 
 
 class GroupsFilter(filters.FilterSet):
     class Meta:
         model = Group
-        fields = ['members', 'name']
+        fields = ["members", "name"]

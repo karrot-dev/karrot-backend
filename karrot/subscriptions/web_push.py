@@ -1,10 +1,10 @@
 from typing import List
 
+from cryptography.hazmat.primitives import serialization
 from django.conf import settings
 from orjson import orjson
 from py_vapid import Vapid, b64urlencode
-from pywebpush import webpush, WebPushException
-from cryptography.hazmat.primitives import serialization
+from pywebpush import WebPushException, webpush
 
 from karrot.subscriptions.models import WebPushSubscription
 from karrot.subscriptions.stats import pushed_via_web_push
@@ -14,10 +14,10 @@ def notify_subscribers(
     *,
     subscriptions: List[WebPushSubscription],
     title: str,
-    body: str = '',
-    tag: str = '',
-    url: str = '',
-    image_url: str = '',
+    body: str = "",
+    tag: str = "",
+    url: str = "",
+    image_url: str = "",
 ):
     success_count = 0
     error_count = 0
@@ -27,28 +27,21 @@ def notify_subscribers(
             "keys": subscription.keys,
         }
 
-        vapid_data = {
-            'vapid_private_key': settings.VAPID_PRIVATE_KEY,
-            'vapid_claims': {
-                "sub": "mailto:{}".format(settings.VAPID_ADMIN_EMAIL)
-            }
-        }
-
         payload = {
             "title": title,
         }
 
         if body:
-            payload['body'] = body
+            payload["body"] = body
 
         if url:
-            payload['url'] = url
+            payload["url"] = url
 
         if tag:
-            payload['tag'] = tag
+            payload["tag"] = tag
 
         if image_url:
-            payload['image_url'] = image_url
+            payload["image_url"] = image_url
 
         try:
             webpush(
@@ -74,16 +67,14 @@ def generate_keypair():
     vapid = Vapid()
     vapid.generate_keys()
     return {
-        "VAPID_PRIVATE_KEY":
-        b64urlencode(
+        "VAPID_PRIVATE_KEY": b64urlencode(
             vapid.private_key.private_bytes(
                 encoding=serialization.Encoding.DER,
                 format=serialization.PrivateFormat.PKCS8,
                 encryption_algorithm=serialization.NoEncryption(),
             )
         ),
-        "VAPID_PUBLIC_KEY":
-        b64urlencode(
+        "VAPID_PUBLIC_KEY": b64urlencode(
             vapid.public_key.public_bytes(
                 encoding=serialization.Encoding.X962,
                 format=serialization.PublicFormat.UncompressedPoint,

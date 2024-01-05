@@ -5,18 +5,18 @@ from django.conf import settings
 from django.db.models import IntegerField, Q
 from django.db.models.fields.json import KeyTextTransform
 from django.db.models.functions import Cast
-from django.db.models.signals import post_save, pre_save, pre_delete, post_delete
+from django.db.models.signals import post_delete, post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 from pytz import utc
 
+from karrot.activities.models import Activity, ActivityParticipant, Feedback
 from karrot.applications.models import Application, ApplicationStatus
-from karrot.issues.models import Issue, Voting, OptionTypes
-from karrot.notifications.models import Notification, NotificationType, NotificationMeta
 from karrot.groups.models import GroupMembership, get_default_roles
 from karrot.groups.roles import GROUP_EDITOR
 from karrot.invitations.models import Invitation
-from karrot.activities.models import Activity, ActivityParticipant
+from karrot.issues.models import Issue, OptionTypes, Voting
+from karrot.notifications.models import Notification, NotificationMeta, NotificationType
 from karrot.places.models import Place
 from karrot.users.models import User
 
@@ -43,7 +43,7 @@ def user_got_role(sender, instance, **kwargs):
             type=NotificationType.YOU_BECAME_EDITOR.value,
             user=membership.user,
             context={
-                'group': membership.group.id,
+                "group": membership.group.id,
             },
         )
 
@@ -52,8 +52,8 @@ def user_got_role(sender, instance, **kwargs):
                 type=NotificationType.USER_BECAME_EDITOR.value,
                 user=member,
                 context={
-                    'group': membership.group.id,
-                    'user': membership.user.id,
+                    "group": membership.group.id,
+                    "user": membership.user.id,
                 },
             )
 
@@ -64,8 +64,8 @@ def user_got_role(sender, instance, **kwargs):
             type=NotificationType.YOU_GOT_ROLE.value,
             user=membership.user,
             context={
-                'group': membership.group.id,
-                'role': role,
+                "group": membership.group.id,
+                "role": role,
             },
         )
 
@@ -74,9 +74,9 @@ def user_got_role(sender, instance, **kwargs):
                 type=NotificationType.USER_GOT_ROLE.value,
                 user=member,
                 context={
-                    'group': membership.group.id,
-                    'user': membership.user.id,
-                    'role': role,
+                    "group": membership.group.id,
+                    "user": membership.user.id,
+                    "role": role,
                 },
             )
 
@@ -93,9 +93,9 @@ def new_applicant(sender, instance, created, **kwargs):
             type=NotificationType.NEW_APPLICANT.value,
             user=member,
             context={
-                'group': application.group.id,
-                'user': application.user.id,
-                'application': application.id,
+                "group": application.group.id,
+                "user": application.user.id,
+                "application": application.id,
             },
         )
 
@@ -105,9 +105,9 @@ def application_decided(sender, instance, **kwargs):
     application = instance
 
     if application.status not in (
-            ApplicationStatus.ACCEPTED.value,
-            ApplicationStatus.DECLINED.value,
-            ApplicationStatus.WITHDRAWN.value,
+        ApplicationStatus.ACCEPTED.value,
+        ApplicationStatus.DECLINED.value,
+        ApplicationStatus.WITHDRAWN.value,
     ):
         return
 
@@ -128,16 +128,16 @@ def application_decided(sender, instance, **kwargs):
         return
 
     notification_data = {
-        'context': {
-            'group': application.group.id,
-            'application': application.id,
+        "context": {
+            "group": application.group.id,
+            "application": application.id,
         },
     }
 
     if application.status == ApplicationStatus.ACCEPTED.value:
-        notification_data['type'] = NotificationType.APPLICATION_ACCEPTED.value
+        notification_data["type"] = NotificationType.APPLICATION_ACCEPTED.value
     elif application.status == ApplicationStatus.DECLINED.value:
-        notification_data['type'] = NotificationType.APPLICATION_DECLINED.value
+        notification_data["type"] = NotificationType.APPLICATION_DECLINED.value
 
     Notification.objects.create(user=application.user, **notification_data)
 
@@ -145,33 +145,42 @@ def application_decided(sender, instance, **kwargs):
 @receiver(pre_save, sender=Activity)
 def feedback_possible(sender, instance, **kwargs):
     activity = instance
-    if not activity.is_done:
+    if not activity.has_started:
         return
 
-    if activity.id:
-        # skip if activity was already processed
-        old = Activity.objects.get(id=activity.id)
-        if old.is_done == activity.is_done:
-            return
-
-        # skip if the activity does not take feedback
-        if not activity.activity_type.has_feedback:
-            return
-    else:
+    if not activity.id:
         # Activity is not saved yet and can't have any participants
+        return
+
+    # skip if activity was already processed
+    old = Activity.objects.get(id=activity.id)
+    if old.has_started == activity.has_started:
+        return
+
+    # skip if the activity does not take feedback
+    if not activity.activity_type.has_feedback:
         return
 
     # TODO take into account that settings can change
     # better save feedback possible expiry in activity too
     expiry_date = activity.date.end + relativedelta(days=settings.FEEDBACK_POSSIBLE_DAYS)
 
-    for user in activity.participants.all():
+    if expiry_date < timezone.now():
+        # already outdated!
+        return
+
+    for participant in activity.activityparticipant_set.filter(feedback_dismissed=False):
+        user = participant.user
+        if Feedback.objects.filter(given_by=user, about=activity).exists():
+            # Ignore if they already gave feedback obvs.
+            continue
+
         Notification.objects.create(
             user=user,
             type=NotificationType.FEEDBACK_POSSIBLE.value,
             context={
-                'group': activity.place.group.id,
-                'activity': activity.id,
+                "group": activity.place.group.id,
+                "activity": activity.id,
             },
             expires_at=expiry_date,
         )
@@ -189,9 +198,9 @@ def new_place(sender, instance, created, **kwargs):
             user=user,
             type=NotificationType.NEW_PLACE.value,
             context={
-                'group': place.group.id,
-                'place': place.id,
-                'user': place.last_changed_by_id,
+                "group": place.group.id,
+                "place": place.id,
+                "user": place.last_changed_by_id,
             },
         )
 
@@ -208,9 +217,9 @@ def new_member(sender, instance, created, **kwargs):
             user=user,
             type=NotificationType.NEW_MEMBER.value,
             context={
-                'group': membership.group_id,
-                'user': membership.user_id,
-                'added_by': membership.added_by_id,
+                "group": membership.group_id,
+                "user": membership.user_id,
+                "added_by": membership.added_by_id,
             },
         )
 
@@ -224,9 +233,9 @@ def group_member_removed(sender, instance, **kwargs):
         NotificationType.CONFLICT_RESOLUTION_YOU_WERE_REMOVED.value,
     ]
 
-    Notification.objects.filter(
-        user=membership.user, context__group=membership.group_id
-    ).exclude(type__in=types_to_keep).delete()
+    Notification.objects.filter(user=membership.user, context__group=membership.group_id).exclude(
+        type__in=types_to_keep
+    ).delete()
 
 
 @receiver(pre_delete, sender=Invitation)
@@ -238,15 +247,12 @@ def invitation_accepted(sender, instance, **kwargs):
         return
 
     # search for the user who accepted the invitation, as we don't have access to the request object
-    user = invitation.group.groupmembership_set.filter(added_by=invitation.invited_by).latest('created_at').user
+    user = invitation.group.groupmembership_set.filter(added_by=invitation.invited_by).latest("created_at").user
 
     Notification.objects.create(
         user=invitation.invited_by,
         type=NotificationType.INVITATION_ACCEPTED.value,
-        context={
-            'group': invitation.group.id,
-            'user': user.id
-        }
+        context={"group": invitation.group.id, "user": user.id},
     )
 
 
@@ -255,10 +261,9 @@ def invitation_accepted(sender, instance, **kwargs):
 def delete_activity_notifications_when_participant_leaves(sender, instance, **kwargs):
     participant = instance
 
-    Notification.objects.order_by().not_expired()\
-        .filter(Q(type=NotificationType.ACTIVITY_UPCOMING.value) | Q(type=NotificationType.ACTIVITY_DISABLED.value))\
-        .filter(user=participant.user, context__activity_participant=participant.id)\
-        .delete()
+    Notification.objects.order_by().not_expired().filter(
+        Q(type=NotificationType.ACTIVITY_UPCOMING.value) | Q(type=NotificationType.ACTIVITY_DISABLED.value)
+    ).filter(user=participant.user, context__activity_participant=participant.id).delete()
 
 
 @receiver(pre_save, sender=Activity)
@@ -274,11 +279,9 @@ def activity_modified(sender, instance, **kwargs):
     participants = activity.activityparticipant_set
 
     def delete_notifications_for_participants(participants, type):
-        Notification.objects.order_by().not_expired() \
-            .filter(type=type) \
-            .annotate(participant_id=Cast(KeyTextTransform('activity_participant', 'context'), IntegerField())) \
-            .filter(participant_id__in=participants.values_list('id', flat=True)) \
-            .delete()
+        Notification.objects.order_by().not_expired().filter(type=type).annotate(
+            participant_id=Cast(KeyTextTransform("activity_participant", "context"), IntegerField())
+        ).filter(participant_id__in=participants.values_list("id", flat=True)).delete()
 
     if old.is_disabled != activity.is_disabled:
         if activity.is_disabled:
@@ -309,11 +312,13 @@ def activity_modified(sender, instance, **kwargs):
 # Issue
 def create_notification_about_issue(issue, user, type):
     return Notification.objects.create(
-        user=user, type=type, context={
-            'issue': issue.id,
-            'group': issue.group.id,
-            'user': issue.affected_user.id,
-        }
+        user=user,
+        type=type,
+        context={
+            "issue": issue.id,
+            "group": issue.group.id,
+            "user": issue.affected_user.id,
+        },
     )
 
 
@@ -332,9 +337,10 @@ def conflict_resolution_issue_created_or_continued(sender, instance, created, **
                 issue=issue,
                 user=user,
                 type=(
-                    NotificationType.CONFLICT_RESOLUTION_CREATED.value if user.id != issue.affected_user_id else
-                    NotificationType.CONFLICT_RESOLUTION_CREATED_ABOUT_YOU.value
-                )
+                    NotificationType.CONFLICT_RESOLUTION_CREATED.value
+                    if user.id != issue.affected_user_id
+                    else NotificationType.CONFLICT_RESOLUTION_CREATED_ABOUT_YOU.value
+                ),
             )
     else:
         for user in issue.group.members.distinct():
@@ -342,9 +348,10 @@ def conflict_resolution_issue_created_or_continued(sender, instance, created, **
                 issue=issue,
                 user=user,
                 type=(
-                    NotificationType.CONFLICT_RESOLUTION_CONTINUED.value if user.id != issue.affected_user_id else
-                    NotificationType.CONFLICT_RESOLUTION_CONTINUED_ABOUT_YOU.value
-                )
+                    NotificationType.CONFLICT_RESOLUTION_CONTINUED.value
+                    if user.id != issue.affected_user_id
+                    else NotificationType.CONFLICT_RESOLUTION_CONTINUED_ABOUT_YOU.value
+                ),
             )
 
 
@@ -367,8 +374,9 @@ def conflict_resolution_issue_decided(sender, instance, **kwargs):
             user=user,
             type=(
                 NotificationType.CONFLICT_RESOLUTION_DECIDED.value
-                if user.id != issue.affected_user_id else NotificationType.CONFLICT_RESOLUTION_DECIDED_ABOUT_YOU.value
-            )
+                if user.id != issue.affected_user_id
+                else NotificationType.CONFLICT_RESOLUTION_DECIDED_ABOUT_YOU.value
+            ),
         )
 
     accepted_option = issue.latest_voting().accepted_option
@@ -377,8 +385,8 @@ def conflict_resolution_issue_decided(sender, instance, **kwargs):
             user=issue.affected_user,
             type=NotificationType.CONFLICT_RESOLUTION_YOU_WERE_REMOVED.value,
             context={
-                'group': issue.group.id,
-            }
+                "group": issue.group.id,
+            },
         )
 
 
@@ -390,4 +398,4 @@ def make_notification_meta(sender, instance, created, **kwargs):
     user = instance
     # This is equivalent of not setting marked_at, by choosing a the earliest date possible
     # (but it has to be timezone-aware, otherwise there will be comparison errors)
-    NotificationMeta.objects.get_or_create({'marked_at': datetime.min.replace(tzinfo=utc)}, user=user)
+    NotificationMeta.objects.get_or_create({"marked_at": datetime.min.replace(tzinfo=utc)}, user=user)

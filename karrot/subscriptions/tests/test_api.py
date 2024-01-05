@@ -16,8 +16,8 @@ class TestSubscriptionsAPI(APITestCase):
         self.client.force_login(user=user)
 
         data: dict = factory.build(dict, FACTORY_CLASS=WebPushSubscriptionFactory)
-        data.pop('user')
-        response = self.client.post('/api/subscriptions/web-push/subscribe/', data, format='json')
+        data.pop("user")
+        response = self.client.post("/api/subscriptions/web-push/subscribe/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_can_delete_subscriptions(self):
@@ -25,7 +25,7 @@ class TestSubscriptionsAPI(APITestCase):
         with mute_signals(post_save):
             subscription = WebPushSubscriptionFactory(user=user)
         self.client.force_login(user=user)
-        data = {'endpoint': subscription.endpoint, 'keys': subscription.keys}
-        response = self.client.post('/api/subscriptions/web-push/unsubscribe/', data, format='json')
+        data = {"endpoint": subscription.endpoint, "keys": subscription.keys}
+        response = self.client.post("/api/subscriptions/web-push/unsubscribe/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(WebPushSubscription.objects.filter(pk=subscription.id).count(), 0)

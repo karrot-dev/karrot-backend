@@ -1,6 +1,5 @@
-from karrot.utils.influxdb_utils import write_points
-
 from karrot.groups.stats import group_tags
+from karrot.utils.influxdb_utils import write_points
 
 
 def offer_tags(offer):
@@ -8,20 +7,24 @@ def offer_tags(offer):
 
 
 def offer_created(offer):
-    write_points([{
-        'measurement': 'karrot.events',
-        'tags': offer_tags(offer),
-        'fields': {
-            'offer_created': 1
-        },
-    }])
+    write_points(
+        [
+            {
+                "measurement": "karrot.events",
+                "tags": offer_tags(offer),
+                "fields": {"offer_created": 1},
+            }
+        ]
+    )
 
 
 def offer_archived(offer):
-    write_points([{
-        'measurement': 'karrot.events',
-        'tags': offer_tags(offer),
-        'fields': {
-            'offer_archived': 1
-        },
-    }])
+    write_points(
+        [
+            {
+                "measurement": "karrot.events",
+                "tags": offer_tags(offer),
+                "fields": {"offer_archived": 1},
+            }
+        ]
+    )

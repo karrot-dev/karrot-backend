@@ -12,16 +12,17 @@ class WebPushSubscriptionViewSet(GenericViewSet):
     """
     WebPushSubscriptions
     """
+
     queryset = WebPushSubscription.objects
     serializer_class = WebPushSubscribeSerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
 
     @action(
         detail=False,
-        methods=['POST'],
+        methods=["POST"],
         serializer_class=WebPushSubscribeSerializer,
     )
     def subscribe(self, request, pk=None):
@@ -30,8 +31,8 @@ class WebPushSubscriptionViewSet(GenericViewSet):
 
         # don't want duplicate push notifications for this endpoint/key combo
         self.get_queryset().filter(
-            endpoint=request.data['endpoint'],
-            keys__contains=request.data['keys'],
+            endpoint=request.data["endpoint"],
+            keys__contains=request.data["keys"],
         ).delete()
 
         serializer.save()
@@ -39,7 +40,7 @@ class WebPushSubscriptionViewSet(GenericViewSet):
 
     @action(
         detail=False,
-        methods=['POST'],
+        methods=["POST"],
         serializer_class=WebPushUnsubscribeSerializer,
     )
     def unsubscribe(self, request, pk=None):
@@ -48,8 +49,8 @@ class WebPushSubscriptionViewSet(GenericViewSet):
 
         # we could have ended up with multiple, so delete them all
         self.get_queryset().filter(
-            endpoint=serializer.data['endpoint'],
-            keys__contains=serializer.data['keys'],
+            endpoint=serializer.data["endpoint"],
+            keys__contains=serializer.data["keys"],
         ).delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -1,30 +1,29 @@
 from datetime import timedelta
 
-from django.db import DataError
-from django.db import IntegrityError
+from django.db import DataError, IntegrityError
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
-from karrot.conversations.models import Conversation, ConversationParticipant
-from karrot.groups.factories import GroupFactory
-from karrot.groups.models import Group, get_default_notification_types
 from karrot.activities.factories import ActivityFactory
 from karrot.activities.models import to_range
-from karrot.groups.roles import GROUP_NEWCOMER, GROUP_MEMBER, GROUP_EDITOR
+from karrot.conversations.models import Conversation, ConversationParticipant
+from karrot.groups import themes
+from karrot.groups.factories import GroupFactory
+from karrot.groups.models import Group, get_default_notification_types
+from karrot.groups.roles import GROUP_EDITOR, GROUP_MEMBER, GROUP_NEWCOMER
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory
-from karrot.groups import themes
 
 
 class TestGroupModel(TestCase):
     def test_create_fails_if_name_too_long(self):
         with self.assertRaises(DataError):
-            Group.objects.create(name='a' * 81)
+            Group.objects.create(name="a" * 81)
 
     def test_create_group_with_same_name_fails(self):
-        Group.objects.create(name='abcdef')
+        Group.objects.create(name="abcdef")
         with self.assertRaises(IntegrityError):
-            Group.objects.create(name='abcdef')
+            Group.objects.create(name="abcdef")
 
     def test_notifications_on_by_default(self):
         user = UserFactory()
@@ -36,8 +35,8 @@ class TestGroupModel(TestCase):
         self.assertFalse(conversation_participant.muted)
 
     def test_uses_default_application_questions_if_not_specified(self):
-        group = GroupFactory(application_questions='')
-        self.assertIn('Hey there', group.get_application_questions_or_default())
+        group = GroupFactory(application_questions="")
+        self.assertIn("Hey there", group.get_application_questions_or_default())
 
 
 class TestGroupMembershipModel(TestCase):
@@ -83,9 +82,9 @@ class TestGroupMembershipModel(TestCase):
     def test_remove_newcomer_role(self):
         user = UserFactory()
         membership = self.group.groupmembership_set.create(user=user)
-        membership.add_roles(['random-other-role'])
+        membership.add_roles(["random-other-role"])
         membership.save()
-        self.assertEqual(membership.roles, [GROUP_MEMBER, 'random-other-role'])
+        self.assertEqual(membership.roles, [GROUP_MEMBER, "random-other-role"])
 
     def test_adds_newcomer_role(self):
         membership = self.group.groupmembership_set.get(user=self.user)
@@ -96,7 +95,6 @@ class TestGroupMembershipModel(TestCase):
 
 
 class TestGroupManager(TestCase):
-
     # test if setting a default status and theme via settings works
 
     # set each setting individually
