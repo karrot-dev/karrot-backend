@@ -33,6 +33,9 @@ def get_config_data():
         "web_push": {
             "vapid_public_key": getattr(settings, "VAPID_PUBLIC_KEY", None),
         },
+        "meet": {
+            "livekit_endpoint": settings.MEET_LIVEKIT_ENDPOINT,
+        },
     }
 
 

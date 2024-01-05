@@ -37,12 +37,17 @@ class WebPushConfigSerializer(serializers.Serializer):
     vapid_public_key = serializers.CharField()
 
 
+class MeetConfigSerializer(serializers.Serializer):
+    livekit_endpoint = serializers.CharField()
+
+
 class ConfigSerializer(serializers.Serializer):
     sentry = SentryClientConfigSerializer()
     upload = UploadConfigSerializer()
     forum = ForumConfigSerializer()
     feedback_possible_days = serializers.IntegerField()
     web_push = WebPushConfigSerializer()
+    meet = MeetConfigSerializer()
 
 
 class BootstrapSerializer(serializers.Serializer):
