@@ -10,7 +10,7 @@ from karrot.conversations.models import ConversationMixin
 
 
 class Offer(BaseModel, ConversationMixin):
-    group = models.ForeignKey('groups.Group', on_delete=models.CASCADE)
+    group = models.ForeignKey("groups.Group", on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(blank=False, max_length=settings.NAME_MAX_LENGTH)
     description = models.TextField(blank=False)
@@ -31,16 +31,16 @@ class Offer(BaseModel, ConversationMixin):
 
 class OfferImage(BaseModel):
     class Meta:
-        ordering = ['position']
+        ordering = ["position"]
 
     offer = models.ForeignKey(
         Offer,
-        related_name='images',
+        related_name="images",
         on_delete=models.CASCADE,
     )
     image = VersatileImageField(
-        'Offer Image',
-        upload_to='offer_images',
+        "Offer Image",
+        upload_to="offer_images",
         null=False,
     )
     position = IntegerField(default=0)
@@ -49,7 +49,7 @@ class OfferImage(BaseModel):
 def create_offer_image_warmer(instance_or_queryset, *, verbose=False):
     return VersatileImageFieldWarmer(
         instance_or_queryset=instance_or_queryset,
-        rendition_key_set='offer_image',
-        image_attr='image',
+        rendition_key_set="offer_image",
+        image_attr="image",
         verbose=verbose,
     )

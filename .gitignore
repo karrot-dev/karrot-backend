@@ -21,6 +21,7 @@ grafana/config.py
 .env
 *.pyz
 karrot/COMMIT
+.ruff_cache
 
 # IDE
 /.idea

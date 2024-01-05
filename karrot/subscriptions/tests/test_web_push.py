@@ -13,10 +13,10 @@ from karrot.subscriptions.web_push import notify_subscribers
 
 
 def mock_webpush(subscription_info, *args, **kwargs):
-    if subscription_info['keys'] == 'INVALID':
+    if subscription_info["keys"] == "INVALID":
         res = Response()
         res.status_code = 410
-        raise WebPushException('invalid', res)
+        raise WebPushException("invalid", res)
 
 
 class WebPushTests(TestCase):
@@ -28,12 +28,12 @@ class WebPushTests(TestCase):
                 valid.append(WebPushSubscriptionFactory())
                 invalid.append(WebPushSubscriptionFactory(keys="INVALID"))
 
-        with patch('karrot.subscriptions.web_push.webpush', side_effect=mock_webpush) as webpush:
+        with patch("karrot.subscriptions.web_push.webpush", side_effect=mock_webpush):
             subscriptions = [*valid, *invalid]
             shuffle(subscriptions)
             notify_subscribers(
                 subscriptions=subscriptions,
-                title='Hey',
+                title="Hey",
             )
 
         self.assertEqual(WebPushSubscription.objects.filter(id__in=[entry.id for entry in valid]).count(), len(valid))
@@ -41,7 +41,7 @@ class WebPushTests(TestCase):
 
 
 class WebPushNotifySubscribersTests(TestCase):
-    @patch('karrot.subscriptions.stats.write_points')
+    @patch("karrot.subscriptions.stats.write_points")
     def test_notify_subscribers(self, write_points):
         success_count = 7
         error_count = 4
@@ -52,26 +52,27 @@ class WebPushNotifySubscribersTests(TestCase):
             for _ in range(error_count):
                 subscriptions.append(WebPushSubscriptionFactory(keys="INVALID"))
 
-        with patch('karrot.subscriptions.web_push.webpush', side_effect=mock_webpush) as webpush:
-
+        with patch("karrot.subscriptions.web_push.webpush", side_effect=mock_webpush) as webpush:
             write_points.reset_mock()
 
             notify_subscribers(
                 subscriptions=subscriptions,
-                title='heya',
+                title="heya",
             )
 
             self.assertEqual(len(webpush.call_args_list), len(subscriptions))
 
-            write_points.assert_called_with([
-                {
-                    'measurement': 'karrot.events',
-                    'tags': {
-                        'platform': 'web_push',
+            write_points.assert_called_with(
+                [
+                    {
+                        "measurement": "karrot.events",
+                        "tags": {
+                            "platform": "web_push",
+                        },
+                        "fields": {
+                            "subscription_push": success_count,
+                            "subscription_push_error": error_count,
+                        },
                     },
-                    'fields': {
-                        'subscription_push': success_count,
-                        'subscription_push_error': error_count,
-                    },
-                },
-            ])
+                ]
+            )

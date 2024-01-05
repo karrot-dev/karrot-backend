@@ -14,25 +14,25 @@ class OfferImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = OfferImage
         fields = (
-            'id',
-            'position',
-            'image',
-            'image_urls',
-            '_removed',
+            "id",
+            "position",
+            "image",
+            "image_urls",
+            "_removed",
         )
 
     id = serializers.IntegerField(required=False)
     _removed = serializers.BooleanField(required=False)
 
     image = VersatileImageFieldSerializer(
-        sizes='offer_image',
+        sizes="offer_image",
         required=True,
         allow_null=False,
         write_only=True,
     )
     image_urls = VersatileImageFieldSerializer(
-        sizes='offer_image',
-        source='image',
+        sizes="offer_image",
+        source="image",
         read_only=True,
     )
 
@@ -40,7 +40,7 @@ class OfferImageSerializer(serializers.ModelSerializer):
     def validate_image(image):
         if image.size > settings.FILE_UPLOAD_MAX_SIZE:
             raise ValidationError(
-                f'Max upload file size is {settings.FILE_UPLOAD_MAX_SIZE}, your file has size {image.size}'
+                f"Max upload file size is {settings.FILE_UPLOAD_MAX_SIZE}, your file has size {image.size}"
             )
         return image
 
@@ -49,30 +49,30 @@ class OfferSerializer(serializers.ModelSerializer):
     class Meta:
         model = Offer
         fields = (
-            'id',
-            'created_at',
-            'user',
-            'group',
-            'name',
-            'description',
-            'archived_at',
-            'is_archived',
-            'images',
+            "id",
+            "created_at",
+            "user",
+            "group",
+            "name",
+            "description",
+            "archived_at",
+            "is_archived",
+            "images",
         )
         read_only_fields = (
-            'id',
-            'created_at',
-            'archived_at',
-            'user',
+            "id",
+            "created_at",
+            "archived_at",
+            "user",
         )
 
     images = OfferImageSerializer(many=True)
 
     def save(self, **kwargs):
-        return super().save(user=self.context['request'].user)
+        return super().save(user=self.context["request"].user)
 
     def create(self, validated_data):
-        images = validated_data.pop('images')
+        images = validated_data.pop("images")
         # Save the offer and its associated images in one transaction
         # Allows us to trigger the notifications in the receiver only after all is saved
         with transaction.atomic():
@@ -85,17 +85,17 @@ class OfferSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         offer = instance
 
-        if 'is_archived' in validated_data:
-            is_archived = validated_data.pop('is_archived')
+        if "is_archived" in validated_data:
+            is_archived = validated_data.pop("is_archived")
             archived_at = timezone.now() if is_archived else None
-            validated_data['archived_at'] = archived_at
+            validated_data["archived_at"] = archived_at
 
-        images = validated_data.pop('images', None)
+        images = validated_data.pop("images", None)
         if images:
             for image in images:
-                pk = image.pop('id', None)
+                pk = image.pop("id", None)
                 if pk:
-                    if image.get('_removed', False):
+                    if image.get("_removed", False):
                         OfferImage.objects.filter(pk=pk).delete()
                     else:
                         OfferImage.objects.filter(pk=pk).update(**image)
@@ -104,6 +104,6 @@ class OfferSerializer(serializers.ModelSerializer):
         return serializers.ModelSerializer.update(self, instance, validated_data)
 
     def validate_group(self, group):
-        if not group.is_member(self.context['request'].user):
-            raise PermissionDenied(_('You are not a member of this group.'))
+        if not group.is_member(self.context["request"].user):
+            raise PermissionDenied(_("You are not a member of this group."))
         return group

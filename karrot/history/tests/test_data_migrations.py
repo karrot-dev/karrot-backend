@@ -14,35 +14,34 @@ def to_range(date, **kwargs):
 
 
 base = [
-    ('groups', '0050_enable_agreements_and_participant_types'),
-    ('users', '0027_fix_usernames'),
-    ('places', '0038_place_default_view'),
-    ('activities', '0041_feedbacknoshow'),
+    ("groups", "0050_enable_agreements_and_participant_types"),
+    ("users", "0027_fix_usernames"),
+    ("places", "0038_place_default_view"),
+    ("activities", "0041_feedbacknoshow"),
 ]
 
 
 class TestFixActivityDoneMissedHistory(TestMigrations):
-
     migrate_from = [
         *base,
-        ('history', '0015_history_history_his_typus_c46ce5_idx'),
+        ("history", "0015_history_history_his_typus_c46ce5_idx"),
     ]
     migrate_to = [
         *base,
-        ('history', '0016_fix_activity_done_missed_history'),
+        ("history", "0016_fix_activity_done_missed_history"),
     ]
 
     def setUpBeforeMigration(self):
-        History = self.apps.get_model('history', 'History')
-        Activity = self.apps.get_model('activities', 'Activity')
-        ActivityType = self.apps.get_model('activities', 'ActivityType')
-        ActivityParticipant = self.apps.get_model('activities', 'ActivityParticipant')
-        ParticipantType = self.apps.get_model('activities', 'ParticipantType')
-        Group = self.apps.get_model('groups', 'Group')
-        User = self.apps.get_model('users', 'User')
-        GroupMembership = self.apps.get_model('groups', 'GroupMembership')
-        Place = self.apps.get_model('places', 'Place')
-        PlaceType = self.apps.get_model('places', 'PlaceType')
+        History = self.apps.get_model("history", "History")
+        Activity = self.apps.get_model("activities", "Activity")
+        ActivityType = self.apps.get_model("activities", "ActivityType")
+        ActivityParticipant = self.apps.get_model("activities", "ActivityParticipant")
+        ParticipantType = self.apps.get_model("activities", "ParticipantType")
+        Group = self.apps.get_model("groups", "Group")
+        User = self.apps.get_model("users", "User")
+        GroupMembership = self.apps.get_model("groups", "GroupMembership")
+        Place = self.apps.get_model("places", "Place")
+        PlaceType = self.apps.get_model("places", "PlaceType")
 
         group = Group.objects.create(name=faker.name())
         user1 = User.objects.create(username=faker.name())
@@ -105,8 +104,8 @@ class TestFixActivityDoneMissedHistory(TestMigrations):
         self.assertEqual(history2.users.count(), 1)
 
     def test_sets_date_range_from_date(self):
-        History = self.apps.get_model('history', 'History')
-        Activity = self.apps.get_model('activities', 'Activity')
+        History = self.apps.get_model("history", "History")
+        Activity = self.apps.get_model("activities", "Activity")
         activity1 = Activity.objects.get(pk=self.activity1_id)
         activity2 = Activity.objects.get(pk=self.activity2_id)
         history1_qs = History.objects.filter(activity=activity1)

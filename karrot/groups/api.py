@@ -1,65 +1,72 @@
 import pytz
-from django.http import HttpResponseRedirect, Http404
+from django.http import Http404, HttpResponseRedirect
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework import mixins
-from rest_framework import status
+from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticated, BasePermission
+from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from karrot.conversations.api import RetrieveConversationMixin
 from karrot.groups import stats
 from karrot.groups.filters import GroupsFilter, GroupsInfoFilter
-from karrot.groups.models import Group as GroupModel, GroupMembership, Trust
-from karrot.groups.serializers import GroupDetailSerializer, GroupPreviewSerializer, GroupJoinSerializer, \
-    GroupLeaveSerializer, TimezonesSerializer, GroupMembershipInfoSerializer, \
-    GroupMembershipAddNotificationTypeSerializer, \
-    GroupMembershipRemoveNotificationTypeSerializer, TrustActionSerializer
-from karrot.utils.serializers import EmptySerializer
+from karrot.groups.models import Group as GroupModel
+from karrot.groups.models import GroupMembership, Trust
+from karrot.groups.serializers import (
+    GroupDetailSerializer,
+    GroupJoinSerializer,
+    GroupLeaveSerializer,
+    GroupMembershipAddNotificationTypeSerializer,
+    GroupMembershipInfoSerializer,
+    GroupMembershipRemoveNotificationTypeSerializer,
+    GroupPreviewSerializer,
+    TimezonesSerializer,
+    TrustActionSerializer,
+)
 from karrot.utils.mixins import PartialUpdateModelMixin
+from karrot.utils.serializers import EmptySerializer
 
 
 class IsNotMember(BasePermission):
-    message = _('You are already a member.')
+    message = _("You are already a member.")
 
     def has_object_permission(self, request, view, obj):
         return not obj.is_member(request.user)
 
 
 class IsOpenGroup(BasePermission):
-    message = _('You can only join open groups.')
+    message = _("You can only join open groups.")
 
     def has_object_permission(self, request, view, obj):
         return obj.is_open
 
 
 class IsOtherUser(BasePermission):
-    message = _('You cannot give trust to yourself')
+    message = _("You cannot give trust to yourself")
 
     def has_object_permission(self, request, view, membership):
         return membership.user != request.user
 
 
 class IsGroupEditor(BasePermission):
-    message = _('You need to be a group editor')
+    message = _("You need to be a group editor")
 
     def has_object_permission(self, request, view, obj):
-        if view.action == 'partial_update':
+        if view.action == "partial_update":
             return obj.is_editor(request.user)
         return True
 
 
 class GroupInfoViewSet(
-        mixins.RetrieveModelMixin,
-        mixins.ListModelMixin,
-        GenericViewSet,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
 ):
     """
     Group Info - public information
@@ -69,22 +76,23 @@ class GroupInfoViewSet(
     - `?search` - search in name and public description
     - `?include_empty` - set to False to exclude empty groups without members
     """
+
     queryset = GroupModel.objects
     filter_backends = (SearchFilter, filters.DjangoFilterBackend)
     filterset_class = GroupsInfoFilter
-    search_fields = ('name', 'public_description')
+    search_fields = ("name", "public_description")
     serializer_class = GroupPreviewSerializer
 
     def get_queryset(self):
         qs = self.queryset
-        if self.action == 'list':
+        if self.action == "list":
             qs = qs.annotate_member_count().annotate_is_user_member(self.request.user)
 
         return qs
 
     @action(
         detail=True,
-        methods=['GET'],
+        methods=["GET"],
     )
     def photo(self, request, pk=None):
         group = self.get_object()
@@ -94,20 +102,21 @@ class GroupInfoViewSet(
 
 
 class GroupViewSet(
-        mixins.CreateModelMixin,
-        mixins.RetrieveModelMixin,
-        PartialUpdateModelMixin,
-        mixins.ListModelMixin,
-        RetrieveConversationMixin,
-        GenericViewSet,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    PartialUpdateModelMixin,
+    mixins.ListModelMixin,
+    RetrieveConversationMixin,
+    GenericViewSet,
 ):
     """
     Your groups: list, create, update
     """
+
     queryset = GroupModel.objects
     filter_backends = (SearchFilter, filters.DjangoFilterBackend)
     filterset_class = GroupsFilter
-    search_fields = ('name', 'public_description')
+    search_fields = ("name", "public_description")
     serializer_class = GroupDetailSerializer
     permission_classes = (IsAuthenticated, IsGroupEditor)
 
@@ -135,45 +144,45 @@ class GroupViewSet(
     def get_queryset(self):
         qs = self.queryset
 
-        if self.action in ('retrieve', 'list'):
+        if self.action in ("retrieve", "list"):
             qs = qs.annotate_yesterdays_member_count().prefetch_related(
-                'members',
-                'groupmembership_set',
-                'groupmembership_set__trust_set',
-                'groupmembership_set__trust_set__given_by',
+                "members",
+                "groupmembership_set",
+                "groupmembership_set__trust_set",
+                "groupmembership_set__trust_set__given_by",
             )
 
-        if self.action != 'join':
+        if self.action != "join":
             qs = qs.filter(members=self.request.user)
 
         return qs
 
     @action(
         detail=True,
-        methods=['POST'],
+        methods=["POST"],
         permission_classes=(IsAuthenticated, IsNotMember, IsOpenGroup),
-        serializer_class=GroupJoinSerializer
+        serializer_class=GroupJoinSerializer,
     )
     def join(self, request, pk=None):
         """Join a group"""
         return self.partial_update(request)
 
-    @action(detail=True, methods=['POST'], serializer_class=GroupLeaveSerializer)
+    @action(detail=True, methods=["POST"], serializer_class=GroupLeaveSerializer)
     def leave(self, request, pk=None):
         """Leave one of your groups"""
         return self.partial_update(request)
 
-    @action(detail=False, methods=['GET'], serializer_class=TimezonesSerializer)
+    @action(detail=False, methods=["GET"], serializer_class=TimezonesSerializer)
     def timezones(self, request, pk=None):
         """List all accepted timezones"""
-        return Response(self.get_serializer({'all_timezones': pytz.all_timezones}).data)
+        return Response(self.get_serializer({"all_timezones": pytz.all_timezones}).data)
 
     @action(detail=True)
     def conversation(self, request, pk=None):
         """Get wall conversation ID of this group"""
         return self.retrieve_conversation(request, pk)
 
-    @action(detail=True, methods=['POST'])
+    @action(detail=True, methods=["POST"])
     def mark_user_active(self, request, pk=None):
         """Mark that the logged-in user is active in the group"""
         self.check_permissions(request)
@@ -187,14 +196,14 @@ class GroupViewSet(
         stats.group_activity(membership.group)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @extend_schema(parameters=[OpenApiParameter('user_id', OpenApiTypes.INT, OpenApiParameter.PATH)])
+    @extend_schema(parameters=[OpenApiParameter("user_id", OpenApiTypes.INT, OpenApiParameter.PATH)])
     @action(
         detail=True,
-        methods=['POST'],
+        methods=["POST"],
         permission_classes=(IsAuthenticated, IsOtherUser),
-        url_name='trust-user',
-        url_path='users/(?P<user_id>[^/.]+)/trust',
-        serializer_class=TrustActionSerializer
+        url_name="trust-user",
+        url_path="users/(?P<user_id>[^/.]+)/trust",
+        serializer_class=TrustActionSerializer,
     )
     def trust_user(self, request, pk, user_id):
         """trust the user in a group for a given role. role defaults to 'editor'"""
@@ -206,7 +215,7 @@ class GroupViewSet(
         self.perform_update(serializer)
         return Response(data={})
 
-    @extend_schema(parameters=[OpenApiParameter('user_id', OpenApiTypes.INT, OpenApiParameter.PATH)])
+    @extend_schema(parameters=[OpenApiParameter("user_id", OpenApiTypes.INT, OpenApiParameter.PATH)])
     @trust_user.mapping.delete
     def revoke_trust(self, request, pk, user_id):
         """revoke trust for a user in a group for a given role. role defaults to 'editor'"""
@@ -221,14 +230,14 @@ class GroupViewSet(
         except Trust.DoesNotExist:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-    @extend_schema(parameters=[OpenApiParameter('notification_type', OpenApiTypes.STR, OpenApiParameter.PATH)])
+    @extend_schema(parameters=[OpenApiParameter("notification_type", OpenApiTypes.STR, OpenApiParameter.PATH)])
     @action(
         detail=True,
-        methods=['PUT', 'DELETE'],
-        permission_classes=(IsAuthenticated, ),
-        url_name='notification_types',
-        url_path='notification_types/(?P<notification_type>[^/.]+)',
-        serializer_class=EmptySerializer  # for Swagger
+        methods=["PUT", "DELETE"],
+        permission_classes=(IsAuthenticated,),
+        url_name="notification_types",
+        url_path="notification_types/(?P<notification_type>[^/.]+)",
+        serializer_class=EmptySerializer,  # for Swagger
     )
     def modify_notification_types(self, request, pk, notification_type):
         """add (POST) or remove (DELETE) a notification type"""
@@ -236,11 +245,11 @@ class GroupViewSet(
         membership = get_object_or_404(GroupMembership.objects, group=self.get_object(), user=request.user)
         self.check_object_permissions(request, membership)
         serializer_class = None
-        if request.method == 'PUT':
+        if request.method == "PUT":
             serializer_class = GroupMembershipAddNotificationTypeSerializer
-        elif request.method == 'DELETE':
+        elif request.method == "DELETE":
             serializer_class = GroupMembershipRemoveNotificationTypeSerializer
-        serializer = serializer_class(membership, data={'notification_type': notification_type}, partial=True)
+        serializer = serializer_class(membership, data={"notification_type": notification_type}, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 

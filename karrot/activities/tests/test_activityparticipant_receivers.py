@@ -18,8 +18,8 @@ class TestPickUpParticipantReceivers(APITestCase):
         self.activity = ActivityFactory(place=self.place, participants=[self.first_member])
 
     def test_new_participant_marks_existing_messages_as_read(self):
-        self.activity.conversation.messages.create(author=self.first_member, content='foo')
-        self.activity.conversation.messages.create(author=self.first_member, content='bar')
+        self.activity.conversation.messages.create(author=self.first_member, content="foo")
+        self.activity.conversation.messages.create(author=self.first_member, content="bar")
 
         self.activity.add_participant(self.second_member)
 

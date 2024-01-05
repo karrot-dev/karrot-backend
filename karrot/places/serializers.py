@@ -7,20 +7,21 @@ from rest_framework.exceptions import PermissionDenied
 
 from karrot.groups.serializers import GroupPreviewSerializer
 from karrot.history.models import History, HistoryTypus
-from karrot.places.models import Place as PlaceModel, PlaceSubscription, PlaceType, PlaceStatus
+from karrot.places.models import Place as PlaceModel
+from karrot.places.models import PlaceStatus, PlaceSubscription, PlaceType
 from karrot.utils.misc import find_changed
 
 
 class PlaceTypeHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = PlaceType
-        fields = '__all__'
+        fields = "__all__"
 
 
 class PlaceStatusHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = PlaceStatus
-        fields = '__all__'
+        fields = "__all__"
 
 
 class PlaceTypeSerializer(serializers.ModelSerializer):
@@ -30,42 +31,42 @@ class PlaceTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlaceType
         fields = [
-            'id',
-            'name',
-            'name_is_translatable',
-            'description',
-            'icon',
-            'archived_at',
-            'is_archived',
-            'group',
+            "id",
+            "name",
+            "name_is_translatable",
+            "description",
+            "icon",
+            "archived_at",
+            "is_archived",
+            "group",
             "created_at",
-            'updated_at',
-            'updated_message',
+            "updated_at",
+            "updated_message",
         ]
         read_only_fields = [
-            'id',
-            'created_at',
-            'updated_at',
-            'archived_at',
+            "id",
+            "created_at",
+            "updated_at",
+            "archived_at",
         ]
 
     def validate_group(self, group):
-        if not group.is_member(self.context['request'].user):
-            raise PermissionDenied('You are not a member of this group.')
-        if not group.is_editor(self.context['request'].user):
-            raise PermissionDenied('You need to be a group editor')
+        if not group.is_member(self.context["request"].user):
+            raise PermissionDenied("You are not a member of this group.")
+        if not group.is_editor(self.context["request"].user):
+            raise PermissionDenied("You need to be a group editor")
         return group
 
     def save(self, **kwargs):
         if not self.instance:
             return super().save(**kwargs)
 
-        updated_message = self.validated_data.pop('updated_message', None)
+        updated_message = self.validated_data.pop("updated_message", None)
 
-        if 'is_archived' in self.validated_data:
-            is_archived = self.validated_data.pop('is_archived')
+        if "is_archived" in self.validated_data:
+            is_archived = self.validated_data.pop("is_archived")
             archived_at = timezone.now() if is_archived else None
-            self.initial_data['archived_at'] = self.validated_data['archived_at'] = archived_at
+            self.initial_data["archived_at"] = self.validated_data["archived_at"] = archived_at
 
         place_type = self.instance
         changed_data = find_changed(place_type, self.validated_data)
@@ -82,9 +83,8 @@ class PlaceTypeSerializer(serializers.ModelSerializer):
             History.objects.create(
                 typus=HistoryTypus.PLACE_TYPE_MODIFY,
                 group=place_type.group,
-                users=[self.context['request'].user],
-                payload={k: self.initial_data.get(k)
-                         for k in changed_data.keys()},
+                users=[self.context["request"].user],
+                payload={k: self.initial_data.get(k) for k in changed_data.keys()},
                 before=before_data,
                 after=after_data,
                 message=updated_message,
@@ -92,14 +92,14 @@ class PlaceTypeSerializer(serializers.ModelSerializer):
         return place_type
 
     def create(self, validated_data):
-        if 'is_archived' in validated_data:
+        if "is_archived" in validated_data:
             # can't create something in an archived state
-            validated_data.pop('is_archived')
+            validated_data.pop("is_archived")
         place_type = super().create(validated_data)
         History.objects.create(
             typus=HistoryTypus.PLACE_TYPE_CREATE,
             group=place_type.group,
-            users=[self.context['request'].user],
+            users=[self.context["request"].user],
             payload=self.initial_data,
             after=PlaceTypeHistorySerializer(place_type).data,
         )
@@ -114,47 +114,47 @@ class PlaceStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlaceStatus
         fields = [
-            'id',
-            'name',
-            'name_is_translatable',
-            'description',
-            'colour',
-            'order',
-            'is_visible',
-            'archived_at',
-            'is_archived',
-            'group',
+            "id",
+            "name",
+            "name_is_translatable",
+            "description",
+            "colour",
+            "order",
+            "is_visible",
+            "archived_at",
+            "is_archived",
+            "group",
             "created_at",
-            'updated_at',
-            'updated_message',
-            'set_places_to_status',
+            "updated_at",
+            "updated_message",
+            "set_places_to_status",
         ]
         read_only_fields = [
-            'id',
-            'created_at',
-            'updated_at',
-            'archived_at',
+            "id",
+            "created_at",
+            "updated_at",
+            "archived_at",
         ]
 
     def validate_group(self, group):
-        if not group.is_member(self.context['request'].user):
-            raise PermissionDenied('You are not a member of this group.')
-        if not group.is_editor(self.context['request'].user):
-            raise PermissionDenied('You need to be a group editor')
+        if not group.is_member(self.context["request"].user):
+            raise PermissionDenied("You are not a member of this group.")
+        if not group.is_editor(self.context["request"].user):
+            raise PermissionDenied("You need to be a group editor")
         return group
 
     def validate_set_places_to_status(self, status_id):
         group = self.instance.group
         if not group.place_statuses.filter(id=status_id).exists():
-            raise PermissionDenied('Invalid status')
+            raise PermissionDenied("Invalid status")
         return status_id
 
     def save(self, **kwargs):
         if not self.instance:
             return super().save(**kwargs)
 
-        updated_message = self.validated_data.pop('updated_message', None)
-        set_places_to_status = self.validated_data.pop('set_places_to_status', None)
+        updated_message = self.validated_data.pop("updated_message", None)
+        set_places_to_status = self.validated_data.pop("set_places_to_status", None)
 
         place_status = self.instance
         changed_data = find_changed(place_status, self.validated_data)
@@ -163,10 +163,10 @@ class PlaceStatusSerializer(serializers.ModelSerializer):
         if skip_update:
             return self.instance
 
-        if 'is_archived' in self.validated_data:
-            is_archived = self.validated_data.pop('is_archived')
+        if "is_archived" in self.validated_data:
+            is_archived = self.validated_data.pop("is_archived")
             archived_at = timezone.now() if is_archived else None
-            self.initial_data['archived_at'] = self.validated_data['archived_at'] = archived_at
+            self.initial_data["archived_at"] = self.validated_data["archived_at"] = archived_at
 
         before_data = PlaceStatusHistorySerializer(place_status).data
         status = super().save(**kwargs)
@@ -183,9 +183,8 @@ class PlaceStatusSerializer(serializers.ModelSerializer):
             History.objects.create(
                 typus=HistoryTypus.PLACE_STATUS_MODIFY,
                 group=status.group,
-                users=[self.context['request'].user],
-                payload={k: self.initial_data.get(k)
-                         for k in changed_data.keys()},
+                users=[self.context["request"].user],
+                payload={k: self.initial_data.get(k) for k in changed_data.keys()},
                 before=before_data,
                 after=after_data,
                 message=updated_message,
@@ -193,14 +192,14 @@ class PlaceStatusSerializer(serializers.ModelSerializer):
         return status
 
     def create(self, validated_data):
-        if 'is_archived' in validated_data:
+        if "is_archived" in validated_data:
             # can't create something in an archived state
-            validated_data.pop('is_archived')
+            validated_data.pop("is_archived")
         status = super().create(validated_data)
         History.objects.create(
             typus=HistoryTypus.PLACE_STATUS_CREATE,
             group=status.group,
-            users=[self.context['request'].user],
+            users=[self.context["request"].user],
             payload=self.initial_data,
             after=PlaceStatusHistorySerializer(status).data,
         )
@@ -210,7 +209,7 @@ class PlaceStatusSerializer(serializers.ModelSerializer):
 class PlaceHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = PlaceModel
-        fields = '__all__'
+        fields = "__all__"
 
 
 class PublicPlaceSerializer(serializers.ModelSerializer):
@@ -220,12 +219,12 @@ class PublicPlaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlaceModel
         fields = [
-            'place_type',
-            'name',
-            'group',
-            'address',
-            'latitude',
-            'longitude',
+            "place_type",
+            "name",
+            "group",
+            "address",
+            "latitude",
+            "longitude",
         ]
         read_only_fields = fields
 
@@ -234,47 +233,47 @@ class PlaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlaceModel
         fields = [
-            'id',
-            'name',
-            'description',
-            'group',
-            'address',
-            'latitude',
-            'longitude',
-            'weeks_in_advance',
-            'status',
-            'archived_at',
-            'is_archived',
-            'is_subscribed',
-            'subscribers',
-            'place_type',
-            'default_view',
+            "id",
+            "name",
+            "description",
+            "group",
+            "address",
+            "latitude",
+            "longitude",
+            "weeks_in_advance",
+            "status",
+            "archived_at",
+            "is_archived",
+            "is_subscribed",
+            "subscribers",
+            "place_type",
+            "default_view",
         ]
         extra_kwargs = {
-            'name': {
-                'min_length': 3,
+            "name": {
+                "min_length": 3,
             },
-            'description': {
-                'trim_whitespace': False,
-                'max_length': settings.DESCRIPTION_MAX_LENGTH,
+            "description": {
+                "trim_whitespace": False,
+                "max_length": settings.DESCRIPTION_MAX_LENGTH,
             },
-            'place_type': {
-                'required': False,
+            "place_type": {
+                "required": False,
             },
         }
         read_only_fields = [
-            'id',
-            'subscribers',
-            'archived_at',
+            "id",
+            "subscribers",
+            "archived_at",
         ]
 
     is_subscribed = serializers.SerializerMethodField()
 
     def get_is_subscribed(self, place) -> bool:
-        return any(u == self.context['request'].user for u in place.subscribers.all())
+        return any(u == self.context["request"].user for u in place.subscribers.all())
 
     def save(self, **kwargs):
-        return super().save(last_changed_by=self.context['request'].user)
+        return super().save(last_changed_by=self.context["request"].user)
 
     def create(self, validated_data):
         place = super().create(validated_data)
@@ -285,7 +284,7 @@ class PlaceSerializer(serializers.ModelSerializer):
             group=place.group,
             place=place,
             users=[
-                self.context['request'].user,
+                self.context["request"].user,
             ],
             payload=self.initial_data,
             after=PlaceHistorySerializer(place).data,
@@ -294,25 +293,25 @@ class PlaceSerializer(serializers.ModelSerializer):
         return place
 
     def validate(self, attrs):
-        if not self.instance and not attrs.get('place_type'):
+        if not self.instance and not attrs.get("place_type"):
             """creating place without place type, we'll provide a default"""
-            group = attrs.get('group')
-            attrs['place_type'] = group.place_types.get(name='Unspecified')
+            group = attrs.get("group")
+            attrs["place_type"] = group.place_types.get(name="Unspecified")
         return attrs
 
     def validate_group(self, group):
-        if not group.is_member(self.context['request'].user):
-            raise PermissionDenied('You are not a member of this group.')
-        if not group.is_editor(self.context['request'].user):
-            raise PermissionDenied('You need to be a group editor')
+        if not group.is_member(self.context["request"].user):
+            raise PermissionDenied("You are not a member of this group.")
+        if not group.is_editor(self.context["request"].user):
+            raise PermissionDenied("You need to be a group editor")
         return group
 
     def validate_weeks_in_advance(self, w):
         if w < 1:
-            raise serializers.ValidationError(_('Set at least one week in advance'))
+            raise serializers.ValidationError(_("Set at least one week in advance"))
         if w > settings.STORE_MAX_WEEKS_IN_ADVANCE:
             raise serializers.ValidationError(
-                _('Do not set more than %(count)s weeks in advance') % {'count': settings.STORE_MAX_WEEKS_IN_ADVANCE}
+                _("Do not set more than %(count)s weeks in advance") % {"count": settings.STORE_MAX_WEEKS_IN_ADVANCE}
             )
         return w
 
@@ -333,10 +332,10 @@ class PlaceUpdateSerializer(PlaceSerializer):
         if skip_update:
             return self.instance
 
-        if 'is_archived' in self.validated_data:
-            is_archived = self.validated_data.pop('is_archived')
+        if "is_archived" in self.validated_data:
+            is_archived = self.validated_data.pop("is_archived")
             archived_at = timezone.now() if is_archived else None
-            self.initial_data['archived_at'] = self.validated_data['archived_at'] = archived_at
+            self.initial_data["archived_at"] = self.validated_data["archived_at"] = archived_at
 
         return super().save(**kwargs)
 
@@ -350,9 +349,8 @@ class PlaceUpdateSerializer(PlaceSerializer):
                 typus=HistoryTypus.STORE_MODIFY,
                 group=place.group,
                 place=place,
-                users=[self.context['request'].user],
-                payload={k: self.initial_data.get(k)
-                         for k in validated_data.keys()},
+                users=[self.context["request"].user],
+                payload={k: self.initial_data.get(k) for k in validated_data.keys()},
                 before=before_data,
                 after=after_data,
             )
@@ -364,15 +362,15 @@ class PlaceSubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlaceSubscription
         fields = [
-            'place',
+            "place",
         ]
 
     def save(self, **kwargs):
-        return super().save(user=self.context['request'].user)
+        return super().save(user=self.context["request"].user)
 
     def validate_place(self, place):
-        if place.placesubscription_set.filter(user=self.context['request'].user).exists():
-            raise serializers.ValidationError(_('You are already subscribed to this place'))
+        if place.placesubscription_set.filter(user=self.context["request"].user).exists():
+            raise serializers.ValidationError(_("You are already subscribed to this place"))
         return place
 
     def create(self, validated_data):

@@ -1,20 +1,28 @@
 import pytz
 from babel.dates import format_date, format_time
-from django.utils import translation, timezone
+from django.utils import timezone, translation
 from django.utils.text import Truncator
 from django.utils.translation import gettext as _
 
 from config import settings
-from karrot.utils.email_utils import prepare_email, formataddr
+from karrot.utils.email_utils import formataddr, prepare_email
 from karrot.utils.frontend_urls import (
-    group_wall_url, conversation_unsubscribe_url, activity_detail_url, user_detail_url, application_url, thread_url,
-    thread_unsubscribe_url, issue_url, place_wall_url, offer_url
+    activity_detail_url,
+    application_url,
+    conversation_unsubscribe_url,
+    group_wall_url,
+    issue_url,
+    offer_url,
+    place_wall_url,
+    thread_unsubscribe_url,
+    thread_url,
+    user_detail_url,
 )
 from karrot.webhooks.utils import make_local_part
 
 
 def author_names(messages):
-    return ', '.join(set(message.author.display_name for message in messages))
+    return ", ".join({message.author.display_name for message in messages})
 
 
 def prepare_conversation_message_notification(user, messages):
@@ -23,17 +31,17 @@ def prepare_conversation_message_notification(user, messages):
 
     if first_message.is_thread_reply():
         return prepare_thread_message_notification(user, messages)
-    if type == 'activity':
+    if type == "activity":
         return prepare_activity_conversation_message_notification(user, messages)
-    if type == 'application':
+    if type == "application":
         return prepare_application_message_notification(user, messages)
-    if type == 'issue':
+    if type == "issue":
         return prepare_issue_message_notification(user, messages)
-    if type == 'offer':
+    if type == "offer":
         return prepare_offer_message_notification(user, messages)
-    if type == 'private':
+    if type == "private":
         return prepare_private_user_conversation_message_notification(user, messages)
-    raise Exception('Cannot send message notification because conversation doesn\'t have a known type')
+    raise Exception("Cannot send message notification because conversation doesn't have a known type")
 
 
 def conversation_url_for(message):
@@ -42,21 +50,21 @@ def conversation_url_for(message):
 
     if message.is_thread_reply():
         return thread_url(message.thread)
-    if type == 'group':
+    if type == "group":
         return group_wall_url(conversation.target)
-    if type == 'place':
+    if type == "place":
         return place_wall_url(conversation.target)
-    if type == 'activity':
+    if type == "activity":
         return activity_detail_url(conversation.target)
-    if type == 'application':
+    if type == "application":
         return application_url(conversation.target)
-    if type == 'issue':
+    if type == "issue":
         return issue_url(conversation.target)
-    if type == 'offer':
+    if type == "offer":
         return offer_url(conversation.target)
-    if type == 'private':
+    if type == "private":
         return user_detail_url(message.author)
-    raise Exception('Cannot get conversation url because conversation doesn\'t have a known type')
+    raise Exception("Cannot get conversation url because conversation doesn't have a known type")
 
 
 def prepare_thread_message_notification(user, messages):
@@ -72,27 +80,27 @@ def prepare_thread_message_notification(user, messages):
     conversation_name = thread_text_beginning
 
     local_part = make_local_part(conversation, user, thread)
-    reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.EMAIL_REPLY_DOMAIN)))
+    reply_to = formataddr((reply_to_name, f"{local_part}@{settings.EMAIL_REPLY_DOMAIN}"))
     from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
     unsubscribe_url = thread_unsubscribe_url(user, group, thread)
 
     return prepare_email(
-        template='thread_message_notification',
+        template="thread_message_notification",
         from_email=from_email,
         user=user,
         tz=group.timezone,
         reply_to=[reply_to],
         unsubscribe_url=unsubscribe_url,
         context={
-            'messages': messages,
-            'conversation_name': conversation_name,
-            'thread_author': thread.author,
-            'thread_message_content': thread.content_rendered(truncate_words=40),
-            'thread_url': thread_url(thread),
-            'mute_url': unsubscribe_url,
+            "messages": messages,
+            "conversation_name": conversation_name,
+            "thread_author": thread.author,
+            "thread_message_content": thread.content_rendered(truncate_words=40),
+            "thread_url": thread_url(thread),
+            "mute_url": unsubscribe_url,
         },
-        stats_category='thread_message',
+        stats_category="thread_message",
     )
 
 
@@ -106,7 +114,7 @@ def language_for_user(user):
     language = user.language
 
     if not translation.check_for_language(language):
-        language = 'en'
+        language = "en"
 
     return language
 
@@ -118,7 +126,7 @@ def get_timezone(user, group):
         return user.current_group.timezone
 
     # default, I guess most groups are not so far from this timezone...
-    return pytz.timezone('Europe/Berlin')
+    return pytz.timezone("Europe/Berlin")
 
 
 def prepare_message_notification(
@@ -147,23 +155,23 @@ def prepare_message_notification(
         thread = first_message if conversation.target and conversation.target.conversation_supports_threads else None
 
         local_part = make_local_part(conversation, user, thread)
-        reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.EMAIL_REPLY_DOMAIN)))
+        reply_to = formataddr((reply_to_name, f"{local_part}@{settings.EMAIL_REPLY_DOMAIN}"))
         from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
         unsubscribe_url = conversation_unsubscribe_url(user, group=group, conversation=conversation)
 
         return prepare_email(
-            template='conversation_message_notification',
+            template="conversation_message_notification",
             from_email=from_email,
             user=user,
             tz=tz,
             reply_to=[reply_to],
             unsubscribe_url=unsubscribe_url,
             context={
-                'messages': messages,
-                'conversation_name': conversation_name,
-                'conversation_url': conversation_url,
-                'mute_url': unsubscribe_url,
+                "messages": messages,
+                "conversation_name": conversation_name,
+                "conversation_url": conversation_url,
+                "mute_url": unsubscribe_url,
             },
             stats_category=stats_category,
         )
@@ -182,7 +190,7 @@ def prepare_group_conversation_message_notification(user, message):
             reply_to_name=reply_to_name,
             conversation_name=conversation_name,
             conversation_url=group_wall_url(group),
-            stats_category='group_conversation_message'
+            stats_category="group_conversation_message",
         )
 
 
@@ -199,7 +207,7 @@ def prepare_place_conversation_message_notification(user, message):
             reply_to_name=reply_to_name,
             conversation_name=conversation_name,
             conversation_url=place_wall_url(place),
-            stats_category='place_conversation_message'
+            stats_category="place_conversation_message",
         )
 
 
@@ -210,26 +218,26 @@ def prepare_activity_conversation_message_notification(user, messages):
         with timezone.override(activity.place.group.timezone):
             weekday = format_date(
                 activity.date.start.astimezone(timezone.get_current_timezone()),
-                'EEEE',
+                "EEEE",
                 locale=translation.to_locale(language),
             )
             time = format_time(
                 activity.date.start,
-                format='short',
+                format="short",
                 locale=translation.to_locale(language),
                 tzinfo=timezone.get_current_timezone(),
             )
             date = format_date(
                 activity.date.start.astimezone(timezone.get_current_timezone()),
-                format='long',
+                format="long",
                 locale=translation.to_locale(language),
             )
 
-            long_date = '{} {}, {}'.format(weekday, time, date)
-            short_date = '{} {}'.format(weekday, time)
+            long_date = f"{weekday} {time}, {date}"
+            short_date = f"{weekday} {time}"
 
-            reply_to_name = '{} {}'.format(activity.activity_type.get_translated_name(), short_date)
-            conversation_name = '{} {}'.format(activity.activity_type.get_translated_name(), long_date)
+            reply_to_name = f"{activity.activity_type.get_translated_name()} {short_date}"
+            conversation_name = f"{activity.activity_type.get_translated_name()} {long_date}"
 
         return prepare_message_notification(
             user,
@@ -238,7 +246,7 @@ def prepare_activity_conversation_message_notification(user, messages):
             reply_to_name=reply_to_name,
             conversation_name=conversation_name,
             conversation_url=activity_detail_url(activity),
-            stats_category='activity_conversation_message'
+            stats_category="activity_conversation_message",
         )
 
 
@@ -251,7 +259,7 @@ def prepare_private_user_conversation_message_notification(user, messages):
             messages,
             conversation_name=author.display_name,
             conversation_url=user_detail_url(author),
-            stats_category='private_conversation_message'
+            stats_category="private_conversation_message",
         )
 
 
@@ -260,13 +268,13 @@ def prepare_application_message_notification(user, messages):
     with translation.override(language_for_user(user)):
         reply_to_name = application.user.display_name
         if application.user == user:
-            conversation_name = _('New message in your application to %(group_name)s') % {
-                'group_name': application.group.name
+            conversation_name = _("New message in your application to %(group_name)s") % {
+                "group_name": application.group.name
             }
         else:
-            conversation_name = _('New message in application of %(user_name)s to %(group_name)s') % {
-                'user_name': application.user.display_name,
-                'group_name': application.group.name,
+            conversation_name = _("New message in application of %(user_name)s to %(group_name)s") % {
+                "user_name": application.user.display_name,
+                "group_name": application.group.name,
             }
         return prepare_message_notification(
             user,
@@ -275,7 +283,7 @@ def prepare_application_message_notification(user, messages):
             group=application.group,
             conversation_name=conversation_name,
             conversation_url=application_url(application),
-            stats_category='application_message'
+            stats_category="application_message",
         )
 
 
@@ -287,11 +295,12 @@ def prepare_issue_message_notification(user, messages):
             messages,
             group=issue.group,
             # TODO: also add some context text that can be passed in to explain that it's not a private message...
-            conversation_name=_('New message in membership review of %(user_name)s') % {
-                'user_name': user.display_name,
+            conversation_name=_("New message in membership review of %(user_name)s")
+            % {
+                "user_name": user.display_name,
             },
             conversation_url=issue_url(issue),
-            stats_category='issue_message'
+            stats_category="issue_message",
         )
 
 
@@ -302,12 +311,13 @@ def prepare_offer_message_notification(user, messages):
             user,
             messages,
             group=offer.group,
-            conversation_name=_('New message for offer %(offer_name)s in %(group_name)s') % {
-                'offer_name': offer.name,
-                'group_name': offer.group.name,
+            conversation_name=_("New message for offer %(offer_name)s in %(group_name)s")
+            % {
+                "offer_name": offer.name,
+                "group_name": offer.group.name,
             },
             conversation_url=offer_url(offer),
-            stats_category='offer_message'
+            stats_category="offer_message",
         )
 
 
@@ -325,21 +335,21 @@ def prepare_mention_notification(mention):
 
     reply_to_name = message.author.display_name
     local_part = make_local_part(conversation, user, thread)
-    reply_to = formataddr((reply_to_name, '{}@{}'.format(local_part, settings.EMAIL_REPLY_DOMAIN)))
+    reply_to = formataddr((reply_to_name, f"{local_part}@{settings.EMAIL_REPLY_DOMAIN}"))
 
     from_text = message.author.display_name
     from_email = formataddr((from_text, settings.DEFAULT_FROM_EMAIL))
 
     with translation.override(language_for_user(user)), timezone.override(tz):
         return prepare_email(
-            template='mention_notification',
+            template="mention_notification",
             from_email=from_email,
             user=user,
             tz=tz,
             reply_to=[reply_to],
             context={
-                'message': message,
-                'conversation_url': conversation_url_for(message),
+                "message": message,
+                "conversation_url": conversation_url_for(message),
             },
-            stats_category='{}_mention'.format(conversation.type()),
+            stats_category=f"{conversation.type()}_mention",
         )

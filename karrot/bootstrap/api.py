@@ -18,20 +18,20 @@ BACKEND_REVISION = get_git_rev()
 
 def get_config_data():
     return {
-        'sentry': {
-            'dsn': settings.SENTRY_CLIENT_DSN,
-            'environment': settings.SENTRY_ENVIRONMENT,
+        "sentry": {
+            "dsn": settings.SENTRY_CLIENT_DSN,
+            "environment": settings.SENTRY_ENVIRONMENT,
         },
-        'upload': {
-            'max_size': settings.FILE_UPLOAD_MAX_SIZE,
+        "upload": {
+            "max_size": settings.FILE_UPLOAD_MAX_SIZE,
         },
-        'forum': {
-            'banner_topic_id': settings.FORUM_BANNER_TOPIC_ID,
-            'discussions_feed': settings.FORUM_DISCUSSIONS_FEED,
+        "forum": {
+            "banner_topic_id": settings.FORUM_BANNER_TOPIC_ID,
+            "discussions_feed": settings.FORUM_DISCUSSIONS_FEED,
         },
-        'feedback_possible_days': settings.FEEDBACK_POSSIBLE_DAYS,
-        'web_push': {
-            'vapid_public_key': getattr(settings, 'VAPID_PUBLIC_KEY', None),
+        "feedback_possible_days": settings.FEEDBACK_POSSIBLE_DAYS,
+        "web_push": {
+            "vapid_public_key": getattr(settings, "VAPID_PUBLIC_KEY", None),
         },
     }
 
@@ -49,7 +49,7 @@ class BootstrapDataHandlers:
     @staticmethod
     def server(request):
         return {
-            'revision': BACKEND_REVISION,
+            "revision": BACKEND_REVISION,
         }
 
     @staticmethod
@@ -70,10 +70,10 @@ class BootstrapDataHandlers:
                 city = ip_to_city(client_ip)
                 if city:
                     return {
-                        'lat': city.get('latitude', None),
-                        'lng': city.get('longitude', None),
-                        'country_code': city.get('country_code', None),
-                        'timezone': city.get('time_zone', None),
+                        "lat": city.get("latitude", None),
+                        "lng": city.get("longitude", None),
+                        "country_code": city.get("country_code", None),
+                        "timezone": city.get("time_zone", None),
                     }
 
     @staticmethod
@@ -95,10 +95,7 @@ class BootstrapDataHandlers:
         groups = user.groups.all()
         is_applicant_of_group = Q(application__group__in=groups)
 
-        return get_user_model().objects \
-            .active() \
-            .filter(is_member_of_group | is_applicant_of_group | is_self) \
-            .distinct()
+        return get_user_model().objects.active().filter(is_member_of_group | is_applicant_of_group | is_self).distinct()
 
     @staticmethod
     def status(request):
@@ -110,7 +107,7 @@ class BootstrapDataHandlers:
     def places(request):
         if not request.user.is_authenticated:
             return None
-        return Place.objects.filter(group__members=request.user).prefetch_related('subscribers')
+        return Place.objects.filter(group__members=request.user).prefetch_related("subscribers")
 
     @staticmethod
     def activity_types(request):
@@ -123,15 +120,15 @@ class BootstrapViewSet(GenericViewSet):
     serializer_class = BootstrapSerializer  # for OpenAPI generation with drf-spectacular
     handlers = BootstrapDataHandlers()
     defaults = (
-        'server',
-        'config',
-        'geoip',
-        'user',
-        'groups',
+        "server",
+        "config",
+        "geoip",
+        "user",
+        "groups",
     )
 
     def list(self, request, *args, **kwargs):
-        fields = request.query_params.get('fields').split(',') if 'fields' in request.query_params else self.defaults
+        fields = request.query_params.get("fields").split(",") if "fields" in request.query_params else self.defaults
         valid_fields = dir(self.handlers)
 
         invalid_fields = [field for field in fields if field not in valid_fields]

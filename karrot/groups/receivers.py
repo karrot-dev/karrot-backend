@@ -2,13 +2,16 @@ import json
 
 import requests
 from django.conf import settings
-from django.db.models.signals import post_save, pre_delete, post_delete
+from django.db.models.signals import post_delete, post_save, pre_delete
 from django.dispatch import receiver
 
 from karrot.conversations.models import Conversation
 from karrot.groups import roles, stats
-from karrot.groups.emails import prepare_user_became_editor_email, prepare_user_lost_editor_role_email, \
-    prepare_user_got_role_email
+from karrot.groups.emails import (
+    prepare_user_became_editor_email,
+    prepare_user_got_role_email,
+    prepare_user_lost_editor_role_email,
+)
 from karrot.groups.models import Group, GroupMembership, Trust, create_group_photo_warmer
 from karrot.groups.roles import GROUP_EDITOR
 from karrot.history.models import History, HistoryTypus
@@ -80,7 +83,7 @@ def trust_given(sender, instance, created, **kwargs):
                 group=membership.group,
                 users=[membership.user],
                 payload={
-                    'threshold': trust_threshold,
+                    "threshold": trust_threshold,
                 },
             )
 
@@ -103,11 +106,11 @@ def trust_given(sender, instance, created, **kwargs):
                 group=membership.group,
                 users=[membership.user],
                 payload={
-                    'role': {
-                        'name': role.name,
-                        'display_name': role.display_name,
+                    "role": {
+                        "name": role.name,
+                        "display_name": role.display_name,
                     },
-                }
+                },
             )
 
             role = membership.group.roles.get(name=trust.role)
@@ -137,7 +140,7 @@ def trust_revoked(sender, instance, **kwargs):
                 group=membership.group,
                 users=[membership.user],
                 payload={
-                    'threshold': trust_threshold,
+                    "threshold": trust_threshold,
                 },
             )
 
@@ -161,7 +164,7 @@ def notify_chat_on_group_creation(sender, instance, created, **kwargs):
     if not created:
         return
     group = instance
-    webhook_url = getattr(settings, 'ADMIN_CHAT_WEBHOOK', None)
+    webhook_url = getattr(settings, "ADMIN_CHAT_WEBHOOK", None)
 
     if webhook_url is None:
         return
@@ -169,10 +172,10 @@ def notify_chat_on_group_creation(sender, instance, created, **kwargs):
     group_url = frontend_urls.group_preview_url(group)
 
     message_data = {
-        'text': f':tada: A new group has been created on **{settings.SITE_NAME}**! [Visit {group.name}]({group_url})',
+        "text": f":tada: A new group has been created on **{settings.SITE_NAME}**! [Visit {group.name}]({group_url})",
     }
 
-    response = requests.post(webhook_url, data=json.dumps(message_data), headers={'Content-Type': 'application/json'})
+    response = requests.post(webhook_url, data=json.dumps(message_data), headers={"Content-Type": "application/json"})
     response.raise_for_status()
 
 

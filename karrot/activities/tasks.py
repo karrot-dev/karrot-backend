@@ -1,28 +1,28 @@
 from collections import defaultdict
 
-from babel.dates import format_time, format_datetime
+from babel.dates import format_datetime, format_time
 from dateutil.relativedelta import relativedelta
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import F, Q, QuerySet
 from django.utils import timezone, translation
 from django.utils.text import Truncator
 from django.utils.timezone import get_current_timezone
-from django.utils.translation import gettext as _, to_locale, get_language
+from django.utils.translation import get_language, to_locale
+from django.utils.translation import gettext as _
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task, db_task
 
 from karrot.activities import stats
-from karrot.activities.emails import prepare_activity_notification_email, \
-    prepare_participant_removed_email
-from karrot.activities.models import Activity, ActivitySeries, ActivityParticipant, ParticipantType, ActivityType
+from karrot.activities.emails import prepare_activity_notification_email, prepare_participant_removed_email
+from karrot.activities.models import Activity, ActivityParticipant, ActivitySeries, ActivityType, ParticipantType
 from karrot.groups.models import Group, GroupMembership, GroupNotificationType
+from karrot.notifications.models import Notification, NotificationType
 from karrot.places.models import Place
 from karrot.subscriptions.models import WebPushSubscription
 from karrot.subscriptions.tasks import notify_subscribers
 from karrot.users.models import User
-from karrot.utils import stats_utils, frontend_urls
+from karrot.utils import frontend_urls, stats_utils
 from karrot.utils.stats_utils import timer
-from karrot.notifications.models import Notification, NotificationType
 
 
 def is_today(dt):
@@ -55,29 +55,29 @@ def activity_reminder(participant_id):
         if subscriptions.count() == 0:
             return
 
-        emoji = '⏰'
+        emoji = "⏰"
 
         if is_today(activity.date.start):
             when = format_time(
                 activity.date.start,
-                format='short',
+                format="short",
                 locale=translation.to_locale(language),
                 tzinfo=tz,
             )
         else:
             when = format_datetime(
                 activity.date.start,
-                format='medium',  # short gives US date format in English, is confusing!
+                format="medium",  # short gives US date format in English, is confusing!
                 locale=translation.to_locale(language),
                 tzinfo=tz,
             )
 
-        where = ', '.join(part for part in [activity.place.name, activity.place.address] if part)
+        where = ", ".join(part for part in [activity.place.name, activity.place.address] if part)
 
-        title = _('Upcoming %(activity_type)s') % {'activity_type': activity.activity_type.get_translated_name()}
-        title = f'{emoji} {title}!'
+        title = _("Upcoming %(activity_type)s") % {"activity_type": activity.activity_type.get_translated_name()}
+        title = f"{emoji} {title}!"
 
-        body = Truncator(' / '.join(part for part in [when, where, activity.description] if part)).chars(num=1000)
+        body = Truncator(" / ".join(part for part in [when, where, activity.description] if part)).chars(num=1000)
 
         click_action = frontend_urls.activity_detail_url(activity)
 
@@ -86,7 +86,7 @@ def activity_reminder(participant_id):
             title=title,
             body=body,
             url=click_action,
-            tag='activity:{}'.format(activity.id),
+            tag=f"activity:{activity.id}",
         )
 
 
@@ -109,16 +109,16 @@ def notify_participant_removals(
     activities_by_id = {}
     for entry in activities_data:
         # activities doesn't include related fields, so flesh it out a bit
-        activities_by_id[entry['id']] = {
+        activities_by_id[entry["id"]] = {
             **entry,
-            'activity_type': ActivityType.objects.get(id=entry['activity_type']),
-            'place': Place.objects.get(id=entry['place']),
+            "activity_type": ActivityType.objects.get(id=entry["activity_type"]),
+            "place": Place.objects.get(id=entry["place"]),
         }
 
     # collect activities affected per-user
     by_user = defaultdict(list)
     for entry in participants:
-        by_user[entry['user']].append(activities_by_id[entry['activity']])
+        by_user[entry["user"]].append(activities_by_id[entry["activity"]])
 
     for user_id in by_user.keys():
         activities_for_user = by_user[user_id]
@@ -128,7 +128,6 @@ def notify_participant_removals(
         tz = group.timezone
 
         with translation.override(language), timezone.override(tz):
-
             # email them
             prepare_participant_removed_email(
                 user,
@@ -144,28 +143,28 @@ def notify_participant_removals(
                     type=NotificationType.PARTICIPANT_REMOVED.value,
                     user=user,
                     context={
-                        'activity_type': activity_type.id,
-                        'place': place.id,
-                        'group': group.id,
-                        'activity_date': DjangoJSONEncoder().default(activity['date'].start),
-                        'removed_by': removed_by.id,
-                        'history': history_id,
+                        "activity_type": activity_type.id,
+                        "place": place.id,
+                        "group": group.id,
+                        "activity_date": DjangoJSONEncoder().default(activity["date"].start),
+                        "removed_by": removed_by.id,
+                        "history": history_id,
                     },
                 )
 
                 subscriptions = WebPushSubscription.objects.filter(user=user)
-                activity_type_name = activity['activity_type'].get_translated_name()
+                activity_type_name = activity["activity_type"].get_translated_name()
                 formatted_date_time = format_datetime(
-                    activity['date'].start,
-                    format='medium',
+                    activity["date"].start,
+                    format="medium",
                     locale=to_locale(get_language()),
                     tzinfo=get_current_timezone(),
                 )
-                title = _('%(activity_type)s no longer available - %(date_time)s') % {
-                    'activity_type': activity_type_name,
-                    'date_time': formatted_date_time,
+                title = _("%(activity_type)s no longer available - %(date_time)s") % {
+                    "activity_type": activity_type_name,
+                    "date_time": formatted_date_time,
                 }
-                body = removed_by.display_name + ':' + Truncator(message).chars(num=1000)
+                body = removed_by.display_name + ":" + Truncator(message).chars(num=1000)
                 if subscriptions.count() > 0:
                     notify_subscribers(
                         subscriptions=subscriptions,
@@ -175,24 +174,23 @@ def notify_participant_removals(
                     )
 
 
-@db_periodic_task(crontab(minute='*'))  # every minute
+@db_periodic_task(crontab(minute="*"))  # every minute
 def process_activities():
     with timer() as t:
         Activity.objects.process_activities()
     # keep as "activities__process_finished_activities" for historic compat
-    stats_utils.periodic_task('activities__process_finished_activities', seconds=t.elapsed_seconds)
+    stats_utils.periodic_task("activities__process_finished_activities", seconds=t.elapsed_seconds)
 
 
 @db_periodic_task(crontab(minute=0))  # every hour
 def update_activities():
     with timer() as t:
         ActivitySeries.objects.update_activities()
-    stats_utils.periodic_task('activities__update_activities', seconds=t.elapsed_seconds)
+    stats_utils.periodic_task("activities__update_activities", seconds=t.elapsed_seconds)
 
 
 @db_periodic_task(crontab(minute=0))  # we check every hour
 def daily_activity_notifications():
-
     with timer() as t:
         for group in Group.objects.all():
             with timezone.override(group.timezone):
@@ -202,13 +200,10 @@ def daily_activity_notifications():
                 for data in fetch_activity_notification_data_for_group(group):
                     prepare_activity_notification_email(**data).send()
                     stats.activity_notification_email(
-                        group=data['group'], **{
-                            k: v.count()
-                            for k, v in data.items() if isinstance(v, QuerySet)
-                        }
+                        group=data["group"], **{k: v.count() for k, v in data.items() if isinstance(v, QuerySet)}
                     )
 
-    stats_utils.periodic_task('activities__daily_activity_notifications', seconds=t.elapsed_seconds)
+    stats_utils.periodic_task("activities__daily_activity_notifications", seconds=t.elapsed_seconds)
 
 
 def fetch_activity_notification_data_for_group(group):
@@ -218,20 +213,25 @@ def fetch_activity_notification_data_for_group(group):
     midnight = localnow.replace(hour=0, minute=0, second=0, microsecond=0) + relativedelta(days=1)
     midnight_tomorrow = midnight + relativedelta(days=1)
 
-    tonight = dict(date__startswith__gte=localnow, date__startswith__lt=midnight)
-    tomorrow = dict(date__startswith__gte=midnight, date__startswith__lt=midnight_tomorrow)
+    tonight = {"date__startswith__gte": localnow, "date__startswith__lt": midnight}
+    tomorrow = {"date__startswith__gte": midnight, "date__startswith__lt": midnight_tomorrow}
 
-    empty = dict(num_participants=0)
-    not_full = dict(
-        participant_types__in=ParticipantType.objects.annotate_num_participants().filter(
-            Q(num_participants__gt=0) & (Q(max_participants=None) | Q(num_participants__lt=F('max_participants'))),
+    empty = {"num_participants": 0}
+    not_full = {
+        "participant_types__in": ParticipantType.objects.annotate_num_participants().filter(
+            Q(num_participants__gt=0) & (Q(max_participants=None) | Q(num_participants__lt=F("max_participants"))),
         )
-    )
+    }
 
-    group_activities = Activity.objects.exclude_disabled().annotate_num_participants().filter(
-        place__archived_at__isnull=True,
-        place__group=group,
-    ).order_by('date')
+    group_activities = (
+        Activity.objects.exclude_disabled()
+        .annotate_num_participants()
+        .filter(
+            place__archived_at__isnull=True,
+            place__group=group,
+        )
+        .order_by("date")
+    )
 
     users = group.members.filter(
         groupmembership__in=GroupMembership.objects.active().with_notification_type(
@@ -261,7 +261,7 @@ def fetch_activity_notification_data_for_group(group):
         joined_activities = Activity.objects.filter(
             place__group=group,
             participants__in=[user],
-        ).order_by('date')
+        ).order_by("date")
 
         tonight_user = joined_activities.filter(**tonight)
         tomorrow_user = joined_activities.filter(**tomorrow)
@@ -269,27 +269,30 @@ def fetch_activity_notification_data_for_group(group):
         tonight_not_full = base_tonight_not_full.exclude(participants__in=[user])
         tomorrow_not_full = base_tomorrow_not_full.exclude(participants__in=[user])
 
-        has_user_activities = any([
-            v.count() > 0 for v in [
+        has_user_activities = any(
+            v.count() > 0
+            for v in [
                 tonight_user,
                 tomorrow_user,
                 tonight_not_full,
                 tomorrow_not_full,
             ]
-        ])
+        )
 
         if has_empty_activities or has_user_activities:
-            results.append({
-                'user': user,
-                'group': group,
-                'tonight_date': localnow,
-                'tomorrow_date': midnight,
-                'tonight_user': tonight_user,
-                'tonight_empty': tonight_empty,
-                'tonight_not_full': tonight_not_full,
-                'tomorrow_user': tomorrow_user,
-                'tomorrow_empty': tomorrow_empty,
-                'tomorrow_not_full': tomorrow_not_full,
-            })
+            results.append(
+                {
+                    "user": user,
+                    "group": group,
+                    "tonight_date": localnow,
+                    "tomorrow_date": midnight,
+                    "tonight_user": tonight_user,
+                    "tonight_empty": tonight_empty,
+                    "tonight_not_full": tonight_not_full,
+                    "tomorrow_user": tomorrow_user,
+                    "tomorrow_empty": tomorrow_empty,
+                    "tomorrow_not_full": tomorrow_not_full,
+                }
+            )
 
     return results

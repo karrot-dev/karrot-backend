@@ -2,14 +2,17 @@ from dateutil.relativedelta import relativedelta
 from django.test import TestCase
 from django.utils import timezone
 
-from karrot.issues.factories import IssueFactory, fast_forward_just_before_voting_expiration, \
-    vote_for_further_discussion
+from karrot.activities.factories import ActivityFactory
+from karrot.activities.models import ActivityParticipant, to_range
 from karrot.groups.factories import GroupFactory
+from karrot.issues.factories import (
+    IssueFactory,
+    fast_forward_just_before_voting_expiration,
+    vote_for_further_discussion,
+)
 from karrot.notifications import tasks
 from karrot.notifications.models import Notification, NotificationType
 from karrot.notifications.tasks import create_activity_upcoming_notifications, create_voting_ends_soon_notifications
-from karrot.activities.factories import ActivityFactory
-from karrot.activities.models import ActivityParticipant, to_range
 from karrot.places.factories import PlaceFactory
 from karrot.users.factories import UserFactory
 
@@ -23,8 +26,8 @@ class TestDeleteExpiredTask(TestCase):
             user=UserFactory(),
             expires_at=one_hour_ago,
             context={
-                'group': group.id,
-            }
+                "group": group.id,
+            },
         )
 
         tasks.delete_expired_notifications.call_local()
@@ -39,8 +42,8 @@ class TestDeleteExpiredTask(TestCase):
             user=UserFactory(),
             expires_at=in_one_hour,
             context={
-                'group': group.id,
-            }
+                "group": group.id,
+            },
         )
 
         tasks.delete_expired_notifications.call_local()
@@ -62,18 +65,19 @@ class TestActivityUpcomingTask(TestCase):
         create_activity_upcoming_notifications.call_local()
         notifications = Notification.objects.filter(type=NotificationType.ACTIVITY_UPCOMING.value)
         self.assertEqual(notifications.count(), 6)
-        self.assertEqual(set(n.user.id for n in notifications), set(user.id for user in users))
+        self.assertEqual({n.user.id for n in notifications}, {user.id for user in users})
         activity1_user1_participant = ActivityParticipant.objects.get(user=users[0], activity=activity1)
         activity1_user1_notification = next(
-            n for n in notifications if n.context['activity_participant'] == activity1_user1_participant.id
+            n for n in notifications if n.context["activity_participant"] == activity1_user1_participant.id
         )
         self.assertEqual(
-            activity1_user1_notification.context, {
-                'group': group.id,
-                'place': place.id,
-                'activity': activity1.id,
-                'activity_participant': activity1_user1_participant.id,
-            }
+            activity1_user1_notification.context,
+            {
+                "group": group.id,
+                "place": place.id,
+                "activity": activity1.id,
+                "activity_participant": activity1_user1_participant.id,
+            },
         )
         self.assertEqual(activity1_user1_notification.expires_at, activity1.date.start)
 

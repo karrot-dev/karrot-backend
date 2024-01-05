@@ -1,46 +1,47 @@
 from collections import defaultdict
-from django.db.models import F, Count, Q, Case, When, BooleanField
+
+from django.db.models import BooleanField, Case, Count, F, Q, When
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from karrot.issues.models import IssueStatus
+from karrot.activities.models import Activity
 from karrot.applications.models import ApplicationStatus
 from karrot.conversations.models import ConversationParticipant, ConversationThreadParticipant
 from karrot.groups.models import Group
+from karrot.issues.models import IssueStatus
 from karrot.notifications.models import Notification
-from karrot.activities.models import Activity
 
 
 def unseen_notification_count(user):
-    return Notification.objects \
-        .filter(
-            user=user,
-            created_at__gt=F('user__notificationmeta__marked_at')
-        ) \
-        .count()
+    return Notification.objects.filter(user=user, created_at__gt=F("user__notificationmeta__marked_at")).count()
 
 
 def unread_conversations(user):
-    threads = ConversationThreadParticipant.objects.filter(user=user).annotate_unread_replies_count().filter(
-        unread_replies_count__gt=0
-    ).aggregate(
-        unread=Count('id'),
-        unseen=Count(
-            'id', filter=Q(thread__latest_message__created_at__gt=F('user__conversationmeta__threads_marked_at'))
+    threads = (
+        ConversationThreadParticipant.objects.filter(user=user)
+        .annotate_unread_replies_count()
+        .filter(unread_replies_count__gt=0)
+        .aggregate(
+            unread=Count("id"),
+            unseen=Count(
+                "id", filter=Q(thread__latest_message__created_at__gt=F("user__conversationmeta__threads_marked_at"))
+            ),
         )
     )
     participants = list(
-        ConversationParticipant.objects.filter(user=user).annotate_unread_message_count().filter(
-            unread_message_count__gt=0
-        ).select_related('conversation', 'conversation__target_type').annotate(
+        ConversationParticipant.objects.filter(user=user)
+        .annotate_unread_message_count()
+        .filter(unread_message_count__gt=0)
+        .select_related("conversation", "conversation__target_type")
+        .annotate(
             is_unseen=Case(
                 When(
-                    conversation__latest_message__created_at__gt=F('user__conversationmeta__conversations_marked_at'),
-                    then=True
+                    conversation__latest_message__created_at__gt=F("user__conversationmeta__conversations_marked_at"),
+                    then=True,
                 ),
                 default=False,
-                output_field=BooleanField()
+                output_field=BooleanField(),
             )
         )
     )
@@ -48,51 +49,63 @@ def unread_conversations(user):
     groups = {}
     places = {}
     unseen_conversation_count = 0
-    unseen_thread_count = threads['unseen']
+    unseen_thread_count = threads["unseen"]
 
     for p in participants:
         conversation = p.conversation
         target_id = conversation.target_id
         t = conversation.type()
-        if t == 'group':
-            groups[target_id] = {'unread_wall_message_count': p.unread_message_count}
-        elif t == 'place':
-            places[target_id] = {'unread_wall_message_count': p.unread_message_count}
+        if t == "group":
+            groups[target_id] = {"unread_wall_message_count": p.unread_message_count}
+        elif t == "place":
+            places[target_id] = {"unread_wall_message_count": p.unread_message_count}
 
         if p.is_unseen:
             unseen_conversation_count += 1
 
     return {
-        'unseen_conversation_count': unseen_conversation_count,
-        'unseen_thread_count': unseen_thread_count,
-        'has_unread_conversations_or_threads': len(participants) + threads['unread'] > 0,
-        'groups': groups,
-        'places': places,
+        "unseen_conversation_count": unseen_conversation_count,
+        "unseen_thread_count": unseen_thread_count,
+        "has_unread_conversations_or_threads": len(participants) + threads["unread"] > 0,
+        "groups": groups,
+        "places": places,
     }
 
 
 def ongoing_issues(user):
-    return Group.objects.filter(members=user).annotate(
-        ongoing_issue_count=Count('issues', filter=Q(issues__status=IssueStatus.ONGOING.value))
-    ).values_list('id', 'ongoing_issue_count')
+    return (
+        Group.objects.filter(members=user)
+        .annotate(ongoing_issue_count=Count("issues", filter=Q(issues__status=IssueStatus.ONGOING.value)))
+        .values_list("id", "ongoing_issue_count")
+    )
 
 
 def pending_applications(user):
-    return Group.objects.filter(members=user).annotate(
-        pending_application_count=Count('application', filter=Q(application__status=ApplicationStatus.PENDING.value))
-    ).values_list('id', 'pending_application_count')
+    return (
+        Group.objects.filter(members=user)
+        .annotate(
+            pending_application_count=Count(
+                "application", filter=Q(application__status=ApplicationStatus.PENDING.value)
+            )
+        )
+        .values_list("id", "pending_application_count")
+    )
 
 
 def get_feedback_possible(user):
-    return Group.objects.filter(members=user).annotate(
-        feedback_possible=Count(
-            'places__activities',
-            filter=Q(
-                places__activities__in=Activity.objects.only_feedback_possible(user),
-                places__archived_at__isnull=True,
+    return (
+        Group.objects.filter(members=user)
+        .annotate(
+            feedback_possible=Count(
+                "places__activities",
+                filter=Q(
+                    places__activities__in=Activity.objects.only_feedback_possible(user),
+                    places__archived_at__isnull=True,
+                ),
             )
         )
-    ).values_list('id', 'feedback_possible')
+        .values_list("id", "feedback_possible")
+    )
 
 
 class StatusSerializer(serializers.Serializer):
@@ -106,48 +119,48 @@ class StatusSerializer(serializers.Serializer):
     @staticmethod
     @extend_schema_field(OpenApiTypes.INT)
     def get_unseen_conversation_count(data):
-        return data['conversations']['unseen_conversation_count']
+        return data["conversations"]["unseen_conversation_count"]
 
     @staticmethod
     @extend_schema_field(OpenApiTypes.INT)
     def get_unseen_thread_count(data):
-        return data['conversations']['unseen_thread_count']
+        return data["conversations"]["unseen_thread_count"]
 
     @staticmethod
     @extend_schema_field(OpenApiTypes.BOOL)
     def get_has_unread_conversations_or_threads(data):
-        return data['conversations']['has_unread_conversations_or_threads']
+        return data["conversations"]["has_unread_conversations_or_threads"]
 
     @staticmethod
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_groups(data):
-        conversations = data.get('conversations')
-        applications = data.get('applications')
-        issues = data.get('issues')
-        feedback_possible = data.get('feedback_possible')
+        conversations = data.get("conversations")
+        applications = data.get("applications")
+        issues = data.get("issues")
+        feedback_possible = data.get("feedback_possible")
         groups = defaultdict(dict)
-        for group_id, conversation_data in conversations['groups'].items():
+        for group_id, conversation_data in conversations["groups"].items():
             groups[group_id] = {
                 **conversation_data,
             }
 
         for group_id, application_count in applications:
-            groups[group_id]['pending_application_count'] = application_count
+            groups[group_id]["pending_application_count"] = application_count
 
         for group_id, feedback_possible_count in feedback_possible:
-            groups[group_id]['feedback_possible_count'] = feedback_possible_count
+            groups[group_id]["feedback_possible_count"] = feedback_possible_count
 
         for group_id, ongoing_issue_count in issues:
-            groups[group_id]['ongoing_issue_count'] = ongoing_issue_count
+            groups[group_id]["ongoing_issue_count"] = ongoing_issue_count
 
         return groups
 
     @staticmethod
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_places(data):
-        conversations = data.get('conversations')
+        conversations = data.get("conversations")
         places = {}
-        for place_id, conversation_data in conversations['places'].items():
+        for place_id, conversation_data in conversations["places"].items():
             places[place_id] = {
                 **conversation_data,
             }
@@ -156,9 +169,9 @@ class StatusSerializer(serializers.Serializer):
 
 def status_data(user):
     return {
-        'conversations': unread_conversations(user),
-        'applications': pending_applications(user),
-        'issues': ongoing_issues(user),
-        'feedback_possible': get_feedback_possible(user),
-        'unseen_notification_count': unseen_notification_count(user),
+        "conversations": unread_conversations(user),
+        "applications": pending_applications(user),
+        "issues": ongoing_issues(user),
+        "feedback_possible": get_feedback_possible(user),
+        "unseen_notification_count": unseen_notification_count(user),
     }

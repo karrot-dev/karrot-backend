@@ -4,11 +4,11 @@ from karrot.offers.models import Offer
 
 
 class OffersFilter(filters.FilterSet):
-    is_archived = filters.BooleanFilter(method='filter_is_archived')
+    is_archived = filters.BooleanFilter(method="filter_is_archived")
 
     class Meta:
         model = Offer
-        fields = ('group', )
+        fields = ("group",)
 
     def filter_is_archived(self, qs, name, value):
         if value is True:

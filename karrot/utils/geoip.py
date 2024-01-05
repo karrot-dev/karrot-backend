@@ -14,14 +14,14 @@ def geoip_is_available():
 
 
 def get_client_ip(request):
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
     if x_forwarded_for:
-        return x_forwarded_for.split(',')[0]
+        return x_forwarded_for.split(",")[0]
     else:
-        return request.META.get('REMOTE_ADDR')
+        return request.META.get("REMOTE_ADDR")
 
 
-@lru_cache()
+@lru_cache
 def ip_to_city(ip):
     if not geoip_is_available():
         return None
@@ -31,7 +31,7 @@ def ip_to_city(ip):
         return None
 
 
-@lru_cache()
+@lru_cache
 def ip_to_lat_lon(ip):
     if not geoip_is_available():
         return None

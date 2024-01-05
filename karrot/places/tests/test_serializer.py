@@ -1,4 +1,5 @@
 from collections import namedtuple
+
 from django.test import TestCase
 
 from karrot.groups.factories import GroupFactory
@@ -13,6 +14,6 @@ class TestPlaceSerializer(TestCase):
         self.place = PlaceFactory()
 
     def test_place_instantiation(self):
-        MockRequest = namedtuple('Request', ['user'])
-        serializer = PlaceSerializer(self.place, context={'request': MockRequest(user=UserFactory())})
-        self.assertEqual(serializer.data['name'], self.place.name)
+        MockRequest = namedtuple("Request", ["user"])
+        serializer = PlaceSerializer(self.place, context={"request": MockRequest(user=UserFactory())})
+        self.assertEqual(serializer.data["name"], self.place.name)

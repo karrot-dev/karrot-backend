@@ -16,6 +16,7 @@ class ChannelSubscriptionQuerySet(models.QuerySet):
 
 class ChannelSubscription(BaseModel):
     """A subscription to receive messages over a django channel."""
+
     objects = ChannelSubscriptionQuerySet.as_manager()
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

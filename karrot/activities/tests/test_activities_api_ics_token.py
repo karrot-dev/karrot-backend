@@ -10,7 +10,7 @@ from karrot.users.factories import UserFactory
 class TestActivitiesAPIICSToken(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.url = '/api/activities/'
+        cls.url = "/api/activities/"
 
         # activity for group with one member and one place
         cls.member = UserFactory()
@@ -24,35 +24,35 @@ class TestActivitiesAPIICSToken(APITestCase):
 
     def test_export_ics_with_token(self):
         self.client.force_login(self.member)
-        response = self.client.get('/api/activities/ics_token/')
+        response = self.client.get("/api/activities/ics_token/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         token = response.data
 
         self.client.logout()
-        response = self.client.get(f'/api/activities/ics/?token={token}')
+        response = self.client.get(f"/api/activities/ics/?token={token}")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_refresh_token(self):
         self.client.force_login(self.member)
-        response = self.client.post('/api/activities/ics_token_refresh/')
+        response = self.client.post("/api/activities/ics_token_refresh/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         old_token = response.data
 
-        response = self.client.post('/api/activities/ics_token_refresh/')
+        response = self.client.post("/api/activities/ics_token_refresh/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         new_token = response.data
 
         self.client.logout()
-        response = self.client.get(f'/api/activities/ics/?token={old_token}')
+        response = self.client.get(f"/api/activities/ics/?token={old_token}")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED, response.data)
 
-        response = self.client.get(f'/api/activities/ics/?token={new_token}')
+        response = self.client.get(f"/api/activities/ics/?token={new_token}")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
     def test_export_ics_fails_with_invalid_token(self):
-        response = self.client.get('/api/activities/ics/?token=invalid')
+        response = self.client.get("/api/activities/ics/?token=invalid")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED, response.data)
 
     def test_export_ics_fails_without_token(self):
-        response = self.client.get('/api/activities/ics/')
+        response = self.client.get("/api/activities/ics/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED, response.data)
