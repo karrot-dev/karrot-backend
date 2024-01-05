@@ -2,9 +2,9 @@ import hashlib
 import json
 from dataclasses import dataclass
 from os import listdir
-from os.path import isdir, join, realpath, dirname, exists
+from os.path import dirname, exists, isdir, join, realpath
 from pathlib import Path
-from typing import List, Optional, Iterator
+from typing import Iterator, List, Optional
 
 from config.settings import PLUGIN_DIRS
 
@@ -24,7 +24,7 @@ class Plugin:
 
 def find_manifest(base: str) -> Optional[str]:
     try:
-        return str(next(entry for entry in Path(base).rglob('manifest.json') if 'node_modules' not in str(entry)))
+        return str(next(entry for entry in Path(base).rglob("manifest.json") if "node_modules" not in str(entry)))
     except StopIteration:
         return None
 
@@ -34,25 +34,25 @@ def process_manifest(manifest_path: str) -> (str, List[str], List[str], List[str
     entry = []
     css_entries = []
     assets = []
-    with open(manifest_path, 'rb') as f:
+    with open(manifest_path, "rb") as f:
         contents = f.read()
         sha256 = hashlib.sha256(contents).hexdigest()
         data: dict = json.loads(contents)
         for item in data.values():
-            if 'isEntry' in item and item['isEntry']:
+            if "isEntry" in item and item["isEntry"]:
                 if entry:
-                    print('WARNING: multiple entries, used the first one')
+                    print("WARNING: multiple entries, used the first one")
                 else:
-                    entry = item['file']
-                    if 'css' in item:
-                        for css_file in item['css']:
+                    entry = item["file"]
+                    if "css" in item:
+                        for css_file in item["css"]:
                             css_entries.append(css_file)
-            assets.append(item['file'])
-            if 'css' in item:
-                for css_file in item['css']:
+            assets.append(item["file"])
+            if "css" in item:
+                for css_file in item["css"]:
                     assets.append(css_file)
-            if 'assets' in item:
-                for asset_file in item['assets']:
+            if "assets" in item:
+                for asset_file in item["assets"]:
                     assets.append(asset_file)
     return sha256, entry, css_entries, assets
 
@@ -110,7 +110,7 @@ def reload_plugin(name, path):
 
 
 def manifest_changed(plugin: Plugin) -> bool:
-    with open(plugin.manifest, 'rb') as f:
+    with open(plugin.manifest, "rb") as f:
         contents = f.read()
         sha256 = hashlib.sha256(contents).hexdigest()
         return sha256 != plugin.manifest_sha256

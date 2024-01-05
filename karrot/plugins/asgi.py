@@ -1,15 +1,14 @@
-from os.path import normpath, join
-from asgiref.sync import sync_to_async
+from os.path import join, normpath
 
 import aiofiles.os
-from starlette.responses import FileResponse
-from starlette.responses import Response
+from asgiref.sync import sync_to_async
+from starlette.responses import FileResponse, Response
 from starlette.types import Receive, Scope, Send
 
 from karrot.plugins.frontend import get_plugin
 from karrot.utils.asgi_utils import expires_max_headers
 
-not_found = Response('not found', status_code=404, media_type='text/plain')
+not_found = Response("not found", status_code=404, media_type="text/plain")
 
 get_plugin_async = sync_to_async(get_plugin)
 
@@ -24,7 +23,6 @@ class PluginAssets:
         return await response(scope, receive, send)
 
     async def get_response(self, scope):
-
         plugin_name, path = self.split_plugin_name_and_asset_path(scope["path"])
         if not plugin_name or not path:
             return not_found

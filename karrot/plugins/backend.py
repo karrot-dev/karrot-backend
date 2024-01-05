@@ -1,16 +1,17 @@
-from django.urls import path, include
 import importlib.util
 import sys
 from os import listdir
-from os.path import realpath, join, dirname, basename
+from os.path import basename, dirname, join, realpath
 from pathlib import Path
-from typing import Optional, List
+from typing import List, Optional
+
+from django.urls import include, path
 
 
 def find_apps_dot_py(base: str) -> Optional[str]:
     try:
         # TODO: find a way to exclude finding things inside lib dirs?
-        return str(next(Path(base).rglob('apps.py')))
+        return str(next(Path(base).rglob("apps.py")))
     except StopIteration:
         return None
 
@@ -26,19 +27,19 @@ def load_backend_plugin(plugin_path: str) -> Optional[str]:
         module_name = plugin_name
 
         if module_name in sys.modules:
-            print('module', module_name, 'already exists, bailing')
+            print("module", module_name, "already exists, bailing")
             return
         try:
-            spec = importlib.util.spec_from_file_location(module_name, join(module_dir, '__init__.py'))
+            spec = importlib.util.spec_from_file_location(module_name, join(module_dir, "__init__.py"))
             if not spec:
-                print('cannot load module spec from', module_name, module_dir)
+                print("cannot load module spec from", module_name, module_dir)
                 return
             module = importlib.util.module_from_spec(spec)
             sys.modules[module_name] = module
             spec.loader.exec_module(module)
             return module_name
         except ModuleNotFoundError as ex:
-            print('not a backend plugin', plugin_name, ex)
+            print("not a backend plugin", plugin_name, ex)
 
 
 def load_backend_plugins(plugin_dirs: List[str]) -> List[str]:
@@ -58,9 +59,9 @@ def get_plugin_urlpatterns(plugins: List[str]):
         try:
             patterns.append(
                 path(
-                    f'api/{name}/',
+                    f"api/{name}/",
                     # TODO: not sure best way to manage app_name + namespace
-                    include((f'{name}.urls', name), namespace=name),
+                    include((f"{name}.urls", name), namespace=name),
                 )
             )
         except ModuleNotFoundError:

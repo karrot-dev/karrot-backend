@@ -1,13 +1,13 @@
-from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
+from rest_framework.viewsets import ViewSet
 
 from config.settings import PLUGIN_ASSETS_PUBLIC_PREFIX
-from karrot.plugins.frontend import list_plugins, Plugin
+from karrot.plugins.frontend import Plugin, list_plugins
 
 
 def serialize_plugin(plugin: Plugin):
     def get_public_path(path):
-        return '/'.join([PLUGIN_ASSETS_PUBLIC_PREFIX.rstrip('/'), plugin.name, path])
+        return "/".join([PLUGIN_ASSETS_PUBLIC_PREFIX.rstrip("/"), plugin.name, path])
 
     return {
         "name": plugin.name,
