@@ -19,7 +19,8 @@ from karrot.conversations.models import ConversationMixin
 from karrot.groups.roles import GROUP_EDITOR, GROUP_MEMBER, GROUP_NEWCOMER
 from karrot.history.models import History, HistoryTypus
 from karrot.activities.models import Activity, ActivityType
-from karrot.places.models import PlaceType
+from karrot.places.models import PlaceType, PlaceStatus
+from karrot.places.place_statuses import default_place_statuses
 from karrot.places.place_types import default_place_types
 from karrot.utils import markdown
 from karrot.groups import roles, themes
@@ -206,6 +207,10 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
         # place types
         for name, options in default_place_types.items():
             PlaceType.objects.get_or_create(name=name, group=self, defaults=options)
+
+        # place statuses
+        for name, options in default_place_statuses.items():
+            PlaceStatus.objects.get_or_create(name=name, group=self, defaults=options)
 
 
 class GroupNotificationType(object):

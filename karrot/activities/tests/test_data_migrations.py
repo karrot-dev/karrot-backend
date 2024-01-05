@@ -4,6 +4,7 @@ from random import randint
 from django.db.backends.postgresql.psycopg_any import DateTimeTZRange
 from django.utils import timezone
 
+from karrot.history.models import HistoryTypus
 from karrot.tests.utils import TestMigrations
 from karrot.utils.tests.fake import faker
 
@@ -23,10 +24,10 @@ class TestConvertActivityToRangeMigration(TestMigrations):
         ('activities', '0011_activity_migrate_to_date_range'),
     ]
 
-    def setUpBeforeMigration(self, apps):
-        Group = apps.get_model('groups', 'Group')
-        Place = apps.get_model('places', 'Place')
-        Activity = apps.get_model('activities', 'Activity')
+    def setUpBeforeMigration(self):
+        Group = self.apps.get_model('groups', 'Group')
+        Place = self.apps.get_model('places', 'Place')
+        Activity = self.apps.get_model('activities', 'Activity')
         group = Group.objects.create(name=faker.name())
         place = Place.objects.create(name=faker.name(), group=group)
         activity = Activity.objects.create(place=place, date=timezone.now())
@@ -54,14 +55,14 @@ class TestConvertWeightIntoSumMigration(TestMigrations):
         ('activities', '0020_activity_feedback_always_as_sum'),
     ]
 
-    def setUpBeforeMigration(self, apps):
-        User = apps.get_model('users', 'User')
-        Group = apps.get_model('groups', 'Group')
-        GroupMembership = apps.get_model('groups', 'GroupMembership')
-        Place = apps.get_model('places', 'Place')
-        Activity = apps.get_model('activities', 'Activity')
-        ActivityParticipant = apps.get_model('activities', 'ActivityParticipant')
-        Feedback = apps.get_model('activities', 'Feedback')
+    def setUpBeforeMigration(self):
+        User = self.apps.get_model('users', 'User')
+        Group = self.apps.get_model('groups', 'Group')
+        GroupMembership = self.apps.get_model('groups', 'GroupMembership')
+        Place = self.apps.get_model('places', 'Place')
+        Activity = self.apps.get_model('activities', 'Activity')
+        ActivityParticipant = self.apps.get_model('activities', 'ActivityParticipant')
+        Feedback = self.apps.get_model('activities', 'Feedback')
         group = Group.objects.create(name=faker.name())
         place = Place.objects.create(name=faker.name(), group=group)
         activity1 = Activity.objects.create(place=place, date=to_range(timezone.now()), feedback_as_sum=False)
@@ -122,11 +123,11 @@ class TestSetActivityTypes(TestMigrations):
         ('activities', '0023_create_and_set_activity_types'),
     ]
 
-    def setUpBeforeMigration(self, apps):
-        Group = apps.get_model('groups', 'Group')
-        Place = apps.get_model('places', 'Place')
-        Activity = apps.get_model('activities', 'Activity')
-        ActivitySeries = apps.get_model('activities', 'ActivitySeries')
+    def setUpBeforeMigration(self):
+        Group = self.apps.get_model('groups', 'Group')
+        Place = self.apps.get_model('places', 'Place')
+        Activity = self.apps.get_model('activities', 'Activity')
+        ActivitySeries = self.apps.get_model('activities', 'ActivitySeries')
 
         for theme in ['foodsaving', 'bikekitchen', 'general']:
             group = Group.objects.create(name=faker.name(), theme=theme)
@@ -170,16 +171,16 @@ class TestAddParticipantTypes(TestMigrations):
         ('activities', '0034_backfill_participant_role'),
     ]
 
-    def setUpBeforeMigration(self, apps):
-        User = apps.get_model('users', 'User')
-        Group = apps.get_model('groups', 'Group')
-        GroupMembership = apps.get_model('groups', 'GroupMembership')
-        PlaceType = apps.get_model('places', 'PlaceType')
-        Place = apps.get_model('places', 'Place')
-        ActivityType = apps.get_model('activities', 'ActivityType')
-        Activity = apps.get_model('activities', 'Activity')
-        ActivitySeries = apps.get_model('activities', 'ActivitySeries')
-        ActivityParticipant = apps.get_model('activities', 'ActivityParticipant')
+    def setUpBeforeMigration(self):
+        User = self.apps.get_model('users', 'User')
+        Group = self.apps.get_model('groups', 'Group')
+        GroupMembership = self.apps.get_model('groups', 'GroupMembership')
+        PlaceType = self.apps.get_model('places', 'PlaceType')
+        Place = self.apps.get_model('places', 'Place')
+        ActivityType = self.apps.get_model('activities', 'ActivityType')
+        Activity = self.apps.get_model('activities', 'Activity')
+        ActivitySeries = self.apps.get_model('activities', 'ActivitySeries')
+        ActivityParticipant = self.apps.get_model('activities', 'ActivityParticipant')
 
         group = Group.objects.create(name=faker.name())
         place_type = PlaceType.objects.create(name=faker.name(), group=group)
@@ -233,3 +234,74 @@ class TestAddParticipantTypes(TestMigrations):
             self.assertEqual(spt.role, 'member')
             # and copy the max_participants from the series
             self.assertEqual(spt.max_participants, spt.activity_series.max_participants)
+
+
+class TestActivityTypeArchivedAtMigration(TestMigrations):
+    migrate_from = [
+        ('groups', '0050_enable_agreements_and_participant_types'),
+        ('places', '0038_place_default_view'),
+        ('activities', '0044_activitytype_archived_at'),
+        ('history', '0015_history_history_his_typus_c46ce5_idx'),
+    ]
+    migrate_to = [
+        ('activities', '0045_set_activity_type_archived_at'),
+    ]
+
+    def setUpBeforeMigration(self):
+        self.apps.get_model('users', 'User')
+        Group = self.apps.get_model('groups', 'Group')
+        PlaceType = self.apps.get_model('places', 'PlaceType')
+        Place = self.apps.get_model('places', 'Place')
+        ActivityType = self.apps.get_model('activities', 'ActivityType')
+        History = self.apps.get_model('history', 'History')
+
+        group = Group.objects.create(name=faker.name())
+        place_type = PlaceType.objects.create(name=faker.name(), group=group)
+        place = Place.objects.create(name=faker.name(), group=group, place_type=place_type)
+        activity_type1 = ActivityType.objects.create(name=faker.name(), group=group)
+        activity_type2 = ActivityType.objects.create(name=faker.name(), group=group)
+
+        for activity_type in [activity_type1, activity_type2]:
+            activity_type.status = 'archived'
+            activity_type.save()
+
+        self.activity_type1_id = activity_type1.id
+        self.activity_type2_id = activity_type2.id
+
+        history_data = dict(
+            typus=HistoryTypus.ACTIVITY_TYPE_MODIFY,
+            group=activity_type.group,
+            payload={'status': 'archived'},
+            # simplified version...
+            before={'id': activity_type1.id},
+            after={'id': activity_type1.id},
+        )
+
+        # have to add the history entry manually, so it's not amazing test, but yeah...
+        # only created it for activity_type1 so we can check activity_type2 uses now()
+        history = History.objects.create(
+            date=faker.date_time_between('-30d', 'now', timezone.utc),
+            **history_data,
+        )
+        # create an older one, that should not be used
+        History.objects.create(
+            date=faker.date_time_between('-60d', '-40d', timezone.utc),
+            **history_data,
+        )
+        self.history_id = history.id
+
+    def test_updates_archived_at_from_history(self):
+        History = self.apps.get_model('history', 'History')
+        ActivityType = self.apps.get_model('activities', 'ActivityType')
+        history = History.objects.get(id=self.history_id)
+
+        activity_type1 = ActivityType.objects.get(id=self.activity_type1_id)
+        activity_type2 = ActivityType.objects.get(id=self.activity_type2_id)
+        diff_seconds1 = abs(timezone.now() - activity_type1.archived_at).total_seconds()
+        diff_seconds2 = abs(timezone.now() - activity_type2.archived_at).total_seconds()
+
+        self.assertEqual(activity_type1.archived_at, history.date)
+        self.assertNotEqual(activity_type2.archived_at, history.date)
+
+        self.assertGreater(diff_seconds1, 5)
+        self.assertLess(diff_seconds2, 5)

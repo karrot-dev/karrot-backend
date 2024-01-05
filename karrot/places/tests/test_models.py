@@ -1,5 +1,5 @@
-from django.db import DataError
-from django.db import IntegrityError
+from django.db import IntegrityError, DataError
+from django.utils import timezone
 from django.test import TestCase
 
 from karrot.groups.factories import GroupFactory
@@ -13,6 +13,7 @@ class TestPlaceModel(TestCase):
         self.defaults = {
             'group': self.group,
             'place_type': self.group.place_types.first(),
+            'status': self.group.place_statuses.first(),
         }
 
     def test_create_fails_if_name_too_long(self):
@@ -28,17 +29,13 @@ class TestPlaceModel(TestCase):
         Place.objects.create(name='abcdef', **self.defaults)
         Place.objects.create(name='abcdef', **{**self.defaults, 'group': GroupFactory()})
 
-    def test_get_active_status(self):
+    def test_get_archived_status(self):
         s = Place.objects.create(name='my place', **self.defaults)
-        self.assertFalse(s.is_active())
+        self.assertFalse(s.is_archived)
 
-        s.status = 'active'
+        s.archived_at = timezone.now()
         s.save()
-        self.assertTrue(s.is_active())
-
-        s.status = 'declined'
-        s.save()
-        self.assertFalse(s.is_active())
+        self.assertTrue(s.is_archived)
 
     def test_removes_subscription_when_leaving_group(self):
         place = Place.objects.create(name='abcdef', **self.defaults)

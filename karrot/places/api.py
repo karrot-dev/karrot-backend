@@ -10,11 +10,11 @@ from rest_framework.viewsets import GenericViewSet
 from karrot.activities.models import Activity
 from karrot.activities.permissions import CannotChangeGroup
 from karrot.conversations.api import RetrieveConversationMixin
-from karrot.places.filters import PlaceTypeFilter
-from karrot.places.models import Place as PlaceModel, PlaceSubscription, PlaceType
+from karrot.places.filters import PlaceTypeFilter, PlaceStatusFilter
+from karrot.places.models import Place as PlaceModel, PlaceSubscription, PlaceType, PlaceStatus
 from karrot.places.permissions import TypeHasNoPlaces, IsGroupEditor
 from karrot.places.serializers import PlaceSerializer, PlaceUpdateSerializer, PlaceSubscriptionSerializer, \
-    PlaceTypeSerializer
+    PlaceTypeSerializer, PlaceStatusSerializer
 from karrot.utils.mixins import PartialUpdateModelMixin
 
 
@@ -29,6 +29,28 @@ class PlaceTypeViewSet(
     queryset = PlaceType.objects
     filter_backends = (filters.DjangoFilterBackend, )
     filterset_class = PlaceTypeFilter
+    permission_classes = (
+        IsAuthenticated,
+        IsGroupEditor,
+        TypeHasNoPlaces,
+        CannotChangeGroup,
+    )
+
+    def get_queryset(self):
+        return self.queryset.filter(group__members=self.request.user)
+
+
+class PlaceStatusViewSet(
+        mixins.CreateModelMixin,
+        mixins.RetrieveModelMixin,
+        PartialUpdateModelMixin,
+        mixins.ListModelMixin,
+        viewsets.GenericViewSet,
+):
+    serializer_class = PlaceStatusSerializer
+    queryset = PlaceStatus.objects
+    filter_backends = (filters.DjangoFilterBackend, )
+    filterset_class = PlaceStatusFilter
     permission_classes = (
         IsAuthenticated,
         IsGroupEditor,

@@ -42,7 +42,7 @@ class TestActivitiesAPI(APITestCase, ExtractPaginationMixin):
         cls.group = GroupFactory(members=[cls.member, cls.second_member])
         cls.place = PlaceFactory(group=cls.group)
         cls.activity_type = ActivityTypeFactory(group=cls.group)
-        cls.archived_activity_type = ActivityTypeFactory(group=cls.group, status='archived')
+        cls.archived_activity_type = ActivityTypeFactory(group=cls.group, archived_at=timezone.now())
         cls.activity = ActivityFactory(activity_type=cls.activity_type, place=cls.place)
         cls.activity_url = cls.url + str(cls.activity.id) + '/'
         cls.join_url = cls.activity_url + 'add/'
@@ -586,7 +586,7 @@ class TestActivitiesWithParticipantTypeAPI(APITestCase):
         self.member = UserFactory()
         self.other_member = UserFactory()
         self.group = GroupFactory(members=[self.member, self.other_member])
-        self.place = PlaceFactory(group=self.group, status='active')
+        self.place = PlaceFactory(group=self.group)
         self.approved_member = UserFactory()
         self.group.groupmembership_set.create(
             user=self.approved_member,
@@ -744,8 +744,8 @@ class TestActivitiesListAPI(APITestCase, ExtractPaginationMixin):
         self.member = UserFactory()
         self.group = GroupFactory(members=[self.member])
         self.activity_type = ActivityTypeFactory(group=self.group)
-        self.active_place = PlaceFactory(group=self.group, status='active')
-        self.inactive_place = PlaceFactory(group=self.group, status='created')
+        self.active_place = PlaceFactory(group=self.group)
+        self.inactive_place = PlaceFactory(group=self.group, archived_at=timezone.now())
 
         participant_types = [
             {
@@ -779,7 +779,7 @@ class TestActivitiesListAPI(APITestCase, ExtractPaginationMixin):
         self.client.force_login(user=self.member)
         response = self.get_results(self.url, {'place': self.inactive_place.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
+        self.assertEqual(len(response.data), 0)
 
     def test_get_activity_for_inactive_place(self):
         self.client.force_login(user=self.member)

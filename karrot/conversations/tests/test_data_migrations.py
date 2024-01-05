@@ -19,14 +19,14 @@ class TestCleanupConversationParticipantsMigration(TestMigrations):
         ('conversations', '0043__cleanup_conversation_participants'),
     ]
 
-    def setUpBeforeMigration(self, apps):
-        User = apps.get_model('users', 'User')
-        Group = apps.get_model('groups', 'Group')
-        GroupMembership = apps.get_model('groups', 'GroupMembership')
-        Conversation = apps.get_model('conversations', 'Conversation')
-        ConversationMessage = apps.get_model('conversations', 'ConversationMessage')
-        ConversationParticipant = apps.get_model('conversations', 'ConversationParticipant')
-        ConversationThreadParticipant = apps.get_model('conversations', 'ConversationThreadParticipant')
+    def setUpBeforeMigration(self):
+        User = self.apps.get_model('users', 'User')
+        Group = self.apps.get_model('groups', 'Group')
+        GroupMembership = self.apps.get_model('groups', 'GroupMembership')
+        Conversation = self.apps.get_model('conversations', 'Conversation')
+        ConversationMessage = self.apps.get_model('conversations', 'ConversationMessage')
+        ConversationParticipant = self.apps.get_model('conversations', 'ConversationParticipant')
+        ConversationThreadParticipant = self.apps.get_model('conversations', 'ConversationThreadParticipant')
 
         user = User.objects.create()
         group = Group.objects.create(name=faker.name())

@@ -25,28 +25,19 @@ from karrot.base.base_models import BaseModel, CustomDateTimeTZRange, CustomDate
     NicelyFormattedModel
 from karrot.conversations.models import ConversationMixin
 from karrot.history.models import History, HistoryTypus
-from karrot.places.models import PlaceStatus
-
-
-class ActivityTypeStatus(models.TextChoices):
-    ACTIVE = 'active'
-    ARCHIVED = 'archived'
 
 
 class ActivityType(BaseModel, UpdatedAtMixin):
     group = models.ForeignKey('groups.Group', on_delete=models.CASCADE, related_name='activity_types')
     name = models.CharField(max_length=80)
     name_is_translatable = models.BooleanField(default=True)
+    description = models.TextField(blank=True)
     colour = models.CharField(max_length=6)
     icon = models.CharField(max_length=100)
     feedback_icon = models.CharField(max_length=100)
     has_feedback = models.BooleanField(default=True)
     has_feedback_weight = models.BooleanField(default=True)
-    status = models.CharField(
-        default=ActivityTypeStatus.ACTIVE.value,
-        choices=ActivityTypeStatus.choices,
-        max_length=100,
-    )
+    archived_at = models.DateTimeField(null=True)
 
     class Meta:
         unique_together = ('group', 'name')
@@ -55,12 +46,15 @@ class ActivityType(BaseModel, UpdatedAtMixin):
         # the translations are collected via activity_types.py
         return _(self.name) if self.name_is_translatable else self.name
 
+    @property
+    def is_archived(self) -> bool:
+        return self.archived_at is not None
+
 
 class ActivitySeriesQuerySet(models.QuerySet):
     @transaction.atomic
     def update_activities(self):
-        for series in self.filter(activity_type__status=ActivityTypeStatus.ACTIVE.value,
-                                  place__status=PlaceStatus.ACTIVE.value):
+        for series in self.filter(activity_type__archived_at__isnull=True, place__archived_at__isnull=True):
             series.update_activities()
 
     def annotate_timezone(self):
@@ -253,7 +247,7 @@ class ActivityQuerySet(models.QuerySet):
                 has_started=False,
                 date__startswith__lt=now,
         ):
-            if not activity.place.is_active():
+            if activity.place.is_archived:
                 # Make sure we don't process this activity again, even if the place gets active in future
                 activity.is_disabled = True
                 activity.save()
@@ -266,7 +260,7 @@ class ActivityQuerySet(models.QuerySet):
                 is_done=False,
                 date__endswith__lt=now,
         ):
-            if not activity.place.is_active():
+            if activity.place.is_archived:
                 # Make sure we don't process this activity again, even if the place gets active in future
                 activity.is_disabled = True
                 activity.save()

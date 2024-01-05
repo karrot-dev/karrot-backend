@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -59,13 +60,13 @@ class TestOffersAPI(APITestCase):
         self.assertEqual(response.data['name'], data['name'])
 
     def test_cannot_fetch_another_users_archived_offer(self):
-        offer = OfferFactory(user=self.user, group=self.group, images=[image_path], status='archived')
+        offer = OfferFactory(user=self.user, group=self.group, images=[image_path], archived_at=timezone.now())
         self.client.force_login(user=self.another_user)
         response = self.client.get('/api/offers/{}/'.format(offer.id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.data)
 
     def test_can_fetch_other_users_archived_offer_if_in_the_conversation(self):
-        offer = OfferFactory(user=self.user, group=self.group, images=[image_path], status='archived')
+        offer = OfferFactory(user=self.user, group=self.group, images=[image_path], archived_at=timezone.now())
         offer.conversation.join(self.another_user)
         self.client.force_login(user=self.another_user)
         response = self.client.get('/api/offers/{}/'.format(offer.id))
@@ -84,7 +85,7 @@ class TestOffersAPI(APITestCase):
         self.client.force_login(user=self.user)
         response = self.client.post('/api/offers/{}/archive/'.format(self.offer.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(response.data['status'], 'archived')
+        self.assertEqual(response.data['is_archived'], True)
 
     def test_mark_offer_archived_as_another_user(self):
         self.client.force_login(user=self.another_user)
@@ -213,15 +214,15 @@ class TestListOffersAPI(APITestCase):
     def test_list_offers_by_status(self):
         self.client.force_login(user=self.user)
         for _ in range(4):
-            OfferFactory(user=self.user, group=self.group, images=[image_path], status='active')
+            OfferFactory(user=self.user, group=self.group, images=[image_path])
         for _ in range(2):
-            OfferFactory(user=self.user, group=self.group, images=[image_path], status='archived')
+            OfferFactory(user=self.user, group=self.group, images=[image_path], archived_at=timezone.now())
 
-        response = self.client.get('/api/offers/', {'status': 'active'})
+        response = self.client.get('/api/offers/', {'is_archived': False})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data['results']), 4)
 
-        response = self.client.get('/api/offers/', {'status': 'archived'})
+        response = self.client.get('/api/offers/', {'is_archived': True})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data['results']), 2)
 
@@ -243,9 +244,9 @@ class TestListOffersAPI(APITestCase):
 
     def test_cannot_list_another_users_archived_offers(self):
         for _ in range(2):
-            OfferFactory(user=self.user, group=self.group, images=[image_path], status='active')
+            OfferFactory(user=self.user, group=self.group, images=[image_path])
         for _ in range(3):
-            OfferFactory(user=self.user, group=self.group, images=[image_path], status='archived')
+            OfferFactory(user=self.user, group=self.group, images=[image_path], archived_at=timezone.now())
         self.client.force_login(user=self.another_user)
         response = self.client.get('/api/offers/')
         self.assertEqual(len(response.data['results']), 2)

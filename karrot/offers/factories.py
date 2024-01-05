@@ -16,7 +16,6 @@ class OfferFactory(DjangoModelFactory):
     user = SubFactory(UserFactory)
     name = LazyAttribute(lambda x: faker.sentence(nb_words=4))
     description = LazyAttribute(lambda x: faker.name())
-    status = 'active'
 
     @post_generation
     def images(self, created, extracted, **kwargs):

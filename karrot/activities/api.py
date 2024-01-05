@@ -297,6 +297,10 @@ class ActivityViewSet(
 
     def get_queryset(self):
         qs = self.queryset.filter(place__group__members=self.request.user)
+        if self.action == 'list':
+            # TODO: need to decide how to ensure we fetch all activities for feedback page, even if place archived
+            # only filter list by not archived places, as we need still need to retrieve activities for archived places
+            qs = qs.filter(place__archived_at__isnull=True)
         if self.action in ('retrieve', 'list'):
             # because we have participants field in the serializer
             # only prefetch on read_only actions, otherwise there are caching problems when participants get added

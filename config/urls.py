@@ -25,7 +25,7 @@ from karrot.notifications.api import NotificationViewSet
 from karrot.offers.api import OfferViewSet
 from karrot.activities.api import ActivityViewSet, ActivitySeriesViewSet, FeedbackViewSet, ActivityTypeViewSet, \
     PublicActivityViewSet
-from karrot.places.api import PlaceViewSet, PlaceTypeViewSet
+from karrot.places.api import PlaceViewSet, PlaceTypeViewSet, PlaceStatusViewSet
 from karrot.stats.api import FrontendStatsView, ActivityHistoryStatsViewSet
 from karrot.status.api import StatusView
 from karrot.subscriptions.api import WebPushSubscriptionViewSet
@@ -76,6 +76,7 @@ router.register('offers', OfferViewSet)
 # Place endpoints
 router.register('places', PlaceViewSet)
 router.register('place-types', PlaceTypeViewSet)
+router.register('place-statuses', PlaceStatusViewSet)
 
 # History endpoints
 router.register('history', HistoryViewSet)

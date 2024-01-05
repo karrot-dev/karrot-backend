@@ -28,7 +28,8 @@ class TestMigrations(TestCase):
         # Reverse to the original migration
         executor.migrate(self.migrate_from)
 
-        self.setUpBeforeMigration(old_apps)
+        self.apps = old_apps
+        self.setUpBeforeMigration()
 
         # Run the migration to test
         executor = MigrationExecutor(connection)
@@ -37,7 +38,7 @@ class TestMigrations(TestCase):
 
         self.apps = executor.loader.project_state(self.migrate_to).apps
 
-    def setUpBeforeMigration(self, apps):
+    def setUpBeforeMigration(self):
         pass
 
 

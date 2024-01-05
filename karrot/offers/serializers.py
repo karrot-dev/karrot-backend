@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import transaction
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -54,13 +55,14 @@ class OfferSerializer(serializers.ModelSerializer):
             'group',
             'name',
             'description',
-            'status',
+            'archived_at',
+            'is_archived',
             'images',
         )
         read_only_fields = (
             'id',
             'created_at',
-            'status',
+            'archived_at',
             'user',
         )
 
@@ -82,6 +84,12 @@ class OfferSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         offer = instance
+
+        if 'is_archived' in validated_data:
+            is_archived = validated_data.pop('is_archived')
+            archived_at = timezone.now() if is_archived else None
+            validated_data['archived_at'] = archived_at
+
         images = validated_data.pop('images', None)
         if images:
             for image in images:

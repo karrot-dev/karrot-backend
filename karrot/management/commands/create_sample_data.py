@@ -13,7 +13,7 @@ from rest_framework.test import APIClient
 from karrot.groups.models import Group, GroupMembership, GroupStatus
 from karrot.groups.roles import GROUP_EDITOR, GROUP_MEMBER
 from karrot.activities.models import Activity, ActivitySeries, to_range, ActivityType
-from karrot.places.models import Place, PlaceType
+from karrot.places.models import Place, PlaceType, PlaceStatus
 from karrot.users.models import User
 from karrot.utils.tests.fake import faker
 
@@ -181,8 +181,8 @@ class Command(BaseCommand):
                     'address': faker.street_address(),
                     'latitude': faker.latitude(),
                     'longitude': faker.longitude(),
-                    'status': 'active',
-                    'place_type': PlaceType.objects.filter(group=group).first().id,
+                    'status': PlaceStatus.objects.filter(group=group).order_by('?').first().id,
+                    'place_type': PlaceType.objects.filter(group=group).order_by('?').first().id,
                 }
             )
             if response.status_code != 201:

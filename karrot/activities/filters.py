@@ -31,9 +31,16 @@ class PublicActivitiesFilter(filters.FilterSet):
     date = ISODateTimeRangeFromToRangeFilter(field_name='date', lookup_expr='overlap')
 
 
+def place_status_queryset(request):
+    if request:
+        return PlaceStatus.objects.filter(group__members=request.user)
+    return PlaceStatus.objects.none()
+
+
 class ActivitiesFilter(filters.FilterSet):
     place = filters.NumberFilter(field_name='place')
-    place_status = filters.ChoiceFilter(field_name='place__status', choices=PlaceStatus.choices)
+    place_status = filters.ModelChoiceFilter(field_name='place__status', queryset=place_status_queryset)
+    place_archived = filters.BooleanFilter(method='filter_place_archived')
     group = filters.NumberFilter(field_name='place__group')
     date = ISODateTimeRangeFromToRangeFilter(field_name='date', lookup_expr='overlap')
     feedback_possible = filters.BooleanFilter(method='filter_feedback_possible')
@@ -58,6 +65,13 @@ class ActivitiesFilter(filters.FilterSet):
             'slots',
             'places',
         ]
+
+    def filter_place_archived(self, qs, name, value):
+        if value is True:
+            return qs.filter(place__archived_at__isnull=False)
+        elif value is False:
+            return qs.filter(place__archived_at__isnull=True)
+        return qs
 
     def filter_feedback_possible(self, qs, name, value):
         if value is True:

@@ -206,6 +206,7 @@ class FeedbackExportRenderer(CSVRenderer):
 
 
 class ActivityTypeSerializer(serializers.ModelSerializer):
+    is_archived = serializers.BooleanField(default=False)
     updated_message = serializers.CharField(write_only=True, required=False)
 
     class Meta:
@@ -214,12 +215,14 @@ class ActivityTypeSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'name_is_translatable',
+            'description',
             'colour',
             'icon',
             'has_feedback',
             'has_feedback_weight',
             'feedback_icon',
-            'status',
+            'archived_at',
+            'is_archived',
             'group',
             "created_at",
             'updated_at',
@@ -230,6 +233,7 @@ class ActivityTypeSerializer(serializers.ModelSerializer):
             'id',
             'created_at',
             'updated_at',
+            'archived_at',
         ]
 
     def validate_group(self, group):
@@ -244,6 +248,11 @@ class ActivityTypeSerializer(serializers.ModelSerializer):
             return super().save(**kwargs)
 
         updated_message = self.validated_data.pop('updated_message', None)
+
+        if 'is_archived' in self.validated_data:
+            is_archived = self.validated_data.pop('is_archived')
+            archived_at = timezone.now() if is_archived else None
+            self.initial_data['archived_at'] = self.validated_data['archived_at'] = archived_at
 
         activity_type = self.instance
         changed_data = find_changed(activity_type, self.validated_data)
@@ -270,6 +279,9 @@ class ActivityTypeSerializer(serializers.ModelSerializer):
         return activity_type
 
     def create(self, validated_data):
+        if 'is_archived' in validated_data:
+            # can't create something in an archived state
+            validated_data.pop('is_archived')
         activity_type = super().create(validated_data)
         History.objects.create(
             typus=HistoryTypus.ACTIVITY_TYPE_CREATE,
@@ -515,7 +527,7 @@ class ActivitySerializer(serializers.ModelSerializer):
         return activity
 
     def validate_activity_type(self, activity_type):
-        if activity_type.status != 'active':
+        if activity_type.is_archived:
             raise serializers.ValidationError('You can only create activities for active types')
         return activity_type
 
@@ -997,7 +1009,7 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
         return series
 
     def validate_activity_type(self, activity_type):
-        if activity_type.status != 'active':
+        if activity_type.is_archived:
             raise serializers.ValidationError('You can only create series for active types')
         return activity_type
 

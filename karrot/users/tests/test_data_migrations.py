@@ -35,10 +35,9 @@ class TestGenerateUsername(TestMigrations, UtilsMixin):
         GroupMembership.objects.create(user=user, group=self.group)
         return user
 
-    def setUpBeforeMigration(self, apps):
-        self.apps = apps
-        User = apps.get_model('users', 'User')
-        Group = apps.get_model('groups', 'Group')
+    def setUpBeforeMigration(self):
+        User = self.apps.get_model('users', 'User')
+        Group = self.apps.get_model('groups', 'Group')
         self.group = Group.objects.create(name='testgroup')
         self.id1 = self.create_user(display_name='Peter Jones').id
         self.id2 = self.create_user(display_name='Peter Jones').id
@@ -102,10 +101,8 @@ class TestFixUsername(TestMigrations, UtilsMixin):
         ('users', '0027_fix_usernames'),
     ]
 
-    def setUpBeforeMigration(self, apps):
-        self.apps = apps
-        apps.get_model('users', 'User')
-        Group = apps.get_model('groups', 'Group')
+    def setUpBeforeMigration(self):
+        Group = self.apps.get_model('groups', 'Group')
         self.group = Group.objects.create(name='testgroup')
         self.id1 = self.create_user(username='something with spaces').id
         self.id2 = self.create_user(username='NothingChanged').id
@@ -113,8 +110,6 @@ class TestFixUsername(TestMigrations, UtilsMixin):
         self.id4 = self.create_user(username='someaddress@gmail.com').id
 
     def test_username_creation(self):
-        self.apps.get_model('users', 'User')
-
         self.check_username(self.id1, 'something_with_spaces')
         self.check_username(self.id2, 'NothingChanged')
         self.check_username(self.id3, '_____')

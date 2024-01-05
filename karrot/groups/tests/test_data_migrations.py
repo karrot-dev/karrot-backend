@@ -20,10 +20,10 @@ class TestAddNewcomerRoleMigration(TestMigrations):
         ('groups', '0047_add_group_newcomer_role'),
     ]
 
-    def setUpBeforeMigration(self, apps):
-        User = apps.get_model('users', 'User')
-        Group = apps.get_model('groups', 'Group')
-        GroupMembership = apps.get_model('groups', 'GroupMembership')
+    def setUpBeforeMigration(self):
+        User = self.apps.get_model('users', 'User')
+        Group = self.apps.get_model('groups', 'Group')
+        GroupMembership = self.apps.get_model('groups', 'GroupMembership')
 
         group = Group.objects.create(name=faker.name())
         user1 = User.objects.create(username=faker.user_name())

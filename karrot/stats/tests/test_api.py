@@ -13,7 +13,6 @@ from karrot.groups.factories import GroupFactory
 from karrot.groups.roles import GROUP_MEMBER
 from karrot.history.models import History
 from karrot.places.factories import PlaceFactory
-from karrot.places.models import PlaceStatus
 from karrot.users.factories import VerifiedUserFactory
 from karrot.utils.tests.fake import faker
 
@@ -358,7 +357,7 @@ class TestActivityHistoryStatsAPI(APITestCase):
         with freeze_time(self.after_the_activity_is_over, tick=True):
             Activity.objects.process_activities()
 
-            self.place.status = PlaceStatus.ARCHIVED.value
+            self.place.archived_at = timezone.now()
             self.place.save()
 
             response = self.client.get('/api/stats/activity-history/', {'group': self.group.id, 'user': self.user.id})

@@ -27,6 +27,7 @@ django-timezone-field
 django-anymail
 sentry-sdk
 furl
+fractional-indexing
 django-versatileimagefield
 html2text
 babel
@@ -80,3 +81,4 @@ psutil
 sqlparse # for pretty-printing SQL in shell
 importlib-metadata # for py3.9 compat
 honcho
+django-watchfiles
