@@ -13,7 +13,7 @@ from karrot.groups.models import Group
 from karrot.places.models import Place
 from karrot.users.models import User
 
-# room id pattern e.g. "activity:5" or "group:6"
+# room id pattern e.g. "activity:5" or "group:6" or "user:6346,43,535"
 room_id_re = re.compile("^(?P<subject_type>[a-z]+):(?P<subject_ids>[0-9,]+)$")
 
 
@@ -28,6 +28,11 @@ class MeetViewSet(GenericAPIView):
 
         Allows the user with the token to join that room
         """
+        api_key = settings.MEET_LIVEKIT_API_KEY
+        api_secret = settings.MEET_LIVEKIT_API_SECRET
+        if not api_key or not api_secret:
+            return NotFoundResponse()
+
         user = request.user
         if not user or user.is_anonymous:
             return NotFoundResponse()
@@ -41,17 +46,25 @@ class MeetViewSet(GenericAPIView):
 
         # can have multiple ids, sort them so it doesn't matter what order the client sends them in
         subject_ids = sorted([int(val) for val in subject_ids.split(",")])
+        extra_response_data = {"subject_type": subject_type}
 
-        if subject_type == "group" and len(subject_ids) == 1:
-            if not Group.objects.filter(id=subject_ids[0], members=user).exists():
+        # subject types that require 1 id
+        if subject_type in ("group", "place", "activity"):
+            if len(subject_ids) != 1:
                 return NotFoundResponse()
-        elif subject_type == "place" and len(subject_ids) == 1:
-            if not Place.objects.filter(id=subject_ids[0], group__members=user).exists():
-                return NotFoundResponse()
-        elif subject_type == "activity" and len(subject_ids) == 1:
-            if not Activity.objects.filter(id=subject_ids[0], place__group__members=user).exists():
-                return NotFoundResponse()
+            subject_id = subject_ids[0]
+            extra_response_data["subject_id"] = subject_id
+            if subject_type == "group":
+                if not Group.objects.filter(id=subject_id, members=user).exists():
+                    return NotFoundResponse()
+            elif subject_type == "place":
+                if not Place.objects.filter(id=subject_id, group__members=user).exists():
+                    return NotFoundResponse()
+            elif subject_type == "activity":
+                if not Activity.objects.filter(id=subject_id, place__group__members=user).exists():
+                    return NotFoundResponse()
         elif subject_type == "user":
+            extra_response_data["subject_ids"] = subject_ids
             user_ids = list(
                 User.objects.filter(id__in=subject_ids, groups__in=self.request.user.groups.all())
                 .order_by("id")
@@ -67,10 +80,7 @@ class MeetViewSet(GenericAPIView):
         # then there is only one per user session... this is probably fine at the moment though
         identity = get_random_string(length=20)
         token = (
-            AccessToken(
-                settings.MEET_LIVEKIT_API_KEY,
-                settings.MEET_LIVEKIT_API_SECRET,
-            )
+            AccessToken(api_key, api_secret)
             .with_identity(identity)
             # we set metadata which allows the other participants to be looked up by id
             .with_metadata(
@@ -93,8 +103,7 @@ class MeetViewSet(GenericAPIView):
         return Response(
             {
                 "room_id": room_id,
-                "subject_type": subject_type,
-                "subject_ids": subject_ids,
                 "token": token.to_jwt(),
+                **extra_response_data,
             }
         )
