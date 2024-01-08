@@ -18,6 +18,9 @@ DEFAULT_SETTINGS = {
     "FORUM_BANNER_TOPIC_ID": settings.FORUM_BANNER_TOPIC_ID,
     "FORUM_DISCUSSIONS_FEED": settings.FORUM_DISCUSSIONS_FEED,
     "VAPID_PUBLIC_KEY": settings.VAPID_PUBLIC_KEY,
+    "MEET_LIVEKIT_ENDPOINT": settings.MEET_LIVEKIT_ENDPOINT,
+    "MEET_LIVEKIT_API_KEY": settings.MEET_LIVEKIT_API_KEY,
+    "MEET_LIVEKIT_API_SECRET": settings.MEET_LIVEKIT_API_SECRET,
 }
 
 OVERRIDE_SETTINGS = {
@@ -27,6 +30,10 @@ OVERRIDE_SETTINGS = {
     "FORUM_BANNER_TOPIC_ID": 444,
     "FORUM_DISCUSSIONS_FEED": "something/else.json",
     "VAPID_PUBLIC_KEY": faker.uuid4(),
+    "MEET_LIVEKIT_ENDPOINT": faker.url(),
+    # We set these to make sure they are not published!
+    "MEET_LIVEKIT_API_KEY": faker.uuid4(),
+    "MEET_LIVEKIT_API_SECRET": faker.uuid4(),
 }
 
 
@@ -51,6 +58,9 @@ class TestConfigAPI(APITestCase):
                 "feedback_possible_days": 30,
                 "web_push": {
                     "vapid_public_key": DEFAULT_SETTINGS["VAPID_PUBLIC_KEY"],
+                },
+                "meet": {
+                    "livekit_endpoint": DEFAULT_SETTINGS["MEET_LIVEKIT_ENDPOINT"],
                 },
             },
             response.data,
@@ -77,6 +87,9 @@ class TestConfigAPI(APITestCase):
                 "feedback_possible_days": 30,
                 "web_push": {
                     "vapid_public_key": OVERRIDE_SETTINGS["VAPID_PUBLIC_KEY"],
+                },
+                "meet": {
+                    "livekit_endpoint": OVERRIDE_SETTINGS["MEET_LIVEKIT_ENDPOINT"],
                 },
             },
             response.data,

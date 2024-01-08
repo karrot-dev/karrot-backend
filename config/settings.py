@@ -150,6 +150,7 @@ INSTALLED_APPS = (
     "karrot.stats",
     "karrot.status.StatusConfig",
     "karrot.utils",
+    "karrot.meet",
     # Django packages
     "django_extensions",
     "corsheaders",
@@ -420,12 +421,18 @@ CORS_ORIGIN_WHITELIST = []
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
-if DEBUG:
+if is_dev:
     # this is primarily to enable the /_templates pages to work properly
     X_FRAME_OPTIONS = "SAMEORIGIN"
 
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SECURE = True
+
+if is_dev:
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+else:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 AUTH_USER_MODEL = "users.User"
 
@@ -496,6 +503,10 @@ ALLOWED_HOSTS = [s.strip() for s in options["ALLOWED_HOSTS"].split(",")] if opti
 CSRF_TRUSTED_ORIGINS = (
     [s.strip() for s in options["CSRF_TRUSTED_ORIGINS"].split(",")] if options["CSRF_TRUSTED_ORIGINS"] else []
 )
+
+MEET_LIVEKIT_ENDPOINT = options["MEET_LIVEKIT_ENDPOINT"]
+MEET_LIVEKIT_API_KEY = options["MEET_LIVEKIT_API_KEY"]
+MEET_LIVEKIT_API_SECRET = options["MEET_LIVEKIT_API_SECRET"]
 
 INFLUXDB_HOST = options["INFLUXDB_HOST"]
 
