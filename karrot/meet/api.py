@@ -52,7 +52,6 @@ class MeetViewSet(GenericAPIView):
             if not Activity.objects.filter(id=subject_ids[0], place__group__members=user).exists():
                 return NotFoundResponse()
         elif subject_type == "user":
-            # user_ids = sorted([int(user_id) for user_id in subject_id.split(",")])
             user_ids = list(
                 User.objects.filter(id__in=subject_ids, groups__in=self.request.user.groups.all())
                 .order_by("id")
