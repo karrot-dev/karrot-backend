@@ -234,7 +234,6 @@ class ActivityTypeSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "updated_message",
-            "group",
         ]
         read_only_fields = [
             "id",

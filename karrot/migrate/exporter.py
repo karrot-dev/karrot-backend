@@ -6,18 +6,22 @@ from typing import List
 import orjson
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
+from django.contrib.contenttypes.models import ContentType
 
-from karrot.activities.models import ActivitySeries, Feedback
+from karrot.activities.models import ActivitySeries, ActivityType, Feedback
 from karrot.groups.models import Group
 from karrot.migrate.serializers import (
     ActivitySeriesMigrateSerializer,
+    ActivityTypeMigrateSerializer,
     FeedbackMigrateSerializer,
-    GroupMigrateOutSerializer,
+    GroupExportSerializer,
     MigrateFileSerializer,
     PlaceMigrateSerializer,
+    PlaceStatusMigrateSerializer,
+    PlaceTypeMigrateSerializer,
     UserMigrateSerializer,
 )
-from karrot.places.models import Place
+from karrot.places.models import Place, PlaceStatus, PlaceType
 
 
 class FakeRequest:
@@ -34,15 +38,17 @@ def export_to_file(group_ids: List[int], output_filename: str):
         fake_request = FakeRequest()
         serializer_context = {"request": fake_request}
 
-        def export_queryset(data_type, qs, serializer_class):
-            contents = BytesIO()
+        def export_queryset(qs, serializer_class):
+            ct = ContentType.objects.get_for_model(qs.model)
+            data_type = f"{ct.app_label}.{ct.model}"
+            data = BytesIO()
             for item in qs.order_by("pk").iterator():
                 item_data = serializer_class(item, context=serializer_context).data
-                contents.write(orjson.dumps(item_data))
-                contents.write(b"\n")
-            contents.seek(0)
+                data.write(orjson.dumps(item_data))
+                data.write(b"\n")
+            data.seek(0)
             json_info = TarInfo(f"{data_type}.json")
-            json_info.size = contents.getbuffer().nbytes
+            json_info.size = data.getbuffer().nbytes
 
             # before exporting the json export any files first
             # so when we import they are already there!
@@ -52,40 +58,53 @@ def export_to_file(group_ids: List[int], output_filename: str):
                 tarfile.addfile(file_info, file)
             MigrateFileSerializer.exported_files = []
 
-            tarfile.addfile(json_info, contents)
+            tarfile.addfile(json_info, data)
 
         # users
         # export them first as they are referred to in lots of other things
         export_queryset(
-            "users",
             get_user_model().objects.filter(groupmembership__group__in=groups),
             UserMigrateSerializer,
         )
 
         # groups
         export_queryset(
-            "groups",
             groups,
-            GroupMigrateOutSerializer,
+            GroupExportSerializer,
+        )
+
+        # activity types
+        export_queryset(
+            ActivityType.objects.filter(group__in=groups),
+            ActivityTypeMigrateSerializer,
+        )
+
+        # place types
+        export_queryset(
+            PlaceType.objects.filter(group__in=groups),
+            PlaceTypeMigrateSerializer,
+        )
+
+        # place statuses
+        export_queryset(
+            PlaceStatus.objects.filter(group__in=groups),
+            PlaceStatusMigrateSerializer,
         )
 
         # places
         export_queryset(
-            "places",
             Place.objects.filter(group__in=groups),
             PlaceMigrateSerializer,
         )
 
         # activity series
         export_queryset(
-            "activity_series",
             ActivitySeries.objects.filter(place__group__in=groups),
             ActivitySeriesMigrateSerializer,
         )
 
         # feedback
         export_queryset(
-            "feedback",
             Feedback.objects.filter(about__place__group__in=groups),
             FeedbackMigrateSerializer,
         )

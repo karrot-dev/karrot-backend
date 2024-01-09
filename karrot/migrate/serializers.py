@@ -1,28 +1,41 @@
+import mimetypes
+from os.path import getsize
+
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import UploadedFile
 from rest_framework import serializers
 
-from karrot.activities.models import ActivitySeries, Feedback
+from karrot.activities.models import ActivitySeries, ActivityType, Feedback
 from karrot.activities.serializers import ParticipantTypeSerializer
 from karrot.groups.models import Group, GroupMembership
-from karrot.places.models import Place
+from karrot.places.models import Place, PlaceStatus, PlaceType
 from karrot.users.models import User
+
+
+class MigrationFile(UploadedFile):
+    def __init__(self, file, name, content_type, size, charset=None, content_type_extra=None):
+        super().__init__(file, name, content_type, size, charset, content_type_extra)
+
+    def close(self):
+        try:
+            return self.file.close()
+        except FileNotFoundError:
+            # don't sweat it
+            pass
 
 
 class MigrateFileSerializer(serializers.Serializer):
     exported_files = []
-    import_dir = None
-    imported_files = []
+    imported_files = {}
 
     def to_internal_value(self, filename):
         if not filename:
             return None
-        if filename not in MigrateFileSerializer.imported_files:
+        file_path = MigrateFileSerializer.imported_files.get(filename, None)
+        if not file_path:
             raise ValueError("missing file import", filename)
-        print("WE HAVE THE IMPROT FILE!", filename)
-        # what do we do now? give it a file? or a filepath?
-        # return join(MigrateFileSerializer.import_dir, filename)
-        return None
-        # raise Exception("did not think about this yet")
+        content_type, _ = mimetypes.guess_type(filename)
+        return MigrationFile(open(file_path, "rb"), filename, content_type, getsize(file_path))
 
     def to_representation(self, field_file):
         if not field_file:
@@ -31,9 +44,8 @@ class MigrateFileSerializer(serializers.Serializer):
         return field_file.name
 
 
-class GroupMembershipMigrateOutSerializer(serializers.ModelSerializer):
+class GroupMembershipExportSerializer(serializers.ModelSerializer):
     email = serializers.SerializerMethodField()
-    # email = serializers.EmailField()
 
     class Meta:
         model = GroupMembership
@@ -47,8 +59,7 @@ class GroupMembershipMigrateOutSerializer(serializers.ModelSerializer):
         return membership.user.email
 
 
-class GroupMembershipMigrateInSerializer(serializers.ModelSerializer):
-    # email = serializers.SerializerMethodField()
+class GroupMembershipImportSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
 
     class Meta:
@@ -60,9 +71,9 @@ class GroupMembershipMigrateInSerializer(serializers.ModelSerializer):
         ]
 
 
-class GroupMigrateOutSerializer(serializers.ModelSerializer):
+class GroupExportSerializer(serializers.ModelSerializer):
     photo = MigrateFileSerializer(required=False)
-    memberships = GroupMembershipMigrateOutSerializer(many=True, source="groupmembership_set")
+    memberships = GroupMembershipExportSerializer(many=True, source="groupmembership_set")
 
     class Meta:
         model = Group
@@ -81,12 +92,12 @@ class GroupMigrateOutSerializer(serializers.ModelSerializer):
         ]
 
 
-class GroupMigrateInSerializer(GroupMigrateOutSerializer):
-    memberships = GroupMembershipMigrateInSerializer(many=True, source="groupmembership_set")
+class GroupImportSerializer(GroupExportSerializer):
+    memberships = GroupMembershipImportSerializer(many=True, source="groupmembership_set")
 
     class Meta:
         model = Group
-        fields = GroupMigrateOutSerializer.Meta.fields
+        fields = GroupExportSerializer.Meta.fields
 
     def create(self, validated_data):
         memberships = validated_data.pop("groupmembership_set", None)
@@ -170,3 +181,21 @@ class ActivitySeriesMigrateSerializer(serializers.ModelSerializer):
             "description",
             "duration",
         ]
+
+
+class ActivityTypeMigrateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ActivityType
+        fields = "__all__"
+
+
+class PlaceTypeMigrateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlaceType
+        fields = "__all__"
+
+
+class PlaceStatusMigrateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlaceStatus
+        fields = "__all__"

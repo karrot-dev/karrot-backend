@@ -1,3 +1,4 @@
+import filecmp
 from os.path import isfile, join
 from tarfile import TarFile
 from tempfile import TemporaryDirectory
@@ -16,6 +17,7 @@ from karrot.places.models import Place
 from karrot.users.factories import UserFactory
 from karrot.users.models import User
 from karrot.utils.tests.fake import faker
+from karrot.utils.tests.uploads import image_path
 
 
 class TestExportImport(TransactionTestCase):
@@ -42,6 +44,19 @@ class TestExportImport(TransactionTestCase):
         import_from_file(export_filename)
         self.assertTrue(Group.objects.filter(name=group_name).exists())
 
+    def test_can_migrate_files(self):
+        group = GroupFactory(photo=image_path)
+        group_name = group.name
+        original_photo_file = group.photo.path
+        export_filename = join(self.tmpdir, faker.file_name(extension="tar.xz"))
+        export_to_file([group.id], export_filename)
+        self.reset_db()
+        import_from_file(export_filename)
+        imported_group = Group.objects.get(name=group_name)
+        imported_photo_file = imported_group.photo.path
+        self.assertNotEqual(original_photo_file, imported_photo_file)
+        self.assertTrue(filecmp.cmp(original_photo_file, imported_photo_file))
+
     def test_exports_memberships(self):
         user = UserFactory()
         group = GroupFactory(members=[user])
@@ -51,7 +66,7 @@ class TestExportImport(TransactionTestCase):
         with TarFile.open(export_filename, "r|xz") as tarfile:
             group_data = None
             for member in tarfile:
-                if member.name == "groups.json":
+                if member.name == "groups.group.json":
                     for line in tarfile.extractfile(member).readlines():
                         group_data = orjson.loads(line)
                         break  # just want the first line as we have one group
