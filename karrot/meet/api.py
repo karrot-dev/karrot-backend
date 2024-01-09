@@ -4,7 +4,8 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.utils.crypto import get_random_string
-from livekit.api import AccessToken, VideoGrants
+from livekit.api import AccessToken, TokenVerifier, VideoGrants, WebhookReceiver
+from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
@@ -107,3 +108,20 @@ class MeetViewSet(GenericAPIView):
                 **extra_response_data,
             }
         )
+
+
+token_verifier = TokenVerifier(
+    settings.MEET_LIVEKIT_API_KEY,
+    settings.MEET_LIVEKIT_API_SECRET,
+)
+webhook_receiver = WebhookReceiver(token_verifier)
+
+
+class MeetWebhookViewSet(GenericAPIView):
+    def post(self, request):
+        auth_token = request.headers.get("Authorization")
+        if not auth_token:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        event = webhook_receiver.receive(request.data, auth_token)
+        print("got webhook event!", event)
+        return Response(status=status.HTTP_200_OK)
