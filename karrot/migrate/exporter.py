@@ -7,25 +7,25 @@ import orjson
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.contenttypes.models import ContentType
+from pytz import BaseTzInfo
 
-from karrot.activities.models import ActivitySeries, ActivityType, Feedback
-from karrot.groups.models import Group
+from karrot.activities.models import ActivitySeries, ActivityType, Feedback, FeedbackNoShow, SeriesParticipantType
+from karrot.groups.models import Group, GroupMembership
 from karrot.migrate.serializers import (
-    ActivitySeriesMigrateSerializer,
-    ActivityTypeMigrateSerializer,
-    FeedbackMigrateSerializer,
-    GroupExportSerializer,
     MigrateFileSerializer,
-    PlaceMigrateSerializer,
-    PlaceStatusMigrateSerializer,
-    PlaceTypeMigrateSerializer,
-    UserMigrateSerializer,
+    get_migrate_serializer_class,
 )
 from karrot.places.models import Place, PlaceStatus, PlaceType
 
 
 class FakeRequest:
     user = AnonymousUser()
+
+
+def serialize_value(value):
+    if isinstance(value, BaseTzInfo):
+        return str(value)
+    raise TypeError
 
 
 def export_to_file(group_ids: List[int], output_filename: str):
@@ -38,13 +38,15 @@ def export_to_file(group_ids: List[int], output_filename: str):
         fake_request = FakeRequest()
         serializer_context = {"request": fake_request}
 
-        def export_queryset(qs, serializer_class):
+        def export_queryset(qs, serializer_class=None):
+            if not serializer_class:
+                serializer_class = get_migrate_serializer_class(qs.model)
             ct = ContentType.objects.get_for_model(qs.model)
             data_type = f"{ct.app_label}.{ct.model}"
             data = BytesIO()
             for item in qs.order_by("pk").iterator():
                 item_data = serializer_class(item, context=serializer_context).data
-                data.write(orjson.dumps(item_data))
+                data.write(orjson.dumps(item_data, default=serialize_value))
                 data.write(b"\n")
             data.seek(0)
             json_info = TarInfo(f"{data_type}.json")
@@ -62,49 +64,30 @@ def export_to_file(group_ids: List[int], output_filename: str):
 
         # users
         # export them first as they are referred to in lots of other things
-        export_queryset(
-            get_user_model().objects.filter(groupmembership__group__in=groups),
-            UserMigrateSerializer,
-        )
+        export_queryset(get_user_model().objects.filter(groupmembership__group__in=groups))
 
         # groups
-        export_queryset(
-            groups,
-            GroupExportSerializer,
-        )
+        export_queryset(groups)
+
+        # group memberships
+        export_queryset(GroupMembership.objects.filter(group__in=groups))
 
         # activity types
-        export_queryset(
-            ActivityType.objects.filter(group__in=groups),
-            ActivityTypeMigrateSerializer,
-        )
+        export_queryset(ActivityType.objects.filter(group__in=groups))
 
         # place types
-        export_queryset(
-            PlaceType.objects.filter(group__in=groups),
-            PlaceTypeMigrateSerializer,
-        )
+        export_queryset(PlaceType.objects.filter(group__in=groups))
 
         # place statuses
-        export_queryset(
-            PlaceStatus.objects.filter(group__in=groups),
-            PlaceStatusMigrateSerializer,
-        )
+        export_queryset(PlaceStatus.objects.filter(group__in=groups))
 
         # places
-        export_queryset(
-            Place.objects.filter(group__in=groups),
-            PlaceMigrateSerializer,
-        )
+        export_queryset(Place.objects.filter(group__in=groups))
 
         # activity series
-        export_queryset(
-            ActivitySeries.objects.filter(place__group__in=groups),
-            ActivitySeriesMigrateSerializer,
-        )
+        export_queryset(ActivitySeries.objects.filter(place__group__in=groups))
+        export_queryset(SeriesParticipantType.objects.filter(activity_series__place__group__in=groups))
 
         # feedback
-        export_queryset(
-            Feedback.objects.filter(about__place__group__in=groups),
-            FeedbackMigrateSerializer,
-        )
+        export_queryset(Feedback.objects.filter(about__place__group__in=groups))
+        export_queryset(FeedbackNoShow.objects.filter(feedback__about__place__group__in=groups))

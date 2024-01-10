@@ -64,22 +64,14 @@ class TestExportImport(TransactionTestCase):
         export_filename = join(self.tmpdir, faker.file_name(extension="tar.xz"))
         export_to_file([group.id], export_filename)
         with TarFile.open(export_filename, "r|xz") as tarfile:
-            group_data = None
+            memberships = []
             for member in tarfile:
-                if member.name == "groups.group.json":
+                if member.name == "groups.groupmembership.json":
                     for line in tarfile.extractfile(member).readlines():
-                        group_data = orjson.loads(line)
-                        break  # just want the first line as we have one group
-            self.assertIsNotNone(group_data)
-            self.assertEqual(len(group_data["memberships"]), 1)
-            self.assertEqual(
-                group_data["memberships"][0],
-                {
-                    "email": user.email,
-                    "notification_types": membership.notification_types,
-                    "roles": membership.roles,
-                },
-            )
+                        memberships.append(orjson.loads(line))
+            self.assertIsNotNone(memberships)
+            self.assertEqual(len(memberships), 1)
+            self.assertEqual(memberships[0]["notification_types"], membership.notification_types)
 
     def test_migrates_users_and_memberships(self):
         users = [UserFactory() for _ in range(10)]

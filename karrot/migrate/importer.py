@@ -13,14 +13,8 @@ from django.db.models import Model
 from karrot.activities.models import ActivitySeries, ActivityType
 from karrot.groups.models import Group
 from karrot.migrate.serializers import (
-    ActivitySeriesMigrateSerializer,
-    ActivityTypeMigrateSerializer,
-    GroupImportSerializer,
     MigrateFileSerializer,
-    PlaceMigrateSerializer,
-    PlaceStatusMigrateSerializer,
-    PlaceTypeMigrateSerializer,
-    UserMigrateSerializer,
+    get_migrate_serializer_class,
 )
 from karrot.places.models import Place, PlaceStatus, PlaceType
 from karrot.users.models import User
@@ -63,31 +57,22 @@ def import_from_file(input_filename: str):
                     ct = ContentType.objects.get(app_label=app_label, model=model_name)
                     model_class = ct.model_class()
 
-                    serializer_class = {
-                        Group: GroupImportSerializer,
-                        User: UserMigrateSerializer,
-                        Place: PlaceMigrateSerializer,
-                        ActivitySeries: ActivitySeriesMigrateSerializer,
-                        ActivityType: ActivityTypeMigrateSerializer,
-                        PlaceType: PlaceTypeMigrateSerializer,
-                        PlaceStatus: PlaceStatusMigrateSerializer,
-                    }.get(model_class, None)
-                    if not serializer_class:
-                        raise ValueError(f"missing serializer for type {data_type}")
-
                     # mapping from old id to new id
                     # assumes the things were exported in the correct order
+                    # such that the ids are already known
 
+                    map_id(import_data, "user", User)
                     map_id(import_data, "group", Group)
                     map_id(import_data, "place", Place)
                     map_id(import_data, "place_type", PlaceType)
                     map_id(import_data, "activity_type", ActivityType)
+                    map_id(import_data, "activity_series", ActivitySeries)
                     if model_class is Place:
                         # extra check, incase something else has a "status" field
                         map_id(import_data, "status", PlaceStatus)
 
-                    print("importing data", import_data)
-                    serializer = serializer_class(data=import_data)
+                    MigrateSerializer = get_migrate_serializer_class(model_class)
+                    serializer = MigrateSerializer(data=import_data)
                     serializer.is_valid(raise_exception=True)
                     entity = serializer.save()
                     # record our mapping
