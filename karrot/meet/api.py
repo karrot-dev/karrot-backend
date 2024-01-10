@@ -1,21 +1,23 @@
 import json
-import re
 from datetime import timedelta
 
 from django.conf import settings
+from django.db import transaction
 from django.utils.crypto import get_random_string
 from livekit.api import AccessToken, TokenVerifier, VideoGrants, WebhookReceiver
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
+from rest_framework.negotiation import BaseContentNegotiation
 from rest_framework.response import Response
 
 from karrot.activities.models import Activity
 from karrot.groups.models import Group
+from karrot.meet.livekit import list_participants
+from karrot.meet.meet_utils import parse_room_name
+from karrot.meet.models import Room
+from karrot.meet.tasks import notify_room_changed, notify_room_ended
 from karrot.places.models import Place
 from karrot.users.models import User
-
-# room id pattern e.g. "activity:5" or "group:6" or "user:6346,43,535"
-room_id_re = re.compile("^(?P<subject_type>[a-z]+):(?P<subject_ids>[0-9,]+)$")
 
 
 class NotFoundResponse(Response):
@@ -24,7 +26,7 @@ class NotFoundResponse(Response):
 
 
 class MeetViewSet(GenericAPIView):
-    def get(self, request, room_id):
+    def get(self, request, room_name):
         """Creates a room token for a given room_id
 
         Allows the user with the token to join that room
@@ -38,15 +40,11 @@ class MeetViewSet(GenericAPIView):
         if not user or user.is_anonymous:
             return NotFoundResponse()
 
-        match = room_id_re.match(room_id)
-        if not match:
+        subject_type, subject_ids = parse_room_name(room_name)
+
+        if not subject_type:
             return NotFoundResponse()
 
-        subject_type = match.group("subject_type")
-        subject_ids = match.group("subject_ids")
-
-        # can have multiple ids, sort them so it doesn't matter what order the client sends them in
-        subject_ids = sorted([int(val) for val in subject_ids.split(",")])
         extra_response_data = {"subject_type": subject_type}
 
         # subject types that require 1 id
@@ -96,14 +94,14 @@ class MeetViewSet(GenericAPIView):
             .with_grants(
                 VideoGrants(
                     room_join=True,
-                    room=room_id,
+                    room=room_name,
                 )
             )
         )
 
         return Response(
             {
-                "room_id": room_id,
+                "room_name": room_name,
                 "token": token.to_jwt(),
                 **extra_response_data,
             }
@@ -117,11 +115,79 @@ token_verifier = TokenVerifier(
 webhook_receiver = WebhookReceiver(token_verifier)
 
 
+class LiveKitContentNegotiation(BaseContentNegotiation):
+    def select_parser(self, request, parsers):
+        for parser in parsers:
+            if parser.media_type == "application/json":
+                return parser
+
+    def select_renderer(self, request, renderers, format_suffix=None):
+        for renderer in renderers:
+            if renderer.media_type == "application/json":
+                return renderer, renderer.media_type
+
+
+# application/webhook+json
+
+
 class MeetWebhookViewSet(GenericAPIView):
+    """Receive livekit webhooks
+
+    See docs at https://docs.livekit.io/realtime/server/webhooks/
+    """
+
+    # if sends us "application/webhook+json" so we need to fiddle with the negotiation part
+    content_negotiation_class = LiveKitContentNegotiation
+
     def post(self, request):
         auth_token = request.headers.get("Authorization")
         if not auth_token:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        event = webhook_receiver.receive(request.data, auth_token)
-        print("got webhook event!", event)
+        event = webhook_receiver.receive(request.body.decode("utf-8"), auth_token)
+        subject_type, subject_ids = parse_room_name(event.room.name)
+        if not subject_type:
+            # didn't match our format, ignore it
+            return Response(status=status.HTTP_200_OK)
+
+        # Don't actually need to handle "room_started" as
+        # we get a "participant_joined" right after, and we can just
+        # sync everything then.
+
+        # if event.event == "room_started":
+        #     sync_participants_and_notify(event.room.name)
+        if event.event == "room_finished":
+            room = Room.objects.get(name=event.room.name)
+            room_name = room.name
+            room.delete()
+            notify_room_ended(room_name)
+        elif event.event == "participant_joined":
+            sync_participants_and_notify(event.room.name)
+        elif event.event == "participant_left":
+            sync_participants_and_notify(event.room.name)
+
         return Response(status=status.HTTP_200_OK)
+
+
+def sync_participants_and_notify(room_name: str):
+    """Fetch and sync participants then notify users
+
+    Lists the participants using the livekit server API
+    then updates our database to match.
+
+    Means we don't need to rely on keeping track of join/left participants
+    and will always ensure it's correct.
+    """
+    with transaction.atomic():
+        room, _ = Room.objects.get_or_create(name=room_name)
+        participants = {participant.identity: participant for participant in room.participants.all()}
+        for livekit_participant in list_participants(room_name):
+            participant = participants.pop(livekit_participant.identity, None)
+            if not participant:
+                metadata = json.loads(livekit_participant.metadata)
+                user = None
+                if "user_id" in metadata:
+                    user = User.objects.get(id=metadata["user_id"])
+                room.participants.create(identity=livekit_participant.identity, user=user)
+        # anything leftover is no longer in room
+        [participant.delete() for participant in participants.values()]
+    notify_room_changed(room)
