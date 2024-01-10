@@ -30,26 +30,23 @@ class TestExportImport(TransactionTestCase):
 
     def test_creates_archive_file(self):
         group = GroupFactory()
-        export_filename = join(self.tmpdir, faker.file_name(extension="tar.xz"))
-        export_to_file([group.id], export_filename)
+        export_filename = self.export(group)
         self.assertTrue(isfile(export_filename))
 
     def test_can_import_exported_file(self):
         group = GroupFactory()
         group_name = group.name
-        export_filename = join(self.tmpdir, faker.file_name(extension="tar.xz"))
-        export_to_file([group.id], export_filename)
+        export_filename = self.export(group)
         self.reset_db()
         self.assertFalse(Group.objects.filter(name=group_name).exists())
         import_from_file(export_filename)
         self.assertTrue(Group.objects.filter(name=group_name).exists())
 
-    def test_can_migrate_files(self):
+    def test_can_migrate_group_photo(self):
         group = GroupFactory(photo=image_path)
         group_name = group.name
         original_photo_file = group.photo.path
-        export_filename = join(self.tmpdir, faker.file_name(extension="tar.xz"))
-        export_to_file([group.id], export_filename)
+        export_filename = self.export(group)
         self.reset_db()
         import_from_file(export_filename)
         imported_group = Group.objects.get(name=group_name)
@@ -61,8 +58,7 @@ class TestExportImport(TransactionTestCase):
         user = UserFactory()
         group = GroupFactory(members=[user])
         membership = GroupMembership.objects.get(user=user, group=group)
-        export_filename = join(self.tmpdir, faker.file_name(extension="tar.xz"))
-        export_to_file([group.id], export_filename)
+        export_filename = self.export(group)
         with TarFile.open(export_filename, "r|xz") as tarfile:
             memberships = []
             for member in tarfile:
@@ -76,8 +72,7 @@ class TestExportImport(TransactionTestCase):
     def test_migrates_users_and_memberships(self):
         users = [UserFactory() for _ in range(10)]
         group = GroupFactory(members=users)
-        export_filename = join(self.tmpdir, faker.file_name(extension="tar.xz"))
-        export_to_file([group.id], export_filename)
+        export_filename = self.export(group)
         self.assertEqual(group.members.count(), 10)
         self.reset_db()
         self.assertEqual(User.objects.count(), 0)
@@ -88,8 +83,7 @@ class TestExportImport(TransactionTestCase):
     def test_migrates_place(self):
         group = GroupFactory()
         PlaceFactory(group=group)
-        export_filename = join(self.tmpdir, faker.file_name(extension="tar.xz"))
-        export_to_file([group.id], export_filename)
+        export_filename = self.export(group)
         self.reset_db()
         self.assertEqual(Place.objects.count(), 0)
         import_from_file(export_filename)
@@ -99,8 +93,7 @@ class TestExportImport(TransactionTestCase):
         group = GroupFactory()
         place = PlaceFactory(group=group)
         ActivitySeriesFactory(place=place)
-        export_filename = join(self.tmpdir, faker.file_name(extension="tar.xz"))
-        export_to_file([group.id], export_filename)
+        export_filename = self.export(group)
         self.reset_db()
         self.assertEqual(ActivitySeries.objects.count(), 0)
         import_from_file(export_filename)
@@ -108,3 +101,8 @@ class TestExportImport(TransactionTestCase):
 
     def reset_db(self):
         self._fixture_teardown()
+
+    def export(self, *groups):
+        export_filename = join(self.tmpdir, faker.file_name(extension="tar.xz"))
+        export_to_file([group.id for group in groups], export_filename)
+        return export_filename

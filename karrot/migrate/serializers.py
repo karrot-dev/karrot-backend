@@ -1,13 +1,12 @@
 import mimetypes
 from os.path import getsize
 
-from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import UploadedFile
 from django.db.models import Model
 from rest_framework import serializers
+from rest_framework.fields import ImageField
 
 from karrot.groups.models import Group
-from karrot.users.models import User
 
 
 class MigrationFile(UploadedFile):
@@ -23,8 +22,26 @@ class MigrationFile(UploadedFile):
 
 
 class MigrateFileSerializer(serializers.Serializer):
-    exported_files = []
-    imported_files = {}
+    """Handles files during import/export
+
+    Replace any FileField/ImageField/VersatileImageField with this to have
+    the files handled correctly for export and import.
+
+    During export it gives you the relative file path and keeps track of
+    which files have been exported in "exported_files" class variable.
+
+    "exported_files" is read elsewhere during the export to add them to
+    the archive file.
+
+    During import we expect "imported_files" gets pre-populated to map
+    from the relative file path to a temp file that has been extracted
+    from the archive already.
+
+    We then pass a file field through, so it can get saved properly.
+    """
+
+    exported_files = []  # list of file field values that were exported
+    imported_files = {}  # maps relative filename -> tmp file path
 
     def to_internal_value(self, filename):
         if not filename:
@@ -50,24 +67,30 @@ class GroupMigrateSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class UserMigrateSerializer(serializers.ModelSerializer):
-    photo = MigrateFileSerializer(required=False)
-
-    class Meta:
-        model = get_user_model()
-        fields = "__all__"
-
-
 def get_migrate_serializer_class(model_class: type[Model]) -> type[serializers.ModelSerializer]:
-    # special cases
-    if model_class is Group:
-        return GroupMigrateSerializer
+    """Dynamically creates a serializer class for use for export/import
 
-    if model_class is User:
-        return UserMigrateSerializer
+    It is a simple serializer just returning __all__ fields.
+    It does not handle any kind of nested fields, you are expected to export all the related
+    tables separately.
+
+    It has special handling for image fields, to automatically use the MigrateFileSerializer.
+    """
 
     # generic serializer with all fields
     class MigrateSerializer(serializers.ModelSerializer):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            for name in self.fields.keys():
+                field = self.fields[name]
+                if isinstance(field, ImageField):
+                    # replace ImageFields with our special file migration serializer
+                    self.fields[name] = MigrateFileSerializer(
+                        required=field.required,
+                        allow_null=field.allow_null,
+                        context=field.context,
+                    )
+
         class Meta:
             model = model_class
             fields = "__all__"

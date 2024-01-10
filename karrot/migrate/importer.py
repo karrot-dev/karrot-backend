@@ -8,27 +8,45 @@ from tempfile import TemporaryDirectory
 import orjson
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
-from django.db.models import Model
+from django.db.models import ForeignKey
 
-from karrot.activities.models import ActivitySeries, ActivityType
-from karrot.groups.models import Group
 from karrot.migrate.serializers import (
     MigrateFileSerializer,
     get_migrate_serializer_class,
 )
-from karrot.places.models import Place, PlaceStatus, PlaceType
-from karrot.users.models import User
 
 
 def import_from_file(input_filename: str):
+    """Imports from a tar.xz archive created using export_to_file
+
+    The import is done inside a database transaction, so it's all or nothing.
+    We don't preserve the original database ids, so they cannot clash with existing ids in the database you
+    are importing into.
+
+    For the duration of the import we keep a mapping of original_id -> imported_id so we can handle
+    all the foreign key fields.
+    """
     with transaction.atomic(), TemporaryDirectory() as tmpdir, TarFile.open(input_filename, "r|xz") as tarfile:
         MigrateFileSerializer.imported_files = {}
 
         id_mappings = defaultdict(dict)
 
-        def map_id(data: dict, field_name: str, map_model_class: type[Model]):
+        def update_foreign_key_ids(data: dict, field):
+            """Finds the foreign key fields, and swaps the original id for the newly imported id
+
+            Depends on the related object having been imported first.
+            """
+            if not isinstance(field, ForeignKey):
+                return
+            field_name = field.name
+            foreign_key_model_class = field.remote_field.model
             if isinstance(data.get(field_name, None), int):
-                data[field_name] = id_mappings[map_model_class][data[field_name]]
+                mapping = id_mappings[foreign_key_model_class]
+                orig_id = data[field_name]
+                if orig_id not in mapping:
+                    raise ValueError("missing id mapping for", model_class, field_name)
+                imported_id = mapping[orig_id]
+                data[field_name] = imported_id
 
         for member in tarfile:
             if member.name.startswith("files/"):
@@ -57,23 +75,16 @@ def import_from_file(input_filename: str):
                     ct = ContentType.objects.get(app_label=app_label, model=model_name)
                     model_class = ct.model_class()
 
-                    # mapping from old id to new id
+                    # mapping from original ids to imported ids
                     # assumes the things were exported in the correct order
-                    # such that the ids are already known
-
-                    map_id(import_data, "user", User)
-                    map_id(import_data, "group", Group)
-                    map_id(import_data, "place", Place)
-                    map_id(import_data, "place_type", PlaceType)
-                    map_id(import_data, "activity_type", ActivityType)
-                    map_id(import_data, "activity_series", ActivitySeries)
-                    if model_class is Place:
-                        # extra check, incase something else has a "status" field
-                        map_id(import_data, "status", PlaceStatus)
+                    # such that the ids are already known by the time we need them
+                    for model_field in model_class._meta.get_fields():
+                        update_foreign_key_ids(import_data, model_field)
 
                     MigrateSerializer = get_migrate_serializer_class(model_class)
                     serializer = MigrateSerializer(data=import_data)
                     serializer.is_valid(raise_exception=True)
                     entity = serializer.save()
-                    # record our mapping
+
+                    # record the imported id
                     id_mappings[model_class][original_id] = entity.id

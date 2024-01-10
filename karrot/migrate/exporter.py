@@ -9,17 +9,33 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.contenttypes.models import ContentType
 from pytz import BaseTzInfo
 
-from karrot.activities.models import ActivitySeries, ActivityType, Feedback, FeedbackNoShow, SeriesParticipantType
-from karrot.groups.models import Group, GroupMembership
+from karrot.activities.models import (
+    Activity,
+    ActivityParticipant,
+    ActivitySeries,
+    ActivityType,
+    Feedback,
+    FeedbackNoShow,
+    ParticipantType,
+    SeriesParticipantType,
+)
+from karrot.agreements.models import Agreement
+from karrot.groups.models import Group, GroupMembership, Role, Trust
 from karrot.migrate.serializers import (
     MigrateFileSerializer,
     get_migrate_serializer_class,
 )
-from karrot.places.models import Place, PlaceStatus, PlaceType
+from karrot.places.models import Place, PlaceStatus, PlaceSubscription, PlaceType
 
 
 class FakeRequest:
     user = AnonymousUser()
+
+    def build_absolute_uri(self, *args, **kwargs):
+        raise Exception(
+            "build_absolute_uri got called which probably means you are trying to serialize a file "
+            "field incorrectly, use the MigrateFileSerializer for that field"
+        )
 
 
 def serialize_value(value):
@@ -38,14 +54,13 @@ def export_to_file(group_ids: List[int], output_filename: str):
         fake_request = FakeRequest()
         serializer_context = {"request": fake_request}
 
-        def export_queryset(qs, serializer_class=None):
-            if not serializer_class:
-                serializer_class = get_migrate_serializer_class(qs.model)
+        def export_queryset(qs):
+            MigrateSerializer = get_migrate_serializer_class(qs.model)
             ct = ContentType.objects.get_for_model(qs.model)
             data_type = f"{ct.app_label}.{ct.model}"
             data = BytesIO()
             for item in qs.order_by("pk").iterator():
-                item_data = serializer_class(item, context=serializer_context).data
+                item_data = MigrateSerializer(item, context=serializer_context).data
                 data.write(orjson.dumps(item_data, default=serialize_value))
                 data.write(b"\n")
             data.seek(0)
@@ -53,7 +68,7 @@ def export_to_file(group_ids: List[int], output_filename: str):
             json_info.size = data.getbuffer().nbytes
 
             # before exporting the json export any files first
-            # so when we import they are already there!
+            # so when we import they are available
             for file in MigrateFileSerializer.exported_files:
                 file_info = TarInfo(join("files", file.name))
                 file_info.size = file.size
@@ -62,21 +77,29 @@ def export_to_file(group_ids: List[int], output_filename: str):
 
             tarfile.addfile(json_info, data)
 
-        # users
-        # export them first as they are referred to in lots of other things
-        export_queryset(get_user_model().objects.filter(groupmembership__group__in=groups))
+        # the order of these exports is very important
+        # anything that references something else must be below the thing it references
 
         # groups
         export_queryset(groups)
 
-        # group memberships
+        # users
+        export_queryset(get_user_model().objects.filter(groupmembership__group__in=groups))
+
+        # group related things
         export_queryset(GroupMembership.objects.filter(group__in=groups))
+        export_queryset(Trust.objects.filter(membership__group__in=groups))
+        export_queryset(Role.objects.filter(group__in=groups))
+
+        # agreements
+        export_queryset(Agreement.objects.filter(group__in=groups))
 
         # activity types
         export_queryset(ActivityType.objects.filter(group__in=groups))
 
         # place types
         export_queryset(PlaceType.objects.filter(group__in=groups))
+        export_queryset(PlaceSubscription.objects.filter(place__group__in=groups))
 
         # place statuses
         export_queryset(PlaceStatus.objects.filter(group__in=groups))
@@ -84,9 +107,12 @@ def export_to_file(group_ids: List[int], output_filename: str):
         # places
         export_queryset(Place.objects.filter(group__in=groups))
 
-        # activity series
+        # activity
         export_queryset(ActivitySeries.objects.filter(place__group__in=groups))
         export_queryset(SeriesParticipantType.objects.filter(activity_series__place__group__in=groups))
+        export_queryset(Activity.objects.filter(place__group__in=groups))
+        export_queryset(ParticipantType.objects.filter(activity__place__group__in=groups))
+        export_queryset(ActivityParticipant.objects.filter(activity__place__group__in=groups))
 
         # feedback
         export_queryset(Feedback.objects.filter(about__place__group__in=groups))
