@@ -6,14 +6,42 @@ from tarfile import TarFile
 from tempfile import TemporaryDirectory
 
 import orjson
+from django.contrib.auth.hashers import make_password
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.db.models import ForeignKey
+from django.utils import timezone
 
 from karrot.migrate.serializers import (
     MigrateFileSerializer,
     get_migrate_serializer_class,
 )
+from karrot.users.models import User
+
+
+def create_anonymous_user():
+    """Create anon deleted user that we can use for missing user foreign key
+
+    It might be there are import records that refers to users that are not imported
+    ... and for cases where that field is required, we can use this to set it to
+    an anonymous user.
+    """
+    return User.objects.create(
+        description="",
+        email=None,
+        is_active=False,
+        is_staff=False,
+        mail_verified=False,
+        unverified_email=None,
+        username=make_password(None),
+        display_name="",
+        address=None,
+        latitude=None,
+        longitude=None,
+        mobile_number="",
+        deleted_at=timezone.now(),
+        deleted=True,
+    )
 
 
 def import_from_file(input_filename: str):
@@ -30,6 +58,7 @@ def import_from_file(input_filename: str):
         MigrateFileSerializer.imported_files = {}
 
         id_mappings = defaultdict(dict)
+        anon_user = None
 
         def update_foreign_key_ids(data: dict, field):
             """Finds the foreign key fields, and swaps the original id for the newly imported id
@@ -43,10 +72,40 @@ def import_from_file(input_filename: str):
             if isinstance(data.get(field_name, None), int):
                 mapping = id_mappings[foreign_key_model_class]
                 orig_id = data[field_name]
-                if orig_id not in mapping:
-                    raise ValueError("missing id mapping for", model_class, field_name)
-                imported_id = mapping[orig_id]
-                data[field_name] = imported_id
+                if orig_id in mapping:
+                    imported_id = mapping[orig_id]
+                    data[field_name] = imported_id
+                elif field.null:  # means allows null value
+                    # the mapping is missing, but the field is not required
+                    # likely means something like a referenced user that is not in the group anymore
+                    print(
+                        "Warning: missing id mapping for optional field",
+                        model_class,
+                        field_name,
+                        orig_id,
+                        "setting to null",
+                    )
+                    data[field_name] = None
+                elif foreign_key_model_class is User:
+                    # a required user field
+                    nonlocal anon_user
+                    if not anon_user:
+                        anon_user = create_anonymous_user()
+                    print(
+                        "Warning: missing id mapping for required field",
+                        model_class,
+                        field_name,
+                        orig_id,
+                        "setting to anon user",
+                    )
+                    data[field_name] = anon_user.id
+                else:
+                    raise ValueError(
+                        "missing id mapping for required field",
+                        model_class,
+                        field_name,
+                        orig_id,
+                    )
 
         for member in tarfile:
             if member.name.startswith("files/"):

@@ -25,6 +25,7 @@ from karrot.migrate.serializers import (
     MigrateFileSerializer,
     get_migrate_serializer_class,
 )
+from karrot.offers.models import Offer, OfferImage
 from karrot.places.models import Place, PlaceStatus, PlaceSubscription, PlaceType
 
 
@@ -86,7 +87,7 @@ def export_to_file(group_ids: List[int], output_filename: str):
         # users
         export_queryset(get_user_model().objects.filter(groupmembership__group__in=groups))
 
-        # group related things
+        # membership / trust / roles
         export_queryset(GroupMembership.objects.filter(group__in=groups))
         export_queryset(Trust.objects.filter(membership__group__in=groups))
         export_queryset(Role.objects.filter(group__in=groups))
@@ -94,20 +95,14 @@ def export_to_file(group_ids: List[int], output_filename: str):
         # agreements
         export_queryset(Agreement.objects.filter(group__in=groups))
 
-        # activity types
-        export_queryset(ActivityType.objects.filter(group__in=groups))
-
-        # place types
+        # places
         export_queryset(PlaceType.objects.filter(group__in=groups))
         export_queryset(PlaceSubscription.objects.filter(place__group__in=groups))
-
-        # place statuses
         export_queryset(PlaceStatus.objects.filter(group__in=groups))
-
-        # places
         export_queryset(Place.objects.filter(group__in=groups))
 
-        # activity
+        # activities
+        export_queryset(ActivityType.objects.filter(group__in=groups))
         export_queryset(ActivitySeries.objects.filter(place__group__in=groups))
         export_queryset(SeriesParticipantType.objects.filter(activity_series__place__group__in=groups))
         export_queryset(Activity.objects.filter(place__group__in=groups))
@@ -117,3 +112,7 @@ def export_to_file(group_ids: List[int], output_filename: str):
         # feedback
         export_queryset(Feedback.objects.filter(about__place__group__in=groups))
         export_queryset(FeedbackNoShow.objects.filter(feedback__about__place__group__in=groups))
+
+        # offers
+        export_queryset(Offer.objects.filter(group__in=groups))
+        export_queryset(OfferImage.objects.filter(offer__group__in=groups))
