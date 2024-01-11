@@ -125,7 +125,7 @@ urlpatterns = [
     path("api/auth/", AuthView.as_view()),
     path("api/stats/", FrontendStatsView.as_view()),
     path("api/status/", StatusView.as_view()),
-    path("api/meet/<str:room_name>/token/", MeetViewSet.as_view()),
+    path("api/meet/token/", MeetViewSet.as_view()),
     path("api/meet/webhook/", MeetWebhookViewSet.as_view()),
     path("api/", include(router.urls)),
     path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),

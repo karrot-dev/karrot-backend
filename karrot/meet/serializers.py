@@ -19,6 +19,6 @@ class RoomSerializer(serializers.ModelSerializer):
         model = Room
         fields = [
             "id",
-            "name",
+            "subject",
             "participants",
         ]

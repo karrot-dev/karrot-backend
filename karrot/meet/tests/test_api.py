@@ -32,7 +32,7 @@ class TestMeetAPI(APITestCase):
         self.client.force_login(user=self.user)
         response = self.client.get(token_url("group", self.group.id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["room_id"], f"group:{self.group.id}")
+        self.assertEqual(response.data["subject"], f"group:{self.group.id}")
         self.assertEqual(response.data["subject_type"], "group")
         self.assertEqual(response.data["subject_id"], self.group.id)
         self.assertIsNotNone(response.data["token"])
