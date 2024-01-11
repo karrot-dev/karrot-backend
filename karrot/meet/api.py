@@ -2,12 +2,15 @@ import json
 
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
+from rest_framework.mixins import ListModelMixin
 from rest_framework.negotiation import BaseContentNegotiation
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 
-from karrot.meet.livekit import create_room_token, list_participants, webhook_receiver
+from karrot.meet import livekit
 from karrot.meet.meet_utils import (
     get_or_create_room,
     parse_room_subject,
@@ -25,7 +28,19 @@ class NotFoundResponse(Response):
         super().__init__({}, status=404)
 
 
-class MeetViewSet(GenericAPIView):
+class MeetRoomViewSet(
+    ListModelMixin,
+    GenericViewSet,
+):
+    serializer_class = RoomSerializer
+    queryset = Room.objects
+
+    def get_queryset(self):
+        # Either group rooms, or ones you are a subject user of
+        return super().get_queryset().filter(Q(group__members=self.request.user) | Q(subject_users=self.request.user))
+
+
+class MeetTokenViewSet(GenericAPIView):
     def get(self, request):
         """Creates a room token for a given room subject
 
@@ -50,10 +65,14 @@ class MeetViewSet(GenericAPIView):
         if not user_has_room_access(user, room_subject):
             return NotFoundResponse()
 
+        # TODO: should we pre-create the room and sync?
+        # livekit.create_room(room_subject_to_room_name(room_subject))
+        # sync_participants_and_notify(room_subject)
+
         return Response(
             {
                 "subject": room_subject,
-                "token": create_room_token(user, room_subject),
+                "token": livekit.create_room_token(user, room_subject),
             }
         )
 
@@ -86,7 +105,7 @@ class MeetWebhookViewSet(GenericAPIView):
         auth_token = request.headers.get("Authorization")
         if not auth_token:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        event = webhook_receiver.receive(request.body.decode("utf-8"), auth_token)
+        event = livekit.webhook_receiver.receive(request.body.decode("utf-8"), auth_token)
         if not event.room.name.startswith(settings.MEET_LIVEKIT_ROOM_PREFIX):
             # not our prefix, ignore...
             return Response(status=status.HTTP_200_OK)
@@ -98,19 +117,20 @@ class MeetWebhookViewSet(GenericAPIView):
             # didn't match our format, ignore it
             return Response(status=status.HTTP_200_OK)
 
-        # Don't actually need to handle "room_started" as
-        # we get a "participant_joined" right after, and we can just
-        # sync everything then.
-
-        if event.event == "room_finished":
+        if event.event in (
+            # Don't actually need to handle "room_started" as
+            # we get a "participant_joined" right after, and we can just
+            # sync everything then.
+            # "room_started",
+            "participant_joined",
+            "participant_left",
+        ):
+            sync_participants_and_notify(room_subject)
+        elif event.event == "room_finished":
             room = Room.objects.filter(subject=room_subject).first()
             if room:
                 notify_room_ended(RoomSerializer(room).data)
                 room.delete()
-        elif event.event == "participant_joined":
-            sync_participants_and_notify(room_subject)
-        elif event.event == "participant_left":
-            sync_participants_and_notify(room_subject)
 
         return Response(status=status.HTTP_200_OK)
 
@@ -127,7 +147,7 @@ def sync_participants_and_notify(room_subject: str):
     with transaction.atomic():
         room = get_or_create_room(room_subject)
         participants = {participant.identity: participant for participant in room.participants.all()}
-        for livekit_participant in list_participants(room_subject_to_room_name(room_subject)):
+        for livekit_participant in livekit.list_participants(room_subject_to_room_name(room_subject)):
             participant = participants.pop(livekit_participant.identity, None)
             if not participant:
                 metadata = json.loads(livekit_participant.metadata)

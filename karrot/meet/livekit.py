@@ -1,13 +1,16 @@
 import json
 from datetime import timedelta
+from typing import List
 
 from asgiref.sync import async_to_sync
 from django.conf import settings
 from django.utils.crypto import get_random_string
 from livekit.api import AccessToken, LiveKitAPI, TokenVerifier, VideoGrants, WebhookReceiver
-from livekit.protocol.room import ListParticipantsRequest
+from livekit.protocol.models import ParticipantInfo
+from livekit.protocol.room import CreateRoomRequest, ListParticipantsRequest
 
 from karrot.meet.meet_utils import room_subject_to_room_name
+from karrot.meet.models import Room
 from karrot.users.models import User
 
 token_verifier = TokenVerifier(
@@ -40,6 +43,7 @@ def create_room_token(user: User, room_subject: str) -> str:
         .with_ttl(timedelta(seconds=20))
         .with_grants(
             VideoGrants(
+                room_create=False,
                 room_join=True,
                 # actual room name as far as livekit is concerned is prefix + subject
                 room=room_subject_to_room_name(room_subject),
@@ -49,21 +53,33 @@ def create_room_token(user: User, room_subject: str) -> str:
     return token.to_jwt()
 
 
-async def alist_participants(room_name: str):
+def get_async_api() -> LiveKitAPI:
+    # This needs to be run from an async context
+    return LiveKitAPI(
+        url=settings.MEET_LIVEKIT_ENDPOINT,
+        api_key=settings.MEET_LIVEKIT_API_KEY,
+        api_secret=settings.MEET_LIVEKIT_API_SECRET,
+    )
+
+
+async def alist_participants(room_name: str) -> List[ParticipantInfo]:
     # Would be nice to have a non-async version
     # TODO: use "twirp" python lib and avoid the async/sync dance?
     # OR could have an async django view (but they're not great as lots of middleware is sync)
     # OR OR could have a fully async path by mounting at the ASGI app layer
 
-    # This needs to be constructed in an async context
-    livekit_api = LiveKitAPI(
-        url=settings.MEET_LIVEKIT_ENDPOINT,
-        api_key=settings.MEET_LIVEKIT_API_KEY,
-        api_secret=settings.MEET_LIVEKIT_API_SECRET,
-    )
-    result = await livekit_api.room.list_participants(ListParticipantsRequest(room=room_name))
+    result = await get_async_api().room.list_participants(ListParticipantsRequest(room=room_name))
+
     return result.participants
 
 
-def list_participants(room_name: str):
+async def acreate_room(room_name: str) -> Room:
+    return await get_async_api().room.create_room(CreateRoomRequest(name=room_name))
+
+
+def create_room(room_name: str) -> Room:
+    return async_to_sync(acreate_room)(room_name)
+
+
+def list_participants(room_name: str) -> List[ParticipantInfo]:
     return async_to_sync(alist_participants)(room_name)
