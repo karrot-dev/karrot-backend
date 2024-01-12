@@ -57,7 +57,7 @@ class MeetTokenViewSet(GenericAPIView):
         if not user or user.is_anonymous:
             return NotFoundResponse()
 
-        subject_type, subject_ids = parse_room_subject(room_subject)
+        room_subject, subject_type, subject_ids = parse_room_subject(room_subject)
 
         if not subject_type:
             return NotFoundResponse()
@@ -112,7 +112,7 @@ class MeetWebhookViewSet(GenericAPIView):
 
         room_subject = event.room.name.removeprefix(settings.MEET_LIVEKIT_ROOM_PREFIX)
 
-        subject_type, subject_ids = parse_room_subject(room_subject)
+        room_subject, subject_type, subject_ids = parse_room_subject(room_subject)
         if not subject_type:
             # didn't match our format, ignore it
             return Response(status=status.HTTP_200_OK)

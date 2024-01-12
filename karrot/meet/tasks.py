@@ -7,7 +7,7 @@ from karrot.users.models import User
 
 
 def get_subscriptions(room_subject):
-    subject_type, subject_ids = parse_room_subject(room_subject)
+    room_subject, subject_type, subject_ids = parse_room_subject(room_subject)
     if not subject_type:
         return ChannelSubscription.objects.none()
     if subject_type in ("group", "place", "activity"):

@@ -13,7 +13,7 @@ from karrot.users.models import User
 room_subject_re = re.compile("^(?P<subject_type>[a-z]+):(?P<subject_ids>[0-9,]+)$")
 
 
-def parse_room_subject(room_subject: str) -> Optional[tuple[str, List[int]]]:
+def parse_room_subject(room_subject: str) -> Optional[tuple[str, str, List[int]]]:
     match = room_subject_re.match(room_subject)
     if not match:
         return None
@@ -24,18 +24,21 @@ def parse_room_subject(room_subject: str) -> Optional[tuple[str, List[int]]]:
     # can have multiple ids, sort them so it doesn't matter what order the client sends them in
     subject_ids = sorted([int(val) for val in subject_ids.split(",")])
 
-    return subject_type, subject_ids
+    # normalize the room subject, so subject ids are back in order
+    room_subject = f"{subject_type}:{','.join(str(val) for val in subject_ids)}"
+
+    return room_subject, subject_type, subject_ids
 
 
-def require_room_subject(room_subject: str) -> tuple[str, List[int]]:
-    subject_type, subject_ids = parse_room_subject(room_subject)
+def require_room_subject(room_subject: str) -> tuple[str, str, List[int]]:
+    room_subject, subject_type, subject_ids = parse_room_subject(room_subject)
     if not subject_type:
         raise ValueError("invalid room subject")
-    return subject_type, subject_ids
+    return room_subject, subject_type, subject_ids
 
 
 def user_has_room_access(user: User, room_subject: str) -> bool:
-    subject_type, subject_ids = parse_room_subject(room_subject)
+    room_subject, subject_type, subject_ids = parse_room_subject(room_subject)
     if not subject_type:
         return False
 
@@ -64,7 +67,7 @@ def user_has_room_access(user: User, room_subject: str) -> bool:
 
 
 def get_room_group(room_subject: str) -> Optional[Group]:
-    subject_type, subject_ids = parse_room_subject(room_subject)
+    room_subject, subject_type, subject_ids = parse_room_subject(room_subject)
     if not subject_type:
         return None
     if subject_type in ("group", "place", "activity"):
@@ -79,7 +82,7 @@ def get_room_group(room_subject: str) -> Optional[Group]:
 
 
 def get_or_create_room(room_subject: str) -> Room:
-    subject_type, subject_ids = require_room_subject(room_subject)
+    room_subject, subject_type, subject_ids = require_room_subject(room_subject)
     group = get_room_group(room_subject)
     room, created = Room.objects.get_or_create(group=group, subject=room_subject)
     if created and subject_type == "user":
