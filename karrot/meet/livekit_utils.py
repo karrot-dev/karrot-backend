@@ -1,4 +1,5 @@
 import json
+from contextlib import asynccontextmanager
 from datetime import timedelta
 from typing import List
 
@@ -63,13 +64,18 @@ def create_room_token(user: User, room_subject: str) -> str:
     return token.to_jwt()
 
 
-def get_async_api() -> LiveKitAPI:
+@asynccontextmanager
+async def livekit_api():
     # This needs to be run from an async context
-    return LiveKitAPI(
+    api = LiveKitAPI(
         url=settings.MEET_LIVEKIT_ENDPOINT,
         api_key=settings.MEET_LIVEKIT_API_KEY,
         api_secret=settings.MEET_LIVEKIT_API_SECRET,
     )
+    try:
+        yield api
+    finally:
+        await api.aclose()
 
 
 async def alist_participants(room_name: str) -> List[ParticipantInfo]:
@@ -77,14 +83,14 @@ async def alist_participants(room_name: str) -> List[ParticipantInfo]:
     # TODO: use "twirp" python lib and avoid the async/sync dance?
     # OR could have an async django view (but they're not great as lots of middleware is sync)
     # OR OR could have a fully async path by mounting at the ASGI app layer
-
-    result = await get_async_api().room.list_participants(ListParticipantsRequest(room=room_name))
-
-    return result.participants
+    async with livekit_api() as api:
+        result = await api.room.list_participants(ListParticipantsRequest(room=room_name))
+        return result.participants
 
 
 async def acreate_room(room_name: str) -> Room:
-    return await get_async_api().room.create_room(CreateRoomRequest(name=room_name))
+    async with livekit_api() as api:
+        return await api.room.create_room(CreateRoomRequest(name=room_name))
 
 
 def create_room(room_name: str) -> Room:
