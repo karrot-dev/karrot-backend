@@ -63,6 +63,7 @@ def user_has_room_access(user: User, room_subject: str) -> bool:
             User.objects.filter(id__in=subject_ids, groups__in=user.groups.all())
             .order_by("id")
             .values_list("id", flat=True)
+            .distinct()
         )
         return user_ids == subject_ids
 
