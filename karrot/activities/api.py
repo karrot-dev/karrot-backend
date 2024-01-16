@@ -211,6 +211,7 @@ class ActivitySeriesViewSet(
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = ActivitySeriesFilter
     permission_classes = (IsAuthenticated, IsGroupEditor)
+    parser_classes = [JSONWithFilesMultiPartParser, JSONParser]
 
     def get_queryset(self):
         return self.queryset.filter(place__group__members=self.request.user)

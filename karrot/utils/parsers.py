@@ -6,10 +6,9 @@ from rest_framework.parsers import MultiPartParser
 
 
 class JSONWithFilesMultiPartParser(MultiPartParser):
-    """ "
-    A multipart parser that allows you send JSON with files to be nested inside it
+    """A multipart parser that allows you to send JSON with files to be nested inside it
 
-    So, if you you had an model with a name and image field you kind of want to be able to
+    So, if you had a model with a name and image field you kind of want to be able to
     update it with:
 
         {
