@@ -28,7 +28,7 @@ from karrot.groups.api import GroupInfoViewSet, GroupViewSet
 from karrot.history.api import HistoryViewSet
 from karrot.invitations.api import InvitationAcceptViewSet, InvitationsViewSet
 from karrot.issues.api import IssuesViewSet
-from karrot.meet.api import MeetViewSet
+from karrot.meet.api import MeetRoomViewSet, MeetTokenViewSet, MeetWebhookViewSet
 from karrot.notifications.api import NotificationViewSet
 from karrot.offers.api import OfferViewSet
 from karrot.places.api import PlaceStatusViewSet, PlaceTypeViewSet, PlaceViewSet
@@ -106,6 +106,9 @@ router.register("feedback", FeedbackViewSet)
 
 router.register("unsubscribe", UnsubscribeViewSet, basename="unsubscribe")
 
+# Meet rooms
+router.register("meet/rooms", MeetRoomViewSet)
+
 # Stats endpoints
 router.register("stats/activity-history", ActivityHistoryStatsViewSet)
 
@@ -125,7 +128,8 @@ urlpatterns = [
     path("api/auth/", AuthView.as_view()),
     path("api/stats/", FrontendStatsView.as_view()),
     path("api/status/", StatusView.as_view()),
-    path("api/meet/<str:room_id>/token/", MeetViewSet.as_view()),
+    path("api/meet/token/", MeetTokenViewSet.as_view()),
+    path("api/meet/webhook/", MeetWebhookViewSet.as_view()),
     path("api/", include(router.urls)),
     path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
     path("admin/docs/", include("django.contrib.admindocs.urls")),
