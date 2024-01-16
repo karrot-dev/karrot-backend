@@ -1,7 +1,7 @@
 # Translations template for PROJECT.
-# Copyright (C) 2023 ORGANIZATION
+# Copyright (C) 2024 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
 # 
 # Translators:
 # Daniel Waxweiler, 2022
@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.12.1\n"
+"Generated-By: Babel 2.13.1\n"
 "Language: lb\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
@@ -45,15 +45,15 @@ msgstr "Aktivitéit"
 msgid "Task"
 msgstr "Aufgab"
 
-#: karrot/activities/serializers.py:311
+#: karrot/activities/serializers.py:329
 msgid "Must be a list"
 msgstr "Muss eng Lëscht sinn"
 
-#: karrot/activities/serializers.py:312
+#: karrot/activities/serializers.py:330
 msgid "Must be a list with one or two values"
 msgstr "Muss eng Lëscht mat een oder zwee Wäerter sinn"
 
-#: karrot/activities/serializers.py:313
+#: karrot/activities/serializers.py:331
 msgid "Must pass start value"
 msgstr "Ee Start-Wäert muss ugi ginn."
 
@@ -62,7 +62,7 @@ msgstr "Ee Start-Wäert muss ugi ginn."
 msgid "Upcoming %(activity_type)s"
 msgstr "Zukünfteg %(activity_type)s"
 
-#: karrot/activities/tasks.py:164
+#: karrot/activities/tasks.py:163
 #, python-format
 msgid "%(activity_type)s no longer available - %(date_time)s"
 msgstr "%(activity_type)s net méi disponibel - %(date_time)s"
@@ -166,7 +166,7 @@ msgstr ""
 msgid "You need to have a verified email address"
 msgstr "Du muss eng verifizéiert E-Mail-Adress hunn"
 
-#: karrot/applications/api.py:38 karrot/groups/api.py:51
+#: karrot/applications/api.py:38 karrot/groups/api.py:58
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
 msgid "You need to be a group editor"
 msgstr "Du muss eng Persoun sinn, déi beaarbechten duerf"
@@ -265,16 +265,16 @@ msgstr ""
 "%(site_name)s</a> oder <a href=\"%(mute_url)s\">schalt d'Ënnerhalung op "
 "stomm</a>."
 
-#: karrot/conversations/api.py:84 karrot/conversations/api.py:292
-#: karrot/conversations/api.py:483 karrot/conversations/serializers.py:271
+#: karrot/conversations/api.py:92 karrot/conversations/api.py:310
+#: karrot/conversations/api.py:506 karrot/conversations/serializers.py:281
 msgid "You are not in this conversation"
 msgstr "Du bass net an dëser Ënnerhalung"
 
-#: karrot/conversations/api.py:93
+#: karrot/conversations/api.py:101
 msgid "You are not the author of this message"
 msgstr "Du bass net den Auteur vun dëser Noriicht."
 
-#: karrot/conversations/api.py:102
+#: karrot/conversations/api.py:110
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
@@ -282,36 +282,36 @@ msgstr ""
 "Du kanns eng Noriicht net méi wéi %(days_number)s Deeg no senger Erstellung "
 "beaarbechten."
 
-#: karrot/conversations/api.py:411
+#: karrot/conversations/api.py:432
 msgid "Must be first in thread"
 msgstr "Muss als éischt am Thread sinn"
 
-#: karrot/conversations/api.py:414
+#: karrot/conversations/api.py:435
 msgid "You are not a participant in this thread"
 msgstr "Du bass kee Member vun dëser Ënnerhalung"
 
-#: karrot/conversations/emails.py:263
+#: karrot/conversations/emails.py:271
 #, python-format
 msgid "New message in your application to %(group_name)s"
 msgstr "Nei Noriicht op deng Bewerbung bei %(group_name)s"
 
-#: karrot/conversations/emails.py:267
+#: karrot/conversations/emails.py:275
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr "Nei Noriicht an der Bewerbung vum %(user_name)s bei %(group_name)s"
 
-#: karrot/conversations/emails.py:290
+#: karrot/conversations/emails.py:298
 #, python-format
 msgid "New message in membership review of %(user_name)s"
 msgstr ""
 "Nei Noriicht am Kritik-Prozess iwwert d'Memberschaft vum %(user_name)s"
 
-#: karrot/conversations/emails.py:305
+#: karrot/conversations/emails.py:314
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr "Nei Norricht fir d'Offer %(offer_name)s bei %(group_name)s"
 
-#: karrot/conversations/serializers.py:273
+#: karrot/conversations/serializers.py:283
 msgid "This conversation has been closed"
 msgstr "Dës Ënnerhalung gouf zougemaach"
 
@@ -361,27 +361,27 @@ msgstr ""
 "%(site_name)s</a> oder <a href=\"%(mute_url)s\">schalt fir weider Äntwerten "
 "op stomm</a>."
 
-#: karrot/groups/api.py:30
+#: karrot/groups/api.py:37
 msgid "You are already a member."
 msgstr "Du bass schonn e Member."
 
-#: karrot/groups/api.py:37
+#: karrot/groups/api.py:44
 msgid "You can only join open groups."
 msgstr "Du kanns just oppe Gruppe bäitrieden."
 
-#: karrot/groups/api.py:44
+#: karrot/groups/api.py:51
 msgid "You cannot give trust to yourself"
 msgstr "Du kanns dir selwer kee Vertraue ginn"
 
-#: karrot/groups/serializers.py:34
+#: karrot/groups/serializers.py:35
 msgid "Unknown timezone"
 msgstr "Onbekannten Zäitzon"
 
-#: karrot/groups/serializers.py:42
+#: karrot/groups/serializers.py:43
 msgid "Playground"
 msgstr "Spillplaz"
 
-#: karrot/groups/serializers.py:256
+#: karrot/groups/serializers.py:254
 msgid "You are not in this group"
 msgstr "Du bass net an dëser Grupp"
 
@@ -617,7 +617,7 @@ msgstr ""
 msgid "%(group_name)s is really missing you!"
 msgstr "%(group_name)s vermësst dech wierklech!"
 
-#: karrot/invitations/api.py:27
+#: karrot/invitations/api.py:26
 msgid ""
 "Invitation to this email address was sent recently, wait before resending"
 msgstr ""
@@ -629,7 +629,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "Eng Aluedung gouf schonn un dës E-Mail-Adress geschéckt"
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
-#: karrot/offers/serializers.py:100
+#: karrot/offers/serializers.py:108
 msgid "You are not a member of this group."
 msgstr "Du bass kee Member vun dëser Grupp."
 
@@ -758,11 +758,11 @@ msgstr "Dës Ofstëmmungsronn geet den %(expiry_date)s eriwwer."
 msgid "A review of your membership was started"
 msgstr "Ee Kritik-Prozess iwwert deng Memberschaft gouf gestart"
 
-#: karrot/offers/api.py:33
+#: karrot/offers/api.py:34
 msgid "You are not the owner of this offer"
 msgstr "Du bass net den Auteur vun dëser Offer"
 
-#: karrot/offers/api.py:95
+#: karrot/offers/api.py:93
 msgid "You can only archive an active offer"
 msgstr "Du kanns just eng aktiv Offer archivéieren"
 
@@ -799,6 +799,22 @@ msgstr ""
 "%(site_name)s</a> oder <a href=\"%(mute_url)s\">schalt d'Ënnerhalung op "
 "stomm</a>."
 
+#: karrot/places/place_statuses.py:6
+msgid "Created"
+msgstr ""
+
+#: karrot/places/place_statuses.py:7
+msgid "Negotiating"
+msgstr ""
+
+#: karrot/places/place_statuses.py:8
+msgid "Active"
+msgstr ""
+
+#: karrot/places/place_statuses.py:9
+msgid "Declined"
+msgstr ""
+
 #: karrot/places/place_types.py:5
 msgid "Unspecified"
 msgstr "Net spezifizéiert"
@@ -823,24 +839,24 @@ msgstr "Restaurant"
 msgid "Market"
 msgstr "Maart"
 
-#: karrot/places/serializers.py:190
+#: karrot/places/serializers.py:311
 msgid "Set at least one week in advance"
 msgstr "Setz se mindestens eng Woch am Viraus"
 
-#: karrot/places/serializers.py:193
+#: karrot/places/serializers.py:314
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr "Setz se net méi wéi %(count)s Wochen am Viraus"
 
-#: karrot/places/serializers.py:245
+#: karrot/places/serializers.py:373
 msgid "You are already subscribed to this place"
 msgstr "Du hues dës Plaz schonn abonéiert"
 
-#: karrot/subscriptions/receivers.py:777
+#: karrot/subscriptions/receivers.py:828
 msgid "Push notifications are enabled!"
 msgstr "Push-Matdeelungen sinn aktivéiert!"
 
-#: karrot/userauth/api.py:98 karrot/userauth/serializers.py:102
+#: karrot/userauth/api.py:105 karrot/userauth/serializers.py:102
 #: karrot/userauth/serializers.py:151 karrot/userauth/serializers.py:172
 #: karrot/userauth/serializers.py:202 karrot/userauth/serializers.py:224
 msgid "We could not send you an e-mail."

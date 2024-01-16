@@ -1,7 +1,7 @@
 # Translations template for PROJECT.
-# Copyright (C) 2023 ORGANIZATION
+# Copyright (C) 2024 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
 # 
 # Translators:
 # Carlos Pesquera Alonso <fydus@hotmail.com>, 2021
@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.12.1\n"
+"Generated-By: Babel 2.13.1\n"
 "Language: eo\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
@@ -45,15 +45,15 @@ msgstr "Activivaĵoj"
 msgid "Task"
 msgstr "Taskoj"
 
-#: karrot/activities/serializers.py:311
+#: karrot/activities/serializers.py:329
 msgid "Must be a list"
 msgstr "Ĝi devas esti listo"
 
-#: karrot/activities/serializers.py:312
+#: karrot/activities/serializers.py:330
 msgid "Must be a list with one or two values"
 msgstr "Ĝi devas esti listo kun unu aŭ du valoroj"
 
-#: karrot/activities/serializers.py:313
+#: karrot/activities/serializers.py:331
 msgid "Must pass start value"
 msgstr "Ĝi devas meti komencan valoron"
 
@@ -62,7 +62,7 @@ msgstr "Ĝi devas meti komencan valoron"
 msgid "Upcoming %(activity_type)s"
 msgstr "Venontaj %(activity_type)s"
 
-#: karrot/activities/tasks.py:164
+#: karrot/activities/tasks.py:163
 #, python-format
 msgid "%(activity_type)s no longer available - %(date_time)s"
 msgstr ""
@@ -161,7 +161,7 @@ msgstr "Vi povas foriti la grupon de la <a href=\"%(group_url)s\">grupa paĝo</a
 msgid "You need to have a verified email address"
 msgstr "Vi bezonas havi kontrolitan retadreson"
 
-#: karrot/applications/api.py:38 karrot/groups/api.py:51
+#: karrot/applications/api.py:38 karrot/groups/api.py:58
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:122
 msgid "You need to be a group editor"
 msgstr "Vi bezonas esti grupa redaktoro"
@@ -260,50 +260,50 @@ msgstr ""
 "ĝin en %(site_name)s</a> aŭ <a href=\"%(mute_url)s\">silentigu la "
 "konversacion </a>."
 
-#: karrot/conversations/api.py:84 karrot/conversations/api.py:292
-#: karrot/conversations/api.py:483 karrot/conversations/serializers.py:271
+#: karrot/conversations/api.py:92 karrot/conversations/api.py:310
+#: karrot/conversations/api.py:506 karrot/conversations/serializers.py:281
 msgid "You are not in this conversation"
 msgstr "Vi ne estas en tiu ĉi konversacio"
 
-#: karrot/conversations/api.py:93
+#: karrot/conversations/api.py:101
 msgid "You are not the author of this message"
 msgstr "Vi ne estas la aŭtoro de la mesaĝo"
 
-#: karrot/conversations/api.py:102
+#: karrot/conversations/api.py:110
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
 msgstr "Vi ne povas redakti la mesaĝon pli ol %(days_number)s post la kreado."
 
-#: karrot/conversations/api.py:411
+#: karrot/conversations/api.py:432
 msgid "Must be first in thread"
 msgstr "Ĝi devas unue esti en diskuto"
 
-#: karrot/conversations/api.py:414
+#: karrot/conversations/api.py:435
 msgid "You are not a participant in this thread"
 msgstr "Vi ne partoprenas en tiu ĉi diskuto"
 
-#: karrot/conversations/emails.py:263
+#: karrot/conversations/emails.py:271
 #, python-format
 msgid "New message in your application to %(group_name)s"
 msgstr "Nova mesaĝo en via kandidatiĝo al %(group_name)s"
 
-#: karrot/conversations/emails.py:267
+#: karrot/conversations/emails.py:275
 #, python-format
 msgid "New message in application of %(user_name)s to %(group_name)s"
 msgstr "Nova mesaĝo en kandidatiĝo de %(user_name)s al %(group_name)s"
 
-#: karrot/conversations/emails.py:290
+#: karrot/conversations/emails.py:298
 #, python-format
 msgid "New message in membership review of %(user_name)s"
 msgstr ""
 
-#: karrot/conversations/emails.py:305
+#: karrot/conversations/emails.py:314
 #, python-format
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr "Nova mesaĝo por oferto %(offer_name)s en %(group_name)s"
 
-#: karrot/conversations/serializers.py:273
+#: karrot/conversations/serializers.py:283
 msgid "This conversation has been closed"
 msgstr "La konversacio fermiĝis"
 
@@ -350,27 +350,27 @@ msgstr ""
 "respondojn en %(site_name)s</a> aŭ <a href=\"%(mute_url)s\">silentigu "
 "estontajn respondojn </a>."
 
-#: karrot/groups/api.py:30
+#: karrot/groups/api.py:37
 msgid "You are already a member."
 msgstr "Vi jam estas ano"
 
-#: karrot/groups/api.py:37
+#: karrot/groups/api.py:44
 msgid "You can only join open groups."
 msgstr "Vi nur povas aliĝi malfermajn grupon."
 
-#: karrot/groups/api.py:44
+#: karrot/groups/api.py:51
 msgid "You cannot give trust to yourself"
 msgstr "Vi ne povas fidi vin mem"
 
-#: karrot/groups/serializers.py:34
+#: karrot/groups/serializers.py:35
 msgid "Unknown timezone"
 msgstr "Nekonata horzono"
 
-#: karrot/groups/serializers.py:42
+#: karrot/groups/serializers.py:43
 msgid "Playground"
 msgstr "Relaksujo"
 
-#: karrot/groups/serializers.py:256
+#: karrot/groups/serializers.py:254
 msgid "You are not in this group"
 msgstr "Vi ne estas en ĉi tiu grupo"
 
@@ -601,7 +601,7 @@ msgstr ""
 msgid "%(group_name)s is really missing you!"
 msgstr "Vi ege mankas al %(group_name)s!"
 
-#: karrot/invitations/api.py:27
+#: karrot/invitations/api.py:26
 msgid ""
 "Invitation to this email address was sent recently, wait before resending"
 msgstr ""
@@ -613,7 +613,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "Invito jam sendita al tiu ĉi retadreso"
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:120
-#: karrot/offers/serializers.py:100
+#: karrot/offers/serializers.py:108
 msgid "You are not a member of this group."
 msgstr "Vi ne anas en ĉi tiu grupo"
 
@@ -735,11 +735,11 @@ msgstr "Ĉi tiu voĉdona rondo finas la %(expiry_date)s."
 msgid "A review of your membership was started"
 msgstr ""
 
-#: karrot/offers/api.py:33
+#: karrot/offers/api.py:34
 msgid "You are not the owner of this offer"
 msgstr "Vi ne estas la posedanto de tiu ĉi oferto"
 
-#: karrot/offers/api.py:95
+#: karrot/offers/api.py:93
 msgid "You can only archive an active offer"
 msgstr "Vi nur povas arkivi aktivan oferton"
 
@@ -776,6 +776,22 @@ msgstr ""
 "%(site_name)s</a> aŭ <a href=\"%(mute_url)s\">silentigu la konversacion "
 "</a>."
 
+#: karrot/places/place_statuses.py:6
+msgid "Created"
+msgstr ""
+
+#: karrot/places/place_statuses.py:7
+msgid "Negotiating"
+msgstr ""
+
+#: karrot/places/place_statuses.py:8
+msgid "Active"
+msgstr ""
+
+#: karrot/places/place_statuses.py:9
+msgid "Declined"
+msgstr ""
+
 #: karrot/places/place_types.py:5
 msgid "Unspecified"
 msgstr ""
@@ -800,24 +816,24 @@ msgstr ""
 msgid "Market"
 msgstr ""
 
-#: karrot/places/serializers.py:190
+#: karrot/places/serializers.py:311
 msgid "Set at least one week in advance"
 msgstr "Fiksu ĝin almenaŭ antaŭ unu semajno"
 
-#: karrot/places/serializers.py:193
+#: karrot/places/serializers.py:314
 #, python-format
 msgid "Do not set more than %(count)s weeks in advance"
 msgstr "Ne agordu antaŭ pli ol %(count)ssemanjnoj"
 
-#: karrot/places/serializers.py:245
+#: karrot/places/serializers.py:373
 msgid "You are already subscribed to this place"
 msgstr "Vi jam abonis tiun ĉi lokon"
 
-#: karrot/subscriptions/receivers.py:777
+#: karrot/subscriptions/receivers.py:828
 msgid "Push notifications are enabled!"
 msgstr ""
 
-#: karrot/userauth/api.py:98 karrot/userauth/serializers.py:102
+#: karrot/userauth/api.py:105 karrot/userauth/serializers.py:102
 #: karrot/userauth/serializers.py:151 karrot/userauth/serializers.py:172
 #: karrot/userauth/serializers.py:202 karrot/userauth/serializers.py:224
 msgid "We could not send you an e-mail."
