@@ -1,3 +1,3 @@
-web: ./scripts/wait-for-db && ./manage.py migrate && ./manage.py runserver 0.0.0.0:8000
+web: ./scripts/wait-for-db && ./manage.py migrate && ./manage.py runserver
 huey: ./scripts/wait-for-db && ./manage.py run_huey
 mjml: ./mjml/convert --watch

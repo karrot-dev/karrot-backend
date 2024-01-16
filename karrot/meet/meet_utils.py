@@ -42,12 +42,11 @@ def user_has_room_access(user: User, room_subject: str) -> bool:
     if not subject_type:
         return False
 
-    # subject types that require 1 id
     if subject_type in ("group", "place", "activity"):
+        # subject types that require 1 id
         if len(subject_ids) != 1:
             return False
         subject_id = subject_ids[0]
-        # response_data["subject_id"] = subject_id
         if subject_type == "group":
             return Group.objects.filter(id=subject_id, members=user).exists()
         elif subject_type == "place":
@@ -55,7 +54,11 @@ def user_has_room_access(user: User, room_subject: str) -> bool:
         elif subject_type == "activity":
             return Activity.objects.filter(id=subject_id, place__group__members=user).exists()
     elif subject_type == "user":
-        # response_data["subject_ids"] = subject_ids
+        # user chats have to include the user themselves
+        if user.id not in subject_ids:
+            return False
+
+        # all users must be accessible to our requesting user
         user_ids = list(
             User.objects.filter(id__in=subject_ids, groups__in=user.groups.all())
             .order_by("id")
