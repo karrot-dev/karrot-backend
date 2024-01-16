@@ -10,7 +10,7 @@ from rest_framework.negotiation import BaseContentNegotiation
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from karrot.meet import livekit
+from karrot.meet import livekit_utils
 from karrot.meet.meet_utils import (
     get_or_create_room,
     parse_room_subject,
@@ -72,7 +72,7 @@ class MeetTokenViewSet(GenericAPIView):
         return Response(
             {
                 "subject": room_subject,
-                "token": livekit.create_room_token(user, room_subject),
+                "token": livekit_utils.create_room_token(user, room_subject),
             }
         )
 
@@ -102,10 +102,7 @@ class MeetWebhookViewSet(GenericAPIView):
     content_negotiation_class = LiveKitContentNegotiation
 
     def post(self, request):
-        auth_token = request.headers.get("Authorization")
-        if not auth_token:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        event = livekit.webhook_receiver.receive(request.body.decode("utf-8"), auth_token)
+        event = livekit_utils.receive_request(request)
         if not event.room.name.startswith(settings.MEET_LIVEKIT_ROOM_PREFIX):
             # not our prefix, ignore...
             return Response(status=status.HTTP_200_OK)
@@ -147,7 +144,7 @@ def sync_participants_and_notify(room_subject: str):
     with transaction.atomic():
         room = get_or_create_room(room_subject)
         participants = {participant.identity: participant for participant in room.participants.all()}
-        for livekit_participant in livekit.list_participants(room_subject_to_room_name(room_subject)):
+        for livekit_participant in livekit_utils.list_participants(room_subject_to_room_name(room_subject)):
             participant = participants.pop(livekit_participant.identity, None)
             if not participant:
                 metadata = json.loads(livekit_participant.metadata)

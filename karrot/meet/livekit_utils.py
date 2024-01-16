@@ -4,6 +4,8 @@ from typing import List
 
 from asgiref.sync import async_to_sync
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
+from django.http import HttpRequest
 from django.utils.crypto import get_random_string
 from livekit.api import AccessToken, LiveKitAPI, TokenVerifier, VideoGrants, WebhookReceiver
 from livekit.protocol.models import ParticipantInfo
@@ -13,11 +15,19 @@ from karrot.meet.meet_utils import room_subject_to_room_name
 from karrot.meet.models import Room
 from karrot.users.models import User
 
-token_verifier = TokenVerifier(
-    settings.MEET_LIVEKIT_API_KEY,
-    settings.MEET_LIVEKIT_API_SECRET,
-)
-webhook_receiver = WebhookReceiver(token_verifier)
+
+def receive_request(request: HttpRequest):
+    auth_token = request.headers.get("Authorization")
+    if not auth_token:
+        raise PermissionDenied()
+
+    token_verifier = TokenVerifier(
+        settings.MEET_LIVEKIT_API_KEY,
+        settings.MEET_LIVEKIT_API_SECRET,
+    )
+    webhook_receiver = WebhookReceiver(token_verifier)
+
+    return webhook_receiver.receive(request.body.decode("utf-8"), auth_token)
 
 
 def create_room_token(user: User, room_subject: str) -> str:
