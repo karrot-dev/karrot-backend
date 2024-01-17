@@ -507,6 +507,9 @@ CSRF_TRUSTED_ORIGINS = (
 MEET_LIVEKIT_ENDPOINT = options["MEET_LIVEKIT_ENDPOINT"]
 MEET_LIVEKIT_API_KEY = options["MEET_LIVEKIT_API_KEY"]
 MEET_LIVEKIT_API_SECRET = options["MEET_LIVEKIT_API_SECRET"]
+# means we can use livekit server for multiple (trusted) instances
+# co-operatively ignoring prefixes that don't match ours
+MEET_LIVEKIT_ROOM_PREFIX = re.sub("[^a-zA-Z0-9]", "_", re.sub(r"^https?://", "", HOSTNAME)) + ":"
 
 INFLUXDB_HOST = options["INFLUXDB_HOST"]
 
