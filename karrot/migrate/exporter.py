@@ -60,6 +60,7 @@ def export_to_file(group_ids: List[int], output_filename: str):
             ct = ContentType.objects.get_for_model(qs.model)
             data_type = f"{ct.app_label}.{ct.model}"
             data = BytesIO()
+            # uses .iterator() to not load all entries into memory
             for item in qs.order_by("pk").iterator():
                 item_data = MigrateSerializer(item, context=serializer_context).data
                 data.write(orjson.dumps(item_data, default=serialize_value))
@@ -88,9 +89,9 @@ def export_to_file(group_ids: List[int], output_filename: str):
         export_queryset(get_user_model().objects.filter(groupmembership__group__in=groups))
 
         # membership / trust / roles
+        export_queryset(Role.objects.filter(group__in=groups))
         export_queryset(GroupMembership.objects.filter(group__in=groups))
         export_queryset(Trust.objects.filter(membership__group__in=groups))
-        export_queryset(Role.objects.filter(group__in=groups))
 
         # agreements
         export_queryset(Agreement.objects.filter(group__in=groups))

@@ -6,42 +6,53 @@ from tarfile import TarFile
 from tempfile import TemporaryDirectory
 
 import orjson
-from django.contrib.auth.hashers import make_password
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.db.models import ForeignKey
-from django.utils import timezone
 
+from karrot.activities.models import (
+    Activity,
+    ActivityParticipant,
+    ActivitySeries,
+    ActivityType,
+    Feedback,
+    FeedbackNoShow,
+    ParticipantType,
+    SeriesParticipantType,
+)
+from karrot.agreements.models import Agreement
+from karrot.groups.models import Group, GroupMembership, Role, Trust
+from karrot.migrate.migrate_utils import create_anonymous_user, disabled_signals
 from karrot.migrate.serializers import (
     MigrateFileSerializer,
     get_migrate_serializer_class,
 )
+from karrot.offers.models import Offer, OfferImage
+from karrot.places.models import Place, PlaceStatus, PlaceSubscription, PlaceType
 from karrot.users.models import User
 
-
-def create_anonymous_user():
-    """Create anon deleted user that we can use for missing user foreign key
-
-    It might be there are import records that refers to users that are not imported
-    ... and for cases where that field is required, we can use this to set it to
-    an anonymous user.
-    """
-    return User.objects.create(
-        description="",
-        email=None,
-        is_active=False,
-        is_staff=False,
-        mail_verified=False,
-        unverified_email=None,
-        username=make_password(None),
-        display_name="",
-        address=None,
-        latitude=None,
-        longitude=None,
-        mobile_number="",
-        deleted_at=timezone.now(),
-        deleted=True,
-    )
+import_order = [
+    Group,
+    User,
+    Role,
+    GroupMembership,
+    Trust,
+    Agreement,
+    PlaceType,
+    PlaceStatus,
+    Place,
+    PlaceSubscription,
+    ActivityType,
+    ActivitySeries,
+    SeriesParticipantType,
+    Activity,
+    ParticipantType,
+    ActivityParticipant,
+    Feedback,
+    FeedbackNoShow,
+    Offer,
+    OfferImage,
+]
 
 
 def import_from_file(input_filename: str):
@@ -54,11 +65,13 @@ def import_from_file(input_filename: str):
     For the duration of the import we keep a mapping of original_id -> imported_id so we can handle
     all the foreign key fields.
     """
-    with transaction.atomic(), TemporaryDirectory() as tmpdir, TarFile.open(input_filename, "r|xz") as tarfile:
+    with disabled_signals(), transaction.atomic(), TemporaryDirectory() as tmpdir, TarFile.open(
+        input_filename, "r|xz"
+    ) as tarfile:
         MigrateFileSerializer.imported_files = {}
 
         id_mappings = defaultdict(dict)
-        anon_user = None
+        anon_users = {}  # original id -> anon_user
 
         def update_foreign_key_ids(data: dict, field):
             """Finds the foreign key fields, and swaps the original id for the newly imported id
@@ -88,9 +101,13 @@ def import_from_file(input_filename: str):
                     data[field_name] = None
                 elif foreign_key_model_class is User:
                     # a required user field
-                    nonlocal anon_user
-                    if not anon_user:
-                        anon_user = create_anonymous_user()
+                    # we create an anon user for each original user id
+                    # this is so unique constraints by user can still work
+                    # e.g. ActivityParticipant objects
+                    nonlocal anon_users
+                    if orig_id not in anon_users:
+                        anon_users[orig_id] = create_anonymous_user()
+                    anon_user = anon_users[orig_id]
                     print(
                         "Warning: missing id mapping for required field",
                         model_class,
@@ -107,6 +124,8 @@ def import_from_file(input_filename: str):
                         orig_id,
                     )
 
+        data_entries = defaultdict(list)  # data_type -> List[json_data]
+
         for member in tarfile:
             if member.name.startswith("files/"):
                 # we copy all the files into our tmpdir first
@@ -119,21 +138,39 @@ def import_from_file(input_filename: str):
                 MigrateFileSerializer.imported_files[filename] = file_tmp_dest
 
             data_type, ext = splitext(member.name)
-            if ext == ".json":  # == "groups.json":
+            if ext == ".json":
                 for line in tarfile.extractfile(member).readlines():
                     json_data = orjson.loads(line)
+                    data_entries[data_type].append(json_data)
 
-                    # we don't import with original id, but we do keep a mapping during the import
-                    # so we can tie up related things
-                    original_id = json_data.pop("id")
+        for model_class in import_order:
+            ct = ContentType.objects.get_for_model(model_class)
+            data_type = f"{ct.app_label}.{ct.model}"
 
-                    # exclude null values, as this allows serializer fields with required=False to work
-                    import_data = {k: json_data[k] for k in json_data.keys() if json_data[k] is not None}
+            json_data_entries = data_entries.pop(data_type, [])
 
-                    app_label, model_name = data_type.split(".", 2)
-                    ct = ContentType.objects.get(app_label=app_label, model=model_name)
-                    model_class = ct.model_class()
+            for json_data in json_data_entries:
+                # we don't import with original id, but we do keep a mapping during the import
+                # so we can tie up related things
+                original_id = json_data.pop("id")
 
+                # exclude null values, as this allows serializer fields with required=False to work
+                import_data = {k: json_data[k] for k in json_data.keys() if json_data[k] is not None}
+
+                app_label, model_name = data_type.split(".", 2)
+                ct = ContentType.objects.get(app_label=app_label, model=model_name)
+                model_class = ct.model_class()
+
+                skip_import = False
+
+                if model_class is User:
+                    existing_user = User.objects.filter(email=import_data["email"]).first()
+                    if existing_user:
+                        # if it's a user we're importing and they already exist, use that user
+                        skip_import = True
+                        id_mappings[model_class][original_id] = existing_user.id
+
+                if not skip_import:
                     # mapping from original ids to imported ids
                     # assumes the things were exported in the correct order
                     # such that the ids are already known by the time we need them
@@ -147,3 +184,6 @@ def import_from_file(input_filename: str):
 
                     # record the imported id
                     id_mappings[model_class][original_id] = entity.id
+
+        if len(data_entries) > 0:
+            raise ValueError("imported did not import all the data, failing entire import")

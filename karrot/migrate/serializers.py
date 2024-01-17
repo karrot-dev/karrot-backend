@@ -4,7 +4,7 @@ from os.path import getsize
 from django.core.files.uploadedfile import UploadedFile
 from django.db.models import Model
 from rest_framework import serializers
-from rest_framework.fields import ImageField
+from rest_framework.fields import ImageField, ListField
 
 from karrot.groups.models import Group
 
@@ -83,6 +83,9 @@ def get_migrate_serializer_class(model_class: type[Model]) -> type[serializers.M
             super().__init__(*args, **kwargs)
             for name in self.fields.keys():
                 field = self.fields[name]
+                if isinstance(field, ListField):
+                    # ensure lists can be empty, e.g. GroupMembership.notification_types
+                    field.allow_empty = True
                 if isinstance(field, ImageField):
                     # replace ImageFields with our special file migration serializer
                     self.fields[name] = MigrateFileSerializer(
