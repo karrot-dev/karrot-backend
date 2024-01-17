@@ -12,6 +12,7 @@ class PlaceTypeFactory(DjangoModelFactory):
         model = PlaceType
 
     name = Sequence(lambda n: " ".join(["PlaceType", str(n), faker.first_name()]))
+    icon = "not-a-real-icon"
 
 
 class PlaceStatusFactory(DjangoModelFactory):
@@ -19,6 +20,8 @@ class PlaceStatusFactory(DjangoModelFactory):
         model = PlaceStatus
 
     name = Sequence(lambda n: " ".join(["PlaceStatus", str(n), faker.first_name()]))
+    colour = "000000"
+    order = "a0"
 
 
 class PlaceFactory(DjangoModelFactory):

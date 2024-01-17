@@ -32,6 +32,9 @@ class ActivityTypeFactory(DjangoModelFactory):
         model = ActivityType
 
     name = Sequence(lambda n: " ".join(["ActivityType", str(n), faker.first_name()]))
+    icon = "not-a-real-icon"
+    colour = "000000"
+    feedback_icon = "also-not-a-real-icon"
 
 
 class ActivityFactory(DjangoModelFactory):
