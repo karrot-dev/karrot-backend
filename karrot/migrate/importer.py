@@ -1,10 +1,13 @@
 from collections import defaultdict
+from contextlib import contextmanager
 from os import makedirs
 from os.path import dirname, join, splitext
 from shutil import copyfileobj
 from tarfile import TarFile
-from tempfile import TemporaryDirectory
+from tempfile import NamedTemporaryFile, TemporaryDirectory
+from typing import IO
 
+import gnupg
 import orjson
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
@@ -55,7 +58,36 @@ import_order = [
 ]
 
 
-def import_from_file(input_filename: str):
+@contextmanager
+def decrypted_file(input_filename: str, password: str):
+    with (
+        TemporaryDirectory() as home,
+        NamedTemporaryFile() as tmp,
+    ):
+        # use a tmp home to ensure we have clean environment
+        gpg = gnupg.GPG(gnupghome=home)
+
+        result = gpg.decrypt_file(
+            input_filename,
+            passphrase=password,
+            output=tmp.name,
+        )
+        if not result.ok:
+            raise RuntimeError(result.status)
+
+        yield tmp
+
+
+def import_from_file(input_filename: str, password: str = None):
+    if input_filename.endswith(".gpg"):
+        with decrypted_file(input_filename, password) as file:
+            import_from_io(file)
+    else:
+        with open(input_filename, "rb") as file:
+            import_from_io(file)
+
+
+def import_from_io(io: IO):
     """Imports from a tar.xz archive created using export_to_file
 
     The import is done inside a database transaction, so it's all or nothing.
@@ -65,9 +97,12 @@ def import_from_file(input_filename: str):
     For the duration of the import we keep a mapping of original_id -> imported_id so we can handle
     all the foreign key fields.
     """
-    with disabled_signals(), transaction.atomic(), TemporaryDirectory() as tmpdir, TarFile.open(
-        input_filename, "r|xz"
-    ) as tarfile:
+    with (
+        disabled_signals(),
+        transaction.atomic(),
+        TemporaryDirectory() as tmpdir,
+        TarFile.open(fileobj=io, mode="r|xz") as tarfile,
+    ):
         MigrateFileSerializer.imported_files = {}
 
         id_mappings = defaultdict(dict)

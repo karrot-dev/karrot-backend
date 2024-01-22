@@ -5,13 +5,14 @@ from tempfile import TemporaryDirectory
 
 import orjson
 from django.test import TransactionTestCase
+from django.utils.crypto import get_random_string
 
 from karrot.activities.factories import ActivitySeriesFactory
 from karrot.activities.models import ActivitySeries
 from karrot.groups.factories import GroupFactory
 from karrot.groups.models import Group, GroupMembership
 from karrot.migrate.exporter import export_to_file
-from karrot.migrate.importer import import_from_file
+from karrot.migrate.importer import decrypted_file, import_from_file
 from karrot.places.factories import PlaceFactory
 from karrot.places.models import Place
 from karrot.users.factories import UserFactory
@@ -24,6 +25,7 @@ class TestExportImport(TransactionTestCase):
     def setUp(self):
         self._tmpdir = TemporaryDirectory()
         self.tmpdir = self._tmpdir.name
+        self.passphrase = get_random_string(40)
 
     def tearDown(self):
         self._tmpdir.cleanup()
@@ -39,7 +41,7 @@ class TestExportImport(TransactionTestCase):
         export_filename = self.export(group)
         self.reset_db()
         self.assertFalse(Group.objects.filter(name=group_name).exists())
-        import_from_file(export_filename)
+        import_from_file(export_filename, self.passphrase)
         self.assertTrue(Group.objects.filter(name=group_name).exists())
 
     def test_can_migrate_group_photo(self):
@@ -48,7 +50,7 @@ class TestExportImport(TransactionTestCase):
         original_photo_file = group.photo.path
         export_filename = self.export(group)
         self.reset_db()
-        import_from_file(export_filename)
+        import_from_file(export_filename, self.passphrase)
         imported_group = Group.objects.get(name=group_name)
         imported_photo_file = imported_group.photo.path
         self.assertNotEqual(original_photo_file, imported_photo_file)
@@ -59,15 +61,16 @@ class TestExportImport(TransactionTestCase):
         group = GroupFactory(members=[user])
         membership = GroupMembership.objects.get(user=user, group=group)
         export_filename = self.export(group)
-        with TarFile.open(export_filename, "r|xz") as tarfile:
-            memberships = []
-            for member in tarfile:
-                if member.name == "groups.groupmembership.json":
-                    for line in tarfile.extractfile(member).readlines():
-                        memberships.append(orjson.loads(line))
-            self.assertIsNotNone(memberships)
-            self.assertEqual(len(memberships), 1)
-            self.assertEqual(memberships[0]["notification_types"], membership.notification_types)
+        with decrypted_file(export_filename, self.passphrase) as file:
+            with TarFile.open(fileobj=file, mode="r|xz") as tarfile:
+                memberships = []
+                for member in tarfile:
+                    if member.name == "groups.groupmembership.json":
+                        for line in tarfile.extractfile(member).readlines():
+                            memberships.append(orjson.loads(line))
+                self.assertIsNotNone(memberships)
+                self.assertEqual(len(memberships), 1)
+                self.assertEqual(memberships[0]["notification_types"], membership.notification_types)
 
     def test_migrates_users_and_memberships(self):
         users = [UserFactory() for _ in range(10)]
@@ -76,7 +79,7 @@ class TestExportImport(TransactionTestCase):
         self.assertEqual(group.members.count(), 10)
         self.reset_db()
         self.assertEqual(User.objects.count(), 0)
-        import_from_file(export_filename)
+        import_from_file(export_filename, self.passphrase)
         self.assertEqual(User.objects.count(), 10)
         self.assertEqual(Group.objects.first().members.count(), 10)
 
@@ -86,7 +89,7 @@ class TestExportImport(TransactionTestCase):
         export_filename = self.export(group)
         self.reset_db()
         self.assertEqual(Place.objects.count(), 0)
-        import_from_file(export_filename)
+        import_from_file(export_filename, self.passphrase)
         self.assertEqual(Place.objects.count(), 1)
 
     def test_migrates_activity_series(self):
@@ -96,13 +99,13 @@ class TestExportImport(TransactionTestCase):
         export_filename = self.export(group)
         self.reset_db()
         self.assertEqual(ActivitySeries.objects.count(), 0)
-        import_from_file(export_filename)
+        import_from_file(export_filename, self.passphrase)
         self.assertEqual(ActivitySeries.objects.count(), 1)
 
     def reset_db(self):
         self._fixture_teardown()
 
     def export(self, *groups):
-        export_filename = join(self.tmpdir, faker.file_name(extension="tar.xz"))
-        export_to_file([group.id for group in groups], export_filename)
+        export_filename = join(self.tmpdir, faker.file_name(extension="tar.xz.gpg"))
+        export_to_file([group.id for group in groups], export_filename, self.passphrase)
         return export_filename
