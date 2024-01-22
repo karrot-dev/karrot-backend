@@ -59,6 +59,7 @@ urllib3<2 # sentry-sdk does not support urllib3 yet: https://github.com/getsentr
 pywebpush
 typing_extensions
 livekit-api
+python-gnupg
 
 # dev PyPI dependencies
 pip-tools

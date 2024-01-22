@@ -145,6 +145,7 @@ pytest-django==4.7.0
 pytest-xdist==3.4.0
 python-dateutil==2.8.2
 python-dotenv==1.0.0
+python-gnupg==0.5.2
 python-magic==0.4.27
 pytz==2023.3.post1
 pywebpush==1.14.0

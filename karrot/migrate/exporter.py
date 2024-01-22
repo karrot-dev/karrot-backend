@@ -1,9 +1,12 @@
 from io import BytesIO
 from os.path import join
 from tarfile import TarFile, TarInfo
-from typing import List
+from tempfile import TemporaryDirectory, TemporaryFile
+from typing import IO, List
 
+import gnupg
 import orjson
+from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.contenttypes.models import ContentType
@@ -16,17 +19,74 @@ from karrot.activities.models import (
     ActivityType,
     Feedback,
     FeedbackNoShow,
+    ICSAuthToken,
     ParticipantType,
     SeriesParticipantType,
 )
 from karrot.agreements.models import Agreement
+from karrot.applications.models import Application
+from karrot.community_feed.models import CommunityFeedMeta
+from karrot.conversations.models import (
+    Conversation,
+    ConversationMessage,
+    ConversationMessageAttachment,
+    ConversationMessageImage,
+    ConversationMessageMention,
+    ConversationMessageReaction,
+    ConversationMeta,
+    ConversationParticipant,
+    ConversationThreadParticipant,
+)
 from karrot.groups.models import Group, GroupMembership, Role, Trust
+from karrot.history.models import History
+from karrot.invitations.models import Invitation
+from karrot.issues.models import Issue, Option, Vote, Voting
+from karrot.meet.models import Room, RoomParticipant
 from karrot.migrate.serializers import (
     MigrateFileSerializer,
     get_migrate_serializer_class,
 )
+from karrot.notifications.models import Notification, NotificationMeta
 from karrot.offers.models import Offer, OfferImage
 from karrot.places.models import Place, PlaceStatus, PlaceSubscription, PlaceType
+from karrot.subscriptions.models import ChannelSubscription, WebPushSubscription
+from karrot.userauth.models import VerificationCode
+from karrot.webhooks.models import EmailEvent, IncomingEmail
+
+# This might seem a bit excessive to list each model we do *not* export
+# ... but it's just precautionary to ensure it is really explicit which
+# things get exported. If you add a model but don't export it, the tests
+# will fail, and you can decide whether to mark that model excluded or
+# whether to export it.
+excluded_models = [
+    Application,
+    CommunityFeedMeta,
+    Issue,
+    Voting,
+    Option,
+    Vote,
+    VerificationCode,
+    ChannelSubscription,
+    WebPushSubscription,
+    Conversation,
+    ConversationMeta,
+    ConversationParticipant,
+    ConversationMessage,
+    ConversationMessageMention,
+    ConversationThreadParticipant,
+    ConversationMessageReaction,
+    ConversationMessageImage,
+    ConversationMessageAttachment,
+    History,
+    ICSAuthToken,
+    Invitation,
+    EmailEvent,
+    IncomingEmail,
+    Notification,
+    NotificationMeta,
+    Room,
+    RoomParticipant,
+]
 
 
 class FakeRequest:
@@ -45,8 +105,31 @@ def serialize_value(value):
     raise TypeError
 
 
-def export_to_file(group_ids: List[int], output_filename: str):
-    with TarFile.open(output_filename, "w|xz") as tarfile:
+def export_to_file(group_ids: List[int], output_filename: str, password: str):
+    with (
+        TemporaryDirectory() as home,
+        TemporaryFile() as tmp,
+    ):
+        # use a tmp home to ensure we have clean environment
+        gpg = gnupg.GPG(gnupghome=home)
+        export_to_io(group_ids, tmp)
+        tmp.seek(0)
+
+        result = gpg.encrypt_file(
+            tmp,
+            recipients=[],
+            passphrase=password,
+            symmetric="AES256",
+            armor=False,
+            output=output_filename,
+        )
+
+        if not result.ok:
+            raise RuntimeError(result.status)
+
+
+def export_to_io(group_ids: List[int], output: IO):
+    with TarFile.open(fileobj=output, mode="w|xz") as tarfile:
         groups = Group.objects.filter(id__in=group_ids)
         if len(groups) != len(group_ids):
             print("Not all groups found")
@@ -55,8 +138,20 @@ def export_to_file(group_ids: List[int], output_filename: str):
         fake_request = FakeRequest()
         serializer_context = {"request": fake_request}
 
+        models = [
+            model
+            for model in apps.get_models()
+            if model.__module__.startswith("karrot.") and model not in excluded_models
+        ]
+
         def export_queryset(qs):
             MigrateSerializer = get_migrate_serializer_class(qs.model)
+            if qs.model in excluded_models:
+                raise ValueError(
+                    f"model {qs.model.__name__} is marked as excluded "
+                    f"if it should be exported you can remove it from the excluded_models list"
+                )
+            models.remove(qs.model)
             ct = ContentType.objects.get_for_model(qs.model)
             data_type = f"{ct.app_label}.{ct.model}"
             data = BytesIO()
@@ -117,3 +212,13 @@ def export_to_file(group_ids: List[int], output_filename: str):
         # offers
         export_queryset(Offer.objects.filter(group__in=groups))
         export_queryset(OfferImage.objects.filter(offer__group__in=groups))
+
+        # if we have anything left, it's an error!
+        if len(models) > 0:
+            for model in models:
+                print("not exported model", model.__module__, model.__name__)
+            raise Exception(
+                "not all models were exported "
+                "if this is intentional then add the missing "
+                "models to excluded_models"
+            )
