@@ -1119,21 +1119,39 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
 
         description = validated_data.get("description", None)
         duration = validated_data.get("duration", None)
+        is_public = validated_data.get("is_public", None)
         participant_types = validated_data.get("participant_types", None)
 
         description_changed = "description" in validated_data and series.description != description
         duration_changed = "duration" in validated_data and series.duration != duration
-        if description_changed or duration_changed or participant_types:
+        is_public_changed = "is_public" in validated_data and series.is_public != is_public
+        if description_changed or duration_changed or participant_types or is_public_changed:
             activities = series.activities.upcoming()
 
             if description_changed:
+                # this update is filtered incase some of the descriptions were individually modified
                 activities.filter(description=series.description).update(description=description)
 
+            # collect together any updates that will be applied to ALL activities so we can do one update
+            updates = {}
+
             if duration_changed:
-                activities.update(
-                    has_duration=duration is not None,
-                    date=Tstzrange(Lower(F("date")), Lower(F("date")) + (duration or default_duration)),
+                updates.update(
+                    {
+                        "has_duration": duration is not None,
+                        "date": Tstzrange(Lower(F("date")), Lower(F("date")) + (duration or default_duration)),
+                    }
                 )
+
+            if is_public_changed:
+                updates.update(
+                    {
+                        "is_public": is_public,
+                    }
+                )
+
+            if len(updates) > 0:
+                activities.update(**updates)
 
             if participant_types:
                 for entry in participant_types:
