@@ -94,6 +94,8 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
             "rule": str(recurrence),
             "description": "",
             "duration": None,
+            "is_public": False,
+            "banner_image_urls": {},
         }
         self.assertEqual(response.data, expected_series_data)
 
@@ -167,6 +169,7 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
                     "is_public": False,
                     "public_id": None,
                     "banner_image_urls": {},
+                    "series_banner_image_urls": {},
                 }
             )
         self.assertEqual(response.data, created_activities, response.data)
