@@ -47,7 +47,15 @@ def get_options():
         defaults.update(get_defaults("dev.env"))
 
     for key, default in defaults.items():
-        value = os.environ.get(key, default)
+        # support any variable to be supplied as a file using the _FILE suffix
+        file_key = f"{key}_FILE"
+        if key in os.environ:
+            value = os.environ[key]
+        elif file_key in os.environ:
+            with open(os.environ[file_key]) as file:
+                value = file.read().strip()
+        else:
+            value = default
         options[key] = value if value else None
 
     # some more complex defaults that depend on other values
