@@ -5,7 +5,7 @@ from django.utils import timezone
 from versatileimagefield.fields import VersatileImageField
 from versatileimagefield.image_warmer import VersatileImageFieldWarmer
 
-from karrot.base.base_models import BaseModel
+from karrot.base.base_models import BaseModel, UploadToUUID
 from karrot.conversations.models import ConversationMixin
 
 
@@ -40,7 +40,7 @@ class OfferImage(BaseModel):
     )
     image = VersatileImageField(
         "Offer Image",
-        upload_to="offer_images",
+        upload_to=UploadToUUID("offer_images"),
         null=False,
     )
     position = IntegerField(default=0)

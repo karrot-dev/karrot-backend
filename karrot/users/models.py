@@ -8,7 +8,7 @@ from django.dispatch import Signal
 from django.utils import timezone
 from versatileimagefield.fields import VersatileImageField
 
-from karrot.base.base_models import BaseModel, LocationModel
+from karrot.base.base_models import BaseModel, LocationModel, UploadToUUID
 from karrot.groups.models import Group, GroupMembership
 from karrot.userauth.models import VerificationCode
 from karrot.users.emails import (
@@ -99,7 +99,7 @@ class User(AbstractBaseUser, BaseModel, LocationModel):
 
     photo = VersatileImageField(
         "Photo",
-        upload_to="user__photos",
+        upload_to=UploadToUUID("user__photos"),
         null=True,
     )
 

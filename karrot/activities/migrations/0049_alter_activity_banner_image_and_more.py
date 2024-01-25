@@ -4,6 +4,8 @@ from django.db import migrations
 import karrot.activities.models
 import versatileimagefield.fields
 
+import karrot.base.base_models
+
 
 class Migration(migrations.Migration):
 
@@ -15,11 +17,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='activity',
             name='banner_image',
-            field=versatileimagefield.fields.VersatileImageField(null=True, upload_to=karrot.activities.models.UploadToUUID('activity__banner_images'), verbose_name='BannerImage'),
+            field=versatileimagefield.fields.VersatileImageField(null=True, upload_to=karrot.base.base_models.UploadToUUID('activity__banner_images'), verbose_name='BannerImage'),
         ),
         migrations.AlterField(
             model_name='activityseries',
             name='banner_image',
-            field=versatileimagefield.fields.VersatileImageField(null=True, upload_to=karrot.activities.models.UploadToUUID('activity_series__banner_images'), verbose_name='BannerImage'),
+            field=versatileimagefield.fields.VersatileImageField(null=True, upload_to=karrot.base.base_models.UploadToUUID('activity_series__banner_images'), verbose_name='BannerImage'),
         ),
     ]

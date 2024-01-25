@@ -1,6 +1,5 @@
 import uuid
 from datetime import timedelta
-from os.path import splitext
 
 import pytz
 from dateutil.relativedelta import relativedelta
@@ -11,7 +10,6 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
 from django.db.models import CheckConstraint, Count, DurationField, F, FilteredRelation, Q, Sum
 from django.utils import timezone
-from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext as _
 from versatileimagefield.fields import VersatileImageField
 from versatileimagefield.image_warmer import VersatileImageFieldWarmer
@@ -24,20 +22,11 @@ from karrot.base.base_models import (
     CustomDateTimeTZRange,
     NicelyFormattedModel,
     UpdatedAtMixin,
+    UploadToUUID,
 )
 from karrot.conversations.models import ConversationMixin
 from karrot.groups.roles import GROUP_MEMBER
 from karrot.history.models import History, HistoryTypus
-
-
-@deconstructible
-class UploadToUUID:
-    def __init__(self, base: str):
-        self.base = base
-
-    def __call__(self, instance, filename):
-        ext = splitext(filename)[-1]
-        return f"{self.base}/{uuid.uuid4()}{ext}"
 
 
 class ActivityType(BaseModel, UpdatedAtMixin):

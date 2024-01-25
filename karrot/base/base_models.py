@@ -1,3 +1,6 @@
+import uuid
+from os.path import splitext
+
 from django.contrib.postgres.fields import DateTimeRangeField
 from django.db.backends.postgresql.psycopg_any import DateTimeTZRange
 from django.db.backends.signals import connection_created
@@ -5,6 +8,7 @@ from django.db.models import AutoField, DateTimeField, Field, FloatField, Func, 
 from django.db.models.fields.related import RelatedField
 from django.dispatch import receiver
 from django.utils import timezone
+from django.utils.deconstruct import deconstructible
 from psycopg.types.range import TimestampTZRangeLoader
 
 
@@ -115,3 +119,13 @@ class CustomTimestampTZRangeLoader(TimestampTZRangeLoader):
 def register_custom_date_time_tz_range(sender, connection, **kwargs):
     psycopg_connection = connection.connection
     psycopg_connection.adapters.register_loader("tstzrange", CustomTimestampTZRangeLoader)
+
+
+@deconstructible
+class UploadToUUID:
+    def __init__(self, base: str):
+        self.base = base
+
+    def __call__(self, instance, filename):
+        ext = splitext(filename)[-1]
+        return f"{self.base}/{uuid.uuid4()}{ext}"
