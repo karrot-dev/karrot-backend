@@ -16,7 +16,7 @@ from versatileimagefield.image_warmer import VersatileImageFieldWarmer
 
 from karrot.activities.activity_types import default_activity_types
 from karrot.activities.models import Activity, ActivityType
-from karrot.base.base_models import BaseModel, LocationModel
+from karrot.base.base_models import BaseModel, LocationModel, UploadToUUID
 from karrot.conversations.models import ConversationMixin
 from karrot.groups import roles, themes
 from karrot.groups.roles import GROUP_EDITOR, GROUP_MEMBER, GROUP_NEWCOMER
@@ -101,7 +101,7 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
     is_open = models.BooleanField(default=False)
     photo = VersatileImageField(
         "Group Photo",
-        upload_to="group_photos",
+        upload_to=UploadToUUID("group_photos"),
         null=True,
     )
     features = ArrayField(TextField(), default=default_group_features)

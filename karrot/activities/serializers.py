@@ -413,6 +413,11 @@ class SeriesParticipantTypeSerializer(serializers.ModelSerializer):
 
 class PublicActivitySerializer(serializers.ModelSerializer):
     banner_image_urls = VersatileImageFieldSerializer(sizes="activity_banner_image", source="banner_image")
+    series_banner_image_urls = VersatileImageFieldSerializer(
+        sizes="activity_banner_image",
+        source="series.banner_image",
+        read_only=True,
+    )
     place = PublicPlaceSerializer()
     activity_type = ActivityTypeSerializer()
     date = DateTimeRangeField()
@@ -430,6 +435,7 @@ class PublicActivitySerializer(serializers.ModelSerializer):
             "is_done",
             "is_public",
             "banner_image_urls",
+            "series_banner_image_urls",
         ]
         read_only_fields = fields
 
@@ -440,6 +446,9 @@ class ActivitySerializer(serializers.ModelSerializer):
     )
     banner_image_urls = VersatileImageFieldSerializer(
         sizes="activity_banner_image", source="banner_image", read_only=True
+    )
+    series_banner_image_urls = VersatileImageFieldSerializer(
+        sizes="activity_banner_image", source="series.banner_image", read_only=True
     )
 
     class Meta:
@@ -464,12 +473,14 @@ class ActivitySerializer(serializers.ModelSerializer):
             "public_id",
             "banner_image",
             "banner_image_urls",
+            "series_banner_image_urls",
         ]
         read_only_fields = [
             "id",
             "series",
             "is_done",
             "banner_image_urls",
+            "series_banner_image_urls",
             "public_id",
         ]
 
@@ -972,6 +983,13 @@ class ActivitySeriesHistorySerializer(serializers.ModelSerializer):
 
 
 class ActivitySeriesSerializer(serializers.ModelSerializer):
+    banner_image = VersatileImageFieldSerializer(
+        sizes="activity_banner_image", required=False, allow_null=True, write_only=True
+    )
+    banner_image_urls = VersatileImageFieldSerializer(
+        sizes="activity_banner_image", source="banner_image", read_only=True
+    )
+
     class Meta:
         model = ActivitySeriesModel
         fields = [
@@ -984,6 +1002,9 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
             "description",
             "dates_preview",
             "duration",
+            "is_public",
+            "banner_image",
+            "banner_image_urls",
         ]
         read_only_fields = [
             "id",
@@ -1015,7 +1036,12 @@ class ActivitySeriesSerializer(serializers.ModelSerializer):
             place=series.place,
             series=series,
             users=[self.context["request"].user],
-            payload=self.initial_data,
+            payload={
+                # cannot serialize the UploadedFile data...
+                k: self.initial_data[k]
+                for k in self.initial_data.keys()
+                if not isinstance(self.initial_data[k], UploadedFile)
+            },
             after=ActivitySeriesHistorySerializer(series).data,
         )
         series.place.group.refresh_active_status()
@@ -1093,21 +1119,39 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
 
         description = validated_data.get("description", None)
         duration = validated_data.get("duration", None)
+        is_public = validated_data.get("is_public", None)
         participant_types = validated_data.get("participant_types", None)
 
         description_changed = "description" in validated_data and series.description != description
         duration_changed = "duration" in validated_data and series.duration != duration
-        if description_changed or duration_changed or participant_types:
+        is_public_changed = "is_public" in validated_data and series.is_public != is_public
+        if description_changed or duration_changed or participant_types or is_public_changed:
             activities = series.activities.upcoming()
 
             if description_changed:
+                # this update is filtered incase some of the descriptions were individually modified
                 activities.filter(description=series.description).update(description=description)
 
+            # collect together any updates that will be applied to ALL activities so we can do one update
+            updates = {}
+
             if duration_changed:
-                activities.update(
-                    has_duration=duration is not None,
-                    date=Tstzrange(Lower(F("date")), Lower(F("date")) + (duration or default_duration)),
+                updates.update(
+                    {
+                        "has_duration": duration is not None,
+                        "date": Tstzrange(Lower(F("date")), Lower(F("date")) + (duration or default_duration)),
+                    }
                 )
+
+            if is_public_changed:
+                updates.update(
+                    {
+                        "is_public": is_public,
+                    }
+                )
+
+            if len(updates) > 0:
+                activities.update(**updates)
 
             if participant_types:
                 for entry in participant_types:
@@ -1186,10 +1230,15 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
                                 **entry,
                             )
 
+        if "banner_image" in validated_data:
+            series.delete_banner_image()
+
         update_data = validated_data.copy()
         update_data.pop("participant_types", None)
         update_data["last_changed_by"] = self.context["request"].user
         series = super().update(series, update_data)
+
+        validated_data.pop("banner_image", None)  # can't store this in history, so remove it
 
         if old.start_date != series.start_date or old.rule != series.rule:
             # we don't use series.update_activities() here because we want to remove and collect participants

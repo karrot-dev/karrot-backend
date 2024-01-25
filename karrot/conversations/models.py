@@ -14,7 +14,7 @@ from versatileimagefield.fields import VersatileImageField
 from versatileimagefield.image_warmer import VersatileImageFieldWarmer
 
 from config.settings import USERNAME_MENTION_RE
-from karrot.base.base_models import BaseModel, UpdatedAtMixin
+from karrot.base.base_models import BaseModel, UpdatedAtMixin, UploadToUUID
 from karrot.conversations.signals import (
     conversation_marked_seen,
     new_conversation_message,
@@ -474,7 +474,7 @@ class ConversationMessageImage(BaseModel):
     )
     image = VersatileImageField(
         "ConversationMessage Image",
-        upload_to="conversation_message_images",
+        upload_to=UploadToUUID("conversation_message_images"),
         null=False,
     )
     position = IntegerField(default=0)
@@ -503,7 +503,7 @@ class ConversationMessageAttachment(BaseModel):
     )
     file = models.FileField(
         "ConversationMessage Attachment",
-        upload_to="conversation_message_attachment_files",
+        upload_to=UploadToUUID("conversation_message_attachment_files"),
         null=False,
     )
 

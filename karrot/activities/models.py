@@ -22,6 +22,7 @@ from karrot.base.base_models import (
     CustomDateTimeTZRange,
     NicelyFormattedModel,
     UpdatedAtMixin,
+    UploadToUUID,
 )
 from karrot.conversations.models import ConversationMixin
 from karrot.groups.roles import GROUP_MEMBER
@@ -75,6 +76,7 @@ class ActivitySeries(BaseModel):
     start_date = models.DateTimeField()
     description = models.TextField(blank=True)
     duration = DurationField(null=True)
+    is_public = models.BooleanField(default=False)
 
     activity_type = models.ForeignKey(
         ActivityType,
@@ -89,12 +91,20 @@ class ActivitySeries(BaseModel):
         null=True,
     )
 
+    banner_image = VersatileImageField(
+        "BannerImage",
+        upload_to=UploadToUUID("activity_series__banner_images"),
+        null=True,
+    )
+
     def create_activity(self, date):
         activity = self.activities.create(
             activity_type=self.activity_type,
             date=CustomDateTimeTZRange(date, date + (self.duration or default_duration)),
             has_duration=self.duration is not None,
             series=self,
+            is_public=self.is_public,
+            public_id=uuid.uuid4() if self.is_public else None,
             place=self.place,
             description=self.description,
             last_changed_by=self.last_changed_by,
@@ -144,6 +154,14 @@ class ActivitySeries(BaseModel):
 
     def __str__(self):
         return f"ActivitySeries {self.rule} - {self.place}"
+
+    def delete_banner_image(self):
+        if self.banner_image.name is None:
+            return
+        # Deletes Image Renditions
+        self.banner_image.delete_all_created_images()
+        # Deletes Original Image
+        self.banner_image.delete(save=False)
 
     def delete(self, **kwargs):
         self.rule = str(rrulestr(self.rule).replace(dtstart=self.start_date, until=timezone.now()))
@@ -383,7 +401,7 @@ class Activity(BaseModel, ConversationMixin):
 
     banner_image = VersatileImageField(
         "BannerImage",
-        upload_to="activity__banner_images",
+        upload_to=UploadToUUID("activity__banner_images"),
         null=True,
     )
 
