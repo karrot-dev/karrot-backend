@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
 from django.db.models import F
-from django.db.models.functions import Lower
+from django.db.models.functions import Coalesce, Lower
 from django.forms import model_to_dict
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -43,7 +43,7 @@ from karrot.activities.models import (
     Feedback as FeedbackModel,
 )
 from karrot.activities.tasks import notify_participant_removals
-from karrot.base.base_models import CustomDateTimeTZRange, Tstzrange
+from karrot.base.base_models import CustomDateTimeTZRange, GenRandomUUID, Tstzrange
 from karrot.history.models import History, HistoryTypus
 from karrot.places.serializers import PublicPlaceSerializer
 from karrot.utils.date_utils import csv_datetime
@@ -1132,26 +1132,21 @@ class ActivitySeriesUpdateSerializer(ActivitySeriesSerializer):
                 # this update is filtered incase some of the descriptions were individually modified
                 activities.filter(description=series.description).update(description=description)
 
-            # collect together any updates that will be applied to ALL activities so we can do one update
-            updates = {}
-
             if duration_changed:
-                updates.update(
-                    {
-                        "has_duration": duration is not None,
-                        "date": Tstzrange(Lower(F("date")), Lower(F("date")) + (duration or default_duration)),
-                    }
+                activities.update(
+                    has_duration=duration is not None,
+                    date=Tstzrange(Lower(F("date")), Lower(F("date")) + (duration or default_duration)),
                 )
 
             if is_public_changed:
-                updates.update(
-                    {
-                        "is_public": is_public,
-                    }
-                )
-
-            if len(updates) > 0:
-                activities.update(**updates)
+                if is_public:
+                    activities.update(
+                        is_public=True,
+                        # ensures we set a public id if not already set
+                        public_id=Coalesce(F("public_id"), GenRandomUUID()),
+                    )
+                else:
+                    activities.update(is_public=False)
 
             if participant_types:
                 for entry in participant_types:

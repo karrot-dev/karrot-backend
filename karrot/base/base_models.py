@@ -63,6 +63,10 @@ class LocationModel(Model):
     longitude = FloatField(null=True)
 
 
+class GenRandomUUID(Func):
+    function = "gen_random_uuid"
+
+
 class Tstzrange(Func):
     function = "tstzrange"
 
