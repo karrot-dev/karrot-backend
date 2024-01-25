@@ -215,7 +215,6 @@ MIDDLEWARE = (
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.locale.LocaleMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.middleware.common.CommonMiddleware",
     "karrot.utils.extend_session_middleware.ExtendSessionMiddleware",
@@ -420,10 +419,6 @@ CORS_ORIGIN_WHITELIST = []
 # e.g. including the docs from any location
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
-
-if is_dev:
-    # this is primarily to enable the /_templates pages to work properly
-    X_FRAME_OPTIONS = "SAMEORIGIN"
 
 SESSION_COOKIE_HTTPONLY = True
 
