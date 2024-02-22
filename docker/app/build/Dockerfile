@@ -2,7 +2,7 @@
 
 #----------- below here would be buildbase --------------------
 
-FROM docker.io/python:3.9-bookworm as build
+FROM python:3.9-bookworm as build
 
 RUN sed -i -e's/ main/ main contrib non-free/g' /etc/apt/sources.list.d/debian.sources && \
   apt-get update && \
@@ -47,7 +47,7 @@ RUN python manage.py collectstatic --noinput --clear
 #---------------------------------------------------------------------
 # Now, the email templates
 
-FROM docker.io/node:20-alpine as email_templates
+FROM node:20-alpine as email_templates
 
 COPY . /app/code
 
@@ -63,7 +63,7 @@ RUN rm -rf /app/code/mjml/node_modules && \
 #---------------------------------------------------------------------
 # And finally, the runnable image
 
-FROM docker.io/python:3.9-slim-bookworm as runner
+FROM python:3.9-slim-bookworm as runner
 
 LABEL org.opencontainers.image.source=https://github.com/karrot-dev/karrot-backend
 
@@ -74,7 +74,6 @@ RUN sed -i -e's/ main/ main contrib non-free/g' /etc/apt/sources.list.d/debian.s
   apt-get update && \
   apt-get install -y \
     git \
-    curl \
     gdal-bin \
     libmaxminddb0 \
     libmaxminddb-dev \
