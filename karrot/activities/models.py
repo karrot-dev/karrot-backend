@@ -16,10 +16,8 @@ from django.db.models import (
     Exists,
     ExpressionWrapper,
     F,
-    FilteredRelation,
     OuterRef,
     Q,
-    Subquery,
     Sum,
     TextField,
 )
@@ -234,40 +232,7 @@ class ActivityQuerySet(models.QuerySet):
         )
 
     def with_free_slots(self, user):
-        participant_types_with_free_slots = ParticipantType.objects.annotate_num_participants().filter(
-            num_participants__lt=F("max_participants")
-        )
-
-        if user:
-            # check if the roles that are free actually match up with the users roles for that group
-            participant_types_with_free_slots = participant_types_with_free_slots.annotate(
-                membership=FilteredRelation(
-                    "activity__place__group__groupmembership",
-                    condition=Q(activity__place__group__groupmembership__user=user),
-                ),
-            ).filter(membership__roles__contains=[F("role")])
-
-        # Ok, I think might work!
-        if False:
-            activities = (
-                self.exclude_disabled()
-                .alias(roles=F("place__group__groupmembership__roles"))
-                .alias(
-                    foop=Subquery(
-                        ParticipantType.objects.filter(activity=OuterRef("id"))
-                        .alias(num_participants=Count("participants"))
-                        .filter(num_participants__lt=F("max_participants"))
-                        .alias(roles=ExpressionWrapper(OuterRef("roles"), output_field=ArrayField(TextField())))
-                        .filter(roles__contains=[F("role")])
-                        .annotate(count=Count("id", distinct=True))
-                        .values("count")
-                    )
-                )
-                .filter(foop__gt=0)
-                .distinct()
-            )
-
-        subquery = (
+        participant_types_with_free_slots = (
             ParticipantType.objects.filter(activity=OuterRef("id"))
             # Ones that have some capacity still
             .alias(num_participants=Count("participants"))
@@ -275,75 +240,24 @@ class ActivityQuerySet(models.QuerySet):
         )
 
         if user:
-            subquery = (
-                subquery
-                # Check the role matches too
-                # It gets confused without the ExpressionWrapper ... :/
-                .alias(
-                    roles=ExpressionWrapper(
-                        OuterRef("place__group__groupmembership__roles"), output_field=ArrayField(TextField())
-                    )
-                ).filter(roles__contains=[F("role")])
-            )
-
-        activities = self.exclude_disabled().alias(has_slot=Exists(subquery)).filter(has_slot=True).distinct()
-
-        if False:
-            activities = (
-                self.exclude_disabled()
-                .alias(
-                    has_slot=Exists(
-                        ParticipantType.objects.filter(activity=OuterRef("id"))
-                        # Ones that have some capacity still
-                        .alias(num_participants=Count("participants"))
-                        .filter(num_participants__lt=F("max_participants"))
-                        # Check the role matches too
-                        # It gets confused without the ExpressionWrapper ... :/
-                        .alias(
-                            roles=ExpressionWrapper(
-                                OuterRef("place__group__groupmembership__roles"), output_field=ArrayField(TextField())
-                            )
-                        )
-                        .filter(roles__contains=[F("role")])
-                    )
+            # We have a user!
+            # Make sure their roles in the appropriate group match up
+            participant_types_with_free_slots = participant_types_with_free_slots.alias(
+                # (It gets confused without the ExpressionWrapper ... :/)
+                roles=ExpressionWrapper(
+                    # Use an OuterRef so we can refer to the membership we have
+                    # already selected in the outer query
+                    OuterRef("place__group__groupmembership__roles"),
+                    output_field=ArrayField(TextField()),
                 )
-                .filter(has_slot=True)
-                # .filter(foop__gt=0)
-                .distinct()
-            )
+            ).filter(roles__contains=[F("role")])
 
-        if False:
-            activities = (
-                self.exclude_disabled()
-                # .alias(membership=Subquery(
-                #     GroupMembership.objects.filter(
-                #         pk=OuterRef("place__group__groupmembership"),
-                #     )
-                # ))
-                .alias(
-                    participant_types_with_free_slots=Subquery(
-                        ParticipantType.objects.filter(
-                            activity=OuterRef("id"),
-                            # role__contained_by=OuterRef("place__group__groupmembership__roles")
-                        )
-                        # .alias(place=OuterRef("place"))
-                        # .alias(user_roles=OuterRef("place__group__groupmembership__roles"))
-                        # .filter(user_roles__contains=[F("role")])
-                        # .filter(membership__roles__contains=[F("role")])
-                        .filter(role__in=OuterRef("groups_group_members__roles"))
-                        .alias(num_participants=Count("participants"))
-                        .filter(num_participants__lt=F("max_participants"))
-                        .annotate(count=Count("id"))
-                        .values("count")
-                        # .alias(count=Count("participants"))
-                        # .values("count")
-                        # .annotate(count=NonAggregatingCount("id"))
-                        # .values("count")
-                    )
-                )
-                .filter(participant_types_with_free_slots__gt=0)
-            )
-        # activities = self.exclude_disabled()
+        activities = (
+            self.exclude_disabled()
+            .alias(has_free_slot=Exists(participant_types_with_free_slots))
+            .filter(has_free_slot=True)
+            .distinct()
+        )
 
         return activities
 
