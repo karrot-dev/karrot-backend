@@ -8,7 +8,7 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from karrot.activities.factories import ActivityFactory, ActivityTypeFactory
+from karrot.activities.factories import ActivityFactory, ActivitySeriesFactory, ActivityTypeFactory
 from karrot.activities.models import ActivityParticipant, Feedback, to_range
 from karrot.base.base_models import CustomDateTimeTZRange
 from karrot.conversations.models import ConversationNotificationStatus
@@ -825,3 +825,21 @@ class TestActivitiesListAPI(APITestCase, ExtractPaginationMixin):
         response = self.get_results(self.url, {"place": self.active_place.id, "slots": "free"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
+
+
+class TestActivitiesListFromSeriesAPI(APITestCase, ExtractPaginationMixin):
+    def setUp(self):
+        self.url = "/api/activities/"
+        self.member = UserFactory()
+        self.group = GroupFactory(members=[self.member])
+        self.place = PlaceFactory(group=self.group)
+
+        ActivitySeriesFactory(
+            place=self.place,
+        )
+
+    def test_list_activities_from_series(self):
+        self.client.force_login(user=self.member)
+        with self.assertNumQueries(5):
+            response = self.client.get("/api/activities/")
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
