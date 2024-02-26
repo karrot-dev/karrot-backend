@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.db.models import Count, F, OuterRef, Q, Subquery, Sum, Value
+from django.db.models import F, OuterRef, Q, Subquery, Value
 from django.db.models.functions import Coalesce, Concat
 from django_filters import IsoDateTimeFromToRangeFilter
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, ModelChoiceFilter, ModelMultipleChoiceFilter
@@ -16,6 +16,7 @@ from karrot.history.models import History, HistoryTypus
 from karrot.places.models import Place
 from karrot.stats import stats
 from karrot.stats.serializers import ActivityHistoryStatsSerializer, FrontendStatsSerializer
+from karrot.utils.query_utils import NonAggregatingCount, NonAggregatingSum
 
 
 class StatsThrottle(UserRateThrottle):
@@ -32,24 +33,6 @@ def users_queryset(request):
 
 def activity_type_queryset(request):
     return ActivityType.objects.filter(group__in=request.user.groups.all())
-
-
-class NonAggregatingCount(Count):
-    """A COUNT that does not trigger a GROUP BY to be added
-
-    This is useful when using Subquery in an annotation
-    """
-
-    contains_aggregate = False
-
-
-class NonAggregatingSum(Sum):
-    """A SUM that does not trigger a GROUP BY to be added
-
-    This is useful when using Subquery in an annotation
-    """
-
-    contains_aggregate = False
 
 
 class ActivityHistoryStatsFilter(FilterSet):

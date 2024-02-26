@@ -5,10 +5,24 @@ import pytz
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrulestr
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.indexes import GistIndex
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
-from django.db.models import CheckConstraint, Count, DurationField, F, FilteredRelation, Q, Sum
+from django.db.models import (
+    CheckConstraint,
+    Count,
+    DurationField,
+    Exists,
+    ExpressionWrapper,
+    F,
+    FilteredRelation,
+    OuterRef,
+    Q,
+    Subquery,
+    Sum,
+    TextField,
+)
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from versatileimagefield.fields import VersatileImageField
@@ -233,7 +247,103 @@ class ActivityQuerySet(models.QuerySet):
                 ),
             ).filter(membership__roles__contains=[F("role")])
 
-        activities = self.exclude_disabled().filter(participant_types__in=participant_types_with_free_slots).distinct()
+        # Ok, I think might work!
+        if False:
+            activities = (
+                self.exclude_disabled()
+                .alias(roles=F("place__group__groupmembership__roles"))
+                .alias(
+                    foop=Subquery(
+                        ParticipantType.objects.filter(activity=OuterRef("id"))
+                        .alias(num_participants=Count("participants"))
+                        .filter(num_participants__lt=F("max_participants"))
+                        .alias(roles=ExpressionWrapper(OuterRef("roles"), output_field=ArrayField(TextField())))
+                        .filter(roles__contains=[F("role")])
+                        .annotate(count=Count("id", distinct=True))
+                        .values("count")
+                    )
+                )
+                .filter(foop__gt=0)
+                .distinct()
+            )
+
+        subquery = (
+            ParticipantType.objects.filter(activity=OuterRef("id"))
+            # Ones that have some capacity still
+            .alias(num_participants=Count("participants"))
+            .filter(num_participants__lt=F("max_participants"))
+        )
+
+        if user:
+            subquery = (
+                subquery
+                # Check the role matches too
+                # It gets confused without the ExpressionWrapper ... :/
+                .alias(
+                    roles=ExpressionWrapper(
+                        OuterRef("place__group__groupmembership__roles"), output_field=ArrayField(TextField())
+                    )
+                ).filter(roles__contains=[F("role")])
+            )
+
+        activities = self.exclude_disabled().alias(has_slot=Exists(subquery)).filter(has_slot=True).distinct()
+
+        if False:
+            activities = (
+                self.exclude_disabled()
+                .alias(
+                    has_slot=Exists(
+                        ParticipantType.objects.filter(activity=OuterRef("id"))
+                        # Ones that have some capacity still
+                        .alias(num_participants=Count("participants"))
+                        .filter(num_participants__lt=F("max_participants"))
+                        # Check the role matches too
+                        # It gets confused without the ExpressionWrapper ... :/
+                        .alias(
+                            roles=ExpressionWrapper(
+                                OuterRef("place__group__groupmembership__roles"), output_field=ArrayField(TextField())
+                            )
+                        )
+                        .filter(roles__contains=[F("role")])
+                    )
+                )
+                .filter(has_slot=True)
+                # .filter(foop__gt=0)
+                .distinct()
+            )
+
+        if False:
+            activities = (
+                self.exclude_disabled()
+                # .alias(membership=Subquery(
+                #     GroupMembership.objects.filter(
+                #         pk=OuterRef("place__group__groupmembership"),
+                #     )
+                # ))
+                .alias(
+                    participant_types_with_free_slots=Subquery(
+                        ParticipantType.objects.filter(
+                            activity=OuterRef("id"),
+                            # role__contained_by=OuterRef("place__group__groupmembership__roles")
+                        )
+                        # .alias(place=OuterRef("place"))
+                        # .alias(user_roles=OuterRef("place__group__groupmembership__roles"))
+                        # .filter(user_roles__contains=[F("role")])
+                        # .filter(membership__roles__contains=[F("role")])
+                        .filter(role__in=OuterRef("groups_group_members__roles"))
+                        .alias(num_participants=Count("participants"))
+                        .filter(num_participants__lt=F("max_participants"))
+                        .annotate(count=Count("id"))
+                        .values("count")
+                        # .alias(count=Count("participants"))
+                        # .values("count")
+                        # .annotate(count=NonAggregatingCount("id"))
+                        # .values("count")
+                    )
+                )
+                .filter(participant_types_with_free_slots__gt=0)
+            )
+        # activities = self.exclude_disabled()
 
         return activities
 
