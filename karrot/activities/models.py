@@ -5,10 +5,22 @@ import pytz
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrulestr
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.indexes import GistIndex
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
-from django.db.models import CheckConstraint, Count, DurationField, F, FilteredRelation, Q, Sum
+from django.db.models import (
+    CheckConstraint,
+    Count,
+    DurationField,
+    Exists,
+    ExpressionWrapper,
+    F,
+    OuterRef,
+    Q,
+    Sum,
+    TextField,
+)
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from versatileimagefield.fields import VersatileImageField
@@ -220,20 +232,32 @@ class ActivityQuerySet(models.QuerySet):
         )
 
     def with_free_slots(self, user):
-        participant_types_with_free_slots = ParticipantType.objects.annotate_num_participants().filter(
-            num_participants__lt=F("max_participants")
+        participant_types_with_free_slots = (
+            ParticipantType.objects.filter(activity=OuterRef("id"))
+            # Ones that have some capacity still
+            .alias(num_participants=Count("participants"))
+            .filter(num_participants__lt=F("max_participants"))
         )
 
         if user:
-            # check if the roles that are free actually match up with the users roles for that group
-            participant_types_with_free_slots = participant_types_with_free_slots.annotate(
-                membership=FilteredRelation(
-                    "activity__place__group__groupmembership",
-                    condition=Q(activity__place__group__groupmembership__user=user),
-                ),
-            ).filter(membership__roles__contains=[F("role")])
+            # We have a user!
+            # Make sure their roles in the appropriate group match up
+            participant_types_with_free_slots = participant_types_with_free_slots.alias(
+                # (It gets confused without the ExpressionWrapper ... :/)
+                roles=ExpressionWrapper(
+                    # Use an OuterRef so we can refer to the membership we have
+                    # already selected in the outer query
+                    OuterRef("place__group__groupmembership__roles"),
+                    output_field=ArrayField(TextField()),
+                )
+            ).filter(roles__contains=[F("role")])
 
-        activities = self.exclude_disabled().filter(participant_types__in=participant_types_with_free_slots).distinct()
+        activities = (
+            self.exclude_disabled()
+            .alias(has_free_slot=Exists(participant_types_with_free_slots))
+            .filter(has_free_slot=True)
+            .distinct()
+        )
 
         return activities
 
