@@ -201,6 +201,9 @@ class ActivityQuerySet(models.QuerySet):
     def annotate_num_participants(self):
         return self.annotate(num_participants=Count("activityparticipant"))
 
+    def alias_num_participants(self):
+        return self.alias(num_participants=Count("activityparticipant"))
+
     def annotate_timezone(self):
         return self.annotate(timezone=F("place__group__timezone"))
 
@@ -235,7 +238,7 @@ class ActivityQuerySet(models.QuerySet):
         participant_types_with_free_slots = (
             ParticipantType.objects.filter(activity=OuterRef("id"))
             # Ones that have some capacity still
-            .alias(num_participants=Count("participants"))
+            .alias_num_participants()
             .filter(num_participants__lt=F("max_participants"))
         )
 
@@ -262,7 +265,7 @@ class ActivityQuerySet(models.QuerySet):
         return activities
 
     def empty(self):
-        return self.exclude_disabled().annotate_num_participants().filter(num_participants=0)
+        return self.exclude_disabled().alias_num_participants().filter(num_participants=0)
 
     def with_participant(self, user):
         return self.filter(participants=user)
@@ -536,6 +539,9 @@ class SeriesParticipantType(BaseModel):
 class ParticipantTypeQuerySet(models.QuerySet):
     def annotate_num_participants(self):
         return self.annotate(num_participants=Count("participants"))
+
+    def alias_num_participants(self):
+        return self.alias(num_participants=Count("participants"))
 
 
 class ParticipantTypeManager(models.Manager.from_queryset(ParticipantTypeQuerySet)):
