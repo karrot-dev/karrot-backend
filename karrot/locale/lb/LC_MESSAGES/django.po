@@ -45,15 +45,15 @@ msgstr "Aktivitéit"
 msgid "Task"
 msgstr "Aufgab"
 
-#: karrot/activities/serializers.py:329
+#: karrot/activities/serializers.py:328
 msgid "Must be a list"
 msgstr "Muss eng Lëscht sinn"
 
-#: karrot/activities/serializers.py:330
+#: karrot/activities/serializers.py:329
 msgid "Must be a list with one or two values"
 msgstr "Muss eng Lëscht mat een oder zwee Wäerter sinn"
 
-#: karrot/activities/serializers.py:331
+#: karrot/activities/serializers.py:330
 msgid "Must pass start value"
 msgstr "Ee Start-Wäert muss ugi ginn."
 

@@ -45,15 +45,15 @@ msgstr "활동"
 msgid "Task"
 msgstr "업무"
 
-#: karrot/activities/serializers.py:329
+#: karrot/activities/serializers.py:328
 msgid "Must be a list"
 msgstr "목록이어야 합니다"
 
-#: karrot/activities/serializers.py:330
+#: karrot/activities/serializers.py:329
 msgid "Must be a list with one or two values"
 msgstr "하나 혹은 두 값의 목록이어야 합니다"
 
-#: karrot/activities/serializers.py:331
+#: karrot/activities/serializers.py:330
 msgid "Must pass start value"
 msgstr "시작 값을 통과해야 합니다"
 

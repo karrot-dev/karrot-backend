@@ -46,15 +46,15 @@ msgstr "Aktivita"
 msgid "Task"
 msgstr "Úkol"
 
-#: karrot/activities/serializers.py:329
+#: karrot/activities/serializers.py:328
 msgid "Must be a list"
 msgstr "Musí to být seznam"
 
-#: karrot/activities/serializers.py:330
+#: karrot/activities/serializers.py:329
 msgid "Must be a list with one or two values"
 msgstr "Musí to být seznam s jednou nebo dvěma hodnotami"
 
-#: karrot/activities/serializers.py:331
+#: karrot/activities/serializers.py:330
 msgid "Must pass start value"
 msgstr "Musí předat počáteční hodnotu"
 
