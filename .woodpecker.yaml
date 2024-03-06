@@ -11,6 +11,7 @@ services:
 steps:
   - name: "Test"
     image: "docker.io/karrot/python:3.1"
+    image: "codeberg.org/karrot/ci:latest"
     environment:
       - MODE=dev
       - DATABASE_HOST=database
@@ -20,8 +21,11 @@ steps:
       - REDIS_HOST=redis
       - SECRET_KEY=notverysecret
     commands:
-      - test -d env/bin || virtualenv -p python3 env
-      - . env/bin/activate
+      #- test -d env/bin || virtualenv -p python3 env
+      # The karrot/ci image provides a pre-made virtualenv for us
+      # shouldn't even need to activate it as the image sets the
+      # path already
+      #- . /app/venv/bin/activate
       - ./sync.py
       - mkdir -p test-reports
       - pytest -n $(nproc) --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
