@@ -17,6 +17,7 @@ steps:
       - DATABASE_NAME=karrot
       - DATABASE_USER=karrot
       - DATABASE_PASSWORD=karrot
+      - REDIS_HOST=redis
       - SECRET_KEY=notverysecret
     commands:
       - test -d env/bin || virtualenv -p python3 env
