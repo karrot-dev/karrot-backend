@@ -14,5 +14,6 @@ steps:
         branch: main
       - event: tag
       - event: manual
-    depends_on:
-      - test
+
+depends_on:
+  - test
