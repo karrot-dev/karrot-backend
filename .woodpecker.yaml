@@ -2,9 +2,9 @@ services:
   - name: "database"
     image: "postgres:14-alpine"
     environment:
-      - POSTGRES_USER: karrot
-      - POSTGRES_DB: karrot
-      - POSTGRES_PASSWORD: karrot
+      - POSTGRES_USER=karrot
+      - POSTGRES_DB=karrot
+      - POSTGRES_PASSWORD=karrot
   - name: "redis"
     image: "redis:6-alpine"
 
