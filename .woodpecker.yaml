@@ -11,7 +11,7 @@ services:
 steps:
   - name: "Test"
     #image: "docker.io/karrot/python:3.1"
-    image: "codeberg.org/karrot/ci:latest"
+    image: "codeberg.org/karrot/ci:796207fea50363b719ca6d5edaa497169988a07f"
     environment:
       - MODE=dev
       - DATABASE_HOST=database
