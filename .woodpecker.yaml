@@ -1,11 +1,37 @@
+services:
+  - name: "database"
+    image: "postgres:14-alpine"
+    environment:
+      - POSTGRES_USER: karrot
+      - POSTGRES_DB: karrot
+      - POSTGRES_PASSWORD: karrot
+  - name: "redis"
+    image: "redis:6-alpine"
+
 steps:
-  - name: "Build docker image"
-    image: woodpeckerci/plugin-docker-buildx
-    settings:
-      platforms: linux/amd64
-      repo: codeberg.org/${CI_REPO}
-      registry: codeberg.org
-      auto_tag: true
-      username: ${CI_REPO_OWNER}
-      password:
-        from_secret: cb_token
+  - name: "Test"
+    image: "docker.io/karrot/python:3.1"
+    commands:
+      - test -d env/bin || virtualenv -p python3 env
+      - source env/bin/activate
+      - ./sync.py
+      - mkdir -p test-reports
+      - pytest -n 4 --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
+    when:
+      branch: master
+
+#  - name: "Build docker image"
+#    image: woodpeckerci/plugin-docker-buildx
+#    settings:
+#      platforms: linux/amd64
+#      repo: codeberg.org/${CI_REPO}
+#      registry: codeberg.org
+#      auto_tag: true
+#      username: ${CI_REPO_OWNER}
+#      password:
+#        from_secret: cb_token
+#    when:
+#      - event: push
+#        branch: master
+#      - event: tag
+
