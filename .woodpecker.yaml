@@ -10,7 +10,7 @@ services:
 
 steps:
   - name: "Test"
-    image: "docker.io/karrot/python:3.1"
+    #image: "docker.io/karrot/python:3.1"
     image: "codeberg.org/karrot/ci:latest"
     environment:
       - MODE=dev
