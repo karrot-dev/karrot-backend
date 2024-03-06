@@ -10,7 +10,8 @@ services:
 
 steps:
   - name: "Test"
-    image: "codeberg.org/karrot/ci:796207fea50363b719ca6d5edaa497169988a07f"
+    image: "codeberg.org/karrot/ci:latest"
+    pull: true
     environment:
       - MODE=dev
       - DATABASE_HOST=database
@@ -25,19 +26,4 @@ steps:
       - pytest -n $(nproc) --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
     when:
       - branch: master
-      - event: tag
-
-  - name: "Build docker image"
-    image: woodpeckerci/plugin-docker-buildx
-    settings:
-      platforms: linux/amd64
-      repo: codeberg.org/${CI_REPO}
-      registry: codeberg.org
-      auto_tag: true
-      username: ${CI_REPO_OWNER}
-      password:
-        from_secret: cb_token
-    when:
-      - event: push
-        branch: master
       - event: tag
