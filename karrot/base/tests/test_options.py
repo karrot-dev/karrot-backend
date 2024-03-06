@@ -16,6 +16,6 @@ class TestOptions(TestCase):
         with NamedTemporaryFile() as tmpfile:
             tmpfile.write(b"a-test-password-in-a-file\n")
             tmpfile.seek(0)
-            with patch.dict("os.environ", {"DATABASE_PASSWORD_FILE": tmpfile.name}):
+            with patch.dict("os.environ", {"DATABASE_PASSWORD_FILE": tmpfile.name}, clear=True):
                 options = get_options()
                 self.assertEqual(options["DATABASE_PASSWORD"], "a-test-password-in-a-file")
