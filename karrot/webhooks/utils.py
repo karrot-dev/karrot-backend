@@ -3,11 +3,11 @@ from base64 import b32decode, b32encode
 
 import requests
 import sentry_sdk
-import talon
+import talon_core
 from anymail.exceptions import AnymailAPIError
 from django.conf import settings
 from django.core import signing
-from talon import quotations
+from talon_core import quotations
 
 from karrot.webhooks import stats
 from karrot.webhooks.emails import prepare_incoming_email_rejected_email
@@ -15,7 +15,7 @@ from karrot.webhooks.emails import prepare_incoming_email_rejected_email
 logger = logging.getLogger(__name__)
 
 # register talon xpath extensions, to avoid XPathEvalError
-talon.init()
+talon_core.init()
 
 
 def trim_with_talon(text):
