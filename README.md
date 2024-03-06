@@ -9,17 +9,30 @@ Our issues are tracked in [karrot-frontend](https://github.com/karrot-dev/karrot
 
 ## Developer setup
 
-### Experimental new podman setup
+### Podman setup
 
-This runs all the app code locally on your machine, and the services (database, redis, etc.) in containers using podman.
+This runs all the app code locally on your machine, and the services (postgresql, redis, etc.) in containers using podman.
 
 Prerequisites:
-- python3 (I use [rtx](https://github.com/jdxcode/rtx) to install specific version)
-- [podman](https://podman.io/) (docker without the daemon or root power)
+- python
+  - Karrot is written in python
+  - I use [mise](https://mise.jdx.dev) to install specific version, if you do `mise install` will install the dependencies
+  - otherwise get a version 3 of python
+- nodejs
+  - this is used for email templates as we use https://mjml.io
+  - install it via your package manager or from https://nodejs.org
+- yarn (classic)
+  - used to install nodejs dependencies
+  - install it via your package manager or with `npm install --global yarn`
+- podman
+  - used to run the services (postgresql, redis, etc.)
+  - podman is like docker, but without the daemon or root power
+  - install it via package manager or from https://podman.io
 
 ```commandline
-# if not using rtx, create a virtualenv
+# if not using rtx, create a virtualenv and activate it
 python -m venv env
+source env/bin/activate
 
 # install deps
 ./sync.py
@@ -30,7 +43,9 @@ python -m venv env
 
 Everything should be up and running now.
 
-### docker-compose setup
+### docker-compose setup (legacy)
+
+_Nobody is actively using this setup, so it might have broken!_
 
 Includes backend, frontend, mail catcher, postgres, redis, etc..
 
@@ -38,7 +53,12 @@ Head over to [karrot-dev/karrot-docker](https://github.com/karrot-dev/karrot-doc
 
 ### Manual setup
 
-You can also just run everything locally if you want.
+You can also just run everything locally if you want:
+
+- run postgresql
+- run redis
+- create `config/local_settings.py` and configure it to point to those
+  - you can reference `config/local_settings.py.example` to see what to set
 
 If you want help/tips you can chat with us at:
 - [#karrot:matrix.org](https://matrix.to/#/#karrot:matrix.org)
