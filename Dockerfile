@@ -1,8 +1,7 @@
-#FROM buildbase as build
+ARG PYTHON_VERSION=3.11
+ARG NODE_VERSION=20
 
-#----------- below here would be buildbase --------------------
-
-FROM docker.io/python:3.9-bookworm as build
+FROM docker.io/python:${PYTHON_VERSION}-bookworm as build
 
 RUN sed -i -e's/ main/ main contrib non-free/g' /etc/apt/sources.list.d/debian.sources && \
   apt-get update && \
@@ -37,8 +36,6 @@ RUN python -m venv /app/venv && \
 # Enable the venv
 ENV PATH="/app/venv/bin:$PATH"
 
-#----------- above here would be buildbase --------------------
-
 COPY . /app/code
 
 RUN pip install -r requirements.txt
@@ -47,7 +44,7 @@ RUN python manage.py collectstatic --noinput --clear
 #---------------------------------------------------------------------
 # Now, the email templates
 
-FROM docker.io/node:20-alpine as email_templates
+FROM docker.io/node:${NODE_VERSION}-alpine as email_templates
 
 COPY . /app/code
 
@@ -63,9 +60,7 @@ RUN rm -rf /app/code/mjml/node_modules && \
 #---------------------------------------------------------------------
 # And finally, the runnable image
 
-FROM docker.io/python:3.9-slim-bookworm as runner
-
-LABEL org.opencontainers.image.source=https://github.com/karrot-dev/karrot-backend
+FROM docker.io/python:${PYTHON_VERSION}-slim-bookworm as runner
 
 ENV PYTHONUNBUFFERED=1
 
@@ -82,12 +77,13 @@ RUN sed -i -e's/ main/ main contrib non-free/g' /etc/apt/sources.list.d/debian.s
     libmagic1 \
   && apt-get clean
 
+# Run as unprivileged user
 ARG USERNAME=karrot
 ARG UID=1000
 ARG GID=1000
 
 RUN groupadd --gid $GID $USERNAME && \
-   useradd --uid $UID -g $GID -m $USERNAME
+    useradd --uid $UID -g $GID -m $USERNAME
 
 # Copies code + dependencies
 COPY --from=build /app /app
