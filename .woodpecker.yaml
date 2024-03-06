@@ -1,5 +1,11 @@
 steps:
-  - name: a-test-step
-    image: debian
-    commands:
-      - echo "Testing 123.."
+  - name: "Build docker image"
+    image: woodpeckerci/plugin-docker-buildx
+    settings:
+      platforms: linux/amd64
+      repo: codeberg.org/${CI_REPO}
+      registry: codeberg.org
+      auto_tag: true
+      username: ${CI_REPO_OWNER}
+      password:
+        from_secret: cb_token
