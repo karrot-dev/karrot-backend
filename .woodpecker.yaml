@@ -1,11 +1,15 @@
 services:
   - name: "database"
     image: "postgres:14-alpine"
+    # Test performance: don't flush every write to disk
+    command: "-c fsync=off"
     environment:
       - POSTGRES_USER=karrot
       - POSTGRES_DB=karrot
       - POSTGRES_PASSWORD=karrot
   - name: "redis"
+    # Test performance: don't save to disk
+    command: "redis-server --save '' --appendonly no"
     image: "redis:6-alpine"
 
 steps:
@@ -19,12 +23,12 @@ steps:
       - DATABASE_PASSWORD=karrot
       - REDIS_HOST=redis
       - SECRET_KEY=notverysecret
+      # Test performance: use custom test settings
+      - DJANGO_SETTINGS_MODULE=config.test_settings
     commands:
       - test -d env/bin || virtualenv -p python3 env
       - . env/bin/activate
       - ./sync.py
-      # failfast for now!
-      #- ./manage.py test --failfast --noinput
       - mkdir -p test-reports
       - pytest -n 4 --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
     when:
