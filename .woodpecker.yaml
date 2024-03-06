@@ -11,6 +11,9 @@ services:
 steps:
   - name: "Test"
     image: "docker.io/karrot/python:3.1"
+    entrypoint:
+      - "/bin/bash"
+      - "-c"
     commands:
       - test -d env/bin || virtualenv -p python3 env
       - source env/bin/activate
