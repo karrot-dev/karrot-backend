@@ -4,7 +4,7 @@ services:
     environment:
       - POSTGRES_USER=karrot
       - POSTGRES_DB=karrot
-      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_PASSWORD=karrot
   - name: "redis"
     image: "redis:6-alpine"
 
@@ -13,15 +13,19 @@ steps:
     image: "docker.io/karrot/python:3.1"
     environment:
       - MODE=dev
+      - DATABASE_HOST=database
       - DATABASE_NAME=karrot
       - DATABASE_USER=karrot
+      - DATABASE_PASSWORD=karrot
       - SECRET_KEY=notverysecret
     commands:
       - test -d env/bin || virtualenv -p python3 env
       - . env/bin/activate
       - ./sync.py
-      - mkdir -p test-reports
-      - pytest -n 4 --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
+      # failfast for now!
+      - ./manage.py test --failfast --noinput
+      #- mkdir -p test-reports
+      #- pytest -n 4 --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
     when:
       branch: master
 
