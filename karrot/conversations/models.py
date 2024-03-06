@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 from uuid import uuid4
 
@@ -10,6 +11,7 @@ from django.db.models import Count, F, IntegerField, Q
 from django.db.models.manager import BaseManager
 from django.utils import timezone
 from PIL import Image, UnidentifiedImageError
+from pytz import utc
 from versatileimagefield.fields import VersatileImageField
 from versatileimagefield.image_warmer import VersatileImageFieldWarmer
 
@@ -142,10 +144,13 @@ class Conversation(BaseModel, UpdatedAtMixin):
         return self.type() is not None and self.type() != "private" and self.group is not None
 
 
+min_datetime = datetime.min.replace(tzinfo=utc)
+
+
 class ConversationMeta(BaseModel):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    conversations_marked_at = models.DateTimeField()
-    threads_marked_at = models.DateTimeField()
+    conversations_marked_at = models.DateTimeField(default=min_datetime)
+    threads_marked_at = models.DateTimeField(default=min_datetime)
 
 
 class ConversationParticipantQuerySet(models.QuerySet):
