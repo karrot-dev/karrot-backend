@@ -24,9 +24,9 @@ steps:
       - . env/bin/activate
       - ./sync.py
       # failfast for now!
-      - ./manage.py test --failfast --noinput
-      #- mkdir -p test-reports
-      #- pytest -n 4 --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
+      #- ./manage.py test --failfast --noinput
+      - mkdir -p test-reports
+      - pytest -n 4 --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
     when:
       branch: master
 
