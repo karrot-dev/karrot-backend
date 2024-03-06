@@ -11,12 +11,9 @@ services:
 steps:
   - name: "Test"
     image: "docker.io/karrot/python:3.1"
-    entrypoint:
-      - "/bin/bash"
-      - "-c"
     commands:
       - test -d env/bin || virtualenv -p python3 env
-      - source env/bin/activate
+      - . env/bin/activate
       - ./sync.py
       - mkdir -p test-reports
       - pytest -n 4 --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
