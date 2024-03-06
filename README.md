@@ -30,8 +30,10 @@ Prerequisites:
   - install it via package manager or from https://podman.io
 
 ```commandline
-# if not using rtx, create a virtualenv and activate it
+# create a virtualenv
 python -m venv env
+
+# if not using mise, you'll need to activate the virtualenv
 source env/bin/activate
 
 # install deps
