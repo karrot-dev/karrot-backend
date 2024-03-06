@@ -11,7 +11,8 @@ steps:
         from_secret: cb_token
     when:
       - event: push
-        branch: master
+        branch: main
       - event: tag
+      - event: manual
     depends_on:
       - test

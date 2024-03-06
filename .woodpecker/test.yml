@@ -25,5 +25,6 @@ steps:
       - mkdir -p test-reports
       - pytest -n $(nproc) --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
     when:
-      - branch: master
+      - branch: main
       - event: tag
+      - event: manual
