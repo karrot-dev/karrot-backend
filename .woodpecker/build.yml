@@ -7,6 +7,8 @@ steps:
       registry: codeberg.org
       auto_tag: true
       username: ${CI_REPO_OWNER}
+      cache_images:
+        - codeberg.org/${CI_REPO}:cache
       password:
         from_secret: cb_token
     when:
