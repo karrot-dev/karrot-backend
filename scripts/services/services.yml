@@ -6,7 +6,12 @@ spec:
   containers:
 
   - name: db
-    image: docker.io/postgres:13.11
+    image: docker.io/postgres:16.2-alpine
+    args:
+      - "-c"
+      - "fsync=off"
+      - "-c"
+      - "full_page_writes=off"
     env:
     - name: POSTGRES_USER
       value: db
