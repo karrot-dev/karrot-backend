@@ -12,6 +12,11 @@ steps:
         - codeberg.org/${CI_REPO}:cache
       password:
         from_secret: cb_token
+      logins:
+        - registry: docker.io
+          username: nicksellen
+          password:
+            from_secret: docker_token
 
 #  - name: "Check using built image"
 #    image: codeberg.org/${CI_REPO}:tmp-${CI_COMMIT_SHA:0:8}
