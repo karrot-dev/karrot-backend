@@ -17,5 +17,5 @@ steps:
       - event: tag
       - event: manual
 
-depends_on:
-  - test
+#depends_on:
+#  - test
