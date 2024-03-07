@@ -47,7 +47,7 @@ RUN pip install -r requirements.txt
 
 FROM docker.io/node:${NODE_VERSION}-alpine as email_templates
 
-COPY --parents karrot/*/templates/*.mjml /app/code/karrot
+COPY --parents karrot/*/templates/*.mjml /app/code
 COPY mjml /app/code/mjml
 
 RUN find /app/code
@@ -73,6 +73,7 @@ RUN sed -i -e's/ main/ main contrib non-free/g' /etc/apt/sources.list.d/debian.s
   apt-get update && \
   apt-get install -y \
     git \
+    gpg \
     curl \
     gdal-bin \
     libmaxminddb0 \
