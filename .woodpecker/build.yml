@@ -6,7 +6,7 @@ steps:
       repo: codeberg.org/${CI_REPO}
       registry: codeberg.org
       auto_tag: true
-      tags: ${CI_COMMIT_SHA}
+      tags: tmp-${CI_COMMIT_SHA:0:8}
       username: ${CI_REPO_OWNER}
       cache_images:
         - codeberg.org/${CI_REPO}:cache
@@ -14,7 +14,7 @@ steps:
         from_secret: cb_token
 
   - name: "Check using built image"
-    image: codeberg.org/${CI_REPO}:${CI_COMMIT_SHA}
+    image: codeberg.org/${CI_REPO}:tmp-${CI_COMMIT_SHA:0:8}
     commands:
       - env
 
