@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile-upstream:master-labs
+
 ARG PYTHON_VERSION=3.11
 ARG NODE_VERSION=20
 
@@ -36,17 +38,19 @@ RUN python -m venv /app/venv && \
 # Enable the venv
 ENV PATH="/app/venv/bin:$PATH"
 
-COPY . /app/code
+COPY requirements.txt /app/code
 
 RUN pip install -r requirements.txt
-RUN python manage.py collectstatic --noinput --clear
 
 #---------------------------------------------------------------------
 # Now, the email templates
 
 FROM docker.io/node:${NODE_VERSION}-alpine as email_templates
 
-COPY . /app/code
+COPY --parents karrot/*/templates/*.mjml /app/code/karrot
+COPY mjml /app/code/mjml
+
+RUN find /app/code
 
 RUN cd /app/code/mjml && \
     yarn && \
@@ -85,17 +89,22 @@ ARG GID=1000
 RUN groupadd --gid $GID $USERNAME && \
     useradd --uid $UID -g $GID -m $USERNAME
 
-# Copies code + dependencies
-COPY --from=build /app /app
-
-# Copies email templates
-COPY --from=email_templates /app /app
-
-RUN chown -R $UID:$GID /app
+WORKDIR /app/code
 
 # Enable the venv
 ENV PATH="/app/venv/bin:$PATH"
 
+# Copies dependencies
+COPY --from=build /app/venv /app/venv
+
+COPY . /app/code
+
+# Copies email templates
+COPY --from=email_templates /app/code /app/code
+
+RUN python manage.py collectstatic --noinput --clear
+
+RUN chown -R $UID:$GID /app
+
 USER $USERNAME
-WORKDIR /app/code
 
