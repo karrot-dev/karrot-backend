@@ -13,10 +13,10 @@ steps:
       password:
         from_secret: cb_token
 
-  - name: "Check using built image"
-    image: codeberg.org/${CI_REPO}:tmp-${CI_COMMIT_SHA:0:8}
-    commands:
-      - env
+#  - name: "Check using built image"
+#    image: codeberg.org/${CI_REPO}:tmp-${CI_COMMIT_SHA:0:8}
+#    commands:
+#      - env
 
 when:
   - event: push
