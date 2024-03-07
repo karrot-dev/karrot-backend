@@ -22,7 +22,6 @@ steps:
       - REDIS_HOST=redis
       - SECRET_KEY=notverysecret
     commands:
-      - ./sync.py
       - mkdir -p test-reports
       - pytest -n auto --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
 when:
