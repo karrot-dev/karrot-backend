@@ -18,16 +18,8 @@ steps:
           password:
             from_secret: docker_token
 
-#  - name: "Check using built image"
-#    image: codeberg.org/${CI_REPO}:tmp-${CI_COMMIT_SHA:0:8}
-#    commands:
-#      - env
-
 when:
   - event: push
     branch: main
   - event: tag
   - event: manual
-
-#depends_on:
-#  - test

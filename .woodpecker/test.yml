@@ -12,8 +12,6 @@ skip_clone: true
 
 steps:
   - name: "Test"
-    #image: "codeberg.org/karrot/ci:latest"
-    #pull: true
     image: codeberg.org/${CI_REPO}:tmp-${CI_COMMIT_SHA:0:8}
     environment:
       - MODE=dev
@@ -25,9 +23,8 @@ steps:
       - SECRET_KEY=notverysecret
     directory: /app/code
     commands:
-      - pytest -n auto
-      #- mkdir -p test-reports
-      #- pytest -n auto --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
+      - mkdir -p test-reports
+      - pytest -n auto --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
 
 when:
   - branch: main
