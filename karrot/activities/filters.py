@@ -30,6 +30,17 @@ class ActivitySeriesFilter(filters.FilterSet):
 class PublicActivitiesFilter(filters.FilterSet):
     group = filters.NumberFilter(field_name="place__group")
     date = ISODateTimeRangeFromToRangeFilter(field_name="date", lookup_expr="overlap")
+    place = filters.NumberFilter(field_name="place")
+    activity_type = filters.NumberFilter(field_name="activity_type")
+
+    class Meta:
+        model = Activity
+        fields = [
+            "group",
+            "date",
+            "place",
+            "activity_type",
+        ]
 
 
 def place_status_queryset(request):

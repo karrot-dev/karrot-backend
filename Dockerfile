@@ -1,24 +1,101 @@
+ARG PYTHON_VERSION=3.11
+ARG NODE_VERSION=20
 
-FROM ubuntu:16.04
+FROM docker.io/python:${PYTHON_VERSION}-bookworm as build
 
-RUN apt-get update; apt-get --yes upgrade; apt-get install --yes git redis-server python3 python3-dev python-virtualenv postgresql postgresql-server-dev-9.5 gcc build-essential g++ libffi-dev libncurses5-dev sudo vim
+RUN sed -i -e's/ main/ main contrib non-free/g' /etc/apt/sources.list.d/debian.sources && \
+  apt-get update && \
+  apt-get install -y \
+    curl \
+    gnupg \
+    gnupg1 \
+    gnupg2 \
+    python3 \
+    python3-dev \
+    virtualenv \
+    build-essential \
+    git \
+    wget \
+    rsync \
+    python3-pip \
+    binutils \
+    libproj-dev \
+    gdal-bin \
+    zip \
+    postgresql-client \
+  && apt-get clean
 
-# Postgres setup
-RUN echo 'fsync = off' >> /etc/postgresql/9.5/main/postgresql.conf; service postgresql start; sudo -i -u postgres psql -c "CREATE USER root WITH SUPERUSER LOGIN PASSWORD 'root';"; sudo -i -u postgres createdb fstool-db; service postgresql stop
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+ENV PIP_ROOT_USER_ACTION=ignore
 
-# Python virtualenv setup
-COPY requirements.txt /
-RUN rm -rf /env; virtualenv -p /usr/bin/python3 /env; bash -c 'source /env/bin/activate; pip install -r /requirements.txt'
+WORKDIR /app/code
 
-# Django setup
-COPY . /karrot-backend
-WORKDIR /karrot-backend
-RUN cd config; sed 's/fstool-user/root/g; s/fstool-pw/root/g' local_settings.py.example > local_settings.py
-RUN bash -c 'source /env/bin/activate; service postgresql start; service redis-server start; python manage.py migrate; python manage.py create_sample_data >/tmp/create_data; service postgresql stop; service redis-server stop'
-RUN echo 'source /env/bin/activate' >> /root/.bashrc
+RUN python -m venv /app/venv && \
+    pip install pip-tools
 
-EXPOSE 8000
-EXPOSE 5432
-# The '0.0.0.0:8000' makes the server listen on 0.0.0.0 instead of 127.0.0.1.
-# It seems docker cannot expose services bound to the loopback interface.
-CMD bash -c 'service postgresql start; service redis-server start; cd /karrot-backend; source /env/bin/activate; cat /tmp/create_data; python manage.py runserver 0.0.0.0:8000'
+# Enable the venv
+ENV PATH="/app/venv/bin:$PATH"
+
+COPY . /app/code
+
+RUN pip install -r requirements.txt
+RUN python manage.py collectstatic --noinput --clear
+
+#---------------------------------------------------------------------
+# Now, the email templates
+
+FROM docker.io/node:${NODE_VERSION}-alpine as email_templates
+
+COPY . /app/code
+
+RUN cd /app/code/mjml && \
+    yarn && \
+    ./convert
+
+# Remove files not related to the templates we just converted
+RUN rm -rf /app/code/mjml/node_modules && \
+    find /app/code -type f -not -name \*.html.jinja2 -delete && \
+    find /app/code -empty -type d -delete
+
+#---------------------------------------------------------------------
+# And finally, the runnable image
+
+FROM docker.io/python:${PYTHON_VERSION}-slim-bookworm as runner
+
+ENV PYTHONUNBUFFERED=1
+
+# Only dependencies needed for runtime
+RUN sed -i -e's/ main/ main contrib non-free/g' /etc/apt/sources.list.d/debian.sources && \
+  apt-get update && \
+  apt-get install -y \
+    git \
+    curl \
+    gdal-bin \
+    libmaxminddb0 \
+    libmaxminddb-dev \
+    geoipupdate \
+    libmagic1 \
+  && apt-get clean
+
+# Run as unprivileged user
+ARG USERNAME=karrot
+ARG UID=1000
+ARG GID=1000
+
+RUN groupadd --gid $GID $USERNAME && \
+    useradd --uid $UID -g $GID -m $USERNAME
+
+# Copies code + dependencies
+COPY --from=build /app /app
+
+# Copies email templates
+COPY --from=email_templates /app /app
+
+RUN chown -R $UID:$GID /app
+
+# Enable the venv
+ENV PATH="/app/venv/bin:$PATH"
+
+USER $USERNAME
+WORKDIR /app/code
+

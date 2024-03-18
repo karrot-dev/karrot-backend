@@ -4,7 +4,6 @@
 #
 #    pip-compile --no-annotate
 #
--e git+https://github.com/tiltec/talon@80886cd#egg=talon
 aiofiles==23.2.1
 aiohttp==3.9.0
 aiosignal==1.3.1
@@ -23,7 +22,6 @@ bleach==6.1.0
 bleach-allowlist==1.0.3
 boltons==23.1.1
 build==1.0.3
-cchardet==2.1.7
 certifi==2023.11.17
 cffi==1.16.0
 cfgv==3.4.0
@@ -64,6 +62,7 @@ executing==2.0.1
 face==20.1.1
 factory-boy==3.3.0
 faker==20.0.3
+faust-cchardet==2.1.19
 filelock==3.13.1
 fractional-indexing==0.1.3
 freezegun==1.2.2
@@ -97,6 +96,7 @@ iniconfig==2.0.0
 ipython==8.17.2
 jedi==0.19.1
 jinja2==3.1.2
+joblib==1.3.2
 jsonschema==4.20.0
 jsonschema-specifications==2023.11.1
 livekit-api==0.3.0
@@ -165,6 +165,7 @@ sniffio==1.3.0
 sqlparse==0.4.4
 stack-data==0.6.3
 starlette==0.32.0.post1
+talon-core @ https://github.com/zulip/talon/archive/refs/tags/zulip-25522.zip#subdirectory=talon-core
 tblib==3.0.0
 tomli==2.0.1
 traitlets==5.13.0

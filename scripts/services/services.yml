@@ -6,7 +6,12 @@ spec:
   containers:
 
   - name: db
-    image: docker.io/postgres:13.11
+    image: docker.io/postgres:16.2-alpine
+    args:
+      - "-c"
+      - "fsync=off"
+      - "-c"
+      - "full_page_writes=off"
     env:
     - name: POSTGRES_USER
       value: db
@@ -30,7 +35,7 @@ spec:
       protocol: TCP
 
   - name: maildev
-    image: docker.io/maildev/maildev:2.0.5
+    image: docker.io/maildev/maildev:2.1.0
     ports:
     - containerPort: 1080
       hostPort: 1080
@@ -40,7 +45,7 @@ spec:
       protocol: TCP
 
   - name: pgweb
-    image: docker.io/sosedoff/pgweb:0.14.1
+    image: docker.io/sosedoff/pgweb:0.14.3
     env:
     - name: DATABASE_URL
       value: postgres://db:db@db:5432/db?sslmode=disable

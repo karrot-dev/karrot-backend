@@ -1,8 +1,11 @@
-# Removes machine learning dependencies
-# Zulip maintains their own fork:
-# https://github.com/zulip/zulip/blob/61e1e38a00f4ef9fe4c1a302b93ce059646c62a6/requirements/common.in#L60-L61
-# Might hopefully get merged eventually: https://github.com/mailgun/talon/pull/200
--e git+https://github.com/tiltec/talon@80886cd#egg=talon
+# We use Zulip's fork of talon for two reasons:
+#
+# 1. they remove machine learning dependencies
+#    https://github.com/mailgun/talon/pull/200
+#
+# 2. cchardet is now unmaintained and they switched to a fork
+#    https://github.com/zulip/talon/commit/5529af43ff5172ff30c1a7b99111a68dcd997810
+https://github.com/zulip/talon/archive/refs/tags/zulip-25522.zip#egg=talon-core&subdirectory=talon-core
 
 # Common PyPI dependencies
 django[argon2]
