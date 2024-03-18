@@ -264,7 +264,7 @@ class PublicActivityViewSet(
     mixins.ListModelMixin,
 ):
     serializer_class = PublicActivitySerializer
-    queryset = ActivityModel.objects.is_public().exclude_disabled()
+    queryset = ActivityModel.objects.is_public().exclude_disabled().filter(place__archived_at__isnull=True)
     filter_backends = (
         filters.DjangoFilterBackend,
         OrderingFilter,
