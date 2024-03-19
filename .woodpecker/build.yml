@@ -1,3 +1,15 @@
+# this is for building the main docker images
+# main branch images are tagged as "latest"
+# tag images are tagged with their git tag
+
+when:
+  - event: push
+    branch: main
+  - event: tag
+
+depends_on:
+  - test
+
 variables:
   build_settings: &build_settings
     platforms: linux/amd64
@@ -39,9 +51,3 @@ steps:
       cache_from: codeberg.org/${CI_REPO}-cache:main
     when:
       - event: tag
-
-
-when:
-  - event: push
-    branch: main
-  - event: tag
