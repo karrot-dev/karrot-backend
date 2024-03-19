@@ -8,8 +8,6 @@ services:
   - name: redis
     image: "redis:6-alpine"
 
-skip_clone: true
-
 steps:
   - name: "build test image"
     image: woodpeckerci/plugin-docker-buildx
