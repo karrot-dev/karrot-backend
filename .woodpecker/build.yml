@@ -19,7 +19,7 @@ steps:
         - KARROT_COMMIT
       username: ${CI_REPO_OWNER}
       cache_images:
-        - codeberg.org/${CI_REPO_OWNER}/cache:${CI_REPO_NAME}-${CI_COMMIT_BRANCH=unknown}
+        - codeberg.org/${CI_REPO}:cache
       password:
         from_secret: cb_token
       logins:
