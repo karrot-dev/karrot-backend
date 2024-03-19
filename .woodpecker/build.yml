@@ -16,8 +16,6 @@ variables:
 steps:
   - name: "build latest image"
     image: woodpeckerci/plugin-docker-buildx
-    environment:
-      <<: *karrot_env
     settings:
       <<: *build_settings
       build_args:
@@ -32,8 +30,6 @@ steps:
 
   - name: "build tag image"
     image: woodpeckerci/plugin-docker-buildx
-    environment:
-      <<: *karrot_env
     settings:
       <<: *build_settings
       build_args:
