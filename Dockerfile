@@ -12,23 +12,15 @@ RUN <<EOF
 sed -i -e's/ main/ main contrib non-free/g' /etc/apt/sources.list.d/debian.sources
 apt-get update
 apt-get install -y \
-  curl \
-  gnupg \
-  gnupg1 \
-  gnupg2 \
-  python3 \
-  python3-dev \
-  virtualenv \
-  build-essential \
   git \
-  wget \
-  rsync \
-  python3-pip \
+  gpg \
+  curl \
+  gdal-bin \
+  python3-dev \
+  build-essential \
   binutils \
   libproj-dev \
-  gdal-bin \
-  zip \
-  postgresql-client
+  zip
 apt-get clean
 EOF
 
@@ -74,6 +66,12 @@ EOF
 # And finally, the runnable image
 
 FROM docker.io/python:${PYTHON_VERSION}-slim-bookworm as runner
+
+ARG KARROT_VERSION="unknown"
+ENV KARROT_VERSION="${KARROT_VERSION}"
+
+ARG KARROT_COMMIT="unknown"
+ENV KARROT_COMMIT="${KARROT_COMMIT}"
 
 ENV PYTHONUNBUFFERED=1
 
