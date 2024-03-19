@@ -39,3 +39,9 @@ steps:
       cache_from: codeberg.org/${CI_REPO}-cache:main
     when:
       - event: tag
+
+
+when:
+  - event: push
+    branch: main
+  - event: tag
