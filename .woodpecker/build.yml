@@ -1,15 +1,25 @@
+variables:
+  karrot_env: &karrot_env
+    KARROT_VERSION: "${CI_COMMIT_TAG=latest}"
+    KARROT_COMMIT: "${CI_COMMIT_SHA}"
+
 steps:
   - name: "Build docker image"
     image: woodpeckerci/plugin-docker-buildx
+    environment:
+      <<: *karrot_env
     settings:
       platforms: linux/amd64
       repo: codeberg.org/${CI_REPO}
       registry: codeberg.org
       auto_tag: true
       tags: tmp-${CI_COMMIT_SHA:0:8}
+      build_args_from_env:
+        - KARROT_VERSION
+        - KARROT_COMMIT
       username: ${CI_REPO_OWNER}
       cache_images:
-        - codeberg.org/${CI_REPO}:cache
+        - codeberg.org/${CI_REPO_OWNER}/cache:${CI_REPO_name}-${CI_COMMIT_BRANCH=unknown}
       password:
         from_secret: cb_token
       logins:
