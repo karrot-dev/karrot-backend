@@ -42,6 +42,10 @@ steps:
     commands:
       - mkdir -p test-reports
       - pytest -n auto --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
+    depends_on:
+      - build test image
+    when:
+      - evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "test"'
 
 when:
   - branch: main
