@@ -3,7 +3,7 @@
 # remove this once it's supported widely enough
 # https://docs.docker.com/reference/dockerfile/#copy---parents
 
-ARG PYTHON_VERSION=3.11
+ARG PYTHON_VERSION=3.12
 ARG NODE_VERSION=20
 
 FROM docker.io/python:${PYTHON_VERSION}-bookworm as build
