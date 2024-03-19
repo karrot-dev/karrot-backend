@@ -27,6 +27,8 @@ steps:
           username: nicksellen
           password:
             from_secret: docker_token
+    when:
+      - evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "test"'
 
   - name: "test"
     image: codeberg.org/${CI_REPO}-test:tmp-${CI_COMMIT_SHA:0:8}
@@ -42,8 +44,6 @@ steps:
     commands:
       - mkdir -p test-reports
       - pytest -n auto --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
-    depends_on:
-      - build test image
     when:
       - evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "test"'
 
