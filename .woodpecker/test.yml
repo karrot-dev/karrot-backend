@@ -44,5 +44,6 @@ steps:
       - pytest -n auto --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
 
 when:
-  # anything on or targeting the main branch, pull requests must be labelled with ci/test though
+  # anything on or targeting the main branch
+  # pull requests must be labelled with ci/test
   - evaluate: 'CI_COMMIT_BRANCH == CI_REPO_DEFAULT_BRANCH && (CI_PIPELINE_EVENT != "pull_request" || CI_COMMIT_PULL_REQUEST_LABELS contains "ci/test")'
