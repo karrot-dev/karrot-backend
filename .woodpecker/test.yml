@@ -27,8 +27,6 @@ steps:
           username: nicksellen
           password:
             from_secret: docker_token
-    when:
-      - evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "ci/test"'
 
   - name: "test"
     image: codeberg.org/${CI_REPO}-test:tmp-${CI_COMMIT_SHA:0:8}
@@ -44,9 +42,7 @@ steps:
     commands:
       - mkdir -p test-reports
       - pytest -n auto --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
-    when:
-      - evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "ci/test"'
 
 when:
-  - branch: main
-  - event: pull_request
+  # anything on or targeting the main branch, pull requests must be labelled with ci/test though
+  - evaluate: 'CI_COMMIT_BRANCH == CI_REPO_DEFAULT_BRANCH && (CI_PIPELINE_EVENT != "pull_request" || CI_COMMIT_PULL_REQUEST_LABELS contains "ci/test")'
