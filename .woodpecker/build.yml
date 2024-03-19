@@ -1,3 +1,15 @@
+# this is for building the main docker images
+# main branch images are tagged as "latest"
+# tag images are tagged with their git tag
+
+when:
+  - event: push
+    branch: main
+  - event: tag
+
+depends_on:
+  - test
+
 variables:
   build_settings: &build_settings
     platforms: linux/amd64
@@ -15,7 +27,7 @@ variables:
 
 steps:
   - name: "build latest image"
-    image: woodpeckerci/plugin-docker-buildx
+    image: docker.io/woodpeckerci/plugin-docker-buildx
     settings:
       <<: *build_settings
       build_args:
@@ -29,7 +41,7 @@ steps:
         branch: main
 
   - name: "build tag image"
-    image: woodpeckerci/plugin-docker-buildx
+    image: docker.io/woodpeckerci/plugin-docker-buildx
     settings:
       <<: *build_settings
       build_args:

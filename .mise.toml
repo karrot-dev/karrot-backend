@@ -1,4 +1,5 @@
 [tools]
+# switch to 3.12 once multidict installs ok
 python = "3.11"
 [env]
 _.python.venv = "env"

@@ -1,14 +1,14 @@
-services:
-  - name: database
-    image: "postgres:14-alpine"
-    environment:
-      - POSTGRES_USER=karrot
-      - POSTGRES_DB=karrot
-      - POSTGRES_PASSWORD=karrot
-  - name: redis
-    image: "redis:6-alpine"
+when:
+  # anything on or targeting the main branch
+  # pull requests must be labelled with ci/test
+  - evaluate: 'CI_COMMIT_BRANCH == CI_REPO_DEFAULT_BRANCH && (CI_PIPELINE_EVENT != "pull_request" || CI_COMMIT_PULL_REQUEST_LABELS contains "ci/test")'
 
 steps:
+
+  # The tests are run inside a docker image that we build
+  # from the main Dockerfile, so it closely resembles
+  # the production environment
+
   - name: "build test image"
     image: woodpeckerci/plugin-docker-buildx
     settings:
@@ -43,6 +43,12 @@ steps:
       - mkdir -p test-reports
       - pytest -n auto --cov=karrot --cov-report xml --junitxml=test-reports/junit.xml
 
-when:
-  - branch: main
-  - event: pull_request
+services:
+  - name: database
+    image: "postgres:14-alpine"
+    environment:
+      - POSTGRES_DB=karrot
+      - POSTGRES_USER=karrot
+      - POSTGRES_PASSWORD=karrot
+  - name: redis
+    image: "redis:6-alpine"
