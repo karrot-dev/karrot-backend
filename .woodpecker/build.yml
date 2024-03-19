@@ -15,7 +15,7 @@ variables:
 
 steps:
   - name: "build latest image"
-    image: woodpeckerci/plugin-docker-buildx
+    image: docker.io/woodpeckerci/plugin-docker-buildx
     settings:
       <<: *build_settings
       build_args:
@@ -29,7 +29,7 @@ steps:
         branch: main
 
   - name: "build tag image"
-    image: woodpeckerci/plugin-docker-buildx
+    image: docker.io/woodpeckerci/plugin-docker-buildx
     settings:
       <<: *build_settings
       build_args:
