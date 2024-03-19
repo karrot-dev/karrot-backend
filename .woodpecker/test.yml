@@ -11,8 +11,27 @@ services:
 skip_clone: true
 
 steps:
-  - name: "Test"
-    image: codeberg.org/${CI_REPO}:tmp-${CI_COMMIT_SHA:0:8}
+  - name: "build test image"
+    image: woodpeckerci/plugin-docker-buildx
+    settings:
+      platforms: linux/amd64
+      repo: codeberg.org/${CI_REPO}-test
+      registry: codeberg.org
+      auto_tag: false
+      tags: tmp-${CI_COMMIT_SHA:0:8}
+      username: ${CI_REPO_OWNER}
+      cache_images:
+        - codeberg.org/${CI_REPO}-cache:test
+      password:
+        from_secret: cb_token
+      logins:
+        - registry: docker.io
+          username: nicksellen
+          password:
+            from_secret: docker_token
+
+  - name: "test"
+    image: codeberg.org/${CI_REPO}-test:tmp-${CI_COMMIT_SHA:0:8}
     environment:
       - MODE=dev
       - DATABASE_HOST=database
@@ -28,8 +47,4 @@ steps:
 
 when:
   - branch: main
-  - event: tag
-  - event: manual
-
-depends_on:
-  - build
+  - event: pull_request
