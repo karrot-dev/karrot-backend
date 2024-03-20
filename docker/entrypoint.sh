@@ -5,7 +5,7 @@ set -eu
 case "${1:-}" in
 "/"*)
   # Starts with / - we'll treat is as a proper command
-  "$@"
+  exec "$@"
 ;;
 *)
   # Otherwise treat is as a karrot cli command
@@ -16,6 +16,6 @@ case "${1:-}" in
   fi
 
   # Then run a karrot CLI command
-  python -m karrot.cli "$@"
+  exec python -m karrot.cli "$@"
 ;;
 esac
