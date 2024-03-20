@@ -120,3 +120,7 @@ RUN python manage.py collectstatic --noinput --clear
 RUN chown -R $UID:$GID /app
 
 USER $USERNAME
+
+COPY docker/entrypoint.sh /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
