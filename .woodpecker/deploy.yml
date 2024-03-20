@@ -13,4 +13,4 @@ steps:
       - pushd yuca
       - pip install -r requirements.txt
       - ansible-galaxy install -r galaxy-requirements.yml
-      - ansible-playbook -u karrot-dev-deploy --become-user karrot-dev-deploy playbooks/karrot-dev/deploy.playbook.yml
+      - ansible-playbook -u karrot-dev-deploy playbooks/karrot-dev/deploy.playbook.yml
