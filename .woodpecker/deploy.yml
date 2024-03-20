@@ -1,0 +1,16 @@
+when:
+  - event: push
+    branch: main
+
+steps:
+  - name: "deploy karrot-dev"
+    image: docker.io/python:3.12-slim-bookworm
+    environment:
+      - ANSIBLE_HOST_KEY_CHECKING=False
+    commands:
+      - echo "$SSH_KEY" > ~/.ssh/id_ed25519
+      - git clone https://github.com/karrot-dev/yuca yuca
+      - pushd yuca
+      - pip install -r requirements.txt
+      - ansible-galaxy install -r galaxy-requirements.yml
+      - ansible-playbook -u karrot-dev-deploy --become-user karrot-dev-deploy playbooks/karrot-dev/deploy.playbook.yml
