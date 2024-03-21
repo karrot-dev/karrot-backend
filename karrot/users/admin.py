@@ -5,4 +5,4 @@ from karrot.users.models import User
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    pass
+    search_fields = ["email"]

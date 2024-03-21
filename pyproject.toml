@@ -20,3 +20,7 @@ select = [
 exclude = [
     "migrations",
 ]
+
+[tool.pip-tools]
+
+annotate = false

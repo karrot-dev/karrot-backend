@@ -1,4 +1,3 @@
-
 from django.db import migrations, models
 
 def copy_threads_marked_at_from_conversation(apps, schema_editor):

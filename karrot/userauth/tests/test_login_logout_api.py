@@ -103,6 +103,6 @@ class TestTokenAuthAPI(APITestCase):
 
     def test_use_token(self):
         token = Token.objects.create(user=self.user)
-        response = self.client.get("/api/auth/user/", HTTP_AUTHORIZATION=f"Token {token.key}")
+        response = self.client.get("/api/auth/user/", headers={"authorization": f"Token {token.key}"})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(response.data["email"], self.user.email)
