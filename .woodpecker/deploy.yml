@@ -1,4 +1,5 @@
 when:
+  - event: manual
   - event: push
     branch: main
 
