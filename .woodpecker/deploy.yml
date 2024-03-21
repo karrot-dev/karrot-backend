@@ -9,14 +9,14 @@ steps:
   - name: "deploy karrot-dev"
     image: docker.io/python:3.12-slim-bookworm
     environment:
-      - ANSIBLE_HOST_KEY_CHECKING=False
+      - "ANSIBLE_HOST_KEY_CHECKING=False"
     commands:
       - apt-get update && apt-get install -y curl zip ssh
-      - mkdir -p ~/.ssh
-      - echo "$SSH_KEY" > ~/.ssh/id_ed25519
-      - chmod 600 ~/.ssh/id_ed25519
-      - curl -L https://github.com/karrot-dev/yuca/archive/refs/heads/master.zip -o yuca.zip
-      - unzip yuca.zip
+      #- mkdir -p ~/.ssh
+      #- echo "$SSH_KEY" > ~/.ssh/id_ed25519
+      #- chmod 600 ~/.ssh/id_ed25519
+      #- curl -L https://github.com/karrot-dev/yuca/archive/refs/heads/master.zip -o yuca.zip
+      #- unzip yuca.zip
       #- cd yuca-master
       #- pip install -r requirements.txt
       #- ansible-galaxy install -r galaxy-requirements.yml
