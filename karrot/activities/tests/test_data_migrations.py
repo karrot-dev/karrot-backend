@@ -278,12 +278,12 @@ class TestActivityTypeArchivedAtMigration(TestMigrations):
         # have to add the history entry manually, so it's not amazing test, but yeah...
         # only created it for activity_type1 so we can check activity_type2 uses now()
         history = History.objects.create(
-            date=faker.date_time_between("-30d", "now", timezone.utc),
+            date=faker.date_time_between("-30d", "now", datetime.timezone.utc),
             **history_data,
         )
         # create an older one, that should not be used
         History.objects.create(
-            date=faker.date_time_between("-60d", "-40d", timezone.utc),
+            date=faker.date_time_between("-60d", "-40d", datetime.timezone.utc),
             **history_data,
         )
         self.history_id = history.id

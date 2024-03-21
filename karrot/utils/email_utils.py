@@ -1,3 +1,4 @@
+import datetime
 from email.utils import formataddr as real_formataddr
 
 import html2text
@@ -102,7 +103,7 @@ def prepare_email(
     **kwargs,
 ):
     context = dict(context) if context else {}
-    tz = kwargs.pop("tz", timezone.utc)
+    tz = kwargs.pop("tz", datetime.timezone.utc)
 
     default_context = {
         "site_name": settings.SITE_NAME,

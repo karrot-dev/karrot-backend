@@ -1,7 +1,7 @@
 from django.db import migrations
 
 
-class GroupNotificationType(object):
+class GroupNotificationType:
     NEW_OFFER = 'new_offer'
 
 
