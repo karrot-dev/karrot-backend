@@ -8,9 +8,15 @@ steps:
     environment:
       - ANSIBLE_HOST_KEY_CHECKING=False
     commands:
+      - apt-get update && apt-get install -y curl zip ssh
+      - mkdir -p ~/.ssh
       - echo "$SSH_KEY" > ~/.ssh/id_ed25519
-      - git clone https://github.com/karrot-dev/yuca yuca
-      - pushd yuca
+      - chmod 600 ~/.ssh/id_ed25519
+      - curl -L https://github.com/karrot-dev/yuca/archive/refs/heads/master.zip -o yuca.zip
+      - unzip yuca.zip
+      - cd yuca-master
       - pip install -r requirements.txt
       - ansible-galaxy install -r galaxy-requirements.yml
-      - ansible-playbook -u karrot-dev-deploy playbooks/karrot-dev/deploy.playbook.yml
+      - echo "#!/bin/sh\necho unused" > vault-password
+chmod +x vault-password
+      - ansible-playbook --user karrot-dev-deploy --become-user karrot-dev-deploy playbooks/karrot-dev/deploy.playbook.yml
