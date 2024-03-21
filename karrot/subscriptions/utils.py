@@ -54,5 +54,6 @@ class MockRequest:
         self.headers = {}
         self.META = META or {}
 
-    def build_absolute_uri(self, path):
+    @staticmethod
+    def build_absolute_uri(path):
         return settings.HOSTNAME + path
