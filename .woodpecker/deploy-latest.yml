@@ -3,6 +3,9 @@ when:
   - event: push
     branch: main
 
+depends_on:
+  - build-latest
+
 skip_clone: true
 
 steps:
