@@ -67,12 +67,6 @@ EOF
 
 FROM docker.io/python:${PYTHON_VERSION}-slim-bookworm as runner
 
-ARG KARROT_VERSION="unknown"
-ENV KARROT_VERSION="${KARROT_VERSION}"
-
-ARG KARROT_COMMIT="unknown"
-ENV KARROT_COMMIT="${KARROT_COMMIT}"
-
 ENV PYTHONUNBUFFERED=1
 
 # Only dependencies needed for runtime
@@ -122,5 +116,14 @@ RUN chown -R $UID:$GID /app
 USER $USERNAME
 
 COPY docker/entrypoint.sh /entrypoint.sh
+
+# Keep these near the end, as they are added to any RUN commands
+# which means new layers are created when just the version/commit
+# has changed
+ARG KARROT_VERSION="unknown"
+ENV KARROT_VERSION="${KARROT_VERSION}"
+
+ARG KARROT_COMMIT="unknown"
+ENV KARROT_COMMIT="${KARROT_COMMIT}"
 
 ENTRYPOINT ["/entrypoint.sh"]
