@@ -184,7 +184,7 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": """
 Welcome to our API documentation!
 
-Check out our code on [GitHub](https://github.com/karrot-dev/karrot-frontend)
+Check out our code on [GitHub](https://codeberg.org/karrot/karrot-frontend)
 or talk with us in our [Karrot Team & Feedback](https://karrot.world/#/groupPreview/191) group on Karrot
 or in our [Matrix chat room](https://chat.karrot.world)!
     """,

@@ -2,10 +2,9 @@
 
 Django API server for the _karrot_ frontend
 
-Our issues are tracked in [karrot-frontend](https://github.com/karrot-dev/karrot-frontend/issues). We plan to unite karrot-backend, karrot-frontend and related repos in near future.
+Our issues are tracked on our [community board](https://community.karrot.world/c/32/l/latest?board=default), and also on [karrot-frontend](https://codeberg.org/karrot/karrot-frontend/issues) issues.
 
-[![CircleCI](https://circleci.com/gh/karrot-dev/karrot-backend/tree/master.svg?style=svg)](https://circleci.com/gh/karrot-dev/karrot-backend/tree/master)
-[![codecov](https://codecov.io/gh/karrot-dev/karrot-backend/branch/master/graph/badge.svg?token=U2gJZBxdkU)](https://codecov.io/gh/karrot-dev/karrot-backend)
+[![status-badge](https://ci.codeberg.org/api/badges/13131/status.svg)](https://ci.codeberg.org/repos/13131)
 
 ## Developer setup
 
@@ -44,14 +43,6 @@ source env/bin/activate
 ```
 
 Everything should be up and running now.
-
-### docker-compose setup (legacy)
-
-_Nobody is actively using this setup, so it might have broken!_
-
-Includes backend, frontend, mail catcher, postgres, redis, etc..
-
-Head over to [karrot-dev/karrot-docker](https://github.com/karrot-dev/karrot-docker) for further instructions.
 
 ### Manual setup
 

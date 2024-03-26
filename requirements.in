@@ -48,7 +48,6 @@ glom
 geoip2
 starlette
 aiofiles
-shiv
 uvicorn[standard]
 gunicorn
 python-dotenv

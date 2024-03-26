@@ -4,7 +4,7 @@ setup(
     name="karrot-backend",
     version="0.1",
     description="Karrot",
-    url="http://github.com/karrot-dev/karrot-backend",
+    url="https://codeberg.org/karrot/karrot-backend",
     author="Karrot Team",
     author_email="info@karrot.world",
     license="AGPL",
