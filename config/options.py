@@ -12,6 +12,7 @@ def get_defaults(filename: Literal["options.env", "dev.env"]):
 
 
 def get_git_rev():
+    release = None
     with open(os.path.devnull, "w+") as null:
         try:
             release = (
