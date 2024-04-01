@@ -1,4 +1,5 @@
 import datetime
+from datetime import timedelta
 from random import randint
 
 from django.db.backends.postgresql.psycopg_any import DateTimeTZRange
@@ -10,7 +11,7 @@ from karrot.utils.tests.fake import faker
 
 
 def to_range(date, **kwargs):
-    duration = datetime.timedelta(**kwargs) if kwargs else datetime.timedelta(minutes=30)
+    duration = timedelta(**kwargs) if kwargs else timedelta(minutes=30)
     return DateTimeTZRange(date, date + duration)
 
 
@@ -38,9 +39,7 @@ class TestConvertActivityToRangeMigration(TestMigrations):
         Activity = self.apps.get_model("activities", "Activity")
         activity = Activity.objects.get(pk=self.activity_id)
         self.assertIsNotNone(activity.date_range)
-        self.assertEqual(
-            activity.date_range, DateTimeTZRange(activity.date, activity.date + datetime.timedelta(minutes=30))
-        )
+        self.assertEqual(activity.date_range, DateTimeTZRange(activity.date, activity.date + timedelta(minutes=30)))
 
 
 class TestConvertWeightIntoSumMigration(TestMigrations):
