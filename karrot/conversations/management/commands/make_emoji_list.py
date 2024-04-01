@@ -1,3 +1,4 @@
+import json
 from itertools import groupby
 from operator import itemgetter
 
@@ -5,7 +6,7 @@ import requests
 from django.core.management.base import BaseCommand
 from pymdownx import twemoji_db
 
-SOURCE_URL = "https://raw.githubusercontent.com/markdown-it/markdown-it-emoji/339abf72f84a02e66fe9a4d682a7217d1f660e6a/lib/data/full.json"  # noqa E501
+SOURCE_URL = "https://raw.githubusercontent.com/markdown-it/markdown-it-emoji/3.0.0/lib/data/full.mjs"
 FILENAME = "karrot/conversations/emoji_db.py"
 HEADER = f"""
 # Source: {SOURCE_URL} # noqa E501
@@ -44,7 +45,14 @@ class Command(BaseCommand):
                 print("Choosing {} over {}".format(chosen_name, ", ".join(our_aliases.keys())))
             aliases.update(our_aliases)
 
-        source_list = requests.get(SOURCE_URL).json()
+        source_list_text = requests.get(SOURCE_URL).text
+
+        # It used to be a json file now, it's a mjs file
+        # We hack it to make it json again :)
+        idx = source_list_text.find("{")
+        source_list_text = source_list_text[idx:]
+        source_list = json.loads(source_list_text)
+
         keyfunc = itemgetter(1)
         for _, g in groupby(sorted(source_list.items(), key=keyfunc), key=keyfunc):
             group = list(g)
