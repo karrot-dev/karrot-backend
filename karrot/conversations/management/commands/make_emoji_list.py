@@ -48,7 +48,7 @@ class Command(BaseCommand):
         source_list_text = requests.get(SOURCE_URL).text
 
         # It used to be a json file now, it's a mjs file
-        # We hack it to make it json again!
+        # We hack it to make it json again :)
         idx = source_list_text.find("{")
         source_list_text = source_list_text[idx:]
         source_list = json.loads(source_list_text)
