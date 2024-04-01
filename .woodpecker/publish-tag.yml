@@ -4,7 +4,7 @@ when:
   - event: tag
 
 steps:
-  - name: "build tag image"
+  - name: "publishtag image"
     image: docker.io/woodpeckerci/plugin-docker-buildx
     settings:
       platforms: linux/amd64
