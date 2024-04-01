@@ -1,6 +1,5 @@
 import uuid
 from datetime import timedelta
-from typing import List, Optional
 
 import dateutil.rrule
 from django.conf import settings
@@ -500,18 +499,18 @@ class ActivitySerializer(serializers.ModelSerializer):
     date = DateTimeRangeField()
 
     @staticmethod
-    def get_feedback_given_by(activity) -> Optional[List[int]]:
+    def get_feedback_given_by(activity) -> list[int] | None:
         # assume we only need it if we've prefetched it
         if is_prefetched(activity, "feedback_set"):
             return [f.given_by_id for f in activity.feedback_set.all()]
         return None
 
     @staticmethod
-    def get_feedback_dismissed_by(activity) -> Optional[List[int]]:
+    def get_feedback_dismissed_by(activity) -> list[int] | None:
         # ensure we use prefetched data
         return [c.user_id for c in activity.activityparticipant_set.all() if c.feedback_dismissed]
 
-    def get_feedback(self, activity) -> Optional[List]:
+    def get_feedback(self, activity) -> list | None:
         # assume we only need it if we've prefetched it
         if is_prefetched(activity, "feedback_set"):
             return FeedbackSerializer(activity.feedback_set.all(), many=True, context=self.context).data
@@ -830,8 +829,8 @@ class ActivityICSSerializer(serializers.ModelSerializer):
     def get_uid(self, activity):
         request = self.context.get("request")
         domain = "karrot"
-        if request and request.META.get("HTTP_HOST"):
-            domain = request.META.get("HTTP_HOST")
+        if request and request.headers.get("host"):
+            domain = request.headers.get("host")
         return f"activity_{activity.id}@{domain}"
 
     def get_status(self, activity):
@@ -868,8 +867,8 @@ class PublicActivityICSSerializer(ActivityICSSerializer):
     def get_uid(self, activity):
         request = self.context.get("request")
         domain = "karrot"
-        if request and request.META.get("HTTP_HOST"):
-            domain = request.META.get("HTTP_HOST")
+        if request and request.headers.get("host"):
+            domain = request.headers.get("host")
         return f"activity_{activity.public_id}@{domain}"
 
     def get_attendee(self, activity):
