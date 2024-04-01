@@ -8,7 +8,7 @@ depends_on:
   - test
 
 steps:
-  - name: "publishlatest image"
+  - name: "publish latest image"
     image: docker.io/woodpeckerci/plugin-docker-buildx
     settings:
       platforms: linux/amd64
