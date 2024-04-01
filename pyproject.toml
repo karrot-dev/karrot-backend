@@ -2,7 +2,7 @@
 
 line-length = 120
 
-select = [
+lint.select = [
     # https://docs.astral.sh/ruff/rules/
     "B",
     "BLE",
