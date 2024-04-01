@@ -73,7 +73,7 @@ class TestActivitySeriesModel(TestCase):
             self.assertEqual(actual_date.date.start, expected_date)
 
     def test_daylight_saving_time_to_winter(self):
-        start_date = self.place.group.timezone.localize(datetime.now().replace(2016, 10, 22, 15, 0, 0, 0))  # noqa: DTZ005
+        start_date = self.place.group.timezone.localize(datetime(2016, 10, 22, 15))  # noqa: DTZ001
 
         before_dst_switch = timezone.now().replace(2016, 10, 22, 4, 40, 13)
         with freeze_time(before_dst_switch, tick=True):
