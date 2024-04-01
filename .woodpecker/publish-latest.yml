@@ -27,5 +27,3 @@ steps:
         - KARROT_VERSION=latest
         - KARROT_COMMIT=${CI_COMMIT_SHA}
       tags: latest
-      cache_images:
-        - codeberg.org/${CI_REPO}-cache:main
