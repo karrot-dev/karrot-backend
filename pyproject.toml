@@ -2,7 +2,7 @@
 
 line-length = 120
 
-lint.select = [
+select = [
     # https://docs.astral.sh/ruff/rules/
     "B",
     "BLE",
@@ -20,7 +20,3 @@ lint.select = [
 exclude = [
     "migrations",
 ]
-
-[tool.pip-tools]
-
-annotate = false

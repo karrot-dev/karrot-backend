@@ -3,7 +3,6 @@
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/2.0/topics/http/urls/
 """
-
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
@@ -68,13 +67,13 @@ router.register("agreements", AgreementViewSet)
 
 # User endpoints
 router.register("users", UserViewSet)
-router.register("users-info", UserInfoViewSet, basename="userinfo")
+router.register("users-info", UserInfoViewSet)
 
 # activity endpoints
 router.register("activity-series", ActivitySeriesViewSet)
 router.register("activities", ActivityViewSet)
 router.register("activity-types", ActivityTypeViewSet)
-router.register("public-activities", PublicActivityViewSet, basename="publicactivities")
+router.register("public-activities", PublicActivityViewSet)
 
 # Conversation/Message endpoints
 router.register("conversations", ConversationViewSet)
@@ -100,7 +99,7 @@ router.register("history", HistoryViewSet)
 
 # Invitation endpoints
 router.register("invitations", InvitationsViewSet)
-router.register("invitations", InvitationAcceptViewSet, basename="invitationsaccept")
+router.register("invitations", InvitationAcceptViewSet)
 
 # Feedback endpoints
 router.register("feedback", FeedbackViewSet)
@@ -111,7 +110,7 @@ router.register("unsubscribe", UnsubscribeViewSet, basename="unsubscribe")
 router.register("meet/rooms", MeetRoomViewSet)
 
 # Stats endpoints
-router.register("stats/activity-history", ActivityHistoryStatsViewSet, basename="statsactivityhistory")
+router.register("stats/activity-history", ActivityHistoryStatsViewSet)
 
 urlpatterns = [
     path("api/auth/token/", obtain_auth_token),

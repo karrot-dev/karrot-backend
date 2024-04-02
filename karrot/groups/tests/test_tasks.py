@@ -181,7 +181,7 @@ class TestSummaryEmailTask(TestCase):
 
     def test_summary_email_dates_printed_correctly(self):
         mail.outbox = []
-        with timezone.override(datetime.timezone.utc), freeze_time(timezone.datetime(2018, 8, 19)):  # Sunday
+        with timezone.override(timezone.utc), freeze_time(timezone.datetime(2018, 8, 19)):  # Sunday
             group = GroupFactory()
             self.make_activity_in_group(group)
             from_date, to_date = calculate_group_summary_dates(group)
@@ -195,9 +195,7 @@ class TestSummaryEmailTask(TestCase):
     def test_summary_emails_send_at_8am_localtime(self):
         group = GroupFactory(timezone=pytz.timezone("Europe/Berlin"))
         # 6am UTC is 8am in this timezone
-        with timezone.override(datetime.timezone.utc), freeze_time(
-            datetime.datetime(2018, 8, 19, 6, 0, 0, tzinfo=pytz.utc)
-        ):
+        with timezone.override(timezone.utc), freeze_time(datetime.datetime(2018, 8, 19, 6, 0, 0, tzinfo=pytz.utc)):
             self.make_activity_in_group(group)
             mail.outbox = []
             send_summary_emails()
@@ -206,9 +204,7 @@ class TestSummaryEmailTask(TestCase):
     def test_summary_emails_do_not_send_at_other_times(self):
         group = GroupFactory(timezone=pytz.timezone("Europe/Berlin"))
         # 6am UTC is 8am in this timezone
-        with timezone.override(datetime.timezone.utc), freeze_time(
-            datetime.datetime(2018, 8, 19, 7, 0, 0, tzinfo=pytz.utc)
-        ):
+        with timezone.override(timezone.utc), freeze_time(datetime.datetime(2018, 8, 19, 7, 0, 0, tzinfo=pytz.utc)):
             self.make_activity_in_group(group)
             mail.outbox = []
             send_summary_emails()

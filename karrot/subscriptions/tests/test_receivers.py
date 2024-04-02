@@ -1,4 +1,3 @@
-import datetime
 import itertools
 import os
 import pathlib
@@ -789,7 +788,7 @@ class ActivityReceiverTests(WSTransactionTestCase):
         client = self.connect_as(self.member)
 
         # change property
-        date = to_range(faker.future_datetime(end_date="+30d", tzinfo=datetime.timezone.utc))
+        date = to_range(faker.future_datetime(end_date="+30d", tzinfo=timezone.utc))
         self.activity.date = date
         self.activity.save()
 
@@ -855,7 +854,7 @@ class ActivitySeriesReceiverTests(WSTransactionTestCase):
     def test_receive_series_changes(self):
         client = self.connect_as(self.member)
 
-        date = faker.future_datetime(end_date="+30d", tzinfo=datetime.timezone.utc) + relativedelta(months=2)
+        date = faker.future_datetime(end_date="+30d", tzinfo=timezone.utc) + relativedelta(months=2)
         self.series.start_date = date
         self.series.save()
 

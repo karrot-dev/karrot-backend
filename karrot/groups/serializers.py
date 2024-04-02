@@ -1,3 +1,5 @@
+from typing import List
+
 import pytz
 from django.conf import settings
 from django.contrib.gis.geos import Point
@@ -182,7 +184,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
             for role in group.roles.all()
         }
 
-    def get_notification_types(self, group) -> list[str]:
+    def get_notification_types(self, group) -> List[str]:
         user = self.context["request"].user
         membership = next(m for m in group.groupmembership_set.all() if m.user_id == user.id)
         return membership.notification_types

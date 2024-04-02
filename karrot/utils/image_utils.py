@@ -1,4 +1,5 @@
 from io import BytesIO
+from typing import Tuple
 
 from django.core.files import File
 from PIL import Image
@@ -16,7 +17,7 @@ def is_supported_content_type(content_type: str) -> bool:
     return content_type.lower() in PILLOW_SUPPORTED_MIME_TYPES
 
 
-def resize_image(image: Image, size: tuple[int, int]) -> File:
+def resize_image(image: Image, size: Tuple[int, int]) -> File:
     # processes rotation if present
     image = exif_transpose(image)
     # remove alpha if it has it

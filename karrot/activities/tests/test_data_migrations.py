@@ -1,5 +1,4 @@
 import datetime
-from datetime import timedelta
 from random import randint
 
 from django.db.backends.postgresql.psycopg_any import DateTimeTZRange
@@ -11,7 +10,7 @@ from karrot.utils.tests.fake import faker
 
 
 def to_range(date, **kwargs):
-    duration = timedelta(**kwargs) if kwargs else timedelta(minutes=30)
+    duration = datetime.timedelta(**kwargs) if kwargs else datetime.timedelta(minutes=30)
     return DateTimeTZRange(date, date + duration)
 
 
@@ -39,7 +38,9 @@ class TestConvertActivityToRangeMigration(TestMigrations):
         Activity = self.apps.get_model("activities", "Activity")
         activity = Activity.objects.get(pk=self.activity_id)
         self.assertIsNotNone(activity.date_range)
-        self.assertEqual(activity.date_range, DateTimeTZRange(activity.date, activity.date + timedelta(minutes=30)))
+        self.assertEqual(
+            activity.date_range, DateTimeTZRange(activity.date, activity.date + datetime.timedelta(minutes=30))
+        )
 
 
 class TestConvertWeightIntoSumMigration(TestMigrations):
@@ -277,12 +278,12 @@ class TestActivityTypeArchivedAtMigration(TestMigrations):
         # have to add the history entry manually, so it's not amazing test, but yeah...
         # only created it for activity_type1 so we can check activity_type2 uses now()
         history = History.objects.create(
-            date=faker.date_time_between("-30d", "now", datetime.timezone.utc),
+            date=faker.date_time_between("-30d", "now", timezone.utc),
             **history_data,
         )
         # create an older one, that should not be used
         History.objects.create(
-            date=faker.date_time_between("-60d", "-40d", datetime.timezone.utc),
+            date=faker.date_time_between("-60d", "-40d", timezone.utc),
             **history_data,
         )
         self.history_id = history.id

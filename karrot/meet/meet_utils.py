@@ -1,4 +1,5 @@
 import re
+from typing import List, Optional
 
 from django.conf import settings
 
@@ -12,7 +13,7 @@ from karrot.users.models import User
 room_subject_re = re.compile("^(?P<subject_type>[a-z]+):(?P<subject_ids>[0-9,]+)$")
 
 
-def parse_room_subject(room_subject: str) -> tuple[str, str, list[int]] | None:
+def parse_room_subject(room_subject: str) -> Optional[tuple[str, str, List[int]]]:
     match = room_subject_re.match(room_subject)
     if not match:
         return None
@@ -29,7 +30,7 @@ def parse_room_subject(room_subject: str) -> tuple[str, str, list[int]] | None:
     return room_subject, subject_type, subject_ids
 
 
-def require_room_subject(room_subject: str) -> tuple[str, str, list[int]]:
+def require_room_subject(room_subject: str) -> tuple[str, str, List[int]]:
     room_subject, subject_type, subject_ids = parse_room_subject(room_subject)
     if not subject_type:
         raise ValueError("invalid room subject")
@@ -69,7 +70,7 @@ def user_has_room_access(user: User, room_subject: str) -> bool:
     return False
 
 
-def get_room_group(room_subject: str) -> Group | None:
+def get_room_group(room_subject: str) -> Optional[Group]:
     room_subject, subject_type, subject_ids = parse_room_subject(room_subject)
     if not subject_type:
         return None

@@ -1,3 +1,5 @@
+from typing import List
+
 from cryptography.hazmat.primitives import serialization
 from django.conf import settings
 from orjson import orjson
@@ -10,7 +12,7 @@ from karrot.subscriptions.stats import pushed_via_web_push
 
 def notify_subscribers(
     *,
-    subscriptions: list[WebPushSubscription],
+    subscriptions: List[WebPushSubscription],
     title: str,
     body: str = "",
     tag: str = "",

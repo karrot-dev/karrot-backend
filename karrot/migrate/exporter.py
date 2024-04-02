@@ -2,7 +2,7 @@ from io import BytesIO
 from os.path import join
 from tarfile import TarFile, TarInfo
 from tempfile import TemporaryDirectory, TemporaryFile
-from typing import IO
+from typing import IO, List
 
 import gnupg
 import orjson
@@ -105,7 +105,7 @@ def serialize_value(value):
     raise TypeError
 
 
-def export_to_file(group_ids: list[int], output_filename: str, password: str):
+def export_to_file(group_ids: List[int], output_filename: str, password: str):
     with (
         TemporaryDirectory() as home,
         TemporaryFile() as tmp,
@@ -128,7 +128,7 @@ def export_to_file(group_ids: list[int], output_filename: str, password: str):
             raise RuntimeError(result.status)
 
 
-def export_to_io(group_ids: list[int], output: IO):
+def export_to_io(group_ids: List[int], output: IO):
     with TarFile.open(fileobj=output, mode="w|xz") as tarfile:
         groups = Group.objects.filter(id__in=group_ids)
         if len(groups) != len(group_ids):

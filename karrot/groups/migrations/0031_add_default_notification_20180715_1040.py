@@ -3,7 +3,7 @@
 from django.db import migrations
 
 
-class GroupNotificationType:
+class GroupNotificationType(object):
     WEEKLY_SUMMARY = 'weekly_summary'
     DAILY_ACTIVITY_NOTIFICATION = 'daily_activity_notification'
     NEW_APPLICATION = 'new_application'

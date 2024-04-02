@@ -51,9 +51,7 @@ def send_in_channel(channel, topic, payload):
 class MockRequest:
     def __init__(self, user=None, META=None):
         self.user = user or AnonymousUser()
-        self.headers = {}
         self.META = META or {}
 
-    @staticmethod
-    def build_absolute_uri(path):
+    def build_absolute_uri(self, path):
         return settings.HOSTNAME + path

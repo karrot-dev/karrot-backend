@@ -1,6 +1,7 @@
 import json
 from contextlib import asynccontextmanager
 from datetime import timedelta
+from typing import List
 
 from asgiref.sync import async_to_sync
 from django.conf import settings
@@ -77,7 +78,7 @@ async def livekit_api():
         await api.aclose()
 
 
-async def alist_participants(room_name: str) -> list[ParticipantInfo]:
+async def alist_participants(room_name: str) -> List[ParticipantInfo]:
     # Would be nice to have a non-async version
     # TODO: use "twirp" python lib and avoid the async/sync dance?
     # OR could have an async django view (but they're not great as lots of middleware is sync)
@@ -96,5 +97,5 @@ def create_room(room_name: str) -> Room:
     return async_to_sync(acreate_room)(room_name)
 
 
-def list_participants(room_name: str) -> list[ParticipantInfo]:
+def list_participants(room_name: str) -> List[ParticipantInfo]:
     return async_to_sync(alist_participants)(room_name)

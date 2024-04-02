@@ -64,7 +64,7 @@ def migrate(apps, schema_editor):
         h.activity_id = activity_id
         history_to_update.append(h)
 
-    requested_activity_ids = {h.activity_id for h in history_to_update}
+    requested_activity_ids = set(h.activity_id for h in history_to_update)
     valid_activity_ids = Activity.objects.filter(id__in=requested_activity_ids).values_list(flat=True)
 
     for h in history_to_update:

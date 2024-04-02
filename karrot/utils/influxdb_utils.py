@@ -1,5 +1,4 @@
 """Utilities for working with influxdb."""
-
 # partially from https://github.com/bitlabstudio/django-influxdb-metrics
 import logging
 from threading import Thread

@@ -123,7 +123,7 @@ class TestBootstrapAPI(APITestCase):
         lat_lng = [float(val) for val in faker.latlng()]
         city = {"latitude": lat_lng[0], "longitude": lat_lng[1], "country_code": "AA", "time_zone": "Europe/Berlin"}
         geoip.city.return_value = city
-        response = self.client.get(self.url, headers={"x-forwarded-for": self.client_ip})
+        response = self.client.get(self.url, HTTP_X_FORWARDED_FOR=self.client_ip)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             dict(response.data["geoip"]),
@@ -138,7 +138,7 @@ class TestBootstrapAPI(APITestCase):
     @patch("karrot.utils.geoip.geoip")
     def test_without_geoip(self, geoip):
         geoip.city.side_effect = AddressNotFoundError("not found")
-        response = self.client.get(self.url, headers={"x-forwarded-for": self.client_ip})
+        response = self.client.get(self.url, HTTP_X_FORWARDED_FOR=self.client_ip)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNone(response.data["geoip"])
 
