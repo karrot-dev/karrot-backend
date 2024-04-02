@@ -273,9 +273,8 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
             response.data,
             {
                 "non_field_errors": [
-                    "You cannot give weight feedback to an activity of type {}.".format(
-                        self.activity_without_feedback_weight.activity_type.name
-                    )
+                    f"You cannot give weight feedback to an activity of "
+                    f"type {self.activity_without_feedback_weight.activity_type.name}."
                 ]
             },
         )
@@ -296,9 +295,8 @@ class FeedbackTest(APITestCase, ExtractPaginationMixin):
             response.data,
             {
                 "non_field_errors": [
-                    "You cannot give feedback to an activity of type {}.".format(
-                        self.activity_without_feedback.activity_type.name
-                    )
+                    f"You cannot give feedback to an activity of "
+                    f"type {self.activity_without_feedback.activity_type.name}."
                 ]
             },
         )

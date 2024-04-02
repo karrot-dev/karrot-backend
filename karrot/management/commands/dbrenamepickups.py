@@ -89,8 +89,9 @@ class Command(BaseCommand):
                 where constraint_name like '%{constraint_from}%'
             """
             for table_name, constraint_name in fetchall(constraints_query):
-                return "alter table {} rename constraint {} to {}".format(
-                    table_name, constraint_name, constraint_name.replace(constraint_from, constraint_to)
+                return (
+                    f"alter table {table_name} rename constraint {constraint_name} "
+                    f"to {constraint_name.replace(constraint_from, constraint_to)}"
                 )
 
         rename_constraints("pickup", "activity")
