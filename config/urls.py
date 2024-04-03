@@ -68,13 +68,13 @@ router.register("agreements", AgreementViewSet)
 
 # User endpoints
 router.register("users", UserViewSet)
-router.register("users-info", UserInfoViewSet)
+router.register("users-info", UserInfoViewSet, basename="userinfo")
 
 # activity endpoints
 router.register("activity-series", ActivitySeriesViewSet)
 router.register("activities", ActivityViewSet)
 router.register("activity-types", ActivityTypeViewSet)
-router.register("public-activities", PublicActivityViewSet)
+router.register("public-activities", PublicActivityViewSet, basename="publicactivities")
 
 # Conversation/Message endpoints
 router.register("conversations", ConversationViewSet)
@@ -100,7 +100,7 @@ router.register("history", HistoryViewSet)
 
 # Invitation endpoints
 router.register("invitations", InvitationsViewSet)
-router.register("invitations", InvitationAcceptViewSet)
+router.register("invitations", InvitationAcceptViewSet, basename="invitationsaccept")
 
 # Feedback endpoints
 router.register("feedback", FeedbackViewSet)
@@ -111,7 +111,7 @@ router.register("unsubscribe", UnsubscribeViewSet, basename="unsubscribe")
 router.register("meet/rooms", MeetRoomViewSet)
 
 # Stats endpoints
-router.register("stats/activity-history", ActivityHistoryStatsViewSet)
+router.register("stats/activity-history", ActivityHistoryStatsViewSet, basename="statsactivityhistory")
 
 urlpatterns = [
     path("api/auth/token/", obtain_auth_token),

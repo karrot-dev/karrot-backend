@@ -8,7 +8,6 @@ from dateutil.rrule import rrulestr
 from dateutil.tz import tzlocal
 from django.core import mail
 from django.utils import timezone
-from django.utils.datetime_safe import datetime
 from more_itertools import interleave
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -70,7 +69,7 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
             freq=rrule.WEEKLY,
             byweekday=[0, 1],  # Monday and Tuesday
         )
-        start_date = self.group.timezone.localize(datetime.now().replace(hour=20, minute=0))
+        start_date = self.group.timezone.localize(timezone.now().replace(hour=20, minute=0, tzinfo=None))
         activity_series_data = {
             "activity_type": self.activity_type.id,
             "place": self.place.id,
@@ -180,7 +179,7 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
             freq=rrule.WEEKLY,
             byweekday=[0, 1],  # Monday and Tuesday
         )
-        start_date = self.group.timezone.localize(datetime.now().replace(hour=20, minute=0))
+        start_date = self.group.timezone.localize(timezone.now().replace(hour=20, minute=0, tzinfo=None))
         activity_series_data = {
             "activity_type": self.activity_type.id,
             "place": self.place.id,
@@ -201,7 +200,7 @@ class TestActivitySeriesCreationAPI(APITestCase, ExtractPaginationMixin):
             freq=rrule.WEEKLY,
             byweekday=[0, 1],  # Monday and Tuesday
         )
-        start_date = self.group.timezone.localize(datetime.now().replace(hour=20, minute=0))
+        start_date = self.group.timezone.localize(timezone.now().replace(hour=20, minute=0, tzinfo=None))
         self.client.force_login(user=self.member)
         response = self.client.post(
             url,

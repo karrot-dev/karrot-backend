@@ -1,7 +1,6 @@
 import logging
 from dataclasses import asdict, dataclass
 from os.path import basename
-from typing import List, Optional
 
 from django.conf import settings
 from django.db import transaction
@@ -91,7 +90,7 @@ class ConversationThreadSerializer(serializers.ModelSerializer):
     def get_is_participant(self, _) -> bool:
         return True
 
-    def get_participants(self, participant) -> List[int]:
+    def get_participants(self, participant) -> list[int]:
         return [participants.user_id for participants in participant.thread.participants.all()]
 
     def get_reply_count(self, participant) -> int:
@@ -160,8 +159,8 @@ class ConversationMessageImageSerializer(serializers.ModelSerializer):
 class AttachmentURLs:
     download: str
     original: str
-    preview: Optional[str] = None
-    thumbnail: Optional[str] = None
+    preview: str | None = None
+    thumbnail: str | None = None
 
 
 class ConversationMessageAttachmentSerializer(serializers.ModelSerializer):
@@ -205,7 +204,7 @@ class ConversationMessageAttachmentSerializer(serializers.ModelSerializer):
         return asdict(urls)
 
     @staticmethod
-    def get_size(attachment) -> Optional[int]:
+    def get_size(attachment) -> int | None:
         try:
             return attachment.file.size
         except FileNotFoundError:

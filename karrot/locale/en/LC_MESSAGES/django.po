@@ -40,15 +40,15 @@ msgstr ""
 msgid "Task"
 msgstr ""
 
-#: karrot/activities/serializers.py:328
+#: karrot/activities/serializers.py:327
 msgid "Must be a list"
 msgstr ""
 
-#: karrot/activities/serializers.py:329
+#: karrot/activities/serializers.py:328
 msgid "Must be a list with one or two values"
 msgstr ""
 
-#: karrot/activities/serializers.py:330
+#: karrot/activities/serializers.py:329
 msgid "Must pass start value"
 msgstr ""
 
@@ -249,7 +249,7 @@ msgid ""
 msgstr ""
 
 #: karrot/conversations/api.py:92 karrot/conversations/api.py:310
-#: karrot/conversations/api.py:505 karrot/conversations/serializers.py:281
+#: karrot/conversations/api.py:505 karrot/conversations/serializers.py:280
 msgid "You are not in this conversation"
 msgstr ""
 
@@ -292,7 +292,7 @@ msgstr ""
 msgid "New message for offer %(offer_name)s in %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/serializers.py:283
+#: karrot/conversations/serializers.py:282
 msgid "This conversation has been closed"
 msgstr ""
 
@@ -347,15 +347,15 @@ msgstr ""
 msgid "You cannot give trust to yourself"
 msgstr ""
 
-#: karrot/groups/serializers.py:35
+#: karrot/groups/serializers.py:33
 msgid "Unknown timezone"
 msgstr ""
 
-#: karrot/groups/serializers.py:43
+#: karrot/groups/serializers.py:41
 msgid "Playground"
 msgstr ""
 
-#: karrot/groups/serializers.py:254
+#: karrot/groups/serializers.py:252
 msgid "You are not in this group"
 msgstr ""
 
