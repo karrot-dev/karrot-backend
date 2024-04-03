@@ -100,7 +100,7 @@ jsonschema-specifications==2023.12.1
 livekit-api==0.4.3
 livekit-protocol==0.3.2
 logging-tree==1.9
-lxml==5.2.0
+lxml==5.1.1
 markdown==3.6
 markupsafe==2.1.5
 matplotlib-inline==0.1.6

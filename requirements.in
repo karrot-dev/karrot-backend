@@ -7,6 +7,11 @@
 #    https://github.com/zulip/talon/commit/5529af43ff5172ff30c1a7b99111a68dcd997810
 https://github.com/zulip/talon/archive/refs/tags/zulip-25522.zip#egg=talon-core&subdirectory=talon-core
 
+# lxml 5.2.0 introduces minimum CPU which excludes our aging yuca
+# See https://github.com/lxml/lxml/releases/tag/lxml-5.2.0
+# lxml is required by talon
+lxml<5.2.0  
+
 # Common PyPI dependencies
 django[argon2]
 django-cors-headers
