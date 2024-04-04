@@ -3,6 +3,7 @@ import json
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Q
+from django.views import View
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import ListModelMixin
@@ -40,7 +41,7 @@ class MeetRoomViewSet(
         return super().get_queryset().filter(Q(group__members=self.request.user) | Q(subject_users=self.request.user))
 
 
-class MeetTokenViewSet(GenericAPIView):
+class MeetTokenViewSet(View):
     def get(self, request):
         """Creates a room token for a given room subject
 
