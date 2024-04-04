@@ -208,6 +208,7 @@ or in our [Matrix chat room](https://chat.karrot.world)!
 
 MIDDLEWARE = (
     "silk.middleware.SilkyMiddleware",
+    "django.middleware.http.ConditionalGetMiddleware",
     "karrot.utils.influxdb_middleware.InfluxDBRequestMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
