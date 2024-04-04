@@ -400,7 +400,7 @@ SILKY_INTERCEPT_FUNC = lambda request: "silky_record_requests" in request.COOKIE
 
 # silk profiling
 SILKY_PYTHON_PROFILER = True
-SILKY_PYTHON_PROFILER_FUNC = lambda request: "silky_record_requests" in request.COOKIES  # noqa: E731
+SILKY_PYTHON_PROFILER_FUNC = lambda request: "silky_profile_requests" in request.COOKIES  # noqa: E731
 
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
