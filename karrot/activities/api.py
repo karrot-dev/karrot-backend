@@ -336,7 +336,7 @@ class ActivityViewSet(
 
     def get_queryset(self):
         qs = self.queryset.filter(place__group__members=self.request.user)
-        if self.action == "list":
+        if self.action in ("list", "ics_list"):
             # TODO: need to decide how to ensure we fetch all activities for feedback page, even if place archived
             # only filter list by not archived places, as we need still need to retrieve activities for archived places
             qs = qs.filter(place__archived_at__isnull=True)
@@ -353,6 +353,15 @@ class ActivityViewSet(
                 "activityparticipant_set__participant_type",
                 "feedback_set__no_shows",
             )
+        if self.action in ("ics_detail", "ics_list"):
+            qs = qs.select_related(
+                "activity_type",
+                "place",
+            ).prefetch_related(
+                "participant_types",
+                "participants",
+            )
+
         if self.action == "add":
             # Lock activity when adding a participant
             # This should prevent a race condition that would result in more participants than slots

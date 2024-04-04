@@ -3,7 +3,6 @@ from datetime import timedelta
 
 import dateutil.rrule
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
 from django.db.models import F
@@ -854,7 +853,7 @@ class ActivityICSSerializer(serializers.ModelSerializer):
 
     def get_attendee(self, activity):
         attendees = []
-        for attendee in get_user_model().objects.filter(activityparticipant__activity=activity):
+        for attendee in activity.participants.all():
             address = vCalAddress(attendee.email)
             address.params["cn"] = vText(attendee.get_full_name())
             address.params["role"] = vText("REQ-PARTICIPANT")

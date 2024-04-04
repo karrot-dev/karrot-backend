@@ -208,6 +208,7 @@ or in our [Matrix chat room](https://chat.karrot.world)!
 
 MIDDLEWARE = (
     "silk.middleware.SilkyMiddleware",
+    "django.middleware.http.ConditionalGetMiddleware",
     "karrot.utils.influxdb_middleware.InfluxDBRequestMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
@@ -399,7 +400,7 @@ SILKY_INTERCEPT_FUNC = lambda request: "silky_record_requests" in request.COOKIE
 
 # silk profiling
 SILKY_PYTHON_PROFILER = True
-SILKY_PYTHON_PROFILER_FUNC = lambda request: "silky_record_requests" in request.COOKIES  # noqa: E731
+SILKY_PYTHON_PROFILER_FUNC = lambda request: "silky_profile_requests" in request.COOKIES  # noqa: E731
 
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
