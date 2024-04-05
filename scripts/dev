@@ -1,40 +1,132 @@
 #!/bin/bash
+#
+# Script to run dev environment
+#
+# Runs locally:
+#  - python webserver
+#  - python job runner (huey)
+#  - mjml converter (for email templates)
+#
+# Runs in containers:
+#  - postgres db
+#  - redis
+#  - maildev (receives SMTP, shows it in UI)
+#  - pgweb (web UI for db)
+#
+# You can also just run selected parts, e.g.:
+#   ./scripts/dev db redis
+#
+# This can be useful if there is an error one service.
 
 set -eu
 
-DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+BASEDIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &> /dev/null && pwd)
 
-start_services() {
-  $DIR/services/start
-}
+source "$BASEDIR/scripts/inc"
 
-stop_services() {
-  $DIR/services/stop
-}
+check_setup() {
+  if [[ ! -d "$BASEDIR/.venv" ]]; then
+    if ! command -v mise >/dev/null; then
+      # mise will print out a similar message
+      echo "no venv found at $BASEDIR/.venv"
+      echo
+      echo "To create a virtualenv manually, run:"
+      echo "python -m venv $BASEDIR/.venv"
+    fi
+    exit 1
+  fi
 
-on_exit() {
-  echo
-  read -p "Do you want to stop the services? " -r
-  echo
-  if [[ $REPLY =~ ^[Yy]$ ]]; then
+  sys_executable="$(python -c 'import sys; print(sys.executable)')"
+
+  if [[ "$sys_executable" != "$BASEDIR/.venv/bin/python" ]]; then
+    echo "venv is not active"
     echo
-    echo " ★ Stopping services"
+    echo "To activate it run:"
+    echo "source .venv/bin/activate"
+    exit 1
+  fi
+
+  if ! command -v honcho >/dev/null 2>&1; then
+    echo "Looks like dependencies are not installed yet"
     echo
-    stop_services
+    echo "To install them run:"
+    echo "./sync.py"
+    exit 1
   fi
 }
 
-trap on_exit EXIT
+# "services" are the things we run in a container
+# we cleanup before/after running
+all_services="db redis maildev pgweb"
 
-if [[ $(podman pod ps --format '{{.Status}}' --filter "name=karrot-services") != "Running" ]]; then
-  echo
-  echo " ★ Starting services"
-  echo
-  start_services
+if [[ $# -eq 0 ]]; then
+  # We did not pass any args, so we are managing all services
+  services="$all_services"
+else
+  # We passed arguments, so we are only managing those specific services
+  services=""
+  for service in $all_services; do
+    if [[ "$*" == *"$service"* ]]; then
+      services="${services} $service"
+    fi
+  done
 fi
 
-echo
-echo " ★ Starting application"
-echo
+cleanup() {
+  # Only cleanup what we started
+  for service in $services; do
+    $RUNTIME rm -f "karrot-services-$service" >/dev/null 2>&1
+  done
+}
 
-PYTHONUNBUFFERED=1 honcho --procfile scripts/Procfile start
+trap cleanup EXIT
+
+export PYTHONUNBUFFERED="1"
+export REDIS_IMAGE="${REDIS_IMAGE:-docker.io/redis:6.2.6-alpine}"
+export POSTGRES_IMAGE="${POSTGRES_IMAGE:-docker.io/postgres:16.2-alpine}"
+export MAILDEV_IMAGE="${MAILDEV_IMAGE:-docker.io/maildev/maildev:2.1.0}"
+export PGWEB_IMAGE="${PGWEB_IMAGE:-docker.io/sosedoff/pgweb:0.15.0}"
+export POSTGRES_VOLUME=karrot-db
+
+header() {
+    echo
+    echo " ★ $1"
+    echo
+}
+
+ensure_image() {
+  local image="$1"
+  if ! $RUNTIME image inspect "$image" >/dev/null 2>&1; then
+    header "Pulling image $image"
+    $RUNTIME pull $image
+  fi
+}
+
+check_setup
+
+# Prefetch the images so we can keep the timeouts shorter in our
+# wait-for-db script
+ensure_image "$REDIS_IMAGE"
+ensure_image "$POSTGRES_IMAGE"
+ensure_image "$MAILDEV_IMAGE"
+ensure_image "$PGWEB_IMAGE"
+
+# Start fresh by removing any existing containers
+# they could be left there from an unclean shutdown
+cleanup
+
+# Ensure we have our database volume
+if ! $RUNTIME volume inspect "$POSTGRES_VOLUME" >/dev/null 2>&1 ; then
+  header "Creating database volume"
+  $RUNTIME volume create "$POSTGRES_VOLUME"
+fi
+
+# Ensure we have our network
+if ! $RUNTIME network inspect karrot >/dev/null 2>&1; then
+  header "Creating network"
+  $RUNTIME network create karrot
+fi
+
+header "Starting application"
+
+honcho --procfile "$BASEDIR/scripts/Procfile" start "$@"

@@ -1,0 +1,35 @@
+#!/bin/bash
+
+set -eu
+
+BASEDIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &> /dev/null && pwd)
+
+if [[ -e "$BASEDIR/.env" ]]; then
+  # Load .env file
+  # Exports everything in the file :)
+  set -o allexport
+  source "$BASEDIR/.env"
+  set +o allexport
+fi
+
+if [[ -z "${RUNTIME:-}" ]]; then
+  if command -v podman >/dev/null; then
+    RUNTIME=podman
+  elif command -v nerdctl >/dev/null; then
+      RUNTIME=nerdctl
+  elif command -v docker >/dev/null; then
+    RUNTIME=docker
+  fi
+fi
+
+if [[ ! "${RUNTIME:-}"  ]]; then
+  echo "Must have a container runtime installed! (e.g. docker, podman, or nerdctl)"
+  exit 1
+fi
+
+if ! command -v $RUNTIME >/dev/null; then
+  echo "Runtime $RUNTIME not available"
+  exit 1
+fi
+
+export RUNTIME

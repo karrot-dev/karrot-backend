@@ -1,8 +1,16 @@
 #!/bin/bash
+#
+# wait for database to be ready
+# used in the Procfile for development setup
 
 set -eu
 
-# wait for database!
-# if db container isn't running it will error, so you need to have at least started the service first
+BASEDIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &> /dev/null && pwd)
 
-podman exec karrot-services-db sh -c 'timeout 60s sh -c "until pg_isready >/dev/null; do sleep 1; done"'
+source "$BASEDIR/scripts/inc"
+
+# first wait for the container to be running
+timeout 10s sh -c "until $RUNTIME container inspect karrot-services-db >/dev/null 2>&1; do sleep 1; done"
+
+# then wait for postgres to be ready
+$RUNTIME exec karrot-services-db sh -c 'timeout 20s sh -c "until pg_isready -U db >/dev/null; do sleep 1; done"'

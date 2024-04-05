@@ -1,3 +1,7 @@
 web: ./scripts/wait-for-db && ./manage.py migrate && ./manage.py runserver
 huey: ./scripts/wait-for-db && ./manage.py run_huey
 mjml: ./mjml/convert --watch
+redis: $RUNTIME run --rm --name karrot-services-redis --network karrot -p 6379:6379 $REDIS_IMAGE
+db: $RUNTIME run --rm --name karrot-services-db -e POSTGRES_USER=db -e POSTGRES_PASSWORD=db -e POSTGRES_DB=db -v $POSTGRES_VOLUME:/var/lib/postgresql/data --network karrot -p 5432:5432 $POSTGRES_IMAGE -c "fsync=off" -c "full_page_writes=off"
+maildev: $RUNTIME run --rm --name karrot-services-maildev --network karrot -p 1080:1080 -p 1025:1025 $MAILDEV_IMAGE
+pgweb: ./scripts/wait-for-db && $RUNTIME run --rm --name karrot-services-pgweb -e PGWEB_DATABASE_URL=postgres://db:db@karrot-services-db:5432/db?sslmode=disable --network karrot -p 8081:8081 $PGWEB_IMAGE
