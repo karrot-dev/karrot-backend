@@ -34,9 +34,6 @@ karrot/COMMIT
 *.pyc
 *.pyo
 
-# Uploads
-/uploads
-
 # Backups
 /backup/backup.sh
 /backup/*.db.enc
