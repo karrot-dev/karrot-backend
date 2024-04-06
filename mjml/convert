@@ -5,7 +5,7 @@ const { readFileSync, writeFileSync } = require('fs');
 const mjml2html = require('mjml');
 const path = require('path');
 const BASEDIR = path.resolve(path.join(__dirname, '..'));
-const watch = require('node-watch');
+const chokidar = require('chokidar');
 const ws = require('ws');
 const http = require('http');
 const KARROT_BASE = path.join(BASEDIR, 'karrot')
@@ -15,17 +15,35 @@ const websocketPort = 8001;
 const listeners = [];
 
 if (process.argv.indexOf('--watch') !== -1) {
-  compileAll();  
+  compileAll();
   console.log('watching for changes to mjml files in', KARROT_BASE);
-  watch(KARROT_BASE, { recursive: true, filter: /\.mjml$/ }, (event, file) => {
-    // We could just compile the specific one but then would not handle when just partials change
-    compileAll();
-  });
+  const mjmlWatcher = chokidar.watch(
+    path.join(KARROT_BASE, '/**/*.mjml'),
+    {
+      persistent: true,
+      ignoreInitial: true,
+    },
+  )
 
-  watch(KARROT_BASE, { recursive: true, filter: /\.jinja2$/ }, (event, file) => {    
-    console.log('jinja2 change', event, file);
-    listeners.forEach(fn => fn());
-  });
+  for (const event of ["add", "change", "unlink"]) {
+    // We could just compile the specific one but then would not handle when just partials change
+    mjmlWatcher.on(event, () => compileAll())
+  }
+
+  const jinja2Watcher = chokidar.watch(
+    path.join(KARROT_BASE, '/**/*.jinja2'),
+    {
+      persistent: true,
+      ignoreInitial: true,
+    },
+  )
+
+
+  for (const event of ["add", "change", "unlink"]) {
+    jinja2Watcher.on(event, () => {
+      listeners.forEach(fn => fn());
+    })
+  }
 
   console.log('websocket server listening on port', websocketPort);
   const server = new ws.Server({ port: websocketPort });

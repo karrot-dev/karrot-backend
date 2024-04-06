@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# runs a command using the container runtime of choice
+# they all will use docker-like API although might vary in
+# some situations
+#
+# Example usage:
+#   ./scripts/runtime ps
+#   ./scripts/runtime volume ls
+#   ./scripts/runtime ps
+
+set -eu
+
+BASEDIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &> /dev/null && pwd)
+
+source "$BASEDIR/scripts/inc"
+
+"$RUNTIME" "$@"

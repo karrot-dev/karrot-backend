@@ -3,6 +3,13 @@ import subprocess
 import re
 import sys
 
+# An example configuration for how you can use a different database for each git branch
+#
+# This is useful if you're likely to be working on many branches at the same time
+#
+# After switching to a new branch you'll need to run "./manage.py migrate" to create the tables
+
+
 from psycopg import connect
 
 from config.options import get_options

@@ -3,6 +3,7 @@
 .pytest_cache
 env
 venv
+.venv
 myvenv
 test-results
 .coverage
@@ -32,9 +33,6 @@ karrot/COMMIT
 # Python files
 *.pyc
 *.pyo
-
-# Uploads
-/uploads
 
 # Backups
 /backup/backup.sh

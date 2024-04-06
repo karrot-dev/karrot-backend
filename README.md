@@ -8,32 +8,43 @@ Our issues are tracked on our [community board](https://community.karrot.world/c
 
 ## Developer setup
 
-### Podman setup
+### Recommended setup
 
-This runs all the app code locally on your machine, and the services (postgresql, redis, etc.) in containers using podman.
+This runs all the app code locally on your machine, and the services (postgresql, redis, etc.) in containers.
 
-Prerequisites:
+#### Prerequisites
+
 - python
   - Karrot is written in python
-  - I use [mise](https://mise.jdx.dev) to install specific version, if you do `mise install` will install the dependencies
+  - optionally you can use [mise](https://mise.jdx.dev) to install a specific version, run `mise install`
   - otherwise get a version 3 of python
+  - if possible use the same version as listed at the top of the `Dockerfile`
 - nodejs
-  - this is used for email templates as we use https://mjml.io
-  - install it via your package manager or from https://nodejs.org
+  - this is used for email templates as we use [mjml.io](https://mjml.io)
+  - install it via your package manager or from [nodejs.org](https://nodejs.org)
+  - if you are using mise, `mise install` will have already installed it previously
 - yarn (classic)
   - used to install nodejs dependencies
   - install it via your package manager or with `npm install --global yarn`
-- podman
+- a container runtime
   - used to run the services (postgresql, redis, etc.)
-  - podman is like docker, but without the daemon or root power
-  - install it via package manager or from https://podman.io
+  - podman is the recommended option
+    - install podman via package manager or from [podman.io](https://podman.io)
+  - docker is just fine too
+    - install docker via package manager or from [docs.docker.com/get-docker](https://docs.docker.com/get-docker)
+  - nerdctl is for advanced users who know what they're doing
+    - install nerdctl via package manager or see [github.com/containerd/nerdctl](https://github.com/containerd/nerdctl)
+  - if you don't like the autodetected choice, you can set `RUNTIME=<runtime>"` in `.env`
+    - e.g. `RUNTIME=nerdctl`
+
+#### Setup
 
 ```commandline
 # create a virtualenv
-python -m venv env
+python -m venv .venv
 
 # if not using mise, you'll need to activate the virtualenv
-source env/bin/activate
+source .venv/bin/activate
 
 # install deps
 ./sync.py
@@ -42,9 +53,40 @@ source env/bin/activate
 ./scripts/dev
 ```
 
-Everything should be up and running now.
+It might take some time on first run, as it has to download some container images.
 
-### Manual setup
+Once it's ready you should a line something like:
+
+```bash
+12:37:11 web.1     | Listening on TCP address 127.0.0.1:8000
+```
+
+#### Up and running
+
+Everything should be up and running now! Visiting http://localhost:8000 should show you "not found".
+
+More interesting places to visit are:
+- http://localhost:8000/docs/ - API documentation
+- http://localhost:8000/api/bootstrap/ - a request that will show you some json
+- http://localhost:8000/_templates - email template previews
+- http://localhost:8081/ - pgweb database UI
+- http://localhost:1080/ - maildev mail catcher UI
+
+If you want a Karrot frontend, you have two options:
+1. setup [karrot-frontend](https://codeberg.org/karrot/karrot-frontend) and set `BACKEND=http://127.0.0.1:8000` in `.env`
+2. download and unpack the .tar.gz archive from a [recent release](https://codeberg.org/karrot/karrot/releases) and configure `FRONTEND_DIR` to point to the folder
+
+You can create some interesting usable data by running:
+
+```bash
+./manage.py create_sample_data
+```
+
+After that you can login as `foo@foo.com` / `foofoo`
+
+Be sure to checkout the [Karrot Developer Documentation](https://docs.karrot.world/dev/getting-started) too.
+
+### Advanced: Manual setup
 
 You can also just run everything locally if you want:
 
@@ -79,14 +121,6 @@ A live dev instance of _karrot_ is running at https://dev.karrot.world/. See htt
 
 Most of karrot developers use [PyCharm](https://www.jetbrains.com/pycharm/download/). We have some licenses available for the professional version. The free community edition also works well.
 
-To get proper introspection and support from PyCharm, it's necessary to set up a virtualenv. Run this inside the backend directory:
-
-```
-python -m venv env
-source env/bin/activate
-./sync.py
-```
-
 ## Django quick introduction
 
 The manage.py application can be used to perform administrative tasks:
@@ -96,15 +130,14 @@ The manage.py application can be used to perform administrative tasks:
   - shell\_plus: for playing in a django python environment
   - test: Run automated tests
 
-You can launch them via docker-compose, for example:
+You can launch them like this:
 
 ```
-docker-compose exec backend ./manage.py makemigrations
-docker-compose exec backend ./manage.py migrate
+./manage.py makemigrations
+./manage.py migrate
+./manage.py shell_plus
+./manage.py test
 ```
-
-If you spend too much time typing those long commands, consider creating your own [bash aliases](https://askubuntu.com/questions/17536/how-do-i-create-a-permanent-bash-alias).
-
 
 ## Speed up testing
 
@@ -128,9 +161,11 @@ using dot-syntax:
 
 When editing emails it's useful to be able to see how they will be rendered.
 
-Assuming the server is running you can visit visit [localhost:8000/\_templates](http://localhost:8000/_templates).
+Assuming the server is running you can visit [localhost:8000/\_templates](http://localhost:8000/_templates).
 
-To compile the `.mjml` templates to `.html.jinja2` files you can run:
+When running `./scripts/dev` the templates will automatically be compiled for you.
+
+If you need to run the conversion manually though, you can run:
 ```
 cd mjml
 yarn

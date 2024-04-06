@@ -3,7 +3,7 @@ repos:
   hooks:
   - id: lint
     name: lint
-    entry: ./scripts/local-or-docker-compose ruff
+    entry: ruff
     args:
     - "check"
     - "--fix"
@@ -12,7 +12,7 @@ repos:
     types: [python]
   - id: format
     name: format
-    entry: ./scripts/local-or-docker-compose ruff
+    entry: ruff
     args:
     - "format"
     - "--force-exclude"
@@ -20,7 +20,7 @@ repos:
     types: [ python ]
   - id: makemessages
     name: makemessages
-    entry: ./scripts/local-or-docker-compose python manage.py makemessages
+    entry: python manage.py makemessages
     language: system
     types: [python]
     stages: [push]

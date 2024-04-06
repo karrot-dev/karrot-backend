@@ -2,12 +2,9 @@
 
 set -eu
 
-if ! podman pod exists karrot-services; then
-  echo "Services not running!"
-  echo
-  echo "You can run ./scripts/dev to start everything"
-  echo "Or ./scripts/services/start for just the services"
-  exit 1
-fi
+BASEDIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &> /dev/null && pwd)
 
-podman exec -it karrot-services-redis redis-cli "$@"
+source "$BASEDIR/scripts/inc"
+
+"$RUNTIME" exec -it karrot-services-redis redis-cli "$@"
+
