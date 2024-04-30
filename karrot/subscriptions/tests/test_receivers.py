@@ -14,6 +14,7 @@ from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 from factory.django import mute_signals
+from rest_framework.fields import DateTimeField
 
 from karrot.activities.factories import ActivityFactory, ActivitySeriesFactory, FeedbackFactory
 from karrot.activities.models import Activity, to_range
@@ -431,7 +432,7 @@ class ConversationMessageReactionReceiverTests(WSTestCase):
 
         # create reaction
         with self.captureOnCommitCallbacks(execute=True):
-            ConversationMessageReaction.objects.create(
+            reaction = ConversationMessageReaction.objects.create(
                 message=message,
                 user=reaction_user,
                 name="carrot",
@@ -440,9 +441,22 @@ class ConversationMessageReactionReceiverTests(WSTestCase):
         # check if conversation update was received
         response = client.messages[0]
         parse_dates(response)
+
+        # to borrow the date formatting from it
+        dt_field = DateTimeField()
+
         self.assertEqual(
             response,
-            make_conversation_message_broadcast(message, reactions=[{"name": "carrot", "user": reaction_user.id}]),
+            make_conversation_message_broadcast(
+                message,
+                reactions=[
+                    {
+                        "created_at": dt_field.to_representation(reaction.created_at),
+                        "name": "carrot",
+                        "user": reaction_user.id,
+                    }
+                ],
+            ),
         )
 
     def test_receive_reaction_deletion(self):
