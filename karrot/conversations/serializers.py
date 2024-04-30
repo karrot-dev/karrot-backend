@@ -44,7 +44,7 @@ class EmojiField(serializers.Field):
 class ConversationMessageReactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConversationMessageReaction
-        fields = ("user", "name", "message")
+        fields = ("created_at", "user", "name", "message")
         extra_kwargs = {"message": {"write_only": True}}
 
     name = EmojiField()
