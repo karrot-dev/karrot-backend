@@ -7,6 +7,7 @@ https://docs.djangoproject.com/en/dev/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/dev/ref/settings/
 """
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import re
@@ -159,7 +160,6 @@ INSTALLED_APPS = (
     "karrot.utils",
     "karrot.meet",
     *BACKEND_PLUGINS,
-
     # Django packages
     "django_extensions",
     "corsheaders",

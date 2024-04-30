@@ -49,7 +49,6 @@ class ExpiresMax:
         return await self.app(scope, receive, send_cached)
 
 
-
 class CommunityProxy:
     def __init__(self, proxy_url):
         self.proxy_url = re.sub(r"/$", "", proxy_url)  # no trailing slash

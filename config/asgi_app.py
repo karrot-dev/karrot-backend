@@ -64,7 +64,7 @@ async def http_router(scope, receive, send):
         path = scope["path"]
         if path.startswith(plugin_assets_prefix):
             # putting this one first, so it can be nested inside /api/
-            scope["path"] = path[len(plugin_assets_prefix.rstrip("/")):]
+            scope["path"] = path[len(plugin_assets_prefix.rstrip("/")) :]
             app = plugin_assets_app
         elif any(path.startswith(prefix) for prefix in api_prefixes):
             app = api_app
