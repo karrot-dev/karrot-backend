@@ -1,3 +1,4 @@
+import time
 from os.path import join, normpath
 
 import aiofiles.os
@@ -6,7 +7,7 @@ from starlette.responses import FileResponse, Response
 from starlette.types import Receive, Scope, Send
 
 from karrot.plugins.frontend import get_plugin
-from karrot.utils.asgi_utils import expires_max_headers
+from karrot.utils.asgi_utils import http_date, max_age
 
 not_found = Response("not found", status_code=404, media_type="text/plain")
 
@@ -41,7 +42,10 @@ class PluginAssets:
 
         headers = None
         if plugin.cache_assets:
-            headers = expires_max_headers
+            headers = {
+                "Cache-Control": f"max-age={max_age}",
+                "Expires": http_date(time.time() + max_age),
+            }
 
         return FileResponse(
             full_path,
