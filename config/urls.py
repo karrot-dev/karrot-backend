@@ -118,8 +118,10 @@ router.register("stats/activity-history", ActivityHistoryStatsViewSet, basename=
 # Plugins
 router.register("plugins", PluginViewSet, basename="plugins")
 
+plugin_url_patterns = get_plugin_urlpatterns(settings.BACKEND_PLUGINS)
+
 urlpatterns = [
-    *get_plugin_urlpatterns(settings.BACKEND_PLUGINS),
+    *plugin_url_patterns,
     path("api/auth/token/", obtain_auth_token),
     path("api/auth/logout/", LogoutView.as_view()),
     path("api/auth/user/", AuthUserView.as_view()),

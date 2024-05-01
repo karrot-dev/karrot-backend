@@ -6,12 +6,12 @@ from asgiref.sync import sync_to_async
 from starlette.responses import FileResponse, Response
 from starlette.types import Receive, Scope, Send
 
-from karrot.plugins.frontend import get_plugin
+from karrot.plugins.registry import get_frontend_plugin
 from karrot.utils.asgi_utils import http_date, max_age
 
 not_found = Response("not found", status_code=404, media_type="text/plain")
 
-get_plugin_async = sync_to_async(get_plugin)
+get_frontend_plugin_async = sync_to_async(get_frontend_plugin)
 
 
 class PluginAssets:
@@ -28,7 +28,7 @@ class PluginAssets:
         if not plugin_name or not path:
             return not_found
 
-        plugin = await get_plugin_async(plugin_name)
+        plugin = await get_frontend_plugin_async(plugin_name)
         if not plugin:
             return not_found
 

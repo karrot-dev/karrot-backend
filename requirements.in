@@ -75,6 +75,7 @@ ipython
 requests-mock
 tblib
 ruff
+ruff-lsp
 pytest-asyncio
 pytest-django
 pytest-xdist

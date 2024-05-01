@@ -1,16 +1,13 @@
 import hashlib
 import json
 from dataclasses import dataclass
-from os import listdir
-from os.path import dirname, exists, isdir, join, realpath
+from os.path import basename, dirname, isdir
 from pathlib import Path
-from typing import Iterator, List, Optional
-
-from config.settings import PLUGIN_DIRS
+from typing import List, Optional
 
 
 @dataclass(frozen=True)
-class Plugin:
+class FrontendPlugin:
     name: str
     dir: str
     manifest: str
@@ -57,17 +54,20 @@ def process_manifest(manifest_path: str) -> (str, List[str], List[str], List[str
     return sha256, entry, css_entries, assets
 
 
-def load_plugin(name: str, path: str) -> Optional[Plugin]:
-    if not isdir(path):
+def load_frontend_plugin(name: str, plugin_dir: str) -> Optional[FrontendPlugin]:
+    if not isdir(plugin_dir):
         return
-    manifest = find_manifest(path)
+    manifest = find_manifest(plugin_dir)
     if not manifest:
         return
     manifest_sha256, entry, css_entries, assets = process_manifest(manifest)
     asset_dir = dirname(manifest)
-    return Plugin(
+    # the manifest can be in the root dir, or in a .vite subdir
+    if basename(asset_dir) == ".vite":
+        asset_dir = dirname(asset_dir)
+    return FrontendPlugin(
         name=name,
-        dir=path,
+        dir=plugin_dir,
         manifest=manifest,
         manifest_sha256=manifest_sha256,
         entry=entry,
@@ -76,80 +76,3 @@ def load_plugin(name: str, path: str) -> Optional[Plugin]:
         assets=assets,
         cache_assets=True,
     )
-
-
-def scan_for_plugins() -> Iterator[tuple[str, str]]:
-    for plugin_dir in PLUGIN_DIRS:
-        for name in listdir(plugin_dir):
-            path = realpath(join(plugin_dir, name))
-            yield name, path
-
-
-def load_plugins() -> dict[str, Plugin]:
-    loaded_plugins = {}
-
-    for name, path in scan_for_plugins():
-        plugin = load_plugin(name, path)
-        if plugin:
-            loaded_plugins[name] = plugin
-
-    return loaded_plugins
-
-
-_plugins: dict[str, Plugin] = load_plugins()
-
-
-def reload_plugin(name, path):
-    plugin = load_plugin(name, path)
-    if plugin:
-        _plugins[name] = plugin
-    elif name in _plugins:
-        # didn't reload, gone now!
-        _plugins.pop(name)
-    return plugin
-
-
-def manifest_changed(plugin: Plugin) -> bool:
-    with open(plugin.manifest, "rb") as f:
-        contents = f.read()
-        sha256 = hashlib.sha256(contents).hexdigest()
-        return sha256 != plugin.manifest_sha256
-
-
-def list_plugins() -> List[Plugin]:
-    removed_plugins = set(_plugins.keys())
-
-    for name, path in scan_for_plugins():
-        if name in removed_plugins:
-            removed_plugins.remove(name)
-        plugin = _plugins.get(name, None)
-        if plugin:
-            if path != plugin.dir or not exists(plugin.manifest) or manifest_changed(plugin):
-                # path has changed, maybe a different plugin dir
-                # or manifest gone
-                # reload fresh
-                reload_plugin(name, path)
-        else:
-            # new plugin!
-            reload_plugin(name, path)
-
-    for name in removed_plugins:
-        if name in _plugins:
-            _plugins.pop(name)
-
-    return list(_plugins.values())
-
-
-def get_plugin(name: str) -> Optional[Plugin]:
-    plugin = _plugins.get(name, None)
-    if not plugin:
-        return None
-    if not exists(plugin.manifest) or manifest_changed(plugin):
-        # we rescan for the small chance that the plugin is now in another
-        # plugin dir...
-        for scanned_name, path in scan_for_plugins():
-            if scanned_name == name:
-                return reload_plugin(name, path)
-        # oh, didn't find it, it's gone!
-        _plugins.pop(name)
-    return _plugins.get(name, None)

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import re
+from os.path import realpath
 
 import orjson
 import redis
@@ -22,8 +23,7 @@ from sentry_sdk.integrations.redis import RedisIntegration
 
 from config.options import get_options
 from karrot.groups import themes
-from karrot.plugins.backend import load_backend_plugins
-from karrot.plugins.utils import normalize_plugin_dirs
+from karrot.plugins.registry import get_backend_plugin_module_names, initialize_plugins
 
 load_dotenv()
 
@@ -45,10 +45,12 @@ is_dev = MODE == "dev"
 
 DEBUG = is_dev
 
-PLUGIN_DIRS = normalize_plugin_dirs(options["PLUGIN_DIRS"])
+PLUGIN_DIR = realpath(options["PLUGIN_DIR"].strip())
 PLUGIN_ASSETS_PUBLIC_PREFIX = "/api/plugins/assets/"
 
-BACKEND_PLUGINS = load_backend_plugins(PLUGIN_DIRS)
+initialize_plugins(PLUGIN_DIR)
+
+BACKEND_PLUGINS = get_backend_plugin_module_names()
 
 USE_DEPRECATED_PYTZ = True
 

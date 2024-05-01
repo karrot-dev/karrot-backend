@@ -12,6 +12,7 @@ from gunicorn.app.base import BaseApplication
 from uvicorn.workers import UvicornWorker
 
 from config.options import get_options
+from karrot.plugins.cli import plugin_cli
 
 
 def setup(env_files=()):
@@ -217,6 +218,8 @@ class KarrotUvicornWorker(UvicornWorker):
         "forwarded_allow_ips": "*",
     }
 
+
+cli.add_command(plugin_cli)
 
 run = cli
 
