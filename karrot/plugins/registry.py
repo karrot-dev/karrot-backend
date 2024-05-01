@@ -17,7 +17,8 @@ def scan_for_plugins(plugin_dir: str) -> Iterator[tuple[str, str]]:
     if isdir(plugin_dir):
         for name in listdir(plugin_dir):
             path = realpath(join(plugin_dir, name))
-            yield name, path
+            if isdir(path):
+                yield name, path
 
 
 def load_plugins(plugin_dir: str) -> dict[str, Plugin]:
@@ -26,11 +27,10 @@ def load_plugins(plugin_dir: str) -> dict[str, Plugin]:
     for name, path in scan_for_plugins(plugin_dir):
         frontend_plugin = load_frontend_plugin(name, path)
         backend_plugin = load_backend_plugin(name, path)
-        if frontend_plugin or backend_plugin:
-            loaded_plugins[name] = Plugin(
-                frontend_plugin=frontend_plugin,
-                backend_plugin=backend_plugin,
-            )
+        loaded_plugins[name] = Plugin(
+            frontend_plugin=frontend_plugin,
+            backend_plugin=backend_plugin,
+        )
 
     return loaded_plugins
 

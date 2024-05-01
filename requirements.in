@@ -57,6 +57,7 @@ uvicorn[standard]
 gunicorn
 python-dotenv
 click
+rich
 httpx
 icalendar
 influxdb
