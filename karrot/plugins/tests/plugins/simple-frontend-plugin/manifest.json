@@ -1,0 +1,6 @@
+{
+  "main.js": {
+    "file": "assets/main.js",
+    "isEntry": true
+  }
+}

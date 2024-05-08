@@ -3,6 +3,7 @@ from os.path import join, normpath
 
 import aiofiles.os
 from asgiref.sync import sync_to_async
+from django.conf import settings
 from starlette.responses import FileResponse, Response
 from starlette.types import Receive, Scope, Send
 
@@ -59,8 +60,11 @@ class PluginAssets:
         Given the ASGI scope, return the `path` string to serve up,
         with OS specific path separators, and any '..', '.' components removed.
         """
+        if not path.startswith(settings.PLUGIN_ASSETS_PUBLIC_PREFIX):
+            return "", ""
+        path = path[len(settings.PLUGIN_ASSETS_PUBLIC_PREFIX.rstrip("/")) :]
         parts = path.lstrip("/").split("/")
         if len(parts) < 2:
-            return
+            return "", ""
         plugin_name = parts[0]
         return plugin_name, normpath(join(*parts[1:]))

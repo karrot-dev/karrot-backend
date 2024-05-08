@@ -9,6 +9,7 @@ from karrot.plugins.frontend import FrontendPlugin, load_frontend_plugin
 
 @dataclass(frozen=True)
 class Plugin:
+    name: str
     frontend_plugin: Optional[FrontendPlugin]
     backend_plugin: Optional[BackendPlugin]
 
@@ -26,8 +27,15 @@ def load_plugins(plugin_dir: str) -> dict[str, Plugin]:
 
     for name, path in scan_for_plugins(plugin_dir):
         frontend_plugin = load_frontend_plugin(name, path)
-        backend_plugin = load_backend_plugin(name, path)
+        backend_plugin = None
+        try:
+            backend_plugin = load_backend_plugin(name, path)
+        except Exception:  # noqa: BLE001
+            # intentionally broad exception capturing
+            # as plugin could be totally broken code
+            pass
         loaded_plugins[name] = Plugin(
+            name=name,
             frontend_plugin=frontend_plugin,
             backend_plugin=backend_plugin,
         )
@@ -40,6 +48,7 @@ plugins: dict[str, Plugin] = {}
 
 def initialize_plugins(plugin_dir: str):
     global plugins
+    plugins.clear()
     plugins.update(load_plugins(plugin_dir))
 
 
