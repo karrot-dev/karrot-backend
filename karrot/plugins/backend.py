@@ -17,8 +17,7 @@ class BackendPlugin:
 
 def find_apps_dot_py(base: str) -> Optional[str]:
     try:
-        # TODO: find a way to exclude finding things inside lib dirs?
-        return str(next(Path(base).rglob("apps.py")))
+        return str(next(entry for entry in Path(base).rglob("apps.py") if "site-packages" not in str(entry)))
     except StopIteration:
         return None
 
@@ -34,8 +33,7 @@ def load_backend_plugin(name: str, plugin_dir: str) -> Optional[BackendPlugin]:
         module_name = plugin_name
 
         if module_name in sys.modules:
-            print("module", module_name, "already exists, bailing")
-            return
+            raise RuntimeError(f"there is module named {module_name} already loaded")
         try:
             spec = importlib.util.spec_from_file_location(module_name, join(module_dir, "__init__.py"))
             if not spec:
@@ -50,7 +48,7 @@ def load_backend_plugin(name: str, plugin_dir: str) -> Optional[BackendPlugin]:
                 module_name=module_name,
             )
         except ModuleNotFoundError as ex:
-            print("not a backend plugin", plugin_name, ex)
+            raise RuntimeError(f"could not load backend plugin {plugin_name}") from ex
 
 
 def get_plugin_urlpatterns(plugins: List[str]):
