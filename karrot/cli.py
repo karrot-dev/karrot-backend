@@ -1,7 +1,9 @@
 import os
+import signal
 
 import click
 import django
+import psutil
 from click import pass_context
 from daphne.cli import CommandLineInterface
 from django.conf import settings
@@ -86,6 +88,35 @@ def generate_vapid_keypair():
     keypair = generate_keypair()
     for k in keypair:
         print(f"{k}={keypair[k]}")
+
+
+@cli.command(short_help="reload server gracefully", help="looks for server pid and sends SIGHUP to it")
+def reload():
+    if settings.LISTEN_SERVER != "uvicorn":
+        print(f"reload is only available when LISTEN_SERVER=uvicorn (not {settings.LISTEN_SERVER})")
+        exit(1)
+
+    def is_python(process: psutil.Process) -> bool:
+        if not process:
+            return False
+        cmdline = process.cmdline()
+        if not cmdline:
+            return False
+        cmd = cmdline[0]
+        return cmd == "python" or cmd == "python3" or cmd.endswith(("/python", "/python3"))
+
+    def is_karrot_cli_command(process: psutil.Process, command: str) -> bool:
+        if not is_python(process):
+            return False
+        cmdline = process.cmdline()
+        return len(cmdline) == 4 and cmdline[1] == "-m" and cmdline[2] == "karrot.cli" and cmdline[3] == command
+
+    for process in psutil.process_iter():
+        if is_karrot_cli_command(process, "server"):
+            # it spawns children with the same cmdline, so need to ensure we only get the parent
+            if not is_karrot_cli_command(process.parent(), "server"):
+                process.send_signal(signal.SIGHUP)
+                print("Sent SIGHUP to pid", process.pid)
 
 
 @cli.command(help="show the effective config")
