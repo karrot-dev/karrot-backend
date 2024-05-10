@@ -12,10 +12,19 @@ from karrot.utils.asgi_utils import http_date, max_age
 
 not_found = Response("not found", status_code=404, media_type="text/plain")
 
+# TODO: I don't think we need this async version any more now it's simpler
 get_frontend_plugin_async = sync_to_async(get_frontend_plugin)
 
 
 class PluginAssets:
+    """An ASGI app that serves up asset files for plugins
+
+    It's anticipated the frontend plugins won't have *so* many asset files and it'll
+    be fine to serve them using the python webserver.
+
+    We do the best we can to make them serve up fast :)
+    """
+
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         """
         The ASGI entry point.

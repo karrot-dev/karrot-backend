@@ -36,6 +36,9 @@ class TestSimpleFrontendPlugin(SimpleTestCase):
         initialize_plugins(settings.PLUGIN_DIR)
         self.plugin = plugins.get("simple-frontend-plugin", None)
 
+    def get_asset_path(self, path: str):
+        return "/".join([PLUGIN_ASSETS_PUBLIC_PREFIX.rstrip("/"), self.plugin.name, path])
+
     def test_loads(self):
         self.assertIn("simple-frontend-plugin", plugins.keys())
         self.assertEqual(self.plugin.name, "simple-frontend-plugin")
@@ -47,11 +50,23 @@ class TestSimpleFrontendPlugin(SimpleTestCase):
         asset_dir = self.plugin.frontend_plugin.asset_dir
         asset_file_path = join(asset_dir, entry)
         self.assertTrue(isfile(asset_file_path))
-        asset_request_path = "".join(
-            [PLUGIN_ASSETS_PUBLIC_PREFIX, "/".join([self.plugin.name, self.plugin.frontend_plugin.entry])]
-        )
-        response = await request_asset(asset_request_path)
+        response = await request_asset(self.get_asset_path(entry))
         self.assertEqual(response["status"], 200)
         self.assertIn((b"content-type", b"text/javascript; charset=utf-8"), response["headers"])
         with open(asset_file_path, "rb") as asset_file:
             self.assertEqual(response["body"], asset_file.read())
+
+    async def test_css_asset(self):
+        print("self.plugin.frontend_plugin.css_entries", self.plugin.frontend_plugin.css_entries)
+        css_entry = self.plugin.frontend_plugin.css_entries[0]
+        asset_dir = self.plugin.frontend_plugin.asset_dir
+        asset_file_path = join(asset_dir, css_entry)
+        response = await request_asset(self.get_asset_path(css_entry))
+        self.assertEqual(response["status"], 200)
+        self.assertIn((b"content-type", b"text/css; charset=utf-8"), response["headers"])
+        with open(asset_file_path, "rb") as asset_file:
+            self.assertEqual(response["body"], asset_file.read())
+
+    async def test_invalid_asset_fails(self):
+        response = await request_asset(self.get_asset_path("invalid.js"))
+        self.assertEqual(response["status"], 404)

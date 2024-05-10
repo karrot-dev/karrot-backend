@@ -1,6 +1,12 @@
 {
   "main.js": {
     "file": "assets/main.js",
-    "isEntry": true
+    "isEntry": true,
+    "css": [
+      "assets/main.css"
+    ]
+  },
+  "main.css": {
+    "file": "assets/main.css"
   }
 }
