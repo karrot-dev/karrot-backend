@@ -1,7 +1,0 @@
-[run]
-source = karrot
-branch = true
-omit = karrot/resources/*, karrot/tests/*
-
-[report]
-precision = 2

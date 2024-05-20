@@ -1,8 +1,0 @@
-<mj-section padding-top="10px"
-            padding-bottom="20px"
-            background-url="https://karrot.world/img/repeating_grey.c9ea44a.jpg"
-            background-size="600px">
-    <mj-column width="180px">
-        <mj-image src="{{ absolute_url(header_image) }}"/>
-    </mj-column>
-</mj-section>

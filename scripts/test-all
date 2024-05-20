@@ -1,7 +1,0 @@
-#!/bin/bash
-
-# Run all tests on all cores, don't ask anything
-
-set -eu
-
-./scripts/test --parallel auto --noinput
